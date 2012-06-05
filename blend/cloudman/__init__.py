@@ -11,22 +11,18 @@ class CloudMan:
         print "Initializing with type:{0} and storage_size:{1}".format(type, storage_size)
 
     def get_status(self):
-        print "Get status"
-        return self._make_get_request("/cloud/instance_state_json")
+        return simplejson.loads(self._make_get_request("/cloud/instance_state_json"))
 
     def get_nodes(self):
-        print "Get nodes"
         instance_feed_json = self._make_get_request("/cloud/instance_feed_json")
         return simplejson.loads(instance_feed_json)['instances']
 
     def add_nodes(self, num_nodes, type="some size", spot_price="some price"):
-        print "Add nodes"
         payload = {'number_nodes' : num_nodes}
         result = self._make_get_request("/cloud/add_instances", parameters=payload)
         return result
 
     def remove_nodes(self, num_nodes, force=False):
-        print "Remove nodes"
         payload = {'number_nodes': num_nodes, 'force_termination': force}
         result = self._make_get_request("/cloud/remove_instances", parameters=payload) 
         return result
