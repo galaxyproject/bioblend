@@ -28,11 +28,14 @@ class CloudMan:
         return result
 
     def remove_node(self, instance_id, force=False):
-        print "Remove node"
-
+        payload = {'instance_id': instance_id}
+        result = self._make_get_request("/cloud/remove_instance", parameters=payload) 
 
     def reboot_node(self, instance_id):
         print "Reboot node"
+        payload = {'instance_id': instance_id}
+        result = self._make_get_request("/cloud/reboot_instance", parameters=payload) 
+
 
     def enable_autoscaling(self, minimum_nodes=0, maximum_nodes=19):
         print "Enable autoscaling"

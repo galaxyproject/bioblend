@@ -121,15 +121,23 @@ class CloudManTest(unittest.TestCase):
         
 
     def test_remove_node(self):
+        self.cm._make_get_request = MagicMock(return_value="{}")
         instance_id = "abcdef"
         self.cm.remove_node(instance_id, force=True)
-        assert(False)
+
+        # Check that the correct URL was called
+        params = {'instance_id': "abcdef"}
+        self.cm._make_get_request.assert_called_with("/cloud/remove_instance", parameters=params)
 
 
     def test_reboot_node(self):
+        self.cm._make_get_request = MagicMock(return_value="{}")
         instance_id = "abcdef"
         self.cm.reboot_node(instance_id)
-        assert(False)
+
+        # Check that the correct URL was called
+        params = {'instance_id': "abcdef"}
+        self.cm._make_get_request.assert_called_with("/cloud/reboot_instance", parameters=params)
         
 
     def test_autoscaling(self):
