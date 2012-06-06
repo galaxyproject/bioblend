@@ -58,14 +58,14 @@ class CloudMan:
 
     def adjust_autoscaling(self, minimum_nodes=None, maximum_nodes=None):
         if (self.autoscaling_enabled()):
-            payload = {'as_min': minimum_nodes, 'as_max': maximum_nodes}
+            payload = {'as_min_adj': minimum_nodes, 'as_max_adj': maximum_nodes}
             self._make_get_request("/cloud/adjust_autoscaling", parameters=payload)
 
     def get_galaxy_state(self):
-        print "Get Galaxy state"
-        return "Some state"
+        payload = {'srvc': 'Galaxy'}
+        status = self._make_get_request("/cloud/get_srvc_status", parameters=payload)
+        return simplejson.loads(status)['status']
 
     def _make_get_request(self, url, parameters={}):
         r = requests.get(self.cloudman_url + url, params=parameters, auth=("", self.password))
         return r.text
-
