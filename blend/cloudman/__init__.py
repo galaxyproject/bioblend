@@ -5,17 +5,17 @@ import simplejson
 class CloudMan:
 
     # Constructor
-    # url: The URL of CloudMan
-    # password: The password for CloudMan
+    # url: The URL of CloudMan (e.g. "http://127.0.0.1:42284")
+    # password: The password for CloudMan, as defined in the user data
     def __init__(self, url, password):
         self.cloudman_url = url
         self.password = password
 
     # Initialise CloudMan
-    # type: The type of instance .....
-    # storage_size: .....
-    def initialize(self, type="some size", storage_size="some other size"):
-        print "Initializing with type:{0} and storage_size:{1}".format(type, storage_size)
+    # type: The type of instance "Galaxy" (default), "Data", or "SGE"
+    # storage_size: Not implemented
+    def initialize(self, type="Galaxy", storage_size="some size"):
+        self._make_get_request("/cloud/initialize_cluster", parameters={'startup_opt': type})
 
     # Get the current status of Cloudman as JSON
     def get_status(self):

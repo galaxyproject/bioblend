@@ -11,10 +11,13 @@ class CloudManTest(unittest.TestCase):
         
 
     def test_initialize(self):
-        self.assertIsNotNone(self.cm)
+        self.cm._make_get_request = MagicMock(return_value="{}")
 
-        ## Set cluster type and storage size
-        self.cm.initialize(type="xxx", storage_size="yyy")
+        ## Set cluster type
+        self.cm.initialize(type="Galaxy")
+
+        params = {'startup_opt': 'Galaxy'}
+        self.cm._make_get_request.assert_called_with("/cloud/initialize_cluster", parameters=params)
 
 
     def test_get_status(self):
@@ -142,7 +145,7 @@ class CloudManTest(unittest.TestCase):
         return_json = """{"status": "'Galaxy' is not running", "srvc": "Galaxy"}"""
         self.cm._make_get_request = MagicMock(return_value=return_json)
 
-        self.assertEquals(self.cm.get_galaxy_state(), "'Galaxy' is not running") #RUNNING, STARTING.....
+        self.assertEquals(self.cm.get_galaxy_state(), "'Galaxy' is not running")
         params = {'srvc': "Galaxy"}
         self.cm._make_get_request.assert_called_with("/cloud/get_srvc_status", parameters=params)
 
