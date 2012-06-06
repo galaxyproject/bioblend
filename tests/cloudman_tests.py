@@ -2,9 +2,6 @@ import unittest
 from mock import MagicMock
 from blend import cloudman
 
-# Some ad-hoc tests for the CloudMan API
-# This is fairly unreadable at the moment. This needs to be fixed.
-
 class CloudManTest(unittest.TestCase):
 
     def setUp(self):
@@ -13,74 +10,6 @@ class CloudManTest(unittest.TestCase):
         self.cm = cloudman.CloudMan(url, password)
         
 
-    def test_basic_usage_against_local_instance(self):
-        # Expects CloudMan to be running locally
-        
-        ## Start master
-        #cluster = cloudman.StartCluster
-        #cluster.ip
-        
-        self.assertIsNotNone(self.cm)
-
-        ## Set cluster type and storage size
-        self.cm.initialize(type="xxx", storage_size="yyy")
-        
-        ## Get cluster status
-        status = self.cm.get_status()
-        self.assertIsNotNone(status)
-        
-        ## Get nodes
-        nodes = self.cm.get_nodes()
-        self.assertIsNotNone(nodes)
-        # There should be a master node
-        self.assertEqual(len(nodes), 1)
-
-        ## Add node
-        num_nodes = 10
-        status = self.cm.add_nodes(num_nodes, type="xxx", spot_price="yyy")
-        self.assertIsNotNone(status)
-
-        ## Remove nodes
-        instance_id = "abcdef"
-        status = self.cm.remove_nodes(num_nodes, force=True)
-        self.assertIsNotNone(status)
-
-        self.cm.remove_node(instance_id, force=True)
-
-        ## Reboot instance
-        self.cm.reboot_node(instance_id)
-        
-        ## Autoscaling
-        # enable
-        self.cm.disable_autoscaling()
-        self.assertFalse(self.cm.autoscaling_enabled())
-        self.cm.enable_autoscaling(minimum_nodes=0,maximum_nodes=19)
-        self.assertTrue(self.cm.autoscaling_enabled())
-        self.assertEquals(self.cm.get_status()['autoscaling']['as_min'], 0)
-        self.assertEquals(self.cm.get_status()['autoscaling']['as_max'], 19)
-
-        # adjust
-        self.cm.adjust_autoscaling(minimum_nodes=1, maximum_nodes=2)
-        self.assertEquals(self.cm.get_status()['autoscaling']['as_min'], 1)
-        self.assertEquals(self.cm.get_status()['autoscaling']['as_max'], 2)
-
-        # disable
-        self.cm.disable_autoscaling()
-        self.cm.adjust_autoscaling(minimum_nodes=None,maximum_nodes=None)
-        self.assertFalse(self.cm.autoscaling_enabled())
-        
-        ## Get Galaxy DNS/Host
-        galaxy_state = self.cm.get_galaxy_state() #RUNNING, STARTING.....
-        
-        ## Restart cluster
-        
-        ## Administration
-        ## reboot master
-        ## reboot service
-        ## update galaxy
-
-
-    
     def test_initialize(self):
         self.assertIsNotNone(self.cm)
 
@@ -164,6 +93,12 @@ class CloudManTest(unittest.TestCase):
         return_json_string = """{"autoscaling": {"use_autoscaling": true, "as_max": "3", "as_min": "1"}}"""
         self.cm._make_get_request = MagicMock(return_value=return_json_string)
         self.assertTrue(self.cm.autoscaling_enabled())
+
+
+    def test_autoscaling_enabled_false(self):
+        return_json_string = """{"autoscaling": {"use_autoscaling": false, "as_max": "3", "as_min": "1"}}"""
+        self.cm._make_get_request = MagicMock(return_value=return_json_string)
+        self.assertFalse(self.cm.autoscaling_enabled())
         
 
     def test_enable_autoscaling(self):
@@ -198,12 +133,17 @@ class CloudManTest(unittest.TestCase):
         self.cm._make_get_request = MagicMock(return_value=return_json_string)
         self.cm.adjust_autoscaling(minimum_nodes=3,maximum_nodes=4)
 
-        params = {'as_min': 3, 'as_max': 4} 
+        params = {'as_min_adj': 3, 'as_max_adj': 4} 
         self.cm._make_get_request.assert_called_with("/cloud/adjust_autoscaling", parameters=params)
 
        
 
-    #def test_get_galaxy_state(self):
-    #    galaxy_state = self.cm.get_galaxy_state() #RUNNING, STARTING.....
-    #    assert(False)
+    def test_get_galaxy_state_stopped(self):
+        return_json = """{"status": "'Galaxy' is not running", "srvc": "Galaxy"}"""
+        self.cm._make_get_request = MagicMock(return_value=return_json)
+
+        self.assertEquals(self.cm.get_galaxy_state(), "'Galaxy' is not running") #RUNNING, STARTING.....
+        params = {'srvc': "Galaxy"}
+        self.cm._make_get_request.assert_called_with("/cloud/get_srvc_status", parameters=params)
+
         
