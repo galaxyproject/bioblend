@@ -51,9 +51,23 @@ class CloudManTest(unittest.TestCase):
         self.cm.reboot_node(instance_id)
         
         ## Autoscaling
-        self.cm.enable_autoscaling(minimum_nodes=0,maximum_nodes=19) #20 is max on AWS
+        # enable
+        self.cm.disable_autoscaling()
+        self.assertFalse(self.cm.autoscaling_enabled())
+        self.cm.enable_autoscaling(minimum_nodes=0,maximum_nodes=19)
+        self.assertTrue(self.cm.autoscaling_enabled())
+        self.assertEquals(self.cm.get_status()['autoscaling']['as_min'], 0)
+        self.assertEquals(self.cm.get_status()['autoscaling']['as_max'], 19)
+
+        # adjust
+        self.cm.adjust_autoscaling(minimum_nodes=1, maximum_nodes=2)
+        self.assertEquals(self.cm.get_status()['autoscaling']['as_min'], 1)
+        self.assertEquals(self.cm.get_status()['autoscaling']['as_max'], 2)
+
+        # disable
         self.cm.disable_autoscaling()
         self.cm.adjust_autoscaling(minimum_nodes=None,maximum_nodes=None)
+        self.assertFalse(self.cm.autoscaling_enabled())
         
         ## Get Galaxy DNS/Host
         galaxy_state = self.cm.get_galaxy_state() #RUNNING, STARTING.....
@@ -138,16 +152,58 @@ class CloudManTest(unittest.TestCase):
         # Check that the correct URL was called
         params = {'instance_id': "abcdef"}
         self.cm._make_get_request.assert_called_with("/cloud/reboot_instance", parameters=params)
+
+       
+    def test_autoscaling_enabled_false(self):
+        return_json_string = """{"autoscaling": {"use_autoscaling": false, "as_max": "N/A", "as_min": "N/A"}}"""
+        self.cm._make_get_request = MagicMock(return_value=return_json_string)
+        self.assertFalse(self.cm.autoscaling_enabled())
+
+
+    def test_autoscaling_enabled_true(self):
+        return_json_string = """{"autoscaling": {"use_autoscaling": true, "as_max": "3", "as_min": "1"}}"""
+        self.cm._make_get_request = MagicMock(return_value=return_json_string)
+        self.assertTrue(self.cm.autoscaling_enabled())
         
 
-    def test_autoscaling(self):
-        self.cm.enable_autoscaling(minimum_nodes=0,maximum_nodes=19) #20 is max on AWS
+    def test_enable_autoscaling(self):
+        return_json_string = """{"autoscaling": {"use_autoscaling": false, "as_max": "N/A", "as_min": "N/A"}}"""
+        self.cm._make_get_request = MagicMock(return_value=return_json_string)
+        self.assertFalse(self.cm.autoscaling_enabled())
+        self.cm.enable_autoscaling(minimum_nodes=0,maximum_nodes=19)
+
+        # Check that the correct URL was called
+        params = {'as_min': 0, 'as_max': 19}
+        self.cm._make_get_request.assert_called_with("/cloud/toggle_autoscaling", parameters=params)
+        
+        return_json_string = """{"autoscaling": {"use_autoscaling": true, "as_max": "19", "as_min": "0"}}"""
+        self.cm.enable_autoscaling(minimum_nodes=0,maximum_nodes=19)
+
+        # Check that the correct URL was called
+        params = {'as_min': 0, 'as_max': 19}
+        self.cm._make_get_request.assert_called_with("/cloud/toggle_autoscaling", parameters=params)
+
+
+
+    def test_disable_autoscaling(self):
+        return_json_string = """{"autoscaling": {"use_autoscaling": true, "as_max": "3", "as_min": "1"}}"""
+        self.cm._make_get_request = MagicMock(return_value=return_json_string)
         self.cm.disable_autoscaling()
-        self.cm.adjust_autoscaling(minimum_nodes=None,maximum_nodes=None)
-        assert(False)
+
+        self.cm._make_get_request.assert_called_with("/cloud/toggle_autoscaling")
+
+
+    def test_adjust_autoscaling(self):
+        return_json_string = """{"autoscaling": {"use_autoscaling": true, "as_max": "3", "as_min": "1"}}"""
+        self.cm._make_get_request = MagicMock(return_value=return_json_string)
+        self.cm.adjust_autoscaling(minimum_nodes=3,maximum_nodes=4)
+
+        params = {'as_min': 3, 'as_max': 4} 
+        self.cm._make_get_request.assert_called_with("/cloud/adjust_autoscaling", parameters=params)
+
        
 
-    def test_get_galaxy_state(self):
-        galaxy_state = self.cm.get_galaxy_state() #RUNNING, STARTING.....
-        assert(False)
+    #def test_get_galaxy_state(self):
+    #    galaxy_state = self.cm.get_galaxy_state() #RUNNING, STARTING.....
+    #    assert(False)
         
