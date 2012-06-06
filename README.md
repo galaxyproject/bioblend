@@ -12,6 +12,8 @@ This section outlines how to use the *blend* API.
 
 Here is an example usage:
 
+    from blend import cloudman
+
     # This connects to a locally running cloudman instance
     cm = cloudman.CloudMan("http://127.0.0.1:42284", "my password")
 
