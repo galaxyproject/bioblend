@@ -6,7 +6,7 @@
 Welcome to Blend's documentation!
 =================================
 
-Contents:
+API documentation for interacting with Galaxy.
 
 .. toctree::
    :maxdepth: 2
@@ -15,18 +15,29 @@ Contents:
     :members:
     :undoc-members:
 
+-----
+
 .. autoclass:: blend.galaxy.GalaxyInstance
 
     .. automethod:: blend.galaxy.GalaxyInstance.__init__
-    .. automethod:: blend.galaxy.GalaxyInstance._make_url
+
+-----
 
 .. automodule:: blend.galaxy.libraries
 
+-----
+
 .. automodule:: blend.galaxy.histories
+
+-----
 
 .. automodule:: blend.galaxy.workflows
 
+-----
+
 .. automodule:: blend.galaxy.datasets
+
+-----
 
 .. automodule:: blend.galaxy.users
 

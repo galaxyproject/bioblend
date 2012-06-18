@@ -1,3 +1,6 @@
+"""
+A base representation of an instance of Galaxy
+"""
 import requests
 from blend.galaxy import (libraries, histories, workflows, datasets, users)
 
@@ -6,6 +9,20 @@ class GalaxyInstance(object):
         """
         A base representation of an instance of Galaxy, identified by a
         URL and a user's API key.
+
+        After you have created an ``GalaxyInstance`` object, access various
+        modules via the class fields (see the source for the most up-to-date
+        list): ``libraries``, ``histories``, ``workflows``, ``datasets``,
+        and ``users`` are the minimum set supported. For example, to work with
+        histories, and get a list of all the user's histories, the following
+        should be done::
+
+            from blend import galaxy
+
+            gi = galaxy.GalaxyInstance(url='http://127.0.0.1:8000', key='your_api_key')
+
+            hl = gi.histories.get_histories()
+            print "List of histories:", hl
 
         :type url: string
         :param url: A FQDN or IP for a given instance of Galaxy. For example:

@@ -1,13 +1,21 @@
 """
-An interface the clients should implement
+An interface the clients should implement.
+
+This class is primarily a helper for the library and user code
+should not use it directly.
 """
 import requests
 import simplejson
 
 class Client(object):
     def __init__(self, galaxy_instance):
-        # All clinets must define the following field
-        # self.module = 'workflows' | 'libraries' | 'histories' | ...
+        """
+        A generic Client interface defining the common fields.
+
+        All clinets *must* define the following field (which will be used as part
+        of the URL composition (eg, http://<galaxy_instance>/api/libraries):
+        ``self.module = 'workflows' | 'libraries' | 'histories' | ...``
+        """
         self.gi = galaxy_instance
         self.url = '/'.join([self.gi.url, self.module])
 
@@ -27,6 +35,12 @@ class Client(object):
         return r.json
 
     def _post(self, payload, id=None, deleted=False, contents=None, url=None):
+        """
+        Do a generic POST request, composing the url from the contents of the
+        arguments. Alternatively, an explicit ``url`` can be provided to use
+        for the request. ``payload`` must be a dict that can be converted
+        into a JSON object (which will be done whthin this method) 
+        """
         if not url:
             url = self.gi._make_url(self, module_id=id, deleted=deleted, contents=contents)
         payload = simplejson.dumps(payload)
@@ -34,6 +48,12 @@ class Client(object):
         return r.json
 
     def _delete(self, payload, id=None, deleted=False, contents=None, url=None):
+        """
+        Do a generic DELETE request, composing the url from the contents of the
+        arguments. Alternatively, an explicit ``url`` can be provided to use
+        for the request. ``payload`` must be a dict that can be converted
+        into a JSON object (which will be done whthin this method) 
+        """
         if not url:
             url = self.gi._make_url(self, module_id=id, deleted=deleted, contents=contents)
         payload = simplejson.dumps(payload)
