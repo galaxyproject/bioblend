@@ -57,7 +57,7 @@ class GalaxyInstance(object):
 
     def make_get_request(self, url, params=None):
         """
-        Make a GET request using the provided url. 
+        Make a GET request using the provided url.
 
         If the ``params`` are not provided, use ``default_params`` class field.
         If params are provided and the provided dict does not have ``key`` key,
