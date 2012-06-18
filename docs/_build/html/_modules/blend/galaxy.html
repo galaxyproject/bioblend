@@ -1,0 +1,146 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>blend.galaxy &mdash; Blend 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="Blend 0.1 documentation" href="../../index.html" />
+    <link rel="up" title="blend" href="../blend.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Blend 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../blend.html" accesskey="U">blend</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for blend.galaxy</h1><div class="highlight"><pre>
+<span class="c"># from blend.galaxy.libraries.client import LibraryClient</span>
+
+<div class="viewcode-block" id="GalaxyInstance"><a class="viewcode-back" href="../../index.html#blend.galaxy.GalaxyInstance">[docs]</a><span class="k">class</span> <span class="nc">GalaxyInstance</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="GalaxyInstance.__init__"><a class="viewcode-back" href="../../index.html#blend.galaxy.GalaxyInstance.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The base representation of an instance of Galaxy, identified by the</span>
+<span class="sd">        URL and user&#39;s API key.</span>
+<span class="sd">        </span>
+<span class="sd">        :type url: string</span>
+<span class="sd">        :param url: A FQDN or IP for a given instance of Galaxy. For example:</span>
+<span class="sd">                    http://usegalaxy.org</span>
+<span class="sd">        </span>
+<span class="sd">        :type key: string</span>
+<span class="sd">        :param key: User&#39;s API key for the given instance of Galaxy, obtained</span>
+<span class="sd">                    from the user preferences.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="s">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">url</span><span class="p">,</span> <span class="s">&#39;api&#39;</span><span class="p">])</span> <span class="c"># All of Galaxy&#39;s API&#39;s are rooted at &lt;url&gt;/api</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="o">=</span> <span class="n">key</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">key_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;key&#39;</span><span class="p">:</span> <span class="n">key</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">json_headers</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;Content-Type&#39;</span><span class="p">:</span> <span class="s">&#39;application/json&#39;</span><span class="p">}</span>
+        <span class="c"># self.library_client = LibraryClient(self)</span>
+    </div>
+<div class="viewcode-block" id="GalaxyInstance._make_url"><a class="viewcode-back" href="../../index.html#blend.galaxy.GalaxyInstance._make_url">[docs]</a>    <span class="k">def</span> <span class="nf">_make_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">module_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">deleted</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">contents</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compose a URL based on the provided arguments.</span>
+<span class="sd">        </span>
+<span class="sd">        :type module: string</span>
+<span class="sd">        :param module: The name of the base module for which to make the URL.</span>
+<span class="sd">                       For example: libraries, workflows, histories</span>
+<span class="sd">        </span>
+<span class="sd">        :type module_id: string</span>
+<span class="sd">        :param module_id: The encoded ID for a specific module (eg, library ID)</span>
+<span class="sd">        </span>
+<span class="sd">        :type deleted: bool</span>
+<span class="sd">        :param deleted: If True, include &#39;deleted&#39; in the URL, after the module:</span>
+<span class="sd">                        &lt;base_url&gt;/api/libraries/deleted</span>
+<span class="sd">        </span>
+<span class="sd">        :type contents: bool</span>
+<span class="sd">        :param contents: If True, include &#39;contents&#39; in the URL, after the module ID:</span>
+<span class="sd">                         &lt;base_url&gt;/api/libraries/&lt;encoded_library_id&gt;/contents</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">c_url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">url</span>
+        <span class="n">c_url</span> <span class="o">=</span> <span class="s">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">c_url</span><span class="p">,</span> <span class="n">module</span><span class="o">.</span><span class="n">module</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">deleted</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="n">c_url</span> <span class="o">=</span> <span class="s">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">c_url</span><span class="p">,</span> <span class="s">&#39;deleted&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">module_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">c_url</span> <span class="o">=</span> <span class="s">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">c_url</span><span class="p">,</span> <span class="n">module_id</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">contents</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+                <span class="n">c_url</span> <span class="o">=</span> <span class="s">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">c_url</span><span class="p">,</span> <span class="s">&#39;contents&#39;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">c_url</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Blend 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../blend.html" >blend</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Enis Afgan.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
