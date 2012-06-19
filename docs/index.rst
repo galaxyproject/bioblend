@@ -5,29 +5,28 @@ Blend
 About
 =====
 
-Blend is a Python (2.6 or higher) library for interacting with `BioCloudCentral.org`_,
-`CloudMan`_, and `Galaxy`_ API. It makes it possible to script and automate the process
-of cloud infrastrucutre provisioning, scaling, and running of analyses within
-Galaxy.
+.. include:: ../README.rst
 
 Installation
 ============
 
 Stable releases of Blend are best installed via ``pip`` or ``easy_install`` from
-PyPI using something like ``pip install blend``.
+PyPI using something like::
+
+    $ pip install blend
 
 Alternatively, you may install the most current source code from our `Git repository`_,
 or fork the project on Github. To install from source, do the following::
 
     # Clone the repository to a local directory
-    git clone https://github.com/afgane/blend.git
+    $ git clone https://github.com/afgane/blend.git
     # Install the library
-    cd blend
-    python setup.py install
+    $ cd blend
+    $ python setup.py install
 
 After installing the library, you will be able to simply import it into your
-Python scripts with ``import blend``. For details on the available functionality,
-see the API methods.
+Python environment with ``import blend``. For details on the available functionality,
+see the `API documentation`_.
 
 Usage
 =====
@@ -90,6 +89,22 @@ and workflow execution.
     :glob:
 
     api_docs/galaxy/*
+
+
+Testing
+=======
+The unit tests, in the ``tests`` folder, can be run using 
+`nose <https://github.com/nose-devs/nose>`_. From the project root::
+
+    $ nosetests
+
+Getting help
+============
+
+If you've run into issues, found a bug, or can't seem to find an answer to
+your question regarding the use and functionality of Blend, please use
+`Github Issues <https://github.com/afgane/blend/issues>`_ page to ask your
+question 
 
 Indices and tables
 ==================
