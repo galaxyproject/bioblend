@@ -57,13 +57,13 @@
 <span class="kn">import</span> <span class="nn">requests</span>
 <span class="kn">import</span> <span class="nn">simplejson</span>
 
-<div class="viewcode-block" id="DatasetClient"><a class="viewcode-back" href="../../../index.html#blend.galaxy.datasets.DatasetClient">[docs]</a><span class="k">class</span> <span class="nc">DatasetClient</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="DatasetClient"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#blend.galaxy.datasets.DatasetClient">[docs]</a><span class="k">class</span> <span class="nc">DatasetClient</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">galaxy_instance</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">gi</span> <span class="o">=</span> <span class="n">galaxy_instance</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">module</span> <span class="o">=</span> <span class="s">&#39;datasets&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="s">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">gi</span><span class="o">.</span><span class="n">url</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">])</span>
 
-<div class="viewcode-block" id="DatasetClient.show_dataset"><a class="viewcode-back" href="../../../index.html#blend.galaxy.datasets.DatasetClient.show_dataset">[docs]</a>    <span class="k">def</span> <span class="nf">show_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset_id</span><span class="p">,</span> <span class="n">deleted</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="DatasetClient.show_dataset"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#blend.galaxy.datasets.DatasetClient.show_dataset">[docs]</a>    <span class="k">def</span> <span class="nf">show_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset_id</span><span class="p">,</span> <span class="n">deleted</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Display information about and/or content of a dataset.</span>
 <span class="sd">        &quot;&quot;&quot;</span>

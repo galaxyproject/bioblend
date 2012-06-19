@@ -1,0 +1,167 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>blend.cloudman &mdash; Blend 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="Blend 0.1 documentation" href="../../index.html" />
+    <link rel="up" title="blend" href="../blend.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Blend 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../blend.html" accesskey="U">blend</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for blend.cloudman</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">import</span> <span class="nn">simplejson</span>
+
+<span class="c"># API for interacting with CloudMan</span>
+<div class="viewcode-block" id="CloudMan"><a class="viewcode-back" href="../../api_docs/cloudman/all.html#blend.cloudman.CloudMan">[docs]</a><span class="k">class</span> <span class="nc">CloudMan</span><span class="p">:</span>
+
+    <span class="c"># Constructor</span>
+    <span class="c"># url: The URL of CloudMan (e.g. &quot;http://127.0.0.1:42284&quot;)</span>
+    <span class="c"># password: The password for CloudMan, as defined in the user data</span>
+<div class="viewcode-block" id="CloudMan.__init__"><a class="viewcode-back" href="../../api_docs/cloudman/all.html#blend.cloudman.CloudMan.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">password</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cloudman_url</span> <span class="o">=</span> <span class="n">url</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">password</span> <span class="o">=</span> <span class="n">password</span>
+
+    <span class="c"># Initialise CloudMan</span>
+    <span class="c"># type: The type of instance &quot;Galaxy&quot; (default), &quot;Data&quot;, or &quot;SGE&quot;</span>
+    <span class="c"># storage_size: Not implemented</span></div>
+<div class="viewcode-block" id="CloudMan.initialize"><a class="viewcode-back" href="../../api_docs/cloudman/all.html#blend.cloudman.CloudMan.initialize">[docs]</a>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s">&quot;Galaxy&quot;</span><span class="p">,</span> <span class="n">storage_size</span><span class="o">=</span><span class="s">&quot;some size&quot;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_make_get_request</span><span class="p">(</span><span class="s">&quot;/cloud/initialize_cluster&quot;</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;startup_opt&#39;</span><span class="p">:</span> <span class="nb">type</span><span class="p">})</span>
+
+    <span class="c"># Get the current status of Cloudman as JSON</span></div>
+<div class="viewcode-block" id="CloudMan.get_status"><a class="viewcode-back" href="../../api_docs/cloudman/all.html#blend.cloudman.CloudMan.get_status">[docs]</a>    <span class="k">def</span> <span class="nf">get_status</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">simplejson</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_get_request</span><span class="p">(</span><span class="s">&quot;/cloud/instance_state_json&quot;</span><span class="p">))</span>
+
+    <span class="c"># Get a list of current CloudMan nodes</span></div>
+<div class="viewcode-block" id="CloudMan.get_nodes"><a class="viewcode-back" href="../../api_docs/cloudman/all.html#blend.cloudman.CloudMan.get_nodes">[docs]</a>    <span class="k">def</span> <span class="nf">get_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">instance_feed_json</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_get_request</span><span class="p">(</span><span class="s">&quot;/cloud/instance_feed_json&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">simplejson</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">instance_feed_json</span><span class="p">)[</span><span class="s">&#39;instances&#39;</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="CloudMan.add_nodes"><a class="viewcode-back" href="../../api_docs/cloudman/all.html#blend.cloudman.CloudMan.add_nodes">[docs]</a>    <span class="k">def</span> <span class="nf">add_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_nodes</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s">&quot;some size&quot;</span><span class="p">,</span> <span class="n">spot_price</span><span class="o">=</span><span class="s">&quot;some price&quot;</span><span class="p">):</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;number_nodes&#39;</span> <span class="p">:</span> <span class="n">num_nodes</span><span class="p">}</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_get_request</span><span class="p">(</span><span class="s">&quot;/cloud/add_instances&quot;</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span>
+</div>
+<div class="viewcode-block" id="CloudMan.remove_nodes"><a class="viewcode-back" href="../../api_docs/cloudman/all.html#blend.cloudman.CloudMan.remove_nodes">[docs]</a>    <span class="k">def</span> <span class="nf">remove_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_nodes</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;number_nodes&#39;</span><span class="p">:</span> <span class="n">num_nodes</span><span class="p">,</span> <span class="s">&#39;force_termination&#39;</span><span class="p">:</span> <span class="n">force</span><span class="p">}</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_get_request</span><span class="p">(</span><span class="s">&quot;/cloud/remove_instances&quot;</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span> 
+        <span class="k">return</span> <span class="n">result</span>
+</div>
+<div class="viewcode-block" id="CloudMan.remove_node"><a class="viewcode-back" href="../../api_docs/cloudman/all.html#blend.cloudman.CloudMan.remove_node">[docs]</a>    <span class="k">def</span> <span class="nf">remove_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instance_id</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;instance_id&#39;</span><span class="p">:</span> <span class="n">instance_id</span><span class="p">}</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_get_request</span><span class="p">(</span><span class="s">&quot;/cloud/remove_instance&quot;</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span> 
+</div>
+<div class="viewcode-block" id="CloudMan.reboot_node"><a class="viewcode-back" href="../../api_docs/cloudman/all.html#blend.cloudman.CloudMan.reboot_node">[docs]</a>    <span class="k">def</span> <span class="nf">reboot_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instance_id</span><span class="p">):</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;instance_id&#39;</span><span class="p">:</span> <span class="n">instance_id</span><span class="p">}</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_get_request</span><span class="p">(</span><span class="s">&quot;/cloud/reboot_instance&quot;</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span> 
+</div>
+<div class="viewcode-block" id="CloudMan.autoscaling_enabled"><a class="viewcode-back" href="../../api_docs/cloudman/all.html#blend.cloudman.CloudMan.autoscaling_enabled">[docs]</a>    <span class="k">def</span> <span class="nf">autoscaling_enabled</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_status</span><span class="p">()[</span><span class="s">&#39;autoscaling&#39;</span><span class="p">][</span><span class="s">&#39;use_autoscaling&#39;</span><span class="p">])</span>
+</div>
+<div class="viewcode-block" id="CloudMan.enable_autoscaling"><a class="viewcode-back" href="../../api_docs/cloudman/all.html#blend.cloudman.CloudMan.enable_autoscaling">[docs]</a>    <span class="k">def</span> <span class="nf">enable_autoscaling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minimum_nodes</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">maximum_nodes</span><span class="o">=</span><span class="mi">19</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">autoscaling_enabled</span><span class="p">()):</span>
+            <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;as_min&#39;</span><span class="p">:</span> <span class="n">minimum_nodes</span><span class="p">,</span> <span class="s">&#39;as_max&#39;</span><span class="p">:</span> <span class="n">maximum_nodes</span><span class="p">}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_make_get_request</span><span class="p">(</span><span class="s">&quot;/cloud/toggle_autoscaling&quot;</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="CloudMan.disable_autoscaling"><a class="viewcode-back" href="../../api_docs/cloudman/all.html#blend.cloudman.CloudMan.disable_autoscaling">[docs]</a>    <span class="k">def</span> <span class="nf">disable_autoscaling</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">autoscaling_enabled</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_make_get_request</span><span class="p">(</span><span class="s">&quot;/cloud/toggle_autoscaling&quot;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="CloudMan.adjust_autoscaling"><a class="viewcode-back" href="../../api_docs/cloudman/all.html#blend.cloudman.CloudMan.adjust_autoscaling">[docs]</a>    <span class="k">def</span> <span class="nf">adjust_autoscaling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minimum_nodes</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">maximum_nodes</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">autoscaling_enabled</span><span class="p">()):</span>
+            <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;as_min_adj&#39;</span><span class="p">:</span> <span class="n">minimum_nodes</span><span class="p">,</span> <span class="s">&#39;as_max_adj&#39;</span><span class="p">:</span> <span class="n">maximum_nodes</span><span class="p">}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_make_get_request</span><span class="p">(</span><span class="s">&quot;/cloud/adjust_autoscaling&quot;</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="CloudMan.get_galaxy_state"><a class="viewcode-back" href="../../api_docs/cloudman/all.html#blend.cloudman.CloudMan.get_galaxy_state">[docs]</a>    <span class="k">def</span> <span class="nf">get_galaxy_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;srvc&#39;</span><span class="p">:</span> <span class="s">&#39;Galaxy&#39;</span><span class="p">}</span>
+        <span class="n">status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_get_request</span><span class="p">(</span><span class="s">&quot;/cloud/get_srvc_status&quot;</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">simplejson</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">status</span><span class="p">)[</span><span class="s">&#39;status&#39;</span><span class="p">]</span>
+</div>
+    <span class="k">def</span> <span class="nf">_make_get_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="p">{}):</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cloudman_url</span> <span class="o">+</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span> <span class="n">auth</span><span class="o">=</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">password</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">r</span><span class="o">.</span><span class="n">text</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Blend 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../blend.html" >blend</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Enis Afgan.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

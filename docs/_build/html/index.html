@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Welcome to Blend’s documentation! &mdash; Blend 0.1 documentation</title>
+    <title>Blend &mdash; Blend 0.1 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -25,7 +25,8 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Blend 0.1 documentation" href="#" /> 
+    <link rel="top" title="Blend 0.1 documentation" href="#" />
+    <link rel="next" title="API documentation for interacting with BioCloudCentral.org" href="api_docs/bcc/all.html" /> 
   </head>
   <body>
     <div class="related">
@@ -37,6 +38,9 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
+        <li class="right" >
+          <a href="api_docs/bcc/all.html" title="API documentation for interacting with BioCloudCentral.org"
+             accesskey="N">next</a> |</li>
         <li><a href="#">Blend 0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
@@ -46,399 +50,91 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="welcome-to-blend-s-documentation">
-<h1>Welcome to Blend&#8217;s documentation!<a class="headerlink" href="#welcome-to-blend-s-documentation" title="Permalink to this headline">¶</a></h1>
-<p>API documentation for interacting with Galaxy.</p>
+  <div class="section" id="blend">
+<h1>Blend<a class="headerlink" href="#blend" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="about">
+<h2>About<a class="headerlink" href="#about" title="Permalink to this headline">¶</a></h2>
+<p>Blend is a Python (2.6 or higher) library for interacting with <a class="reference external" href="http://biocloudcentral.org/">BioCloudCentral.org</a>,
+<a class="reference external" href="http://usecloudman.org/">CloudMan</a>, and <a class="reference external" href="http://usegalaxy.org/">Galaxy</a> API. It makes it possible to script and automate the process
+of cloud infrastrucutre provisioning, scaling, and running of analyses within
+Galaxy.</p>
+</div>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p>Stable releases of Blend are best installed via <tt class="docutils literal"><span class="pre">pip</span></tt> or <tt class="docutils literal"><span class="pre">easy_install</span></tt> from
+PyPI using something like <tt class="docutils literal"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">blend</span></tt>.</p>
+<p>Alternatively, you may install the most current source code from our <a class="reference external" href="https://github.com/afgane/blend">Git repository</a>,
+or fork the project on Github. To install from source, do the following:</p>
+<div class="highlight-python"><pre># Clone the repository to a local directory
+git clone https://github.com/afgane/blend.git
+# Install the library
+cd blend
+python setup.py install</pre>
+</div>
+<p>After installing the library, you will be able to simply import it into your
+Python scripts with <tt class="docutils literal"><span class="pre">import</span> <span class="pre">blend</span></tt>. For details on the available functionality,
+see the API methods.</p>
+</div>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<p>To get started using Blend, it&#8217;s probably best to take a look at the example
+scripts in <tt class="docutils literal"><span class="pre">docs/examples</span></tt> source directory and browse the <a class="reference internal" href="#api-documentation">API documentation</a>.
+Beyond that, it&#8217;s up to your creativity :).</p>
+</div>
+<div class="section" id="development">
+<h2>Development<a class="headerlink" href="#development" title="Permalink to this headline">¶</a></h2>
+<p>Anyone interested in contributing or tweaking the library is more then welcome
+to do so. To start, simply fork the <a class="reference external" href="https://github.com/afgane/blend">Git repository</a> on Github and start playing with
+it. Then, issue pull requests.</p>
+</div>
+<div class="section" id="api-documentation">
+<h2>API Documentation<a class="headerlink" href="#api-documentation" title="Permalink to this headline">¶</a></h2>
+<p>Blend&#8217;s API foucuses around and matches the services it wraps. Thus, there are
+three top-level sets of APIs, each corresponding to a separate serivce and a
+corresponding step in the automation process. <em>Note</em> that each of the service APIs
+can be used completely independently of one another.</p>
+<p>Effort has been made to keep the structure and naming of those API&#8217;s consistent
+across the library but because they do bridge different services, some discrepancies
+may exist. Feel free to point those out and/or provide fixes.</p>
+<div class="section" id="biocloudcentral-org-api">
+<h3>BioCloudCentral.org API<a class="headerlink" href="#biocloudcentral-org-api" title="Permalink to this headline">¶</a></h3>
+<p>API used to request instantiation of cloud resoruces (e.g., request a new CloudMan
+cluster).</p>
 <div class="toctree-wrapper compound">
-<ul class="simple">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api_docs/bcc/all.html">API documentation for interacting with BioCloudCentral.org</a></li>
 </ul>
 </div>
-<span class="target" id="module-blend"></span><hr class="docutils" />
-<dl class="class">
-<dt id="blend.galaxy.GalaxyInstance">
-<em class="property">class </em><tt class="descclassname">blend.galaxy.</tt><tt class="descname">GalaxyInstance</tt><big>(</big><em>url</em>, <em>key</em><big>)</big><a class="reference internal" href="_modules/blend/galaxy.html#GalaxyInstance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.galaxy.GalaxyInstance" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
-<dt id="blend.galaxy.GalaxyInstance.__init__">
-<tt class="descname">__init__</tt><big>(</big><em>url</em>, <em>key</em><big>)</big><a class="reference internal" href="_modules/blend/galaxy.html#GalaxyInstance.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.galaxy.GalaxyInstance.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>A base representation of an instance of Galaxy, identified by a
-URL and a user&#8217;s API key.</p>
-<p>After you have created an <tt class="docutils literal"><span class="pre">GalaxyInstance</span></tt> object, access various
-modules via the class fields (see the source for the most up-to-date
-list): <tt class="docutils literal"><span class="pre">libraries</span></tt>, <tt class="docutils literal"><span class="pre">histories</span></tt>, <tt class="docutils literal"><span class="pre">workflows</span></tt>, <tt class="docutils literal"><span class="pre">datasets</span></tt>,
-and <tt class="docutils literal"><span class="pre">users</span></tt> are the minimum set supported. For example, to work with
-histories, and get a list of all the user&#8217;s histories, the following
-should be done:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">blend</span> <span class="kn">import</span> <span class="n">galaxy</span>
-
-<span class="n">gi</span> <span class="o">=</span> <span class="n">galaxy</span><span class="o">.</span><span class="n">GalaxyInstance</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s">&#39;http://127.0.0.1:8000&#39;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s">&#39;your_api_key&#39;</span><span class="p">)</span>
-
-<span class="n">hl</span> <span class="o">=</span> <span class="n">gi</span><span class="o">.</span><span class="n">histories</span><span class="o">.</span><span class="n">get_histories</span><span class="p">()</span>
-<span class="k">print</span> <span class="s">&quot;List of histories:&quot;</span><span class="p">,</span> <span class="n">hl</span>
-</pre></div>
 </div>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>url</strong> (<em>string</em>) &#8211; A FQDN or IP for a given instance of Galaxy. For example:
-<a class="reference external" href="http://127.0.0.1:8080">http://127.0.0.1:8080</a></li>
-<li><strong>key</strong> (<em>string</em>) &#8211; User&#8217;s API key for the given instance of Galaxy, obtained
-from the user preferences.</li>
+<div class="section" id="cloudman-api">
+<h3>CloudMan API<a class="headerlink" href="#cloudman-api" title="Permalink to this headline">¶</a></h3>
+<p>API used to manipulate the instantiated infrastucture. For example, scale the
+size of the compute cluster, get infrastructure status, get service status.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api_docs/cloudman/all.html">API documentation for interacting with CloudMan</a></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="blend.galaxy.GalaxyInstance.make_delete_request">
-<tt class="descname">make_delete_request</tt><big>(</big><em>url</em>, <em>payload=None</em>, <em>params=None</em><big>)</big><a class="headerlink" href="#blend.galaxy.GalaxyInstance.make_delete_request" title="Permalink to this definition">¶</a></dt>
-<dd><p>Make a DELETE request using the provided <tt class="docutils literal"><span class="pre">url</span></tt> and the optional
-arguments.
-The <tt class="docutils literal"><span class="pre">payload</span></tt> must be a dict that can be converted into a JSON
-object (via <tt class="docutils literal"><span class="pre">simplejson.dumps</span></tt>)</p>
-<p>If the <tt class="docutils literal"><span class="pre">params</span></tt> are not provided, use <tt class="docutils literal"><span class="pre">default_params</span></tt> class field.
-If params are provided and the provided dict does not have <tt class="docutils literal"><span class="pre">key</span></tt> key,
-the default <tt class="docutils literal"><span class="pre">self.key</span></tt> value will be included in what&#8217;s passed to
-the server via the request.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="blend.galaxy.GalaxyInstance.make_get_request">
-<tt class="descname">make_get_request</tt><big>(</big><em>url</em>, <em>params=None</em><big>)</big><a class="headerlink" href="#blend.galaxy.GalaxyInstance.make_get_request" title="Permalink to this definition">¶</a></dt>
-<dd><p>Make a GET request using the provided url.</p>
-<p>If the <tt class="docutils literal"><span class="pre">params</span></tt> are not provided, use <tt class="docutils literal"><span class="pre">default_params</span></tt> class field.
-If params are provided and the provided dict does not have <tt class="docutils literal"><span class="pre">key</span></tt> key,
-the default <tt class="docutils literal"><span class="pre">self.key</span></tt> value will be included in what&#8217;s passed to
-the server via the request.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="blend.galaxy.GalaxyInstance.make_post_request">
-<tt class="descname">make_post_request</tt><big>(</big><em>url</em>, <em>payload</em>, <em>params=None</em><big>)</big><a class="headerlink" href="#blend.galaxy.GalaxyInstance.make_post_request" title="Permalink to this definition">¶</a></dt>
-<dd><p>Make a POST request using the provided <tt class="docutils literal"><span class="pre">url</span></tt> and <tt class="docutils literal"><span class="pre">payload</span></tt>.
-The <tt class="docutils literal"><span class="pre">payload</span></tt> must be a dict that can be converted into a JSON
-object (via <tt class="docutils literal"><span class="pre">simplejson.dumps</span></tt>)</p>
-<p>If the <tt class="docutils literal"><span class="pre">params</span></tt> are not provided, use <tt class="docutils literal"><span class="pre">default_params</span></tt> class field.
-If params are provided and the provided dict does not have <tt class="docutils literal"><span class="pre">key</span></tt> key,
-the default <tt class="docutils literal"><span class="pre">self.key</span></tt> value will be included in what&#8217;s passed to
-the server via the request.</p>
-</dd></dl>
-
-</dd></dl>
-
-<hr class="docutils" />
-<span class="target" id="module-blend.galaxy.libraries"></span><p>Contains possible interactions with the Galaxy Data Libraries</p>
-<dl class="class">
-<dt id="blend.galaxy.libraries.LibraryClient">
-<em class="property">class </em><tt class="descclassname">blend.galaxy.libraries.</tt><tt class="descname">LibraryClient</tt><big>(</big><em>galaxy_instance</em><big>)</big><a class="reference internal" href="_modules/blend/galaxy/libraries.html#LibraryClient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.galaxy.libraries.LibraryClient" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
-<dt id="blend.galaxy.libraries.LibraryClient.create_folder">
-<tt class="descname">create_folder</tt><big>(</big><em>library_id</em>, <em>folder_name</em>, <em>description=None</em>, <em>base_folder_id=None</em><big>)</big><a class="headerlink" href="#blend.galaxy.libraries.LibraryClient.create_folder" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a folder in the given library and the base folder. If
-<tt class="docutils literal"><span class="pre">base_folder_id</span></tt> is not provided, the new folder will be created
-in the root folder.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="blend.galaxy.libraries.LibraryClient.create_library">
-<tt class="descname">create_library</tt><big>(</big><em>name</em>, <em>description=None</em>, <em>synopsis=None</em><big>)</big><a class="headerlink" href="#blend.galaxy.libraries.LibraryClient.create_library" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a data library with the properties defined in the arguments.
-Return a list of JSON dicts, looking like so:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="p">[{</span><span class="s">&quot;id&quot;</span><span class="p">:</span> <span class="s">&quot;f740ab636b360a70&quot;</span><span class="p">,</span> 
-  <span class="s">&quot;name&quot;</span><span class="p">:</span> <span class="s">&quot;Library from blend&quot;</span><span class="p">,</span> 
-  <span class="s">&quot;url&quot;</span><span class="p">:</span> <span class="s">&quot;/api/libraries/f740ab636b360a70&quot;</span><span class="p">}]</span>
-</pre></div>
 </div>
-</dd></dl>
-
-<dl class="method">
-<dt id="blend.galaxy.libraries.LibraryClient.get_libraries">
-<tt class="descname">get_libraries</tt><big>(</big><em>library_id=None</em>, <em>name=None</em>, <em>deleted=False</em><big>)</big><a class="reference internal" href="_modules/blend/galaxy/libraries.html#LibraryClient.get_libraries"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.galaxy.libraries.LibraryClient.get_libraries" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get all the libraries or filter for specific one(s) via the provided name or ID.
-Provide only one argument: <tt class="docutils literal"><span class="pre">name</span></tt> or <tt class="docutils literal"><span class="pre">library_id</span></tt>.</p>
-<p>If <tt class="docutils literal"><span class="pre">name</span></tt> is set and multiple names match the given name, all the
-libraries matching the argument will be returned.</p>
-<p>Return a list of JSON formatted dicts each containing basic information
-about a library.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="blend.galaxy.libraries.LibraryClient.show_library">
-<tt class="descname">show_library</tt><big>(</big><em>library_id</em>, <em>contents=False</em><big>)</big><a class="headerlink" href="#blend.galaxy.libraries.LibraryClient.show_library" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get information about a library.</p>
-<p>If want to get contents of the library (rather than just the library details),
-set <tt class="docutils literal"><span class="pre">contents</span></tt> to <tt class="docutils literal"><span class="pre">True</span></tt>.</p>
-<p>Return a list of JSON formatted dicts containing library details.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="blend.galaxy.libraries.LibraryClient.upload_file_contents">
-<tt class="descname">upload_file_contents</tt><big>(</big><em>library_id</em>, <em>pasted_content</em>, <em>folder_id=None</em>, <em>file_type='auto'</em>, <em>dbkey='?'</em><big>)</big><a class="headerlink" href="#blend.galaxy.libraries.LibraryClient.upload_file_contents" title="Permalink to this definition">¶</a></dt>
-<dd><p>Upload pasted_contents to a data library as a new file.
-If <tt class="docutils literal"><span class="pre">folder_id</span></tt> is not specified, the file will be placed in the root folder.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="blend.galaxy.libraries.LibraryClient.upload_file_from_server">
-<tt class="descname">upload_file_from_server</tt><big>(</big><em>library_id</em>, <em>server_dir</em>, <em>folder_id=None</em>, <em>file_type='auto'</em>, <em>dbkey='?'</em><big>)</big><a class="headerlink" href="#blend.galaxy.libraries.LibraryClient.upload_file_from_server" title="Permalink to this definition">¶</a></dt>
-<dd><p>Upload a file to a library from a path on the server where Galaxy is running.
-If <tt class="docutils literal"><span class="pre">folder_id</span></tt> is not provided, the file will be placed in the root folder.</p>
-<p>Note that for this method to work, the Galaxy instance you&#8217;re connecting to
-must have the configuration option <tt class="docutils literal"><span class="pre">library_import_dir</span></tt> set in <tt class="docutils literal"><span class="pre">universe_wsgi.ini</span></tt>.
-The value of that configuration option should be a base directory from where
-more specific directories can be specified as part of the <tt class="docutils literal"><span class="pre">server_dir</span></tt> argument.
-All and only the files (ie, no folders) specifed by the <tt class="docutils literal"><span class="pre">server_dir</span></tt> argument
-will be uploaded to the data library.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="blend.galaxy.libraries.LibraryClient.upload_file_from_url">
-<tt class="descname">upload_file_from_url</tt><big>(</big><em>library_id</em>, <em>file_url</em>, <em>folder_id=None</em>, <em>file_type='auto'</em>, <em>dbkey='?'</em><big>)</big><a class="headerlink" href="#blend.galaxy.libraries.LibraryClient.upload_file_from_url" title="Permalink to this definition">¶</a></dt>
-<dd><p>Upload a file to a library from a URL.
-If <tt class="docutils literal"><span class="pre">folder_id</span></tt> is not specified, the file will be uploaded to the root folder.</p>
-</dd></dl>
-
-</dd></dl>
-
-<hr class="docutils" />
-<span class="target" id="module-blend.galaxy.histories"></span><p>Contains possible interactions with the Galaxy Histories</p>
-<dl class="class">
-<dt id="blend.galaxy.histories.HistoryClient">
-<em class="property">class </em><tt class="descclassname">blend.galaxy.histories.</tt><tt class="descname">HistoryClient</tt><big>(</big><em>galaxy_instance</em><big>)</big><a class="reference internal" href="_modules/blend/galaxy/histories.html#HistoryClient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.galaxy.histories.HistoryClient" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
-<dt id="blend.galaxy.histories.HistoryClient.create_history">
-<tt class="descname">create_history</tt><big>(</big><em>name=None</em><big>)</big><a class="reference internal" href="_modules/blend/galaxy/histories.html#HistoryClient.create_history"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.galaxy.histories.HistoryClient.create_history" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a new history, optionally setting the <tt class="docutils literal"><span class="pre">name</span></tt>.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="blend.galaxy.histories.HistoryClient.delete_history">
-<tt class="descname">delete_history</tt><big>(</big><em>history_id</em>, <em>purge=False</em><big>)</big><a class="reference internal" href="_modules/blend/galaxy/histories.html#HistoryClient.delete_history"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.galaxy.histories.HistoryClient.delete_history" title="Permalink to this definition">¶</a></dt>
-<dd><p>Delete a history.</p>
-<p>If <tt class="docutils literal"><span class="pre">purge</span></tt> is set to <tt class="docutils literal"><span class="pre">True</span></tt>, also purge the history. Note that for
-the purge option to work, <tt class="docutils literal"><span class="pre">allow_user_dataset_purge</span></tt> option must be
-set in the Galaxy&#8217;s configuration file <tt class="docutils literal"><span class="pre">universe_wsgi.ini</span></tt></p>
-</dd></dl>
-
-<dl class="method">
-<dt id="blend.galaxy.histories.HistoryClient.get_histories">
-<tt class="descname">get_histories</tt><big>(</big><em>history_id=None</em>, <em>name=None</em>, <em>deleted=False</em><big>)</big><a class="reference internal" href="_modules/blend/galaxy/histories.html#HistoryClient.get_histories"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.galaxy.histories.HistoryClient.get_histories" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get all histories or filter the specific one(s) via the provided <tt class="docutils literal"><span class="pre">name</span></tt>
-or <tt class="docutils literal"><span class="pre">history_id</span></tt>. Provide only one argument, <tt class="docutils literal"><span class="pre">name</span></tt> or <tt class="docutils literal"><span class="pre">history_id</span></tt>,
-but not both.</p>
-<p>If <tt class="docutils literal"><span class="pre">deleted</span></tt> is set to <tt class="docutils literal"><span class="pre">True</span></tt>, return histories that have been deleted.</p>
-<p>Return a list of history element dicts. If more than one history
-matches the given <tt class="docutils literal"><span class="pre">name</span></tt>, return the list of all the histories with the
-given name.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="blend.galaxy.histories.HistoryClient.show_dataset">
-<tt class="descname">show_dataset</tt><big>(</big><em>history_id</em>, <em>dataset_id</em><big>)</big><a class="reference internal" href="_modules/blend/galaxy/histories.html#HistoryClient.show_dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.galaxy.histories.HistoryClient.show_dataset" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get details about a given history dataset. The required <tt class="docutils literal"><span class="pre">history_id</span></tt>
-can be obtained from the datasets&#8217;s history content details.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="blend.galaxy.histories.HistoryClient.show_history">
-<tt class="descname">show_history</tt><big>(</big><em>history_id</em>, <em>contents=False</em><big>)</big><a class="reference internal" href="_modules/blend/galaxy/histories.html#HistoryClient.show_history"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.galaxy.histories.HistoryClient.show_history" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get details of a given history. By default, just get the history meta
-information. If <tt class="docutils literal"><span class="pre">contents</span></tt> is set to <tt class="docutils literal"><span class="pre">True</span></tt>, get the complete list of
-datasets in the given history.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="blend.galaxy.histories.HistoryClient.undelete_history">
-<tt class="descname">undelete_history</tt><big>(</big><em>history_id</em><big>)</big><a class="reference internal" href="_modules/blend/galaxy/histories.html#HistoryClient.undelete_history"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.galaxy.histories.HistoryClient.undelete_history" title="Permalink to this definition">¶</a></dt>
-<dd><p>Undelete a history</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="blend.galaxy.histories.HistoryClient.upload_dataset_from_library">
-<tt class="descname">upload_dataset_from_library</tt><big>(</big><em>history_id</em>, <em>lib_dataset_id</em><big>)</big><a class="headerlink" href="#blend.galaxy.histories.HistoryClient.upload_dataset_from_library" title="Permalink to this definition">¶</a></dt>
-<dd><p>Upload a dataset into the history from a library. Requires the
-library dataset ID, which can be obtained from the library
-contents.</p>
-</dd></dl>
-
-</dd></dl>
-
-<hr class="docutils" />
-<span class="target" id="module-blend.galaxy.workflows"></span><p>Contains possible interactions with the Galaxy Workflows</p>
-<dl class="class">
-<dt id="blend.galaxy.workflows.WorkflowClient">
-<em class="property">class </em><tt class="descclassname">blend.galaxy.workflows.</tt><tt class="descname">WorkflowClient</tt><big>(</big><em>galaxy_instance</em><big>)</big><a class="reference internal" href="_modules/blend/galaxy/workflows.html#WorkflowClient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.galaxy.workflows.WorkflowClient" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
-<dt id="blend.galaxy.workflows.WorkflowClient.get_workflows">
-<tt class="descname">get_workflows</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/blend/galaxy/workflows.html#WorkflowClient.get_workflows"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.galaxy.workflows.WorkflowClient.get_workflows" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get a list of all workflows</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A list of workflow dicts. 
-For example:<div class="highlight-python"><div class="highlight"><pre><span class="p">[{</span><span class="s">u&#39;id&#39;</span><span class="p">:</span> <span class="s">u&#39;92c56938c2f9b315&#39;</span><span class="p">,</span>
-  <span class="s">u&#39;name&#39;</span><span class="p">:</span> <span class="s">u&#39;Simple&#39;</span><span class="p">,</span>
-  <span class="s">u&#39;url&#39;</span><span class="p">:</span> <span class="s">u&#39;/api/workflows/92c56938c2f9b315&#39;</span><span class="p">}]</span>
-</pre></div>
 </div>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="blend.galaxy.workflows.WorkflowClient.run_workflow">
-<tt class="descname">run_workflow</tt><big>(</big><em>workflow_id</em>, <em>dataset_map</em>, <em>history_id=None</em>, <em>history_name=None</em>, <em>import_inputs_to_history=False</em><big>)</big><a class="reference internal" href="_modules/blend/galaxy/workflows.html#WorkflowClient.run_workflow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.galaxy.workflows.WorkflowClient.run_workflow" title="Permalink to this definition">¶</a></dt>
-<dd><p>Run the workflow identified by <tt class="docutils literal"><span class="pre">workflow_id</span></tt></p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>workflow_id</strong> (<em>string</em>) &#8211; Encoded workflow ID</li>
-<li><strong>dataset_map</strong> (<em>string or dict</em>) &#8211; A mapping of workflow inputs to datasets. The datasets
-source can be a LibraryDatasetDatasetAssociation (<tt class="docutils literal"><span class="pre">ldda</span></tt>),
-LibraryDataset (<tt class="docutils literal"><span class="pre">ld</span></tt>), or HistoryDatasetAssociation (<tt class="docutils literal"><span class="pre">hda</span></tt>).
-The map must be in the following format:
-<tt class="docutils literal"><span class="pre">{'&lt;input&gt;':</span> <span class="pre">{'id':</span> <span class="pre">&lt;encoded</span> <span class="pre">dataset</span> <span class="pre">ID&gt;,</span> <span class="pre">'src':</span> <span class="pre">'[ldda,</span> <span class="pre">ld,</span> <span class="pre">hda]'}}</span></tt>
-(eg, <tt class="docutils literal"><span class="pre">{'23':</span> <span class="pre">{'id':</span> <span class="pre">'29beef4fadeed09f',</span> <span class="pre">'src':</span> <span class="pre">'ld'}}</span></tt>)</li>
-<li><strong>history_id</strong> (<em>string</em>) &#8211; The encoded history ID where to store the workflow output.
-<tt class="docutils literal"><span class="pre">history_id</span></tt> OR <tt class="docutils literal"><span class="pre">history_name</span></tt> should be provided but not both!</li>
-<li><strong>history_name</strong> (<em>string</em>) &#8211; Create a new history with the given name to store the 
-workflow output. <tt class="docutils literal"><span class="pre">history_id</span></tt> OR <tt class="docutils literal"><span class="pre">history_name</span></tt>
-should be provided but not both!</li>
-<li><strong>import_inputs_to_history</strong> (<em>bool</em>) &#8211; If <tt class="docutils literal"><span class="pre">True</span></tt>, used workflow inputs will be imported
-into the history. If <tt class="docutils literal"><span class="pre">False</span></tt>, only workflow outputs
-will be visible in the given history.</li>
+<div class="section" id="galaxy-api">
+<h3>Galaxy API<a class="headerlink" href="#galaxy-api" title="Permalink to this headline">¶</a></h3>
+<p>API used to manipulate genomic analyses within Galaxy, including data management
+and workflow execution.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api_docs/galaxy/all.html">API documentation for interacting with Galaxy</a></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">dict</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><p>A dict containing the history ID where the outputs are placed as well as
-output dataset IDs. 
-For example:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span><span class="s">u&#39;history&#39;</span><span class="p">:</span> <span class="s">u&#39;64177123325c9cfd&#39;</span><span class="p">,</span> 
- <span class="s">u&#39;outputs&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s">u&#39;aa4d3084af404259&#39;</span><span class="p">]}</span>
-</pre></div>
 </div>
-</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="blend.galaxy.workflows.WorkflowClient.show_workflow">
-<tt class="descname">show_workflow</tt><big>(</big><em>workflow_id</em><big>)</big><a class="reference internal" href="_modules/blend/galaxy/workflows.html#WorkflowClient.show_workflow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.galaxy.workflows.WorkflowClient.show_workflow" title="Permalink to this definition">¶</a></dt>
-<dd><p>Display information needed to run a workflow</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>workflow_id</strong> (<em>string</em>) &#8211; Encoded workflow ID</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">list</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A description of the workflow and its inputs as a JSON object.
-For example:<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span><span class="s">u&#39;id&#39;</span><span class="p">:</span> <span class="s">u&#39;92c56938c2f9b315&#39;</span><span class="p">,</span>
- <span class="s">u&#39;inputs&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">u&#39;23&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">u&#39;label&#39;</span><span class="p">:</span> <span class="s">u&#39;Input Dataset&#39;</span><span class="p">,</span> <span class="s">u&#39;value&#39;</span><span class="p">:</span> <span class="s">u&#39;&#39;</span><span class="p">}},</span>
- <span class="s">u&#39;name&#39;</span><span class="p">:</span> <span class="s">u&#39;Simple&#39;</span><span class="p">,</span>
- <span class="s">u&#39;url&#39;</span><span class="p">:</span> <span class="s">u&#39;/api/workflows/92c56938c2f9b315&#39;</span><span class="p">}</span>
-</pre></div>
 </div>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-</dd></dl>
-
-<hr class="docutils" />
-<span class="target" id="module-blend.galaxy.datasets"></span><p>Contains possible interactions with the Galaxy Datasets</p>
-<dl class="class">
-<dt id="blend.galaxy.datasets.DatasetClient">
-<em class="property">class </em><tt class="descclassname">blend.galaxy.datasets.</tt><tt class="descname">DatasetClient</tt><big>(</big><em>galaxy_instance</em><big>)</big><a class="reference internal" href="_modules/blend/galaxy/datasets.html#DatasetClient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.galaxy.datasets.DatasetClient" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
-<dt id="blend.galaxy.datasets.DatasetClient.show_dataset">
-<tt class="descname">show_dataset</tt><big>(</big><em>dataset_id</em>, <em>deleted=False</em><big>)</big><a class="reference internal" href="_modules/blend/galaxy/datasets.html#DatasetClient.show_dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.galaxy.datasets.DatasetClient.show_dataset" title="Permalink to this definition">¶</a></dt>
-<dd><p>Display information about and/or content of a dataset. This can be a
-history or a library dataset.</p>
-</dd></dl>
-
-</dd></dl>
-
-<hr class="docutils" />
-<span class="target" id="module-blend.galaxy.users"></span><p>Contains possible interaction dealing with Galaxy users.</p>
-<p>These methods must be executed by a registered Galaxy admin user.</p>
-<dl class="class">
-<dt id="blend.galaxy.users.UserClient">
-<em class="property">class </em><tt class="descclassname">blend.galaxy.users.</tt><tt class="descname">UserClient</tt><big>(</big><em>galaxy_instance</em><big>)</big><a class="reference internal" href="_modules/blend/galaxy/users.html#UserClient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.galaxy.users.UserClient" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
-<dt id="blend.galaxy.users.UserClient.create_user">
-<tt class="descname">create_user</tt><big>(</big><em>user_email</em><big>)</big><a class="reference internal" href="_modules/blend/galaxy/users.html#UserClient.create_user"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.galaxy.users.UserClient.create_user" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a new Galaxy user.</p>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">For this method to work, the Galaxy instance must have 
-<tt class="docutils literal"><span class="pre">allow_user_creation</span></tt> and <tt class="docutils literal"><span class="pre">use_remote_user</span></tt> options set to <tt class="docutils literal"><span class="pre">True</span></tt>
-in the <tt class="docutils literal"><span class="pre">universe_wsgi.ini</span></tt> configuration file. Also note that setting
-<tt class="docutils literal"><span class="pre">use_remote_user</span></tt> will require an upstream authentication proxy
-server; however, if you do not have one, access to Galaxy via a browser
-will not be possible.</p>
-</div>
-</dd></dl>
-
-<dl class="method">
-<dt id="blend.galaxy.users.UserClient.get_users">
-<tt class="descname">get_users</tt><big>(</big><em>deleted=False</em><big>)</big><a class="reference internal" href="_modules/blend/galaxy/users.html#UserClient.get_users"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.galaxy.users.UserClient.get_users" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get a list of all registered users. If <tt class="docutils literal"><span class="pre">deleted</span></tt> is set to <tt class="docutils literal"><span class="pre">True</span></tt>,
-get a list of deleted users.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A list of dicts with user details. 
-For example:<div class="highlight-python"><div class="highlight"><pre><span class="p">[{</span><span class="s">u&#39;email&#39;</span><span class="p">:</span> <span class="s">u&#39;a_user@example.com&#39;</span><span class="p">,</span>
-  <span class="s">u&#39;id&#39;</span><span class="p">:</span> <span class="s">u&#39;dda47097d9189f15&#39;</span><span class="p">,</span>
-  <span class="s">u&#39;url&#39;</span><span class="p">:</span> <span class="s">u&#39;/api/users/dda47097d9189f15&#39;</span><span class="p">}]</span>
-</pre></div>
-</div>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="blend.galaxy.users.UserClient.show_user">
-<tt class="descname">show_user</tt><big>(</big><em>user_id</em>, <em>deleted=False</em><big>)</big><a class="reference internal" href="_modules/blend/galaxy/users.html#UserClient.show_user"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.galaxy.users.UserClient.show_user" title="Permalink to this definition">¶</a></dt>
-<dd><p>Display information about a user. If <tt class="docutils literal"><span class="pre">deleted</span></tt> is set to <tt class="docutils literal"><span class="pre">True</span></tt>,
-display information about a deleted user.</p>
-</dd></dl>
-
-</dd></dl>
-
 </div>
 <div class="section" id="indices-and-tables">
-<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><a class="reference internal" href="genindex.html"><em>Index</em></a></li>
 <li><a class="reference internal" href="py-modindex.html"><em>Module Index</em></a></li>
 <li><a class="reference internal" href="search.html"><em>Search Page</em></a></li>
 </ul>
+</div>
 </div>
 
 
@@ -449,12 +145,31 @@ display information about a deleted user.</p>
         <div class="sphinxsidebarwrapper">
   <h3><a href="#">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">Welcome to Blend&#8217;s documentation!</a><ul>
+<li><a class="reference internal" href="#">Blend</a><ul>
+<li><a class="reference internal" href="#about">About</a></li>
+<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#usage">Usage</a></li>
+<li><a class="reference internal" href="#development">Development</a></li>
+<li><a class="reference internal" href="#api-documentation">API Documentation</a><ul>
+<li><a class="reference internal" href="#biocloudcentral-org-api">BioCloudCentral.org API</a><ul>
+</ul>
+</li>
+<li><a class="reference internal" href="#cloudman-api">CloudMan API</a><ul>
+</ul>
+</li>
+<li><a class="reference internal" href="#galaxy-api">Galaxy API</a><ul>
+</ul>
+</li>
 </ul>
 </li>
 <li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
 </ul>
+</li>
+</ul>
 
+  <h4>Next topic</h4>
+  <p class="topless"><a href="api_docs/bcc/all.html"
+                        title="next chapter">API documentation for interacting with BioCloudCentral.org</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/index.txt"
@@ -486,6 +201,9 @@ display information about a deleted user.</p>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
+        <li class="right" >
+          <a href="api_docs/bcc/all.html" title="API documentation for interacting with BioCloudCentral.org"
+             >next</a> |</li>
         <li><a href="#">Blend 0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>

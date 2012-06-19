@@ -1,45 +1,95 @@
-.. Blend documentation master file, created by
-   sphinx-quickstart on Wed Jun  6 11:51:19 2012.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+=====
+Blend
+=====
 
-Welcome to Blend's documentation!
-=================================
+About
+=====
 
-API documentation for interacting with Galaxy.
+Blend is a Python (2.6 or higher) library for interacting with `BioCloudCentral.org`_,
+`CloudMan`_, and `Galaxy`_ API. It makes it possible to script and automate the process
+of cloud infrastrucutre provisioning, scaling, and running of analyses within
+Galaxy.
+
+Installation
+============
+
+Stable releases of Blend are best installed via ``pip`` or ``easy_install`` from
+PyPI using something like ``pip install blend``.
+
+Alternatively, you may install the most current source code from our `Git repository`_,
+or fork the project on Github. To install from source, do the following::
+
+    # Clone the repository to a local directory
+    git clone https://github.com/afgane/blend.git
+    # Install the library
+    cd blend
+    python setup.py install
+
+After installing the library, you will be able to simply import it into your
+Python scripts with ``import blend``. For details on the available functionality,
+see the API methods.
+
+Usage
+=====
+
+To get started using Blend, it's probably best to take a look at the example
+scripts in ``docs/examples`` source directory and browse the `API documentation`_.
+Beyond that, it's up to your creativity :).
+
+Development
+===========
+
+Anyone interested in contributing or tweaking the library is more then welcome
+to do so. To start, simply fork the `Git repository`_ on Github and start playing with
+it. Then, issue pull requests.
+
+API Documentation
+=================
+
+Blend's API foucuses around and matches the services it wraps. Thus, there are
+three top-level sets of APIs, each corresponding to a separate serivce and a
+corresponding step in the automation process. *Note* that each of the service APIs
+can be used completely independently of one another.
+
+Effort has been made to keep the structure and naming of those API's consistent
+across the library but because they do bridge different services, some discrepancies
+may exist. Feel free to point those out and/or provide fixes.
+
+BioCloudCentral.org API
+~~~~~~~~~~~~~~~~~~~~~~~
+
+API used to request instantiation of cloud resoruces (e.g., request a new CloudMan
+cluster).
 
 .. toctree::
-   :maxdepth: 2
+    :maxdepth: 2
+    :glob:
 
-.. automodule:: blend
-    :members:
-    :undoc-members:
+    api_docs/bcc/*
 
------
+CloudMan API
+~~~~~~~~~~~~
 
-.. autoclass:: blend.galaxy.GalaxyInstance
+API used to manipulate the instantiated infrastucture. For example, scale the
+size of the compute cluster, get infrastructure status, get service status.
 
-    .. automethod:: blend.galaxy.GalaxyInstance.__init__
+.. toctree::
+    :maxdepth: 2
+    :glob:
 
------
+    api_docs/cloudman/*
 
-.. automodule:: blend.galaxy.libraries
+Galaxy API
+~~~~~~~~~~
 
------
+API used to manipulate genomic analyses within Galaxy, including data management
+and workflow execution.
 
-.. automodule:: blend.galaxy.histories
+.. toctree::
+    :maxdepth: 2
+    :glob:
 
------
-
-.. automodule:: blend.galaxy.workflows
-
------
-
-.. automodule:: blend.galaxy.datasets
-
------
-
-.. automodule:: blend.galaxy.users
+    api_docs/galaxy/*
 
 Indices and tables
 ==================
@@ -47,4 +97,10 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+.. References/hyperlinks used above
+.. _BioCloudCentral.org: http://biocloudcentral.org/
+.. _CloudMan: http://usecloudman.org/
+.. _Galaxy: http://usegalaxy.org/
+.. _Git repository: https://github.com/afgane/blend
 
