@@ -47,7 +47,7 @@ class CloudManTest(unittest.TestCase):
     def test_add_nodes(self):
         self.cm._make_get_request = MagicMock(return_value="{}")
         num_nodes = 10
-        status = self.cm.add_nodes(num_nodes, type="xxx", spot_price="yyy")
+        status = self.cm.add_nodes(num_nodes)
         self.assertIsNotNone(status)
 
         # Check that the correct URL was called
