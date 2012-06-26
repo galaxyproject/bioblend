@@ -41,24 +41,20 @@ class BCC:
                 }
         return simplejson.loads(self._make_get_request("/api/get_regions", parameters=params))
 
-    #def create_cluster(self, cluster_name, password, cloud_type, access_key, secret_key, instance_type, placement=None, post_start_script=None, worker_script=None, ami=None):
-    #    """
-    #    Launch a new CloudMan cluster.
-
-    #    The ``cluster_name`` names the cluster. The ``password`` sets the 
-    #    user password for web access to CloudMan (their is no username). The 
-    #    ``cloud_type`` is the numerical ID of the cloud to deploy (the ``id`` field 
-    #    from ``get_cloud_types()``). The ``access_key`` and ``secret_key`` are 
-    #    your cloud access credentials (BioCloudCentral requires these to create the cluster). The ``instance_type`` is the ``tech_name`` (e.g. ``m1.small``) for
-    #    the master instance of the cluster (from ``get_instance_types()``).
-
-    #    The ``placement`` defines the zone for the cluster. The
-    #    ``post_start_script`` defines the post start script. The ``worker_script``
-    #    defines the worker script. The ``ami`` defines the numerical ID of
-    #    the image to use for the master instance of the cluster (``id`` field
-    #    from ``get_images()``).
-    #    """
     def launch(self, instance_type, ud={}, cloud_name="Amazon"):
+        """
+        Launch a new CloudMan cluster.
+
+        The ``instance_type`` is the ``tech_name`` (e.g. ``m1.small``) for
+        the master instance of the cluster (from ``get_instance_types()``).
+
+        The ``ud`` is a dictionary of user data. It should at least contain 
+        ``cluster_name``, ``password``, ``cloud``, ``access_key``, ``secret_key``,
+        ``instance_type``, and ``image_id``.
+
+        The ``cloud_name``, defaulting to ``Amazon``, is the name of the cloud.
+
+        """
         parameters = {
                 'cluster_name': ud['cluster_name'],
                 'password': ud['password'],

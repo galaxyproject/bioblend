@@ -117,8 +117,4 @@ class BCCTest(unittest.TestCase):
         }
         result = self.bcc.launch(instance_type, ud=user_data, cloud_name=cloud_name)
 
-        #result = self.bcc.create_cluster(cluster_name, password, cloud_type, access_key, secret_key, instance_type, placement=zone, post_start_script=psscript, worker_script=wscript, ami=image_id)
-
         self.bcc._make_post_request.assert_called_with("/api/launch", parameters=launch_hash)
-
-
