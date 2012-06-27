@@ -1,7 +1,9 @@
 from setuptools import setup
 
+from blend import __version__
+
 setup(name = "blend",
-      version = "0.1",
+      version = __version__,
       description = "BioCloudCentral, CloudMan, and Galaxy Library",
       author = "Enis Afgan",
       author_email = "afgane@gmail.com",
