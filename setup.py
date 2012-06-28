@@ -1,12 +1,14 @@
 from setuptools import setup
 
+from blend import __version__
+
 setup(name = "blend",
-      version = "0.1",
+      version = __version__,
       description = "BioCloudCentral, CloudMan, and Galaxy Library",
       author = "Enis Afgan",
       author_email = "afgane@gmail.com",
       url = "https://github.com/afgane/blend",
-      install_requires = ['requests', 'simplejson'],
+      install_requires = ['requests', 'simplejson', 'boto'],
       packages = ['blend', 'blend.bcc', 'blend.cloudman', 'blend.galaxy',
                   'blend.galaxy.datasets', 'blend.galaxy.histories',
                   'blend.galaxy.libraries', 'blend.galaxy.users',
