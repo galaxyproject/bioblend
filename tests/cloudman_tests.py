@@ -1,3 +1,12 @@
+"""
+Tests the functionality of the Blend CloudMan API, without actually making
+calls to a remote CloudMan instance/server. These don't actually ensure
+that Blend is integrated with CloudMan correctly. They only ensure that
+if you refactor the Blend CloudMan API code, that it will maintain its
+current behaviour.
+
+Use ``nose`` to run these unit tests.
+"""
 import unittest
 from mock import MagicMock
 from blend import cloudman

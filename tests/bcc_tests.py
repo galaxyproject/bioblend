@@ -1,3 +1,12 @@
+"""
+Tests the functionality of the Blend BioCloudCentral API, without actually 
+making calls to a remote BioCloudCentral instance/server. These don't 
+actually ensure that Blend is integrated with BioCloudCentral correctly. 
+They only ensure that if you refactor the Blend BioCloudCentral API code, 
+that it will maintain its current behavior.
+
+Use ``nose`` to run these unit tests.
+"""
 import unittest
 from mock import MagicMock
 from blend import bcc
