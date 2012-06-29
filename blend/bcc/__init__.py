@@ -41,6 +41,17 @@ class BCC:
                 }
         return simplejson.loads(self._make_get_request("/api/get_regions", parameters=params))
 
+    def get_instance_state(self, secret_key, access_key, cloud_type, instance_id):
+        """
+        """
+        parameters = {
+                'access_key': access_key,
+                'secret_key': secret_key,
+                'cloud_type': cloud_type,
+                'instance_id': instance_id
+                }
+        return simplejson.loads(self._make_get_request("/api/state", parameters=parameters))
+
     def launch(self, instance_type, ud={}, cloud_name="Amazon"):
         """
         Launch a new CloudMan cluster.
