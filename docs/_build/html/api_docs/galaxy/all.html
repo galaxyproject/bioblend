@@ -122,7 +122,7 @@ from the user preferences.</li>
 
 <dl class="method">
 <dt id="blend.galaxy.GalaxyInstance.make_delete_request">
-<tt class="descname">make_delete_request</tt><big>(</big><em>url</em>, <em>payload=None</em>, <em>params=None</em><big>)</big><a class="headerlink" href="#blend.galaxy.GalaxyInstance.make_delete_request" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">make_delete_request</tt><big>(</big><em>url</em>, <em>payload=None</em>, <em>params=None</em><big>)</big><a class="reference internal" href="../../_modules/blend/galaxy.html#GalaxyInstance.make_delete_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.galaxy.GalaxyInstance.make_delete_request" title="Permalink to this definition">¶</a></dt>
 <dd><p>Make a DELETE request using the provided <tt class="docutils literal"><span class="pre">url</span></tt> and the optional
 arguments.
 The <tt class="docutils literal"><span class="pre">payload</span></tt> must be a dict that can be converted into a JSON
@@ -135,7 +135,7 @@ the server via the request.</p>
 
 <dl class="method">
 <dt id="blend.galaxy.GalaxyInstance.make_get_request">
-<tt class="descname">make_get_request</tt><big>(</big><em>url</em>, <em>params=None</em><big>)</big><a class="headerlink" href="#blend.galaxy.GalaxyInstance.make_get_request" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">make_get_request</tt><big>(</big><em>url</em>, <em>params=None</em><big>)</big><a class="reference internal" href="../../_modules/blend/galaxy.html#GalaxyInstance.make_get_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.galaxy.GalaxyInstance.make_get_request" title="Permalink to this definition">¶</a></dt>
 <dd><p>Make a GET request using the provided url.</p>
 <p>If the <tt class="docutils literal"><span class="pre">params</span></tt> are not provided, use <tt class="docutils literal"><span class="pre">default_params</span></tt> class field.
 If params are provided and the provided dict does not have <tt class="docutils literal"><span class="pre">key</span></tt> key,
@@ -145,7 +145,7 @@ the server via the request.</p>
 
 <dl class="method">
 <dt id="blend.galaxy.GalaxyInstance.make_post_request">
-<tt class="descname">make_post_request</tt><big>(</big><em>url</em>, <em>payload</em>, <em>params=None</em><big>)</big><a class="headerlink" href="#blend.galaxy.GalaxyInstance.make_post_request" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">make_post_request</tt><big>(</big><em>url</em>, <em>payload</em>, <em>params=None</em><big>)</big><a class="reference internal" href="../../_modules/blend/galaxy.html#GalaxyInstance.make_post_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.galaxy.GalaxyInstance.make_post_request" title="Permalink to this definition">¶</a></dt>
 <dd><p>Make a POST request using the provided <tt class="docutils literal"><span class="pre">url</span></tt> and <tt class="docutils literal"><span class="pre">payload</span></tt>.
 The <tt class="docutils literal"><span class="pre">payload</span></tt> must be a dict that can be converted into a JSON
 object (via <tt class="docutils literal"><span class="pre">simplejson.dumps</span></tt>)</p>
@@ -164,7 +164,7 @@ the server via the request.</p>
 <em class="property">class </em><tt class="descclassname">blend.galaxy.libraries.</tt><tt class="descname">LibraryClient</tt><big>(</big><em>galaxy_instance</em><big>)</big><a class="reference internal" href="../../_modules/blend/galaxy/libraries.html#LibraryClient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.galaxy.libraries.LibraryClient" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="method">
 <dt id="blend.galaxy.libraries.LibraryClient.create_folder">
-<tt class="descname">create_folder</tt><big>(</big><em>library_id</em>, <em>folder_name</em>, <em>description=None</em>, <em>base_folder_id=None</em><big>)</big><a class="headerlink" href="#blend.galaxy.libraries.LibraryClient.create_folder" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">create_folder</tt><big>(</big><em>library_id</em>, <em>folder_name</em>, <em>description=None</em>, <em>base_folder_id=None</em><big>)</big><a class="reference internal" href="../../_modules/blend/galaxy/libraries.html#LibraryClient.create_folder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.galaxy.libraries.LibraryClient.create_folder" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a folder in the given library and the base folder. If
 <tt class="docutils literal"><span class="pre">base_folder_id</span></tt> is not provided, the new folder will be created
 in the root folder.</p>
@@ -172,7 +172,7 @@ in the root folder.</p>
 
 <dl class="method">
 <dt id="blend.galaxy.libraries.LibraryClient.create_library">
-<tt class="descname">create_library</tt><big>(</big><em>name</em>, <em>description=None</em>, <em>synopsis=None</em><big>)</big><a class="headerlink" href="#blend.galaxy.libraries.LibraryClient.create_library" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">create_library</tt><big>(</big><em>name</em>, <em>description=None</em>, <em>synopsis=None</em><big>)</big><a class="reference internal" href="../../_modules/blend/galaxy/libraries.html#LibraryClient.create_library"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.galaxy.libraries.LibraryClient.create_library" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a data library with the properties defined in the arguments.
 Return a list of JSON dicts, looking like so:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="p">[{</span><span class="s">&quot;id&quot;</span><span class="p">:</span> <span class="s">&quot;f740ab636b360a70&quot;</span><span class="p">,</span> 
@@ -195,7 +195,7 @@ about a library.</p>
 
 <dl class="method">
 <dt id="blend.galaxy.libraries.LibraryClient.show_library">
-<tt class="descname">show_library</tt><big>(</big><em>library_id</em>, <em>contents=False</em><big>)</big><a class="headerlink" href="#blend.galaxy.libraries.LibraryClient.show_library" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">show_library</tt><big>(</big><em>library_id</em>, <em>contents=False</em><big>)</big><a class="reference internal" href="../../_modules/blend/galaxy/libraries.html#LibraryClient.show_library"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.galaxy.libraries.LibraryClient.show_library" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get information about a library.</p>
 <p>If want to get contents of the library (rather than just the library details),
 set <tt class="docutils literal"><span class="pre">contents</span></tt> to <tt class="docutils literal"><span class="pre">True</span></tt>.</p>
@@ -204,14 +204,14 @@ set <tt class="docutils literal"><span class="pre">contents</span></tt> to <tt c
 
 <dl class="method">
 <dt id="blend.galaxy.libraries.LibraryClient.upload_file_contents">
-<tt class="descname">upload_file_contents</tt><big>(</big><em>library_id</em>, <em>pasted_content</em>, <em>folder_id=None</em>, <em>file_type='auto'</em>, <em>dbkey='?'</em><big>)</big><a class="headerlink" href="#blend.galaxy.libraries.LibraryClient.upload_file_contents" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">upload_file_contents</tt><big>(</big><em>library_id</em>, <em>pasted_content</em>, <em>folder_id=None</em>, <em>file_type='auto'</em>, <em>dbkey='?'</em><big>)</big><a class="reference internal" href="../../_modules/blend/galaxy/libraries.html#LibraryClient.upload_file_contents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.galaxy.libraries.LibraryClient.upload_file_contents" title="Permalink to this definition">¶</a></dt>
 <dd><p>Upload pasted_contents to a data library as a new file.
 If <tt class="docutils literal"><span class="pre">folder_id</span></tt> is not specified, the file will be placed in the root folder.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="blend.galaxy.libraries.LibraryClient.upload_file_from_server">
-<tt class="descname">upload_file_from_server</tt><big>(</big><em>library_id</em>, <em>server_dir</em>, <em>folder_id=None</em>, <em>file_type='auto'</em>, <em>dbkey='?'</em><big>)</big><a class="headerlink" href="#blend.galaxy.libraries.LibraryClient.upload_file_from_server" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">upload_file_from_server</tt><big>(</big><em>library_id</em>, <em>server_dir</em>, <em>folder_id=None</em>, <em>file_type='auto'</em>, <em>dbkey='?'</em><big>)</big><a class="reference internal" href="../../_modules/blend/galaxy/libraries.html#LibraryClient.upload_file_from_server"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.galaxy.libraries.LibraryClient.upload_file_from_server" title="Permalink to this definition">¶</a></dt>
 <dd><p>Upload a file to a library from a path on the server where Galaxy is running.
 If <tt class="docutils literal"><span class="pre">folder_id</span></tt> is not provided, the file will be placed in the root folder.</p>
 <p>Note that for this method to work, the Galaxy instance you&#8217;re connecting to
@@ -224,7 +224,7 @@ will be uploaded to the data library.</p>
 
 <dl class="method">
 <dt id="blend.galaxy.libraries.LibraryClient.upload_file_from_url">
-<tt class="descname">upload_file_from_url</tt><big>(</big><em>library_id</em>, <em>file_url</em>, <em>folder_id=None</em>, <em>file_type='auto'</em>, <em>dbkey='?'</em><big>)</big><a class="headerlink" href="#blend.galaxy.libraries.LibraryClient.upload_file_from_url" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">upload_file_from_url</tt><big>(</big><em>library_id</em>, <em>file_url</em>, <em>folder_id=None</em>, <em>file_type='auto'</em>, <em>dbkey='?'</em><big>)</big><a class="reference internal" href="../../_modules/blend/galaxy/libraries.html#LibraryClient.upload_file_from_url"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.galaxy.libraries.LibraryClient.upload_file_from_url" title="Permalink to this definition">¶</a></dt>
 <dd><p>Upload a file to a library from a URL.
 If <tt class="docutils literal"><span class="pre">folder_id</span></tt> is not specified, the file will be uploaded to the root folder.</p>
 </dd></dl>
@@ -286,7 +286,7 @@ datasets in the given history.</p>
 
 <dl class="method">
 <dt id="blend.galaxy.histories.HistoryClient.upload_dataset_from_library">
-<tt class="descname">upload_dataset_from_library</tt><big>(</big><em>history_id</em>, <em>lib_dataset_id</em><big>)</big><a class="headerlink" href="#blend.galaxy.histories.HistoryClient.upload_dataset_from_library" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">upload_dataset_from_library</tt><big>(</big><em>history_id</em>, <em>lib_dataset_id</em><big>)</big><a class="reference internal" href="../../_modules/blend/galaxy/histories.html#HistoryClient.upload_dataset_from_library"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.galaxy.histories.HistoryClient.upload_dataset_from_library" title="Permalink to this definition">¶</a></dt>
 <dd><p>Upload a dataset into the history from a library. Requires the
 library dataset ID, which can be obtained from the library
 contents.</p>

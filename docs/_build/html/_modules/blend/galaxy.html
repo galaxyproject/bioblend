@@ -26,7 +26,7 @@
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
     <link rel="top" title="Blend 0.1 documentation" href="../../index.html" />
-    <link rel="up" title="blend" href="../blend.html" /> 
+    <link rel="up" title="Module code" href="../index.html" /> 
   </head>
   <body>
     <div class="related">
@@ -39,8 +39,7 @@
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li><a href="../../index.html">Blend 0.1 documentation</a> &raquo;</li>
-          <li><a href="../index.html" >Module code</a> &raquo;</li>
-          <li><a href="../blend.html" accesskey="U">blend</a> &raquo;</li> 
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -50,46 +49,69 @@
           <div class="body">
             
   <h1>Source code for blend.galaxy</h1><div class="highlight"><pre>
-<span class="c"># from blend.galaxy.libraries.client import LibraryClient</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">A base representation of an instance of Galaxy</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">from</span> <span class="nn">blend.galaxy</span> <span class="kn">import</span> <span class="p">(</span><span class="n">libraries</span><span class="p">,</span> <span class="n">histories</span><span class="p">,</span> <span class="n">workflows</span><span class="p">,</span> <span class="n">datasets</span><span class="p">,</span> <span class="n">users</span><span class="p">)</span>
 
 <div class="viewcode-block" id="GalaxyInstance"><a class="viewcode-back" href="../../api_docs/galaxy/all.html#blend.galaxy.GalaxyInstance">[docs]</a><span class="k">class</span> <span class="nc">GalaxyInstance</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <div class="viewcode-block" id="GalaxyInstance.__init__"><a class="viewcode-back" href="../../api_docs/galaxy/all.html#blend.galaxy.GalaxyInstance.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        The base representation of an instance of Galaxy, identified by the</span>
-<span class="sd">        URL and user&#39;s API key.</span>
-<span class="sd">        </span>
+<span class="sd">        A base representation of an instance of Galaxy, identified by a</span>
+<span class="sd">        URL and a user&#39;s API key.</span>
+
+<span class="sd">        After you have created an ``GalaxyInstance`` object, access various</span>
+<span class="sd">        modules via the class fields (see the source for the most up-to-date</span>
+<span class="sd">        list): ``libraries``, ``histories``, ``workflows``, ``datasets``,</span>
+<span class="sd">        and ``users`` are the minimum set supported. For example, to work with</span>
+<span class="sd">        histories, and get a list of all the user&#39;s histories, the following</span>
+<span class="sd">        should be done::</span>
+
+<span class="sd">            from blend import galaxy</span>
+
+<span class="sd">            gi = galaxy.GalaxyInstance(url=&#39;http://127.0.0.1:8000&#39;, key=&#39;your_api_key&#39;)</span>
+
+<span class="sd">            hl = gi.histories.get_histories()</span>
+<span class="sd">            print &quot;List of histories:&quot;, hl</span>
+
 <span class="sd">        :type url: string</span>
 <span class="sd">        :param url: A FQDN or IP for a given instance of Galaxy. For example:</span>
-<span class="sd">                    http://usegalaxy.org</span>
-<span class="sd">        </span>
+<span class="sd">                    http://127.0.0.1:8080</span>
+
 <span class="sd">        :type key: string</span>
 <span class="sd">        :param key: User&#39;s API key for the given instance of Galaxy, obtained</span>
 <span class="sd">                    from the user preferences.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="s">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">url</span><span class="p">,</span> <span class="s">&#39;api&#39;</span><span class="p">])</span> <span class="c"># All of Galaxy&#39;s API&#39;s are rooted at &lt;url&gt;/api</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="o">=</span> <span class="n">key</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">key_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;key&#39;</span><span class="p">:</span> <span class="n">key</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">default_params</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;key&#39;</span><span class="p">:</span> <span class="n">key</span><span class="p">}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">json_headers</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;Content-Type&#39;</span><span class="p">:</span> <span class="s">&#39;application/json&#39;</span><span class="p">}</span>
-        <span class="c"># self.library_client = LibraryClient(self)</span>
-    </div>
-<div class="viewcode-block" id="GalaxyInstance._make_url"><a class="viewcode-back" href="../../index.html#blend.galaxy.GalaxyInstance._make_url">[docs]</a>    <span class="k">def</span> <span class="nf">_make_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">module_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">deleted</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">contents</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verify</span> <span class="o">=</span> <span class="bp">False</span> <span class="c"># Should SSL verification be done</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">libraries</span> <span class="o">=</span> <span class="n">libraries</span><span class="o">.</span><span class="n">LibraryClient</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">histories</span> <span class="o">=</span> <span class="n">histories</span><span class="o">.</span><span class="n">HistoryClient</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">workflows</span> <span class="o">=</span> <span class="n">workflows</span><span class="o">.</span><span class="n">WorkflowClient</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">DatasetClient</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">users</span> <span class="o">=</span> <span class="n">users</span><span class="o">.</span><span class="n">UserClient</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">_make_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">module_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">deleted</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">contents</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compose a URL based on the provided arguments.</span>
-<span class="sd">        </span>
+
 <span class="sd">        :type module: string</span>
 <span class="sd">        :param module: The name of the base module for which to make the URL.</span>
-<span class="sd">                       For example: libraries, workflows, histories</span>
-<span class="sd">        </span>
+<span class="sd">                       For example: ``libraries``, ``workflows``, ``histories``</span>
+
 <span class="sd">        :type module_id: string</span>
 <span class="sd">        :param module_id: The encoded ID for a specific module (eg, library ID)</span>
-<span class="sd">        </span>
+
 <span class="sd">        :type deleted: bool</span>
-<span class="sd">        :param deleted: If True, include &#39;deleted&#39; in the URL, after the module:</span>
-<span class="sd">                        &lt;base_url&gt;/api/libraries/deleted</span>
-<span class="sd">        </span>
+<span class="sd">        :param deleted: If ``True``, include ``deleted`` in the URL, after the module</span>
+<span class="sd">                        name (eg, ``&lt;base_url&gt;/api/libraries/deleted``)</span>
+
 <span class="sd">        :type contents: bool</span>
-<span class="sd">        :param contents: If True, include &#39;contents&#39; in the URL, after the module ID:</span>
-<span class="sd">                         &lt;base_url&gt;/api/libraries/&lt;encoded_library_id&gt;/contents</span>
+<span class="sd">        :param contents: If ``True``, include &#39;contents&#39; in the URL, after the module ID:</span>
+<span class="sd">                         ``&lt;base_url&gt;/api/libraries/&lt;encoded_library_id&gt;/contents``</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">c_url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">url</span>
         <span class="n">c_url</span> <span class="o">=</span> <span class="s">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">c_url</span><span class="p">,</span> <span class="n">module</span><span class="o">.</span><span class="n">module</span><span class="p">])</span>
@@ -99,8 +121,62 @@
             <span class="n">c_url</span> <span class="o">=</span> <span class="s">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">c_url</span><span class="p">,</span> <span class="n">module_id</span><span class="p">])</span>
             <span class="k">if</span> <span class="n">contents</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
                 <span class="n">c_url</span> <span class="o">=</span> <span class="s">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">c_url</span><span class="p">,</span> <span class="s">&#39;contents&#39;</span><span class="p">])</span>
-        <span class="k">return</span> <span class="n">c_url</span></div></div>
-</pre></div>
+        <span class="k">return</span> <span class="n">c_url</span>
+
+<div class="viewcode-block" id="GalaxyInstance.make_get_request"><a class="viewcode-back" href="../../api_docs/galaxy/all.html#blend.galaxy.GalaxyInstance.make_get_request">[docs]</a>    <span class="k">def</span> <span class="nf">make_get_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Make a GET request using the provided url.</span>
+
+<span class="sd">        If the ``params`` are not provided, use ``default_params`` class field.</span>
+<span class="sd">        If params are provided and the provided dict does not have ``key`` key,</span>
+<span class="sd">        the default ``self.key`` value will be included in what&#39;s passed to</span>
+<span class="sd">        the server via the request.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">params</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;key&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
+            <span class="n">params</span><span class="p">[</span><span class="s">&#39;key&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_params</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verify</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">r</span>
+</div>
+<div class="viewcode-block" id="GalaxyInstance.make_post_request"><a class="viewcode-back" href="../../api_docs/galaxy/all.html#blend.galaxy.GalaxyInstance.make_post_request">[docs]</a>    <span class="k">def</span> <span class="nf">make_post_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">payload</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Make a POST request using the provided ``url`` and ``payload``.</span>
+<span class="sd">        The ``payload`` must be a dict that can be converted into a JSON</span>
+<span class="sd">        object (via ``simplejson.dumps``)</span>
+
+<span class="sd">        If the ``params`` are not provided, use ``default_params`` class field.</span>
+<span class="sd">        If params are provided and the provided dict does not have ``key`` key,</span>
+<span class="sd">        the default ``self.key`` value will be included in what&#39;s passed to</span>
+<span class="sd">        the server via the request.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">params</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;key&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
+            <span class="n">params</span><span class="p">[</span><span class="s">&#39;key&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_params</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">json_headers</span><span class="p">,</span>
+                <span class="n">verify</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verify</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">r</span>
+</div>
+<div class="viewcode-block" id="GalaxyInstance.make_delete_request"><a class="viewcode-back" href="../../api_docs/galaxy/all.html#blend.galaxy.GalaxyInstance.make_delete_request">[docs]</a>    <span class="k">def</span> <span class="nf">make_delete_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Make a DELETE request using the provided ``url`` and the optional</span>
+<span class="sd">        arguments.</span>
+<span class="sd">        The ``payload`` must be a dict that can be converted into a JSON</span>
+<span class="sd">        object (via ``simplejson.dumps``)</span>
+
+<span class="sd">        If the ``params`` are not provided, use ``default_params`` class field.</span>
+<span class="sd">        If params are provided and the provided dict does not have ``key`` key,</span>
+<span class="sd">        the default ``self.key`` value will be included in what&#39;s passed to</span>
+<span class="sd">        the server via the request.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">params</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;key&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
+            <span class="n">params</span><span class="p">[</span><span class="s">&#39;key&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_params</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verify</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">r</span>
+</pre></div></div></div>
 
           </div>
         </div>
@@ -134,8 +210,7 @@
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li><a href="../../index.html">Blend 0.1 documentation</a> &raquo;</li>
-          <li><a href="../index.html" >Module code</a> &raquo;</li>
-          <li><a href="../blend.html" >blend</a> &raquo;</li> 
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

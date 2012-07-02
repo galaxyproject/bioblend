@@ -40,7 +40,6 @@
              >modules</a> |</li>
         <li><a href="../../../index.html">Blend 0.1 documentation</a> &raquo;</li>
           <li><a href="../../index.html" >Module code</a> &raquo;</li>
-          <li><a href="../../blend.html" >blend</a> &raquo;</li>
           <li><a href="../cloudman.html" accesskey="U">blend.cloudman</a> &raquo;</li> 
       </ul>
     </div>  
@@ -84,7 +83,7 @@
         <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="p">)</span>
 
 <div class="viewcode-block" id="CloudManLaunch"><a class="viewcode-back" href="../../../api_docs/cloudman/all.html#blend.cloudman.launch.CloudManLaunch">[docs]</a><span class="k">class</span> <span class="nc">CloudManLaunch</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-<div class="viewcode-block" id="CloudManLaunch.__init__"><a class="viewcode-back" href="../../../api_docs/cloudman/all.html#blend.cloudman.launch.CloudManLaunch.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">access_key</span><span class="p">,</span> <span class="n">secret_key</span><span class="p">,</span> <span class="n">cloud</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">access_key</span><span class="p">,</span> <span class="n">secret_key</span><span class="p">,</span> <span class="n">cloud</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Define the environment in which this instance of CloudMan will be launched.</span>
 
@@ -119,7 +118,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">cloud</span> <span class="o">=</span> <span class="n">cloud</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ec2_conn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connect_ec2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">access_key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">secret_key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cloud</span><span class="p">)</span>
-</div>
+
 <div class="viewcode-block" id="CloudManLaunch.launch"><a class="viewcode-back" href="../../../api_docs/cloudman/all.html#blend.cloudman.launch.CloudManLaunch.launch">[docs]</a>    <span class="k">def</span> <span class="nf">launch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cluster_name</span><span class="p">,</span> <span class="n">image_id</span><span class="p">,</span> <span class="n">instance_type</span><span class="p">,</span> <span class="n">password</span><span class="p">,</span>
                <span class="n">kernel_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">ramdisk_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">key_name</span><span class="o">=</span><span class="s">&#39;cloudman_key_pair&#39;</span><span class="p">,</span>
                <span class="n">security_groups</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;CloudMan&#39;</span><span class="p">],</span> <span class="n">placement</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -496,7 +495,6 @@
              >modules</a> |</li>
         <li><a href="../../../index.html">Blend 0.1 documentation</a> &raquo;</li>
           <li><a href="../../index.html" >Module code</a> &raquo;</li>
-          <li><a href="../../blend.html" >blend</a> &raquo;</li>
           <li><a href="../cloudman.html" >blend.cloudman</a> &raquo;</li> 
       </ul>
     </div>

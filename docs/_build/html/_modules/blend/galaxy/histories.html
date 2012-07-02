@@ -40,7 +40,6 @@
              >modules</a> |</li>
         <li><a href="../../../index.html">Blend 0.1 documentation</a> &raquo;</li>
           <li><a href="../../index.html" >Module code</a> &raquo;</li>
-          <li><a href="../../blend.html" >blend</a> &raquo;</li>
           <li><a href="../galaxy.html" accesskey="U">blend.galaxy</a> &raquo;</li> 
       </ul>
     </div>  
@@ -54,96 +53,94 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Contains possible interactions with the Galaxy Histories</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">requests</span>
-<span class="kn">import</span> <span class="nn">simplejson</span>
+<span class="kn">from</span> <span class="nn">blend.galaxy.client</span> <span class="kn">import</span> <span class="n">Client</span>
 
-<span class="k">class</span> <span class="nc">HistoryClient</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-<div class="viewcode-block" id="HistoryClient"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#blend.galaxy.histories.HistoryClient">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">galaxy_instance</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">gi</span> <span class="o">=</span> <span class="n">galaxy_instance</span>
+<div class="viewcode-block" id="HistoryClient"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#blend.galaxy.histories.HistoryClient">[docs]</a><span class="k">class</span> <span class="nc">HistoryClient</span><span class="p">(</span><span class="n">Client</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">galaxy_instance</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">module</span> <span class="o">=</span> <span class="s">&#39;histories&#39;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="s">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">gi</span><span class="o">.</span><span class="n">url</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">])</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">HistoryClient</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">galaxy_instance</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">create_history</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-<div class="viewcode-block" id="HistoryClient.create_history"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#blend.galaxy.histories.HistoryClient.create_history">[docs]</a>        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Create a new history</span>
+<div class="viewcode-block" id="HistoryClient.create_history"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#blend.galaxy.histories.HistoryClient.create_history">[docs]</a>    <span class="k">def</span> <span class="nf">create_history</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a new history, optionally setting the ``name``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">payload</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
             <span class="n">payload</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
-        <span class="n">payload</span> <span class="o">=</span> <span class="n">simplejson</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
-        <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gi</span><span class="o">.</span><span class="n">_make_url</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gi</span><span class="o">.</span><span class="n">make_post_request</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">payload</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">r</span><span class="o">.</span><span class="n">json</span>
+        <span class="k">return</span> <span class="n">Client</span><span class="o">.</span><span class="n">_post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">payload</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="HistoryClient.get_histories"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#blend.galaxy.histories.HistoryClient.get_histories">[docs]</a>    <span class="k">def</span> <span class="nf">get_histories</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">history_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">deleted</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get all histories or filter the specific one(s) via the provided ``name``</span>
+<span class="sd">        or ``history_id``. Provide only one argument, ``name`` or ``history_id``,</span>
+<span class="sd">        but not both.</span>
 
-    <span class="k">def</span> <span class="nf">get_histories</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">history_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">deleted</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span></div>
-<div class="viewcode-block" id="HistoryClient.get_histories"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#blend.galaxy.histories.HistoryClient.get_histories">[docs]</a>        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get all histories or filter a specific one via the provided name or ID.</span>
-<span class="sd">        Provide only one argument, name or history_id, but not both.</span>
-<span class="sd">        Returns a list of history element dicts.</span>
+<span class="sd">        If ``deleted`` is set to ``True``, return histories that have been deleted.</span>
+
+<span class="sd">        Return a list of history element dicts. If more than one history</span>
+<span class="sd">        matches the given ``name``, return the list of all the histories with the</span>
+<span class="sd">        given name.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gi</span><span class="o">.</span><span class="n">_make_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">deleted</span><span class="o">=</span><span class="n">deleted</span><span class="p">)</span>
-        <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gi</span><span class="o">.</span><span class="n">make_get_request</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+        <span class="n">histories</span> <span class="o">=</span> <span class="n">Client</span><span class="o">.</span><span class="n">_get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">deleted</span><span class="o">=</span><span class="n">deleted</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">history_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">histories</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">history</span> <span class="ow">in</span> <span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">:</span>
+            <span class="n">filtered_hists</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">history</span> <span class="ow">in</span> <span class="n">histories</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="n">history</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="ow">or</span> <span class="n">history_id</span> <span class="o">==</span> <span class="n">history</span><span class="p">[</span><span class="s">&#39;id&#39;</span><span class="p">]:</span>
-                    <span class="n">histories</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">history</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">histories</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">json</span>
+                    <span class="n">filtered_hists</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">history</span><span class="p">)</span>
+                    <span class="c"># History ID&#39;s are unique so break now that the hist was found</span>
+                    <span class="k">if</span> <span class="n">history_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="k">break</span>
+            <span class="n">histories</span> <span class="o">=</span> <span class="n">filtered_hists</span>
         <span class="k">return</span> <span class="n">histories</span>
-
-    <span class="k">def</span> <span class="nf">show_history</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">history_id</span><span class="p">,</span> <span class="n">contents</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span></div>
-<div class="viewcode-block" id="HistoryClient.show_history"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#blend.galaxy.histories.HistoryClient.show_history">[docs]</a>        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get details of a given history.</span>
+</div>
+<div class="viewcode-block" id="HistoryClient.show_history"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#blend.galaxy.histories.HistoryClient.show_history">[docs]</a>    <span class="k">def</span> <span class="nf">show_history</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">history_id</span><span class="p">,</span> <span class="n">contents</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get details of a given history. By default, just get the history meta</span>
+<span class="sd">        information. If ``contents`` is set to ``True``, get the complete list of</span>
+<span class="sd">        datasets in the given history.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gi</span><span class="o">.</span><span class="n">_make_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">history_id</span><span class="p">,</span> <span class="n">contents</span><span class="o">=</span><span class="n">contents</span><span class="p">)</span>
-        <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gi</span><span class="o">.</span><span class="n">make_get_request</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">r</span><span class="o">.</span><span class="n">json</span>
-
-    <span class="k">def</span> <span class="nf">import_dataset_from_library</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">history_id</span><span class="p">,</span> <span class="n">lib_dataset_id</span><span class="p">):</span></div>
-<div class="viewcode-block" id="HistoryClient.import_dataset_from_library"><a class="viewcode-back" href="../../../index.html#blend.galaxy.histories.HistoryClient.import_dataset_from_library">[docs]</a>        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Import a dataset into the history from a library, given then library</span>
-<span class="sd">        dataset ID.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gi</span><span class="o">.</span><span class="n">_make_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">history_id</span><span class="p">,</span> <span class="n">contents</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-        <span class="n">payload</span> <span class="o">=</span> <span class="n">simplejson</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s">&#39;from_ld_id&#39;</span><span class="p">:</span> <span class="n">lib_dataset_id</span><span class="p">})</span>
-        <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gi</span><span class="o">.</span><span class="n">make_post_request</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">payload</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">r</span><span class="o">.</span><span class="n">json</span>
-
-    <span class="k">def</span> <span class="nf">show_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">history_id</span><span class="p">,</span> <span class="n">dataset_id</span><span class="p">):</span></div>
-<div class="viewcode-block" id="HistoryClient.show_dataset"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#blend.galaxy.histories.HistoryClient.show_dataset">[docs]</a>        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get details about a given history dataset. The required URL can be</span>
-<span class="sd">        obtained from the datasets&#39;s history content details.</span>
+        <span class="k">return</span> <span class="n">Client</span><span class="o">.</span><span class="n">_get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">history_id</span><span class="p">,</span> <span class="n">contents</span><span class="o">=</span><span class="n">contents</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="HistoryClient.show_dataset"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#blend.galaxy.histories.HistoryClient.show_dataset">[docs]</a>    <span class="k">def</span> <span class="nf">show_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">history_id</span><span class="p">,</span> <span class="n">dataset_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get details about a given history dataset. The required ``history_id``</span>
+<span class="sd">        can be obtained from the datasets&#39;s history content details.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gi</span><span class="o">.</span><span class="n">_make_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">history_id</span><span class="p">,</span> <span class="n">contents</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
         <span class="c"># Append the dataset_id to the base history contents URL</span>
         <span class="n">url</span> <span class="o">=</span> <span class="s">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">url</span><span class="p">,</span> <span class="n">dataset_id</span><span class="p">])</span>
-        <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gi</span><span class="o">.</span><span class="n">make_get_request</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">r</span><span class="o">.</span><span class="n">json</span>
+        <span class="k">return</span> <span class="n">Client</span><span class="o">.</span><span class="n">_get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="HistoryClient.upload_dataset_from_library"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#blend.galaxy.histories.HistoryClient.upload_dataset_from_library">[docs]</a>    <span class="k">def</span> <span class="nf">upload_dataset_from_library</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">history_id</span><span class="p">,</span> <span class="n">lib_dataset_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Upload a dataset into the history from a library. Requires the</span>
+<span class="sd">        library dataset ID, which can be obtained from the library</span>
+<span class="sd">        contents.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;from_ld_id&#39;</span><span class="p">:</span> <span class="n">lib_dataset_id</span><span class="p">}</span>
+        <span class="k">return</span> <span class="n">Client</span><span class="o">.</span><span class="n">_post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">payload</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">history_id</span><span class="p">,</span> <span class="n">contents</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="HistoryClient.delete_history"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#blend.galaxy.histories.HistoryClient.delete_history">[docs]</a>    <span class="k">def</span> <span class="nf">delete_history</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">history_id</span><span class="p">,</span> <span class="n">purge</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Delete a history.</span>
 
-    <span class="k">def</span> <span class="nf">delete_history</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">history_id</span><span class="p">,</span> <span class="n">purge</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span></div>
-<div class="viewcode-block" id="HistoryClient.delete_history"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#blend.galaxy.histories.HistoryClient.delete_history">[docs]</a>        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Delete a history</span>
-<span class="sd">        If purge is set, also purge the history. Note that the user history </span>
-<span class="sd">        purging option must be enabled on the Galaxy instance.</span>
+<span class="sd">        If ``purge`` is set to ``True``, also purge the history. Note that for</span>
+<span class="sd">        the purge option to work, ``allow_user_dataset_purge`` option must be</span>
+<span class="sd">        set in the Galaxy&#39;s configuration file ``universe_wsgi.ini`` </span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">payload</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">if</span> <span class="n">purge</span><span class="p">:</span>
-            <span class="n">payload</span><span class="p">[</span><span class="s">&#39;purge&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
-        <span class="n">payload</span> <span class="o">=</span> <span class="n">simplejson</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
-        <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gi</span><span class="o">.</span><span class="n">_make_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">history_id</span><span class="p">)</span>
-        <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gi</span><span class="o">.</span><span class="n">make_delete_request</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">r</span><span class="o">.</span><span class="n">json</span>
-
-    <span class="k">def</span> <span class="nf">undelete_history</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">history_id</span><span class="p">):</span></div>
-<div class="viewcode-block" id="HistoryClient.undelete_history"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#blend.galaxy.histories.HistoryClient.undelete_history">[docs]</a>        <span class="sd">&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">purge</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="n">payload</span><span class="p">[</span><span class="s">&#39;purge&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">purge</span>
+        <span class="k">return</span> <span class="n">Client</span><span class="o">.</span><span class="n">_delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">payload</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">history_id</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="HistoryClient.undelete_history"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#blend.galaxy.histories.HistoryClient.undelete_history">[docs]</a>    <span class="k">def</span> <span class="nf">undelete_history</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">history_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Undelete a history</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gi</span><span class="o">.</span><span class="n">_make_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">history_id</span><span class="p">,</span> <span class="n">deleted</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
         <span class="c"># Append the &#39;undelete&#39; action to the history URL</span>
         <span class="n">url</span> <span class="o">=</span> <span class="s">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">url</span><span class="p">,</span> <span class="s">&#39;undelete&#39;</span><span class="p">])</span>
-        <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gi</span><span class="o">.</span><span class="n">make_post_request</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="n">simplejson</span><span class="o">.</span><span class="n">dumps</span><span class="p">({}))</span>
-        <span class="k">return</span> <span class="n">r</span><span class="o">.</span><span class="n">json</span>
+        <span class="k">return</span> <span class="n">Client</span><span class="o">.</span><span class="n">_post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="p">{},</span> <span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">)</span>
 </pre></div></div></div>
 
           </div>
@@ -179,7 +176,6 @@
              >modules</a> |</li>
         <li><a href="../../../index.html">Blend 0.1 documentation</a> &raquo;</li>
           <li><a href="../../index.html" >Module code</a> &raquo;</li>
-          <li><a href="../../blend.html" >blend</a> &raquo;</li>
           <li><a href="../galaxy.html" >blend.galaxy</a> &raquo;</li> 
       </ul>
     </div>

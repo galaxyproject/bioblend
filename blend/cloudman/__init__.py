@@ -132,9 +132,25 @@ class CloudMan:
         status = self._make_get_request("/cloud/get_srvc_status", parameters=payload)
         return simplejson.loads(status)['status']
 
+    def terminate(self, terminate_master_instance=True, delete_cluster=False):
+        """
+        Terminate this CloudMan cluster. Ther is an option to also terminate the
+        master instance (all worker instances will be terminated in the process
+        of cluster termination), and deletete the whole cluster.
+
+        .. note::
+            Deleting a cluster is irreverisble - all of the data will be
+            permatently deleted.
+        """
+        payload = {'terminate_master_instance': terminate_master_instance,
+                   'delete_cluster': delete_cluster}
+        result = self._make_get_request("/cloud/kill_all", parameters=payload)
+        return result
+
     def _make_get_request(self, url, parameters={}):
         """
         Private function that makes a GET request to the nominated ``url``, with the provided GET ``parameters``.
         """
         r = requests.get(self.cloudman_url + url, params=parameters, auth=("", self.password))
         return r.text
+

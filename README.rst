@@ -16,7 +16,7 @@ within Galaxy. In reality, it makes it possible to do things like this:
 - Manipulate your CloudMan instance and react to the current needs::
 
     from blend.cloudman import CloudMan
-    cm = CloudMan("instance IP")
+    cm = CloudMan("instance IP", "password")
     cm.initialize(type="Galaxy")
     cm.add_nodes(3)
     cluster_status = cm.get_status()

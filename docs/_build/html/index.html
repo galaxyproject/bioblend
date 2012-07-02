@@ -72,7 +72,7 @@ within Galaxy. In reality, it makes it possible to do things like this:</p>
 </li>
 <li><p class="first">Manipulate your CloudMan instance and react to the current needs:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">blend.cloudman</span> <span class="kn">import</span> <span class="n">CloudMan</span>
-<span class="n">cm</span> <span class="o">=</span> <span class="n">CloudMan</span><span class="p">(</span><span class="s">&quot;instance IP&quot;</span><span class="p">)</span>
+<span class="n">cm</span> <span class="o">=</span> <span class="n">CloudMan</span><span class="p">(</span><span class="s">&quot;instance IP&quot;</span><span class="p">,</span> <span class="s">&quot;password&quot;</span><span class="p">)</span>
 <span class="n">cm</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s">&quot;Galaxy&quot;</span><span class="p">)</span>
 <span class="n">cm</span><span class="o">.</span><span class="n">add_nodes</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 <span class="n">cluster_status</span> <span class="o">=</span> <span class="n">cm</span><span class="o">.</span><span class="n">get_status</span><span class="p">()</span>
