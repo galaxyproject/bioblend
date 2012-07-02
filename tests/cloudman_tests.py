@@ -17,7 +17,6 @@ class CloudManTest(unittest.TestCase):
         url = "http://127.0.0.1:42284"
         password = "password"
         self.cm = cloudman.CloudMan(url, password)
-        
 
     def test_initialize(self):
         self.cm._make_get_request = MagicMock(return_value="{}")
@@ -28,52 +27,47 @@ class CloudManTest(unittest.TestCase):
         params = {'startup_opt': 'Galaxy'}
         self.cm._make_get_request.assert_called_with("/cloud/initialize_cluster", parameters=params)
 
-
     def test_get_status(self):
         # Set return value of call
         self.cm._make_get_request = MagicMock(return_value="{}")
 
         status = self.cm.get_status()
-        self.assertIsNotNone(status)
+        self.assertNotEqual(status, None)
         self.assertEquals(status, {})
-        
+
         # Check that the correct URL was called
         self.cm._make_get_request.assert_called_with("/cloud/instance_state_json")
-       
 
     def test_get_nodes(self):
         # Set return value of call
         self.cm._make_get_request = MagicMock(return_value="{\"instances\": []}")
 
         nodes = self.cm.get_nodes()
-        self.assertIsNotNone(nodes)
+        self.assertNotEqual(nodes, None)
         self.assertEqual(len(nodes), 0)
 
         # Check that the correct URL was called
         self.cm._make_get_request.assert_called_with("/cloud/instance_feed_json")
-        
 
     def test_add_nodes(self):
         self.cm._make_get_request = MagicMock(return_value="{}")
         num_nodes = 10
         status = self.cm.add_nodes(num_nodes)
-        self.assertIsNotNone(status)
+        self.assertNotEqual(status, None)
 
         # Check that the correct URL was called
         params = {'number_nodes': 10}
         self.cm._make_get_request.assert_called_with("/cloud/add_instances", parameters=params)
-      
 
     def test_remove_nodes(self):
         self.cm._make_get_request = MagicMock(return_value="{}")
         num_nodes = 10
         status = self.cm.remove_nodes(num_nodes, force=True)
-        self.assertIsNotNone(status)
+        self.assertNotEqual(status, None)
 
         # Check that the correct URL was called
         params = {'number_nodes': 10, 'force_termination': True}
         self.cm._make_get_request.assert_called_with("/cloud/remove_instances", parameters=params)
-        
 
     def test_remove_node(self):
         self.cm._make_get_request = MagicMock(return_value="{}")
@@ -84,7 +78,6 @@ class CloudManTest(unittest.TestCase):
         params = {'instance_id': "abcdef"}
         self.cm._make_get_request.assert_called_with("/cloud/remove_instance", parameters=params)
 
-
     def test_reboot_node(self):
         self.cm._make_get_request = MagicMock(return_value="{}")
         instance_id = "abcdef"
@@ -94,24 +87,20 @@ class CloudManTest(unittest.TestCase):
         params = {'instance_id': "abcdef"}
         self.cm._make_get_request.assert_called_with("/cloud/reboot_instance", parameters=params)
 
-       
     def test_autoscaling_enabled_false(self):
         return_json_string = """{"autoscaling": {"use_autoscaling": false, "as_max": "N/A", "as_min": "N/A"}}"""
         self.cm._make_get_request = MagicMock(return_value=return_json_string)
         self.assertFalse(self.cm.autoscaling_enabled())
-
 
     def test_autoscaling_enabled_true(self):
         return_json_string = """{"autoscaling": {"use_autoscaling": true, "as_max": "3", "as_min": "1"}}"""
         self.cm._make_get_request = MagicMock(return_value=return_json_string)
         self.assertTrue(self.cm.autoscaling_enabled())
 
-
     def test_autoscaling_enabled_false(self):
         return_json_string = """{"autoscaling": {"use_autoscaling": false, "as_max": "3", "as_min": "1"}}"""
         self.cm._make_get_request = MagicMock(return_value=return_json_string)
         self.assertFalse(self.cm.autoscaling_enabled())
-        
 
     def test_enable_autoscaling(self):
         return_json_string = """{"autoscaling": {"use_autoscaling": false, "as_max": "N/A", "as_min": "N/A"}}"""
@@ -122,7 +111,7 @@ class CloudManTest(unittest.TestCase):
         # Check that the correct URL was called
         params = {'as_min': 0, 'as_max': 19}
         self.cm._make_get_request.assert_called_with("/cloud/toggle_autoscaling", parameters=params)
-        
+
         return_json_string = """{"autoscaling": {"use_autoscaling": true, "as_max": "19", "as_min": "0"}}"""
         self.cm.enable_autoscaling(minimum_nodes=0,maximum_nodes=19)
 
@@ -130,15 +119,12 @@ class CloudManTest(unittest.TestCase):
         params = {'as_min': 0, 'as_max': 19}
         self.cm._make_get_request.assert_called_with("/cloud/toggle_autoscaling", parameters=params)
 
-
-
     def test_disable_autoscaling(self):
         return_json_string = """{"autoscaling": {"use_autoscaling": true, "as_max": "3", "as_min": "1"}}"""
         self.cm._make_get_request = MagicMock(return_value=return_json_string)
         self.cm.disable_autoscaling()
 
         self.cm._make_get_request.assert_called_with("/cloud/toggle_autoscaling")
-
 
     def test_adjust_autoscaling(self):
         return_json_string = """{"autoscaling": {"use_autoscaling": true, "as_max": "3", "as_min": "1"}}"""
@@ -148,8 +134,6 @@ class CloudManTest(unittest.TestCase):
         params = {'as_min_adj': 3, 'as_max_adj': 4} 
         self.cm._make_get_request.assert_called_with("/cloud/adjust_autoscaling", parameters=params)
 
-       
-
     def test_get_galaxy_state_stopped(self):
         return_json = """{"status": "'Galaxy' is not running", "srvc": "Galaxy"}"""
         self.cm._make_get_request = MagicMock(return_value=return_json)
@@ -158,4 +142,3 @@ class CloudManTest(unittest.TestCase):
         params = {'srvc': "Galaxy"}
         self.cm._make_get_request.assert_called_with("/cloud/get_srvc_status", parameters=params)
 
-        
