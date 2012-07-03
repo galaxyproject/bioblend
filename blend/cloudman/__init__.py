@@ -42,15 +42,22 @@ class CloudMan:
         instance_feed_json = self._make_get_request("/cloud/instance_feed_json")
         return simplejson.loads(instance_feed_json)['instances']
 
-    def add_nodes(self, num_nodes):
+    def add_nodes(self, num_nodes, instance_type='', spot_price=''):
         """
-        Add worker nodes to the cluster.
-
-        The ``num_nodes`` parameter defines the number of worker nodes to add.
+        Add a number of worker nodes to the cluster, optionally specifying
+        the type for new instances. If ``instance_type`` is not specified,
+        instance(s) of the same type as the master instance will be started.
+        Note that the ``instance_type`` must match the type of instance
+        available on the given cloud.
+        
+        ``spot_price`` applies only to AWS and, if set, defines the maximum
+        price for Spot instances, thus turning this request for more instances
+        into a Spot request.
         """
-        payload = {'number_nodes' : num_nodes}
-        result = self._make_get_request("/cloud/add_instances", parameters=payload)
-        return result
+        payload = {'number_nodes' : num_nodes,
+                   'instance_type': instance_type,
+                   'spot_price': spot_price}
+        return self._make_get_request("/cloud/add_instances", parameters=payload)
 
     def remove_nodes(self, num_nodes, force=False):
         """
@@ -61,7 +68,7 @@ class CloudMan:
         whether the nodes should be forcibly removed rather than gracefully removed.
         """
         payload = {'number_nodes': num_nodes, 'force_termination': force}
-        result = self._make_get_request("/cloud/remove_instances", parameters=payload) 
+        result = self._make_get_request("/cloud/remove_instances", parameters=payload)
         return result
 
     def remove_node(self, instance_id, force=False):
@@ -75,7 +82,7 @@ class CloudMan:
 
         """
         payload = {'instance_id': instance_id}
-        result = self._make_get_request("/cloud/remove_instance", parameters=payload) 
+        return self._make_get_request("/cloud/remove_instance", parameters=payload)
 
     def reboot_node(self, instance_id):
         """
@@ -85,7 +92,7 @@ class CloudMan:
         to reboot.
         """
         payload = {'instance_id': instance_id}
-        result = self._make_get_request("/cloud/reboot_instance", parameters=payload) 
+        return self._make_get_request("/cloud/reboot_instance", parameters=payload)
 
     def autoscaling_enabled(self):
         """
@@ -95,8 +102,8 @@ class CloudMan:
 
     def enable_autoscaling(self, minimum_nodes=0, maximum_nodes=19):
         """
-        Enable cluster autoscaling, allowing the cluster to automatically add, or
-        remove, worker nodes, as needed.
+        Enable cluster autoscaling, allowing the cluster to automatically add,
+        or remove, worker nodes, as needed.
 
         The number of worker nodes in the cluster is bounded by the ``minimum_nodes``
         (default is 0) and ``maximum_nodes`` (default is 19) parameters.
@@ -117,8 +124,9 @@ class CloudMan:
         """
         Adjust the autoscaling configuration parameters.
 
-        The number of worker nodes in the cluster is bounded by the optional ``minimum_nodes``
-        (default is None) and ``maximum_nodes`` (default is None) parameters. If a parameter is not provided then its configuration value does not change.
+        The number of worker nodes in the cluster is bounded by the optional
+        ``minimum_nodes`` and ``maximum_nodes`` parameters. If a parameter is
+        not provided then its configuration value does not change.
         """
         if (self.autoscaling_enabled()):
             payload = {'as_min_adj': minimum_nodes, 'as_max_adj': maximum_nodes}
@@ -149,7 +157,8 @@ class CloudMan:
 
     def _make_get_request(self, url, parameters={}):
         """
-        Private function that makes a GET request to the nominated ``url``, with the provided GET ``parameters``.
+        Private function that makes a GET request to the nominated ``url``,
+        with the provided GET ``parameters``.
         """
         r = requests.get(self.cloudman_url + url, params=parameters, auth=("", self.password))
         return r.text
