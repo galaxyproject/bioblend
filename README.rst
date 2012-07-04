@@ -4,14 +4,12 @@ API. Conceptually, it makes it possible to script and automate the process of
 cloud infrastrucutre provisioning and scaling, as well as running of analyses
 within Galaxy. In reality, it makes it possible to do things like this:
 
-- Create a CloudMan compute cluster, direclty from your local machine::
+- Create a CloudMan compute cluster, via an API and directly from your local machine::
 
-    from blend.bcc import BCC
-    user_data = {}
-    user_data['cluster_name'] = 'Started from blend'
-    user_data['access_key'] = 'Your cloud access key'
-    user_data['secret_key'] = 'Your cloud secret key'
-    c = BCC.launch(ud=user_data, image_id='ami-e23943jd')
+    from blend.cloudman.launch import CloudManLaunch
+    cml = CloudManLaunch('<your cloud access key>', '<your cloud secret key')
+    cml.launch('Blend CloudMan', 'ami-<ID>', 'm1.small', 'password')
+    cml.get_status()
 
 - Manipulate your CloudMan instance and react to the current needs::
 
