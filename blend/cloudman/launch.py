@@ -12,7 +12,8 @@ from boto.exception import EC2ResponseError
 
 import blend
 
-blend.set_stream_logger(__name__)
+# Comment the following line if no loggin at the prompt is desired
+#blend.set_stream_logger(__name__)
 
 class Bunch(object):
     """
@@ -66,6 +67,11 @@ class CloudManLaunch(object):
         else:
             self.cloud = cloud
         self.ec2_conn = self.connect_ec2(self.access_key, self.secret_key, self.cloud)
+        self.instance_id = None # To be set after an instance has been launched
+        self.rs = None # boto ResultSet object - to be set after an instance has been launched
+
+    def __repr__(self):
+        return "Cloud: {0}; acct ID: {1}".format(self.cloud.name, self.access_key)
 
     def launch(self, cluster_name, image_id, instance_type, password,
                kernel_id=None, ramdisk_id=None, key_name='cloudman_key_pair',
@@ -113,6 +119,7 @@ class CloudManLaunch(object):
         ud = self._compose_user_data(kwargs)
         # Now launch an instance
         try:
+            rs = None
             rs = self.ec2_conn.run_instances(image_id=image_id,
                                         instance_type=instance_type,
                                         key_name=key_name,
@@ -130,6 +137,10 @@ class CloudManLaunch(object):
             try:
                 blend.log.info("Launched an instance with ID %s" % rs.instances[0].id)
                 ret['instance_id'] = rs.instances[0].id
+                ret['instance_ip'] = rs.instances[0].ip_address
+                # Store some of this data locally for easier state updates
+                self.rs = rs
+                self.instance_id = rs.instances[0].id
             except Exception, e:
                 err = "Problem with the launched instance object: %s" % e
                 blend.log.error(err)
@@ -239,41 +250,60 @@ class CloudManLaunch(object):
         blend.log.info("Created key pair '%s'" % kp.name)
         return kp.name, kp.material
 
-    def instance_state(self, instance_id, ec2_conn=None):
+    def get_status(self, instance_id=None, ec2_conn=None):
         """
-        Given the ``instance_id``, check on the instance state. Return a ``state``
-        dict with the current ``instance_state``, ``public_dns``, and ``placement``
-        keys, which capture the current state (the values for those keys defualt to
-        empty string if no data is available from the cloud).
+        Check on the status of an instance. If ``instance_id`` is not provided,
+        the ID obtained when launching *the most recent* instance is used. Note
+        that this assumes the instance being checked on was launched using this
+        class. Also note that the same class may be used to launch multiple instances
+        but only the most recent ``instance_id`` is kept while any others will
+        need to be explicitly specified.
 
-        This method also allows the requires ``ec2_conn`` connection object to be
-        provided at invocation time. If the object is not provided, the class field
-        is used (this helps in case of stateless method invocations).
+        This method also allows the required ``ec2_conn`` connection object to be
+        provided at invocation time. If the object is not provided, credentials
+        defined for the class are used (ability to specify a custom ``ec2_conn``
+        helps in case of stateless method invocations).
+
+        Return a ``state`` dict with the current ``instance_state``, ``public_ip``,
+        ``placement``, and ``error`` keys, which capture the current state (the
+        values for those keys defualt to empty string if no data is available from
+        the cloud).
         """
         if ec2_conn is None:
             ec2_conn = self.ec2_conn
         rs = None
         state = {'instance_state': "",
-                 'public_dns': "",
-                 'placement': ""}
+                 'public_ip': "",
+                 'placement': "",
+                 'error': ""}
+        if instance_id is None:
+            instance_id = self.instance_id
+        # Make sure we have an instance ID
+        if instance_id is None:
+            err = "Missing instance ID, cannot check the state."
+            blend.log.error(err)
+            state['error'] = err
+            return state
         try:
             rs = ec2_conn.get_all_instances([instance_id])
             if rs is not None:
                 inst_state = rs[0].instances[0].update()
-                public_dns = rs[0].instances[0].ip_address #public_dns_name
+                public_ip = rs[0].instances[0].ip_address
                 if inst_state == 'running':
-                    cm_url = "http://{dns}/cloud".format(dns=public_dns)
+                    cm_url = "http://{dns}/cloud".format(dns=public_ip)
+                    # Wait until the CloudMan URL is accessible to return the data
                     if self._checkURL(cm_url) is True:
-                        state['public_dns'] = public_dns
+                        state['public_ip'] = public_ip
                         state['instance_state'] = inst_state
                         state['placement'] = rs[0].instances[0].placement
                     else:
-                        # Wait until the URL is accessible to display the IP
                         state['instance_state'] = 'booting'
                 else:
                     state['instance_state']= inst_state
         except Exception, e:
-            blend.log.error("Problem updating instance '%s' state: %s" % (instance_id, e))
+            err = "Problem updating instance '%s' state: %s" % (instance_id, e)
+            blend.log.error(err)
+            state['error'] = err
         return state
 
     def connect_ec2(self, a_key, s_key, cloud=None):
