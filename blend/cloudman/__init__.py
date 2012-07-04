@@ -1,25 +1,27 @@
 """
-API for interacting with CloudMan.
+API for interacting with a CloudMan instance.
 """
 import requests
 import simplejson
+from urlparse import urlparse
 
-# API for interacting with CloudMan
 class CloudMan:
 
     def __init__(self, url, password):
         """
-        Create an instance of the CloudMan API class.
+        Create an instance of the CloudMan API class, which is to be used when
+        manipulating that given CloudMan instance.
 
-        The ``url`` is a string defining the address of CloudMan, for 
-        example "http://127.0.0.1:42284". The ``password`` is CloudMan's password,
+        The ``url`` is a string defining the address of CloudMan, for
+        example "http://115.146.92.174". The ``password`` is CloudMan's password,
         as defined in the user data sent to CloudMan on instance creation.
         """
+        # Make sure the url scheme is defined (otherwise requests will not work)
+        if not urlparse(url).scheme:
+           url = "http://" + url
         self.cloudman_url = url
         self.password = password
 
-    # Initialise CloudMan
-    # type: The type of instance "Galaxy" (default), "Data", or "SGE"
     def initialize(self, type="Galaxy"):
         """
         Initialize CloudMan. This needs to be done before the cluster can be used.
@@ -49,7 +51,7 @@ class CloudMan:
         instance(s) of the same type as the master instance will be started.
         Note that the ``instance_type`` must match the type of instance
         available on the given cloud.
-        
+
         ``spot_price`` applies only to AWS and, if set, defines the maximum
         price for Spot instances, thus turning this request for more instances
         into a Spot request.
