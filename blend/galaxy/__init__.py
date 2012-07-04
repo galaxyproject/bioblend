@@ -2,6 +2,7 @@
 A base representation of an instance of Galaxy
 """
 import requests
+import urlparse
 from blend.galaxy import (libraries, histories, workflows, datasets, users)
 
 class GalaxyInstance(object):
@@ -32,7 +33,12 @@ class GalaxyInstance(object):
         :param key: User's API key for the given instance of Galaxy, obtained
                     from the user preferences.
         """
-        self.url = '/'.join([url, 'api']) # All of Galaxy's API's are rooted at <url>/api
+        # Make sure the url scheme is defined (otherwise requests will not work)
+        if not urlparse.urlparse(url).scheme:
+           url = "http://" + url
+        # All of Galaxy's API's are rooted at <url>/api so make that the base url
+        self.url = urlparse.urljoin(url, 'api')
+        print self.url
         self.key = key
         self.default_params = {'key': key}
         self.json_headers = {'Content-Type': 'application/json'}
