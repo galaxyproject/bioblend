@@ -38,7 +38,6 @@ class GalaxyInstance(object):
            url = "http://" + url
         # All of Galaxy's API's are rooted at <url>/api so make that the base url
         self.url = urlparse.urljoin(url, 'api')
-        print self.url
         self.key = key
         self.default_params = {'key': key}
         self.json_headers = {'Content-Type': 'application/json'}

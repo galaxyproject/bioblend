@@ -1,9 +1,12 @@
 """
 API for interacting with a CloudMan instance.
 """
+import logging
 import requests
 import simplejson
 from urlparse import urlparse
+import time
+import blend
 
 class CloudMan:
 
@@ -22,20 +25,24 @@ class CloudMan:
         self.cloudman_url = url
         self.password = password
 
+    def __repr__(self):
+        return "CloudMan instance at {0}/cloud".format(self.cloudman_url)
+
     def initialize(self, type="Galaxy"):
         """
-        Initialize CloudMan. This needs to be done before the cluster can be used.
+        Initialize CloudMan platform. This needs to be done before the cluster
+        can be used.
 
         The ``type``, either 'Galaxy' (default), 'Data', or 'SGE', defines the type
-        of cluster to initialize.
+        of cluster platform to initialize.
         """
         self._make_get_request("/cloud/initialize_cluster", parameters={'startup_opt': type})
 
     def get_status(self):
         """
-        Get status information on CloudMan.
+        Get status information on this CloudMan instance.
         """
-        return simplejson.loads(self._make_get_request("/cloud/instance_state_json"))
+        return self._make_get_request("/cloud/instance_state_json")
 
     def get_nodes(self):
         """
@@ -154,14 +161,18 @@ class CloudMan:
         """
         payload = {'terminate_master_instance': terminate_master_instance,
                    'delete_cluster': delete_cluster}
-        result = self._make_get_request("/cloud/kill_all", parameters=payload)
+        result = self._make_get_request("/cloud/kill_all", parameters=payload,
+                timeout=15)
         return result
 
-    def _make_get_request(self, url, parameters={}):
+    def _make_get_request(self, url, parameters={}, timeout=None):
         """
         Private function that makes a GET request to the nominated ``url``,
-        with the provided GET ``parameters``.
+        with the provided GET ``parameters``. Optionally, set the ``timeout``
+        to stop waiting for a reponse after a given number of seconds. This is
+        particularly useful when terminating a cluster as it may terminate
+        before sending a reponse.
         """
-        r = requests.get(self.cloudman_url + url, params=parameters, auth=("", self.password))
+        r = requests.get(self.cloudman_url + url, params=parameters,
+                auth=("", self.password), timeout=timeout)
         return r.text
-

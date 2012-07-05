@@ -29,7 +29,7 @@ class CloudManTest(unittest.TestCase):
 
     def test_get_status(self):
         # Set return value of call
-        self.cm._make_get_request = MagicMock(return_value="{}")
+        self.cm._make_get_request = MagicMock(return_value={})
 
         status = self.cm.get_status()
         self.assertNotEqual(status, None)
@@ -56,7 +56,7 @@ class CloudManTest(unittest.TestCase):
         self.assertNotEqual(status, None)
 
         # Check that the correct URL was called
-        params = {'number_nodes': 10}
+        params = {'number_nodes': 10, 'instance_type': '', 'spot_price': ''}
         self.cm._make_get_request.assert_called_with("/cloud/add_instances", parameters=params)
 
     def test_remove_nodes(self):
@@ -88,22 +88,22 @@ class CloudManTest(unittest.TestCase):
         self.cm._make_get_request.assert_called_with("/cloud/reboot_instance", parameters=params)
 
     def test_autoscaling_enabled_false(self):
-        return_json_string = """{"autoscaling": {"use_autoscaling": false, "as_max": "N/A", "as_min": "N/A"}}"""
+        return_json_string = {"autoscaling": {"use_autoscaling": False, "as_max": "N/A", "as_min": "N/A"}}
         self.cm._make_get_request = MagicMock(return_value=return_json_string)
         self.assertFalse(self.cm.autoscaling_enabled())
 
     def test_autoscaling_enabled_true(self):
-        return_json_string = """{"autoscaling": {"use_autoscaling": true, "as_max": "3", "as_min": "1"}}"""
+        return_json_string = {"autoscaling": {"use_autoscaling": True, "as_max": "3", "as_min": "1"}}
         self.cm._make_get_request = MagicMock(return_value=return_json_string)
         self.assertTrue(self.cm.autoscaling_enabled())
 
     def test_autoscaling_enabled_false(self):
-        return_json_string = """{"autoscaling": {"use_autoscaling": false, "as_max": "3", "as_min": "1"}}"""
+        return_json_string = {"autoscaling": {"use_autoscaling": False, "as_max": "3", "as_min": "1"}}
         self.cm._make_get_request = MagicMock(return_value=return_json_string)
         self.assertFalse(self.cm.autoscaling_enabled())
 
     def test_enable_autoscaling(self):
-        return_json_string = """{"autoscaling": {"use_autoscaling": false, "as_max": "N/A", "as_min": "N/A"}}"""
+        return_json_string = {"autoscaling": {"use_autoscaling": False, "as_max": "N/A", "as_min": "N/A"}}
         self.cm._make_get_request = MagicMock(return_value=return_json_string)
         self.assertFalse(self.cm.autoscaling_enabled())
         self.cm.enable_autoscaling(minimum_nodes=0,maximum_nodes=19)
@@ -112,7 +112,7 @@ class CloudManTest(unittest.TestCase):
         params = {'as_min': 0, 'as_max': 19}
         self.cm._make_get_request.assert_called_with("/cloud/toggle_autoscaling", parameters=params)
 
-        return_json_string = """{"autoscaling": {"use_autoscaling": true, "as_max": "19", "as_min": "0"}}"""
+        return_json_string = {"autoscaling": {"use_autoscaling": True, "as_max": "19", "as_min": "0"}}
         self.cm.enable_autoscaling(minimum_nodes=0,maximum_nodes=19)
 
         # Check that the correct URL was called
@@ -120,14 +120,14 @@ class CloudManTest(unittest.TestCase):
         self.cm._make_get_request.assert_called_with("/cloud/toggle_autoscaling", parameters=params)
 
     def test_disable_autoscaling(self):
-        return_json_string = """{"autoscaling": {"use_autoscaling": true, "as_max": "3", "as_min": "1"}}"""
+        return_json_string = {"autoscaling": {"use_autoscaling": True, "as_max": "3", "as_min": "1"}}
         self.cm._make_get_request = MagicMock(return_value=return_json_string)
         self.cm.disable_autoscaling()
 
         self.cm._make_get_request.assert_called_with("/cloud/toggle_autoscaling")
 
     def test_adjust_autoscaling(self):
-        return_json_string = """{"autoscaling": {"use_autoscaling": true, "as_max": "3", "as_min": "1"}}"""
+        return_json_string = {"autoscaling": {"use_autoscaling": True, "as_max": "3", "as_min": "1"}}
         self.cm._make_get_request = MagicMock(return_value=return_json_string)
         self.cm.adjust_autoscaling(minimum_nodes=3,maximum_nodes=4)
 
