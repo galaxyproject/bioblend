@@ -1,0 +1,9 @@
+global-exclude *.swp .gitignore
+
+include *.rst
+include setup.py
+
+graft blend
+graft docs
+graft tests
+
