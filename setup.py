@@ -2,9 +2,9 @@ from setuptools import setup
 
 from blend import __version__
 
-setup(name = "blend",
+setup(name = "blend-lib",
       version = __version__,
-      description = "BioCloudCentral.org, CloudMan, and Galaxy library",
+      description = "BioCloudCentral.org, CloudMan, and Galaxy API library",
       author = "Enis Afgan",
       author_email = "afgane@gmail.com",
       url = "http://blend.readthedocs.org/",

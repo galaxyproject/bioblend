@@ -13,7 +13,7 @@ Installation
 Stable releases of Blend are best installed via ``pip`` or ``easy_install`` from
 PyPI using something like::
 
-    $ pip install blend
+    $ pip install blend-lib
 
 Alternatively, you may install the most current source code from our `Git repository`_,
 or fork the project on Github. To install from source, do the following::
