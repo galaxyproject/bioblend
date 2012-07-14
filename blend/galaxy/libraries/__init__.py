@@ -3,6 +3,7 @@ Contains possible interactions with the Galaxy Data Libraries
 """
 from blend.galaxy.client import Client
 
+
 class LibraryClient(Client):
     def __init__(self, galaxy_instance):
         self.module = 'libraries'
@@ -13,8 +14,8 @@ class LibraryClient(Client):
         Create a data library with the properties defined in the arguments.
         Return a list of JSON dicts, looking like so::
 
-            [{"id": "f740ab636b360a70", 
-              "name": "Library from blend", 
+            [{"id": "f740ab636b360a70",
+              "name": "Library from blend",
               "url": "/api/libraries/f740ab636b360a70"}]
 
         """
@@ -60,7 +61,7 @@ class LibraryClient(Client):
         """
         libraries = Client._get(self, deleted=deleted)
         if name is not None or library_id is not None:
-            filtered_libs= []
+            filtered_libs = []
             for lib in libraries:
                 if name == lib['name'] or library_id == lib['id']:
                     filtered_libs.append(lib)
@@ -84,7 +85,7 @@ class LibraryClient(Client):
     def _do_upload(self, **keywords):
         """
         Set up the POST request and do the actual data upload to a data library.
-        This method should not be called directly but instead refer to the methods 
+        This method should not be called directly but instead refer to the methods
         specifc for the desired type of data upload.
         """
         # If folder_id was not provided in the arguments, find the root folder ID

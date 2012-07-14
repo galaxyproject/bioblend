@@ -3,6 +3,7 @@ Contains possible interactions with the Galaxy Datasets
 """
 from blend.galaxy.client import Client
 
+
 class DatasetClient(Client):
     def __init__(self, galaxy_instance):
         self.module = 'datasets'

@@ -1,6 +1,7 @@
 import simplejson
 import requests
 
+
 class BCC:
     def __init__(self, url):
         """
@@ -11,20 +12,17 @@ class BCC:
         """
         self.biocloudcentral_url = url
 
-
     def get_clouds(self):
         """
         Get a list of cloud types supported by BioCloudCentral.
         """
         return simplejson.loads(self._make_get_request("/api/get_clouds"))
 
-
     def get_images(self):
         """
         Get a list of images supported by BioCloudCentral.
         """
         return simplejson.loads(self._make_get_request("/api/get_images"))
-
 
     def get_instance_types(self):
         """
@@ -59,7 +57,7 @@ class BCC:
         The ``instance_type`` is the ``tech_name`` (e.g. ``m1.small``) for
         the master instance of the cluster (from ``get_instance_types()``).
 
-        The ``ud`` is a dictionary of user data. It should at least contain 
+        The ``ud`` is a dictionary of user data. It should at least contain
         ``cluster_name``, ``password``, ``cloud``, ``access_key``, ``secret_key``,
         ``instance_type``, and ``image_id``.
 
@@ -77,7 +75,6 @@ class BCC:
                 'image_id': ud['image_id'],
         }
         return self._make_post_request("/api/launch", parameters=parameters)
-
 
     def _make_get_request(self, url, parameters={}):
         """

@@ -1,12 +1,10 @@
 """
 API for interacting with a CloudMan instance.
 """
-import logging
 import requests
 import simplejson
 from urlparse import urlparse
-import time
-import blend
+
 
 class CloudMan:
 
@@ -21,7 +19,7 @@ class CloudMan:
         """
         # Make sure the url scheme is defined (otherwise requests will not work)
         if not urlparse(url).scheme:
-           url = "http://" + url
+            url = "http://" + url
         self.cloudman_url = url
         self.password = password
 
@@ -63,7 +61,7 @@ class CloudMan:
         price for Spot instances, thus turning this request for more instances
         into a Spot request.
         """
-        payload = {'number_nodes' : num_nodes,
+        payload = {'number_nodes': num_nodes,
                    'instance_type': instance_type,
                    'spot_price': spot_price}
         return self._make_get_request("/cloud/add_instances", parameters=payload)
@@ -73,7 +71,7 @@ class CloudMan:
         Remove worker nodes from the cluster.
 
         The ``num_nodes`` parameter defines the number of worker nodes to remove.
-        The ``force`` parameter (defaulting to False), is a boolean indicating 
+        The ``force`` parameter (defaulting to False), is a boolean indicating
         whether the nodes should be forcibly removed rather than gracefully removed.
         """
         payload = {'number_nodes': num_nodes, 'force_termination': force}
@@ -85,8 +83,8 @@ class CloudMan:
         Remove a specific worker node from the cluster.
 
         The ``instance_id`` parameter defines the ID, as a string, of a worker node
-        to remove from the cluster. The ``force`` parameter (defaulting to False), 
-        is a boolean indicating whether the node should be forcibly removed rather 
+        to remove from the cluster. The ``force`` parameter (defaulting to False),
+        is a boolean indicating whether the node should be forcibly removed rather
         than gracefully removed.
 
         """

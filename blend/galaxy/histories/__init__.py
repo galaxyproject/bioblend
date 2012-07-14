@@ -3,6 +3,7 @@ Contains possible interactions with the Galaxy Histories
 """
 from blend.galaxy.client import Client
 
+
 class HistoryClient(Client):
     def __init__(self, galaxy_instance):
         self.module = 'histories'
@@ -74,7 +75,7 @@ class HistoryClient(Client):
 
         If ``purge`` is set to ``True``, also purge the history. Note that for
         the purge option to work, ``allow_user_dataset_purge`` option must be
-        set in the Galaxy's configuration file ``universe_wsgi.ini`` 
+        set in the Galaxy's configuration file ``universe_wsgi.ini``
         """
         payload = {}
         if purge is True:
@@ -89,4 +90,3 @@ class HistoryClient(Client):
         # Append the 'undelete' action to the history URL
         url = '/'.join([url, 'undelete'])
         return Client._post(self, payload={}, url=url)
-

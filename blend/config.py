@@ -1,5 +1,4 @@
 import os
-import StringIO
 import ConfigParser
 
 # By default we use two locations for the blend configurations,
@@ -9,10 +8,11 @@ BlendConfigLocations = [BlendConfigPath]
 UserConfigPath = os.path.join(os.path.expanduser('~'), '.blend')
 BlendConfigLocations.append(UserConfigPath)
 
+
 class Config(ConfigParser.SafeConfigParser):
     def __init__(self, path=None, fp=None, do_load=True):
-        ConfigParser.SafeConfigParser.__init__(self, {'working_dir' : '/mnt/pyami',
-                                                      'debug' : '0'})
+        ConfigParser.SafeConfigParser.__init__(self, {'working_dir': '/mnt/pyami',
+                                                      'debug': '0'})
         if do_load:
             if path:
                 self.load_from_path(path)
@@ -55,4 +55,3 @@ class Config(ConfigParser.SafeConfigParser):
         else:
             val = default
         return val
-
