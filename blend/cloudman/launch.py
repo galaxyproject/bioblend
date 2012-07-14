@@ -1,7 +1,6 @@
 """
 Setup and launch a CloudMan instance.
 """
-import logging
 import datetime
 from httplib import HTTP
 from urlparse import urlparse
@@ -14,6 +13,7 @@ import blend
 
 # Comment the following line if no loggin at the prompt is desired
 #blend.set_stream_logger(__name__)
+
 
 class Bunch(object):
     """
@@ -30,6 +30,7 @@ class Bunch(object):
         Return the contents of the dict in a printable representation
         """
         return str(self.__dict__)
+
 
 class CloudManLaunch(object):
     def __init__(self, access_key, secret_key, cloud=None):
@@ -50,25 +51,25 @@ class CloudManLaunch(object):
         if cloud is None:
             # Default to an EC2-compatible object
             self.cloud = Bunch(
-                    id = '1', # for compatiility w/ DB representation
-                    name = "Amazon",
-                    cloud_type = "ec2",
-                    bucket_default = "cloudman",
-                    region_name = "us-east-1",
-                    region_endpoint = "ec2.amazonaws.com",
-                    ec2_port = "",
-                    ec2_conn_path = "/",
-                    cidr_range = "",
-                    is_secure = True,
-                    s3_host = "s3.amazonaws.com",
-                    s3_port = "",
-                    s3_conn_path = '/',
+                    id='1',  # for compatiility w/ DB representation
+                    name="Amazon",
+                    cloud_type="ec2",
+                    bucket_default="cloudman",
+                    region_name="us-east-1",
+                    region_endpoint="ec2.amazonaws.com",
+                    ec2_port="",
+                    ec2_conn_path="/",
+                    cidr_range="",
+                    is_secure=True,
+                    s3_host="s3.amazonaws.com",
+                    s3_port="",
+                    s3_conn_path='/',
             )
         else:
             self.cloud = cloud
         self.ec2_conn = self.connect_ec2(self.access_key, self.secret_key, self.cloud)
-        self.instance_id = None # To be set after an instance has been launched
-        self.rs = None # boto ResultSet object - to be set after an instance has been launched
+        self.instance_id = None  # To be set after an instance has been launched
+        self.rs = None  # boto ResultSet object - to be set after an instance has been launched
 
     def __repr__(self):
         return "Cloud: {0}; acct ID: {1}".format(self.cloud.name, self.access_key)
@@ -98,7 +99,7 @@ class CloudManLaunch(object):
         """
         ret = {'sg_names': [],
                'kp_name': '',
-               'kp_material':'',
+               'kp_material': '',
                'rs': '',
                'instance_id': '',
                'error': ''}
@@ -152,7 +153,7 @@ class CloudManLaunch(object):
         return ret
 
     def create_cm_security_group(self, sg_name='CloudMan'):
-        """ 
+        """
         Create a security group with all authorizations required to run CloudMan.
         If the group already exists, check its rules and add the missing ones.
         Return the name of the created security group.
@@ -171,11 +172,11 @@ class CloudManLaunch(object):
             cmsg = self.ec2_conn.create_security_group(sg_name, 'A security group for CloudMan')
         # Add appropriate authorization rules
         # If these rules already exist, nothing will be changed in the SG
-        ports = (('80', '80'), # Web UI
-                 ('20', '21'), # FTP
-                 ('22', '22'), # ssh
-                 ('30000', '30100'), # FTP transfer
-                 ('42284', '42284')) # CloudMan UI
+        ports = (('80', '80'),  # Web UI
+                 ('20', '21'),  # FTP
+                 ('22', '22'),  # ssh
+                 ('30000', '30100'),  # FTP transfer
+                 ('42284', '42284'))  # CloudMan UI
         for port in ports:
             try:
                 if not self.rule_exists(cmsg.rules, from_port=port[0], to_port=port[1]):
@@ -185,7 +186,7 @@ class CloudManLaunch(object):
             except EC2ResponseError, e:
                 blend.log.error("A problem with security group authorizations: %s" % e)
         # Add rule that allows communication between instances in the same SG
-        g_rule_exists = False # Flag to indicate if group rule already exists
+        g_rule_exists = False  # Flag to indicate if group rule already exists
         ci = self._get_cloud_info(self.cloud)
         cloud_type = ci['cloud_type']
         cidr_range = ci.get('cidr_range', '')
@@ -207,7 +208,7 @@ class CloudManLaunch(object):
                         blend.log.debug("Group rule already exists in the SG")
                     if g_rule_exists:
                         break
-        if g_rule_exists is False: 
+        if g_rule_exists is False:
             try:
                 if cloud_type == 'ec2':
                     cmsg.authorize(src_group=cmsg)
@@ -230,7 +231,7 @@ class CloudManLaunch(object):
         return False
 
     def create_key_pair(self, key_name='cloudman_key_pair'):
-        """ 
+        """
         Create a key pair with the provided ``key_name``.
         Return the name of the key or ``None`` if there was an error creating the key.
         """
@@ -299,7 +300,7 @@ class CloudManLaunch(object):
                     else:
                         state['instance_state'] = 'booting'
                 else:
-                    state['instance_state']= inst_state
+                    state['instance_state'] = inst_state
         except Exception, e:
             err = "Problem updating instance '%s' state: %s" % (instance_id, e)
             blend.log.error(err)
@@ -432,10 +433,9 @@ class CloudManLaunch(object):
             h.putrequest('HEAD', p[2])
             h.endheaders()
             r = h.getreply()
-            if r[0] == 200 or r[0] == 401: # CloudMan UI is pwd protected so include 401
+            if r[0] == 200 or r[0] == 401:  # CloudMan UI is pwd protected so include 401
                 return True
         except Exception:
             # No response or no good response
             pass
         return False
-

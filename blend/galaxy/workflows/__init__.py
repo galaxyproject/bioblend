@@ -3,6 +3,7 @@ Contains possible interactions with the Galaxy Workflows
 """
 from blend.galaxy.client import Client
 
+
 class WorkflowClient(Client):
     def __init__(self, galaxy_instance):
         self.module = 'workflows'
@@ -13,7 +14,7 @@ class WorkflowClient(Client):
         Get a list of all workflows
 
         :rtype: list
-        :return: A list of workflow dicts. 
+        :return: A list of workflow dicts.
                  For example::
 
                    [{u'id': u'92c56938c2f9b315',
@@ -63,7 +64,7 @@ class WorkflowClient(Client):
                            ``history_id`` OR ``history_name`` should be provided but not both!
 
         :type history_name: string
-        :param history_name: Create a new history with the given name to store the 
+        :param history_name: Create a new history with the given name to store the
                              workflow output. ``history_id`` OR ``history_name``
                              should be provided but not both!
 
@@ -74,10 +75,10 @@ class WorkflowClient(Client):
 
         :rtype: dict
         :return: A dict containing the history ID where the outputs are placed as well as
-                 output dataset IDs. 
+                 output dataset IDs.
                  For example::
 
-                  {u'history': u'64177123325c9cfd', 
+                  {u'history': u'64177123325c9cfd',
                    u'outputs': [u'aa4d3084af404259']}
 
         """
@@ -93,4 +94,3 @@ class WorkflowClient(Client):
         if import_inputs_to_history is False:
             payload['no_add_to_history'] = True
         return Client._post(self, payload)
-
