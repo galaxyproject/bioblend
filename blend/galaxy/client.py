@@ -4,8 +4,8 @@ An interface the clients should implement.
 This class is primarily a helper for the library and user code
 should not use it directly.
 """
-import requests
 import simplejson
+
 
 class Client(object):
     def __init__(self, galaxy_instance):
@@ -39,7 +39,7 @@ class Client(object):
         Do a generic POST request, composing the url from the contents of the
         arguments. Alternatively, an explicit ``url`` can be provided to use
         for the request. ``payload`` must be a dict that can be converted
-        into a JSON object (which will be done whthin this method) 
+        into a JSON object (which will be done whthin this method)
         """
         if not url:
             url = self.gi._make_url(self, module_id=id, deleted=deleted, contents=contents)
@@ -52,11 +52,10 @@ class Client(object):
         Do a generic DELETE request, composing the url from the contents of the
         arguments. Alternatively, an explicit ``url`` can be provided to use
         for the request. ``payload`` must be a dict that can be converted
-        into a JSON object (which will be done whthin this method) 
+        into a JSON object (which will be done whthin this method)
         """
         if not url:
             url = self.gi._make_url(self, module_id=id, deleted=deleted, contents=contents)
         payload = simplejson.dumps(payload)
         r = self.gi.make_delete_request(url, payload=payload)
         return r.json
-

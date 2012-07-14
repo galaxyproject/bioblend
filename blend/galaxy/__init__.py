@@ -5,6 +5,7 @@ import requests
 import urlparse
 from blend.galaxy import (libraries, histories, workflows, datasets, users)
 
+
 class GalaxyInstance(object):
     def __init__(self, url, key):
         """
@@ -35,13 +36,13 @@ class GalaxyInstance(object):
         """
         # Make sure the url scheme is defined (otherwise requests will not work)
         if not urlparse.urlparse(url).scheme:
-           url = "http://" + url
+            url = "http://" + url
         # All of Galaxy's API's are rooted at <url>/api so make that the base url
         self.url = urlparse.urljoin(url, 'api')
         self.key = key
         self.default_params = {'key': key}
         self.json_headers = {'Content-Type': 'application/json'}
-        self.verify = False # Should SSL verification be done
+        self.verify = False  # Should SSL verification be done
         self.libraries = libraries.LibraryClient(self)
         self.histories = histories.HistoryClient(self)
         self.workflows = workflows.WorkflowClient(self)
@@ -87,7 +88,7 @@ class GalaxyInstance(object):
         the server via the request.
         """
         if params is not None and params.get('key', False) is False:
-            params['key']  = self.key
+            params['key'] = self.key
         else:
             params = self.default_params
         r = requests.get(url, verify=self.verify, params=params)
@@ -105,7 +106,7 @@ class GalaxyInstance(object):
         the server via the request.
         """
         if params is not None and params.get('key', False) is False:
-            params['key']  = self.key
+            params['key'] = self.key
         else:
             params = self.default_params
         r = requests.post(url, data=payload, headers=self.json_headers,
@@ -125,9 +126,8 @@ class GalaxyInstance(object):
         the server via the request.
         """
         if params is not None and params.get('key', False) is False:
-            params['key']  = self.key
+            params['key'] = self.key
         else:
             params = self.default_params
         r = requests.delete(url, verify=self.verify, data=payload, params=params)
         return r
-

@@ -5,6 +5,7 @@ These methods must be executed by a registered Galaxy admin user.
 """
 from blend.galaxy.client import Client
 
+
 class UserClient(Client):
     def __init__(self, galaxy_instance):
         self.module = 'users'
@@ -16,7 +17,7 @@ class UserClient(Client):
         get a list of deleted users.
 
         :rtype: list
-        :return: A list of dicts with user details. 
+        :return: A list of dicts with user details.
                  For example::
 
                    [{u'email': u'a_user@example.com',
@@ -38,7 +39,7 @@ class UserClient(Client):
         Create a new Galaxy user.
 
         .. note::
-            For this method to work, the Galaxy instance must have 
+            For this method to work, the Galaxy instance must have
             ``allow_user_creation`` and ``use_remote_user`` options set to ``True``
             in the ``universe_wsgi.ini`` configuration file. Also note that setting
             ``use_remote_user`` will require an upstream authentication proxy

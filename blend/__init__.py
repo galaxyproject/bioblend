@@ -7,12 +7,14 @@ __version__ = '0.1'
 
 config = Config()
 
+
 def init_logging():
     for file in BlendConfigLocations:
         try:
             logging.config.fileConfig(os.path.expanduser(file))
         except:
             pass
+
 
 class NullHandler(logging.Handler):
     def emit(self, record):
@@ -34,6 +36,7 @@ init_logging()
 #   import blend
 #   blend.set_stream_logger(__name__)
 
+
 def set_file_logger(name, filepath, level=logging.INFO, format_string=None):
     global log
     if not format_string:
@@ -47,6 +50,7 @@ def set_file_logger(name, filepath, level=logging.INFO, format_string=None):
     logger.addHandler(fh)
     log = logger
 
+
 def set_stream_logger(name, level=logging.DEBUG, format_string=None):
     global log
     if not format_string:
@@ -59,4 +63,3 @@ def set_stream_logger(name, level=logging.DEBUG, format_string=None):
     fh.setFormatter(formatter)
     logger.addHandler(fh)
     log = logger
-
