@@ -36,6 +36,14 @@ class CloudMan:
         """
         self._make_get_request("/cloud/initialize_cluster", parameters={'startup_opt': type})
 
+    def get_cluster_type(self):
+        """
+        Get the ``type`` this CloudMan cluster has been initialized to. See the
+        CloudMan docs about the available types. If the cluster has not yet been
+        initialized, this method returns ``None``.
+        """
+        return self._make_get_request("/cloud/get_cluster_type")
+
     def get_status(self):
         """
         Get status information on this CloudMan instance.
@@ -48,6 +56,13 @@ class CloudMan:
         """
         instance_feed_json = self._make_get_request("/cloud/instance_feed_json")
         return simplejson.loads(instance_feed_json)['instances']
+
+    def get_cluster_size(self):
+        """
+        Get the size of the cluster in terms of the number of nodes; this count
+        includes the master node.
+        """
+        return len(self.get_nodes())
 
     def add_nodes(self, num_nodes, instance_type='', spot_price=''):
         """
