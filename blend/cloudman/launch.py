@@ -109,8 +109,8 @@ class CloudManLaunch(object):
         ret['kp_name'], ret['kp_material'] = self.create_key_pair(key_name)
         # If not provided, find placement - see the method for potential issues!
         if placement == '':
-            placement = self._find_placement(self.ec2_conn, instance_type,
-                    self.cloud.cloud_type)
+            placement = self._find_placements(self.ec2_conn, instance_type,
+                    self.cloud.cloud_type)[0]
         # Compose user data for launching an instance, ensuring we have the required fields
         kwargs['access_key'] = self.access_key
         kwargs['secret_key'] = self.secret_key
@@ -384,42 +384,38 @@ class CloudManLaunch(object):
             ci = "\n".join(['%s: %s' % (key, value) for key, value in ci.iteritems()])
         return ci
 
-    def _find_placement(self, ec2_conn, instance_type, cloud_type, get_all=False):
+    def _find_placements(self, ec2_conn, instance_type, cloud_type):
         """
         Find an EC2 region zone that supports the requested instance type.
-
-        By default, the method will return a single (first match) availability
-        zone that matches the requirements. If want to get a list of all
-        the zones that match the requirements, set ``get_all`` to ``True``.
 
         We do this by checking the spot prices in the potential availability zones
         for support before deciding on a region:
         http://blog.piefox.com/2011/07/ec2-availability-zones-and-instance.html
 
+        If instance_type is None, finds all zones that are currently available.
+        
         Note that, currently, this only applies to AWS. For other clouds, all
         the available zones are returned.
         """
         zones = []
-        if cloud_type == 'ec2':
-            base = self.ec2_conn.region.name
-            yesterday = datetime.datetime.now() - datetime.timedelta(1)
-            for loc_choice in ["b", "a", "c", "d"]:
-                cur_loc = "{base}{ext}".format(base=base, ext=loc_choice)
-                if len(self.ec2_conn.get_spot_price_history(instance_type=instance_type,
-                                                       end_time=yesterday.isoformat(),
-                                                       availability_zone=cur_loc)) > 0:
-                    if get_all is True:
-                        zones.append(cur_loc)
-                    else:
-                        return cur_loc
-        else:
-            for zone in self.ec2_conn.get_all_zones():
-                if get_all is True:
-                    zones.append(zone.name)
+        yesterday = datetime.datetime.now() - datetime.timedelta(1)
+        back_compatible_zone = "us-east-1b"
+        for zone in ec2_conn.get_all_zones():
+            if zone.state in ["available"]:
+                # Non EC2 clouds may not support get_spot_price_history
+                if instance_type is not None and cloud_type == 'ec2':
+                    if (len(ec2_conn.get_spot_price_history(instance_type=instance_type,
+                                                            end_time=yesterday.isoformat(),
+                                                            availability_zone=zone.name)) > 0):
+                        zones.append(zone.name)
                 else:
-                    return zone.name
+                    zones.append(zone.name)
+        zones.sort()
+        if back_compatible_zone in zones:
+            zones = [back_compatible_zone] + [z for z in zones if z != back_compatible_zone] 
         if len(zones) == 0:
-            blend.log.error("Did not find availabilty zone in {0} for {1}".format(base, instance_type))
+            log.error("Did not find availabilty zone in {0} for {1}".format(base, instance_type))
+            zones.append(back_compatible_zone)
         return zones
 
     def _checkURL(self, url):
