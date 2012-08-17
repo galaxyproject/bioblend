@@ -188,4 +188,4 @@ class CloudMan:
         """
         r = requests.get(self.cloudman_url + url, params=parameters,
                 auth=("", self.password), timeout=timeout)
-        return r.text
+        return r.json
