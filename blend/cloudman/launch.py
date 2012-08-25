@@ -134,6 +134,7 @@ class CloudManLaunch(object):
             err = "Problem launching an instance: %s" % e
             blend.log.error(err)
             ret['error'] = err
+            return ret
         if rs:
             try:
                 blend.log.info("Launched an instance with ID %s" % rs.instances[0].id)
