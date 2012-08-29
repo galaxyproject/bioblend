@@ -86,7 +86,7 @@ class LibraryClient(Client):
         """
         Set up the POST request and do the actual data upload to a data library.
         This method should not be called directly but instead refer to the methods
-        specifc for the desired type of data upload.
+        specific for the desired type of data upload.
         """
         # If folder_id was not provided in the arguments, find the root folder ID
         if keywords.get('folder_id', None) is None:
@@ -97,6 +97,8 @@ class LibraryClient(Client):
                     break
         else:
             folder_id = keywords['folder_id']
+            
+        files_attached = False
         # Compose the payload dict
         payload = {}
         payload['folder_id'] = folder_id
@@ -112,7 +114,18 @@ class LibraryClient(Client):
         elif keywords.get('server_dir', None) is not None:
             payload['upload_option'] = 'upload_directory'
             payload['server_dir'] = keywords['server_dir']
-        return Client._post(self, payload, id=keywords['library_id'], contents=True)
+        elif keywords.get('file_local_path', None) is not None:
+            payload['upload_option'] = 'upload_file'
+            payload['files_0|file_data'] =  open(keywords['file_local_path'], 'rb')
+            files_attached = True
+                
+        r = Client._post(self, payload, id=keywords['library_id'], contents=True,
+                         files_attached=files_attached)
+        
+        if payload.get('files_0|file_data', None) is not None:
+            payload['files_0|file_data'].close()
+        
+        return r
 
     def upload_file_from_url(self, library_id, file_url, folder_id=None, file_type='auto', dbkey='?'):
         """
@@ -120,7 +133,7 @@ class LibraryClient(Client):
         If ``folder_id`` is not specified, the file will be uploaded to the root folder.
         """
         # TODO: Is there a better way of removing self from locals?
-        vars = locals()
+        vars = locals().copy()
         del vars['self']
         return self._do_upload(**vars)
 
@@ -129,7 +142,16 @@ class LibraryClient(Client):
         Upload pasted_contents to a data library as a new file.
         If ``folder_id`` is not specified, the file will be placed in the root folder.
         """
-        vars = locals()
+        vars = locals().copy()
+        del vars['self']
+        return self._do_upload(**vars)
+    
+    def upload_file_from_local_path(self, library_id, file_local_path, folder_id=None, file_type='auto', dbkey='?'):
+        """
+        Read local file contents from file_local_path and upload data to a library.
+        If ``folder_id`` is not specified, the file will be placed in the root folder.
+        """
+        vars = locals().copy()
         del vars['self']
         return self._do_upload(**vars)
 
@@ -142,9 +164,9 @@ class LibraryClient(Client):
         must have the configuration option ``library_import_dir`` set in ``universe_wsgi.ini``.
         The value of that configuration option should be a base directory from where
         more specific directories can be specified as part of the ``server_dir`` argument.
-        All and only the files (ie, no folders) specifed by the ``server_dir`` argument
+        All and only the files (ie, no folders) specified by the ``server_dir`` argument
         will be uploaded to the data library.
         """
-        vars = locals()
+        vars = locals().copy()
         del vars['self']
         return self._do_upload(**vars)

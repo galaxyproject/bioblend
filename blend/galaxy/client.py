@@ -34,18 +34,25 @@ class Client(object):
         r = self.gi.make_get_request(url)
         return r.json
 
-    def _post(self, payload, id=None, deleted=False, contents=None, url=None):
+    def _post(self, payload, id=None, deleted=False, contents=None, url=None, files_attached=False):
         """
         Do a generic POST request, composing the url from the contents of the
         arguments. Alternatively, an explicit ``url`` can be provided to use
-        for the request. ``payload`` must be a dict that can be converted
-        into a JSON object (which will be done whthin this method)
+        for the request. ``payload`` must be a dict that contains additional
+        request arguments which will be sent along with the request body.
+        The payload dict may contain file handles (in which case the files_attached
+        flag must be set to true).
+        
+        The request body will be encoded in a JSON format if files_attached=False
+        or will be encoded in a multipart/form-data format if files_attached=True.
+        The return value will contain the response body as a JSON object.
         """
         if not url:
             url = self.gi._make_url(self, module_id=id, deleted=deleted, contents=contents)
-        payload = simplejson.dumps(payload)
-        r = self.gi.make_post_request(url, payload=payload)
-        return r.json
+
+        r = self.gi.make_post_request(url, payload=payload, files_attached=files_attached)
+        
+        return r
 
     def _delete(self, payload, id=None, deleted=False, contents=None, url=None):
         """

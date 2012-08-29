@@ -100,9 +100,9 @@ class CloudManLaunch(object):
         ret = {'sg_names': [],
                'kp_name': '',
                'kp_material': '',
-               'rs': '',
+               'rs': None,
                'instance_id': '',
-               'error': ''}
+               'error': None}
         # First satisfy the prerequisites
         for sg in security_groups:
             ret['sg_names'].append(self.create_cm_security_group(sg))
