@@ -3,6 +3,9 @@ A base representation of an instance of Galaxy
 """
 import requests
 import urlparse
+import poster
+import urllib2
+import simplejson
 from blend.galaxy import (libraries, histories, workflows, datasets, users)
 
 
@@ -94,24 +97,38 @@ class GalaxyInstance(object):
         r = requests.get(url, verify=self.verify, params=params)
         return r
 
-    def make_post_request(self, url, payload, params=None):
+    def make_post_request(self, url, payload, params=None, files_attached=False):
         """
         Make a POST request using the provided ``url`` and ``payload``.
-        The ``payload`` must be a dict that can be converted into a JSON
-        object (via ``simplejson.dumps``)
+        The ``payload`` must be a dict that contains the request values.
+        The payload dict may contain file handles (in which case the files_attached
+        flag must be set to true).
 
         If the ``params`` are not provided, use ``default_params`` class field.
         If params are provided and the provided dict does not have ``key`` key,
         the default ``self.key`` value will be included in what's passed to
         the server via the request.
+        
+        The return value will contain the response body as a JSON object.
         """
         if params is not None and params.get('key', False) is False:
             params['key'] = self.key
         else:
             params = self.default_params
-        r = requests.post(url, data=payload, headers=self.json_headers,
-                verify=self.verify, params=params)
-        return r
+        
+        
+        if files_attached:
+            payload.update(params) # merge query string values into request body instead
+            poster.streaminghttp.register_openers()
+            datagen, headers = poster.encode.multipart_encode(payload)
+            request = urllib2.Request(url, datagen, headers)
+            fp = urllib2.urlopen(request)
+            return simplejson.load(fp)
+        else:
+            payload = simplejson.dumps(payload)
+            r = requests.post(url, data=payload, headers=self.json_headers,
+                    verify=self.verify, params=params)    
+            return r.json
 
     def make_delete_request(self, url, payload=None, params=None):
         """
