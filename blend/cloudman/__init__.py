@@ -63,6 +63,20 @@ class CloudMan:
         includes the master node.
         """
         return len(self.get_nodes())
+    
+    def get_master_ip(self):
+        """
+        Returns the IP of the master node in this Cloudman cluster
+        """
+        status_json = self.get_status()
+        return simplejson.loads(status_json)['master_ip']
+
+    def get_master_id(self):
+        """
+        Returns the instance ID of the master node in this Cloudman cluster
+        """
+        status_json = self.get_status()
+        return simplejson.loads(status_json)['master_id']    
 
     def add_nodes(self, num_nodes, instance_type='', spot_price=''):
         """
