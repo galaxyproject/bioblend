@@ -55,7 +55,7 @@ class CloudMan:
         Get a list of nodes currently running in this CloudMan cluster.
         """
         instance_feed_json = self._make_get_request("/cloud/instance_feed_json")
-        return simplejson.loads(instance_feed_json)['instances']
+        return instance_feed_json['instances']
 
     def get_cluster_size(self):
         """
@@ -63,6 +63,27 @@ class CloudMan:
         includes the master node.
         """
         return len(self.get_nodes())
+    
+    def get_static_state(self):
+        """
+        Get static information on this CloudMan instance.
+        i.e. state that doesn't change over the lifetime of the cluster
+        """
+        return self._make_get_request("/cloud/static_instance_state_json")        
+        
+    def get_master_ip(self):
+        """
+        Returns the public IP of the master node in this Cloudman cluster
+        """
+        status_json = self.get_static_state()
+        return status_json['master_ip']
+
+    def get_master_id(self):
+        """
+        Returns the instance ID of the master node in this Cloudman cluster
+        """
+        status_json = self.get_static_state()
+        return status_json['master_id']
 
     def add_nodes(self, num_nodes, instance_type='', spot_price=''):
         """
@@ -160,7 +181,7 @@ class CloudMan:
         """
         payload = {'srvc': 'Galaxy'}
         status = self._make_get_request("/cloud/get_srvc_status", parameters=payload)
-        return simplejson.loads(status)['status']
+        return status['status']
 
     def terminate(self, terminate_master_instance=True, delete_cluster=False):
         """
