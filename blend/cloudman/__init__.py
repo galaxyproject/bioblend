@@ -64,19 +64,26 @@ class CloudMan:
         """
         return len(self.get_nodes())
     
+    def get_static_state(self):
+        """
+        Get static information on this CloudMan instance.
+        i.e. state that doesn't change over the lifetime of the cluster
+        """
+        return self._make_get_request("/cloud/static_instance_state_json")        
+        
     def get_master_ip(self):
         """
-        Returns the IP of the master node in this Cloudman cluster
+        Returns the public IP of the master node in this Cloudman cluster
         """
-        status_json = self.get_status()
-        return simplejson.loads(status_json)['master_ip']
+        status_json = self.get_static_state()
+        return status_json['master_ip']
 
     def get_master_id(self):
         """
         Returns the instance ID of the master node in this Cloudman cluster
         """
-        status_json = self.get_status()
-        return simplejson.loads(status_json)['master_id']    
+        status_json = self.get_static_state()
+        return status_json['master_id']
 
     def add_nodes(self, num_nodes, instance_type='', spot_price=''):
         """
