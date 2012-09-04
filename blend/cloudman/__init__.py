@@ -55,7 +55,7 @@ class CloudMan:
         Get a list of nodes currently running in this CloudMan cluster.
         """
         instance_feed_json = self._make_get_request("/cloud/instance_feed_json")
-        return simplejson.loads(instance_feed_json)['instances']
+        return instance_feed_json['instances']
 
     def get_cluster_size(self):
         """
@@ -181,7 +181,7 @@ class CloudMan:
         """
         payload = {'srvc': 'Galaxy'}
         status = self._make_get_request("/cloud/get_srvc_status", parameters=payload)
-        return simplejson.loads(status)['status']
+        return status['status']
 
     def terminate(self, terminate_master_instance=True, delete_cluster=False):
         """
