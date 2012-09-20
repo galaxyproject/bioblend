@@ -2,7 +2,7 @@
 Contains possible interactions with the Galaxy Workflows
 """
 from blend.galaxy.client import Client
-
+import simplejson
 
 class WorkflowClient(Client):
     def __init__(self, galaxy_instance):
@@ -43,6 +43,28 @@ class WorkflowClient(Client):
         """
         return Client._get(self, id=workflow_id)
 
+    def import_workflow_json(self, workflow_json):
+        """
+        Imports a new workflow given a json representation of a previously exported
+        workflow.
+        """
+        payload = {}
+        payload['workflow'] = workflow_json
+        
+        url = self.gi._make_url(self)
+        url = '/'.join([url, "upload"])
+        return Client._post(self, url=url, payload=payload)
+    
+    def import_workflow_from_local_path(self, file_local_path):
+        """
+        Imports a new workflow given the path to a file containing a previously
+        exported workflow.
+        """
+        with open(file_local_path, 'rb') as fp:
+            workflow_json = simplejson.load(fp)
+        
+        return self.import_workflow_json(workflow_json)
+    
     def run_workflow(self, workflow_id, dataset_map, history_id=None, history_name=None,
             import_inputs_to_history=False):
         """
