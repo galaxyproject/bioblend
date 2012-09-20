@@ -90,3 +90,17 @@ class HistoryClient(Client):
         # Append the 'undelete' action to the history URL
         url = '/'.join([url, 'undelete'])
         return Client._post(self, payload={}, url=url)
+    
+    def get_status(self, history_id):
+        """
+        Returns the state of this history as a dictionary, with the following keys.
+        'state' = This is the current state of the history, such as ok, error, new etc.
+        'state_details' = Contains individual statistics for various dataset states.
+        'percent_complete' = The overall number of datasets processed to completion.
+        """
+        state = {}
+        history = self.show_history(history_id)
+        state['state'] = history['state']
+        state['state_details'] = history['state_details']
+        state['percent_complete'] = 100 * history['state_details']['ok'] / sum(history['state_details'].itervalues())
+        return state
