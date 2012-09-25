@@ -394,13 +394,13 @@ class CloudManLaunch(object):
         http://blog.piefox.com/2011/07/ec2-availability-zones-and-instance.html
 
         If instance_type is None, finds all zones that are currently available.
-        
+
         Note that, currently, this only applies to AWS. For other clouds, all
         the available zones are returned.
         """
         zones = []
         yesterday = datetime.datetime.now() - datetime.timedelta(1)
-        back_compatible_zone = "us-east-1b"
+        back_compatible_zone = "us-east-1d"
         for zone in ec2_conn.get_all_zones():
             if zone.state in ["available"]:
                 # Non EC2 clouds may not support get_spot_price_history
@@ -411,11 +411,11 @@ class CloudManLaunch(object):
                         zones.append(zone.name)
                 else:
                     zones.append(zone.name)
-        zones.sort()
+        zones.sort(reverse=True) # Higher-lettered zones seem to have more availability currently
         if back_compatible_zone in zones:
             zones = [back_compatible_zone] + [z for z in zones if z != back_compatible_zone] 
         if len(zones) == 0:
-            log.error("Did not find availabilty zone in {0} for {1}".format(base, instance_type))
+            blend.log.error("Did not find availabilty zone for {1}".format(instance_type))
             zones.append(back_compatible_zone)
         return zones
 
