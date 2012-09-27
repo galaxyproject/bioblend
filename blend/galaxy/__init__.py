@@ -41,6 +41,7 @@ class GalaxyInstance(object):
         if not urlparse.urlparse(url).scheme:
             url = "http://" + url
         # All of Galaxy's API's are rooted at <url>/api so make that the base url
+        self.base_url = url
         self.url = urlparse.urljoin(url, 'api')
         self.key = key
         self.default_params = {'key': key}
