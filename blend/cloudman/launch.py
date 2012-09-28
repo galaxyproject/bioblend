@@ -9,6 +9,8 @@ import boto
 from boto.ec2.regioninfo import RegionInfo
 from boto.exception import EC2ResponseError
 
+import yaml
+
 import blend
 
 # Comment the following line if no loggin at the prompt is desired
@@ -359,7 +361,7 @@ class CloudManLaunch(object):
         if 'freenxpass' not in form_data and 'password' in form_data:
             form_data['freenxpass'] = form_data['password']
         # Convert form_data into the YAML format
-        ud = "\n".join(['%s: %s' % (key, value) for key, value in form_data.iteritems()])
+        ud = yaml.dump(form_data, default_flow_style=False)
         # Also include connection info about the selected cloud
         ci = self._get_cloud_info(self.cloud, as_str=True)
         return ud + "\n" + ci
@@ -382,7 +384,7 @@ class CloudManLaunch(object):
         ci['s3_port'] = cloud.s3_port if cloud.s3_port != '' else None
         ci['s3_conn_path'] = cloud.s3_conn_path
         if as_str:
-            ci = "\n".join(['%s: %s' % (key, value) for key, value in ci.iteritems()])
+            ci = yaml.dump(ci, default_flow_style=False)
         return ci
 
     def _find_placements(self, ec2_conn, instance_type, cloud_type):
