@@ -49,3 +49,11 @@ class UserClient(Client):
         payload = {}
         payload['remote_user_email'] = user_email
         return Client._post(self, payload)
+
+    def get_current_user(self):
+        """
+        Returns the user id associated with this Galaxy connection
+        """
+        url = self.gi._make_url(self, None)
+        url = '/'.join([url, 'current'])
+        return Client._get(self, url=url)
