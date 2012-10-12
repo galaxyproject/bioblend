@@ -104,3 +104,11 @@ class HistoryClient(Client):
         state['state_details'] = history['state_details']
         state['percent_complete'] = 100 * history['state_details']['ok'] / sum(history['state_details'].itervalues())
         return state
+    
+    def get_current_history(self):
+        """
+        Returns the current user's most recently used history object (not deleted)
+        """
+        url = self.gi._make_url(self, None)
+        url = '/'.join([url, 'most_recently_used'])
+        return Client._get(self, url=url)
