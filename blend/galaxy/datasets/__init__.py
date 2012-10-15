@@ -5,6 +5,10 @@ from blend.galaxy.client import Client
 import shutil
 import urllib2
 import os
+import time
+import logging
+
+log = logging.getLogger(__name__)
 
 class DatasetClient(Client):
     def __init__(self, galaxy_instance):
@@ -18,19 +22,45 @@ class DatasetClient(Client):
         """
         return Client._get(self, id=dataset_id, deleted=deleted)
     
-    def download_dataset(self, dataset_id, file_path=None):
+    def download_dataset(self, dataset_id, file_path=None, use_default_filename=True, wait_for_completion=False, maxwait=12000):
         """
         Downloads the dataset identified by 'id'.
-        If the file_path argument is provided, the dataset will be streamed to disk at that path, and the
-        file name will be the dataset name.
-        If the file_path argument is not provided, the dataset content is loaded into memory
-        and returned by the method. Memory consumption may be heavy as the entire file will be in memory.
         
-        If the dataset state is invalid, a DatasetStateException will be thrown.
+        :type dataset_id: string
+        :param dataset_id: Encoded Dataset ID
+        
+        :type file_path: string
+        :param file_path: If the file_path argument is provided, the dataset will be streamed to disk
+                          at that path (Should not contain filename if use_default_name=True).
+                          If the file_path argument is not provided, the dataset content is loaded into memory
+                          and returned by the method (Memory consumption may be heavy as the entire file
+                          will be in memory).
+                          
+        :type use_default_name: boolean
+        :param use_default_name: If the use_default_name parameter is True, the exported
+                                 file will be saved as file_local_path/%s,
+                                 where %s is the dataset name.
+                                 If use_default_name is False, file_local_path is assumed to
+                                 contain the full file path including filename.
+
+        :type wait_for_completion: boolean
+        :param wait_for_completion: If wait_for_completion is True, this call will block till the dataset is ready.
+                                    If the dataset state becomes invalid, a DatasetStateException will be thrown.
+                                    
+        type maxwait: float
+        :param maxwait: Time (in seconds) to wait for dataset to complete.
+                        If the dataset state is not complete within this time, a DatasetTimeoutException will be thrown.
+                                                         
+        :rtype: dict
+        :return: If a file_path argument is not provided, returns a dict containing the file_content.
+                 Otherwise returns nothing.
         """
-        dataset = self.show_dataset(dataset_id)
-#        if not dataset['state'] == 'ok':
-#            raise DatasetStateException(dataset)
+        if wait_for_completion:
+            self._block_until_dataset_ready(dataset_id, maxwait=maxwait)
+        
+        dataset = self.show_dataset(dataset_id)        
+        if not dataset['state'] == 'ok':
+            raise DatasetStateException("Dataset not ready. Dataset id: %s, current state: %s" % (dataset_id, dataset['state'])) 
         
         # Append the dataset_id to the base history contents URL
         url = '/'.join([self.gi.base_url, dataset['download_url']])
@@ -39,11 +69,45 @@ class DatasetClient(Client):
             return r.content
         else:
             req = urllib2.urlopen(url)
-            file = os.path.join(file_path, dataset['name'])
-            with open(file, 'wb') as fp:
+            
+            if use_default_filename:
+                file_local_path = os.path.join(file_path, dataset['name'])
+            else:
+                file_local_path = file_path
+
+            with open(file_local_path, 'wb') as fp:
                 shutil.copyfileobj(req, fp)
+    
+    def _is_dataset_complete(self, dataset_id):
+        dataset = self.show_dataset(dataset_id)
+        state = dataset['state']
+        return (state == 'ok' or state == 'error')
+                            
+    def _block_until_dataset_ready(self, dataset_id, maxwait=12000, interval=30, raise_on_timeout=True):
+        """
+        Wait until the dataset state changes to ok or error.
+        Based on: https://github.com/salimfadhley/jenkinsapi/blob/master/jenkinsapi/api.py
+        """
+        assert maxwait > 0
+        assert maxwait > interval
+        assert interval > 0
+    
+        for time_left in xrange(maxwait, 0, -interval):
+            if self._is_dataset_complete(dataset_id):
+                return            
+            log.warn( "Waiting for dataset %s to complete. Will wait another %is" % (dataset_id, time_left))
+            time.sleep(interval)
+        if raise_on_timeout:
+            #noinspection PyUnboundLocalVariable
+            raise DatasetTimeoutException("Waited too long for dataset to complete: %s" % dataset_id)                
 
 class DatasetStateException(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)
+    
+class DatasetTimeoutException(Exception):
     def __init__(self, value):
         self.value = value
     def __str__(self):
