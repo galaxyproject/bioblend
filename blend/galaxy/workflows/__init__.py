@@ -3,6 +3,7 @@ Contains possible interactions with the Galaxy Workflows
 """
 from blend.galaxy.client import Client
 import simplejson
+import os
 
 class WorkflowClient(Client):
     def __init__(self, galaxy_instance):
@@ -65,6 +66,47 @@ class WorkflowClient(Client):
         
         return self.import_workflow_json(workflow_json)
     
+    def export_workflow_json(self, workflow_id):
+        """
+        Exports a workflow in json format
+        
+        :type workflow_id: string
+        :param workflow_id: Encoded workflow ID
+        """
+        url = self.gi._make_url(self)
+        url = '/'.join([url, "download"])
+        url = '/'.join([url, workflow_id])
+        return Client._get(self, url=url)
+
+    def export_workflow_to_local_path(self, workflow_id, file_local_path, use_default_filename=True):
+        """
+        Exports a workflow in json format to a given local path.
+        
+        :type workflow_id: string
+        :param workflow_id: Encoded workflow ID
+        
+        :type file_local_path: string
+        :param file_local_path: Local path to which the exported file will be saved.
+                                (Should not contain filename if use_default_name=True)
+        
+        :type use_default_name: boolean
+        :param use_default_name: If the use_default_name parameter is True, the exported
+                                 file will be saved as file_local_path/Galaxy-Workflow-%s.ga,
+                                 where %s is the workflow name.
+                                 If use_default_name is False, file_local_path is assumed to
+                                 contain the full file path including filename.
+        """
+        workflow_json = self.export_workflow_json(workflow_id)
+        
+        if use_default_filename:
+            filename = 'Galaxy-Workflow-%s.ga' % workflow_json['name']
+            file_local_path = os.path.join(file_local_path, filename)
+        
+        with open(file_local_path, 'wb') as fp:
+            workflow_json = simplejson.dump(workflow_json, fp)
+            
+        return workflow_json
+        
     def run_workflow(self, workflow_id, dataset_map, history_id=None, history_name=None,
             import_inputs_to_history=False):
         """
