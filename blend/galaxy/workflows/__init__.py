@@ -78,7 +78,7 @@ class WorkflowClient(Client):
         url = '/'.join([url, workflow_id])
         return Client._get(self, url=url)
 
-    def export_workflow_to_local_path(self, workflow_id, file_local_path, use_default_name=True):
+    def export_workflow_to_local_path(self, workflow_id, file_local_path, use_default_filename=True):
         """
         Exports a workflow in json format to a given local path.
         
@@ -98,7 +98,7 @@ class WorkflowClient(Client):
         """
         workflow_json = self.export_workflow_json(workflow_id)
         
-        if use_default_name:
+        if use_default_filename:
             filename = 'Galaxy-Workflow-%s.ga' % workflow_json['name']
             file_local_path = os.path.join(file_local_path, filename)
         
