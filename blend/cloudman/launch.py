@@ -401,21 +401,21 @@ class CloudManLaunch(object):
         the available zones are returned.
         """
         zones = []
-        yesterday = datetime.datetime.now() - datetime.timedelta(1)
-        back_compatible_zone = "us-east-1d"
+        in_the_past = datetime.datetime.now() - datetime.timedelta(hours=2)
+        back_compatible_zone = "us-east-1e"
         for zone in ec2_conn.get_all_zones():
             if zone.state in ["available"]:
                 # Non EC2 clouds may not support get_spot_price_history
                 if instance_type is not None and cloud_type == 'ec2':
                     if (len(ec2_conn.get_spot_price_history(instance_type=instance_type,
-                                                            end_time=yesterday.isoformat(),
+                                                            end_time=in_the_past.isoformat(),
                                                             availability_zone=zone.name)) > 0):
                         zones.append(zone.name)
                 else:
                     zones.append(zone.name)
         zones.sort(reverse=True) # Higher-lettered zones seem to have more availability currently
         if back_compatible_zone in zones:
-            zones = [back_compatible_zone] + [z for z in zones if z != back_compatible_zone] 
+            zones = [back_compatible_zone] + [z for z in zones if z != back_compatible_zone]
         if len(zones) == 0:
             blend.log.error("Did not find availabilty zone for {1}".format(instance_type))
             zones.append(back_compatible_zone)
