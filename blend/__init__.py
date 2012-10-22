@@ -3,7 +3,7 @@ import logging
 from blend.config import Config, BlendConfigLocations
 
 # Current version of the library
-__version__ = '0.12'
+__version__ = '0.13a0'
 
 config = Config()
 
