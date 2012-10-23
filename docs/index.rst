@@ -54,18 +54,6 @@ Effort has been made to keep the structure and naming of those API's consistent
 across the library but because they do bridge different services, some discrepancies
 may exist. Feel free to point those out and/or provide fixes.
 
-BioCloudCentral.org API
-~~~~~~~~~~~~~~~~~~~~~~~
-
-API used to request instantiation of cloud resoruces (e.g., request a new CloudMan
-cluster).
-
-.. toctree::
-    :maxdepth: 2
-    :glob:
-
-    api_docs/bcc/*
-
 CloudMan API
 ~~~~~~~~~~~~
 
@@ -114,7 +102,6 @@ Indices and tables
 * :ref:`search`
 
 .. References/hyperlinks used above
-.. _BioCloudCentral.org: http://biocloudcentral.org/
 .. _CloudMan: http://usecloudman.org/
 .. _Galaxy: http://usegalaxy.org/
 .. _Git repository: https://github.com/afgane/blend

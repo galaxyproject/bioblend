@@ -1,6 +1,6 @@
 `Blend <http://blend.readthedocs.org/en/latest/>`_ is a Python (2.6 or higher)
-library for interacting with `BioCloudCentral.org`_, `CloudMan`_, and `Galaxy`_'s
-API. Conceptually, it makes it possible to script and automate the process of
+library for interacting with `CloudMan`_, and `Galaxy`_'s API.
+Conceptually, it makes it possible to script and automate the process of
 cloud infrastrucutre provisioning and scaling, as well as running of analyses
 within Galaxy. In reality, it makes it possible to do things like this:
 

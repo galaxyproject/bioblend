@@ -27,7 +27,7 @@
     <script type="text/javascript" src="../../_static/doctools.js"></script>
     <link rel="top" title="Blend 0.1 documentation" href="../../index.html" />
     <link rel="next" title="API documentation for interacting with Galaxy" href="../galaxy/all.html" />
-    <link rel="prev" title="API documentation for interacting with BioCloudCentral.org" href="../bcc/all.html" /> 
+    <link rel="prev" title="Blend" href="../../index.html" /> 
   </head>
   <body>
     <div class="related">
@@ -37,13 +37,10 @@
           <a href="../../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="../../py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
           <a href="../galaxy/all.html" title="API documentation for interacting with Galaxy"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="../bcc/all.html" title="API documentation for interacting with BioCloudCentral.org"
+          <a href="../../index.html" title="Blend"
              accesskey="P">previous</a> |</li>
         <li><a href="../../index.html">Blend 0.1 documentation</a> &raquo;</li> 
       </ul>
@@ -56,218 +53,6 @@
             
   <div class="section" id="api-documentation-for-interacting-with-cloudman">
 <h1>API documentation for interacting with CloudMan<a class="headerlink" href="#api-documentation-for-interacting-with-cloudman" title="Permalink to this headline">¶</a></h1>
-<dl class="class">
-<dt id="blend.cloudman.launch.CloudManLaunch">
-<em class="property">class </em><tt class="descclassname">blend.cloudman.launch.</tt><tt class="descname">CloudManLaunch</tt><big>(</big><em>access_key</em>, <em>secret_key</em>, <em>cloud=None</em><big>)</big><a class="reference internal" href="../../_modules/blend/cloudman/launch.html#CloudManLaunch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.cloudman.launch.CloudManLaunch" title="Permalink to this definition">¶</a></dt>
-<dd><p>Define the environment in which this instance of CloudMan will be launched.</p>
-<p>Besides providing the credentials, optionally provide the <tt class="docutils literal"><span class="pre">cloud</span></tt>
-object. This object must define the properties required to establish a
-<a class="reference external" href="https://github.com/boto/boto/">boto</a> connection to that cloud. See
-this method&#8217;s implementation for an example of the required fields.
-Note that as long the as provided object defines the required fields,
-it can really by implemented as anything (e.g., a Bunch, a database
-object, a custom class). If no value for the <tt class="docutils literal"><span class="pre">cloud</span></tt> argument is
-provided, the default is to use the Amazon cloud.</p>
-<dl class="method">
-<dt id="blend.cloudman.launch.CloudManLaunch._checkURL">
-<tt class="descname">_checkURL</tt><big>(</big><em>url</em><big>)</big><a class="reference internal" href="../../_modules/blend/cloudman/launch.html#CloudManLaunch._checkURL"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.cloudman.launch.CloudManLaunch._checkURL" title="Permalink to this definition">¶</a></dt>
-<dd><p>Check if the <tt class="docutils literal"><span class="pre">url</span></tt> is <em>alive</em> (i.e., remote server returns code 200(OK)
-or 401 (unauthorized)).</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="blend.cloudman.launch.CloudManLaunch._compose_user_data">
-<tt class="descname">_compose_user_data</tt><big>(</big><em>user_provided_data</em><big>)</big><a class="reference internal" href="../../_modules/blend/cloudman/launch.html#CloudManLaunch._compose_user_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.cloudman.launch.CloudManLaunch._compose_user_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>A convenience method used to compose and properly format the user data
-required when requiesting an instance.</p>
-<p><tt class="docutils literal"><span class="pre">user_provided_data</span></tt> is the data provided by a user required to identify
-a cluster and user other user requirements.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="blend.cloudman.launch.CloudManLaunch._find_placement">
-<tt class="descname">_find_placement</tt><big>(</big><em>ec2_conn</em>, <em>instance_type</em>, <em>cloud_type</em>, <em>get_all=False</em><big>)</big><a class="reference internal" href="../../_modules/blend/cloudman/launch.html#CloudManLaunch._find_placement"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.cloudman.launch.CloudManLaunch._find_placement" title="Permalink to this definition">¶</a></dt>
-<dd><p>Find an EC2 region zone that supports the requested instance type.</p>
-<p>By default, the method will return a single (first match) availability
-zone that matches the requirements. If want to get a list of all
-the zones that match the requirements, set <tt class="docutils literal"><span class="pre">get_all</span></tt> to <tt class="docutils literal"><span class="pre">True</span></tt>.</p>
-<p>We do this by checking the spot prices in the potential availability zones
-for support before deciding on a region:
-<a class="reference external" href="http://blog.piefox.com/2011/07/ec2-availability-zones-and-instance.html">http://blog.piefox.com/2011/07/ec2-availability-zones-and-instance.html</a></p>
-<p>Note that, currently, this only applies to AWS. For other clouds, all of
-the zones are returned.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="blend.cloudman.launch.CloudManLaunch._get_cloud_info">
-<tt class="descname">_get_cloud_info</tt><big>(</big><em>cloud</em>, <em>as_str=False</em><big>)</big><a class="reference internal" href="../../_modules/blend/cloudman/launch.html#CloudManLaunch._get_cloud_info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.cloudman.launch.CloudManLaunch._get_cloud_info" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get connection information about a given cloud</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="blend.cloudman.launch.CloudManLaunch.connect_ec2">
-<tt class="descname">connect_ec2</tt><big>(</big><em>a_key</em>, <em>s_key</em>, <em>cloud=None</em><big>)</big><a class="reference internal" href="../../_modules/blend/cloudman/launch.html#CloudManLaunch.connect_ec2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.cloudman.launch.CloudManLaunch.connect_ec2" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create and return an EC2-compatible connection object for the given cloud.</p>
-<p>See <tt class="docutils literal"><span class="pre">_get_cloud_info</span></tt> method for more details on the requirements for
-the <tt class="docutils literal"><span class="pre">cloud</span></tt> parameter. If no value is provided, the class field is used.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="blend.cloudman.launch.CloudManLaunch.create_cm_security_group">
-<tt class="descname">create_cm_security_group</tt><big>(</big><em>sg_name='CloudMan'</em><big>)</big><a class="reference internal" href="../../_modules/blend/cloudman/launch.html#CloudManLaunch.create_cm_security_group"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.cloudman.launch.CloudManLaunch.create_cm_security_group" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a security group with all authorizations required to run CloudMan.
-If the group already exists, check its rules and add the missing ones.
-Return the name of the created security group.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="blend.cloudman.launch.CloudManLaunch.create_key_pair">
-<tt class="descname">create_key_pair</tt><big>(</big><em>key_name='cloudman_key_pair'</em><big>)</big><a class="reference internal" href="../../_modules/blend/cloudman/launch.html#CloudManLaunch.create_key_pair"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.cloudman.launch.CloudManLaunch.create_key_pair" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a key pair with the provided <tt class="docutils literal"><span class="pre">key_name</span></tt>.
-Return the name of the key or <tt class="docutils literal"><span class="pre">None</span></tt> if there was an error creating the key.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="blend.cloudman.launch.CloudManLaunch.instance_state">
-<tt class="descname">instance_state</tt><big>(</big><em>instance_id</em>, <em>ec2_conn=None</em><big>)</big><a class="reference internal" href="../../_modules/blend/cloudman/launch.html#CloudManLaunch.instance_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.cloudman.launch.CloudManLaunch.instance_state" title="Permalink to this definition">¶</a></dt>
-<dd><p>Given the <tt class="docutils literal"><span class="pre">instance_id</span></tt>, check on the instance state. Return a <tt class="docutils literal"><span class="pre">state</span></tt>
-dict with the current <tt class="docutils literal"><span class="pre">instance_state</span></tt>, <tt class="docutils literal"><span class="pre">public_dns</span></tt>, and <tt class="docutils literal"><span class="pre">placement</span></tt>
-keys, which capture the current state (the values for those keys defualt to
-empty string if no data is available from the cloud).</p>
-<p>This method also allows the requires <tt class="docutils literal"><span class="pre">ec2_conn</span></tt> connection object to be
-provided at invocation time. If the object is not provided, the class field
-is used (this helps in case of stateless method invocations).</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="blend.cloudman.launch.CloudManLaunch.launch">
-<tt class="descname">launch</tt><big>(</big><em>cluster_name, image_id, instance_type, password, kernel_id=None, ramdisk_id=None, key_name='cloudman_key_pair', security_groups=['CloudMan'], placement='', **kwargs</em><big>)</big><a class="reference internal" href="../../_modules/blend/cloudman/launch.html#CloudManLaunch.launch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.cloudman.launch.CloudManLaunch.launch" title="Permalink to this definition">¶</a></dt>
-<dd><p>Check all the prerequisites (key pair and security groups) for
-launching a CloudMan instance, compose the user data based on the
-parameters specified in the arguments and the cloud properties as
-defined in the object&#8217;s <tt class="docutils literal"><span class="pre">cloud</span></tt> field.</p>
-<p>For the current list of user data fields that can be provided via
-<tt class="docutils literal"><span class="pre">kwargs</span></tt>, see <a class="reference external" href="http://wiki.g2.bx.psu.edu/CloudMan/UserData">http://wiki.g2.bx.psu.edu/CloudMan/UserData</a></p>
-<p>Return a dict containing the properties and info with wich an instance
-was launched, namely: <tt class="docutils literal"><span class="pre">sg_names</span></tt> containing the names of the security
-groups, <tt class="docutils literal"><span class="pre">kp_name</span></tt> containing the name of the key pair, <tt class="docutils literal"><span class="pre">kp_material</span></tt>
-containing the private portion of the key pair (<em>note</em> that this portion
-of the key is available and can be retrieved <em>only</em> at the time the key
-is created, which will happen only if no key with the name provided in
-the <tt class="docutils literal"><span class="pre">key_name</span></tt> argument exists), <tt class="docutils literal"><span class="pre">rs</span></tt> containing the
-<a class="reference external" href="https://github.com/boto/boto/">boto</a> <tt class="docutils literal"><span class="pre">ResultSet</span></tt> object,
-<tt class="docutils literal"><span class="pre">instance_id</span></tt> containing the ID of a started instance, and
-<tt class="docutils literal"><span class="pre">error</span></tt> containing an error message if there was one.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="blend.cloudman.launch.CloudManLaunch.rule_exists">
-<tt class="descname">rule_exists</tt><big>(</big><em>rules</em>, <em>from_port</em>, <em>to_port</em>, <em>ip_protocol='tcp'</em>, <em>cidr_ip='0.0.0.0/0'</em><big>)</big><a class="reference internal" href="../../_modules/blend/cloudman/launch.html#CloudManLaunch.rule_exists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.cloudman.launch.CloudManLaunch.rule_exists" title="Permalink to this definition">¶</a></dt>
-<dd><p>A convenience method to check if an authorization rule in a security group
-already exists.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="blend.cloudman.CloudMan">
-<em class="property">class </em><tt class="descclassname">blend.cloudman.</tt><tt class="descname">CloudMan</tt><big>(</big><em>url</em>, <em>password</em><big>)</big><a class="reference internal" href="../../_modules/blend/cloudman.html#CloudMan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.cloudman.CloudMan" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create an instance of the CloudMan API class.</p>
-<p>The <tt class="docutils literal"><span class="pre">url</span></tt> is a string defining the address of CloudMan, for 
-example &#8220;<a class="reference external" href="http://127.0.0.1:42284">http://127.0.0.1:42284</a>&#8221;. The <tt class="docutils literal"><span class="pre">password</span></tt> is CloudMan&#8217;s password,
-as defined in the user data sent to CloudMan on instance creation.</p>
-<dl class="method">
-<dt id="blend.cloudman.CloudMan.add_nodes">
-<tt class="descname">add_nodes</tt><big>(</big><em>num_nodes</em><big>)</big><a class="reference internal" href="../../_modules/blend/cloudman.html#CloudMan.add_nodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.cloudman.CloudMan.add_nodes" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add worker nodes to the cluster.</p>
-<p>The <tt class="docutils literal"><span class="pre">num_nodes</span></tt> parameter defines the number of worker nodes to add.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="blend.cloudman.CloudMan.adjust_autoscaling">
-<tt class="descname">adjust_autoscaling</tt><big>(</big><em>minimum_nodes=None</em>, <em>maximum_nodes=None</em><big>)</big><a class="reference internal" href="../../_modules/blend/cloudman.html#CloudMan.adjust_autoscaling"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.cloudman.CloudMan.adjust_autoscaling" title="Permalink to this definition">¶</a></dt>
-<dd><p>Adjust the autoscaling configuration parameters.</p>
-<p>The number of worker nodes in the cluster is bounded by the optional <tt class="docutils literal"><span class="pre">minimum_nodes</span></tt>
-(default is None) and <tt class="docutils literal"><span class="pre">maximum_nodes</span></tt> (default is None) parameters. If a parameter is not provided then its configuration value does not change.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="blend.cloudman.CloudMan.autoscaling_enabled">
-<tt class="descname">autoscaling_enabled</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/blend/cloudman.html#CloudMan.autoscaling_enabled"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.cloudman.CloudMan.autoscaling_enabled" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a boolean indicating whether autoscaling is enabled.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="blend.cloudman.CloudMan.disable_autoscaling">
-<tt class="descname">disable_autoscaling</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/blend/cloudman.html#CloudMan.disable_autoscaling"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.cloudman.CloudMan.disable_autoscaling" title="Permalink to this definition">¶</a></dt>
-<dd><p>Disable autoscaling, meaning that worker nodes will need to be manually
-added and removed.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="blend.cloudman.CloudMan.enable_autoscaling">
-<tt class="descname">enable_autoscaling</tt><big>(</big><em>minimum_nodes=0</em>, <em>maximum_nodes=19</em><big>)</big><a class="reference internal" href="../../_modules/blend/cloudman.html#CloudMan.enable_autoscaling"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.cloudman.CloudMan.enable_autoscaling" title="Permalink to this definition">¶</a></dt>
-<dd><p>Enable cluster autoscaling, allowing the cluster to automatically add, or
-remove, worker nodes, as needed.</p>
-<p>The number of worker nodes in the cluster is bounded by the <tt class="docutils literal"><span class="pre">minimum_nodes</span></tt>
-(default is 0) and <tt class="docutils literal"><span class="pre">maximum_nodes</span></tt> (default is 19) parameters.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="blend.cloudman.CloudMan.get_galaxy_state">
-<tt class="descname">get_galaxy_state</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/blend/cloudman.html#CloudMan.get_galaxy_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.cloudman.CloudMan.get_galaxy_state" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the current status of Galaxy running on the cluster.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="blend.cloudman.CloudMan.get_nodes">
-<tt class="descname">get_nodes</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/blend/cloudman.html#CloudMan.get_nodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.cloudman.CloudMan.get_nodes" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get a list of nodes currently running in this CloudMan cluster.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="blend.cloudman.CloudMan.get_status">
-<tt class="descname">get_status</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/blend/cloudman.html#CloudMan.get_status"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.cloudman.CloudMan.get_status" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get status information on CloudMan.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="blend.cloudman.CloudMan.initialize">
-<tt class="descname">initialize</tt><big>(</big><em>type='Galaxy'</em><big>)</big><a class="reference internal" href="../../_modules/blend/cloudman.html#CloudMan.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.cloudman.CloudMan.initialize" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize CloudMan. This needs to be done before the cluster can be used.</p>
-<p>The <tt class="docutils literal"><span class="pre">type</span></tt>, either &#8216;Galaxy&#8217; (default), &#8216;Data&#8217;, or &#8216;SGE&#8217;, defines the type
-of cluster to initialize.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="blend.cloudman.CloudMan.reboot_node">
-<tt class="descname">reboot_node</tt><big>(</big><em>instance_id</em><big>)</big><a class="reference internal" href="../../_modules/blend/cloudman.html#CloudMan.reboot_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.cloudman.CloudMan.reboot_node" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reboot a specific worker node.</p>
-<p>The <tt class="docutils literal"><span class="pre">instance_id</span></tt> parameter defines the ID, as a string, of a worker node
-to reboot.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="blend.cloudman.CloudMan.remove_node">
-<tt class="descname">remove_node</tt><big>(</big><em>instance_id</em>, <em>force=False</em><big>)</big><a class="reference internal" href="../../_modules/blend/cloudman.html#CloudMan.remove_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.cloudman.CloudMan.remove_node" title="Permalink to this definition">¶</a></dt>
-<dd><p>Remove a specific worker node from the cluster.</p>
-<p>The <tt class="docutils literal"><span class="pre">instance_id</span></tt> parameter defines the ID, as a string, of a worker node
-to remove from the cluster. The <tt class="docutils literal"><span class="pre">force</span></tt> parameter (defaulting to False), 
-is a boolean indicating whether the node should be forcibly removed rather 
-than gracefully removed.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="blend.cloudman.CloudMan.remove_nodes">
-<tt class="descname">remove_nodes</tt><big>(</big><em>num_nodes</em>, <em>force=False</em><big>)</big><a class="reference internal" href="../../_modules/blend/cloudman.html#CloudMan.remove_nodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blend.cloudman.CloudMan.remove_nodes" title="Permalink to this definition">¶</a></dt>
-<dd><p>Remove worker nodes from the cluster.</p>
-<p>The <tt class="docutils literal"><span class="pre">num_nodes</span></tt> parameter defines the number of worker nodes to remove.
-The <tt class="docutils literal"><span class="pre">force</span></tt> parameter (defaulting to False), is a boolean indicating 
-whether the nodes should be forcibly removed rather than gracefully removed.</p>
-</dd></dl>
-
-</dd></dl>
-
 </div>
 
 
@@ -277,8 +62,8 @@ whether the nodes should be forcibly removed rather than gracefully removed.</p>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
-  <p class="topless"><a href="../bcc/all.html"
-                        title="previous chapter">API documentation for interacting with BioCloudCentral.org</a></p>
+  <p class="topless"><a href="../../index.html"
+                        title="previous chapter">Blend</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="../galaxy/all.html"
                         title="next chapter">API documentation for interacting with Galaxy</a></p>
@@ -311,13 +96,10 @@ whether the nodes should be forcibly removed rather than gracefully removed.</p>
           <a href="../../genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="../../py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
           <a href="../galaxy/all.html" title="API documentation for interacting with Galaxy"
              >next</a> |</li>
         <li class="right" >
-          <a href="../bcc/all.html" title="API documentation for interacting with BioCloudCentral.org"
+          <a href="../../index.html" title="Blend"
              >previous</a> |</li>
         <li><a href="../../index.html">Blend 0.1 documentation</a> &raquo;</li> 
       </ul>
