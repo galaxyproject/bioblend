@@ -34,7 +34,7 @@ class Bunch(object):
         return str(self.__dict__)
 
 
-class CloudManLaunch(object):
+class CloudManLauncher(object):
     def __init__(self, access_key, secret_key, cloud=None):
         """
         Define the environment in which this instance of CloudMan will be launched.

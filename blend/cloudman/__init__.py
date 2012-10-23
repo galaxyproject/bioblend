@@ -6,7 +6,7 @@ import simplejson
 from urlparse import urlparse
 
 
-class CloudMan:
+class CloudManInstance:
 
     def __init__(self, url, password):
         """

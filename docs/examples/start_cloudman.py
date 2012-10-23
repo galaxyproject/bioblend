@@ -14,14 +14,14 @@ python start_cloudman.py "cluster x" pwd SGE m1.small ami-00000032 <access_key> 
 import sys
 import time
 
-from blend.cloudman import CloudMan
+from blend.cloudman import CloudManInstance
 from blend.cloudman.launch import Bunch
-from blend.cloudman.launch import CloudManLaunch
+from blend.cloudman.launch import CloudManLauncher
 
 def start_cloudman(name, pwd, cm_type, inst_type, ami, ak, sk):
     """
     Start an instance of CloudMan with the provided arguments.
-    Returns a tuple: an instance of ``CloudManLaunch`` pointing to the class
+    Returns a tuple: an instance of ``CloudManLauncher`` pointing to the class
     instance used to launch this CloudMan; and an instance of ``CloudMan``
     pointing to the given instance of CloudMan.
     """
@@ -40,8 +40,8 @@ def start_cloudman(name, pwd, cm_type, inst_type, ami, ak, sk):
                   s3_host='swift.rc.nectar.org.au',
                   s3_port=8888,
                   s3_conn_path='/')
-    # Create an instance of the CloudManLaunch class and launch a CloudMan instance
-    cml = CloudManLaunch(ak, sk, cloud)
+    # Create an instance of the CloudManLauncher class and launch a CloudMan instance
+    cml = CloudManLauncher(ak, sk, cloud)
     cml.launch(name, ami, inst_type, pwd)
     s = cml.get_status()
     # Wait until he have an IP (i.e., CloudMan is ready)
@@ -55,7 +55,7 @@ def start_cloudman(name, pwd, cm_type, inst_type, ami, ak, sk):
             sys.exit(1)
     print "Instance booted; configuring CloudMan as '{0}' type".format(cm_type)
     # Configure the CloudMan platform type
-    cm = CloudMan(s['public_ip'], pwd)
+    cm = CloudManInstance(s['public_ip'], pwd)
     cm.initialize(cm_type)
     cm.get_status()
     print "Done! CloudMan IP is {0}/cloud".format(s['public_ip'])
