@@ -3,6 +3,8 @@ Contains possible interactions with the Galaxy Histories
 """
 from blend.galaxy.client import Client
 
+import shutil
+import urllib2
 
 class HistoryClient(Client):
     def __init__(self, galaxy_instance):
@@ -68,6 +70,25 @@ class HistoryClient(Client):
         """
         payload = {'from_ld_id': lib_dataset_id}
         return Client._post(self, payload, id=history_id, contents=True)
+
+    def download_dataset(self, history_id, dataset_id, file_path=None, use_default_filename=True, to_ext=None):
+
+            meta = self.show_dataset(history_id, dataset_id)
+            
+            d_type = to_ext
+            if d_type is None and 'data_type' in meta :
+                d_type = meta['data_type']            
+            url = '/'.join([self.gi.base_url, 'datasets', meta['id'], "display"]) + "?to_ext=" + d_type
+            req = urllib2.urlopen(url)
+            if use_default_filename:
+                file_local_path = os.path.join(file_path, dataset['name'])
+            else:
+                file_local_path = file_path
+
+            with open(file_local_path, 'wb') as fp:
+                shutil.copyfileobj(req, fp)
+
+
 
     def delete_history(self, history_id, purge=False):
         """
