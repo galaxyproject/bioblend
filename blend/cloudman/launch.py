@@ -13,6 +13,7 @@ import yaml
 
 import blend
 
+
 # Comment the following line if no loggin at the prompt is desired
 #blend.set_stream_logger(__name__)
 
@@ -32,7 +33,6 @@ class Bunch(object):
         Return the contents of the dict in a printable representation
         """
         return str(self.__dict__)
-
 
 class CloudManLauncher(object):
     def __init__(self, access_key, secret_key, cloud=None):
@@ -70,8 +70,6 @@ class CloudManLauncher(object):
         else:
             self.cloud = cloud
         self.ec2_conn = self.connect_ec2(self.access_key, self.secret_key, self.cloud)
-        self.instance_id = None  # To be set after an instance has been launched
-        self.rs = None  # boto ResultSet object - to be set after an instance has been launched
 
     def __repr__(self):
         return "Cloud: {0}; acct ID: {1}".format(self.cloud.name, self.access_key)
@@ -88,7 +86,7 @@ class CloudManLauncher(object):
         For the current list of user data fields that can be provided via
         ``kwargs``, see `<http://wiki.g2.bx.psu.edu/CloudMan/UserData>`_
 
-        Return a dict containing the properties and info with wich an instance
+        Return a dict containing the properties and info with which an instance
         was launched, namely: ``sg_names`` containing the names of the security
         groups, ``kp_name`` containing the name of the key pair, ``kp_material``
         containing the private portion of the key pair (*note* that this portion
@@ -137,22 +135,15 @@ class CloudManLauncher(object):
             blend.log.error(err)
             ret['error'] = err
             return ret
-        if rs:
+        else:
             try:
                 blend.log.info("Launched an instance with ID %s" % rs.instances[0].id)
                 ret['instance_id'] = rs.instances[0].id
                 ret['instance_ip'] = rs.instances[0].ip_address
-                # Store some of this data locally for easier state updates
-                self.rs = rs
-                self.instance_id = rs.instances[0].id
             except Exception, e:
                 err = "Problem with the launched instance object: %s" % e
                 blend.log.error(err)
                 ret['error'] = err
-        else:
-            err = "Problem launching an instance?"
-            blend.log.warning(err)
-            ret['error'] = err
         return ret
 
     def create_cm_security_group(self, sg_name='CloudMan'):
@@ -254,7 +245,7 @@ class CloudManLauncher(object):
         blend.log.info("Created key pair '%s'" % kp.name)
         return kp.name, kp.material
 
-    def get_status(self, instance_id=None, ec2_conn=None):
+    def get_status(self, instance_id):
         """
         Check on the status of an instance. If ``instance_id`` is not provided,
         the ID obtained when launching *the most recent* instance is used. Note
@@ -273,15 +264,13 @@ class CloudManLauncher(object):
         values for those keys defualt to empty string if no data is available from
         the cloud).
         """
-        if ec2_conn is None:
-            ec2_conn = self.ec2_conn
+        ec2_conn = self.ec2_conn
         rs = None
         state = {'instance_state': "",
                  'public_ip': "",
                  'placement': "",
                  'error': ""}
-        if instance_id is None:
-            instance_id = self.instance_id
+        
         # Make sure we have an instance ID
         if instance_id is None:
             err = "Missing instance ID, cannot check the state."
