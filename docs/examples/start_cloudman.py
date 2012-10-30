@@ -36,7 +36,7 @@ def start_cloudman(name, pwd, cm_type, inst_type, ami, ak, sk):
                   ec2_port=8773,
                   ec2_conn_path='/services/Cloud',
                   cidr_range='115.146.92.0/22',
-                  is_secure=False,
+                  is_secure=True,
                   s3_host='swift.rc.nectar.org.au',
                   s3_port=8888,
                   s3_conn_path='/')
