@@ -6,19 +6,20 @@ within Galaxy. In reality, it makes it possible to do things like this:
 
 - Create a CloudMan compute cluster, via an API and directly from your local machine::
 
-    from blend.cloudman.launch import CloudManLauncher
-    cml = CloudManLauncher('<your cloud access key>', '<your cloud secret key')
-    cml.launch('Blend CloudMan', 'ami-<ID>', 'm1.small', 'password')
-    cml.get_status()
+    from blend.cloudman import CloudManConfig
+	from blend.cloudman import CloudManInstance
 
-- Manipulate your CloudMan instance and react to the current needs::
+    cfg = CloudManConfig('<your cloud access key>', '<your cloud secret key>', 'Blend CloudMan',  'ami-<ID>', 'm1.small', '<password>')
+	cmi = CloudManInstance.launch_instance(cfg)    
+    cmi.get_status()
 
-    from blend.cloudman import CloudMan
-    cm = CloudManInstance("instance IP", "password")
-    cm.initialize(type="Galaxy")
-    cm.add_nodes(3)
-    cluster_status = cm.get_status()
-    cm.remove_nodes(2)
+- Reconnect to an existing CloudMan instance and manipulate it:
+
+    from blend.cloudman import CloudManInstance
+    cmi = CloudManInstance("<instance IP>", "<password>")
+    cmi.add_nodes(3)
+    cluster_status = cmi.get_status()
+    cmi.remove_nodes(2)
 
 - Interact with Galaxy via a straighforward API::
 

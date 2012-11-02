@@ -58,22 +58,22 @@ cloud infrastrucutre provisioning and scaling, as well as running of analyses
 within Galaxy. In reality, it makes it possible to do things like this:</p>
 <ul>
 <li><p class="first">Create a CloudMan compute cluster, via an API and directly from your local machine:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">blend.cloudman.launch</span> <span class="kn">import</span> <span class="n">CloudManLauncher</span>
-<span class="n">cml</span> <span class="o">=</span> <span class="n">CloudManLauncher</span><span class="p">(</span><span class="s">&#39;&lt;your cloud access key&gt;&#39;</span><span class="p">,</span> <span class="s">&#39;&lt;your cloud secret key&#39;</span><span class="p">)</span>
-<span class="n">cml</span><span class="o">.</span><span class="n">launch</span><span class="p">(</span><span class="s">&#39;Blend CloudMan&#39;</span><span class="p">,</span> <span class="s">&#39;ami-&lt;ID&gt;&#39;</span><span class="p">,</span> <span class="s">&#39;m1.small&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>
-<span class="n">cml</span><span class="o">.</span><span class="n">get_status</span><span class="p">()</span>
-</pre></div>
+<div class="highlight-python"><pre>from blend.cloudman import CloudManConfig
+    from blend.cloudman import CloudManInstance
+
+cfg = CloudManConfig('&lt;your cloud access key&gt;', '&lt;your cloud secret key&gt;', 'Blend CloudMan',  'ami-&lt;ID&gt;', 'm1.small', '&lt;password&gt;')
+    cmi = CloudManInstance.launch_instance(cfg)
+cmi.get_status()</pre>
 </div>
 </li>
-<li><p class="first">Manipulate your CloudMan instance and react to the current needs:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">blend.cloudman</span> <span class="kn">import</span> <span class="n">CloudMan</span>
-<span class="n">cm</span> <span class="o">=</span> <span class="n">CloudManInstance</span><span class="p">(</span><span class="s">&quot;instance IP&quot;</span><span class="p">,</span> <span class="s">&quot;password&quot;</span><span class="p">)</span>
-<span class="n">cm</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s">&quot;Galaxy&quot;</span><span class="p">)</span>
-<span class="n">cm</span><span class="o">.</span><span class="n">add_nodes</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
-<span class="n">cluster_status</span> <span class="o">=</span> <span class="n">cm</span><span class="o">.</span><span class="n">get_status</span><span class="p">()</span>
-<span class="n">cm</span><span class="o">.</span><span class="n">remove_nodes</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</pre></div>
-</div>
+<li><p class="first">Reconnect to an existing CloudMan instance and manipulate it:</p>
+<blockquote>
+<div><p>from blend.cloudman import CloudManInstance
+cmi = CloudManInstance(&#8220;&lt;instance IP&gt;&#8221;, &#8220;&lt;password&gt;&#8221;)
+cmi.add_nodes(3)
+cluster_status = cmi.get_status()
+cmi.remove_nodes(2)</p>
+</div></blockquote>
 </li>
 <li><p class="first">Interact with Galaxy via a straighforward API:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">blend.galaxy</span> <span class="kn">import</span> <span class="n">GalaxyInstance</span>

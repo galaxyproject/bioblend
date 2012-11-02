@@ -14,15 +14,15 @@ python start_cloudman.py "cluster x" pwd SGE m1.small ami-00000032 <access_key> 
 import sys
 import time
 
-from blend.cloudman import CloudManInstance
 from blend.cloudman.launch import Bunch
-from blend.cloudman.launch import CloudManLauncher
+from blend.cloudman import CloudManInstance
+from blend.cloudman import CloudManConfig
 
 def start_cloudman(name, pwd, cm_type, inst_type, ami, ak, sk):
     """
     Start an instance of CloudMan with the provided arguments.
-    Returns a tuple: an instance of ``CloudManLauncher`` pointing to the class
-    instance used to launch this CloudMan; and an instance of ``CloudMan``
+    Returns a tuple: an instance of ``CloudManConfig`` pointing to the 
+    settings used to launch this CloudMan; and an instance of ``CloudMan``
     pointing to the given instance of CloudMan.
     """
     cloud = None # If left as None, Blend will default to Amazon
@@ -41,24 +41,9 @@ def start_cloudman(name, pwd, cm_type, inst_type, ami, ak, sk):
                   s3_port=8888,
                   s3_conn_path='/')
     # Create an instance of the CloudManLauncher class and launch a CloudMan instance
-    cml = CloudManLauncher(ak, sk, cloud)
-    cml.launch(name, ami, inst_type, pwd)
-    s = cml.get_status()
-    # Wait until he have an IP (i.e., CloudMan is ready)
-    while s['public_ip'] == '':
-        print "Instance not ready yet (it's in state '{0}'); waiting..."\
-                .format(s['instance_state'])
-        time.sleep(5)
-        s = cml.get_status()
-        if s['error'] != '':
-            print "Error launching an instance: {0}".format(s['error'])
-            sys.exit(1)
-    print "Instance booted; configuring CloudMan as '{0}' type".format(cm_type)
-    # Configure the CloudMan platform type
-    cm = CloudManInstance(s['public_ip'], pwd)
-    cm.initialize(cm_type)
-    cm.get_status()
-    print "Done! CloudMan IP is {0}/cloud".format(s['public_ip'])
+    cmc = CloudManConfig(ak, sk, name,  ami, inst_type, pwd, cloud_metadata=cloud, cloudman_type=cm_type, initial_storage_size=2)
+    cmi = CloudManInstance.launch_instance(cfg)    
+    print "Done! CloudMan IP is {0}/cloud".format(cmi.get_cloudman_url())
     return cml, cm
 
 if __name__=="__main__":
