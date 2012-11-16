@@ -2,7 +2,7 @@ from blend import cloudman
 
 url = "http://127.0.0.1:42284"
 password = "password"
-cm = cloudman.CloudMan(url, password)
+cm = cloudman.CloudManInstance(url, password)
 
 # Expects CloudMan to be running locally
 ## Set cluster type and storage size
