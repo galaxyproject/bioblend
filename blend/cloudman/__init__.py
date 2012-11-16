@@ -63,7 +63,7 @@ class CloudManConfig(object):
                  password=None,
                  cloud_metadata=None,
                  cluster_type='Galaxy',
-                 initial_storage_size=None,
+                 initial_storage_size=1,
                  key_name='cloudman_key_pair',
                  security_groups=['CloudMan'],
                  placement='',
@@ -158,7 +158,7 @@ class CloudManConfig(object):
         self.placement = placement
         self.block_till_ready = block_till_ready
         
-    def set_post_launch_parameters(self, cluster_type='Galaxy', initial_storage_size=None):
+    def set_post_launch_parameters(self, cluster_type='Galaxy', initial_storage_size=1):
         self.cluster_type = cluster_type
         self.initial_storage_size = initial_storage_size
         
@@ -205,6 +205,8 @@ class CloudManConfig(object):
             return "Cluster type must not be null"
         elif self.key_name is None:
             return "Key-pair name must not be null"
+        elif self.initial_storage_size is None:
+            return "Initial storage size must not be null"
         else:
             return None
 
@@ -303,8 +305,11 @@ class CloudManInstance(GenericVMInstance):
             self.initialized = True 
             
         self.config = kwargs.pop('cloudman_config', None)
-        self._set_cloudman_url(url)
-        self.password = password        
+        if (self.config is None):
+            self.password = password
+        else:
+            self.password = self.config.password
+        self._set_cloudman_url(url)             
 
     def __repr__(self):
         return "CloudMan instance at {0}/cloud".format(self.cloudman_url)
