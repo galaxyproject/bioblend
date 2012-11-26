@@ -16,7 +16,7 @@ class CloudManTest(unittest.TestCase):
     def setUp(self):
         url = "http://127.0.0.1:42284"
         password = "password"
-        self.cm = cloudman.CloudMan(url, password)
+        self.cm = cloudman.CloudManInstance(url, password)
 
     def test_initialize(self):
         self.cm._make_get_request = MagicMock(return_value="{}")
