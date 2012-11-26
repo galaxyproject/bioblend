@@ -1,14 +1,14 @@
 """
 API for interacting with a CloudMan instance.
 """
-import requests
-import simplejson
-import functools
-import blend
 import time
+import requests
+import functools
+import simplejson
 from urlparse import urlparse
-from blend.cloudman.launch import CloudManLauncher
-from blend.util import Bunch
+import bioblend
+from bioblend.cloudman.launch import CloudManLauncher
+from bioblend.util import Bunch
 
 def block_till_vm_ready(func):
     """
@@ -276,10 +276,10 @@ class GenericVMInstance(object):
                 return
             elif status['error'] != '':
                 msg = "Error launching an instance: {0}".format(status['error'])
-                blend.log.error(msg)
+                bioblend.log.error(msg)
                 raise VMLaunchException(msg)
             else:
-                blend.log.warn("Instance not ready yet (it's in state '{0}'); waiting another {1} seconds..."\
+                bioblend.log.warn("Instance not ready yet (it's in state '{0}'); waiting another {1} seconds..."\
                                .format(status['instance_state'], time_left))
                 time.sleep(vm_ready_check_interval)
 

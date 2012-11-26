@@ -3,10 +3,10 @@ import ConfigParser
 
 # By default we use two locations for the blend configurations,
 # /etc/blend.cfg and ~/.blend (which works on Windows and Unix).
-BlendConfigPath = '/etc/blend.cfg'
-BlendConfigLocations = [BlendConfigPath]
-UserConfigPath = os.path.join(os.path.expanduser('~'), '.blend')
-BlendConfigLocations.append(UserConfigPath)
+BioBlendConfigPath = '/etc/bioblend.cfg'
+BioBlendConfigLocations = [BioBlendConfigPath]
+UserConfigPath = os.path.join(os.path.expanduser('~'), '.bioblend')
+BioBlendConfigLocations.append(UserConfigPath)
 
 
 class Config(ConfigParser.SafeConfigParser):
@@ -19,7 +19,7 @@ class Config(ConfigParser.SafeConfigParser):
             elif fp:
                 self.readfp(fp)
             else:
-                self.read(BlendConfigLocations)
+                self.read(BioBlendConfigLocations)
 
     def get_value(self, section, name, default=None):
         return self.get(section, name, default)

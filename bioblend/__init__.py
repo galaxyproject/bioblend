@@ -1,6 +1,6 @@
 import os
 import logging
-from blend.config import Config, BlendConfigLocations
+from bioblend.config import Config, BioBlendConfigLocations
 
 # Current version of the library
 __version__ = '0.2.0'
@@ -9,7 +9,7 @@ config = Config()
 
 
 def init_logging():
-    for file in BlendConfigLocations:
+    for file in BioBlendConfigLocations:
         try:
             logging.config.fileConfig(os.path.expanduser(file))
         except:
@@ -23,18 +23,18 @@ class NullHandler(logging.Handler):
 # By default, do not force any logging by the library. If you want to see the
 # log messages in your scripts, add the following to the top of your script:
 #   import logging
-#   logging.basicConfig(filename="blend.log", level=logging.DEBUG)
+#   logging.basicConfig(filename="bioblend.log", level=logging.DEBUG)
 
 default_format_string = "%(asctime)s %(name)s [%(levelname)s]: %(message)s"
-log = logging.getLogger('blend')
+log = logging.getLogger('bioblend')
 log.addHandler(NullHandler())
 init_logging()
 
 # Convenience functions to set logging to a particular file or stream
 # To enable either of these, simply add the following at the top of a
-# blend module:
-#   import blend
-#   blend.set_stream_logger(__name__)
+# bioblend module:
+#   import bioblend
+#   bioblend.set_stream_logger(__name__)
 
 
 def set_file_logger(name, filepath, level=logging.INFO, format_string=None):

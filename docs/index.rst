@@ -1,5 +1,5 @@
 =====
-Blend
+BioBlend
 =====
 
 About
@@ -10,28 +10,28 @@ About
 Installation
 ============
 
-Stable releases of Blend are best installed via ``pip`` or ``easy_install`` from
+Stable releases of BioBlend are best installed via ``pip`` or ``easy_install`` from
 PyPI using something like::
 
-    $ pip install blend-lib
+    $ pip install bioblend
 
 Alternatively, you may install the most current source code from our `Git repository`_,
 or fork the project on Github. To install from source, do the following::
 
     # Clone the repository to a local directory
-    $ git clone https://github.com/afgane/blend.git
+    $ git clone https://github.com/afgane/bioblend.git
     # Install the library
-    $ cd blend
+    $ cd bioblend
     $ python setup.py install
 
 After installing the library, you will be able to simply import it into your
-Python environment with ``import blend``. For details on the available functionality,
+Python environment with ``import bioblend``. For details on the available functionality,
 see the `API documentation`_.
 
 Usage
 =====
 
-To get started using Blend, it's probably best to take a look at the example
+To get started using BioBlend, it's probably best to take a look at the example
 scripts in ``docs/examples`` source directory and browse the `API documentation`_.
 Beyond that, it's up to your creativity :).
 
@@ -45,7 +45,7 @@ it. Then, issue pull requests.
 API Documentation
 =================
 
-Blend's API foucuses around and matches the services it wraps. Thus, there are
+BioBlend's API foucuses around and matches the services it wraps. Thus, there are
 three top-level sets of APIs, each corresponding to a separate serivce and a
 corresponding step in the automation process. *Note* that each of the service APIs
 can be used completely independently of one another.
@@ -81,7 +81,7 @@ and workflow execution.
 
 Testing
 =======
-The unit tests, in the ``tests`` folder, can be run using 
+The unit tests, in the ``tests`` folder, can be run using
 `nose <https://github.com/nose-devs/nose>`_. From the project root::
 
     $ nosetests
@@ -90,9 +90,9 @@ Getting help
 ============
 
 If you've run into issues, found a bug, or can't seem to find an answer to
-your question regarding the use and functionality of Blend, please use
-`Github Issues <https://github.com/afgane/blend/issues>`_ page to ask your
-question 
+your question regarding the use and functionality of BioBlend, please use
+`Github Issues <https://github.com/afgane/bioblend/issues>`_ page to ask your
+question
 
 Indices and tables
 ==================
@@ -104,5 +104,5 @@ Indices and tables
 .. References/hyperlinks used above
 .. _CloudMan: http://usecloudman.org/
 .. _Galaxy: http://usegalaxy.org/
-.. _Git repository: https://github.com/afgane/blend
+.. _Git repository: https://github.com/afgane/bioblend
 

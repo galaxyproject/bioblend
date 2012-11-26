@@ -1,18 +1,18 @@
 from setuptools import setup
 
-from blend import __version__
+from bioblend import __version__
 
 setup(name = "bioblend",
       version = __version__,
-      description = "CloudMan, and Galaxy API library",
+      description = "CloudMan and Galaxy API library",
       author = "Enis Afgan",
       author_email = "afgane@gmail.com",
       url = "http://blend.readthedocs.org/",
       install_requires = ['requests', 'poster', 'simplejson', 'boto', 'nose', 'mock', 'pyyaml'],
-      packages = ['blend', 'blend.cloudman', 'blend.galaxy',
-                  'blend.galaxy.datasets', 'blend.galaxy.histories',
-                  'blend.galaxy.libraries', 'blend.galaxy.users',
-                  'blend.galaxy.workflows'],
+      packages = ['bioblend', 'bioblend.cloudman', 'bioblend.galaxy', 'bioblend.util',
+                  'bioblend.galaxy.datasets', 'bioblend.galaxy.histories',
+                  'bioblend.galaxy.libraries', 'bioblend.galaxy.users',
+                  'bioblend.galaxy.workflows'],
       license = 'MIT',
       platforms = "Posix; MacOS X; Windows",
       classifiers = ["Development Status :: 3 - Alpha",

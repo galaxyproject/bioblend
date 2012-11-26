@@ -13,9 +13,9 @@ python start_cloudman.py "cluster x" pwd SGE m1.small ami-00000032 <access_key> 
 """
 import sys
 
-from blend.util import Bunch
-from blend.cloudman import CloudManInstance
-from blend.cloudman import CloudManConfig
+from bioblend.util import Bunch
+from bioblend.cloudman import CloudManInstance
+from bioblend.cloudman import CloudManConfig
 
 def start_cloudman(name, pwd, cm_type, inst_type, ami, ak, sk):
     """

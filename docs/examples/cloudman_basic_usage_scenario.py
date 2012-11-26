@@ -1,4 +1,4 @@
-from blend import cloudman
+from bioblend import cloudman
 
 url = "http://127.0.0.1:42284"
 password = "password"

@@ -6,7 +6,7 @@ import urlparse
 import poster
 import urllib2
 import simplejson
-from blend.galaxy import (libraries, histories, workflows, datasets, users)
+from bioblend.galaxy import (libraries, histories, workflows, datasets, users)
 
 
 class GalaxyInstance(object):
@@ -22,7 +22,7 @@ class GalaxyInstance(object):
         histories, and get a list of all the user's histories, the following
         should be done::
 
-            from blend import galaxy
+            from bioblend import galaxy
 
             gi = galaxy.GalaxyInstance(url='http://127.0.0.1:8000', key='your_api_key')
 
@@ -109,15 +109,15 @@ class GalaxyInstance(object):
         If params are provided and the provided dict does not have ``key`` key,
         the default ``self.key`` value will be included in what's passed to
         the server via the request.
-        
+
         The return value will contain the response body as a JSON object.
         """
         if params is not None and params.get('key', False) is False:
             params['key'] = self.key
         else:
             params = self.default_params
-        
-        
+
+
         if files_attached:
             payload.update(params) # merge query string values into request body instead
             poster.streaminghttp.register_openers()
@@ -128,7 +128,7 @@ class GalaxyInstance(object):
         else:
             payload = simplejson.dumps(payload)
             r = requests.post(url, data=payload, headers=self.json_headers,
-                    verify=self.verify, params=params)    
+                    verify=self.verify, params=params)
             return r.json
 
     def make_delete_request(self, url, payload=None, params=None):

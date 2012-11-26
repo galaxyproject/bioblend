@@ -1,7 +1,7 @@
 """
 Contains possible interactions with the Galaxy Histories
 """
-from blend.galaxy.client import Client
+from bioblend.galaxy.client import Client
 
 import shutil
 import urllib2
@@ -74,10 +74,10 @@ class HistoryClient(Client):
     def download_dataset(self, history_id, dataset_id, file_path=None, use_default_filename=True, to_ext=None):
 
             meta = self.show_dataset(history_id, dataset_id)
-            
+
             d_type = to_ext
             if d_type is None and 'data_type' in meta :
-                d_type = meta['data_type']            
+                d_type = meta['data_type']
             url = '/'.join([self.gi.base_url, 'datasets', meta['id'], "display"]) + "?to_ext=" + d_type
             req = urllib2.urlopen(url)
             if use_default_filename:
@@ -111,7 +111,7 @@ class HistoryClient(Client):
         # Append the 'undelete' action to the history URL
         url = '/'.join([url, 'undelete'])
         return Client._post(self, payload={}, url=url)
-    
+
     def get_status(self, history_id):
         """
         Returns the state of this history as a dictionary, with the following keys.
@@ -125,7 +125,7 @@ class HistoryClient(Client):
         state['state_details'] = history['state_details']
         state['percent_complete'] = 100 * history['state_details']['ok'] / sum(history['state_details'].itervalues())
         return state
-    
+
     def get_current_history(self):
         """
         Returns the current user's most recently used history object (not deleted)

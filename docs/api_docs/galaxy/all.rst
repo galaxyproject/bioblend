@@ -2,27 +2,27 @@
 API documentation for interacting with Galaxy
 =============================================
 
-.. autoclass:: blend.galaxy.GalaxyInstance
+.. autoclass:: bioblend.galaxy.GalaxyInstance
 
-    .. automethod:: blend.galaxy.GalaxyInstance.__init__
-
------
-
-.. automodule:: blend.galaxy.libraries
+    .. automethod:: bioblend.galaxy.GalaxyInstance.__init__
 
 -----
 
-.. automodule:: blend.galaxy.histories
+.. automodule:: bioblend.galaxy.libraries
 
 -----
 
-.. automodule:: blend.galaxy.workflows
+.. automodule:: bioblend.galaxy.histories
 
 -----
 
-.. automodule:: blend.galaxy.datasets
+.. automodule:: bioblend.galaxy.workflows
 
 -----
 
-.. automodule:: blend.galaxy.users
+.. automodule:: bioblend.galaxy.datasets
+
+-----
+
+.. automodule:: bioblend.galaxy.users
 

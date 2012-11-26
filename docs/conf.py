@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Blend documentation build configuration file, created by
+# BioBlend documentation build configuration file, created by
 # sphinx-quickstart on Wed Jun  6 11:51:19 2012.
 #
 # This file is execfile()d with the current directory set to its containing dir.
@@ -13,7 +13,7 @@
 
 import sys
 sys.path.append('../')
-#sys.path.append('/Users/EnisAfgan/projects/pprojects/blend/blend_repo/')
+#sys.path.append('/Users/EnisAfgan/projects/pprojects/blend/bioblend/')
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -42,7 +42,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Blend'
+project = u'BioBlend'
 copyright = u'2012, Enis Afgan'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -173,7 +173,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'Blenddoc'
+htmlhelp_basename = 'BioBlenddoc'
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -192,7 +192,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'Blend.tex', u'Blend Documentation',
+  ('index', 'BioBlend.tex', u'BioBlend Documentation',
    u'Enis Afgan', 'manual'),
 ]
 
@@ -222,7 +222,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'blend', u'Blend Documentation',
+    ('index', 'bioblend', u'BioBlend Documentation',
      [u'Enis Afgan'], 1)
 ]
 
@@ -236,8 +236,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'Blend', u'Blend Documentation',
-   u'Enis Afgan', 'Blend', 'One line description of project.',
+  ('index', 'BioBlend', u'BioBlend Documentation',
+   u'Enis Afgan', 'BioBlend', 'One line description of project.',
    'Miscellaneous'),
 ]
 

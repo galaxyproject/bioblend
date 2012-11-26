@@ -11,12 +11,12 @@ from boto.exception import EC2ResponseError
 
 import yaml
 
-import blend
-from blend.util import Bunch
+import bioblend
+from bioblend.util import Bunch
 
 
 # Comment the following line if no logging at the prompt is desired
-#blend.set_stream_logger(__name__)
+#bioblend.set_stream_logger(__name__)
 
 class CloudManLauncher(object):
     def __init__(self, access_key, secret_key, cloud=None):
@@ -116,17 +116,17 @@ class CloudManLauncher(object):
             ret['rs'] = rs
         except EC2ResponseError, e:
             err = "Problem launching an instance: %s" % e
-            blend.log.error(err)
+            bioblend.log.error(err)
             ret['error'] = err
             return ret
         else:
             try:
-                blend.log.info("Launched an instance with ID %s" % rs.instances[0].id)
+                bioblend.log.info("Launched an instance with ID %s" % rs.instances[0].id)
                 ret['instance_id'] = rs.instances[0].id
                 ret['instance_ip'] = rs.instances[0].ip_address
             except Exception, e:
                 err = "Problem with the launched instance object: %s" % e
-                blend.log.error(err)
+                bioblend.log.error(err)
                 ret['error'] = err
         return ret
 
@@ -142,11 +142,11 @@ class CloudManLauncher(object):
         for sg in sgs:
             if sg.name == sg_name:
                 cmsg = sg
-                blend.log.debug("Security group '%s' already exists; will add authorizations next." % sg_name)
+                bioblend.log.debug("Security group '%s' already exists; will add authorizations next." % sg_name)
                 break
         # If it does not exist, create security group
         if cmsg is None:
-            blend.log.debug("Creating Security Group %s" % sg_name)
+            bioblend.log.debug("Creating Security Group %s" % sg_name)
             cmsg = self.ec2_conn.create_security_group(sg_name, 'A security group for CloudMan')
         # Add appropriate authorization rules
         # If these rules already exist, nothing will be changed in the SG
@@ -160,9 +160,9 @@ class CloudManLauncher(object):
                 if not self.rule_exists(cmsg.rules, from_port=port[0], to_port=port[1]):
                     cmsg.authorize(ip_protocol='tcp', from_port=port[0], to_port=port[1], cidr_ip='0.0.0.0/0')
                 else:
-                    blend.log.debug("Rule (%s:%s) already exists in the SG" % (port[0], port[1]))
+                    bioblend.log.debug("Rule (%s:%s) already exists in the SG" % (port[0], port[1]))
             except EC2ResponseError, e:
-                blend.log.error("A problem with security group authorizations: %s" % e)
+                bioblend.log.error("A problem with security group authorizations: %s" % e)
         # Add rule that allows communication between instances in the same SG
         g_rule_exists = False  # Flag to indicate if group rule already exists
         ci = self._get_cloud_info(self.cloud)
@@ -175,7 +175,7 @@ class CloudManLauncher(object):
                 for grant in rule.grants:
                     if grant.name == cmsg.name:
                         g_rule_exists = True
-                        blend.log.debug("Group rule already exists in the SG")
+                        bioblend.log.debug("Group rule already exists in the SG")
                 if g_rule_exists:
                     break
         else:
@@ -183,7 +183,7 @@ class CloudManLauncher(object):
                 for grant in rule.grants:
                     if grant.cidr_ip == cidr_range:
                         g_rule_exists = True
-                        blend.log.debug("Group rule already exists in the SG")
+                        bioblend.log.debug("Group rule already exists in the SG")
                     if g_rule_exists:
                         break
         if g_rule_exists is False:
@@ -193,8 +193,8 @@ class CloudManLauncher(object):
                 else:
                     cmsg.authorize(ip_protocol='tcp', from_port=1, to_port=65535, cidr_ip=cidr_range)
             except EC2ResponseError, e:
-                blend.log.error("A problem w/ security group authorization: %s" % e)
-        blend.log.info("Done configuring '%s' security group" % cmsg.name)
+                bioblend.log.error("A problem w/ security group authorization: %s" % e)
+        bioblend.log.info("Done configuring '%s' security group" % cmsg.name)
         return cmsg.name
 
     def rule_exists(self, rules, from_port, to_port, ip_protocol='tcp', cidr_ip='0.0.0.0/0'):
@@ -219,14 +219,14 @@ class CloudManLauncher(object):
         kps = self.ec2_conn.get_all_key_pairs()
         for akp in kps:
             if akp.name == key_name:
-                blend.log.debug("Key pair '%s' already exists; not creating it again." % key_name)
+                bioblend.log.debug("Key pair '%s' already exists; not creating it again." % key_name)
                 return akp.name, None
         try:
             kp = self.ec2_conn.create_key_pair(key_name)
         except EC2ResponseError, e:
-            blend.log.error("Problem creating key pair '%s': %s" % (key_name, e))
+            bioblend.log.error("Problem creating key pair '%s': %s" % (key_name, e))
             return None, None
-        blend.log.info("Created key pair '%s'" % kp.name)
+        bioblend.log.info("Created key pair '%s'" % kp.name)
         return kp.name, kp.material
 
     def get_status(self, instance_id):
@@ -258,7 +258,7 @@ class CloudManLauncher(object):
         # Make sure we have an instance ID
         if instance_id is None:
             err = "Missing instance ID, cannot check the state."
-            blend.log.error(err)
+            bioblend.log.error(err)
             state['error'] = err
             return state
         try:
@@ -279,7 +279,7 @@ class CloudManLauncher(object):
                     state['instance_state'] = inst_state
         except Exception, e:
             err = "Problem updating instance '%s' state: %s" % (instance_id, e)
-            blend.log.error(err)
+            bioblend.log.error(err)
             state['error'] = err
         return state
 
@@ -390,7 +390,7 @@ class CloudManLauncher(object):
         if back_compatible_zone in zones:
             zones = [back_compatible_zone] + [z for z in zones if z != back_compatible_zone]
         if len(zones) == 0:
-            blend.log.error("Did not find availabilty zone for {1}".format(instance_type))
+            bioblend.log.error("Did not find availabilty zone for {1}".format(instance_type))
             zones.append(back_compatible_zone)
         return zones
 

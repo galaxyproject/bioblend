@@ -7,15 +7,15 @@ within Galaxy. In reality, it makes it possible to do things like this:
 
 - Create a CloudMan compute cluster, via an API and directly from your local machine::
 
-    from blend.cloudman import CloudManConfig
-    from blend.cloudman import CloudManInstance
+    from bioblend.cloudman import CloudManConfig
+    from bioblend.cloudman import CloudManInstance
     cfg = CloudManConfig('<your cloud access key>', '<your cloud secret key>', 'My CloudMan',  'ami-<ID>', 'm1.small', '<password>')
     cmi = CloudManInstance.launch_instance(cfg)
     cmi.get_status()
 
 - Reconnect to an existing CloudMan instance and manipulate it::
 
-    from blend.cloudman import CloudManInstance
+    from bioblend.cloudman import CloudManInstance
     cmi = CloudManInstance("<instance IP>", "<password>")
     cmi.add_nodes(3)
     cluster_status = cmi.get_status()
@@ -23,7 +23,7 @@ within Galaxy. In reality, it makes it possible to do things like this:
 
 - Interact with Galaxy via a straightforward API::
 
-    from blend.galaxy import GalaxyInstance
+    from bioblend.galaxy import GalaxyInstance
     gi = GalaxyInstance('<Galaxy IP>', key='your API key')
     libs = gi.libraries.get_libraries()
     gi.workflows.show_workflow('workflow ID')

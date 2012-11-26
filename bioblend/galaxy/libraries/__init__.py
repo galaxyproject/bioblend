@@ -1,7 +1,7 @@
 """
 Contains possible interactions with the Galaxy Data Libraries
 """
-from blend.galaxy.client import Client
+from bioblend.galaxy.client import Client
 
 
 class LibraryClient(Client):
@@ -15,7 +15,7 @@ class LibraryClient(Client):
         Return a list of JSON dicts, looking like so::
 
             [{"id": "f740ab636b360a70",
-              "name": "Library from blend",
+              "name": "Library from bioblend",
               "url": "/api/libraries/f740ab636b360a70"}]
 
         """
@@ -97,7 +97,7 @@ class LibraryClient(Client):
                     break
         else:
             folder_id = keywords['folder_id']
-            
+
         files_attached = False
         # Compose the payload dict
         payload = {}
@@ -118,13 +118,13 @@ class LibraryClient(Client):
             payload['upload_option'] = 'upload_file'
             payload['files_0|file_data'] =  open(keywords['file_local_path'], 'rb')
             files_attached = True
-                
+
         r = Client._post(self, payload, id=keywords['library_id'], contents=True,
                          files_attached=files_attached)
-        
+
         if payload.get('files_0|file_data', None) is not None:
             payload['files_0|file_data'].close()
-        
+
         return r
 
     def upload_file_from_url(self, library_id, file_url, folder_id=None, file_type='auto', dbkey='?'):
@@ -145,7 +145,7 @@ class LibraryClient(Client):
         vars = locals().copy()
         del vars['self']
         return self._do_upload(**vars)
-    
+
     def upload_file_from_local_path(self, library_id, file_local_path, folder_id=None, file_type='auto', dbkey='?'):
         """
         Read local file contents from file_local_path and upload data to a library.

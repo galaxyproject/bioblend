@@ -3,7 +3,7 @@ Contains possible interaction dealing with Galaxy users.
 
 These methods must be executed by a registered Galaxy admin user.
 """
-from blend.galaxy.client import Client
+from bioblend.galaxy.client import Client
 
 
 class UserClient(Client):
