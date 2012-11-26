@@ -2,7 +2,7 @@ from setuptools import setup
 
 from blend import __version__
 
-setup(name = "blend-lib",
+setup(name = "bioblend",
       version = __version__,
       description = "CloudMan, and Galaxy API library",
       author = "Enis Afgan",

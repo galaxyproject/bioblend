@@ -12,27 +12,11 @@ from boto.exception import EC2ResponseError
 import yaml
 
 import blend
+from blend.util import Bunch
 
 
-# Comment the following line if no loggin at the prompt is desired
+# Comment the following line if no logging at the prompt is desired
 #blend.set_stream_logger(__name__)
-
-
-class Bunch(object):
-    """
-    A convenience class to allow dict keys to be representes as object fields.
-
-    The end result is that this allows a dict to be to be represented the same
-    as a database class, thus the two become interchangeable as a data source.
-    """
-    def __init__(self, **kwargs):
-        self.__dict__.update(kwargs)
-
-    def __repr__(self):
-        """
-        Return the contents of the dict in a printable representation
-        """
-        return str(self.__dict__)
 
 class CloudManLauncher(object):
     def __init__(self, access_key, secret_key, cloud=None):
@@ -53,7 +37,7 @@ class CloudManLauncher(object):
         if cloud is None:
             # Default to an EC2-compatible object
             self.cloud = Bunch(
-                    id='1',  # for compatiility w/ DB representation
+                    id='1',  # for compatibility w/ DB representation
                     name="Amazon",
                     cloud_type="ec2",
                     bucket_default="cloudman",
@@ -261,7 +245,7 @@ class CloudManLauncher(object):
 
         Return a ``state`` dict with the current ``instance_state``, ``public_ip``,
         ``placement``, and ``error`` keys, which capture the current state (the
-        values for those keys defualt to empty string if no data is available from
+        values for those keys default to empty string if no data is available from
         the cloud).
         """
         ec2_conn = self.ec2_conn
@@ -270,7 +254,7 @@ class CloudManLauncher(object):
                  'public_ip': "",
                  'placement': "",
                  'error': ""}
-        
+
         # Make sure we have an instance ID
         if instance_id is None:
             err = "Missing instance ID, cannot check the state."
@@ -323,7 +307,7 @@ class CloudManLauncher(object):
     def _compose_user_data(self, user_provided_data):
         """
         A convenience method used to compose and properly format the user data
-        required when requiesting an instance.
+        required when requesting an instance.
 
         ``user_provided_data`` is the data provided by a user required to identify
         a cluster and user other user requirements.
