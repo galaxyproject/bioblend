@@ -1,4 +1,4 @@
-`BioBlend <http://blend.readthedocs.org/en/latest/>`_ is a Python (2.6 or higher)
+`BioBlend <http://bioblend.readthedocs.org/>`_ is a Python (2.6 or higher)
 library for interacting with `CloudMan <http://usecloudman.org>`_ and `Galaxy <http://usegalaxy.org>`_'s API.
 
 Conceptually, it makes it possible to script and automate the process of
