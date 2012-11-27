@@ -7,6 +7,11 @@ __version__ = '0.2.0'
 
 config = Config()
 
+def get_version():
+    """
+    Returns a string with the current version of the library (e.g., "0.2.0")
+    """
+    return __version__
 
 def init_logging():
     for file in BioBlendConfigLocations:

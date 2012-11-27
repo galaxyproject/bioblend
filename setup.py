@@ -1,9 +1,9 @@
 from setuptools import setup
 
-from bioblend import __version__
+from bioblend import get_version
 
 setup(name = "bioblend",
-      version = __version__,
+      version = get_version(),
       description = "CloudMan and Galaxy API library",
       author = "Enis Afgan",
       author_email = "afgane@gmail.com",
