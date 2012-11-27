@@ -24,7 +24,7 @@ def start_cloudman(name, pwd, cm_type, inst_type, ami, ak, sk):
     settings used to launch this CloudMan; and an instance of ``CloudMan``
     pointing to the given instance of CloudMan.
     """
-    cloud = None # If left as None, Blend will default to Amazon
+    cloud = None # If left as None, BioBlend will default to Amazon
     # Define properties for the NeCTAR cloud
     cloud = Bunch(id = '-1',
                   name = "NeCTAR",

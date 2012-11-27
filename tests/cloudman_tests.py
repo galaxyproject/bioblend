@@ -1,15 +1,15 @@
 """
-Tests the functionality of the Blend CloudMan API, without actually making
+Tests the functionality of the BioBlend CloudMan API, without actually making
 calls to a remote CloudMan instance/server. These don't actually ensure
-that Blend is integrated with CloudMan correctly. They only ensure that
-if you refactor the Blend CloudMan API code, that it will maintain its
+that BioBlend is integrated with CloudMan correctly. They only ensure that
+if you refactor the BioBlend CloudMan API code, that it will maintain its
 current behaviour.
 
 Use ``nose`` to run these unit tests.
 """
 import unittest
 from mock import MagicMock
-from blend import cloudman
+from bioblend import cloudman
 
 class CloudManTest(unittest.TestCase):
 
@@ -131,7 +131,7 @@ class CloudManTest(unittest.TestCase):
         self.cm._make_get_request = MagicMock(return_value=return_json_string)
         self.cm.adjust_autoscaling(minimum_nodes=3,maximum_nodes=4)
 
-        params = {'as_min_adj': 3, 'as_max_adj': 4} 
+        params = {'as_min_adj': 3, 'as_max_adj': 4}
         self.cm._make_get_request.assert_called_with("/cloud/adjust_autoscaling", parameters=params)
 
     def test_get_galaxy_state_stopped(self):

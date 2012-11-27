@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Blend &mdash; Blend 0.1 documentation</title>
+    <title>BioBlend &mdash; BioBlend 0.2.0 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.1',
+        VERSION:     '0.2.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Blend 0.1 documentation" href="#" />
+    <link rel="top" title="BioBlend 0.2.0 documentation" href="#" />
     <link rel="next" title="API documentation for interacting with CloudMan" href="api_docs/cloudman/all.html" /> 
   </head>
   <body>
@@ -36,9 +36,12 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
           <a href="api_docs/cloudman/all.html" title="API documentation for interacting with CloudMan"
              accesskey="N">next</a> |</li>
-        <li><a href="#">Blend 0.1 documentation</a> &raquo;</li> 
+        <li><a href="#">BioBlend 0.2.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -47,36 +50,36 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="blend">
-<h1>Blend<a class="headerlink" href="#blend" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="bioblend">
+<h1>BioBlend<a class="headerlink" href="#bioblend" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="about">
 <h2>About<a class="headerlink" href="#about" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://blend.readthedocs.org/en/latest/">Blend</a> is a Python (2.6 or higher)
-library for interacting with <a class="reference external" href="http://usecloudman.org/">CloudMan</a>, and <a class="reference external" href="http://usegalaxy.org/">Galaxy</a>&#8216;s API.
-Conceptually, it makes it possible to script and automate the process of
-cloud infrastrucutre provisioning and scaling, as well as running of analyses
+<p><a class="reference external" href="http://blend.readthedocs.org/en/latest/">BioBlend</a> is a Python (2.6 or higher)
+library for interacting with <a class="reference external" href="http://usecloudman.org">CloudMan</a> and <a class="reference external" href="http://usegalaxy.org">Galaxy</a>&#8216;s API.</p>
+<p>Conceptually, it makes it possible to script and automate the process of
+cloud infrastructure provisioning and scaling via CloudMan, and running of analyses
 within Galaxy. In reality, it makes it possible to do things like this:</p>
 <ul>
 <li><p class="first">Create a CloudMan compute cluster, via an API and directly from your local machine:</p>
-<div class="highlight-python"><pre>from blend.cloudman import CloudManConfig
-    from blend.cloudman import CloudManInstance
-
-cfg = CloudManConfig('&lt;your cloud access key&gt;', '&lt;your cloud secret key&gt;', 'Blend CloudMan',  'ami-&lt;ID&gt;', 'm1.small', '&lt;password&gt;')
-    cmi = CloudManInstance.launch_instance(cfg)
-cmi.get_status()</pre>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">bioblend.cloudman</span> <span class="kn">import</span> <span class="n">CloudManConfig</span>
+<span class="kn">from</span> <span class="nn">bioblend.cloudman</span> <span class="kn">import</span> <span class="n">CloudManInstance</span>
+<span class="n">cfg</span> <span class="o">=</span> <span class="n">CloudManConfig</span><span class="p">(</span><span class="s">&#39;&lt;your cloud access key&gt;&#39;</span><span class="p">,</span> <span class="s">&#39;&lt;your cloud secret key&gt;&#39;</span><span class="p">,</span> <span class="s">&#39;My CloudMan&#39;</span><span class="p">,</span>  <span class="s">&#39;ami-&lt;ID&gt;&#39;</span><span class="p">,</span> <span class="s">&#39;m1.small&#39;</span><span class="p">,</span> <span class="s">&#39;&lt;password&gt;&#39;</span><span class="p">)</span>
+<span class="n">cmi</span> <span class="o">=</span> <span class="n">CloudManInstance</span><span class="o">.</span><span class="n">launch_instance</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+<span class="n">cmi</span><span class="o">.</span><span class="n">get_status</span><span class="p">()</span>
+</pre></div>
 </div>
 </li>
 <li><p class="first">Reconnect to an existing CloudMan instance and manipulate it:</p>
-<blockquote>
-<div><p>from blend.cloudman import CloudManInstance
-cmi = CloudManInstance(&#8220;&lt;instance IP&gt;&#8221;, &#8220;&lt;password&gt;&#8221;)
-cmi.add_nodes(3)
-cluster_status = cmi.get_status()
-cmi.remove_nodes(2)</p>
-</div></blockquote>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">bioblend.cloudman</span> <span class="kn">import</span> <span class="n">CloudManInstance</span>
+<span class="n">cmi</span> <span class="o">=</span> <span class="n">CloudManInstance</span><span class="p">(</span><span class="s">&quot;&lt;instance IP&gt;&quot;</span><span class="p">,</span> <span class="s">&quot;&lt;password&gt;&quot;</span><span class="p">)</span>
+<span class="n">cmi</span><span class="o">.</span><span class="n">add_nodes</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">cluster_status</span> <span class="o">=</span> <span class="n">cmi</span><span class="o">.</span><span class="n">get_status</span><span class="p">()</span>
+<span class="n">cmi</span><span class="o">.</span><span class="n">remove_nodes</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
 </li>
-<li><p class="first">Interact with Galaxy via a straighforward API:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">blend.galaxy</span> <span class="kn">import</span> <span class="n">GalaxyInstance</span>
+<li><p class="first">Interact with Galaxy via a straightforward API:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">bioblend.galaxy</span> <span class="kn">import</span> <span class="n">GalaxyInstance</span>
 <span class="n">gi</span> <span class="o">=</span> <span class="n">GalaxyInstance</span><span class="p">(</span><span class="s">&#39;&lt;Galaxy IP&gt;&#39;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s">&#39;your API key&#39;</span><span class="p">)</span>
 <span class="n">libs</span> <span class="o">=</span> <span class="n">gi</span><span class="o">.</span><span class="n">libraries</span><span class="o">.</span><span class="n">get_libraries</span><span class="p">()</span>
 <span class="n">gi</span><span class="o">.</span><span class="n">workflows</span><span class="o">.</span><span class="n">show_workflow</span><span class="p">(</span><span class="s">&#39;workflow ID&#39;</span><span class="p">)</span>
@@ -88,45 +91,45 @@ cmi.remove_nodes(2)</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">Although this library allows you to blend these three services into a cohesive unit,
-the library itself can be used with any single service irrespective of the rest. For
+the library itself can be used with any single service irrespective of the other. For
 example, you can use it to just manipulate CloudMan clusters or to script the
 interactions with an instance of Galaxy running on your laptop.</p>
 </div>
 </div>
 <div class="section" id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
-<p>Stable releases of Blend are best installed via <tt class="docutils literal"><span class="pre">pip</span></tt> or <tt class="docutils literal"><span class="pre">easy_install</span></tt> from
+<p>Stable releases of BioBlend are best installed via <tt class="docutils literal"><span class="pre">pip</span></tt> or <tt class="docutils literal"><span class="pre">easy_install</span></tt> from
 PyPI using something like:</p>
-<div class="highlight-python"><pre>$ pip install blend-lib</pre>
+<div class="highlight-python"><pre>$ pip install bioblend</pre>
 </div>
-<p>Alternatively, you may install the most current source code from our <a class="reference external" href="https://github.com/afgane/blend">Git repository</a>,
+<p>Alternatively, you may install the most current source code from our <a class="reference external" href="https://github.com/afgane/bioblend">Git repository</a>,
 or fork the project on Github. To install from source, do the following:</p>
 <div class="highlight-python"><pre># Clone the repository to a local directory
-$ git clone https://github.com/afgane/blend.git
+$ git clone https://github.com/afgane/bioblend.git
 # Install the library
-$ cd blend
+$ cd bioblend
 $ python setup.py install</pre>
 </div>
 <p>After installing the library, you will be able to simply import it into your
-Python environment with <tt class="docutils literal"><span class="pre">import</span> <span class="pre">blend</span></tt>. For details on the available functionality,
+Python environment with <tt class="docutils literal"><span class="pre">import</span> <span class="pre">bioblend</span></tt>. For details on the available functionality,
 see the <a class="reference internal" href="#api-documentation">API documentation</a>.</p>
 </div>
 <div class="section" id="usage">
 <h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
-<p>To get started using Blend, it&#8217;s probably best to take a look at the example
+<p>To get started using BioBlend, it&#8217;s probably best to take a look at the example
 scripts in <tt class="docutils literal"><span class="pre">docs/examples</span></tt> source directory and browse the <a class="reference internal" href="#api-documentation">API documentation</a>.
 Beyond that, it&#8217;s up to your creativity :).</p>
 </div>
 <div class="section" id="development">
 <h2>Development<a class="headerlink" href="#development" title="Permalink to this headline">¶</a></h2>
 <p>Anyone interested in contributing or tweaking the library is more then welcome
-to do so. To start, simply fork the <a class="reference external" href="https://github.com/afgane/blend">Git repository</a> on Github and start playing with
+to do so. To start, simply fork the <a class="reference external" href="https://github.com/afgane/bioblend">Git repository</a> on Github and start playing with
 it. Then, issue pull requests.</p>
 </div>
 <div class="section" id="api-documentation">
 <h2>API Documentation<a class="headerlink" href="#api-documentation" title="Permalink to this headline">¶</a></h2>
-<p>Blend&#8217;s API foucuses around and matches the services it wraps. Thus, there are
-three top-level sets of APIs, each corresponding to a separate serivce and a
+<p>BioBlend&#8217;s API focuses around and matches the services it wraps. Thus, there are
+two top-level sets of APIs, each corresponding to a separate service and a
 corresponding step in the automation process. <em>Note</em> that each of the service APIs
 can be used completely independently of one another.</p>
 <p>Effort has been made to keep the structure and naming of those API&#8217;s consistent
@@ -134,7 +137,7 @@ across the library but because they do bridge different services, some discrepan
 may exist. Feel free to point those out and/or provide fixes.</p>
 <div class="section" id="cloudman-api">
 <h3>CloudMan API<a class="headerlink" href="#cloudman-api" title="Permalink to this headline">¶</a></h3>
-<p>API used to manipulate the instantiated infrastucture. For example, scale the
+<p>API used to manipulate the instantiated infrastructure. For example, scale the
 size of the compute cluster, get infrastructure status, get service status.</p>
 <div class="toctree-wrapper compound">
 <ul>
@@ -163,8 +166,8 @@ and workflow execution.</p>
 <div class="section" id="getting-help">
 <h2>Getting help<a class="headerlink" href="#getting-help" title="Permalink to this headline">¶</a></h2>
 <p>If you&#8217;ve run into issues, found a bug, or can&#8217;t seem to find an answer to
-your question regarding the use and functionality of Blend, please use
-<a class="reference external" href="https://github.com/afgane/blend/issues">Github Issues</a> page to ask your
+your question regarding the use and functionality of BioBlend, please use
+<a class="reference external" href="https://github.com/afgane/bioblend/issues">Github Issues</a> page to ask your
 question</p>
 </div>
 <div class="section" id="indices-and-tables">
@@ -185,7 +188,7 @@ question</p>
         <div class="sphinxsidebarwrapper">
   <h3><a href="#">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">Blend</a><ul>
+<li><a class="reference internal" href="#">BioBlend</a><ul>
 <li><a class="reference internal" href="#about">About</a></li>
 <li><a class="reference internal" href="#installation">Installation</a></li>
 <li><a class="reference internal" href="#usage">Usage</a></li>
@@ -238,9 +241,12 @@ question</p>
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
           <a href="api_docs/cloudman/all.html" title="API documentation for interacting with CloudMan"
              >next</a> |</li>
-        <li><a href="#">Blend 0.1 documentation</a> &raquo;</li> 
+        <li><a href="#">BioBlend 0.2.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>API documentation for interacting with CloudMan &mdash; Blend 0.1 documentation</title>
+    <title>API documentation for interacting with CloudMan &mdash; BioBlend 0.2.0 documentation</title>
     
     <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '0.1',
+        VERSION:     '0.2.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,9 +25,9 @@
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
-    <link rel="top" title="Blend 0.1 documentation" href="../../index.html" />
+    <link rel="top" title="BioBlend 0.2.0 documentation" href="../../index.html" />
     <link rel="next" title="API documentation for interacting with Galaxy" href="../galaxy/all.html" />
-    <link rel="prev" title="Blend" href="../../index.html" /> 
+    <link rel="prev" title="BioBlend" href="../../index.html" /> 
   </head>
   <body>
     <div class="related">
@@ -37,12 +37,15 @@
           <a href="../../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
           <a href="../galaxy/all.html" title="API documentation for interacting with Galaxy"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="../../index.html" title="Blend"
+          <a href="../../index.html" title="BioBlend"
              accesskey="P">previous</a> |</li>
-        <li><a href="../../index.html">Blend 0.1 documentation</a> &raquo;</li> 
+        <li><a href="../../index.html">BioBlend 0.2.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -53,6 +56,298 @@
             
   <div class="section" id="api-documentation-for-interacting-with-cloudman">
 <h1>API documentation for interacting with CloudMan<a class="headerlink" href="#api-documentation-for-interacting-with-cloudman" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="bioblend.cloudman.launch.CloudManLauncher">
+<em class="property">class </em><tt class="descclassname">bioblend.cloudman.launch.</tt><tt class="descname">CloudManLauncher</tt><big>(</big><em>access_key</em>, <em>secret_key</em>, <em>cloud=None</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/cloudman/launch.html#CloudManLauncher"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.cloudman.launch.CloudManLauncher" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define the environment in which this instance of CloudMan will be launched.</p>
+<p>Besides providing the credentials, optionally provide the <tt class="docutils literal"><span class="pre">cloud</span></tt>
+object. This object must define the properties required to establish a
+<a class="reference external" href="https://github.com/boto/boto/">boto</a> connection to that cloud. See
+this method&#8217;s implementation for an example of the required fields.
+Note that as long the as provided object defines the required fields,
+it can really by implemented as anything (e.g., a Bunch, a database
+object, a custom class). If no value for the <tt class="docutils literal"><span class="pre">cloud</span></tt> argument is
+provided, the default is to use the Amazon cloud.</p>
+<dl class="method">
+<dt id="bioblend.cloudman.launch.CloudManLauncher._checkURL">
+<tt class="descname">_checkURL</tt><big>(</big><em>url</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/cloudman/launch.html#CloudManLauncher._checkURL"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.cloudman.launch.CloudManLauncher._checkURL" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if the <tt class="docutils literal"><span class="pre">url</span></tt> is <em>alive</em> (i.e., remote server returns code 200(OK)
+or 401 (unauthorized)).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.cloudman.launch.CloudManLauncher._compose_user_data">
+<tt class="descname">_compose_user_data</tt><big>(</big><em>user_provided_data</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/cloudman/launch.html#CloudManLauncher._compose_user_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.cloudman.launch.CloudManLauncher._compose_user_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>A convenience method used to compose and properly format the user data
+required when requesting an instance.</p>
+<p><tt class="docutils literal"><span class="pre">user_provided_data</span></tt> is the data provided by a user required to identify
+a cluster and user other user requirements.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.cloudman.launch.CloudManLauncher._find_placements">
+<tt class="descname">_find_placements</tt><big>(</big><em>ec2_conn</em>, <em>instance_type</em>, <em>cloud_type</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/cloudman/launch.html#CloudManLauncher._find_placements"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.cloudman.launch.CloudManLauncher._find_placements" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find an EC2 region zone that supports the requested instance type.</p>
+<p>We do this by checking the spot prices in the potential availability zones
+for support before deciding on a region:
+<a class="reference external" href="http://blog.piefox.com/2011/07/ec2-availability-zones-and-instance.html">http://blog.piefox.com/2011/07/ec2-availability-zones-and-instance.html</a></p>
+<p>If instance_type is None, finds all zones that are currently available.</p>
+<p>Note that, currently, this only applies to AWS. For other clouds, all
+the available zones are returned.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.cloudman.launch.CloudManLauncher._get_cloud_info">
+<tt class="descname">_get_cloud_info</tt><big>(</big><em>cloud</em>, <em>as_str=False</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/cloudman/launch.html#CloudManLauncher._get_cloud_info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.cloudman.launch.CloudManLauncher._get_cloud_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get connection information about a given cloud</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.cloudman.launch.CloudManLauncher.connect_ec2">
+<tt class="descname">connect_ec2</tt><big>(</big><em>a_key</em>, <em>s_key</em>, <em>cloud=None</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/cloudman/launch.html#CloudManLauncher.connect_ec2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.cloudman.launch.CloudManLauncher.connect_ec2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create and return an EC2-compatible connection object for the given cloud.</p>
+<p>See <tt class="docutils literal"><span class="pre">_get_cloud_info</span></tt> method for more details on the requirements for
+the <tt class="docutils literal"><span class="pre">cloud</span></tt> parameter. If no value is provided, the class field is used.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.cloudman.launch.CloudManLauncher.create_cm_security_group">
+<tt class="descname">create_cm_security_group</tt><big>(</big><em>sg_name='CloudMan'</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/cloudman/launch.html#CloudManLauncher.create_cm_security_group"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.cloudman.launch.CloudManLauncher.create_cm_security_group" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a security group with all authorizations required to run CloudMan.
+If the group already exists, check its rules and add the missing ones.
+Return the name of the created security group.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.cloudman.launch.CloudManLauncher.create_key_pair">
+<tt class="descname">create_key_pair</tt><big>(</big><em>key_name='cloudman_key_pair'</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/cloudman/launch.html#CloudManLauncher.create_key_pair"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.cloudman.launch.CloudManLauncher.create_key_pair" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a key pair with the provided <tt class="docutils literal"><span class="pre">key_name</span></tt>.
+Return the name of the key or <tt class="docutils literal"><span class="pre">None</span></tt> if there was an error creating the key.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.cloudman.launch.CloudManLauncher.get_status">
+<tt class="descname">get_status</tt><big>(</big><em>instance_id</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/cloudman/launch.html#CloudManLauncher.get_status"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.cloudman.launch.CloudManLauncher.get_status" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check on the status of an instance. If <tt class="docutils literal"><span class="pre">instance_id</span></tt> is not provided,
+the ID obtained when launching <em>the most recent</em> instance is used. Note
+that this assumes the instance being checked on was launched using this
+class. Also note that the same class may be used to launch multiple instances
+but only the most recent <tt class="docutils literal"><span class="pre">instance_id</span></tt> is kept while any others will
+need to be explicitly specified.</p>
+<p>This method also allows the required <tt class="docutils literal"><span class="pre">ec2_conn</span></tt> connection object to be
+provided at invocation time. If the object is not provided, credentials
+defined for the class are used (ability to specify a custom <tt class="docutils literal"><span class="pre">ec2_conn</span></tt>
+helps in case of stateless method invocations).</p>
+<p>Return a <tt class="docutils literal"><span class="pre">state</span></tt> dict with the current <tt class="docutils literal"><span class="pre">instance_state</span></tt>, <tt class="docutils literal"><span class="pre">public_ip</span></tt>,
+<tt class="docutils literal"><span class="pre">placement</span></tt>, and <tt class="docutils literal"><span class="pre">error</span></tt> keys, which capture the current state (the
+values for those keys default to empty string if no data is available from
+the cloud).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.cloudman.launch.CloudManLauncher.launch">
+<tt class="descname">launch</tt><big>(</big><em>cluster_name, image_id, instance_type, password, kernel_id=None, ramdisk_id=None, key_name='cloudman_key_pair', security_groups=['CloudMan'], placement='', **kwargs</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/cloudman/launch.html#CloudManLauncher.launch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.cloudman.launch.CloudManLauncher.launch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check all the prerequisites (key pair and security groups) for
+launching a CloudMan instance, compose the user data based on the
+parameters specified in the arguments and the cloud properties as
+defined in the object&#8217;s <tt class="docutils literal"><span class="pre">cloud</span></tt> field.</p>
+<p>For the current list of user data fields that can be provided via
+<tt class="docutils literal"><span class="pre">kwargs</span></tt>, see <a class="reference external" href="http://wiki.g2.bx.psu.edu/CloudMan/UserData">http://wiki.g2.bx.psu.edu/CloudMan/UserData</a></p>
+<p>Return a dict containing the properties and info with which an instance
+was launched, namely: <tt class="docutils literal"><span class="pre">sg_names</span></tt> containing the names of the security
+groups, <tt class="docutils literal"><span class="pre">kp_name</span></tt> containing the name of the key pair, <tt class="docutils literal"><span class="pre">kp_material</span></tt>
+containing the private portion of the key pair (<em>note</em> that this portion
+of the key is available and can be retrieved <em>only</em> at the time the key
+is created, which will happen only if no key with the name provided in
+the <tt class="docutils literal"><span class="pre">key_name</span></tt> argument exists), <tt class="docutils literal"><span class="pre">rs</span></tt> containing the
+<a class="reference external" href="https://github.com/boto/boto/">boto</a> <tt class="docutils literal"><span class="pre">ResultSet</span></tt> object,
+<tt class="docutils literal"><span class="pre">instance_id</span></tt> containing the ID of a started instance, and
+<tt class="docutils literal"><span class="pre">error</span></tt> containing an error message if there was one.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.cloudman.launch.CloudManLauncher.rule_exists">
+<tt class="descname">rule_exists</tt><big>(</big><em>rules</em>, <em>from_port</em>, <em>to_port</em>, <em>ip_protocol='tcp'</em>, <em>cidr_ip='0.0.0.0/0'</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/cloudman/launch.html#CloudManLauncher.rule_exists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.cloudman.launch.CloudManLauncher.rule_exists" title="Permalink to this definition">¶</a></dt>
+<dd><p>A convenience method to check if an authorization rule in a security group
+already exists.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bioblend.cloudman.CloudManInstance">
+<em class="property">class </em><tt class="descclassname">bioblend.cloudman.</tt><tt class="descname">CloudManInstance</tt><big>(</big><em>url</em>, <em>password</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/cloudman.html#CloudManInstance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.cloudman.CloudManInstance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an instance of the CloudMan API class, which is to be used when
+manipulating that given CloudMan instance.</p>
+<p>The <tt class="docutils literal"><span class="pre">url</span></tt> is a string defining the address of CloudMan, for
+example &#8220;<a class="reference external" href="http://115.146.92.174">http://115.146.92.174</a>&#8221;. The <tt class="docutils literal"><span class="pre">password</span></tt> is CloudMan&#8217;s password,
+as defined in the user data sent to CloudMan on instance creation.</p>
+<dl class="method">
+<dt id="bioblend.cloudman.CloudManInstance.add_nodes">
+<tt class="descname">add_nodes</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/cloudman.html#CloudManInstance.add_nodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.cloudman.CloudManInstance.add_nodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a number of worker nodes to the cluster, optionally specifying
+the type for new instances. If <tt class="docutils literal"><span class="pre">instance_type</span></tt> is not specified,
+instance(s) of the same type as the master instance will be started.
+Note that the <tt class="docutils literal"><span class="pre">instance_type</span></tt> must match the type of instance
+available on the given cloud.</p>
+<p><tt class="docutils literal"><span class="pre">spot_price</span></tt> applies only to AWS and, if set, defines the maximum
+price for Spot instances, thus turning this request for more instances
+into a Spot request.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.cloudman.CloudManInstance.adjust_autoscaling">
+<tt class="descname">adjust_autoscaling</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/cloudman.html#CloudManInstance.adjust_autoscaling"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.cloudman.CloudManInstance.adjust_autoscaling" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adjust the autoscaling configuration parameters.</p>
+<p>The number of worker nodes in the cluster is bounded by the optional
+<tt class="docutils literal"><span class="pre">minimum_nodes</span></tt> and <tt class="docutils literal"><span class="pre">maximum_nodes</span></tt> parameters. If a parameter is
+not provided then its configuration value does not change.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.cloudman.CloudManInstance.autoscaling_enabled">
+<tt class="descname">autoscaling_enabled</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/cloudman.html#CloudManInstance.autoscaling_enabled"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.cloudman.CloudManInstance.autoscaling_enabled" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a boolean indicating whether autoscaling is enabled.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.cloudman.CloudManInstance.disable_autoscaling">
+<tt class="descname">disable_autoscaling</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/cloudman.html#CloudManInstance.disable_autoscaling"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.cloudman.CloudManInstance.disable_autoscaling" title="Permalink to this definition">¶</a></dt>
+<dd><p>Disable autoscaling, meaning that worker nodes will need to be manually
+added and removed.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.cloudman.CloudManInstance.enable_autoscaling">
+<tt class="descname">enable_autoscaling</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/cloudman.html#CloudManInstance.enable_autoscaling"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.cloudman.CloudManInstance.enable_autoscaling" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enable cluster autoscaling, allowing the cluster to automatically add,
+or remove, worker nodes, as needed.</p>
+<p>The number of worker nodes in the cluster is bounded by the <tt class="docutils literal"><span class="pre">minimum_nodes</span></tt>
+(default is 0) and <tt class="docutils literal"><span class="pre">maximum_nodes</span></tt> (default is 19) parameters.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.cloudman.CloudManInstance.get_cloudman_url">
+<tt class="descname">get_cloudman_url</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/bioblend/cloudman.html#CloudManInstance.get_cloudman_url"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.cloudman.CloudManInstance.get_cloudman_url" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bioblend.cloudman.CloudManInstance.get_cluster_size">
+<tt class="descname">get_cluster_size</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/cloudman.html#CloudManInstance.get_cluster_size"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.cloudman.CloudManInstance.get_cluster_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the size of the cluster in terms of the number of nodes; this count
+includes the master node.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.cloudman.CloudManInstance.get_cluster_type">
+<tt class="descname">get_cluster_type</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/cloudman.html#CloudManInstance.get_cluster_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.cloudman.CloudManInstance.get_cluster_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the <tt class="docutils literal"><span class="pre">type</span></tt> this CloudMan cluster has been initialized to. See the
+CloudMan docs about the available types. If the cluster has not yet been
+initialized, this method returns <tt class="docutils literal"><span class="pre">None</span></tt>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.cloudman.CloudManInstance.get_galaxy_state">
+<tt class="descname">get_galaxy_state</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/cloudman.html#CloudManInstance.get_galaxy_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.cloudman.CloudManInstance.get_galaxy_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the current status of Galaxy running on the cluster.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.cloudman.CloudManInstance.get_master_id">
+<tt class="descname">get_master_id</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/cloudman.html#CloudManInstance.get_master_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.cloudman.CloudManInstance.get_master_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the instance ID of the master node in this Cloudman cluster</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.cloudman.CloudManInstance.get_master_ip">
+<tt class="descname">get_master_ip</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/cloudman.html#CloudManInstance.get_master_ip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.cloudman.CloudManInstance.get_master_ip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the public IP of the master node in this Cloudman cluster</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.cloudman.CloudManInstance.get_nodes">
+<tt class="descname">get_nodes</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/cloudman.html#CloudManInstance.get_nodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.cloudman.CloudManInstance.get_nodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a list of nodes currently running in this CloudMan cluster.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.cloudman.CloudManInstance.get_static_state">
+<tt class="descname">get_static_state</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/cloudman.html#CloudManInstance.get_static_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.cloudman.CloudManInstance.get_static_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get static information on this CloudMan instance.
+i.e. state that doesn&#8217;t change over the lifetime of the cluster</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.cloudman.CloudManInstance.get_status">
+<tt class="descname">get_status</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/cloudman.html#CloudManInstance.get_status"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.cloudman.CloudManInstance.get_status" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get status information on this CloudMan instance.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.cloudman.CloudManInstance.initialize">
+<tt class="descname">initialize</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/cloudman.html#CloudManInstance.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.cloudman.CloudManInstance.initialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize CloudMan platform. This needs to be done before the cluster
+can be used.</p>
+<p>The <tt class="docutils literal"><span class="pre">type</span></tt>, either &#8216;Galaxy&#8217; (default), &#8216;Data&#8217;, or &#8216;SGE&#8217;, defines the type
+of cluster platform to initialize.</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="bioblend.cloudman.CloudManInstance.launch_instance">
+<em class="property">static </em><tt class="descname">launch_instance</tt><big>(</big><em>cfg</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/cloudman.html#CloudManInstance.launch_instance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.cloudman.CloudManInstance.launch_instance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Launches a new instance of cloudman on the specified cloud infrastructure.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cfg</strong> (<em>CloudManConfig</em>) &#8211; A CloudManConfig object containing the initial parameters for this launch.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.cloudman.CloudManInstance.reboot_node">
+<tt class="descname">reboot_node</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/cloudman.html#CloudManInstance.reboot_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.cloudman.CloudManInstance.reboot_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reboot a specific worker node.</p>
+<p>The <tt class="docutils literal"><span class="pre">instance_id</span></tt> parameter defines the ID, as a string, of a worker node
+to reboot.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.cloudman.CloudManInstance.remove_node">
+<tt class="descname">remove_node</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/cloudman.html#CloudManInstance.remove_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.cloudman.CloudManInstance.remove_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove a specific worker node from the cluster.</p>
+<p>The <tt class="docutils literal"><span class="pre">instance_id</span></tt> parameter defines the ID, as a string, of a worker node
+to remove from the cluster. The <tt class="docutils literal"><span class="pre">force</span></tt> parameter (defaulting to False),
+is a boolean indicating whether the node should be forcibly removed rather
+than gracefully removed.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.cloudman.CloudManInstance.remove_nodes">
+<tt class="descname">remove_nodes</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/cloudman.html#CloudManInstance.remove_nodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.cloudman.CloudManInstance.remove_nodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove worker nodes from the cluster.</p>
+<p>The <tt class="docutils literal"><span class="pre">num_nodes</span></tt> parameter defines the number of worker nodes to remove.
+The <tt class="docutils literal"><span class="pre">force</span></tt> parameter (defaulting to False), is a boolean indicating
+whether the nodes should be forcibly removed rather than gracefully removed.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.cloudman.CloudManInstance.terminate">
+<tt class="descname">terminate</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/cloudman.html#CloudManInstance.terminate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.cloudman.CloudManInstance.terminate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Terminate this CloudMan cluster. There is an option to also terminate the
+master instance (all worker instances will be terminated in the process
+of cluster termination), and delete the whole cluster.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Deleting a cluster is irreversible - all of the data will be
+permanently deleted.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 
 
@@ -63,7 +358,7 @@
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
   <p class="topless"><a href="../../index.html"
-                        title="previous chapter">Blend</a></p>
+                        title="previous chapter">BioBlend</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="../galaxy/all.html"
                         title="next chapter">API documentation for interacting with Galaxy</a></p>
@@ -96,12 +391,15 @@
           <a href="../../genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
           <a href="../galaxy/all.html" title="API documentation for interacting with Galaxy"
              >next</a> |</li>
         <li class="right" >
-          <a href="../../index.html" title="Blend"
+          <a href="../../index.html" title="BioBlend"
              >previous</a> |</li>
-        <li><a href="../../index.html">Blend 0.1 documentation</a> &raquo;</li> 
+        <li><a href="../../index.html">BioBlend 0.2.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

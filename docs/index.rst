@@ -1,6 +1,6 @@
-=====
+========
 BioBlend
-=====
+========
 
 About
 =====
@@ -45,8 +45,8 @@ it. Then, issue pull requests.
 API Documentation
 =================
 
-BioBlend's API foucuses around and matches the services it wraps. Thus, there are
-three top-level sets of APIs, each corresponding to a separate serivce and a
+BioBlend's API focuses around and matches the services it wraps. Thus, there are
+two top-level sets of APIs, each corresponding to a separate service and a
 corresponding step in the automation process. *Note* that each of the service APIs
 can be used completely independently of one another.
 
@@ -57,7 +57,7 @@ may exist. Feel free to point those out and/or provide fixes.
 CloudMan API
 ~~~~~~~~~~~~
 
-API used to manipulate the instantiated infrastucture. For example, scale the
+API used to manipulate the instantiated infrastructure. For example, scale the
 size of the compute cluster, get infrastructure status, get service status.
 
 .. toctree::

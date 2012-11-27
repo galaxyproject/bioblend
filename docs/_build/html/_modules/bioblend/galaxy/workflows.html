@@ -1,0 +1,256 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bioblend.galaxy.workflows &mdash; BioBlend 0.2.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.2.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="BioBlend 0.2.0 documentation" href="../../../index.html" />
+    <link rel="up" title="bioblend.galaxy" href="../galaxy.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">BioBlend 0.2.0 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../galaxy.html" accesskey="U">bioblend.galaxy</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for bioblend.galaxy.workflows</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Contains possible interactions with the Galaxy Workflows</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">bioblend.galaxy.client</span> <span class="kn">import</span> <span class="n">Client</span>
+<span class="kn">import</span> <span class="nn">simplejson</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<div class="viewcode-block" id="WorkflowClient"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#bioblend.galaxy.workflows.WorkflowClient">[docs]</a><span class="k">class</span> <span class="nc">WorkflowClient</span><span class="p">(</span><span class="n">Client</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">galaxy_instance</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">module</span> <span class="o">=</span> <span class="s">&#39;workflows&#39;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">WorkflowClient</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">galaxy_instance</span><span class="p">)</span>
+
+<div class="viewcode-block" id="WorkflowClient.get_workflows"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#bioblend.galaxy.workflows.WorkflowClient.get_workflows">[docs]</a>    <span class="k">def</span> <span class="nf">get_workflows</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get a list of all workflows</span>
+
+<span class="sd">        :rtype: list</span>
+<span class="sd">        :return: A list of workflow dicts.</span>
+<span class="sd">                 For example::</span>
+
+<span class="sd">                   [{u&#39;id&#39;: u&#39;92c56938c2f9b315&#39;,</span>
+<span class="sd">                     u&#39;name&#39;: u&#39;Simple&#39;,</span>
+<span class="sd">                     u&#39;url&#39;: u&#39;/api/workflows/92c56938c2f9b315&#39;}]</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Client</span><span class="o">.</span><span class="n">_get</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="WorkflowClient.show_workflow"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#bioblend.galaxy.workflows.WorkflowClient.show_workflow">[docs]</a>    <span class="k">def</span> <span class="nf">show_workflow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workflow_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Display information needed to run a workflow</span>
+
+<span class="sd">        :type workflow_id: string</span>
+<span class="sd">        :param workflow_id: Encoded workflow ID</span>
+
+<span class="sd">        :rtype: list</span>
+<span class="sd">        :return: A description of the workflow and its inputs as a JSON object.</span>
+<span class="sd">                 For example::</span>
+
+<span class="sd">                  {u&#39;id&#39;: u&#39;92c56938c2f9b315&#39;,</span>
+<span class="sd">                   u&#39;inputs&#39;: {u&#39;23&#39;: {u&#39;label&#39;: u&#39;Input Dataset&#39;, u&#39;value&#39;: u&#39;&#39;}},</span>
+<span class="sd">                   u&#39;name&#39;: u&#39;Simple&#39;,</span>
+<span class="sd">                   u&#39;url&#39;: u&#39;/api/workflows/92c56938c2f9b315&#39;}</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Client</span><span class="o">.</span><span class="n">_get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">workflow_id</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="WorkflowClient.import_workflow_json"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#bioblend.galaxy.workflows.WorkflowClient.import_workflow_json">[docs]</a>    <span class="k">def</span> <span class="nf">import_workflow_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workflow_json</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Imports a new workflow given a json representation of a previously exported</span>
+<span class="sd">        workflow.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">payload</span><span class="p">[</span><span class="s">&#39;workflow&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">workflow_json</span>
+
+        <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gi</span><span class="o">.</span><span class="n">_make_url</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="s">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">url</span><span class="p">,</span> <span class="s">&quot;upload&quot;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">Client</span><span class="o">.</span><span class="n">_post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="WorkflowClient.import_workflow_from_local_path"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#bioblend.galaxy.workflows.WorkflowClient.import_workflow_from_local_path">[docs]</a>    <span class="k">def</span> <span class="nf">import_workflow_from_local_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_local_path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Imports a new workflow given the path to a file containing a previously</span>
+<span class="sd">        exported workflow.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_local_path</span><span class="p">,</span> <span class="s">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+            <span class="n">workflow_json</span> <span class="o">=</span> <span class="n">simplejson</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fp</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">import_workflow_json</span><span class="p">(</span><span class="n">workflow_json</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="WorkflowClient.export_workflow_json"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#bioblend.galaxy.workflows.WorkflowClient.export_workflow_json">[docs]</a>    <span class="k">def</span> <span class="nf">export_workflow_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workflow_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Exports a workflow in json format</span>
+
+<span class="sd">        :type workflow_id: string</span>
+<span class="sd">        :param workflow_id: Encoded workflow ID</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gi</span><span class="o">.</span><span class="n">_make_url</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="s">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">url</span><span class="p">,</span> <span class="s">&quot;download&quot;</span><span class="p">])</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="s">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">url</span><span class="p">,</span> <span class="n">workflow_id</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">Client</span><span class="o">.</span><span class="n">_get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="WorkflowClient.export_workflow_to_local_path"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#bioblend.galaxy.workflows.WorkflowClient.export_workflow_to_local_path">[docs]</a>    <span class="k">def</span> <span class="nf">export_workflow_to_local_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workflow_id</span><span class="p">,</span> <span class="n">file_local_path</span><span class="p">,</span> <span class="n">use_default_filename</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Exports a workflow in json format to a given local path.</span>
+
+<span class="sd">        :type workflow_id: string</span>
+<span class="sd">        :param workflow_id: Encoded workflow ID</span>
+
+<span class="sd">        :type file_local_path: string</span>
+<span class="sd">        :param file_local_path: Local path to which the exported file will be saved.</span>
+<span class="sd">                                (Should not contain filename if use_default_name=True)</span>
+
+<span class="sd">        :type use_default_name: boolean</span>
+<span class="sd">        :param use_default_name: If the use_default_name parameter is True, the exported</span>
+<span class="sd">                                 file will be saved as file_local_path/Galaxy-Workflow-%s.ga,</span>
+<span class="sd">                                 where %s is the workflow name.</span>
+<span class="sd">                                 If use_default_name is False, file_local_path is assumed to</span>
+<span class="sd">                                 contain the full file path including filename.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">workflow_json</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">export_workflow_json</span><span class="p">(</span><span class="n">workflow_id</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">use_default_filename</span><span class="p">:</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="s">&#39;Galaxy-Workflow-</span><span class="si">%s</span><span class="s">.ga&#39;</span> <span class="o">%</span> <span class="n">workflow_json</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+            <span class="n">file_local_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">file_local_path</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_local_path</span><span class="p">,</span> <span class="s">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+            <span class="n">workflow_json</span> <span class="o">=</span> <span class="n">simplejson</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">workflow_json</span><span class="p">,</span> <span class="n">fp</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">workflow_json</span>
+</div>
+<div class="viewcode-block" id="WorkflowClient.run_workflow"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#bioblend.galaxy.workflows.WorkflowClient.run_workflow">[docs]</a>    <span class="k">def</span> <span class="nf">run_workflow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workflow_id</span><span class="p">,</span> <span class="n">dataset_map</span><span class="p">,</span> <span class="n">history_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">history_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+            <span class="n">import_inputs_to_history</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Run the workflow identified by ``workflow_id``</span>
+
+<span class="sd">        :type workflow_id: string</span>
+<span class="sd">        :param workflow_id: Encoded workflow ID</span>
+
+<span class="sd">        :type dataset_map: string or dict</span>
+<span class="sd">        :param dataset_map: A mapping of workflow inputs to datasets. The datasets</span>
+<span class="sd">                            source can be a LibraryDatasetDatasetAssociation (``ldda``),</span>
+<span class="sd">                            LibraryDataset (``ld``), or HistoryDatasetAssociation (``hda``).</span>
+<span class="sd">                            The map must be in the following format:</span>
+<span class="sd">                            ``{&#39;&lt;input&gt;&#39;: {&#39;id&#39;: &lt;encoded dataset ID&gt;, &#39;src&#39;: &#39;[ldda, ld, hda]&#39;}}``</span>
+<span class="sd">                            (eg, ``{&#39;23&#39;: {&#39;id&#39;: &#39;29beef4fadeed09f&#39;, &#39;src&#39;: &#39;ld&#39;}}``)</span>
+
+<span class="sd">        :type history_id: string</span>
+<span class="sd">        :param history_id: The encoded history ID where to store the workflow output.</span>
+<span class="sd">                           ``history_id`` OR ``history_name`` should be provided but not both!</span>
+
+<span class="sd">        :type history_name: string</span>
+<span class="sd">        :param history_name: Create a new history with the given name to store the</span>
+<span class="sd">                             workflow output. ``history_id`` OR ``history_name``</span>
+<span class="sd">                             should be provided but not both!</span>
+
+<span class="sd">        :type import_inputs_to_history: bool</span>
+<span class="sd">        :param import_inputs_to_history: If ``True``, used workflow inputs will be imported</span>
+<span class="sd">                                         into the history. If ``False``, only workflow outputs</span>
+<span class="sd">                                         will be visible in the given history.</span>
+
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        :return: A dict containing the history ID where the outputs are placed as well as</span>
+<span class="sd">                 output dataset IDs.</span>
+<span class="sd">                 For example::</span>
+
+<span class="sd">                  {u&#39;history&#39;: u&#39;64177123325c9cfd&#39;,</span>
+<span class="sd">                   u&#39;outputs&#39;: [u&#39;aa4d3084af404259&#39;]}</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">payload</span><span class="p">[</span><span class="s">&#39;workflow_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">workflow_id</span>
+        <span class="n">payload</span><span class="p">[</span><span class="s">&#39;ds_map&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataset_map</span>
+        <span class="k">if</span> <span class="n">history_id</span><span class="p">:</span>
+            <span class="n">payload</span><span class="p">[</span><span class="s">&#39;history&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;hist_id={0}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">history_id</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">history_name</span><span class="p">:</span>
+            <span class="n">payload</span><span class="p">[</span><span class="s">&#39;history&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">history_name</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;Must provide history_id or history_name argument&quot;</span>
+        <span class="k">if</span> <span class="n">import_inputs_to_history</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
+            <span class="n">payload</span><span class="p">[</span><span class="s">&#39;no_add_to_history&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">return</span> <span class="n">Client</span><span class="o">.</span><span class="n">_post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">payload</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">BioBlend 0.2.0 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../galaxy.html" >bioblend.galaxy</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Enis Afgan.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

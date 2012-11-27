@@ -1,0 +1,231 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bioblend.galaxy.histories &mdash; BioBlend 0.2.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.2.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="BioBlend 0.2.0 documentation" href="../../../index.html" />
+    <link rel="up" title="bioblend.galaxy" href="../galaxy.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">BioBlend 0.2.0 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../galaxy.html" accesskey="U">bioblend.galaxy</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for bioblend.galaxy.histories</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Contains possible interactions with the Galaxy Histories</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">bioblend.galaxy.client</span> <span class="kn">import</span> <span class="n">Client</span>
+
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">import</span> <span class="nn">urllib2</span>
+
+<div class="viewcode-block" id="HistoryClient"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#bioblend.galaxy.histories.HistoryClient">[docs]</a><span class="k">class</span> <span class="nc">HistoryClient</span><span class="p">(</span><span class="n">Client</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">galaxy_instance</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">module</span> <span class="o">=</span> <span class="s">&#39;histories&#39;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">HistoryClient</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">galaxy_instance</span><span class="p">)</span>
+
+<div class="viewcode-block" id="HistoryClient.create_history"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#bioblend.galaxy.histories.HistoryClient.create_history">[docs]</a>    <span class="k">def</span> <span class="nf">create_history</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a new history, optionally setting the ``name``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">payload</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="k">return</span> <span class="n">Client</span><span class="o">.</span><span class="n">_post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">payload</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="HistoryClient.get_histories"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#bioblend.galaxy.histories.HistoryClient.get_histories">[docs]</a>    <span class="k">def</span> <span class="nf">get_histories</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">history_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">deleted</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get all histories or filter the specific one(s) via the provided ``name``</span>
+<span class="sd">        or ``history_id``. Provide only one argument, ``name`` or ``history_id``,</span>
+<span class="sd">        but not both.</span>
+
+<span class="sd">        If ``deleted`` is set to ``True``, return histories that have been deleted.</span>
+
+<span class="sd">        Return a list of history element dicts. If more than one history</span>
+<span class="sd">        matches the given ``name``, return the list of all the histories with the</span>
+<span class="sd">        given name.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">histories</span> <span class="o">=</span> <span class="n">Client</span><span class="o">.</span><span class="n">_get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">deleted</span><span class="o">=</span><span class="n">deleted</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">history_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">filtered_hists</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">history</span> <span class="ow">in</span> <span class="n">histories</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="n">history</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="ow">or</span> <span class="n">history_id</span> <span class="o">==</span> <span class="n">history</span><span class="p">[</span><span class="s">&#39;id&#39;</span><span class="p">]:</span>
+                    <span class="n">filtered_hists</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">history</span><span class="p">)</span>
+                    <span class="c"># History ID&#39;s are unique so break now that the hist was found</span>
+                    <span class="k">if</span> <span class="n">history_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="k">break</span>
+            <span class="n">histories</span> <span class="o">=</span> <span class="n">filtered_hists</span>
+        <span class="k">return</span> <span class="n">histories</span>
+</div>
+<div class="viewcode-block" id="HistoryClient.show_history"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#bioblend.galaxy.histories.HistoryClient.show_history">[docs]</a>    <span class="k">def</span> <span class="nf">show_history</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">history_id</span><span class="p">,</span> <span class="n">contents</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get details of a given history. By default, just get the history meta</span>
+<span class="sd">        information. If ``contents`` is set to ``True``, get the complete list of</span>
+<span class="sd">        datasets in the given history.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Client</span><span class="o">.</span><span class="n">_get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">history_id</span><span class="p">,</span> <span class="n">contents</span><span class="o">=</span><span class="n">contents</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="HistoryClient.show_dataset"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#bioblend.galaxy.histories.HistoryClient.show_dataset">[docs]</a>    <span class="k">def</span> <span class="nf">show_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">history_id</span><span class="p">,</span> <span class="n">dataset_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get details about a given history dataset. The required ``history_id``</span>
+<span class="sd">        can be obtained from the datasets&#39;s history content details.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gi</span><span class="o">.</span><span class="n">_make_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">history_id</span><span class="p">,</span> <span class="n">contents</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="c"># Append the dataset_id to the base history contents URL</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="s">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">url</span><span class="p">,</span> <span class="n">dataset_id</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">Client</span><span class="o">.</span><span class="n">_get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="HistoryClient.upload_dataset_from_library"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#bioblend.galaxy.histories.HistoryClient.upload_dataset_from_library">[docs]</a>    <span class="k">def</span> <span class="nf">upload_dataset_from_library</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">history_id</span><span class="p">,</span> <span class="n">lib_dataset_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Upload a dataset into the history from a library. Requires the</span>
+<span class="sd">        library dataset ID, which can be obtained from the library</span>
+<span class="sd">        contents.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;from_ld_id&#39;</span><span class="p">:</span> <span class="n">lib_dataset_id</span><span class="p">}</span>
+        <span class="k">return</span> <span class="n">Client</span><span class="o">.</span><span class="n">_post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">payload</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">history_id</span><span class="p">,</span> <span class="n">contents</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="HistoryClient.download_dataset"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#bioblend.galaxy.histories.HistoryClient.download_dataset">[docs]</a>    <span class="k">def</span> <span class="nf">download_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">history_id</span><span class="p">,</span> <span class="n">dataset_id</span><span class="p">,</span> <span class="n">file_path</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">use_default_filename</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">to_ext</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+            <span class="n">meta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">show_dataset</span><span class="p">(</span><span class="n">history_id</span><span class="p">,</span> <span class="n">dataset_id</span><span class="p">)</span>
+
+            <span class="n">d_type</span> <span class="o">=</span> <span class="n">to_ext</span>
+            <span class="k">if</span> <span class="n">d_type</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="s">&#39;data_type&#39;</span> <span class="ow">in</span> <span class="n">meta</span> <span class="p">:</span>
+                <span class="n">d_type</span> <span class="o">=</span> <span class="n">meta</span><span class="p">[</span><span class="s">&#39;data_type&#39;</span><span class="p">]</span>
+            <span class="n">url</span> <span class="o">=</span> <span class="s">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">gi</span><span class="o">.</span><span class="n">base_url</span><span class="p">,</span> <span class="s">&#39;datasets&#39;</span><span class="p">,</span> <span class="n">meta</span><span class="p">[</span><span class="s">&#39;id&#39;</span><span class="p">],</span> <span class="s">&quot;display&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="s">&quot;?to_ext=&quot;</span> <span class="o">+</span> <span class="n">d_type</span>
+            <span class="n">req</span> <span class="o">=</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">use_default_filename</span><span class="p">:</span>
+                <span class="n">file_local_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">dataset</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">file_local_path</span> <span class="o">=</span> <span class="n">file_path</span>
+
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_local_path</span><span class="p">,</span> <span class="s">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+                <span class="n">shutil</span><span class="o">.</span><span class="n">copyfileobj</span><span class="p">(</span><span class="n">req</span><span class="p">,</span> <span class="n">fp</span><span class="p">)</span>
+
+
+</div>
+<div class="viewcode-block" id="HistoryClient.delete_history"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#bioblend.galaxy.histories.HistoryClient.delete_history">[docs]</a>    <span class="k">def</span> <span class="nf">delete_history</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">history_id</span><span class="p">,</span> <span class="n">purge</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Delete a history.</span>
+
+<span class="sd">        If ``purge`` is set to ``True``, also purge the history. Note that for</span>
+<span class="sd">        the purge option to work, ``allow_user_dataset_purge`` option must be</span>
+<span class="sd">        set in the Galaxy&#39;s configuration file ``universe_wsgi.ini``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">purge</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="n">payload</span><span class="p">[</span><span class="s">&#39;purge&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">purge</span>
+        <span class="k">return</span> <span class="n">Client</span><span class="o">.</span><span class="n">_delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">payload</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">history_id</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="HistoryClient.undelete_history"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#bioblend.galaxy.histories.HistoryClient.undelete_history">[docs]</a>    <span class="k">def</span> <span class="nf">undelete_history</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">history_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Undelete a history</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gi</span><span class="o">.</span><span class="n">_make_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">history_id</span><span class="p">,</span> <span class="n">deleted</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="c"># Append the &#39;undelete&#39; action to the history URL</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="s">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">url</span><span class="p">,</span> <span class="s">&#39;undelete&#39;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">Client</span><span class="o">.</span><span class="n">_post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="p">{},</span> <span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="HistoryClient.get_status"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#bioblend.galaxy.histories.HistoryClient.get_status">[docs]</a>    <span class="k">def</span> <span class="nf">get_status</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">history_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the state of this history as a dictionary, with the following keys.</span>
+<span class="sd">        &#39;state&#39; = This is the current state of the history, such as ok, error, new etc.</span>
+<span class="sd">        &#39;state_details&#39; = Contains individual statistics for various dataset states.</span>
+<span class="sd">        &#39;percent_complete&#39; = The overall number of datasets processed to completion.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">history</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">show_history</span><span class="p">(</span><span class="n">history_id</span><span class="p">)</span>
+        <span class="n">state</span><span class="p">[</span><span class="s">&#39;state&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">history</span><span class="p">[</span><span class="s">&#39;state&#39;</span><span class="p">]</span>
+        <span class="n">state</span><span class="p">[</span><span class="s">&#39;state_details&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">history</span><span class="p">[</span><span class="s">&#39;state_details&#39;</span><span class="p">]</span>
+        <span class="n">state</span><span class="p">[</span><span class="s">&#39;percent_complete&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">history</span><span class="p">[</span><span class="s">&#39;state_details&#39;</span><span class="p">][</span><span class="s">&#39;ok&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="nb">sum</span><span class="p">(</span><span class="n">history</span><span class="p">[</span><span class="s">&#39;state_details&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">itervalues</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">state</span>
+</div>
+<div class="viewcode-block" id="HistoryClient.get_current_history"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#bioblend.galaxy.histories.HistoryClient.get_current_history">[docs]</a>    <span class="k">def</span> <span class="nf">get_current_history</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the current user&#39;s most recently used history object (not deleted)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gi</span><span class="o">.</span><span class="n">_make_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="s">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">url</span><span class="p">,</span> <span class="s">&#39;most_recently_used&#39;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">Client</span><span class="o">.</span><span class="n">_get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">BioBlend 0.2.0 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../galaxy.html" >bioblend.galaxy</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Enis Afgan.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

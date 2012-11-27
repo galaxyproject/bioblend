@@ -1,0 +1,268 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bioblend.galaxy.libraries &mdash; BioBlend 0.2.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.2.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="BioBlend 0.2.0 documentation" href="../../../index.html" />
+    <link rel="up" title="bioblend.galaxy" href="../galaxy.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">BioBlend 0.2.0 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../galaxy.html" accesskey="U">bioblend.galaxy</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for bioblend.galaxy.libraries</h1><pre>
+"""
+Contains possible interactions with the Galaxy Data Libraries
+"""
+from bioblend.galaxy.client import Client
+
+
+<div class="viewcode-block" id="LibraryClient"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#bioblend.galaxy.libraries.LibraryClient">[docs]</a>class LibraryClient(Client):
+    def __init__(self, galaxy_instance):
+        self.module = 'libraries'
+        super(LibraryClient, self).__init__(galaxy_instance)
+
+<div class="viewcode-block" id="LibraryClient.create_library"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#bioblend.galaxy.libraries.LibraryClient.create_library">[docs]</a>    def create_library(self, name, description=None, synopsis=None):
+        """
+        Create a data library with the properties defined in the arguments.
+        Return a list of JSON dicts, looking like so::
+
+            [{"id": "f740ab636b360a70",
+              "name": "Library from bioblend",
+              "url": "/api/libraries/f740ab636b360a70"}]
+
+        """
+        payload = {'name': name}
+        if description:
+            payload['description'] = description
+        if synopsis:
+            payload['synopsis'] = synopsis
+        return Client._post(self, payload)
+</div>
+<div class="viewcode-block" id="LibraryClient.create_folder"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#bioblend.galaxy.libraries.LibraryClient.create_folder">[docs]</a>    def create_folder(self, library_id, folder_name, description=None, base_folder_id=None):
+        """
+        Create a folder in the given library and the base folder. If
+        ``base_folder_id`` is not provided, the new folder will be created
+        in the root folder.
+        """
+        # Get root folder ID if no ID was provided
+        if base_folder_id is None:
+            folders = self.show_library(library_id=library_id, contents=True)
+            for f in folders:
+                if f['name'] == '/':
+                    base_folder_id = f['id']
+                    break
+        # Compose the payload
+        payload = {}
+        payload['name'] = folder_name
+        payload['folder_id'] = base_folder_id
+        payload['create_type'] = 'folder'
+        if description is not None:
+            payload['description'] = description
+        return Client._post(self, payload, id=library_id, contents=True)
+</div>
+<div class="viewcode-block" id="LibraryClient.get_libraries"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#bioblend.galaxy.libraries.LibraryClient.get_libraries">[docs]</a>    def get_libraries(self, library_id=None, name=None, deleted=False):
+        """
+        Get all the libraries or filter for specific one(s) via the provided name or ID.
+        Provide only one argument: ``name`` or ``library_id``.
+
+        If ``name`` is set and multiple names match the given name, all the
+        libraries matching the argument will be returned.
+
+        Return a list of JSON formatted dicts each containing basic information
+        about a library.
+        """
+        libraries = Client._get(self, deleted=deleted)
+        if name is not None or library_id is not None:
+            filtered_libs = []
+            for lib in libraries:
+                if name == lib['name'] or library_id == lib['id']:
+                    filtered_libs.append(lib)
+                # Library ID's are unique so break now that the lib was found
+                if library_id is not None:
+                    break
+            libraries = filtered_libs
+        return libraries
+</div>
+<div class="viewcode-block" id="LibraryClient.show_library"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#bioblend.galaxy.libraries.LibraryClient.show_library">[docs]</a>    def show_library(self, library_id, contents=False):
+        """
+        Get information about a library.
+
+        If want to get contents of the library (rather than just the library details),
+        set ``contents`` to ``True``.
+
+        Return a list of JSON formatted dicts containing library details.
+        """
+        return Client._get(self, id=library_id, contents=contents)
+</div>
+    def _do_upload(self, **keywords):
+        """
+        Set up the POST request and do the actual data upload to a data library.
+        This method should not be called directly but instead refer to the methods
+        specific for the desired type of data upload.
+        """
+        # If folder_id was not provided in the arguments, find the root folder ID
+        if keywords.get('folder_id', None) is None:
+            folders = self.show_library(library_id=keywords['library_id'], contents=True)
+            for f in folders:
+                if f['name'] == '/':
+                    folder_id = f['id']
+                    break
+        else:
+            folder_id = keywords['folder_id']
+
+        files_attached = False
+        # Compose the payload dict
+        payload = {}
+        payload['folder_id'] = folder_id
+        payload['file_type'] = keywords.get('file_type', 'auto')
+        payload['dbkey'] = keywords.get('dbkey', '?')
+        payload['create_type'] = 'file'
+        if keywords.get('file_url', None) is not None:
+            payload['upload_option'] = 'upload_file'
+            payload['files_0|url_paste'] = keywords['file_url']
+        elif keywords.get('pasted_content', None) is not None:
+            payload['upload_option'] = 'upload_file'
+            payload['files_0|url_paste'] = keywords['pasted_content']
+        elif keywords.get('server_dir', None) is not None:
+            payload['upload_option'] = 'upload_directory'
+            payload['server_dir'] = keywords['server_dir']
+        elif keywords.get('file_local_path', None) is not None:
+            payload['upload_option'] = 'upload_file'
+            payload['files_0|file_data'] =  open(keywords['file_local_path'], 'rb')
+            files_attached = True
+
+        r = Client._post(self, payload, id=keywords['library_id'], contents=True,
+                         files_attached=files_attached)
+
+        if payload.get('files_0|file_data', None) is not None:
+            payload['files_0|file_data'].close()
+
+        return r
+
+<div class="viewcode-block" id="LibraryClient.upload_file_from_url"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#bioblend.galaxy.libraries.LibraryClient.upload_file_from_url">[docs]</a>    def upload_file_from_url(self, library_id, file_url, folder_id=None, file_type='auto', dbkey='?'):
+        """
+        Upload a file to a library from a URL.
+        If ``folder_id`` is not specified, the file will be uploaded to the root folder.
+        """
+        # TODO: Is there a better way of removing self from locals?
+        vars = locals().copy()
+        del vars['self']
+        return self._do_upload(**vars)
+</div>
+<div class="viewcode-block" id="LibraryClient.upload_file_contents"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#bioblend.galaxy.libraries.LibraryClient.upload_file_contents">[docs]</a>    def upload_file_contents(self, library_id, pasted_content, folder_id=None, file_type='auto', dbkey='?'):
+        """
+        Upload pasted_contents to a data library as a new file.
+        If ``folder_id`` is not specified, the file will be placed in the root folder.
+        """
+        vars = locals().copy()
+        del vars['self']
+        return self._do_upload(**vars)
+</div>
+<div class="viewcode-block" id="LibraryClient.upload_file_from_local_path"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#bioblend.galaxy.libraries.LibraryClient.upload_file_from_local_path">[docs]</a>    def upload_file_from_local_path(self, library_id, file_local_path, folder_id=None, file_type='auto', dbkey='?'):
+        """
+        Read local file contents from file_local_path and upload data to a library.
+        If ``folder_id`` is not specified, the file will be placed in the root folder.
+        """
+        vars = locals().copy()
+        del vars['self']
+        return self._do_upload(**vars)
+</div>
+<div class="viewcode-block" id="LibraryClient.upload_file_from_server"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#bioblend.galaxy.libraries.LibraryClient.upload_file_from_server">[docs]</a>    def upload_file_from_server(self, library_id, server_dir, folder_id=None, file_type='auto', dbkey='?'):
+        """
+        Upload a file to a library from a path on the server where Galaxy is running.
+        If ``folder_id`` is not provided, the file will be placed in the root folder.
+
+        Note that for this method to work, the Galaxy instance you're connecting to
+        must have the configuration option ``library_import_dir`` set in ``universe_wsgi.ini``.
+        The value of that configuration option should be a base directory from where
+        more specific directories can be specified as part of the ``server_dir`` argument.
+        All and only the files (ie, no folders) specified by the ``server_dir`` argument
+        will be uploaded to the data library.
+        """
+        vars = locals().copy()
+        del vars['self']
+        return self._do_upload(**vars)</div></div>
+</pre>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">BioBlend 0.2.0 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../galaxy.html" >bioblend.galaxy</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Enis Afgan.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,671 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bioblend.cloudman &mdash; BioBlend 0.2.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.2.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="BioBlend 0.2.0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">BioBlend 0.2.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for bioblend.cloudman</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">API for interacting with a CloudMan instance.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">simplejson</span>
+<span class="kn">from</span> <span class="nn">urlparse</span> <span class="kn">import</span> <span class="n">urlparse</span>
+<span class="kn">import</span> <span class="nn">bioblend</span>
+<span class="kn">from</span> <span class="nn">bioblend.cloudman.launch</span> <span class="kn">import</span> <span class="n">CloudManLauncher</span>
+<span class="kn">from</span> <span class="nn">bioblend.util</span> <span class="kn">import</span> <span class="n">Bunch</span>
+
+<span class="k">def</span> <span class="nf">block_till_vm_ready</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This decorator exists to make sure that a launched VM is</span>
+<span class="sd">    ready and has received a public IP before allowing the wrapped</span>
+<span class="sd">    function call to continue. If the VM is not ready, the function will</span>
+<span class="sd">    block till the VM is ready. If the VM does not become ready</span>
+<span class="sd">    till the vm_ready_timeout elapses or the VM status returns an error,</span>
+<span class="sd">    a VMLaunchException will be thrown.</span>
+
+<span class="sd">    This decorator relies on the wait_till_instance_ready method defined in</span>
+<span class="sd">    class GenericVMInstance. All methods to which this decorator is applied</span>
+<span class="sd">    must be members of a class which inherit from GenericVMInstance.</span>
+
+<span class="sd">    Two optional keyword arguments are recognized by this decorator. These are</span>
+<span class="sd">    :type vm_ready_timeout:     int</span>
+<span class="sd">    :param vm_ready_timeout:    Maximum length of time to block before timing out.</span>
+<span class="sd">                                Once the timeout is reached, a VMLaunchException will be</span>
+<span class="sd">                                thrown.</span>
+<span class="sd">    :type vm_ready_check_interval:  int</span>
+<span class="sd">    :param vm_ready_check_interval: The number of seconds to pause between consecutive calls</span>
+<span class="sd">                                    when polling the VM&#39;s ready status.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nd">@functools.wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">timeout</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;vm_ready_timeout&#39;</span><span class="p">,</span> <span class="mi">300</span><span class="p">)</span>
+        <span class="n">interval</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;vm_ready_check_interval&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">wait_till_instance_ready</span><span class="p">(</span><span class="n">timeout</span><span class="p">,</span> <span class="n">interval</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">VMLaunchException</span><span class="p">(</span><span class="s">&quot;Decorated object does not define a wait_till_instance_ready method.&quot;</span>\
+                                    <span class="s">&quot;Make sure that the object is of type GenericVMInstance.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">wrapper</span>
+
+<span class="k">class</span> <span class="nc">VMLaunchException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">CloudManConfig</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">access_key</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">secret_key</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">cluster_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">image_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">instance_type</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">password</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">cloud_metadata</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">cluster_type</span><span class="o">=</span><span class="s">&#39;Galaxy&#39;</span><span class="p">,</span>
+                 <span class="n">initial_storage_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                 <span class="n">key_name</span><span class="o">=</span><span class="s">&#39;cloudman_key_pair&#39;</span><span class="p">,</span>
+                 <span class="n">security_groups</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;CloudMan&#39;</span><span class="p">],</span>
+                 <span class="n">placement</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span>
+                 <span class="n">kernel_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">ramdisk_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">block_till_ready</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializes a CloudMan launch configuration object.</span>
+
+<span class="sd">        :type access_key:    string</span>
+<span class="sd">        :param access_key:   Access credentials.</span>
+
+<span class="sd">        :type secret_key:    string</span>
+<span class="sd">        :param secret_key:   Access credentials.</span>
+
+<span class="sd">        :type cluster_name:  string</span>
+<span class="sd">        :param cluster_name: Name to give this cloudman cluster.</span>
+
+<span class="sd">        :type image_id:      string</span>
+<span class="sd">        :param image_id:     Machine image id to use for launching cloudman.</span>
+
+<span class="sd">        :type instance_type:  string</span>
+<span class="sd">        :param instance_type: The type of the machine instance, as understood by the cloud</span>
+<span class="sd">                              provider. (e.g. m1.small)</span>
+
+<span class="sd">        :type password:      string</span>
+<span class="sd">        :param password:     The administrative password for this cloudman instance.</span>
+
+<span class="sd">        :type cloud_metadata:  Bunch</span>
+<span class="sd">        :param cloud_metadata: This object must define the properties required to establish a</span>
+<span class="sd">        `boto &lt;https://github.com/boto/boto/&gt;`_ connection to that cloud. See</span>
+<span class="sd">        this method&#39;s implementation for an example of the required fields.</span>
+<span class="sd">        Note that as long the as provided object defines the required fields,</span>
+<span class="sd">        it can really by implemented as anything (e.g., a Bunch, a database</span>
+<span class="sd">        object, a custom class). If no value for the ``cloud`` argument is</span>
+<span class="sd">        provided, the default is to use the Amazon cloud.</span>
+
+<span class="sd">        :type kernel_id: string</span>
+<span class="sd">        :param kernel_id: The ID of the kernel with which to launch the</span>
+<span class="sd">                          instances</span>
+
+<span class="sd">        :type ramdisk_id: string</span>
+<span class="sd">        :param ramdisk_id: The ID of the RAM disk with which to launch the</span>
+<span class="sd">                           instances</span>
+
+<span class="sd">        :type key_name: string</span>
+<span class="sd">        :param key_name: The name of the key pair with which to launch instances</span>
+
+<span class="sd">        :type security_groups: list of strings</span>
+<span class="sd">        :param security_groups: The ID of the VPC security groups with</span>
+<span class="sd">                                   which to associate instances</span>
+
+<span class="sd">        :type placement: string</span>
+<span class="sd">        :param placement: The availability zone in which to launch the instances</span>
+
+<span class="sd">        :type cluster_type: string</span>
+<span class="sd">        :param cluster_type: The ``type``, either &#39;Galaxy&#39; (default), &#39;Data&#39;, or &#39;SGE&#39;, defines the type</span>
+<span class="sd">        of cluster platform to initialize.</span>
+
+<span class="sd">        :type initial_storage_size: int</span>
+<span class="sd">        :param initial_storage_size: The initialize storage to allocate for the instance</span>
+
+<span class="sd">        :type block_till_ready: boolean</span>
+<span class="sd">        :param block_till_ready: Specifies whether the launch method will block till the instance is ready</span>
+<span class="sd">        and only return once all initialization is complete. The default is True. If False, the launch method will</span>
+<span class="sd">        return immediately without blocking. However, any subsequent calls made will automatically block if the</span>
+<span class="sd">        instance is not ready and initialized. The blocking timeout and polling interval can be configured</span>
+<span class="sd">        by providing extra parameters to the CloudManInstance.launch_instance method.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_connection_parameters</span><span class="p">(</span><span class="n">access_key</span><span class="p">,</span> <span class="n">secret_key</span><span class="p">,</span> <span class="n">cloud_metadata</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_pre_launch_parameters</span><span class="p">(</span><span class="n">cluster_name</span><span class="p">,</span> <span class="n">image_id</span><span class="p">,</span> <span class="n">instance_type</span><span class="p">,</span> <span class="n">password</span><span class="p">,</span> <span class="n">kernel_id</span><span class="p">,</span> <span class="n">ramdisk_id</span><span class="p">,</span> <span class="n">key_name</span><span class="p">,</span> <span class="n">security_groups</span><span class="p">,</span> <span class="n">placement</span><span class="p">,</span> <span class="n">block_till_ready</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_post_launch_parameters</span><span class="p">(</span><span class="n">cluster_type</span><span class="p">,</span> <span class="n">initial_storage_size</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_extra_parameters</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">set_connection_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">access_key</span><span class="p">,</span> <span class="n">secret_key</span><span class="p">,</span> <span class="n">cloud_metadata</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">access_key</span> <span class="o">=</span> <span class="n">access_key</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">secret_key</span> <span class="o">=</span> <span class="n">secret_key</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cloud_metadata</span> <span class="o">=</span> <span class="n">cloud_metadata</span>
+
+    <span class="k">def</span> <span class="nf">set_pre_launch_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cluster_name</span><span class="p">,</span> <span class="n">image_id</span><span class="p">,</span> <span class="n">instance_type</span><span class="p">,</span> <span class="n">password</span><span class="p">,</span> <span class="n">kernel_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">ramdisk_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                          <span class="n">key_name</span><span class="o">=</span><span class="s">&#39;cloudman_key_pair&#39;</span><span class="p">,</span> <span class="n">security_groups</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;CloudMan&#39;</span><span class="p">],</span> <span class="n">placement</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">block_till_ready</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cluster_name</span> <span class="o">=</span> <span class="n">cluster_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">image_id</span> <span class="o">=</span> <span class="n">image_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">instance_type</span> <span class="o">=</span> <span class="n">instance_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">password</span> <span class="o">=</span> <span class="n">password</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kernel_id</span> <span class="o">=</span> <span class="n">kernel_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ramdisk_id</span> <span class="o">=</span> <span class="n">ramdisk_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">key_name</span> <span class="o">=</span> <span class="n">key_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">security_groups</span> <span class="o">=</span> <span class="n">security_groups</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">placement</span> <span class="o">=</span> <span class="n">placement</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">block_till_ready</span> <span class="o">=</span> <span class="n">block_till_ready</span>
+
+    <span class="k">def</span> <span class="nf">set_post_launch_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cluster_type</span><span class="o">=</span><span class="s">&#39;Galaxy&#39;</span><span class="p">,</span> <span class="n">initial_storage_size</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cluster_type</span> <span class="o">=</span> <span class="n">cluster_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initial_storage_size</span> <span class="o">=</span> <span class="n">initial_storage_size</span>
+
+    <span class="k">def</span> <span class="nf">set_extra_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
+
+    <span class="k">class</span> <span class="nc">CustomTypeEncoder</span><span class="p">(</span><span class="n">simplejson</span><span class="o">.</span><span class="n">JSONEncoder</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="p">(</span><span class="n">CloudManConfig</span><span class="p">,</span> <span class="n">Bunch</span><span class="p">)):</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="s">&#39;__</span><span class="si">%s</span><span class="s">__&#39;</span> <span class="o">%</span> <span class="n">obj</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span>
+                <span class="k">return</span> <span class="p">{</span> <span class="n">key</span><span class="p">:</span> <span class="n">obj</span><span class="o">.</span><span class="n">__dict__</span> <span class="p">}</span>
+            <span class="k">return</span> <span class="n">simplejson</span><span class="o">.</span><span class="n">JSONEncoder</span><span class="o">.</span><span class="n">default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">CustomTypeDecoder</span><span class="p">(</span><span class="n">dct</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s">&#39;__CloudManConfig__&#39;</span> <span class="ow">in</span> <span class="n">dct</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">CloudManConfig</span><span class="p">(</span><span class="o">**</span><span class="n">dct</span><span class="p">[</span><span class="s">&#39;__CloudManConfig__&#39;</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="s">&#39;__Bunch__&#39;</span> <span class="ow">in</span> <span class="n">dct</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Bunch</span><span class="p">(</span><span class="o">**</span><span class="n">dct</span><span class="p">[</span><span class="s">&#39;__Bunch__&#39;</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">dct</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">load_config</span><span class="p">(</span><span class="n">fp</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">simplejson</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="n">object_hook</span><span class="o">=</span><span class="n">CloudManConfig</span><span class="o">.</span><span class="n">CustomTypeDecoder</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">save_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fp</span><span class="p">):</span>
+        <span class="n">simplejson</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fp</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">CustomTypeEncoder</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">access_key</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&quot;Access key must not be null&quot;</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">secret_key</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&quot;Secret key must not be null&quot;</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">cluster_name</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&quot;Cluster name must not be null&quot;</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_id</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&quot;Image ID must not be null&quot;</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_type</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&quot;Instance type must not be null&quot;</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">password</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&quot;Password must not be null&quot;</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">cluster_type</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&quot;Cluster type must not be null&quot;</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">key_name</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&quot;Key-pair name must not be null&quot;</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_storage_size</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&quot;Initial storage size must not be null&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+<span class="k">class</span> <span class="nc">GenericVMInstance</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">launcher</span><span class="p">,</span> <span class="n">launch_result</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create an instance of the CloudMan API class, which is to be used when</span>
+<span class="sd">        manipulating that given CloudMan instance.</span>
+
+<span class="sd">        The ``url`` is a string defining the address of CloudMan, for</span>
+<span class="sd">        example &quot;http://115.146.92.174&quot;. The ``password`` is CloudMan&#39;s password,</span>
+<span class="sd">        as defined in the user data sent to CloudMan on instance creation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Make sure the url scheme is defined (otherwise requests will not work)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">host_name</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">launcher</span> <span class="o">=</span> <span class="n">launcher</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">launch_result</span> <span class="o">=</span> <span class="n">launch_result</span>
+
+    <span class="k">def</span> <span class="nf">_update_host_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host_name</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">host_name</span> <span class="o">!=</span> <span class="n">host_name</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">host_name</span> <span class="o">=</span> <span class="n">host_name</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">instance_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">None</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">launch_result</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">launch_result</span><span class="p">[</span><span class="s">&#39;instance_id&#39;</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">key_pair_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">None</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">launch_result</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">launch_result</span><span class="p">[</span><span class="s">&#39;kp_name&#39;</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">key_pair_material</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">None</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">launch_result</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">launch_result</span><span class="p">[</span><span class="s">&#39;kp_material&#39;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">get_machine_status</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check on the underlying VM status of an instance. This can be used to determine</span>
+<span class="sd">        whether the VM has finished booting up and cloudman&#39;s services are up and running.</span>
+
+<span class="sd">        Return a ``state`` dict with the current ``instance_state``, ``public_ip``,</span>
+<span class="sd">        ``placement``, and ``error`` keys, which capture the current state (the</span>
+<span class="sd">        values for those keys default to empty string if no data is available from</span>
+<span class="sd">        the cloud).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">launcher</span><span class="o">.</span><span class="n">get_status</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">instance_id</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_init_instance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host_name</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_host_name</span><span class="p">(</span><span class="n">host_name</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">wait_till_instance_ready</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vm_ready_timeout</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">vm_ready_check_interval</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Wait until the vm state changes to ready/error or timeout elapses.</span>
+<span class="sd">        Updates the host name once ready.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="n">vm_ready_timeout</span> <span class="o">&gt;</span> <span class="mi">0</span>
+        <span class="k">assert</span> <span class="n">vm_ready_timeout</span> <span class="o">&gt;</span> <span class="n">vm_ready_check_interval</span>
+        <span class="k">assert</span> <span class="n">vm_ready_check_interval</span> <span class="o">&gt;</span> <span class="mi">0</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">host_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span> <span class="c"># Host name available. Therefore, instance is ready</span>
+            <span class="k">return</span>
+
+        <span class="k">for</span> <span class="n">time_left</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">vm_ready_timeout</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">vm_ready_check_interval</span><span class="p">):</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_machine_status</span><span class="p">()</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">status</span><span class="p">[</span><span class="s">&#39;public_ip&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s">&#39;&#39;</span> <span class="ow">and</span> <span class="n">status</span><span class="p">[</span><span class="s">&#39;error&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;&#39;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_init_instance</span><span class="p">(</span><span class="n">status</span><span class="p">[</span><span class="s">&#39;public_ip&#39;</span><span class="p">])</span>
+                <span class="k">return</span>
+            <span class="k">elif</span> <span class="n">status</span><span class="p">[</span><span class="s">&#39;error&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s">&#39;&#39;</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s">&quot;Error launching an instance: {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">status</span><span class="p">[</span><span class="s">&#39;error&#39;</span><span class="p">])</span>
+                <span class="n">bioblend</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">VMLaunchException</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">bioblend</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&quot;Instance not ready yet (it&#39;s in state &#39;{0}&#39;); waiting another {1} seconds...&quot;</span>\
+                               <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">status</span><span class="p">[</span><span class="s">&#39;instance_state&#39;</span><span class="p">],</span> <span class="n">time_left</span><span class="p">))</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">vm_ready_check_interval</span><span class="p">)</span>
+
+        <span class="k">raise</span> <span class="n">VMLaunchException</span><span class="p">(</span><span class="s">&quot;Waited too long for instance to become ready. Instance Id: </span><span class="si">%s</span><span class="s">&quot;</span>
+                                <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_id</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CloudManInstance"><a class="viewcode-back" href="../../api_docs/cloudman/all.html#bioblend.cloudman.CloudManInstance">[docs]</a><span class="k">class</span> <span class="nc">CloudManInstance</span><span class="p">(</span><span class="n">GenericVMInstance</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">password</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create an instance of the CloudMan API class, which is to be used when</span>
+<span class="sd">        manipulating that given CloudMan instance.</span>
+
+<span class="sd">        The ``url`` is a string defining the address of CloudMan, for</span>
+<span class="sd">        example &quot;http://115.146.92.174&quot;. The ``password`` is CloudMan&#39;s password,</span>
+<span class="sd">        as defined in the user data sent to CloudMan on instance creation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;launch_result&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span> <span class="c"># Used internally by the launch_instance method</span>
+            <span class="nb">super</span><span class="p">(</span><span class="n">CloudManInstance</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;launcher&#39;</span><span class="p">],</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;launch_result&#39;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">initialized</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">super</span><span class="p">(</span><span class="n">CloudManInstance</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">initialized</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;cloudman_config&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">password</span> <span class="o">=</span> <span class="n">password</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">password</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">password</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_cloudman_url</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;CloudMan instance at {0}/cloud&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cloudman_url</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_update_host_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Overrides the super-class method</span>
+<span class="sd">        Makes sure that the cloudman_url</span>
+<span class="sd">        is kept in sync with the host name.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_cloudman_url</span><span class="p">(</span><span class="n">host_name</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_init_instance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hostname</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">CloudManInstance</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_init_instance</span><span class="p">(</span><span class="n">hostname</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">cluster_type</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">initial_storage_size</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_set_cloudman_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Keeps the cloudman url as well as</span>
+<span class="sd">        the host name in sync.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">url</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">parse_result</span> <span class="o">=</span> <span class="n">urlparse</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+            <span class="c"># Make sure the url scheme is defined (otherwise requests will not work)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">parse_result</span><span class="o">.</span><span class="n">scheme</span><span class="p">:</span>
+                <span class="n">url</span> <span class="o">=</span> <span class="s">&quot;http://&quot;</span> <span class="o">+</span> <span class="n">url</span>
+            <span class="c"># parse the corrected url again to extract hostname</span>
+            <span class="n">parse_result</span> <span class="o">=</span> <span class="n">urlparse</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+            <span class="nb">super</span><span class="p">(</span><span class="n">CloudManInstance</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_update_host_name</span><span class="p">(</span><span class="n">parse_result</span><span class="o">.</span><span class="n">hostname</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">cloudman_url</span> <span class="o">=</span> <span class="n">url</span>
+
+<div class="viewcode-block" id="CloudManInstance.get_cloudman_url"><a class="viewcode-back" href="../../api_docs/cloudman/all.html#bioblend.cloudman.CloudManInstance.get_cloudman_url">[docs]</a>    <span class="k">def</span> <span class="nf">get_cloudman_url</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cloudman_url</span>
+</div>
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="CloudManInstance.launch_instance"><a class="viewcode-back" href="../../api_docs/cloudman/all.html#bioblend.cloudman.CloudManInstance.launch_instance">[docs]</a>    <span class="k">def</span> <span class="nf">launch_instance</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span>
+                        <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Launches a new instance of cloudman on the specified cloud infrastructure.</span>
+
+<span class="sd">        :type cfg: CloudManConfig</span>
+<span class="sd">        :param cfg: A CloudManConfig object containing the initial parameters for this launch.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">validation_result</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">validation_result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">VMLaunchException</span><span class="p">(</span><span class="s">&quot;Invalid cloudman configuration provided: &quot;</span> <span class="o">%</span> <span class="n">validation_result</span><span class="p">)</span>
+
+        <span class="n">launcher</span> <span class="o">=</span> <span class="n">CloudManLauncher</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">access_key</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">secret_key</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">cloud_metadata</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">launcher</span><span class="o">.</span><span class="n">launch</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">cluster_name</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">image_id</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">instance_type</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">password</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">kernel_id</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">ramdisk_id</span><span class="p">,</span>
+                                   <span class="n">cfg</span><span class="o">.</span><span class="n">key_name</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">security_groups</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">placement</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s">&#39;error&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">VMLaunchException</span><span class="p">(</span><span class="s">&quot;Error launching cloudman instance: &quot;</span> <span class="o">%</span> <span class="n">result</span><span class="p">[</span><span class="s">&#39;error&#39;</span><span class="p">])</span>
+        <span class="n">instance</span> <span class="o">=</span> <span class="n">CloudManInstance</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">launcher</span><span class="o">=</span><span class="n">launcher</span><span class="p">,</span> <span class="n">launch_result</span><span class="o">=</span><span class="n">result</span><span class="p">,</span> <span class="n">cloudman_config</span><span class="o">=</span><span class="n">cfg</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">block_till_ready</span><span class="p">:</span>
+            <span class="n">instance</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">cluster_type</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">initial_storage_size</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">instance</span>
+</div>
+    <span class="nd">@block_till_vm_ready</span>
+<div class="viewcode-block" id="CloudManInstance.initialize"><a class="viewcode-back" href="../../api_docs/cloudman/all.html#bioblend.cloudman.CloudManInstance.initialize">[docs]</a>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s">&quot;Galaxy&quot;</span><span class="p">,</span> <span class="n">initial_storage_size</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">shared_bucket</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize CloudMan platform. This needs to be done before the cluster</span>
+<span class="sd">        can be used.</span>
+
+<span class="sd">        The ``type``, either &#39;Galaxy&#39; (default), &#39;Data&#39;, or &#39;SGE&#39;, defines the type</span>
+<span class="sd">        of cluster platform to initialize.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">initialized</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_make_get_request</span><span class="p">(</span><span class="s">&quot;/cloud/initialize_cluster&quot;</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;startup_opt&#39;</span><span class="p">:</span> <span class="nb">type</span><span class="p">,</span>
+                                                                            <span class="s">&#39;g_pss&#39;</span> <span class="p">:</span> <span class="n">initial_storage_size</span><span class="p">,</span>
+                                                                            <span class="s">&#39;shared_bucket&#39;</span><span class="p">:</span> <span class="n">shared_bucket</span><span class="p">})</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">initialized</span> <span class="o">=</span> <span class="bp">True</span>
+</div>
+    <span class="nd">@block_till_vm_ready</span>
+<div class="viewcode-block" id="CloudManInstance.get_cluster_type"><a class="viewcode-back" href="../../api_docs/cloudman/all.html#bioblend.cloudman.CloudManInstance.get_cluster_type">[docs]</a>    <span class="k">def</span> <span class="nf">get_cluster_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the ``type`` this CloudMan cluster has been initialized to. See the</span>
+<span class="sd">        CloudMan docs about the available types. If the cluster has not yet been</span>
+<span class="sd">        initialized, this method returns ``None``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_get_request</span><span class="p">(</span><span class="s">&quot;/cloud/get_cluster_type&quot;</span><span class="p">)</span>
+</div>
+    <span class="nd">@block_till_vm_ready</span>
+<div class="viewcode-block" id="CloudManInstance.get_status"><a class="viewcode-back" href="../../api_docs/cloudman/all.html#bioblend.cloudman.CloudManInstance.get_status">[docs]</a>    <span class="k">def</span> <span class="nf">get_status</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get status information on this CloudMan instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_get_request</span><span class="p">(</span><span class="s">&quot;/cloud/instance_state_json&quot;</span><span class="p">)</span>
+</div>
+    <span class="nd">@block_till_vm_ready</span>
+<div class="viewcode-block" id="CloudManInstance.get_nodes"><a class="viewcode-back" href="../../api_docs/cloudman/all.html#bioblend.cloudman.CloudManInstance.get_nodes">[docs]</a>    <span class="k">def</span> <span class="nf">get_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get a list of nodes currently running in this CloudMan cluster.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">instance_feed_json</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_get_request</span><span class="p">(</span><span class="s">&quot;/cloud/instance_feed_json&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">instance_feed_json</span><span class="p">[</span><span class="s">&#39;instances&#39;</span><span class="p">]</span>
+</div>
+    <span class="nd">@block_till_vm_ready</span>
+<div class="viewcode-block" id="CloudManInstance.get_cluster_size"><a class="viewcode-back" href="../../api_docs/cloudman/all.html#bioblend.cloudman.CloudManInstance.get_cluster_size">[docs]</a>    <span class="k">def</span> <span class="nf">get_cluster_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the size of the cluster in terms of the number of nodes; this count</span>
+<span class="sd">        includes the master node.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_nodes</span><span class="p">())</span>
+</div>
+    <span class="nd">@block_till_vm_ready</span>
+<div class="viewcode-block" id="CloudManInstance.get_static_state"><a class="viewcode-back" href="../../api_docs/cloudman/all.html#bioblend.cloudman.CloudManInstance.get_static_state">[docs]</a>    <span class="k">def</span> <span class="nf">get_static_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get static information on this CloudMan instance.</span>
+<span class="sd">        i.e. state that doesn&#39;t change over the lifetime of the cluster</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_get_request</span><span class="p">(</span><span class="s">&quot;/cloud/static_instance_state_json&quot;</span><span class="p">)</span>
+</div>
+    <span class="nd">@block_till_vm_ready</span>
+<div class="viewcode-block" id="CloudManInstance.get_master_ip"><a class="viewcode-back" href="../../api_docs/cloudman/all.html#bioblend.cloudman.CloudManInstance.get_master_ip">[docs]</a>    <span class="k">def</span> <span class="nf">get_master_ip</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the public IP of the master node in this Cloudman cluster</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">status_json</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_static_state</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">status_json</span><span class="p">[</span><span class="s">&#39;master_ip&#39;</span><span class="p">]</span>
+</div>
+    <span class="nd">@block_till_vm_ready</span>
+<div class="viewcode-block" id="CloudManInstance.get_master_id"><a class="viewcode-back" href="../../api_docs/cloudman/all.html#bioblend.cloudman.CloudManInstance.get_master_id">[docs]</a>    <span class="k">def</span> <span class="nf">get_master_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the instance ID of the master node in this Cloudman cluster</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">status_json</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_static_state</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">status_json</span><span class="p">[</span><span class="s">&#39;master_id&#39;</span><span class="p">]</span>
+</div>
+    <span class="nd">@block_till_vm_ready</span>
+<div class="viewcode-block" id="CloudManInstance.add_nodes"><a class="viewcode-back" href="../../api_docs/cloudman/all.html#bioblend.cloudman.CloudManInstance.add_nodes">[docs]</a>    <span class="k">def</span> <span class="nf">add_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_nodes</span><span class="p">,</span> <span class="n">instance_type</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">spot_price</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a number of worker nodes to the cluster, optionally specifying</span>
+<span class="sd">        the type for new instances. If ``instance_type`` is not specified,</span>
+<span class="sd">        instance(s) of the same type as the master instance will be started.</span>
+<span class="sd">        Note that the ``instance_type`` must match the type of instance</span>
+<span class="sd">        available on the given cloud.</span>
+
+<span class="sd">        ``spot_price`` applies only to AWS and, if set, defines the maximum</span>
+<span class="sd">        price for Spot instances, thus turning this request for more instances</span>
+<span class="sd">        into a Spot request.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;number_nodes&#39;</span><span class="p">:</span> <span class="n">num_nodes</span><span class="p">,</span>
+                   <span class="s">&#39;instance_type&#39;</span><span class="p">:</span> <span class="n">instance_type</span><span class="p">,</span>
+                   <span class="s">&#39;spot_price&#39;</span><span class="p">:</span> <span class="n">spot_price</span><span class="p">}</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_get_request</span><span class="p">(</span><span class="s">&quot;/cloud/add_instances&quot;</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span>
+</div>
+    <span class="nd">@block_till_vm_ready</span>
+<div class="viewcode-block" id="CloudManInstance.remove_nodes"><a class="viewcode-back" href="../../api_docs/cloudman/all.html#bioblend.cloudman.CloudManInstance.remove_nodes">[docs]</a>    <span class="k">def</span> <span class="nf">remove_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_nodes</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remove worker nodes from the cluster.</span>
+
+<span class="sd">        The ``num_nodes`` parameter defines the number of worker nodes to remove.</span>
+<span class="sd">        The ``force`` parameter (defaulting to False), is a boolean indicating</span>
+<span class="sd">        whether the nodes should be forcibly removed rather than gracefully removed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;number_nodes&#39;</span><span class="p">:</span> <span class="n">num_nodes</span><span class="p">,</span> <span class="s">&#39;force_termination&#39;</span><span class="p">:</span> <span class="n">force</span><span class="p">}</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_get_request</span><span class="p">(</span><span class="s">&quot;/cloud/remove_instances&quot;</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span>
+</div>
+    <span class="nd">@block_till_vm_ready</span>
+<div class="viewcode-block" id="CloudManInstance.remove_node"><a class="viewcode-back" href="../../api_docs/cloudman/all.html#bioblend.cloudman.CloudManInstance.remove_node">[docs]</a>    <span class="k">def</span> <span class="nf">remove_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instance_id</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remove a specific worker node from the cluster.</span>
+
+<span class="sd">        The ``instance_id`` parameter defines the ID, as a string, of a worker node</span>
+<span class="sd">        to remove from the cluster. The ``force`` parameter (defaulting to False),</span>
+<span class="sd">        is a boolean indicating whether the node should be forcibly removed rather</span>
+<span class="sd">        than gracefully removed.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;instance_id&#39;</span><span class="p">:</span> <span class="n">instance_id</span><span class="p">}</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_get_request</span><span class="p">(</span><span class="s">&quot;/cloud/remove_instance&quot;</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span>
+</div>
+    <span class="nd">@block_till_vm_ready</span>
+<div class="viewcode-block" id="CloudManInstance.reboot_node"><a class="viewcode-back" href="../../api_docs/cloudman/all.html#bioblend.cloudman.CloudManInstance.reboot_node">[docs]</a>    <span class="k">def</span> <span class="nf">reboot_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instance_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reboot a specific worker node.</span>
+
+<span class="sd">        The ``instance_id`` parameter defines the ID, as a string, of a worker node</span>
+<span class="sd">        to reboot.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;instance_id&#39;</span><span class="p">:</span> <span class="n">instance_id</span><span class="p">}</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_get_request</span><span class="p">(</span><span class="s">&quot;/cloud/reboot_instance&quot;</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span>
+</div>
+    <span class="nd">@block_till_vm_ready</span>
+<div class="viewcode-block" id="CloudManInstance.autoscaling_enabled"><a class="viewcode-back" href="../../api_docs/cloudman/all.html#bioblend.cloudman.CloudManInstance.autoscaling_enabled">[docs]</a>    <span class="k">def</span> <span class="nf">autoscaling_enabled</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a boolean indicating whether autoscaling is enabled.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_status</span><span class="p">()[</span><span class="s">&#39;autoscaling&#39;</span><span class="p">][</span><span class="s">&#39;use_autoscaling&#39;</span><span class="p">])</span>
+</div>
+    <span class="nd">@block_till_vm_ready</span>
+<div class="viewcode-block" id="CloudManInstance.enable_autoscaling"><a class="viewcode-back" href="../../api_docs/cloudman/all.html#bioblend.cloudman.CloudManInstance.enable_autoscaling">[docs]</a>    <span class="k">def</span> <span class="nf">enable_autoscaling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minimum_nodes</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">maximum_nodes</span><span class="o">=</span><span class="mi">19</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Enable cluster autoscaling, allowing the cluster to automatically add,</span>
+<span class="sd">        or remove, worker nodes, as needed.</span>
+
+<span class="sd">        The number of worker nodes in the cluster is bounded by the ``minimum_nodes``</span>
+<span class="sd">        (default is 0) and ``maximum_nodes`` (default is 19) parameters.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">autoscaling_enabled</span><span class="p">()):</span>
+            <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;as_min&#39;</span><span class="p">:</span> <span class="n">minimum_nodes</span><span class="p">,</span> <span class="s">&#39;as_max&#39;</span><span class="p">:</span> <span class="n">maximum_nodes</span><span class="p">}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_make_get_request</span><span class="p">(</span><span class="s">&quot;/cloud/toggle_autoscaling&quot;</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span>
+</div>
+    <span class="nd">@block_till_vm_ready</span>
+<div class="viewcode-block" id="CloudManInstance.disable_autoscaling"><a class="viewcode-back" href="../../api_docs/cloudman/all.html#bioblend.cloudman.CloudManInstance.disable_autoscaling">[docs]</a>    <span class="k">def</span> <span class="nf">disable_autoscaling</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Disable autoscaling, meaning that worker nodes will need to be manually</span>
+<span class="sd">        added and removed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">autoscaling_enabled</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_make_get_request</span><span class="p">(</span><span class="s">&quot;/cloud/toggle_autoscaling&quot;</span><span class="p">)</span>
+</div>
+    <span class="nd">@block_till_vm_ready</span>
+<div class="viewcode-block" id="CloudManInstance.adjust_autoscaling"><a class="viewcode-back" href="../../api_docs/cloudman/all.html#bioblend.cloudman.CloudManInstance.adjust_autoscaling">[docs]</a>    <span class="k">def</span> <span class="nf">adjust_autoscaling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minimum_nodes</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">maximum_nodes</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adjust the autoscaling configuration parameters.</span>
+
+<span class="sd">        The number of worker nodes in the cluster is bounded by the optional</span>
+<span class="sd">        ``minimum_nodes`` and ``maximum_nodes`` parameters. If a parameter is</span>
+<span class="sd">        not provided then its configuration value does not change.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">autoscaling_enabled</span><span class="p">()):</span>
+            <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;as_min_adj&#39;</span><span class="p">:</span> <span class="n">minimum_nodes</span><span class="p">,</span> <span class="s">&#39;as_max_adj&#39;</span><span class="p">:</span> <span class="n">maximum_nodes</span><span class="p">}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_make_get_request</span><span class="p">(</span><span class="s">&quot;/cloud/adjust_autoscaling&quot;</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span>
+</div>
+    <span class="nd">@block_till_vm_ready</span>
+<div class="viewcode-block" id="CloudManInstance.get_galaxy_state"><a class="viewcode-back" href="../../api_docs/cloudman/all.html#bioblend.cloudman.CloudManInstance.get_galaxy_state">[docs]</a>    <span class="k">def</span> <span class="nf">get_galaxy_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the current status of Galaxy running on the cluster.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;srvc&#39;</span><span class="p">:</span> <span class="s">&#39;Galaxy&#39;</span><span class="p">}</span>
+        <span class="n">status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_get_request</span><span class="p">(</span><span class="s">&quot;/cloud/get_srvc_status&quot;</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">status</span><span class="p">[</span><span class="s">&#39;status&#39;</span><span class="p">]</span>
+</div>
+    <span class="nd">@block_till_vm_ready</span>
+<div class="viewcode-block" id="CloudManInstance.terminate"><a class="viewcode-back" href="../../api_docs/cloudman/all.html#bioblend.cloudman.CloudManInstance.terminate">[docs]</a>    <span class="k">def</span> <span class="nf">terminate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">terminate_master_instance</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">delete_cluster</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Terminate this CloudMan cluster. There is an option to also terminate the</span>
+<span class="sd">        master instance (all worker instances will be terminated in the process</span>
+<span class="sd">        of cluster termination), and delete the whole cluster.</span>
+
+<span class="sd">        .. note::</span>
+<span class="sd">            Deleting a cluster is irreversible - all of the data will be</span>
+<span class="sd">            permanently deleted.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;terminate_master_instance&#39;</span><span class="p">:</span> <span class="n">terminate_master_instance</span><span class="p">,</span>
+                   <span class="s">&#39;delete_cluster&#39;</span><span class="p">:</span> <span class="n">delete_cluster</span><span class="p">}</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_get_request</span><span class="p">(</span><span class="s">&quot;/cloud/kill_all&quot;</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span>
+                <span class="n">timeout</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span>
+</div>
+    <span class="k">def</span> <span class="nf">_make_get_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="p">{},</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Private function that makes a GET request to the nominated ``url``,</span>
+<span class="sd">        with the provided GET ``parameters``. Optionally, set the ``timeout``</span>
+<span class="sd">        to stop waiting for a response after a given number of seconds. This is</span>
+<span class="sd">        particularly useful when terminating a cluster as it may terminate</span>
+<span class="sd">        before sending a response.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cloudman_url</span> <span class="o">+</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span>
+                <span class="n">auth</span><span class="o">=</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">password</span><span class="p">),</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">r</span><span class="o">.</span><span class="n">json</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">BioBlend 0.2.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Enis Afgan.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

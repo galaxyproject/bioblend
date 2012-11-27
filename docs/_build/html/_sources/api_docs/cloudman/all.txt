@@ -2,10 +2,10 @@
 API documentation for interacting with CloudMan
 ===============================================
 
-.. autoclass:: blend.cloudman.launch.CloudManLauncher
+.. autoclass:: bioblend.cloudman.launch.CloudManLauncher
     :members:
     :private-members:
 
-.. autoclass:: blend.cloudman.CloudManInstance
+.. autoclass:: bioblend.cloudman.CloudManInstance
     :members:
     :undoc-members:

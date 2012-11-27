@@ -1,8 +1,8 @@
 import os
 import ConfigParser
 
-# By default we use two locations for the blend configurations,
-# /etc/blend.cfg and ~/.blend (which works on Windows and Unix).
+# By default we use two locations for the BioBlend configurations,
+# /etc/bioblend.cfg and ~/.bioblend (which works on Windows and Unix).
 BioBlendConfigPath = '/etc/bioblend.cfg'
 BioBlendConfigLocations = [BioBlendConfigPath]
 UserConfigPath = os.path.join(os.path.expanduser('~'), '.bioblend')

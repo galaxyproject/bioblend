@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>blend.galaxy &mdash; Blend 0.1 documentation</title>
+    <title>bioblend.galaxy &mdash; BioBlend 0.2.0 documentation</title>
     
     <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '0.1',
+        VERSION:     '0.2.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
-    <link rel="top" title="Blend 0.1 documentation" href="../../index.html" />
+    <link rel="top" title="BioBlend 0.2.0 documentation" href="../../index.html" />
     <link rel="up" title="Module code" href="../index.html" /> 
   </head>
   <body>
@@ -35,7 +35,10 @@
         <li class="right" style="margin-right: 10px">
           <a href="../../genindex.html" title="General Index"
              accesskey="I">index</a></li>
-        <li><a href="../../index.html">Blend 0.1 documentation</a> &raquo;</li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">BioBlend 0.2.0 documentation</a> &raquo;</li>
           <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
@@ -45,15 +48,20 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <h1>Source code for blend.galaxy</h1><div class="highlight"><pre>
+  <h1>Source code for bioblend.galaxy</h1><div class="highlight"><pre>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">A base representation of an instance of Galaxy</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">requests</span>
-<span class="kn">from</span> <span class="nn">blend.galaxy</span> <span class="kn">import</span> <span class="p">(</span><span class="n">libraries</span><span class="p">,</span> <span class="n">histories</span><span class="p">,</span> <span class="n">workflows</span><span class="p">,</span> <span class="n">datasets</span><span class="p">,</span> <span class="n">users</span><span class="p">)</span>
+<span class="kn">import</span> <span class="nn">urlparse</span>
+<span class="kn">import</span> <span class="nn">poster</span>
+<span class="kn">import</span> <span class="nn">urllib2</span>
+<span class="kn">import</span> <span class="nn">simplejson</span>
+<span class="kn">from</span> <span class="nn">bioblend.galaxy</span> <span class="kn">import</span> <span class="p">(</span><span class="n">libraries</span><span class="p">,</span> <span class="n">histories</span><span class="p">,</span> <span class="n">workflows</span><span class="p">,</span> <span class="n">datasets</span><span class="p">,</span> <span class="n">users</span><span class="p">)</span>
 
-<div class="viewcode-block" id="GalaxyInstance"><a class="viewcode-back" href="../../api_docs/galaxy/all.html#blend.galaxy.GalaxyInstance">[docs]</a><span class="k">class</span> <span class="nc">GalaxyInstance</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-<div class="viewcode-block" id="GalaxyInstance.__init__"><a class="viewcode-back" href="../../api_docs/galaxy/all.html#blend.galaxy.GalaxyInstance.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+
+<div class="viewcode-block" id="GalaxyInstance"><a class="viewcode-back" href="../../api_docs/galaxy/all.html#bioblend.galaxy.GalaxyInstance">[docs]</a><span class="k">class</span> <span class="nc">GalaxyInstance</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="GalaxyInstance.__init__"><a class="viewcode-back" href="../../api_docs/galaxy/all.html#bioblend.galaxy.GalaxyInstance.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        A base representation of an instance of Galaxy, identified by a</span>
 <span class="sd">        URL and a user&#39;s API key.</span>
@@ -65,7 +73,7 @@
 <span class="sd">        histories, and get a list of all the user&#39;s histories, the following</span>
 <span class="sd">        should be done::</span>
 
-<span class="sd">            from blend import galaxy</span>
+<span class="sd">            from bioblend import galaxy</span>
 
 <span class="sd">            gi = galaxy.GalaxyInstance(url=&#39;http://127.0.0.1:8000&#39;, key=&#39;your_api_key&#39;)</span>
 
@@ -80,11 +88,16 @@
 <span class="sd">        :param key: User&#39;s API key for the given instance of Galaxy, obtained</span>
 <span class="sd">                    from the user preferences.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="s">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">url</span><span class="p">,</span> <span class="s">&#39;api&#39;</span><span class="p">])</span> <span class="c"># All of Galaxy&#39;s API&#39;s are rooted at &lt;url&gt;/api</span>
+        <span class="c"># Make sure the url scheme is defined (otherwise requests will not work)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">urlparse</span><span class="o">.</span><span class="n">urlparse</span><span class="p">(</span><span class="n">url</span><span class="p">)</span><span class="o">.</span><span class="n">scheme</span><span class="p">:</span>
+            <span class="n">url</span> <span class="o">=</span> <span class="s">&quot;http://&quot;</span> <span class="o">+</span> <span class="n">url</span>
+        <span class="c"># All of Galaxy&#39;s API&#39;s are rooted at &lt;url&gt;/api so make that the base url</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">base_url</span> <span class="o">=</span> <span class="n">url</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">urlparse</span><span class="o">.</span><span class="n">urljoin</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="s">&#39;api&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="o">=</span> <span class="n">key</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">default_params</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;key&#39;</span><span class="p">:</span> <span class="n">key</span><span class="p">}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">json_headers</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;Content-Type&#39;</span><span class="p">:</span> <span class="s">&#39;application/json&#39;</span><span class="p">}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">verify</span> <span class="o">=</span> <span class="bp">False</span> <span class="c"># Should SSL verification be done</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verify</span> <span class="o">=</span> <span class="bp">False</span>  <span class="c"># Should SSL verification be done</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">libraries</span> <span class="o">=</span> <span class="n">libraries</span><span class="o">.</span><span class="n">LibraryClient</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">histories</span> <span class="o">=</span> <span class="n">histories</span><span class="o">.</span><span class="n">HistoryClient</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">workflows</span> <span class="o">=</span> <span class="n">workflows</span><span class="o">.</span><span class="n">WorkflowClient</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
@@ -120,7 +133,7 @@
                 <span class="n">c_url</span> <span class="o">=</span> <span class="s">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">c_url</span><span class="p">,</span> <span class="s">&#39;contents&#39;</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">c_url</span>
 
-<div class="viewcode-block" id="GalaxyInstance.make_get_request"><a class="viewcode-back" href="../../api_docs/galaxy/all.html#blend.galaxy.GalaxyInstance.make_get_request">[docs]</a>    <span class="k">def</span> <span class="nf">make_get_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="GalaxyInstance.make_get_request"><a class="viewcode-back" href="../../api_docs/galaxy/all.html#bioblend.galaxy.GalaxyInstance.make_get_request">[docs]</a>    <span class="k">def</span> <span class="nf">make_get_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Make a GET request using the provided url.</span>
 
@@ -130,32 +143,46 @@
 <span class="sd">        the server via the request.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">params</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;key&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
-            <span class="n">params</span><span class="p">[</span><span class="s">&#39;key&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span>
+            <span class="n">params</span><span class="p">[</span><span class="s">&#39;key&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_params</span>
         <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verify</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">r</span>
 </div>
-<div class="viewcode-block" id="GalaxyInstance.make_post_request"><a class="viewcode-back" href="../../api_docs/galaxy/all.html#blend.galaxy.GalaxyInstance.make_post_request">[docs]</a>    <span class="k">def</span> <span class="nf">make_post_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">payload</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="GalaxyInstance.make_post_request"><a class="viewcode-back" href="../../api_docs/galaxy/all.html#bioblend.galaxy.GalaxyInstance.make_post_request">[docs]</a>    <span class="k">def</span> <span class="nf">make_post_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">payload</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">files_attached</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Make a POST request using the provided ``url`` and ``payload``.</span>
-<span class="sd">        The ``payload`` must be a dict that can be converted into a JSON</span>
-<span class="sd">        object (via ``simplejson.dumps``)</span>
+<span class="sd">        The ``payload`` must be a dict that contains the request values.</span>
+<span class="sd">        The payload dict may contain file handles (in which case the files_attached</span>
+<span class="sd">        flag must be set to true).</span>
 
 <span class="sd">        If the ``params`` are not provided, use ``default_params`` class field.</span>
 <span class="sd">        If params are provided and the provided dict does not have ``key`` key,</span>
 <span class="sd">        the default ``self.key`` value will be included in what&#39;s passed to</span>
 <span class="sd">        the server via the request.</span>
+
+<span class="sd">        The return value will contain the response body as a JSON object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">params</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;key&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
-            <span class="n">params</span><span class="p">[</span><span class="s">&#39;key&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span>
+            <span class="n">params</span><span class="p">[</span><span class="s">&#39;key&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_params</span>
-        <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">json_headers</span><span class="p">,</span>
-                <span class="n">verify</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verify</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">r</span>
+
+
+        <span class="k">if</span> <span class="n">files_attached</span><span class="p">:</span>
+            <span class="n">payload</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">params</span><span class="p">)</span> <span class="c"># merge query string values into request body instead</span>
+            <span class="n">poster</span><span class="o">.</span><span class="n">streaminghttp</span><span class="o">.</span><span class="n">register_openers</span><span class="p">()</span>
+            <span class="n">datagen</span><span class="p">,</span> <span class="n">headers</span> <span class="o">=</span> <span class="n">poster</span><span class="o">.</span><span class="n">encode</span><span class="o">.</span><span class="n">multipart_encode</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+            <span class="n">request</span> <span class="o">=</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">Request</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">datagen</span><span class="p">,</span> <span class="n">headers</span><span class="p">)</span>
+            <span class="n">fp</span> <span class="o">=</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">simplejson</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fp</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">payload</span> <span class="o">=</span> <span class="n">simplejson</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">json_headers</span><span class="p">,</span>
+                    <span class="n">verify</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verify</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">r</span><span class="o">.</span><span class="n">json</span>
 </div>
-<div class="viewcode-block" id="GalaxyInstance.make_delete_request"><a class="viewcode-back" href="../../api_docs/galaxy/all.html#blend.galaxy.GalaxyInstance.make_delete_request">[docs]</a>    <span class="k">def</span> <span class="nf">make_delete_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="GalaxyInstance.make_delete_request"><a class="viewcode-back" href="../../api_docs/galaxy/all.html#bioblend.galaxy.GalaxyInstance.make_delete_request">[docs]</a>    <span class="k">def</span> <span class="nf">make_delete_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Make a DELETE request using the provided ``url`` and the optional</span>
 <span class="sd">        arguments.</span>
@@ -168,12 +195,12 @@
 <span class="sd">        the server via the request.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">params</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;key&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
-            <span class="n">params</span><span class="p">[</span><span class="s">&#39;key&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span>
+            <span class="n">params</span><span class="p">[</span><span class="s">&#39;key&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_params</span>
         <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verify</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">r</span>
-</pre></div></div></div>
+        <span class="k">return</span> <span class="n">r</span></div></div>
+</pre></div>
 
           </div>
         </div>
@@ -203,7 +230,10 @@
         <li class="right" style="margin-right: 10px">
           <a href="../../genindex.html" title="General Index"
              >index</a></li>
-        <li><a href="../../index.html">Blend 0.1 documentation</a> &raquo;</li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">BioBlend 0.2.0 documentation</a> &raquo;</li>
           <li><a href="../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>

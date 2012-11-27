@@ -1,0 +1,210 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bioblend.galaxy.datasets &mdash; BioBlend 0.2.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.2.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="BioBlend 0.2.0 documentation" href="../../../index.html" />
+    <link rel="up" title="bioblend.galaxy" href="../galaxy.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">BioBlend 0.2.0 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../galaxy.html" accesskey="U">bioblend.galaxy</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for bioblend.galaxy.datasets</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Contains possible interactions with the Galaxy Datasets</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">bioblend.galaxy.client</span> <span class="kn">import</span> <span class="n">Client</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">import</span> <span class="nn">urllib2</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DatasetClient"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#bioblend.galaxy.datasets.DatasetClient">[docs]</a><span class="k">class</span> <span class="nc">DatasetClient</span><span class="p">(</span><span class="n">Client</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">galaxy_instance</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">module</span> <span class="o">=</span> <span class="s">&#39;datasets&#39;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">DatasetClient</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">galaxy_instance</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DatasetClient.show_dataset"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#bioblend.galaxy.datasets.DatasetClient.show_dataset">[docs]</a>    <span class="k">def</span> <span class="nf">show_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset_id</span><span class="p">,</span> <span class="n">deleted</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Display information about and/or content of a dataset. This can be a</span>
+<span class="sd">        history or a library dataset.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Client</span><span class="o">.</span><span class="n">_get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">dataset_id</span><span class="p">,</span> <span class="n">deleted</span><span class="o">=</span><span class="n">deleted</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="DatasetClient.download_dataset"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#bioblend.galaxy.datasets.DatasetClient.download_dataset">[docs]</a>    <span class="k">def</span> <span class="nf">download_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset_id</span><span class="p">,</span> <span class="n">file_path</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">use_default_filename</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">wait_for_completion</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">maxwait</span><span class="o">=</span><span class="mi">12000</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Downloads the dataset identified by &#39;id&#39;.</span>
+
+<span class="sd">        :type dataset_id: string</span>
+<span class="sd">        :param dataset_id: Encoded Dataset ID</span>
+
+<span class="sd">        :type file_path: string</span>
+<span class="sd">        :param file_path: If the file_path argument is provided, the dataset will be streamed to disk</span>
+<span class="sd">                          at that path (Should not contain filename if use_default_name=True).</span>
+<span class="sd">                          If the file_path argument is not provided, the dataset content is loaded into memory</span>
+<span class="sd">                          and returned by the method (Memory consumption may be heavy as the entire file</span>
+<span class="sd">                          will be in memory).</span>
+
+<span class="sd">        :type use_default_name: boolean</span>
+<span class="sd">        :param use_default_name: If the use_default_name parameter is True, the exported</span>
+<span class="sd">                                 file will be saved as file_local_path/%s,</span>
+<span class="sd">                                 where %s is the dataset name.</span>
+<span class="sd">                                 If use_default_name is False, file_local_path is assumed to</span>
+<span class="sd">                                 contain the full file path including filename.</span>
+
+<span class="sd">        :type wait_for_completion: boolean</span>
+<span class="sd">        :param wait_for_completion: If wait_for_completion is True, this call will block till the dataset is ready.</span>
+<span class="sd">                                    If the dataset state becomes invalid, a DatasetStateException will be thrown.</span>
+
+<span class="sd">        :type maxwait: float</span>
+<span class="sd">        :param maxwait: Time (in seconds) to wait for dataset to complete.</span>
+<span class="sd">                        If the dataset state is not complete within this time, a DatasetTimeoutException will be thrown.</span>
+
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        :return: If a file_path argument is not provided, returns a dict containing the file_content.</span>
+<span class="sd">                 Otherwise returns nothing.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">wait_for_completion</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_block_until_dataset_ready</span><span class="p">(</span><span class="n">dataset_id</span><span class="p">,</span> <span class="n">maxwait</span><span class="o">=</span><span class="n">maxwait</span><span class="p">)</span>
+
+        <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">show_dataset</span><span class="p">(</span><span class="n">dataset_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">dataset</span><span class="p">[</span><span class="s">&#39;state&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;ok&#39;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">DatasetStateException</span><span class="p">(</span><span class="s">&quot;Dataset not ready. Dataset id: </span><span class="si">%s</span><span class="s">, current state: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">dataset_id</span><span class="p">,</span> <span class="n">dataset</span><span class="p">[</span><span class="s">&#39;state&#39;</span><span class="p">]))</span>
+
+        <span class="c"># Append the dataset_id to the base history contents URL</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="s">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">gi</span><span class="o">.</span><span class="n">base_url</span><span class="p">,</span> <span class="n">dataset</span><span class="p">[</span><span class="s">&#39;download_url&#39;</span><span class="p">]])</span>
+        <span class="k">if</span> <span class="n">file_path</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gi</span><span class="o">.</span><span class="n">make_get_request</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">r</span><span class="o">.</span><span class="n">content</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">req</span> <span class="o">=</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">use_default_filename</span><span class="p">:</span>
+                <span class="n">file_local_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">dataset</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">file_local_path</span> <span class="o">=</span> <span class="n">file_path</span>
+
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_local_path</span><span class="p">,</span> <span class="s">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+                <span class="n">shutil</span><span class="o">.</span><span class="n">copyfileobj</span><span class="p">(</span><span class="n">req</span><span class="p">,</span> <span class="n">fp</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">_is_dataset_complete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset_id</span><span class="p">):</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">show_dataset</span><span class="p">(</span><span class="n">dataset_id</span><span class="p">)</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s">&#39;state&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">state</span> <span class="o">==</span> <span class="s">&#39;ok&#39;</span> <span class="ow">or</span> <span class="n">state</span> <span class="o">==</span> <span class="s">&#39;error&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_block_until_dataset_ready</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset_id</span><span class="p">,</span> <span class="n">maxwait</span><span class="o">=</span><span class="mi">12000</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">raise_on_timeout</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Wait until the dataset state changes to ok or error.</span>
+<span class="sd">        Based on: https://github.com/salimfadhley/jenkinsapi/blob/master/jenkinsapi/api.py</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="n">maxwait</span> <span class="o">&gt;</span> <span class="mi">0</span>
+        <span class="k">assert</span> <span class="n">maxwait</span> <span class="o">&gt;</span> <span class="n">interval</span>
+        <span class="k">assert</span> <span class="n">interval</span> <span class="o">&gt;</span> <span class="mi">0</span>
+
+        <span class="k">for</span> <span class="n">time_left</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">maxwait</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">interval</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_dataset_complete</span><span class="p">(</span><span class="n">dataset_id</span><span class="p">):</span>
+                <span class="k">return</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span> <span class="s">&quot;Waiting for dataset </span><span class="si">%s</span><span class="s"> to complete. Will wait another </span><span class="si">%i</span><span class="s">s&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">dataset_id</span><span class="p">,</span> <span class="n">time_left</span><span class="p">))</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">interval</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">raise_on_timeout</span><span class="p">:</span>
+            <span class="c">#noinspection PyUnboundLocalVariable</span>
+            <span class="k">raise</span> <span class="n">DatasetTimeoutException</span><span class="p">(</span><span class="s">&quot;Waited too long for dataset to complete: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">dataset_id</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="DatasetStateException"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#bioblend.galaxy.datasets.DatasetStateException">[docs]</a><span class="k">class</span> <span class="nc">DatasetStateException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="DatasetTimeoutException"><a class="viewcode-back" href="../../../api_docs/galaxy/all.html#bioblend.galaxy.datasets.DatasetTimeoutException">[docs]</a><span class="k">class</span> <span class="nc">DatasetTimeoutException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">BioBlend 0.2.0 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../galaxy.html" >bioblend.galaxy</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Enis Afgan.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
