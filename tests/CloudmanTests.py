@@ -11,7 +11,7 @@ import unittest
 from mock import MagicMock
 from blend import cloudman
 
-class CloudManTest(unittest.TestCase):
+class CloudManTests(unittest.TestCase):
 
     def setUp(self):
         url = "http://127.0.0.1:42284"
