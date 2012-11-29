@@ -312,7 +312,7 @@ class CloudManInstance(GenericVMInstance):
         self._set_url(url)             
 
     def __repr__(self):
-        return "CloudMan instance at {0}/cloud".format(self.url)
+        return "CloudMan instance at {0}".format(self.cloudman_url)
     
     def _update_host_name(self, host_name):
         """
@@ -340,11 +340,15 @@ class CloudManInstance(GenericVMInstance):
             parse_result = urlparse(url)
             super(CloudManInstance, self)._update_host_name(parse_result.hostname)
 
-        self.cloudman_url = url
+        self.url = url
     
     @property
-    def url(self):
-        return self.cloudman_url
+    def galaxy_url(self):
+        return self.url
+    
+    @property
+    def cloudman_url(self):
+        return '/'.join([self.url, 'cloud'])
     
     @staticmethod
     def launch_instance(cfg,
@@ -380,7 +384,7 @@ class CloudManInstance(GenericVMInstance):
         of cluster platform to initialize.
         """
         if not self.initialized:
-            self._make_get_request("/cloud/initialize_cluster", parameters={'startup_opt': type,
+            self._make_get_request("initialize_cluster", parameters={'startup_opt': type,
                                                                             'g_pss' : initial_storage_size,
                                                                             'shared_bucket': shared_bucket})
             self.initialized = True
@@ -392,21 +396,21 @@ class CloudManInstance(GenericVMInstance):
         CloudMan docs about the available types. If the cluster has not yet been
         initialized, this method returns ``None``.
         """
-        return self._make_get_request("/cloud/get_cluster_type")
+        return self._make_get_request("get_cluster_type")
 
     @block_till_vm_ready
     def get_status(self):
         """
         Get status information on this CloudMan instance.
         """
-        return self._make_get_request("/cloud/instance_state_json")
+        return self._make_get_request("instance_state_json")
 
     @block_till_vm_ready
     def get_nodes(self):
         """
         Get a list of nodes currently running in this CloudMan cluster.
         """
-        instance_feed_json = self._make_get_request("/cloud/instance_feed_json")
+        instance_feed_json = self._make_get_request("instance_feed_json")
         return instance_feed_json['instances']
 
     @block_till_vm_ready
@@ -423,7 +427,7 @@ class CloudManInstance(GenericVMInstance):
         Get static information on this CloudMan instance.
         i.e. state that doesn't change over the lifetime of the cluster
         """
-        return self._make_get_request("/cloud/static_instance_state_json")        
+        return self._make_get_request("static_instance_state_json")        
     
     @block_till_vm_ready    
     def get_master_ip(self):
@@ -457,7 +461,7 @@ class CloudManInstance(GenericVMInstance):
         payload = {'number_nodes': num_nodes,
                    'instance_type': instance_type,
                    'spot_price': spot_price}
-        return self._make_get_request("/cloud/add_instances", parameters=payload)
+        return self._make_get_request("add_instances", parameters=payload)
 
     @block_till_vm_ready
     def remove_nodes(self, num_nodes, force=False):
@@ -469,7 +473,7 @@ class CloudManInstance(GenericVMInstance):
         whether the nodes should be forcibly removed rather than gracefully removed.
         """
         payload = {'number_nodes': num_nodes, 'force_termination': force}
-        result = self._make_get_request("/cloud/remove_instances", parameters=payload)
+        result = self._make_get_request("remove_instances", parameters=payload)
         return result
 
     @block_till_vm_ready
@@ -484,7 +488,7 @@ class CloudManInstance(GenericVMInstance):
 
         """
         payload = {'instance_id': instance_id}
-        return self._make_get_request("/cloud/remove_instance", parameters=payload)
+        return self._make_get_request("remove_instance", parameters=payload)
 
     @block_till_vm_ready
     def reboot_node(self, instance_id):
@@ -495,7 +499,7 @@ class CloudManInstance(GenericVMInstance):
         to reboot.
         """
         payload = {'instance_id': instance_id}
-        return self._make_get_request("/cloud/reboot_instance", parameters=payload)
+        return self._make_get_request("reboot_instance", parameters=payload)
 
     @block_till_vm_ready
     def autoscaling_enabled(self):
@@ -515,7 +519,7 @@ class CloudManInstance(GenericVMInstance):
         """
         if not(self.autoscaling_enabled()):
             payload = {'as_min': minimum_nodes, 'as_max': maximum_nodes}
-            self._make_get_request("/cloud/toggle_autoscaling", parameters=payload)
+            self._make_get_request("toggle_autoscaling", parameters=payload)
 
     @block_till_vm_ready
     def disable_autoscaling(self):
@@ -524,7 +528,7 @@ class CloudManInstance(GenericVMInstance):
         added and removed.
         """
         if (self.autoscaling_enabled()):
-            self._make_get_request("/cloud/toggle_autoscaling")
+            self._make_get_request("toggle_autoscaling")
 
     @block_till_vm_ready
     def adjust_autoscaling(self, minimum_nodes=None, maximum_nodes=None):
@@ -537,7 +541,7 @@ class CloudManInstance(GenericVMInstance):
         """
         if (self.autoscaling_enabled()):
             payload = {'as_min_adj': minimum_nodes, 'as_max_adj': maximum_nodes}
-            self._make_get_request("/cloud/adjust_autoscaling", parameters=payload)
+            self._make_get_request("adjust_autoscaling", parameters=payload)
 
     @block_till_vm_ready
     def get_galaxy_state(self):
@@ -545,7 +549,7 @@ class CloudManInstance(GenericVMInstance):
         Get the current status of Galaxy running on the cluster.
         """
         payload = {'srvc': 'Galaxy'}
-        status = self._make_get_request("/cloud/get_srvc_status", parameters=payload)
+        status = self._make_get_request("get_srvc_status", parameters=payload)
         return status['status']
 
     @block_till_vm_ready
@@ -561,7 +565,7 @@ class CloudManInstance(GenericVMInstance):
         """
         payload = {'terminate_master_instance': terminate_master_instance,
                    'delete_cluster': delete_cluster}
-        result = self._make_get_request("/cloud/kill_all", parameters=payload,
+        result = self._make_get_request("kill_all", parameters=payload,
                 timeout=15)
         return result
 
@@ -573,6 +577,6 @@ class CloudManInstance(GenericVMInstance):
         particularly useful when terminating a cluster as it may terminate
         before sending a response.
         """
-        r = requests.get(self.url + url, params=parameters,
+        r = requests.get('/'.join([self.cloudman_url, url]), params=parameters,
                 auth=("", self.password), timeout=timeout)
         return r.json
