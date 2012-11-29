@@ -309,10 +309,10 @@ class CloudManInstance(GenericVMInstance):
             self.password = password
         else:
             self.password = self.config.password
-        self._set_cloudman_url(url)             
+        self._set_url(url)             
 
     def __repr__(self):
-        return "CloudMan instance at {0}/cloud".format(self.cloudman_url)
+        return "CloudMan instance at {0}/cloud".format(self.url)
     
     def _update_host_name(self, host_name):
         """
@@ -320,13 +320,13 @@ class CloudManInstance(GenericVMInstance):
         Makes sure that the cloudman_url
         is kept in sync with the host name.
         """
-        self._set_cloudman_url(host_name)
+        self._set_url(host_name)
         
     def _init_instance(self, hostname):
         super(CloudManInstance, self)._init_instance(hostname)
         self.initialize(self.config.cluster_type, self.config.initial_storage_size)
         
-    def _set_cloudman_url(self, url):
+    def _set_url(self, url):
         """
         Keeps the cloudman url as well as
         the host name in sync.
@@ -342,7 +342,8 @@ class CloudManInstance(GenericVMInstance):
 
         self.cloudman_url = url
     
-    def get_cloudman_url(self):
+    @property
+    def url(self):
         return self.cloudman_url
     
     @staticmethod
@@ -572,6 +573,6 @@ class CloudManInstance(GenericVMInstance):
         particularly useful when terminating a cluster as it may terminate
         before sending a response.
         """
-        r = requests.get(self.cloudman_url + url, params=parameters,
+        r = requests.get(self.url + url, params=parameters,
                 auth=("", self.password), timeout=timeout)
         return r.json
