@@ -309,42 +309,24 @@ class CloudManInstance(GenericVMInstance):
             self.password = password
         else:
             self.password = self.config.password
-<<<<<<< HEAD:bioblend/cloudman/__init__.py
-        self._set_cloudman_url(url)
-
-    def __repr__(self):
-        return "CloudMan instance at {0}/cloud".format(self.cloudman_url)
-
-=======
-        self._set_url(url)             
+       self._set_url(url)
 
     def __repr__(self):
         return "CloudMan instance at {0}".format(self.cloudman_url)
-    
->>>>>>> c254d8c6932adf15ef2cd9c4084870f84d48fa16:blend/cloudman/__init__.py
+
     def _update_host_name(self, host_name):
         """
         Overrides the super-class method
         Makes sure that the cloudman_url
         is kept in sync with the host name.
         """
-<<<<<<< HEAD:bioblend/cloudman/__init__.py
-        self._set_cloudman_url(host_name)
-
-    def _init_instance(self, hostname):
-        super(CloudManInstance, self)._init_instance(hostname)
-        self.initialize(self.config.cluster_type, self.config.initial_storage_size)
-
-    def _set_cloudman_url(self, url):
-=======
         self._set_url(host_name)
-        
+
     def _init_instance(self, hostname):
         super(CloudManInstance, self)._init_instance(hostname)
         self.initialize(self.config.cluster_type, self.config.initial_storage_size)
-        
+
     def _set_url(self, url):
->>>>>>> c254d8c6932adf15ef2cd9c4084870f84d48fa16:blend/cloudman/__init__.py
         """
         Keeps the cloudman url as well as
         the host name in sync.
@@ -357,28 +339,18 @@ class CloudManInstance(GenericVMInstance):
             # parse the corrected url again to extract hostname
             parse_result = urlparse(url)
             super(CloudManInstance, self)._update_host_name(parse_result.hostname)
-
-<<<<<<< HEAD:bioblend/cloudman/__init__.py
-        self.cloudman_url = url
-
-    def get_cloudman_url(self):
-        return self.cloudman_url
-
-=======
         self.url = url
-    
+
     @property
     def galaxy_url(self):
         return self.url
-    
+
     @property
     def cloudman_url(self):
         return '/'.join([self.url, 'cloud'])
-    
->>>>>>> c254d8c6932adf15ef2cd9c4084870f84d48fa16:blend/cloudman/__init__.py
+
     @staticmethod
-    def launch_instance(cfg,
-                        **kwargs):
+    def launch_instance(cfg, **kwargs):
         """
         Launches a new instance of cloudman on the specified cloud infrastructure.
 
@@ -453,18 +425,12 @@ class CloudManInstance(GenericVMInstance):
         Get static information on this CloudMan instance.
         i.e. state that doesn't change over the lifetime of the cluster
         """
-<<<<<<< HEAD:bioblend/cloudman/__init__.py
-        return self._make_get_request("/cloud/static_instance_state_json")
+        return self._make_get_request("static_instance_state_json")
 
     @block_till_vm_ready
-=======
-        return self._make_get_request("static_instance_state_json")        
-    
-    @block_till_vm_ready    
->>>>>>> c254d8c6932adf15ef2cd9c4084870f84d48fa16:blend/cloudman/__init__.py
     def get_master_ip(self):
         """
-        Returns the public IP of the master node in this Cloudman cluster
+        Returns the public IP of the master node in this CloudMan cluster
         """
         status_json = self.get_static_state()
         return status_json['master_ip']
@@ -472,7 +438,7 @@ class CloudManInstance(GenericVMInstance):
     @block_till_vm_ready
     def get_master_id(self):
         """
-        Returns the instance ID of the master node in this Cloudman cluster
+        Returns the instance ID of the master node in this CloudMan cluster
         """
         status_json = self.get_static_state()
         return status_json['master_id']

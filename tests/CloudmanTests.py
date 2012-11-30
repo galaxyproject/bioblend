@@ -87,11 +87,6 @@ class CloudManTests(unittest.TestCase):
         params = {'instance_id': "abcdef"}
         self.cm._make_get_request.assert_called_with("reboot_instance", parameters=params)
 
-    def test_autoscaling_enabled_false(self):
-        return_json_string = {"autoscaling": {"use_autoscaling": False, "as_max": "N/A", "as_min": "N/A"}}
-        self.cm._make_get_request = MagicMock(return_value=return_json_string)
-        self.assertFalse(self.cm.autoscaling_enabled())
-
     def test_autoscaling_enabled_true(self):
         return_json_string = {"autoscaling": {"use_autoscaling": True, "as_max": "3", "as_min": "1"}}
         self.cm._make_get_request = MagicMock(return_value=return_json_string)
@@ -130,14 +125,8 @@ class CloudManTests(unittest.TestCase):
         return_json_string = {"autoscaling": {"use_autoscaling": True, "as_max": "3", "as_min": "1"}}
         self.cm._make_get_request = MagicMock(return_value=return_json_string)
         self.cm.adjust_autoscaling(minimum_nodes=3,maximum_nodes=4)
-
-<<<<<<< HEAD:tests/cloudman_tests.py
         params = {'as_min_adj': 3, 'as_max_adj': 4}
-        self.cm._make_get_request.assert_called_with("/cloud/adjust_autoscaling", parameters=params)
-=======
-        params = {'as_min_adj': 3, 'as_max_adj': 4} 
         self.cm._make_get_request.assert_called_with("adjust_autoscaling", parameters=params)
->>>>>>> c254d8c6932adf15ef2cd9c4084870f84d48fa16:tests/CloudmanTests.py
 
     def test_get_galaxy_state_stopped(self):
         return_json = """{"status": "'Galaxy' is not running", "srvc": "Galaxy"}"""
