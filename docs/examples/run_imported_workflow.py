@@ -1,0 +1,94 @@
+import sys
+from blend import galaxy
+
+"""
+This example demonstrates running a tophat+cufflinks workflow over paired-end data. 
+This is a task we could not do Galaxy's GUI batch mode, because the inputs need to be paired.
+The workflow is imported from a json file (previously exported from Galaxy), and the input data files from URLs.
+
+This example creates a new Data Library, so you must be a Galaxy Admin on the instance you run the script against.
+
+Usage: python run_imported_workflow.py <galaxy-url> <galaxy-API-key>
+
+"""
+
+## -----------------------------------
+## Config information for this example
+
+# Specify workflow and data to import into Galaxy
+
+workflow_file = 'tophat_cufflinks_pairedend_workflow.ga'
+
+import_file_pairs = [ 
+    ('https://bioblend.s3.amazonaws.com/C1_R1_1.chr4.fq', 'https://bioblend.s3.amazonaws.com/C1_R1_2.chr4.fq'),
+    ('https://bioblend.s3.amazonaws.com/C1_R2_1.chr4.fq', 'https://bioblend.s3.amazonaws.com/C1_R2_2.chr4.fq'),
+    ('https://bioblend.s3.amazonaws.com/C1_R3_1.chr4.fq', 'https://bioblend.s3.amazonaws.com/C1_R3_2.chr4.fq')
+]
+
+# Specify names of Library and History that will be created in Galaxy
+# In this simple example, these will be created even if items with the same name already exist.
+
+library_name = 'Imported data for API demo'
+output_history_name = 'Output from API demo'
+
+## -----------------------------------
+
+if len(sys.argv) != 3:
+    print "Usage: python run_imported_workflow.py <galaxy-url> <galaxy-API-key>"
+    sys.exit(1)
+galaxy_url = sys.argv[1]
+galaxy_key = sys.argv[2]
+
+print "Initiating Galaxy connection"
+
+gi = galaxy.GalaxyInstance(url=galaxy_url, key=galaxy_key)
+
+print "Importing workflow"
+
+wf_import_dict = gi.workflows.import_workflow_from_local_path(workflow_file)
+workflow = wf_import_dict['id']
+
+print "Creating data library '%s'" % library_name
+
+library_dict = gi.libraries.create_library(library_name)
+library = library_dict['id']
+
+print "Importing data"
+
+# Import each pair of files, and track the resulting identifiers.
+
+dataset_ids = []
+filenames = dict()
+for (file1, file2) in import_file_pairs:
+    dataset1 = gi.libraries.upload_file_from_url(library, file1, file_type='fastqsanger')
+    dataset2 = gi.libraries.upload_file_from_url(library, file2, file_type='fastqsanger')
+    id1, id2 = dataset1[0]['id'], dataset2[0]['id']
+    filenames[id1] = file1
+    filenames[id2] = file2
+    dataset_ids.append( (id1,id2) )
+    
+print "Creating output history '%s'" % output_history_name
+
+outputhist_dict = gi.histories.create_history(output_history_name)
+outputhist = outputhist_dict['id']
+
+print "Will run workflow on %d pairs of files" % len(dataset_ids)
+
+# Get the input step IDs from the workflow.
+# Note that we are assuming inputs are in order readpair-1 then readpair-2 as that's how our workflow is set up. A more general solution would be to check the input names.
+
+wf_dict = gi.workflows.show_workflow(workflow)
+input1 = wf_dict['inputs'].keys()[0]
+input2 = wf_dict['inputs'].keys()[1]
+
+# For each pair of datasets we imported, run the imported workflow
+# For each input we need to build a datamap dict with 'src' set to 'ld', as we stored our data in a Galaxy Library
+
+for (data1, data2) in dataset_ids:
+    print "Initiating workflow run on files %s, %s" % (filenames[data1], filenames[data2])
+    datamap = dict()
+    datamap[input1] = { 'src':'ld', 'id':data1 }
+    datamap[input2] = { 'src':'ld', 'id':data2 }
+    result = gi.workflows.run_workflow(workflow, datamap, history_id=outputhist, import_inputs_to_history=True)
+
+
