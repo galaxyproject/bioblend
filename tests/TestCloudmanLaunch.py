@@ -20,7 +20,8 @@ class TestCloudmanLaunch(CloudmanTestBase.CloudmanTestBase):
         Tests whether a valid config is validated properly.
         """
         #cfg = CloudManConfig(self.access_key, self.secret_key, self.cluster_name, self.ami_id, self.instance_type, self.password, cloud_metadata=self.cloud_metadata)
-        cfg = CloudManConfig(self.access_key, self.secret_key, self.cluster_name, self.ami_id, self.instance_type, self.password)
+        cls = TestCloudmanLaunch
+        cfg = CloudManConfig(cls.access_key, cls.secret_key, cls.cluster_name, cls.ami_id, cls.instance_type, cls.password, cloud_metadata=cls.cloud_metadata)
         result = cfg.validate()
         self.assertIsNone(result, "Validation did not return null to indicate success!")        
         
@@ -34,7 +35,8 @@ class TestCloudmanLaunch(CloudmanTestBase.CloudmanTestBase):
         
     def test_launch_and_terminate(self):    
         #cfg = CloudManConfig(self.access_key, self.secret_key, self.cluster_name, self.ami_id, self.instance_type, self.password, cloud_metadata=self.cloud_metadata)
-        cfg = CloudManConfig(self.access_key, self.secret_key, self.cluster_name, self.ami_id, self.instance_type, self.password)
+        cls = TestCloudmanLaunch
+        cfg = CloudManConfig(cls.access_key, cls.secret_key, cls.cluster_name, cls.ami_id, cls.instance_type, cls.password, cloud_metadata=cls.cloud_metadata)
         cmi = CloudManInstance.launch_instance(cfg)
         status = cmi.get_status()
         with self.assertRaises(Exception):

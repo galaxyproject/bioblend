@@ -58,9 +58,6 @@ class CloudmanTestBase(unittest.TestCase):
             cls.instance_type = 'm1.small'
             cls.password = 'password'
     
-    def setUp(self):
-        self.cmi = self.__class__.cmi
-        
     @classmethod
     def tearDownClass(cls):
         try:

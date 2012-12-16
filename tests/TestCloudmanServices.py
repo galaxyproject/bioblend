@@ -16,6 +16,9 @@ class TestCloudmanServices(CloudmanTestBase.CloudmanTestBase):
         cls.cfg = CloudManConfig(cls.access_key, cls.secret_key, cls.cluster_name, cls.ami_id, cls.instance_type, cls.password, cloud_metadata=cls.cloud_metadata)
         cls.cmi = CloudManInstance.launch_instance(cls.cfg)
         
+    def setUp(self):
+        self.cmi = self.__class__.cmi
+        
     def test_get_status(self):
         status = self.cmi.get_status()
         self.assertNotEqual(status, None)
