@@ -122,8 +122,9 @@ class HistoryClient(Client):
         state = {}
         history = self.show_history(history_id)
         state['state'] = history['state']
-        state['state_details'] = history['state_details']
-        state['percent_complete'] = 100 * history['state_details']['ok'] / sum(history['state_details'].itervalues())
+        if history.get('state_details') is not None:
+            state['state_details'] = history['state_details']
+            state['percent_complete'] = 100 * history['state_details']['ok'] / sum(history['state_details'].itervalues())
         return state
 
     def get_current_history(self):

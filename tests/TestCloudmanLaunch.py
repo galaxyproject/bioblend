@@ -1,0 +1,44 @@
+"""
+Tests the functionality of the Blend CloudMan API. These tests require working
+credentials to supported cloud infrastructure. 
+
+Use ``nose`` to run these unit tests.
+"""
+import unittest
+from bioblend.cloudman.launch import Bunch
+from bioblend.cloudman import CloudManConfig
+from bioblend.cloudman import CloudManInstance
+import CloudmanTestBase
+
+class TestCloudmanLaunch(CloudmanTestBase.CloudmanTestBase):
+
+    def setUp(self):
+        super(TestCloudmanLaunch, self).setUp() 
+
+    def test_validate_valid_config(self):
+        """
+        Tests whether a valid config is validated properly.
+        """
+        #cfg = CloudManConfig(self.access_key, self.secret_key, self.cluster_name, self.ami_id, self.instance_type, self.password, cloud_metadata=self.cloud_metadata)
+        cfg = CloudManConfig(self.access_key, self.secret_key, self.cluster_name, self.ami_id, self.instance_type, self.password)
+        result = cfg.validate()
+        self.assertIsNone(result, "Validation did not return null to indicate success!")        
+        
+    def test_validate_invalid_config(self):
+        """
+        Tests whether an invalid config is validated properly.
+        """
+        cfg = CloudManConfig()
+        result = cfg.validate()
+        self.assertIsNotNone(result, "Validation should have returned a value since the configuration was invalid!")        
+        
+    def test_launch_and_terminate(self):    
+        #cfg = CloudManConfig(self.access_key, self.secret_key, self.cluster_name, self.ami_id, self.instance_type, self.password, cloud_metadata=self.cloud_metadata)
+        cfg = CloudManConfig(self.access_key, self.secret_key, self.cluster_name, self.ami_id, self.instance_type, self.password)
+        cmi = CloudManInstance.launch_instance(cfg)
+        status = cmi.get_status()
+        with self.assertRaises(Exception):
+            #TODO: Terminate method is buggy on cloudman. Needs fix.
+            result = cmi.terminate(delete_cluster=True)
+        self.assertNotEqual(status['cluster_status'], 'ERROR', "instance.get_status() returned ERROR. Should return a successful status!")
+        
