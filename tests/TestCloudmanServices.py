@@ -28,7 +28,7 @@ class TestCloudmanServices(CloudmanTestBase.CloudmanTestBase):
         self.assertNotEqual(nodes, None)
 
     def test_add_nodes(self):
-        num_nodes = 5
+        num_nodes = 1
         status = self.cmi.add_nodes(num_nodes)
         self.assertNotEqual(status, None)
 

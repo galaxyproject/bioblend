@@ -15,10 +15,10 @@ class CloudmanTestBase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):        
         if os.environ.get('CLOUD_TYPE') == 'EC2':
-            cls.access_key = 'AKIAIPOLBVMMPXZKLAWA'
-            cls.secret_key = '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'
+            cls.access_key = os.environ['CLOUD_ACCESS_KEY']
+            cls.secret_key = os.environ['CLOUD_SECRET_KEY'] 
             cls.cluster_name = 'Blend CloudMan'
-            cls.ami_id = 'ami-46d4792f'
+            cls.ami_id = os.environ['CLOUD_AMI_ID']
             cls.instance_type = 'm1.small'
             cls.password = 'password'
             cls.cloud_metadata = Bunch(
@@ -38,8 +38,8 @@ class CloudmanTestBase(unittest.TestCase):
                         )
         else:
             # Assume OpenStack/NeCTAR
-            cls.access_key = '0103cea9ef094d9bab8d0ebdec654bf8'
-            cls.secret_key = '73cad7184c2740fa9623eb1c6cec7c70'
+            cls.access_key = os.environ['CLOUD_ACCESS_KEY']
+            cls.secret_key = os.environ['CLOUD_SECRET_KEY']
             cls.cloud_metadata = Bunch(id = '-1',
                                   name = "NeCTAR",
                                   cloud_type='openstack',
@@ -54,7 +54,7 @@ class CloudmanTestBase(unittest.TestCase):
                                   s3_port=8888,
                                   s3_conn_path='/')
             cls.cluster_name = 'Blend CloudMan'
-            cls.ami_id = 'ami-00000032'
+            cls.ami_id = os.environ['CLOUD_AMI_ID']
             cls.instance_type = 'm1.small'
             cls.password = 'password'
     
