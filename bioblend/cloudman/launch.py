@@ -301,7 +301,8 @@ class CloudManLauncher(object):
                               is_secure=ci['is_secure'],
                               region=r,
                               port=ci['ec2_port'],
-                              path=ci['ec2_conn_path'])
+                              path=ci['ec2_conn_path'],
+                              validate_certs=False)
         return ec2_conn
 
     def _compose_user_data(self, user_provided_data):
