@@ -309,7 +309,7 @@ class CloudManInstance(GenericVMInstance):
             self.password = password
         else:
             self.password = self.config.password
-       self._set_url(url)
+        self._set_url(url)
 
     def __repr__(self):
         return "CloudMan instance at {0}".format(self.cloudman_url)
