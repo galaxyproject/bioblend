@@ -577,4 +577,4 @@ class CloudManInstance(GenericVMInstance):
         """
         r = requests.get('/'.join([self.cloudman_url, url]), params=parameters,
                 auth=("", self.password), timeout=timeout)
-        return r.json
+        return r.json()
