@@ -105,6 +105,11 @@ class LibraryClient(Client):
         payload['file_type'] = keywords.get('file_type', 'auto')
         payload['dbkey'] = keywords.get('dbkey', '?')
         payload['create_type'] = 'file'
+        if keywords.get("roles", None):
+            payload["roles"] = keywords["roles"]
+        if keywords.get("link_data_only", None):
+            payload["link_data_only"] = str(keywords["link_data_only"])
+        # upload options
         if keywords.get('file_url', None) is not None:
             payload['upload_option'] = 'upload_file'
             payload['files_0|url_paste'] = keywords['file_url']
@@ -118,6 +123,9 @@ class LibraryClient(Client):
             payload['upload_option'] = 'upload_file'
             payload['files_0|file_data'] =  open(keywords['file_local_path'], 'rb')
             files_attached = True
+        elif keywords.get("filesystem_paths", None) is not None:
+            payload["upload_option"] = "upload_paths"
+            payload["filesystem_paths"] = keywords["filesystem_paths"]
 
         r = Client._post(self, payload, id=keywords['library_id'], contents=True,
                          files_attached=files_attached)
@@ -155,7 +163,9 @@ class LibraryClient(Client):
         del vars['self']
         return self._do_upload(**vars)
 
-    def upload_file_from_server(self, library_id, server_dir, folder_id=None, file_type='auto', dbkey='?'):
+    def upload_file_from_server(self, library_id, server_dir, folder_id=None,
+                                file_type='auto', dbkey='?', link_data_only=None,
+                                roles=""):
         """
         Upload a file to a library from a path on the server where Galaxy is running.
         If ``folder_id`` is not provided, the file will be placed in the root folder.
@@ -166,6 +176,20 @@ class LibraryClient(Client):
         more specific directories can be specified as part of the ``server_dir`` argument.
         All and only the files (ie, no folders) specified by the ``server_dir`` argument
         will be uploaded to the data library.
+        """
+        vars = locals().copy()
+        del vars['self']
+        return self._do_upload(**vars)
+
+    def upload_from_galaxy_filesystem(self, library_id, filesystem_paths, folder_id=None,
+                                      file_type="auto", dbkey="?", link_data_only=None,
+                                      roles=""):
+        """Upload a file from filesystem paths already present on the Galaxy server.
+
+        Provides API access for the 'Upload files from filesystem paths' approach.
+
+        ``link_data_only`` -- whether to copy data into Galaxy. Setting to 'link_to_files'
+          symlinks data instead of copying
         """
         vars = locals().copy()
         del vars['self']

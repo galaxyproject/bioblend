@@ -129,7 +129,7 @@ class GalaxyInstance(object):
             payload = simplejson.dumps(payload)
             r = requests.post(url, data=payload, headers=self.json_headers,
                     verify=self.verify, params=params)
-            return r.json
+            return r.json()
 
     def make_delete_request(self, url, payload=None, params=None):
         """
