@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>BioBlend &mdash; BioBlend 0.2.0 documentation</title>
+    <title>BioBlend &mdash; BioBlend 0.2.1 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.2.0',
+        VERSION:     '0.2.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="BioBlend 0.2.0 documentation" href="#" />
+    <link rel="top" title="BioBlend 0.2.1 documentation" href="#" />
     <link rel="next" title="API documentation for interacting with CloudMan" href="api_docs/cloudman/all.html" /> 
   </head>
   <body>
@@ -41,7 +41,7 @@
         <li class="right" >
           <a href="api_docs/cloudman/all.html" title="API documentation for interacting with CloudMan"
              accesskey="N">next</a> |</li>
-        <li><a href="#">BioBlend 0.2.0 documentation</a> &raquo;</li> 
+        <li><a href="#">BioBlend 0.2.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -55,10 +55,10 @@
 <div class="section" id="about">
 <h2>About<a class="headerlink" href="#about" title="Permalink to this headline">¶</a></h2>
 <p><a class="reference external" href="http://bioblend.readthedocs.org/">BioBlend</a> is a Python (2.6 or higher)
-library for interacting with <a class="reference external" href="http://usecloudman.org">CloudMan</a> and <a class="reference external" href="http://usegalaxy.org">Galaxy</a>&#8216;s API.</p>
+library for interacting with <a class="reference external" href="http://usecloudman.org/">CloudMan</a> and <a class="reference external" href="http://usegalaxy.org/">Galaxy</a>&#8216;s API.</p>
 <p>Conceptually, it makes it possible to script and automate the process of
 cloud infrastructure provisioning and scaling via CloudMan, and running of analyses
-within Galaxy. In reality, it makes it possible to do things like this:</p>
+via Galaxy. In reality, it makes it possible to do things like this:</p>
 <ul>
 <li><p class="first">Create a CloudMan compute cluster, via an API and directly from your local machine:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">bioblend.cloudman</span> <span class="kn">import</span> <span class="n">CloudManConfig</span>
@@ -90,7 +90,7 @@ within Galaxy. In reality, it makes it possible to do things like this:</p>
 </ul>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">Although this library allows you to blend these three services into a cohesive unit,
+<p class="last">Although this library allows you to blend these two services into a cohesive unit,
 the library itself can be used with any single service irrespective of the other. For
 example, you can use it to just manipulate CloudMan clusters or to script the
 interactions with an instance of Galaxy running on your laptop.</p>
@@ -113,12 +113,20 @@ $ python setup.py install</pre>
 <p>After installing the library, you will be able to simply import it into your
 Python environment with <tt class="docutils literal"><span class="pre">import</span> <span class="pre">bioblend</span></tt>. For details on the available functionality,
 see the <a class="reference internal" href="#api-documentation">API documentation</a>.</p>
+<p>BioBlend requires a number of Python libraries. These libraries are installed
+automatically when BioBlend itself is installed, regardless whether it is installed
+via <a class="reference external" href="https://pypi.python.org/pypi">PyPi</a> or by running <tt class="docutils literal"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">install</span></tt> command. The current list of
+required libraries is always available from <a class="reference external" href="https://github.com/afgane/bioblend/blob/master/setup.py">setup.py</a> in the source code
+repository and it is also replicated here: <tt class="docutils literal"><span class="pre">requests&gt;=1.1.0,</span> <span class="pre">poster,</span> <span class="pre">simplejson,</span>
+<span class="pre">boto,</span> <span class="pre">nose,</span> <span class="pre">mock,</span> <span class="pre">pyyaml</span></tt>.</p>
 </div>
 <div class="section" id="usage">
 <h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
-<p>To get started using BioBlend, it&#8217;s probably best to take a look at the example
-scripts in <tt class="docutils literal"><span class="pre">docs/examples</span></tt> source directory and browse the <a class="reference internal" href="#api-documentation">API documentation</a>.
-Beyond that, it&#8217;s up to your creativity :).</p>
+<p>To get started using BioBlend, install the library as described above. Once the
+library becomes available on the given system, it can be developed against.
+The developed scripts do not need to reside in any particular location on the system.</p>
+<p>It is probably best to take a look at the example scripts in <tt class="docutils literal"><span class="pre">docs/examples</span></tt> source
+directory and browse the <a class="reference internal" href="#api-documentation">API documentation</a>. Beyond that, it&#8217;s up to your creativity :).</p>
 </div>
 <div class="section" id="development">
 <h2>Development<a class="headerlink" href="#development" title="Permalink to this headline">¶</a></h2>
@@ -141,7 +149,11 @@ may exist. Feel free to point those out and/or provide fixes.</p>
 size of the compute cluster, get infrastructure status, get service status.</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="api_docs/cloudman/all.html">API documentation for interacting with CloudMan</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_docs/cloudman/all.html">API documentation for interacting with CloudMan</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api_docs/cloudman/all.html#cloudmanlauncher">CloudManLauncher</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_docs/cloudman/all.html#module-bioblend.cloudman">CloudManInstance</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
@@ -151,7 +163,15 @@ size of the compute cluster, get infrastructure status, get service status.</p>
 and workflow execution.</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="api_docs/galaxy/all.html">API documentation for interacting with Galaxy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_docs/galaxy/all.html">API documentation for interacting with Galaxy</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api_docs/galaxy/all.html#galaxyinstance">GalaxyInstance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_docs/galaxy/all.html#module-bioblend.galaxy.libraries">Libraries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_docs/galaxy/all.html#module-bioblend.galaxy.histories">Histories</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_docs/galaxy/all.html#module-bioblend.galaxy.workflows">Workflows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_docs/galaxy/all.html#module-bioblend.galaxy.datasets">Datasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_docs/galaxy/all.html#module-bioblend.galaxy.users">Users</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
@@ -168,7 +188,7 @@ and workflow execution.</p>
 <p>If you&#8217;ve run into issues, found a bug, or can&#8217;t seem to find an answer to
 your question regarding the use and functionality of BioBlend, please use
 <a class="reference external" href="https://github.com/afgane/bioblend/issues">Github Issues</a> page to ask your
-question</p>
+question.</p>
 </div>
 <div class="section" id="indices-and-tables">
 <h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h2>
@@ -246,7 +266,7 @@ question</p>
         <li class="right" >
           <a href="api_docs/cloudman/all.html" title="API documentation for interacting with CloudMan"
              >next</a> |</li>
-        <li><a href="#">BioBlend 0.2.0 documentation</a> &raquo;</li> 
+        <li><a href="#">BioBlend 0.2.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

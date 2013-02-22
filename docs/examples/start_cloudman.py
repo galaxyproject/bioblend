@@ -43,7 +43,8 @@ def start_cloudman(name, pwd, cm_type, inst_type, ami, ak, sk):
                   s3_conn_path='/')
     # Create an instance of the CloudManConfig class and launch a CloudMan instance
     cmc = CloudManConfig(ak, sk, name,  ami, inst_type, pwd, cloud_metadata=cloud,
-      cloudman_type=cm_type, initial_storage_size=2)
+      cloudman_type=cm_type, initial_storage_size=2, placement='melbourne-np')
+    print "Configured an instance; waiting to launch and boot..."
     cmi = CloudManInstance.launch_instance(cmc)
     print "Done! CloudMan IP is {0}".format(cmi.cloudman_url)
     return cmc, cmi

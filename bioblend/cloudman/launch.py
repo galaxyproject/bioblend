@@ -18,6 +18,7 @@ from bioblend.util import Bunch
 # Comment the following line if no logging at the prompt is desired
 #bioblend.set_stream_logger(__name__)
 
+
 class CloudManLauncher(object):
     def __init__(self, access_key, secret_key, cloud=None):
         """
@@ -386,7 +387,7 @@ class CloudManLauncher(object):
                         zones.append(zone.name)
                 else:
                     zones.append(zone.name)
-        zones.sort(reverse=True) # Higher-lettered zones seem to have more availability currently
+        zones.sort(reverse=True)  # Higher-lettered zones seem to have more availability currently
         if back_compatible_zone in zones:
             zones = [back_compatible_zone] + [z for z in zones if z != back_compatible_zone]
         if len(zones) == 0:

@@ -10,6 +10,7 @@ import bioblend
 from bioblend.cloudman.launch import CloudManLauncher
 from bioblend.util import Bunch
 
+
 def block_till_vm_ready(func):
     """
     This decorator exists to make sure that a launched VM is
@@ -23,14 +24,16 @@ def block_till_vm_ready(func):
     class GenericVMInstance. All methods to which this decorator is applied
     must be members of a class which inherit from GenericVMInstance.
 
-    Two optional keyword arguments are recognized by this decorator. These are
-    :type vm_ready_timeout:     int
-    :param vm_ready_timeout:    Maximum length of time to block before timing out.
-                                Once the timeout is reached, a VMLaunchException will be
-                                thrown.
-    :type vm_ready_check_interval:  int
-    :param vm_ready_check_interval: The number of seconds to pause between consecutive calls
-                                    when polling the VM's ready status.
+    The following two optional keyword arguments are recognized by this decorator:
+
+    :type vm_ready_timeout: int
+    :param vm_ready_timeout: Maximum length of time to block before timing out.
+                             Once the timeout is reached, a VMLaunchException
+                             will be thrown.
+
+    :type vm_ready_check_interval: int
+    :param vm_ready_check_interval: The number of seconds to pause between consecutive
+                                    calls when polling the VM's ready status.
     """
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
@@ -45,9 +48,11 @@ def block_till_vm_ready(func):
         return func(*args, **kwargs)
     return wrapper
 
+
 class VMLaunchException(Exception):
     def __init__(self, value):
         self.value = value
+
     def __str__(self):
         return repr(self.value)
 
@@ -93,14 +98,16 @@ class CloudManConfig(object):
         :type password:      string
         :param password:     The administrative password for this cloudman instance.
 
-        :type cloud_metadata:  Bunch
-        :param cloud_metadata: This object must define the properties required to establish a
-        `boto <https://github.com/boto/boto/>`_ connection to that cloud. See
-        this method's implementation for an example of the required fields.
-        Note that as long the as provided object defines the required fields,
-        it can really by implemented as anything (e.g., a Bunch, a database
-        object, a custom class). If no value for the ``cloud`` argument is
-        provided, the default is to use the Amazon cloud.
+        :type cloud_metadata: Bunch
+        :param cloud_metadata: This object must define the properties required
+                               to establish a `boto <https://github.com/boto/boto/>`_
+                               connection to that cloud. See this method's implementation
+                               for an example of the required fields. Note that as
+                               long the as provided object defines the required fields,
+                               it can really by implemented as anything (e.g.,
+                               a Bunch, a database object, a custom class). If no
+                               value for the ``cloud`` argument is provided, the
+                               default is to use the Amazon cloud.
 
         :type kernel_id: string
         :param kernel_id: The ID of the kernel with which to launch the
@@ -115,25 +122,29 @@ class CloudManConfig(object):
 
         :type security_groups: list of strings
         :param security_groups: The ID of the VPC security groups with
-                                   which to associate instances
+                                which to associate instances
 
         :type placement: string
         :param placement: The availability zone in which to launch the instances
 
         :type cluster_type: string
         :param cluster_type: The ``type``, either 'Galaxy' (default), 'Data', or 'SGE', defines the type
-        of cluster platform to initialize.
+                             of cluster platform to initialize.
 
         :type initial_storage_size: int
         :param initial_storage_size: The initialize storage to allocate for the instance
 
         :type block_till_ready: boolean
-        :param block_till_ready: Specifies whether the launch method will block till the instance is ready
-        and only return once all initialization is complete. The default is True. If False, the launch method will
-        return immediately without blocking. However, any subsequent calls made will automatically block if the
-        instance is not ready and initialized. The blocking timeout and polling interval can be configured
-        by providing extra parameters to the CloudManInstance.launch_instance method.
-
+        :param block_till_ready: Specifies whether the launch method will block
+                                 till the instance is ready and only return once
+                                 all initialization is complete. The default is True.
+                                 If False, the launch method will return immediately
+                                 without blocking. However, any subsequent calls
+                                 made will automatically block if the instance is
+                                 not ready and initialized. The blocking timeout
+                                 and polling interval can be configured by providing
+                                 extra parameters to the ``CloudManInstance.launch_instance``
+                                 method.
         """
         self.set_connection_parameters(access_key, secret_key, cloud_metadata)
         self.set_pre_launch_parameters(cluster_name, image_id, instance_type, password, kernel_id, ramdisk_id, key_name, security_groups, placement, block_till_ready)
@@ -169,7 +180,7 @@ class CloudManConfig(object):
         def default(self, obj):
             if isinstance(obj, (CloudManConfig, Bunch)):
                 key = '__%s__' % obj.__class__.__name__
-                return { key: obj.__dict__ }
+                return {key: obj.__dict__}
             return simplejson.JSONEncoder.default(self, obj)
 
     @staticmethod
@@ -210,6 +221,7 @@ class CloudManConfig(object):
         else:
             return None
 
+
 class GenericVMInstance(object):
 
     def __init__(self, launcher, launch_result):
@@ -232,14 +244,27 @@ class GenericVMInstance(object):
 
     @property
     def instance_id(self):
+        """
+        Returns the ID of this instance (e.g., ``i-87ey32dd``) if launch was
+        successful or ``None`` otherwise.
+        """
         return None if self.launch_result is None else self.launch_result['instance_id']
 
     @property
     def key_pair_name(self):
+        """
+        Returns the name of the key pair used by this instance. If instance was
+        not launched properly, returns ``None``.
+        """
         return None if self.launch_result is None else self.launch_result['kp_name']
 
     @property
     def key_pair_material(self):
+        """
+        Returns the private portion of the generated key pair. It does so only
+        if the instance was properly launched and key pair generated; ``None``
+        otherwise.
+        """
         return None if self.launch_result is None else self.launch_result['kp_material']
 
     def get_machine_status(self):
@@ -266,7 +291,7 @@ class GenericVMInstance(object):
         assert vm_ready_timeout > vm_ready_check_interval
         assert vm_ready_check_interval > 0
 
-        if (self.host_name is not None): # Host name available. Therefore, instance is ready
+        if (self.host_name is not None):  # Host name available. Therefore, instance is ready
             return
 
         for time_left in xrange(vm_ready_timeout, 0, -vm_ready_check_interval):
@@ -286,6 +311,7 @@ class GenericVMInstance(object):
         raise VMLaunchException("Waited too long for instance to become ready. Instance Id: %s"
                                 % self.instance_id)
 
+
 class CloudManInstance(GenericVMInstance):
 
     def __init__(self, url, password, **kwargs):
@@ -297,7 +323,7 @@ class CloudManInstance(GenericVMInstance):
         example "http://115.146.92.174". The ``password`` is CloudMan's password,
         as defined in the user data sent to CloudMan on instance creation.
         """
-        if kwargs.get('launch_result', None) is not None: # Used internally by the launch_instance method
+        if kwargs.get('launch_result', None) is not None:  # Used internally by the launch_instance method
             super(CloudManInstance, self).__init__(kwargs['launcher'], kwargs['launch_result'])
             self.initialized = False
         else:
@@ -328,8 +354,7 @@ class CloudManInstance(GenericVMInstance):
 
     def _set_url(self, url):
         """
-        Keeps the cloudman url as well as
-        the host name in sync.
+        Keeps the CloudMan URL as well and the hostname in sync.
         """
         if not url is None:
             parse_result = urlparse(url)
@@ -343,10 +368,17 @@ class CloudManInstance(GenericVMInstance):
 
     @property
     def galaxy_url(self):
+        """
+        Returns the base URL for this instance, which by default happens to be
+        the URL for Galaxy application.
+        """
         return self.url
 
     @property
     def cloudman_url(self):
+        """
+        Returns the URL for accessing this instance of CloudMan.
+        """
         return '/'.join([self.url, 'cloud'])
 
     @staticmethod
@@ -383,8 +415,8 @@ class CloudManInstance(GenericVMInstance):
         """
         if not self.initialized:
             self._make_get_request("initialize_cluster", parameters={'startup_opt': type,
-                                                                            'g_pss' : initial_storage_size,
-                                                                            'shared_bucket': shared_bucket})
+                                                                     'g_pss': initial_storage_size,
+                                                                     'shared_bucket': shared_bucket})
             self.initialized = True
 
     @block_till_vm_ready
