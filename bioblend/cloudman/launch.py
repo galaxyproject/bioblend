@@ -335,7 +335,7 @@ class CloudManLauncher(object):
         if 'freenxpass' not in form_data and 'password' in form_data:
             form_data['freenxpass'] = form_data['password']
         # Convert form_data into the YAML format
-        ud = yaml.dump(form_data, default_flow_style=False)
+        ud = yaml.dump(form_data, default_flow_style=False, allow_unicode=False)
         # Also include connection info about the selected cloud
         ci = self._get_cloud_info(self.cloud, as_str=True)
         return ud + "\n" + ci
@@ -358,7 +358,7 @@ class CloudManLauncher(object):
         ci['s3_port'] = cloud.s3_port if cloud.s3_port != '' else None
         ci['s3_conn_path'] = cloud.s3_conn_path
         if as_str:
-            ci = yaml.dump(ci, default_flow_style=False)
+            ci = yaml.dump(ci, default_flow_style=False, allow_unicode=False)
         return ci
 
     def _find_placements(self, ec2_conn, instance_type, cloud_type):
