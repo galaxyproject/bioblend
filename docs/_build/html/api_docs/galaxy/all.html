@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>API documentation for interacting with Galaxy &mdash; BioBlend 0.2.1 documentation</title>
+    <title>API documentation for interacting with Galaxy &mdash; BioBlend 0.2.2-dev documentation</title>
     
     <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '0.2.1',
+        VERSION:     '0.2.2-dev',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
-    <link rel="top" title="BioBlend 0.2.1 documentation" href="../../index.html" />
+    <link rel="top" title="BioBlend 0.2.2-dev documentation" href="../../index.html" />
     <link rel="prev" title="API documentation for interacting with CloudMan" href="../cloudman/all.html" /> 
   </head>
   <body>
@@ -41,7 +41,7 @@
         <li class="right" >
           <a href="../cloudman/all.html" title="API documentation for interacting with CloudMan"
              accesskey="P">previous</a> |</li>
-        <li><a href="../../index.html">BioBlend 0.2.1 documentation</a> &raquo;</li> 
+        <li><a href="../../index.html">BioBlend 0.2.2-dev documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -225,7 +225,7 @@ If <tt class="docutils literal"><span class="pre">folder_id</span></tt> is not s
 
 <dl class="method">
 <dt id="bioblend.galaxy.libraries.LibraryClient.upload_file_from_server">
-<tt class="descname">upload_file_from_server</tt><big>(</big><em>library_id</em>, <em>server_dir</em>, <em>folder_id=None</em>, <em>file_type='auto'</em>, <em>dbkey='?'</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/libraries.html#LibraryClient.upload_file_from_server"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.libraries.LibraryClient.upload_file_from_server" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">upload_file_from_server</tt><big>(</big><em>library_id</em>, <em>server_dir</em>, <em>folder_id=None</em>, <em>file_type='auto'</em>, <em>dbkey='?'</em>, <em>link_data_only=None</em>, <em>roles=''</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/libraries.html#LibraryClient.upload_file_from_server"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.libraries.LibraryClient.upload_file_from_server" title="Permalink to this definition">¶</a></dt>
 <dd><p>Upload a file to a library from a path on the server where Galaxy is running.
 If <tt class="docutils literal"><span class="pre">folder_id</span></tt> is not provided, the file will be placed in the root folder.</p>
 <p>Note that for this method to work, the Galaxy instance you&#8217;re connecting to
@@ -241,6 +241,17 @@ will be uploaded to the data library.</p>
 <tt class="descname">upload_file_from_url</tt><big>(</big><em>library_id</em>, <em>file_url</em>, <em>folder_id=None</em>, <em>file_type='auto'</em>, <em>dbkey='?'</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/libraries.html#LibraryClient.upload_file_from_url"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.libraries.LibraryClient.upload_file_from_url" title="Permalink to this definition">¶</a></dt>
 <dd><p>Upload a file to a library from a URL.
 If <tt class="docutils literal"><span class="pre">folder_id</span></tt> is not specified, the file will be uploaded to the root folder.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.galaxy.libraries.LibraryClient.upload_from_galaxy_filesystem">
+<tt class="descname">upload_from_galaxy_filesystem</tt><big>(</big><em>library_id</em>, <em>filesystem_paths</em>, <em>folder_id=None</em>, <em>file_type='auto'</em>, <em>dbkey='?'</em>, <em>link_data_only=None</em>, <em>roles=''</em><big>)</big><a class="headerlink" href="#bioblend.galaxy.libraries.LibraryClient.upload_from_galaxy_filesystem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Upload a file from filesystem paths already present on the Galaxy server.</p>
+<p>Provides API access for the &#8216;Upload files from filesystem paths&#8217; approach.</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">link_data_only</span></tt> &#8211; whether to copy data into Galaxy. Setting to &#8216;link_to_files&#8217;</dt>
+<dd>symlinks data instead of copying</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -670,7 +681,7 @@ display information about a deleted user.</p>
         <li class="right" >
           <a href="../cloudman/all.html" title="API documentation for interacting with CloudMan"
              >previous</a> |</li>
-        <li><a href="../../index.html">BioBlend 0.2.1 documentation</a> &raquo;</li> 
+        <li><a href="../../index.html">BioBlend 0.2.2-dev documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

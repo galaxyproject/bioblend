@@ -3,9 +3,10 @@ import logging
 from bioblend.config import Config, BioBlendConfigLocations
 
 # Current version of the library
-__version__ = '0.2.2'
+__version__ = '0.2.2-dev'
 
 config = Config()
+
 
 def get_version():
     """
@@ -13,7 +14,11 @@ def get_version():
     """
     return __version__
 
+
 def init_logging():
+    """
+    Initialize BioBlend's logging from a configuration file.
+    """
     for file in BioBlendConfigLocations:
         try:
             logging.config.fileConfig(os.path.expanduser(file))

@@ -79,24 +79,25 @@ class CloudManConfig(object):
         """
         Initializes a CloudMan launch configuration object.
 
-        :type access_key:    string
-        :param access_key:   Access credentials.
+        :type access_key: string
+        :param access_key: Access credentials.
 
-        :type secret_key:    string
-        :param secret_key:   Access credentials.
+        :type secret_key: string
+        :param secret_key: Access credentials.
 
-        :type cluster_name:  string
-        :param cluster_name: Name to give this cloudman cluster.
+        :type cluster_name: string
+        :param cluster_name: Name used to identify this CloudMan cluster.
 
-        :type image_id:      string
-        :param image_id:     Machine image id to use for launching cloudman.
+        :type image_id: string
+        :param image_id: Machine image ID to use when launching this
+                         CloudMan instance.
 
-        :type instance_type:  string
-        :param instance_type: The type of the machine instance, as understood by the cloud
-                              provider. (e.g. m1.small)
+        :type instance_type: string
+        :param instance_type: The type of the machine instance, as understood by
+                              the cloud provider. (e.g. ``m1.medium``)
 
-        :type password:      string
-        :param password:     The administrative password for this cloudman instance.
+        :type password: string
+        :param password: The administrative password for this CloudMan instance.
 
         :type cloud_metadata: Bunch
         :param cloud_metadata: This object must define the properties required
@@ -121,15 +122,15 @@ class CloudManConfig(object):
         :param key_name: The name of the key pair with which to launch instances
 
         :type security_groups: list of strings
-        :param security_groups: The ID of the VPC security groups with
+        :param security_groups: The ID of the security groups with
                                 which to associate instances
 
         :type placement: string
         :param placement: The availability zone in which to launch the instances
 
         :type cluster_type: string
-        :param cluster_type: The ``type``, either 'Galaxy' (default), 'Data', or 'SGE', defines the type
-                             of cluster platform to initialize.
+        :param cluster_type: The ``type``, either 'Galaxy' (default), 'Data', or
+                             'SGE', defines the type of cluster platform to initialize.
 
         :type initial_storage_size: int
         :param initial_storage_size: The initialize storage to allocate for the instance
@@ -147,7 +148,9 @@ class CloudManConfig(object):
                                  method.
         """
         self.set_connection_parameters(access_key, secret_key, cloud_metadata)
-        self.set_pre_launch_parameters(cluster_name, image_id, instance_type, password, kernel_id, ramdisk_id, key_name, security_groups, placement, block_till_ready)
+        self.set_pre_launch_parameters(cluster_name, image_id, instance_type,
+            password, kernel_id, ramdisk_id, key_name, security_groups,
+            placement, block_till_ready)
         self.set_post_launch_parameters(cluster_type, initial_storage_size)
         self.set_extra_parameters(**kwargs)
 
@@ -156,8 +159,9 @@ class CloudManConfig(object):
         self.secret_key = secret_key
         self.cloud_metadata = cloud_metadata
 
-    def set_pre_launch_parameters(self, cluster_name, image_id, instance_type, password, kernel_id=None, ramdisk_id=None,
-                          key_name='cloudman_key_pair', security_groups=['CloudMan'], placement='', block_till_ready=True):
+    def set_pre_launch_parameters(self, cluster_name, image_id, instance_type,
+            password, kernel_id=None, ramdisk_id=None, key_name='cloudman_key_pair',
+            security_groups=['CloudMan'], placement='', block_till_ready=True):
         self.cluster_name = cluster_name
         self.image_id = image_id
         self.instance_type = instance_type
@@ -269,8 +273,9 @@ class GenericVMInstance(object):
 
     def get_machine_status(self):
         """
-        Check on the underlying VM status of an instance. This can be used to determine
-        whether the VM has finished booting up and cloudman's services are up and running.
+        Check on the underlying VM status of an instance. This can be used to
+        determine whether the VM has finished booting up and if CloudMan's
+        services are up and running.
 
         Return a ``state`` dict with the current ``instance_state``, ``public_ip``,
         ``placement``, and ``error`` keys, which capture the current state (the
@@ -284,7 +289,7 @@ class GenericVMInstance(object):
 
     def wait_till_instance_ready(self, vm_ready_timeout=300, vm_ready_check_interval=10):
         """
-        Wait until the vm state changes to ready/error or timeout elapses.
+        Wait until the VM state changes to ready/error or timeout elapses.
         Updates the host name once ready.
         """
         assert vm_ready_timeout > 0
@@ -342,8 +347,7 @@ class CloudManInstance(GenericVMInstance):
 
     def _update_host_name(self, host_name):
         """
-        Overrides the super-class method
-        Makes sure that the cloudman_url
+        Overrides the super-class method and makes sure that the ``cloudman_url``
         is kept in sync with the host name.
         """
         self._set_url(host_name)
@@ -384,7 +388,7 @@ class CloudManInstance(GenericVMInstance):
     @staticmethod
     def launch_instance(cfg, **kwargs):
         """
-        Launches a new instance of cloudman on the specified cloud infrastructure.
+        Launches a new instance of CloudMan on the specified cloud infrastructure.
 
         :type cfg: CloudManConfig
         :param cfg: A CloudManConfig object containing the initial parameters for this launch.
@@ -392,7 +396,7 @@ class CloudManInstance(GenericVMInstance):
         """
         validation_result = cfg.validate()
         if validation_result is not None:
-            raise VMLaunchException("Invalid cloudman configuration provided: " % validation_result)
+            raise VMLaunchException("Invalid CloudMan configuration provided: " % validation_result)
 
         launcher = CloudManLauncher(cfg.access_key, cfg.secret_key, cfg.cloud_metadata)
         result = launcher.launch(cfg.cluster_name, cfg.image_id, cfg.instance_type, cfg.password, cfg.kernel_id, cfg.ramdisk_id,
@@ -589,7 +593,7 @@ class CloudManInstance(GenericVMInstance):
         master instance (all worker instances will be terminated in the process
         of cluster termination), and delete the whole cluster.
 
-        .. note::
+        .. warning::
             Deleting a cluster is irreversible - all of the data will be
             permanently deleted.
         """

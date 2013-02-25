@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>API documentation for interacting with CloudMan &mdash; BioBlend 0.2.1 documentation</title>
+    <title>API documentation for interacting with CloudMan &mdash; BioBlend 0.2.2-dev documentation</title>
     
     <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '0.2.1',
+        VERSION:     '0.2.2-dev',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,8 +25,8 @@
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
-    <link rel="top" title="BioBlend 0.2.1 documentation" href="../../index.html" />
-    <link rel="next" title="API documentation for interacting with Galaxy" href="../galaxy/all.html" />
+    <link rel="top" title="BioBlend 0.2.2-dev documentation" href="../../index.html" />
+    <link rel="next" title="Usage documentation" href="docs.html" />
     <link rel="prev" title="BioBlend" href="../../index.html" /> 
   </head>
   <body>
@@ -40,12 +40,12 @@
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="../galaxy/all.html" title="API documentation for interacting with Galaxy"
+          <a href="docs.html" title="Usage documentation"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="../../index.html" title="BioBlend"
              accesskey="P">previous</a> |</li>
-        <li><a href="../../index.html">BioBlend 0.2.1 documentation</a> &raquo;</li> 
+        <li><a href="../../index.html">BioBlend 0.2.2-dev documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -157,11 +157,12 @@ already exists.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>access_key</strong> (<em>string</em>) &#8211; Access credentials.</li>
 <li><strong>secret_key</strong> (<em>string</em>) &#8211; Access credentials.</li>
-<li><strong>cluster_name</strong> (<em>string</em>) &#8211; Name to give this cloudman cluster.</li>
-<li><strong>image_id</strong> (<em>string</em>) &#8211; Machine image id to use for launching cloudman.</li>
-<li><strong>instance_type</strong> (<em>string</em>) &#8211; The type of the machine instance, as understood by the cloud
-provider. (e.g. m1.small)</li>
-<li><strong>password</strong> (<em>string</em>) &#8211; The administrative password for this cloudman instance.</li>
+<li><strong>cluster_name</strong> (<em>string</em>) &#8211; Name used to identify this CloudMan cluster.</li>
+<li><strong>image_id</strong> (<em>string</em>) &#8211; Machine image ID to use when launching this
+CloudMan instance.</li>
+<li><strong>instance_type</strong> (<em>string</em>) &#8211; The type of the machine instance, as understood by
+the cloud provider. (e.g. <tt class="docutils literal"><span class="pre">m1.medium</span></tt>)</li>
+<li><strong>password</strong> (<em>string</em>) &#8211; The administrative password for this CloudMan instance.</li>
 <li><strong>cloud_metadata</strong> (<em>Bunch</em>) &#8211; <p>This object must define the properties required
 to establish a <a class="reference external" href="https://github.com/boto/boto/">boto</a>
 connection to that cloud. See this method&#8217;s implementation
@@ -177,11 +178,11 @@ instances</li>
 <li><strong>ramdisk_id</strong> (<em>string</em>) &#8211; The ID of the RAM disk with which to launch the
 instances</li>
 <li><strong>key_name</strong> (<em>string</em>) &#8211; The name of the key pair with which to launch instances</li>
-<li><strong>security_groups</strong> (<em>list of strings</em>) &#8211; The ID of the VPC security groups with
+<li><strong>security_groups</strong> (<em>list of strings</em>) &#8211; The ID of the security groups with
 which to associate instances</li>
 <li><strong>placement</strong> (<em>string</em>) &#8211; The availability zone in which to launch the instances</li>
-<li><strong>cluster_type</strong> (<em>string</em>) &#8211; The <tt class="docutils literal"><span class="pre">type</span></tt>, either &#8216;Galaxy&#8217; (default), &#8216;Data&#8217;, or &#8216;SGE&#8217;, defines the type
-of cluster platform to initialize.</li>
+<li><strong>cluster_type</strong> (<em>string</em>) &#8211; The <tt class="docutils literal"><span class="pre">type</span></tt>, either &#8216;Galaxy&#8217; (default), &#8216;Data&#8217;, or
+&#8216;SGE&#8217;, defines the type of cluster platform to initialize.</li>
 <li><strong>initial_storage_size</strong> (<em>int</em>) &#8211; The initialize storage to allocate for the instance</li>
 <li><strong>block_till_ready</strong> (<em>boolean</em>) &#8211; Specifies whether the launch method will block
 till the instance is ready and only return once
@@ -425,7 +426,7 @@ of cluster platform to initialize.</p>
 <dl class="staticmethod">
 <dt id="bioblend.cloudman.CloudManInstance.launch_instance">
 <em class="property">static </em><tt class="descname">launch_instance</tt><big>(</big><em>cfg</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/cloudman.html#CloudManInstance.launch_instance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.cloudman.CloudManInstance.launch_instance" title="Permalink to this definition">¶</a></dt>
-<dd><p>Launches a new instance of cloudman on the specified cloud infrastructure.</p>
+<dd><p>Launches a new instance of CloudMan on the specified cloud infrastructure.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -469,8 +470,8 @@ whether the nodes should be forcibly removed rather than gracefully removed.</p>
 <dd><p>Terminate this CloudMan cluster. There is an option to also terminate the
 master instance (all worker instances will be terminated in the process
 of cluster termination), and delete the whole cluster.</p>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
 <p class="last">Deleting a cluster is irreversible - all of the data will be
 permanently deleted.</p>
 </div>
@@ -489,8 +490,9 @@ as defined in the user data sent to CloudMan on instance creation.</p>
 <dl class="method">
 <dt id="bioblend.cloudman.GenericVMInstance.get_machine_status">
 <tt class="descname">get_machine_status</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/bioblend/cloudman.html#GenericVMInstance.get_machine_status"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.cloudman.GenericVMInstance.get_machine_status" title="Permalink to this definition">¶</a></dt>
-<dd><p>Check on the underlying VM status of an instance. This can be used to determine
-whether the VM has finished booting up and cloudman&#8217;s services are up and running.</p>
+<dd><p>Check on the underlying VM status of an instance. This can be used to
+determine whether the VM has finished booting up and if CloudMan&#8217;s
+services are up and running.</p>
 <p>Return a <tt class="docutils literal"><span class="pre">state</span></tt> dict with the current <tt class="docutils literal"><span class="pre">instance_state</span></tt>, <tt class="docutils literal"><span class="pre">public_ip</span></tt>,
 <tt class="docutils literal"><span class="pre">placement</span></tt>, and <tt class="docutils literal"><span class="pre">error</span></tt> keys, which capture the current state (the
 values for those keys default to empty string if no data is available from
@@ -522,7 +524,7 @@ not launched properly, returns <tt class="docutils literal"><span class="pre">No
 <dl class="method">
 <dt id="bioblend.cloudman.GenericVMInstance.wait_till_instance_ready">
 <tt class="descname">wait_till_instance_ready</tt><big>(</big><em>vm_ready_timeout=300</em>, <em>vm_ready_check_interval=10</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/cloudman.html#GenericVMInstance.wait_till_instance_ready"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.cloudman.GenericVMInstance.wait_till_instance_ready" title="Permalink to this definition">¶</a></dt>
-<dd><p>Wait until the vm state changes to ready/error or timeout elapses.
+<dd><p>Wait until the VM state changes to ready/error or timeout elapses.
 Updates the host name once ready.</p>
 </dd></dl>
 
@@ -585,8 +587,8 @@ calls when polling the VM&#8217;s ready status.</li>
   <p class="topless"><a href="../../index.html"
                         title="previous chapter">BioBlend</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="../galaxy/all.html"
-                        title="next chapter">API documentation for interacting with Galaxy</a></p>
+  <p class="topless"><a href="docs.html"
+                        title="next chapter">Usage documentation</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="../../_sources/api_docs/cloudman/all.txt"
@@ -619,12 +621,12 @@ calls when polling the VM&#8217;s ready status.</li>
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="../galaxy/all.html" title="API documentation for interacting with Galaxy"
+          <a href="docs.html" title="Usage documentation"
              >next</a> |</li>
         <li class="right" >
           <a href="../../index.html" title="BioBlend"
              >previous</a> |</li>
-        <li><a href="../../index.html">BioBlend 0.2.1 documentation</a> &raquo;</li> 
+        <li><a href="../../index.html">BioBlend 0.2.2-dev documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

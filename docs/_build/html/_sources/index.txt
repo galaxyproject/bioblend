@@ -89,6 +89,17 @@ and workflow execution.
     api_docs/galaxy/*
 
 
+Configuration
+=============
+BioBlend allows library-wide configuration to be set in external files.
+These configuration files can be used to specify access keys, for example.
+
+.. toctree::
+    :maxdepth: 1
+    :glob:
+
+    api_docs/lib_config
+
 Testing
 =======
 The unit tests, in the ``tests`` folder, can be run using

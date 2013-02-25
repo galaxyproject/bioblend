@@ -1,8 +1,6 @@
 import os
 import ConfigParser
 
-# By default we use two locations for the BioBlend configurations,
-# /etc/bioblend.cfg and ~/.bioblend (which works on Windows and Unix).
 BioBlendConfigPath = '/etc/bioblend.cfg'
 BioBlendConfigLocations = [BioBlendConfigPath]
 UserConfigPath = os.path.join(os.path.expanduser('~'), '.bioblend')
@@ -10,6 +8,14 @@ BioBlendConfigLocations.append(UserConfigPath)
 
 
 class Config(ConfigParser.SafeConfigParser):
+    """
+    BioBlend allows library-wide configuration to be set in external files.
+    These configuration files can be used to specify access keys, for example.
+    By default we use two locations for the BioBlend configurations:
+
+    * System wide: ``/etc/bioblend.cfg``
+    * Individual user: ``~/.bioblend`` (which works on both Windows and Unix)
+    """
     def __init__(self, path=None, fp=None, do_load=True):
         ConfigParser.SafeConfigParser.__init__(self, {'working_dir': '/mnt/pyami',
                                                       'debug': '0'})

@@ -18,6 +18,7 @@ from bioblend.util import Bunch
 from bioblend.cloudman import CloudManConfig
 from bioblend.cloudman import CloudManInstance
 
+
 def start_cloudman(name, pwd, cm_type, inst_type, ami, ak, sk):
     """
     Start an instance of CloudMan with the provided arguments.
@@ -26,10 +27,10 @@ def start_cloudman(name, pwd, cm_type, inst_type, ami, ak, sk):
     settings used to launch this instance of CloudMan; and an instance
     of ``CloudManInstance`` pointing to the given instance of CloudMan.
     """
-    cloud = None # If left as None, BioBlend will default to Amazon
+    cloud = None  # If left as None, BioBlend will default to Amazon
     # Define properties for the NeCTAR cloud
-    cloud = Bunch(id = '-1',
-                  name = "NeCTAR",
+    cloud = Bunch(id='-1',
+                  name="NeCTAR",
                   cloud_type='openstack',
                   bucket_default='cloudman-os',
                   region_name='NeCTAR',
