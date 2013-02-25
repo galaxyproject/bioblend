@@ -154,6 +154,7 @@ class CloudManLauncher(object):
         ports = (('80', '80'),  # Web UI
                  ('20', '21'),  # FTP
                  ('22', '22'),  # ssh
+                 ('9600', '9700'),  # HTCondor
                  ('30000', '30100'),  # FTP transfer
                  ('42284', '42284'))  # CloudMan UI
         for port in ports:
@@ -164,6 +165,14 @@ class CloudManLauncher(object):
                     bioblend.log.debug("Rule (%s:%s) already exists in the SG" % (port[0], port[1]))
             except EC2ResponseError, e:
                 bioblend.log.error("A problem with security group authorizations: %s" % e)
+        # Add ICMP (i.e., ping) rule required by HTCondor
+        try:
+            if not self.rule_exists(cmsg.rules, from_port='-1', to_port='-1', ip_protocol='icmp'):
+                cmsg.authorize(ip_protocol='icmp', from_port=-1, to_port=-1, cidr_ip='0.0.0.0/0')
+            else:
+                bioblend.log.debug("ICMP rule already exists in {0} SG".format(sg_name))
+        except EC2ResponseError, e:
+            bioblend.log.error("A problem with security group authorizations: %s" % e)
         # Add rule that allows communication between instances in the same SG
         g_rule_exists = False  # Flag to indicate if group rule already exists
         ci = self._get_cloud_info(self.cloud)

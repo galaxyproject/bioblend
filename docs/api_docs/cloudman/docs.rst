@@ -49,7 +49,7 @@ In order to launch a CloudMan cluster on a chosen cloud, we do the following
     from bioblend.cloudman import CloudManInstance
     cmc = CloudManConfig('<your AWS access key', 'your AWS secret key', 'Cluster name',
          'ami-<ID>', 'm1.medium', 'choose_a_password_here', nectar, 'SGE')
-    cmi = CloudManInstance(cmc)
+    cmi = CloudManInstance.launch_instance(cmc)
 
 We now have a ``CloudManInstance`` object that allows us to manage created
 CloudMan instance via the API.
