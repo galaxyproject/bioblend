@@ -60,8 +60,8 @@
 examples for these API calls.
 In addition to this page, there are functional examples of complete scripts in
 <tt class="docutils literal"><span class="pre">docs/examples</span></tt> directory of the BioBlend source code repository.</p>
-<div class="section" id="setting-up-a-custom-cloud-connection">
-<h2>Setting up a custom cloud connection<a class="headerlink" href="#setting-up-a-custom-cloud-connection" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="setting-up-custom-cloud-properties">
+<h2>Setting up custom cloud properties<a class="headerlink" href="#setting-up-custom-cloud-properties" title="Permalink to this headline">¶</a></h2>
 <p>CloudMan supports Amazon, OpenStack, OpenNebula, and Eucalyptus based clouds and
 BioBlend can be used to programatically manipulate CloudMan on any of those
 clouds. Once launched, the API calls to CloudMan are the same irrespective of
@@ -102,36 +102,66 @@ given cloud provider.</p>
 <span class="kn">from</span> <span class="nn">bioblend.cloudman</span> <span class="kn">import</span> <span class="n">CloudManInstance</span>
 <span class="n">cmc</span> <span class="o">=</span> <span class="n">CloudManConfig</span><span class="p">(</span><span class="s">&#39;&lt;your AWS access key&#39;</span><span class="p">,</span> <span class="s">&#39;your AWS secret key&#39;</span><span class="p">,</span> <span class="s">&#39;Cluster name&#39;</span><span class="p">,</span>
      <span class="s">&#39;ami-&lt;ID&gt;&#39;</span><span class="p">,</span> <span class="s">&#39;m1.medium&#39;</span><span class="p">,</span> <span class="s">&#39;choose_a_password_here&#39;</span><span class="p">,</span> <span class="n">nectar</span><span class="p">,</span> <span class="s">&#39;SGE&#39;</span><span class="p">)</span>
-<span class="n">cmi</span> <span class="o">=</span> <span class="n">CloudManInstance</span><span class="p">(</span><span class="n">cmc</span><span class="p">)</span>
+<span class="n">cmi</span> <span class="o">=</span> <span class="n">CloudManInstance</span><span class="o">.</span><span class="n">launch_instance</span><span class="p">(</span><span class="n">cmc</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>We now have a <tt class="docutils literal"><span class="pre">CloudManInstance</span></tt> object that allows us to manage created
-CloudMan instance via the API.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p>The <tt class="docutils literal"><span class="pre">CloudManInstance</span></tt> object is a local representation of the actual
-CloudMan instance. As a result, the local object can get out of sync with
-the remote instance. To update the state of the local instance, call <tt class="docutils literal"><span class="pre">get_machine_status</span></tt> method:</p>
-<div class="last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">cmi</span><span class="o">.</span><span class="n">get_machine_status</span><span class="p">()</span>
+<p>If you already have an existing instance of CloudMan, just create an
+instance of the <tt class="docutils literal"><span class="pre">CloudManInstance</span></tt> object directly by calling its
+constructor and connecting to it. For example:</p>
+<div class="last highlight-python"><div class="highlight"><pre><span class="n">cmi</span> <span class="o">=</span> <span class="n">CloudManInstance</span><span class="p">(</span><span class="s">&#39;http://115.146.92.174&#39;</span><span class="p">,</span> <span class="s">&#39;your_UD_password&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>We now have a <tt class="docutils literal"><span class="pre">CloudManInstance</span></tt> object that allows us to manage created
+CloudMan instance via the API. Once launched, it will take a few minutes for the
+instance to boot and CloudMan start. To check on the status of the machine,
+(repeatedly) run the following command:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">cmi</span><span class="o">.</span><span class="n">get_machine_status</span><span class="p">()</span>
+<span class="go">{&#39;error&#39;: &#39;&#39;,</span>
+<span class="go"> &#39;instance_state&#39;: u&#39;pending&#39;,</span>
+<span class="go"> &#39;placement&#39;: &#39;&#39;,</span>
+<span class="go"> &#39;public_ip&#39;: &#39;&#39;}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cmi</span><span class="o">.</span><span class="n">get_machine_status</span><span class="p">()</span>
 <span class="go">{&#39;error&#39;: &#39;&#39;,</span>
 <span class="go"> &#39;instance_state&#39;: u&#39;running&#39;,</span>
 <span class="go"> &#39;placement&#39;: u&#39;melbourne-qh2&#39;,</span>
 <span class="go"> &#39;public_ip&#39;: u&#39;115.146.86.29&#39;}</span>
 </pre></div>
 </div>
+<p>Once the instance is ready, although it may still take a few moments for CloudMan
+to start, it is possible to start interacting with the application.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The <tt class="docutils literal"><span class="pre">CloudManInstance</span></tt> object (e.g., <tt class="docutils literal"><span class="pre">cmi</span></tt>) is a local representation
+of the actual CloudMan instance. As a result, the local object can get
+out of sync with the remote instance. To update the state of the local
+object, call the above mentioned <tt class="docutils literal"><span class="pre">get_machine_status</span></tt> method.</p>
 </div>
 </div>
-<div class="section" id="manipulating-an-instance">
-<h2>Manipulating an instance<a class="headerlink" href="#manipulating-an-instance" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="manipulating-an-existing-cluster">
+<h2>Manipulating an existing cluster<a class="headerlink" href="#manipulating-an-existing-cluster" title="Permalink to this headline">¶</a></h2>
 <p>Having a reference to a <tt class="docutils literal"><span class="pre">CloudManInstance</span></tt> object, we can manage it via the
 available API methods:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">cmi</span>
-<span class="go">CloudMan instance at http://115.146.86.29/cloud</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">cmi</span><span class="o">.</span><span class="n">initialized</span>
-<span class="go">True</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">cmi</span><span class="o">.</span><span class="n">initialized</span>
+<span class="go">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cmi</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="s">&#39;SGE&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cmi</span><span class="o">.</span><span class="n">get_status</span><span class="p">()</span>
+<span class="go">{u&#39;all_fs&#39;: [],</span>
+<span class="go"> u&#39;app_status&#39;: u&#39;yellow&#39;,</span>
+<span class="go"> u&#39;autoscaling&#39;: {u&#39;as_max&#39;: u&#39;N/A&#39;,</span>
+<span class="go"> u&#39;as_min&#39;: u&#39;N/A&#39;,</span>
+<span class="go"> u&#39;use_autoscaling&#39;: False},</span>
+<span class="go"> u&#39;cluster_status&#39;: u&#39;STARTING&#39;,</span>
+<span class="go"> u&#39;data_status&#39;: u&#39;green&#39;,</span>
+<span class="go"> u&#39;disk_usage&#39;: {u&#39;pct&#39;: u&#39;0%&#39;, u&#39;total&#39;: u&#39;0&#39;, u&#39;used&#39;: u&#39;0&#39;},</span>
+<span class="go"> u&#39;dns&#39;: u&#39;#&#39;,</span>
+<span class="go"> u&#39;instance_status&#39;: {u&#39;available&#39;: u&#39;0&#39;, u&#39;idle&#39;: u&#39;0&#39;, u&#39;requested&#39;: u&#39;0&#39;},</span>
+<span class="go"> u&#39;snapshot&#39;: {u&#39;progress&#39;: u&#39;None&#39;, u&#39;status&#39;: u&#39;None&#39;}}</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">cmi</span><span class="o">.</span><span class="n">get_cluster_size</span><span class="p">()</span>
 <span class="go">1</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">cmi</span><span class="o">.</span><span class="n">get_nodes</span><span class="p">()</span><span class="n">Out</span><span class="p">[</span><span class="mi">50</span><span class="p">]:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cmi</span><span class="o">.</span><span class="n">get_nodes</span><span class="p">()</span>
 <span class="go">[{u&#39;id&#39;: u&#39;i-00006016&#39;,</span>
 <span class="go">  u&#39;instance_type&#39;: u&#39;m1.medium&#39;,</span>
 <span class="go">  u&#39;ld&#39;: u&#39;0.0 0.025 0.065&#39;,</span>
@@ -165,9 +195,9 @@ available API methods:</p>
   <h3><a href="../../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Usage documentation</a><ul>
-<li><a class="reference internal" href="#setting-up-a-custom-cloud-connection">Setting up a custom cloud connection</a></li>
+<li><a class="reference internal" href="#setting-up-custom-cloud-properties">Setting up custom cloud properties</a></li>
 <li><a class="reference internal" href="#launching-a-new-cluster-instance">Launching a new cluster instance</a></li>
-<li><a class="reference internal" href="#manipulating-an-instance">Manipulating an instance</a></li>
+<li><a class="reference internal" href="#manipulating-an-existing-cluster">Manipulating an existing cluster</a></li>
 </ul>
 </li>
 </ul>

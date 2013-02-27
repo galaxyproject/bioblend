@@ -7,8 +7,8 @@ examples for these API calls.
 In addition to this page, there are functional examples of complete scripts in
 ``docs/examples`` directory of the BioBlend source code repository.
 
-Setting up a custom cloud connection
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Setting up custom cloud properties
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CloudMan supports Amazon, OpenStack, OpenNebula, and Eucalyptus based clouds and
 BioBlend can be used to programatically manipulate CloudMan on any of those
 clouds. Once launched, the API calls to CloudMan are the same irrespective of
@@ -51,32 +51,60 @@ In order to launch a CloudMan cluster on a chosen cloud, we do the following
          'ami-<ID>', 'm1.medium', 'choose_a_password_here', nectar, 'SGE')
     cmi = CloudManInstance.launch_instance(cmc)
 
+.. Note:: If you already have an existing instance of CloudMan, just create an
+          instance of the ``CloudManInstance`` object directly by calling its
+          constructor and connecting to it. For example::
+
+            cmi = CloudManInstance('http://115.146.92.174', 'your_UD_password')
+
 We now have a ``CloudManInstance`` object that allows us to manage created
-CloudMan instance via the API.
+CloudMan instance via the API. Once launched, it will take a few minutes for the
+instance to boot and CloudMan start. To check on the status of the machine,
+(repeatedly) run the following command::
 
-.. Note:: The ``CloudManInstance`` object is a local representation of the actual
-          CloudMan instance. As a result, the local object can get out of sync with
-          the remote instance. To update the state of the local instance, call ``get_machine_status`` method::
+    >>> cmi.get_machine_status()
+    {'error': '',
+     'instance_state': u'pending',
+     'placement': '',
+     'public_ip': ''}
+    >>> cmi.get_machine_status()
+    {'error': '',
+     'instance_state': u'running',
+     'placement': u'melbourne-qh2',
+     'public_ip': u'115.146.86.29'}
 
-            >>> cmi.get_machine_status()
-            {'error': '',
-             'instance_state': u'running',
-             'placement': u'melbourne-qh2',
-             'public_ip': u'115.146.86.29'}
+Once the instance is ready, although it may still take a few moments for CloudMan
+to start, it is possible to start interacting with the application.
 
-Manipulating an instance
-~~~~~~~~~~~~~~~~~~~~~~~~
+.. Note:: The ``CloudManInstance`` object (e.g., ``cmi``) is a local representation
+          of the actual CloudMan instance. As a result, the local object can get
+          out of sync with the remote instance. To update the state of the local
+          object, call the above mentioned ``get_machine_status`` method.
+
+Manipulating an existing cluster
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Having a reference to a ``CloudManInstance`` object, we can manage it via the
 available API methods::
 
-    >>> cmi
-    CloudMan instance at http://115.146.86.29/cloud
     >>> cmi.initialized
-    True
+    False
+    >>> cmi.initialize('SGE')
+    >>> cmi.get_status()
+    {u'all_fs': [],
+     u'app_status': u'yellow',
+     u'autoscaling': {u'as_max': u'N/A',
+     u'as_min': u'N/A',
+     u'use_autoscaling': False},
+     u'cluster_status': u'STARTING',
+     u'data_status': u'green',
+     u'disk_usage': {u'pct': u'0%', u'total': u'0', u'used': u'0'},
+     u'dns': u'#',
+     u'instance_status': {u'available': u'0', u'idle': u'0', u'requested': u'0'},
+     u'snapshot': {u'progress': u'None', u'status': u'None'}}
     >>> cmi.get_cluster_size()
     1
-    >>> cmi.get_nodes()Out[50]:
+    >>> cmi.get_nodes()
     [{u'id': u'i-00006016',
       u'instance_type': u'm1.medium',
       u'ld': u'0.0 0.025 0.065',

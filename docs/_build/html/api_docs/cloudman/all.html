@@ -148,7 +148,7 @@ already exists.</p>
 <p>API for interacting with a CloudMan instance.</p>
 <dl class="class">
 <dt id="bioblend.cloudman.CloudManConfig">
-<em class="property">class </em><tt class="descclassname">bioblend.cloudman.</tt><tt class="descname">CloudManConfig</tt><big>(</big><em>access_key=None, secret_key=None, cluster_name=None, image_id=None, instance_type=None, password=None, cloud_metadata=None, cluster_type='Galaxy', initial_storage_size=1, key_name='cloudman_key_pair', security_groups=['CloudMan'], placement='', kernel_id=None, ramdisk_id=None, block_till_ready=True, **kwargs</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/cloudman.html#CloudManConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.cloudman.CloudManConfig" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">bioblend.cloudman.</tt><tt class="descname">CloudManConfig</tt><big>(</big><em>access_key=None, secret_key=None, cluster_name=None, image_id=None, instance_type=None, password=None, cloud_metadata=None, cluster_type='SGE', initial_storage_size=1, key_name='cloudman_key_pair', security_groups=['CloudMan'], placement='', kernel_id=None, ramdisk_id=None, block_till_ready=False, **kwargs</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/cloudman.html#CloudManConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.cloudman.CloudManConfig" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initializes a CloudMan launch configuration object.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -372,9 +372,9 @@ includes the master node.</p>
 <dl class="method">
 <dt id="bioblend.cloudman.CloudManInstance.get_cluster_type">
 <tt class="descname">get_cluster_type</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/cloudman.html#CloudManInstance.get_cluster_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.cloudman.CloudManInstance.get_cluster_type" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the <tt class="docutils literal"><span class="pre">type</span></tt> this CloudMan cluster has been initialized to. See the
-CloudMan docs about the available types. If the cluster has not yet been
-initialized, this method returns <tt class="docutils literal"><span class="pre">None</span></tt>.</p>
+<dd><p>Get the <tt class="docutils literal"><span class="pre">cluster</span> <span class="pre">type</span></tt> for this CloudMan instance. See the
+CloudMan docs about the available types. Returns a dictionary,
+for example: <tt class="docutils literal"><span class="pre">{u'cluster_type':</span> <span class="pre">u'SGE'}</span></tt>.</p>
 </dd></dl>
 
 <dl class="method">
@@ -431,7 +431,8 @@ of cluster platform to initialize.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cfg</strong> (<em>CloudManConfig</em>) &#8211; A CloudManConfig object containing the initial parameters for this launch.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cfg</strong> (<em>CloudManConfig</em>) &#8211; A CloudManConfig object containing the initial parameters
+for this launch.</td>
 </tr>
 </tbody>
 </table>

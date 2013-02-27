@@ -67,14 +67,14 @@ class CloudManConfig(object):
                  instance_type=None,
                  password=None,
                  cloud_metadata=None,
-                 cluster_type='Galaxy',
+                 cluster_type='SGE',
                  initial_storage_size=1,
                  key_name='cloudman_key_pair',
                  security_groups=['CloudMan'],
                  placement='',
                  kernel_id=None,
                  ramdisk_id=None,
-                 block_till_ready=True,
+                 block_till_ready=False,
                  **kwargs):
         """
         Initializes a CloudMan launch configuration object.
@@ -343,7 +343,10 @@ class CloudManInstance(GenericVMInstance):
         self._set_url(url)
 
     def __repr__(self):
-        return "CloudMan instance at {0}".format(self.cloudman_url)
+        if self.cloudman_url:
+            return "CloudMan instance at {0}".format(self.cloudman_url)
+        else:
+            return "Waiting for this CloudMan instance to start..."
 
     def _update_host_name(self, host_name):
         """
@@ -383,7 +386,9 @@ class CloudManInstance(GenericVMInstance):
         """
         Returns the URL for accessing this instance of CloudMan.
         """
-        return '/'.join([self.url, 'cloud'])
+        if self.url:
+            return '/'.join([self.url, 'cloud'])
+        return None
 
     @staticmethod
     def launch_instance(cfg, **kwargs):
@@ -391,19 +396,22 @@ class CloudManInstance(GenericVMInstance):
         Launches a new instance of CloudMan on the specified cloud infrastructure.
 
         :type cfg: CloudManConfig
-        :param cfg: A CloudManConfig object containing the initial parameters for this launch.
-
+        :param cfg: A CloudManConfig object containing the initial parameters
+                    for this launch.
         """
         validation_result = cfg.validate()
         if validation_result is not None:
-            raise VMLaunchException("Invalid CloudMan configuration provided: " % validation_result)
+            raise VMLaunchException("Invalid CloudMan configuration provided: {0}"
+                .format(validation_result))
 
         launcher = CloudManLauncher(cfg.access_key, cfg.secret_key, cfg.cloud_metadata)
-        result = launcher.launch(cfg.cluster_name, cfg.image_id, cfg.instance_type, cfg.password, cfg.kernel_id, cfg.ramdisk_id,
-                                   cfg.key_name, cfg.security_groups, cfg.placement)
+        result = launcher.launch(cfg.cluster_name, cfg.image_id, cfg.instance_type,
+            cfg.password, cfg.kernel_id, cfg.ramdisk_id, cfg.key_name,
+            cfg.security_groups, cfg.placement)
         if (result['error'] is not None):
             raise VMLaunchException("Error launching cloudman instance: " % result['error'])
-        instance = CloudManInstance(None, None, launcher=launcher, launch_result=result, cloudman_config=cfg)
+        instance = CloudManInstance(None, None, launcher=launcher, launch_result=result,
+            cloudman_config=cfg)
         if cfg.block_till_ready:
             instance.initialize(cfg.cluster_type, cfg.initial_storage_size)
         return instance
@@ -426,11 +434,14 @@ class CloudManInstance(GenericVMInstance):
     @block_till_vm_ready
     def get_cluster_type(self):
         """
-        Get the ``type`` this CloudMan cluster has been initialized to. See the
-        CloudMan docs about the available types. If the cluster has not yet been
-        initialized, this method returns ``None``.
+        Get the ``cluster type`` for this CloudMan instance. See the
+        CloudMan docs about the available types. Returns a dictionary,
+        for example: ``{u'cluster_type': u'SGE'}``.
         """
-        return self._make_get_request("get_cluster_type")
+        cluster_type = self._make_get_request("cluster_type")
+        if cluster_type['cluster_type']:
+            self.initialized = True
+        return cluster_type
 
     @block_till_vm_ready
     def get_status(self):
@@ -584,7 +595,7 @@ class CloudManInstance(GenericVMInstance):
         """
         payload = {'srvc': 'Galaxy'}
         status = self._make_get_request("get_srvc_status", parameters=payload)
-        return status['status']
+        return {'status': status['status']}
 
     @block_till_vm_ready
     def terminate(self, terminate_master_instance=True, delete_cluster=False):
@@ -611,6 +622,7 @@ class CloudManInstance(GenericVMInstance):
         particularly useful when terminating a cluster as it may terminate
         before sending a response.
         """
-        r = requests.get('/'.join([self.cloudman_url, url]), params=parameters,
-                auth=("", self.password), timeout=timeout)
+        req_url = '/'.join([self.cloudman_url, 'root', url])
+        print "GET request url: %s params: %s timeout: %s" % (req_url, parameters, timeout)
+        r = requests.get(req_url, params=parameters, auth=("", self.password), timeout=timeout)
         return r.json()
