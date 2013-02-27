@@ -129,11 +129,13 @@ class CloudManConfig(object):
         :param placement: The availability zone in which to launch the instances
 
         :type cluster_type: string
-        :param cluster_type: The ``type``, either 'Galaxy' (default), 'Data', or
+        :param cluster_type: The ``type``, either 'Galaxy', 'Data', or
                              'SGE', defines the type of cluster platform to initialize.
 
         :type initial_storage_size: int
-        :param initial_storage_size: The initialize storage to allocate for the instance
+        :param initial_storage_size: The initial storage to allocate for the instance.
+                                     This only applies if ``cluster_type`` is set
+                                     to either ``Galaxy`` or ``Data``.
 
         :type block_till_ready: boolean
         :param block_till_ready: Specifies whether the launch method will block
@@ -427,7 +429,7 @@ class CloudManInstance(GenericVMInstance):
         """
         if not self.initialized:
             self._make_get_request("initialize_cluster", parameters={'startup_opt': type,
-                                                                     'g_pss': initial_storage_size,
+                                                                     'pss': initial_storage_size,
                                                                      'shared_bucket': shared_bucket})
             self.initialized = True
 
