@@ -115,6 +115,15 @@ your question regarding the use and functionality of BioBlend, please use
 `Github Issues <https://github.com/afgane/bioblend/issues>`_ page to ask your
 question.
 
+Related documentation
+=====================
+
+Links to other documentation and libraries relevant to this library:
+
+    * `Galaxy API documentation <http://wiki.galaxyproject.org/Learn/API>`_
+    * `Blend4j <https://github.com/jmchilton/blend4j>`_: Galaxy API wrapper for Java
+    * `clj-blend <https://github.com/chapmanb/clj-blend>`_: Galaxy API wrapper for Clojure
+
 Indices and tables
 ==================
 
