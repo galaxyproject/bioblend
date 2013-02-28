@@ -48,12 +48,14 @@ In order to launch a CloudMan cluster on a chosen cloud, we do the following
     from bioblend.cloudman import CloudManConfig
     from bioblend.cloudman import CloudManInstance
     cmc = CloudManConfig('<your AWS access key', 'your AWS secret key', 'Cluster name',
-         'ami-<ID>', 'm1.medium', 'choose_a_password_here', nectar, 'SGE')
+         'ami-<ID>', 'm1.medium', 'choose_a_password_here', nectar)
     cmi = CloudManInstance.launch_instance(cmc)
 
 .. Note:: If you already have an existing instance of CloudMan, just create an
           instance of the ``CloudManInstance`` object directly by calling its
-          constructor and connecting to it. For example::
+          constructor and connecting to it (the password you provide must match
+          the password you provided as part of user data when launching this
+          instance). For example::
 
             cmi = CloudManInstance('http://115.146.92.174', 'your_UD_password')
 
@@ -79,13 +81,16 @@ to start, it is possible to start interacting with the application.
 .. Note:: The ``CloudManInstance`` object (e.g., ``cmi``) is a local representation
           of the actual CloudMan instance. As a result, the local object can get
           out of sync with the remote instance. To update the state of the local
-          object, call the above mentioned ``get_machine_status`` method.
+          object, call the ``update`` method on the ``cmi`` object::
+
+              >>> cmi.update()
+
 
 Manipulating an existing cluster
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Having a reference to a ``CloudManInstance`` object, we can manage it via the
-available API methods::
+available :ref:`cloudman-instance-api` API::
 
     >>> cmi.initialized
     False
@@ -126,3 +131,4 @@ available API methods::
     3
 
 .. _NeCTAR: http://www.nectar.org.au/research-cloud
+

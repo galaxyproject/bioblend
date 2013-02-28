@@ -101,7 +101,7 @@ given cloud provider.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">bioblend.cloudman</span> <span class="kn">import</span> <span class="n">CloudManConfig</span>
 <span class="kn">from</span> <span class="nn">bioblend.cloudman</span> <span class="kn">import</span> <span class="n">CloudManInstance</span>
 <span class="n">cmc</span> <span class="o">=</span> <span class="n">CloudManConfig</span><span class="p">(</span><span class="s">&#39;&lt;your AWS access key&#39;</span><span class="p">,</span> <span class="s">&#39;your AWS secret key&#39;</span><span class="p">,</span> <span class="s">&#39;Cluster name&#39;</span><span class="p">,</span>
-     <span class="s">&#39;ami-&lt;ID&gt;&#39;</span><span class="p">,</span> <span class="s">&#39;m1.medium&#39;</span><span class="p">,</span> <span class="s">&#39;choose_a_password_here&#39;</span><span class="p">,</span> <span class="n">nectar</span><span class="p">,</span> <span class="s">&#39;SGE&#39;</span><span class="p">)</span>
+     <span class="s">&#39;ami-&lt;ID&gt;&#39;</span><span class="p">,</span> <span class="s">&#39;m1.medium&#39;</span><span class="p">,</span> <span class="s">&#39;choose_a_password_here&#39;</span><span class="p">,</span> <span class="n">nectar</span><span class="p">)</span>
 <span class="n">cmi</span> <span class="o">=</span> <span class="n">CloudManInstance</span><span class="o">.</span><span class="n">launch_instance</span><span class="p">(</span><span class="n">cmc</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -109,7 +109,9 @@ given cloud provider.</p>
 <p class="first admonition-title">Note</p>
 <p>If you already have an existing instance of CloudMan, just create an
 instance of the <tt class="docutils literal"><span class="pre">CloudManInstance</span></tt> object directly by calling its
-constructor and connecting to it. For example:</p>
+constructor and connecting to it (the password you provide must match
+the password you provided as part of user data when launching this
+instance). For example:</p>
 <div class="last highlight-python"><div class="highlight"><pre><span class="n">cmi</span> <span class="o">=</span> <span class="n">CloudManInstance</span><span class="p">(</span><span class="s">&#39;http://115.146.92.174&#39;</span><span class="p">,</span> <span class="s">&#39;your_UD_password&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -134,16 +136,19 @@ instance to boot and CloudMan start. To check on the status of the machine,
 to start, it is possible to start interacting with the application.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">The <tt class="docutils literal"><span class="pre">CloudManInstance</span></tt> object (e.g., <tt class="docutils literal"><span class="pre">cmi</span></tt>) is a local representation
+<p>The <tt class="docutils literal"><span class="pre">CloudManInstance</span></tt> object (e.g., <tt class="docutils literal"><span class="pre">cmi</span></tt>) is a local representation
 of the actual CloudMan instance. As a result, the local object can get
 out of sync with the remote instance. To update the state of the local
-object, call the above mentioned <tt class="docutils literal"><span class="pre">get_machine_status</span></tt> method.</p>
+object, call the <tt class="docutils literal"><span class="pre">update</span></tt> method on the <tt class="docutils literal"><span class="pre">cmi</span></tt> object:</p>
+<div class="last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">cmi</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+</pre></div>
+</div>
 </div>
 </div>
 <div class="section" id="manipulating-an-existing-cluster">
 <h2>Manipulating an existing cluster<a class="headerlink" href="#manipulating-an-existing-cluster" title="Permalink to this headline">¶</a></h2>
 <p>Having a reference to a <tt class="docutils literal"><span class="pre">CloudManInstance</span></tt> object, we can manage it via the
-available API methods:</p>
+available <a class="reference internal" href="all.html#cloudman-instance-api"><em>CloudManInstance</em></a> API:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">cmi</span><span class="o">.</span><span class="n">initialized</span>
 <span class="go">False</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">cmi</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="s">&#39;SGE&#39;</span><span class="p">)</span>

@@ -55,7 +55,7 @@
           <div class="body">
             
   <div class="section" id="api-documentation-for-interacting-with-cloudman">
-<h1>API documentation for interacting with CloudMan<a class="headerlink" href="#api-documentation-for-interacting-with-cloudman" title="Permalink to this headline">¶</a></h1>
+<span id="cloudman-api-docs"></span><h1>API documentation for interacting with CloudMan<a class="headerlink" href="#api-documentation-for-interacting-with-cloudman" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="cloudmanlauncher">
 <h2>CloudManLauncher<a class="headerlink" href="#cloudmanlauncher" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
@@ -144,11 +144,11 @@ already exists.</p>
 
 </div>
 <div class="section" id="module-bioblend.cloudman">
-<span id="cloudmaninstance"></span><h2>CloudManInstance<a class="headerlink" href="#module-bioblend.cloudman" title="Permalink to this headline">¶</a></h2>
+<span id="cloudmaninstance"></span><span id="cloudman-instance-api"></span><h2>CloudManInstance<a class="headerlink" href="#module-bioblend.cloudman" title="Permalink to this headline">¶</a></h2>
 <p>API for interacting with a CloudMan instance.</p>
 <dl class="class">
 <dt id="bioblend.cloudman.CloudManConfig">
-<em class="property">class </em><tt class="descclassname">bioblend.cloudman.</tt><tt class="descname">CloudManConfig</tt><big>(</big><em>access_key=None, secret_key=None, cluster_name=None, image_id=None, instance_type=None, password=None, cloud_metadata=None, cluster_type='SGE', initial_storage_size=1, key_name='cloudman_key_pair', security_groups=['CloudMan'], placement='', kernel_id=None, ramdisk_id=None, block_till_ready=False, **kwargs</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/cloudman.html#CloudManConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.cloudman.CloudManConfig" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">bioblend.cloudman.</tt><tt class="descname">CloudManConfig</tt><big>(</big><em>access_key=None, secret_key=None, cluster_name=None, image_id=None, instance_type='m1.medium', password=None, cloud_metadata=None, cluster_type=None, initial_storage_size=10, key_name='cloudman_key_pair', security_groups=['CloudMan'], placement='', kernel_id=None, ramdisk_id=None, block_till_ready=False, **kwargs</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/cloudman.html#CloudManConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.cloudman.CloudManConfig" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initializes a CloudMan launch configuration object.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -161,7 +161,7 @@ already exists.</p>
 <li><strong>image_id</strong> (<em>string</em>) &#8211; Machine image ID to use when launching this
 CloudMan instance.</li>
 <li><strong>instance_type</strong> (<em>string</em>) &#8211; The type of the machine instance, as understood by
-the cloud provider. (e.g. <tt class="docutils literal"><span class="pre">m1.medium</span></tt>)</li>
+the chosen cloud provider. (e.g., <tt class="docutils literal"><span class="pre">m1.medium</span></tt>)</li>
 <li><strong>password</strong> (<em>string</em>) &#8211; The administrative password for this CloudMan instance.</li>
 <li><strong>cloud_metadata</strong> (<em>Bunch</em>) &#8211; <p>This object must define the properties required
 to establish a <a class="reference external" href="https://github.com/boto/boto/">boto</a>
@@ -181,9 +181,11 @@ instances</li>
 <li><strong>security_groups</strong> (<em>list of strings</em>) &#8211; The ID of the security groups with
 which to associate instances</li>
 <li><strong>placement</strong> (<em>string</em>) &#8211; The availability zone in which to launch the instances</li>
-<li><strong>cluster_type</strong> (<em>string</em>) &#8211; The <tt class="docutils literal"><span class="pre">type</span></tt>, either &#8216;Galaxy&#8217; (default), &#8216;Data&#8217;, or
+<li><strong>cluster_type</strong> (<em>string</em>) &#8211; The <tt class="docutils literal"><span class="pre">type</span></tt>, either &#8216;Galaxy&#8217;, &#8216;Data&#8217;, or
 &#8216;SGE&#8217;, defines the type of cluster platform to initialize.</li>
-<li><strong>initial_storage_size</strong> (<em>int</em>) &#8211; The initialize storage to allocate for the instance</li>
+<li><strong>initial_storage_size</strong> (<em>int</em>) &#8211; The initial storage to allocate for the instance.
+This only applies if <tt class="docutils literal"><span class="pre">cluster_type</span></tt> is set
+to either <tt class="docutils literal"><span class="pre">Galaxy</span></tt> or <tt class="docutils literal"><span class="pre">Data</span></tt>.</li>
 <li><strong>block_till_ready</strong> (<em>boolean</em>) &#8211; Specifies whether the launch method will block
 till the instance is ready and only return once
 all initialization is complete. The default is True.
@@ -282,12 +284,12 @@ in alphabetical order by key.</p>
 
 <dl class="method">
 <dt id="bioblend.cloudman.CloudManConfig.set_post_launch_parameters">
-<tt class="descclassname">CloudManConfig.</tt><tt class="descname">set_post_launch_parameters</tt><big>(</big><em>cluster_type='Galaxy'</em>, <em>initial_storage_size=1</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/cloudman.html#CloudManConfig.set_post_launch_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.cloudman.CloudManConfig.set_post_launch_parameters" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">CloudManConfig.</tt><tt class="descname">set_post_launch_parameters</tt><big>(</big><em>cluster_type=None</em>, <em>initial_storage_size=10</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/cloudman.html#CloudManConfig.set_post_launch_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.cloudman.CloudManConfig.set_post_launch_parameters" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="bioblend.cloudman.CloudManConfig.set_pre_launch_parameters">
-<tt class="descclassname">CloudManConfig.</tt><tt class="descname">set_pre_launch_parameters</tt><big>(</big><em>cluster_name, image_id, instance_type, password, kernel_id=None, ramdisk_id=None, key_name='cloudman_key_pair', security_groups=['CloudMan'], placement='', block_till_ready=True</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/cloudman.html#CloudManConfig.set_pre_launch_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.cloudman.CloudManConfig.set_pre_launch_parameters" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">CloudManConfig.</tt><tt class="descname">set_pre_launch_parameters</tt><big>(</big><em>cluster_name, image_id, instance_type, password, kernel_id=None, ramdisk_id=None, key_name='cloudman_key_pair', security_groups=['CloudMan'], placement='', block_till_ready=False</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/cloudman.html#CloudManConfig.set_pre_launch_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.cloudman.CloudManConfig.set_pre_launch_parameters" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -419,7 +421,7 @@ i.e. state that doesn&#8217;t change over the lifetime of the cluster</p>
 <tt class="descname">initialize</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/cloudman.html#CloudManInstance.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.cloudman.CloudManInstance.initialize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize CloudMan platform. This needs to be done before the cluster
 can be used.</p>
-<p>The <tt class="docutils literal"><span class="pre">type</span></tt>, either &#8216;Galaxy&#8217; (default), &#8216;Data&#8217;, or &#8216;SGE&#8217;, defines the type
+<p>The <tt class="docutils literal"><span class="pre">cluster_type</span></tt>, either &#8216;Galaxy&#8217;, &#8216;Data&#8217;, or &#8216;SGE&#8217;, defines the type
 of cluster platform to initialize.</p>
 </dd></dl>
 
@@ -478,6 +480,16 @@ permanently deleted.</p>
 </div>
 </dd></dl>
 
+<dl class="method">
+<dt id="bioblend.cloudman.CloudManInstance.update">
+<tt class="descname">update</tt><big>(</big><big>)</big><a class="headerlink" href="#bioblend.cloudman.CloudManInstance.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the local object&#8217;s fields to be in sync with the actual state
+of the CloudMan instance the object points to. This method should be
+called periodically to ensure you are looking at the current data.</p>
+<p class="versionadded">
+<span class="versionmodified">New in version 0.2.2.</span></p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="class">
@@ -492,8 +504,8 @@ as defined in the user data sent to CloudMan on instance creation.</p>
 <dt id="bioblend.cloudman.GenericVMInstance.get_machine_status">
 <tt class="descname">get_machine_status</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/bioblend/cloudman.html#GenericVMInstance.get_machine_status"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.cloudman.GenericVMInstance.get_machine_status" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check on the underlying VM status of an instance. This can be used to
-determine whether the VM has finished booting up and if CloudMan&#8217;s
-services are up and running.</p>
+determine whether the VM has finished booting up and if CloudMan
+is up and running.</p>
 <p>Return a <tt class="docutils literal"><span class="pre">state</span></tt> dict with the current <tt class="docutils literal"><span class="pre">instance_state</span></tt>, <tt class="docutils literal"><span class="pre">public_ip</span></tt>,
 <tt class="docutils literal"><span class="pre">placement</span></tt>, and <tt class="docutils literal"><span class="pre">error</span></tt> keys, which capture the current state (the
 values for those keys default to empty string if no data is available from

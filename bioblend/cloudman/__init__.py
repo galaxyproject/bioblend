@@ -64,11 +64,11 @@ class CloudManConfig(object):
                  secret_key=None,
                  cluster_name=None,
                  image_id=None,
-                 instance_type=None,
+                 instance_type='m1.medium',
                  password=None,
                  cloud_metadata=None,
-                 cluster_type='SGE',
-                 initial_storage_size=1,
+                 cluster_type=None,
+                 initial_storage_size=10,
                  key_name='cloudman_key_pair',
                  security_groups=['CloudMan'],
                  placement='',
@@ -94,7 +94,7 @@ class CloudManConfig(object):
 
         :type instance_type: string
         :param instance_type: The type of the machine instance, as understood by
-                              the cloud provider. (e.g. ``m1.medium``)
+                              the chosen cloud provider. (e.g., ``m1.medium``)
 
         :type password: string
         :param password: The administrative password for this CloudMan instance.
@@ -163,7 +163,7 @@ class CloudManConfig(object):
 
     def set_pre_launch_parameters(self, cluster_name, image_id, instance_type,
             password, kernel_id=None, ramdisk_id=None, key_name='cloudman_key_pair',
-            security_groups=['CloudMan'], placement='', block_till_ready=True):
+            security_groups=['CloudMan'], placement='', block_till_ready=False):
         self.cluster_name = cluster_name
         self.image_id = image_id
         self.instance_type = instance_type
@@ -175,7 +175,7 @@ class CloudManConfig(object):
         self.placement = placement
         self.block_till_ready = block_till_ready
 
-    def set_post_launch_parameters(self, cluster_type='Galaxy', initial_storage_size=1):
+    def set_post_launch_parameters(self, cluster_type=None, initial_storage_size=10):
         self.cluster_type = cluster_type
         self.initial_storage_size = initial_storage_size
 
@@ -218,12 +218,10 @@ class CloudManConfig(object):
             return "Instance type must not be null"
         elif self.password is None:
             return "Password must not be null"
-        elif self.cluster_type is None:
-            return "Cluster type must not be null"
+        elif self.cluster_type not in [None, 'SGE', 'Data', 'Galaxy']:
+            return "Unrecognized cluster type ({0})".format(self.cluster_type)
         elif self.key_name is None:
             return "Key-pair name must not be null"
-        elif self.initial_storage_size is None:
-            return "Initial storage size must not be null"
         else:
             return None
 
@@ -240,6 +238,8 @@ class GenericVMInstance(object):
         as defined in the user data sent to CloudMan on instance creation.
         """
         # Make sure the url scheme is defined (otherwise requests will not work)
+        self.vm_error = None
+        self.vm_status = None
         self.host_name = None
         self.launcher = launcher
         self.launch_result = launch_result
@@ -276,15 +276,24 @@ class GenericVMInstance(object):
     def get_machine_status(self):
         """
         Check on the underlying VM status of an instance. This can be used to
-        determine whether the VM has finished booting up and if CloudMan's
-        services are up and running.
+        determine whether the VM has finished booting up and if CloudMan
+        is up and running.
 
         Return a ``state`` dict with the current ``instance_state``, ``public_ip``,
         ``placement``, and ``error`` keys, which capture the current state (the
         values for those keys default to empty string if no data is available from
         the cloud).
         """
-        return self.launcher.get_status(self.instance_id)
+        if self.launcher:
+            return self.launcher.get_status(self.instance_id)
+        # elif self.host_name:
+
+        else:
+            state = {'instance_state': "",
+                     'public_ip': "",
+                     'placement': "",
+                     'error': "No reference to the instance object"}
+            return state
 
     def _init_instance(self, host_name):
         self._update_host_name(host_name)
@@ -298,7 +307,7 @@ class GenericVMInstance(object):
         assert vm_ready_timeout > vm_ready_check_interval
         assert vm_ready_check_interval > 0
 
-        if (self.host_name is not None):  # Host name available. Therefore, instance is ready
+        if self.host_name:  # Host name available. Therefore, instance is ready
             return
 
         for time_left in xrange(vm_ready_timeout, 0, -vm_ready_check_interval):
@@ -330,15 +339,13 @@ class CloudManInstance(GenericVMInstance):
         example "http://115.146.92.174". The ``password`` is CloudMan's password,
         as defined in the user data sent to CloudMan on instance creation.
         """
+        self.initialized = False
         if kwargs.get('launch_result', None) is not None:  # Used internally by the launch_instance method
             super(CloudManInstance, self).__init__(kwargs['launcher'], kwargs['launch_result'])
-            self.initialized = False
         else:
             super(CloudManInstance, self).__init__(None, None)
-            self.initialized = True
-
         self.config = kwargs.pop('cloudman_config', None)
-        if (self.config is None):
+        if not self.config:
             self.password = password
         else:
             self.password = self.config.password
@@ -359,18 +366,19 @@ class CloudManInstance(GenericVMInstance):
 
     def _init_instance(self, hostname):
         super(CloudManInstance, self)._init_instance(hostname)
-        self.initialize(self.config.cluster_type, self.config.initial_storage_size)
+        if self.config.cluster_type:
+            self.initialize(self.config.cluster_type, self.config.initial_storage_size)
 
     def _set_url(self, url):
         """
         Keeps the CloudMan URL as well and the hostname in sync.
         """
-        if not url is None:
+        if url:
             parse_result = urlparse(url)
-            # Make sure the url scheme is defined (otherwise requests will not work)
+            # Make sure the URL scheme is defined (otherwise requests will not work)
             if not parse_result.scheme:
                 url = "http://" + url
-            # parse the corrected url again to extract hostname
+            # Parse the corrected URL again to extract the hostname
             parse_result = urlparse(url)
             super(CloudManInstance, self)._update_host_name(parse_result.hostname)
         self.url = url
@@ -405,7 +413,6 @@ class CloudManInstance(GenericVMInstance):
         if validation_result is not None:
             raise VMLaunchException("Invalid CloudMan configuration provided: {0}"
                 .format(validation_result))
-
         launcher = CloudManLauncher(cfg.access_key, cfg.secret_key, cfg.cloud_metadata)
         result = launcher.launch(cfg.cluster_name, cfg.image_id, cfg.instance_type,
             cfg.password, cfg.kernel_id, cfg.ramdisk_id, cfg.key_name,
@@ -414,21 +421,45 @@ class CloudManInstance(GenericVMInstance):
             raise VMLaunchException("Error launching cloudman instance: " % result['error'])
         instance = CloudManInstance(None, None, launcher=launcher, launch_result=result,
             cloudman_config=cfg)
-        if cfg.block_till_ready:
+        if cfg.block_till_ready and cfg.cluster_type:
             instance.initialize(cfg.cluster_type, cfg.initial_storage_size)
         return instance
 
+    def update(self):
+        """
+        Update the local object's fields to be in sync with the actual state
+        of the CloudMan instance the object points to. This method should be
+        called periodically to ensure you are looking at the current data.
+
+        .. versionadded:: 0.2.2
+        """
+        ms = self.get_machine_status()
+        # Check if the machine is running and update IP and state
+        self.vm_status = ms.get('instance_state', None)
+        self.vm_error = ms.get('error', None)
+        public_ip = ms.get('public_ip', None)
+        # Update url if we don't have it or is different than what we have
+        if not self.url and (public_ip and self.url != public_ip):
+            self._set_url(public_ip)
+        # See if the cluster has been initialized
+        if self.vm_status == 'running' or self.url:
+            ct = self.get_cluster_type()
+            if ct.get('cluster_type', None):
+                self.initialized = True
+        if self.vm_error:
+            bioblend.log.error(self.vm_error)
+
     @block_till_vm_ready
-    def initialize(self, type="Galaxy", initial_storage_size=None, shared_bucket=None):
+    def initialize(self, cluster_type, initial_storage_size=None, shared_bucket=None):
         """
         Initialize CloudMan platform. This needs to be done before the cluster
         can be used.
 
-        The ``type``, either 'Galaxy' (default), 'Data', or 'SGE', defines the type
+        The ``cluster_type``, either 'Galaxy', 'Data', or 'SGE', defines the type
         of cluster platform to initialize.
         """
         if not self.initialized:
-            self._make_get_request("initialize_cluster", parameters={'startup_opt': type,
+            self._make_get_request("initialize_cluster", parameters={'startup_opt': cluster_type,
                                                                      'pss': initial_storage_size,
                                                                      'shared_bucket': shared_bucket})
             self.initialized = True
