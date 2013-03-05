@@ -11,14 +11,14 @@ from bioblend.cloudman import CloudManConfig
 from bioblend.cloudman import CloudManInstance
 
 class CloudmanTestBase(unittest.TestCase):
-    
+
     @classmethod
-    def setUpClass(cls):        
-        if os.environ.get('CLOUD_TYPE') == 'EC2':
-            cls.access_key = os.environ['CLOUD_ACCESS_KEY']
-            cls.secret_key = os.environ['CLOUD_SECRET_KEY'] 
+    def setUpClass(cls):
+        if os.environ.get('BIOBLEND_CLOUD_TYPE') == 'EC2':
+            cls.access_key = os.environ['BIOBLEND_ACCESS_KEY']
+            cls.secret_key = os.environ['BIOBLEND_SECRET_KEY']
             cls.cluster_name = 'Blend CloudMan'
-            cls.ami_id = os.environ['CLOUD_AMI_ID']
+            cls.ami_id = os.environ['BIOBLEND_AMI_ID']
             cls.instance_type = 'm1.small'
             cls.password = 'password'
             cls.cloud_metadata = Bunch(
@@ -38,10 +38,10 @@ class CloudmanTestBase(unittest.TestCase):
                         )
         else:
             # Assume OpenStack/NeCTAR
-            cls.access_key = os.environ['CLOUD_ACCESS_KEY']
-            cls.secret_key = os.environ['CLOUD_SECRET_KEY']
-            cls.cloud_metadata = Bunch(id = '-1',
-                                  name = "NeCTAR",
+            cls.access_key = os.environ['BIOBLEND_ACCESS_KEY']
+            cls.secret_key = os.environ['BIOBLEND_SECRET_KEY']
+            cls.cloud_metadata = Bunch(id='-1',
+                                  name="NeCTAR",
                                   cloud_type='openstack',
                                   bucket_default='cloudman-os',
                                   region_name='NeCTAR',
@@ -54,16 +54,15 @@ class CloudmanTestBase(unittest.TestCase):
                                   s3_port=8888,
                                   s3_conn_path='/')
             cls.cluster_name = 'Blend CloudMan'
-            cls.ami_id = os.environ['CLOUD_AMI_ID']
+            cls.ami_id = os.environ['BIOBLEND_AMI_ID']
             cls.instance_type = 'm1.small'
             cls.password = 'password'
-    
+
     @classmethod
     def tearDownClass(cls):
         try:
-            #TODO: cloudman's terminate method has a bug. Needs fix
+            # TODO: cloudman's terminate method has a bug. Needs fix
             cls.cmi.terminate(delete_cluster=True)
         except:
             pass
 
- 
