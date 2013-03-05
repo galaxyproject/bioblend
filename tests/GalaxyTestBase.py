@@ -8,6 +8,7 @@ import unittest
 from bioblend import galaxy
 
 class GalaxyTestBase(unittest.TestCase):
-    
-    def setUp(self):        
-        self.gi = galaxy.GalaxyInstance(url='https://galaxy-vic.genome.edu.au/', key='90dd6a93c3085dbf192439bfcc0c63f0')
+
+    def setUp(self):
+        galaxy_key = os.environ['BIOBLEND_GALAXY_API_KEY']
+        self.gi = galaxy.GalaxyInstance(url='https://galaxy-vic.genome.edu.au/', key=galaxy_key)
