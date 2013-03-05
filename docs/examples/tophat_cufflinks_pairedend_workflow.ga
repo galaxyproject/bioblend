@@ -1,0 +1,151 @@
+{
+    "a_galaxy_workflow": "true", 
+    "annotation": "", 
+    "format-version": "0.1", 
+    "name": "TopHat + cufflinks paired-end", 
+    "steps": {
+        "0": {
+            "annotation": "", 
+            "id": 0, 
+            "input_connections": {}, 
+            "inputs": [
+                {
+                    "description": "", 
+                    "name": "Input fastq readpair-1"
+                }
+            ], 
+            "name": "Input dataset", 
+            "outputs": [], 
+            "position": {
+                "left": 200, 
+                "top": 308
+            }, 
+            "tool_errors": null, 
+            "tool_id": null, 
+            "tool_state": "{\"name\": \"Input fastq readpair-1\"}", 
+            "tool_version": null, 
+            "type": "data_input", 
+            "user_outputs": []
+        }, 
+        "1": {
+            "annotation": "", 
+            "id": 1, 
+            "input_connections": {}, 
+            "inputs": [
+                {
+                    "description": "", 
+                    "name": "Input fastq readpair-2"
+                }
+            ], 
+            "name": "Input dataset", 
+            "outputs": [], 
+            "position": {
+                "left": 177.7833251953125, 
+                "top": 395.26666259765625
+            }, 
+            "tool_errors": null, 
+            "tool_id": null, 
+            "tool_state": "{\"name\": \"Input fastq readpair-2\"}", 
+            "tool_version": null, 
+            "type": "data_input", 
+            "user_outputs": []
+        }, 
+        "2": {
+            "annotation": "", 
+            "id": 2, 
+            "input_connections": {
+                "input1": {
+                    "id": 0, 
+                    "output_name": "output"
+                }, 
+                "singlePaired|input2": {
+                    "id": 1, 
+                    "output_name": "output"
+                }
+            }, 
+            "inputs": [], 
+            "name": "Tophat for Illumina", 
+            "outputs": [
+                {
+                    "name": "insertions", 
+                    "type": "bed"
+                }, 
+                {
+                    "name": "deletions", 
+                    "type": "bed"
+                }, 
+                {
+                    "name": "junctions", 
+                    "type": "bed"
+                }, 
+                {
+                    "name": "accepted_hits", 
+                    "type": "bam"
+                }
+            ], 
+            "position": {
+                "left": 436, 
+                "top": 280
+            }, 
+            "post_job_actions": {
+                "HideDatasetActiondeletions": {
+                    "action_arguments": {}, 
+                    "action_type": "HideDatasetAction", 
+                    "output_name": "deletions"
+                }, 
+                "HideDatasetActioninsertions": {
+                    "action_arguments": {}, 
+                    "action_type": "HideDatasetAction", 
+                    "output_name": "insertions"
+                }
+            }, 
+            "tool_errors": null, 
+            "tool_id": "tophat", 
+            "tool_state": "{\"__page__\": 0, \"input1\": \"null\", \"refGenomeSource\": \"{\\\"genomeSource\\\": \\\"indexed\\\", \\\"index\\\": \\\"dm3\\\", \\\"__current_case__\\\": 0}\", \"singlePaired\": \"{\\\"input2\\\": null, \\\"sPaired\\\": \\\"paired\\\", \\\"pParams\\\": {\\\"pSettingsType\\\": \\\"preSet\\\", \\\"__current_case__\\\": 0}, \\\"__current_case__\\\": 1, \\\"mate_inner_distance\\\": \\\"20\\\"}\"}", 
+            "tool_version": "1.5.0", 
+            "type": "tool", 
+            "user_outputs": []
+        }, 
+        "3": {
+            "annotation": "", 
+            "id": 3, 
+            "input_connections": {
+                "input": {
+                    "id": 2, 
+                    "output_name": "accepted_hits"
+                }
+            }, 
+            "inputs": [], 
+            "name": "Cufflinks", 
+            "outputs": [
+                {
+                    "name": "genes_expression", 
+                    "type": "tabular"
+                }, 
+                {
+                    "name": "transcripts_expression", 
+                    "type": "tabular"
+                }, 
+                {
+                    "name": "assembled_isoforms", 
+                    "type": "gtf"
+                }, 
+                {
+                    "name": "total_map_mass", 
+                    "type": "txt"
+                }
+            ], 
+            "position": {
+                "left": 679, 
+                "top": 342
+            }, 
+            "post_job_actions": {}, 
+            "tool_errors": null, 
+            "tool_id": "cufflinks", 
+            "tool_state": "{\"min_isoform_fraction\": \"\\\"0.1\\\"\", \"multiread_correct\": \"\\\"Yes\\\"\", \"singlePaired\": \"{\\\"sPaired\\\": \\\"No\\\", \\\"__current_case__\\\": 0}\", \"__page__\": 0, \"pre_mrna_fraction\": \"\\\"0.15\\\"\", \"bias_correction\": \"{\\\"do_bias_correction\\\": \\\"No\\\", \\\"__current_case__\\\": 1}\", \"max_intron_len\": \"\\\"300000\\\"\", \"reference_annotation\": \"{\\\"use_ref\\\": \\\"No\\\", \\\"__current_case__\\\": 0}\", \"global_model\": \"null\", \"do_normalization\": \"\\\"No\\\"\", \"input\": \"null\"}", 
+            "tool_version": "0.0.5", 
+            "type": "tool", 
+            "user_outputs": []
+        }
+    }
+}

@@ -28,12 +28,22 @@ After installing the library, you will be able to simply import it into your
 Python environment with ``import bioblend``. For details on the available functionality,
 see the `API documentation`_.
 
+BioBlend requires a number of Python libraries. These libraries are installed
+automatically when BioBlend itself is installed, regardless whether it is installed
+via `PyPi`_ or by running ``python setup.py install`` command. The current list of
+required libraries is always available from `setup.py`_ in the source code
+repository and it is also replicated here: ``requests>=1.1.0, poster, simplejson,
+boto, nose, mock, pyyaml``.
+
 Usage
 =====
 
-To get started using BioBlend, it's probably best to take a look at the example
-scripts in ``docs/examples`` source directory and browse the `API documentation`_.
-Beyond that, it's up to your creativity :).
+To get started using BioBlend, install the library as described above. Once the
+library becomes available on the given system, it can be developed against.
+The developed scripts do not need to reside in any particular location on the system.
+
+It is probably best to take a look at the example scripts in ``docs/examples`` source
+directory and browse the `API documentation`_. Beyond that, it's up to your creativity :).
 
 Development
 ===========
@@ -73,11 +83,22 @@ API used to manipulate genomic analyses within Galaxy, including data management
 and workflow execution.
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 3
     :glob:
 
     api_docs/galaxy/*
 
+
+Configuration
+=============
+BioBlend allows library-wide configuration to be set in external files.
+These configuration files can be used to specify access keys, for example.
+
+.. toctree::
+    :maxdepth: 1
+    :glob:
+
+    api_docs/lib_config
 
 Testing
 =======
@@ -92,7 +113,16 @@ Getting help
 If you've run into issues, found a bug, or can't seem to find an answer to
 your question regarding the use and functionality of BioBlend, please use
 `Github Issues <https://github.com/afgane/bioblend/issues>`_ page to ask your
-question
+question.
+
+Related documentation
+=====================
+
+Links to other documentation and libraries relevant to this library:
+
+    * `Galaxy API documentation <http://wiki.galaxyproject.org/Learn/API>`_
+    * `Blend4j <https://github.com/jmchilton/blend4j>`_: Galaxy API wrapper for Java
+    * `clj-blend <https://github.com/chapmanb/clj-blend>`_: Galaxy API wrapper for Clojure
 
 Indices and tables
 ==================
@@ -102,7 +132,6 @@ Indices and tables
 * :ref:`search`
 
 .. References/hyperlinks used above
-.. _CloudMan: http://usecloudman.org/
-.. _Galaxy: http://usegalaxy.org/
 .. _Git repository: https://github.com/afgane/bioblend
-
+.. _PyPi: https://pypi.python.org/pypi
+.. _setup.py: https://github.com/afgane/bioblend/blob/master/setup.py

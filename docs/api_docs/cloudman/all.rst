@@ -1,11 +1,21 @@
+.. _cloudman-api-docs:
+
 ===============================================
 API documentation for interacting with CloudMan
 ===============================================
 
+CloudManLauncher
+----------------
+
 .. autoclass:: bioblend.cloudman.launch.CloudManLauncher
     :members:
-    :private-members:
+    :undoc-members:
 
-.. autoclass:: bioblend.cloudman.CloudManInstance
+.. _cloudman-instance-api:
+
+CloudManInstance
+----------------
+
+.. automodule:: bioblend.cloudman
     :members:
     :undoc-members:

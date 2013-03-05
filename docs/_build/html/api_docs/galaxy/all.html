@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>API documentation for interacting with Galaxy &mdash; BioBlend 0.2.0 documentation</title>
+    <title>API documentation for interacting with Galaxy &mdash; BioBlend 0.2.2-dev documentation</title>
     
     <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '0.2.0',
+        VERSION:     '0.2.2-dev',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
-    <link rel="top" title="BioBlend 0.2.0 documentation" href="../../index.html" />
+    <link rel="top" title="BioBlend 0.2.2-dev documentation" href="../../index.html" />
     <link rel="prev" title="API documentation for interacting with CloudMan" href="../cloudman/all.html" /> 
   </head>
   <body>
@@ -41,7 +41,7 @@
         <li class="right" >
           <a href="../cloudman/all.html" title="API documentation for interacting with CloudMan"
              accesskey="P">previous</a> |</li>
-        <li><a href="../../index.html">BioBlend 0.2.0 documentation</a> &raquo;</li> 
+        <li><a href="../../index.html">BioBlend 0.2.2-dev documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -52,6 +52,8 @@
             
   <div class="section" id="api-documentation-for-interacting-with-galaxy">
 <h1>API documentation for interacting with Galaxy<a class="headerlink" href="#api-documentation-for-interacting-with-galaxy" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="galaxyinstance">
+<h2>GalaxyInstance<a class="headerlink" href="#galaxyinstance" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="bioblend.galaxy.GalaxyInstance">
 <em class="property">class </em><tt class="descclassname">bioblend.galaxy.</tt><tt class="descname">GalaxyInstance</tt><big>(</big><em>url</em>, <em>key</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy.html#GalaxyInstance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.GalaxyInstance" title="Permalink to this definition">¶</a></dt>
@@ -159,8 +161,11 @@ the server via the request.</p>
 
 </dd></dl>
 
+</div>
 <hr class="docutils" />
-<span class="target" id="module-bioblend.galaxy.libraries"></span><p>Contains possible interactions with the Galaxy Data Libraries</p>
+<div class="section" id="module-bioblend.galaxy.libraries">
+<span id="libraries"></span><h2>Libraries<a class="headerlink" href="#module-bioblend.galaxy.libraries" title="Permalink to this headline">¶</a></h2>
+<p>Contains possible interactions with the Galaxy Data Libraries</p>
 <dl class="class">
 <dt id="bioblend.galaxy.libraries.LibraryClient">
 <em class="property">class </em><tt class="descclassname">bioblend.galaxy.libraries.</tt><tt class="descname">LibraryClient</tt><big>(</big><em>galaxy_instance</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/libraries.html#LibraryClient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.libraries.LibraryClient" title="Permalink to this definition">¶</a></dt>
@@ -220,7 +225,7 @@ If <tt class="docutils literal"><span class="pre">folder_id</span></tt> is not s
 
 <dl class="method">
 <dt id="bioblend.galaxy.libraries.LibraryClient.upload_file_from_server">
-<tt class="descname">upload_file_from_server</tt><big>(</big><em>library_id</em>, <em>server_dir</em>, <em>folder_id=None</em>, <em>file_type='auto'</em>, <em>dbkey='?'</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/libraries.html#LibraryClient.upload_file_from_server"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.libraries.LibraryClient.upload_file_from_server" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">upload_file_from_server</tt><big>(</big><em>library_id</em>, <em>server_dir</em>, <em>folder_id=None</em>, <em>file_type='auto'</em>, <em>dbkey='?'</em>, <em>link_data_only=None</em>, <em>roles=''</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/libraries.html#LibraryClient.upload_file_from_server"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.libraries.LibraryClient.upload_file_from_server" title="Permalink to this definition">¶</a></dt>
 <dd><p>Upload a file to a library from a path on the server where Galaxy is running.
 If <tt class="docutils literal"><span class="pre">folder_id</span></tt> is not provided, the file will be placed in the root folder.</p>
 <p>Note that for this method to work, the Galaxy instance you&#8217;re connecting to
@@ -238,10 +243,24 @@ will be uploaded to the data library.</p>
 If <tt class="docutils literal"><span class="pre">folder_id</span></tt> is not specified, the file will be uploaded to the root folder.</p>
 </dd></dl>
 
+<dl class="method">
+<dt id="bioblend.galaxy.libraries.LibraryClient.upload_from_galaxy_filesystem">
+<tt class="descname">upload_from_galaxy_filesystem</tt><big>(</big><em>library_id</em>, <em>filesystem_paths</em>, <em>folder_id=None</em>, <em>file_type='auto'</em>, <em>dbkey='?'</em>, <em>link_data_only=None</em>, <em>roles=''</em><big>)</big><a class="headerlink" href="#bioblend.galaxy.libraries.LibraryClient.upload_from_galaxy_filesystem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Upload a file from filesystem paths already present on the Galaxy server.</p>
+<p>Provides API access for the &#8216;Upload files from filesystem paths&#8217; approach.</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">link_data_only</span></tt> &#8211; whether to copy data into Galaxy. Setting to &#8216;link_to_files&#8217;</dt>
+<dd>symlinks data instead of copying</dd>
+</dl>
 </dd></dl>
 
+</dd></dl>
+
+</div>
 <hr class="docutils" />
-<span class="target" id="module-bioblend.galaxy.histories"></span><p>Contains possible interactions with the Galaxy Histories</p>
+<div class="section" id="module-bioblend.galaxy.histories">
+<span id="histories"></span><h2>Histories<a class="headerlink" href="#module-bioblend.galaxy.histories" title="Permalink to this headline">¶</a></h2>
+<p>Contains possible interactions with the Galaxy Histories</p>
 <dl class="class">
 <dt id="bioblend.galaxy.histories.HistoryClient">
 <em class="property">class </em><tt class="descclassname">bioblend.galaxy.histories.</tt><tt class="descname">HistoryClient</tt><big>(</big><em>galaxy_instance</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/histories.html#HistoryClient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.histories.HistoryClient" title="Permalink to this definition">¶</a></dt>
@@ -323,8 +342,11 @@ contents.</p>
 
 </dd></dl>
 
+</div>
 <hr class="docutils" />
-<span class="target" id="module-bioblend.galaxy.workflows"></span><p>Contains possible interactions with the Galaxy Workflows</p>
+<div class="section" id="module-bioblend.galaxy.workflows">
+<span id="workflows"></span><h2>Workflows<a class="headerlink" href="#module-bioblend.galaxy.workflows" title="Permalink to this headline">¶</a></h2>
+<p>Contains possible interactions with the Galaxy Workflows</p>
 <dl class="class">
 <dt id="bioblend.galaxy.workflows.WorkflowClient">
 <em class="property">class </em><tt class="descclassname">bioblend.galaxy.workflows.</tt><tt class="descname">WorkflowClient</tt><big>(</big><em>galaxy_instance</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/workflows.html#WorkflowClient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.workflows.WorkflowClient" title="Permalink to this definition">¶</a></dt>
@@ -473,8 +495,11 @@ For example:<div class="highlight-python"><div class="highlight"><pre><span clas
 
 </dd></dl>
 
+</div>
 <hr class="docutils" />
-<span class="target" id="module-bioblend.galaxy.datasets"></span><p>Contains possible interactions with the Galaxy Datasets</p>
+<div class="section" id="module-bioblend.galaxy.datasets">
+<span id="datasets"></span><h2>Datasets<a class="headerlink" href="#module-bioblend.galaxy.datasets" title="Permalink to this headline">¶</a></h2>
+<p>Contains possible interactions with the Galaxy Datasets</p>
 <dl class="class">
 <dt id="bioblend.galaxy.datasets.DatasetClient">
 <em class="property">class </em><tt class="descclassname">bioblend.galaxy.datasets.</tt><tt class="descname">DatasetClient</tt><big>(</big><em>galaxy_instance</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/datasets.html#DatasetClient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.datasets.DatasetClient" title="Permalink to this definition">¶</a></dt>
@@ -535,8 +560,11 @@ history or a library dataset.</p>
 <em class="property">exception </em><tt class="descclassname">bioblend.galaxy.datasets.</tt><tt class="descname">DatasetTimeoutException</tt><big>(</big><em>value</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/datasets.html#DatasetTimeoutException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.datasets.DatasetTimeoutException" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+</div>
 <hr class="docutils" />
-<span class="target" id="module-bioblend.galaxy.users"></span><p>Contains possible interaction dealing with Galaxy users.</p>
+<div class="section" id="module-bioblend.galaxy.users">
+<span id="users"></span><h2>Users<a class="headerlink" href="#module-bioblend.galaxy.users" title="Permalink to this headline">¶</a></h2>
+<p>Contains possible interaction dealing with Galaxy users.</p>
 <p>These methods must be executed by a registered Galaxy admin user.</p>
 <dl class="class">
 <dt id="bioblend.galaxy.users.UserClient">
@@ -595,6 +623,7 @@ display information about a deleted user.</p>
 </dd></dl>
 
 </div>
+</div>
 
 
           </div>
@@ -602,6 +631,19 @@ display information about a deleted user.</p>
       </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">API documentation for interacting with Galaxy</a><ul>
+<li><a class="reference internal" href="#galaxyinstance">GalaxyInstance</a></li>
+<li><a class="reference internal" href="#module-bioblend.galaxy.libraries">Libraries</a></li>
+<li><a class="reference internal" href="#module-bioblend.galaxy.histories">Histories</a></li>
+<li><a class="reference internal" href="#module-bioblend.galaxy.workflows">Workflows</a></li>
+<li><a class="reference internal" href="#module-bioblend.galaxy.datasets">Datasets</a></li>
+<li><a class="reference internal" href="#module-bioblend.galaxy.users">Users</a></li>
+</ul>
+</li>
+</ul>
+
   <h4>Previous topic</h4>
   <p class="topless"><a href="../cloudman/all.html"
                         title="previous chapter">API documentation for interacting with CloudMan</a></p>
@@ -639,7 +681,7 @@ display information about a deleted user.</p>
         <li class="right" >
           <a href="../cloudman/all.html" title="API documentation for interacting with CloudMan"
              >previous</a> |</li>
-        <li><a href="../../index.html">BioBlend 0.2.0 documentation</a> &raquo;</li> 
+        <li><a href="../../index.html">BioBlend 0.2.2-dev documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

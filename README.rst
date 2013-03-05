@@ -1,9 +1,9 @@
 `BioBlend <http://bioblend.readthedocs.org/>`_ is a Python (2.6 or higher)
-library for interacting with `CloudMan <http://usecloudman.org>`_ and `Galaxy <http://usegalaxy.org>`_'s API.
+library for interacting with `CloudMan`_ and `Galaxy`_'s API.
 
 Conceptually, it makes it possible to script and automate the process of
 cloud infrastructure provisioning and scaling via CloudMan, and running of analyses
-within Galaxy. In reality, it makes it possible to do things like this:
+via Galaxy. In reality, it makes it possible to do things like this:
 
 - Create a CloudMan compute cluster, via an API and directly from your local machine::
 
@@ -30,8 +30,12 @@ within Galaxy. In reality, it makes it possible to do things like this:
     gi.workflows.run_workflow('workflow ID', input_dataset_map)
 
 .. note::
-    Although this library allows you to blend these three services into a cohesive unit,
+    Although this library allows you to blend these two services into a cohesive unit,
     the library itself can be used with any single service irrespective of the other. For
     example, you can use it to just manipulate CloudMan clusters or to script the
     interactions with an instance of Galaxy running on your laptop.
 
+.. References/hyperlinks used above
+.. _CloudMan: http://usecloudman.org/
+.. _Galaxy: http://usegalaxy.org/
+.. _Git repository: https://github.com/afgane/bioblend

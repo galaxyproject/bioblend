@@ -32,7 +32,7 @@ class Client(object):
         if not url:
             url = self.gi._make_url(self, module_id=id, deleted=deleted, contents=contents)
         r = self.gi.make_get_request(url)
-        return r.json
+        return r.json()
 
     def _post(self, payload, id=None, deleted=False, contents=None, url=None, files_attached=False):
         """
@@ -65,4 +65,4 @@ class Client(object):
             url = self.gi._make_url(self, module_id=id, deleted=deleted, contents=contents)
         payload = simplejson.dumps(payload)
         r = self.gi.make_delete_request(url, payload=payload)
-        return r.json
+        return r.json()

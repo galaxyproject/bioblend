@@ -18,6 +18,7 @@ from bioblend.util import Bunch
 # Comment the following line if no logging at the prompt is desired
 #bioblend.set_stream_logger(__name__)
 
+
 class CloudManLauncher(object):
     def __init__(self, access_key, secret_key, cloud=None):
         """
@@ -153,6 +154,7 @@ class CloudManLauncher(object):
         ports = (('80', '80'),  # Web UI
                  ('20', '21'),  # FTP
                  ('22', '22'),  # ssh
+                 ('9600', '9700'),  # HTCondor
                  ('30000', '30100'),  # FTP transfer
                  ('42284', '42284'))  # CloudMan UI
         for port in ports:
@@ -163,6 +165,14 @@ class CloudManLauncher(object):
                     bioblend.log.debug("Rule (%s:%s) already exists in the SG" % (port[0], port[1]))
             except EC2ResponseError, e:
                 bioblend.log.error("A problem with security group authorizations: %s" % e)
+        # Add ICMP (i.e., ping) rule required by HTCondor
+        try:
+            if not self.rule_exists(cmsg.rules, from_port='-1', to_port='-1', ip_protocol='icmp'):
+                cmsg.authorize(ip_protocol='icmp', from_port=-1, to_port=-1, cidr_ip='0.0.0.0/0')
+            else:
+                bioblend.log.debug("ICMP rule already exists in {0} SG".format(sg_name))
+        except EC2ResponseError, e:
+            bioblend.log.error("A problem with security group authorizations: %s" % e)
         # Add rule that allows communication between instances in the same SG
         g_rule_exists = False  # Flag to indicate if group rule already exists
         ci = self._get_cloud_info(self.cloud)
@@ -335,7 +345,7 @@ class CloudManLauncher(object):
         if 'freenxpass' not in form_data and 'password' in form_data:
             form_data['freenxpass'] = form_data['password']
         # Convert form_data into the YAML format
-        ud = yaml.dump(form_data, default_flow_style=False)
+        ud = yaml.dump(form_data, default_flow_style=False, allow_unicode=False)
         # Also include connection info about the selected cloud
         ci = self._get_cloud_info(self.cloud, as_str=True)
         return ud + "\n" + ci
@@ -358,7 +368,7 @@ class CloudManLauncher(object):
         ci['s3_port'] = cloud.s3_port if cloud.s3_port != '' else None
         ci['s3_conn_path'] = cloud.s3_conn_path
         if as_str:
-            ci = yaml.dump(ci, default_flow_style=False)
+            ci = yaml.dump(ci, default_flow_style=False, allow_unicode=False)
         return ci
 
     def _find_placements(self, ec2_conn, instance_type, cloud_type):
@@ -387,7 +397,7 @@ class CloudManLauncher(object):
                         zones.append(zone.name)
                 else:
                     zones.append(zone.name)
-        zones.sort(reverse=True) # Higher-lettered zones seem to have more availability currently
+        zones.sort(reverse=True)  # Higher-lettered zones seem to have more availability currently
         if back_compatible_zone in zones:
             zones = [back_compatible_zone] + [z for z in zones if z != back_compatible_zone]
         if len(zones) == 0:
