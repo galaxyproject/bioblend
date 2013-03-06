@@ -5,6 +5,7 @@ credentials to supported cloud infrastructure.
 Use ``nose`` to run these unit tests.
 """
 import unittest
+import os
 from bioblend import galaxy
 
 class GalaxyTestBase(unittest.TestCase):
