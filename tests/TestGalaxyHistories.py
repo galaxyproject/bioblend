@@ -15,7 +15,7 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
 
     def test_create_history(self):
         history_name = "another buildbot - automated test"
-        # new_history = self.gi.histories.create_history(name=history_name)
+        new_history = self.gi.histories.create_history(name=history_name)
         self.assertIsNotNone(new_history['id'])
         self.assertEqual(new_history['name'], history_name)
         self.assertIsNotNone(new_history['url'])
