@@ -14,7 +14,7 @@ class TestGalaxyUsers(GalaxyTestBase.GalaxyTestBase):
             self.assertIsNotNone(user['id'])
             self.assertIsNotNone(user['url'])
             self.assertIsNotNone(user['email'])
-    
+
     def test_show_user(self):
         current_user = self.gi.users.get_current_user()
         user = self.gi.users.show_user(current_user['id'])
@@ -25,8 +25,8 @@ class TestGalaxyUsers(GalaxyTestBase.GalaxyTestBase):
         self.assertEqual(user['total_disk_usage'], current_user['total_disk_usage'])
 
     def test_create_user(self):
-        users = self.gi.users.create_user('buildbot@galaxy-vic.genome.edu.au')
-        #TODO: Need to have permissions to create user!
+        # TODO: Need to have permissions to create user!
+        # users = self.gi.users.create_user('buildbot@galaxy-vic.genome.edu.au')
         pass
 
     def test_get_current_user(self):
