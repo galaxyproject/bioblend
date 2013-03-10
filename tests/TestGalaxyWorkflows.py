@@ -13,7 +13,8 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
     def test_import_workflow_from_local_path(self):
         with self.assertRaises(Exception):
             self.gi.workflows.import_workflow_from_local_path(None)
-        #TODO: Also need to test importing an actual file!
+        wk = self.gi.workflows.import_workflow_from_local_path('data/SampleWorkflow.ga')
+        self.assertNotEqual(wk['id'], None)
 
     def test_export_workflow_to_local_path(self):
         with self.assertRaises(Exception):
@@ -35,21 +36,21 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
 
     def test_show_workflow(self):
         wk = self.gi.workflows.get_workflows()[0]
-        #TODO: This test is problematic, because it relies on the get_workflow method!
-        #This test is not self-contained.
+        # TODO: This test is problematic, because it relies on the get_workflow method!
+        # This test is not self-contained.
         wk = self.gi.workflows.show_workflow(wk['id'])
         self.assertNotEqual(wk['id'], None)
         self.assertNotEqual(wk['name'], None)
         self.assertNotEqual(wk['inputs'], None)
         self.assertNotEqual(wk['url'], None)
-        
+
     def test_run_workflow(self):
         wk = self.gi.workflows.get_workflows()[0]
         # Try invalid run of workflow
-        output = self.gi.workflows.run_workflow(wk['id'], None)
-        self.assertIsNone(output)
-        
-        #TODO: Hard coded workflow ID. We need to either import, or have a fixed workflow id for testing
+        with self.assertRaises(Exception):
+            self.gi.workflows.run_workflow(wk['id'], None)
+
+        # TODO: Hard coded workflow ID. We need to either import, or have a fixed workflow id for testing
 #        workflowID = wk['id']
 #        sourcehist = '177346507b04acbf'
 #
