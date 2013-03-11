@@ -13,7 +13,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
     def test_import_workflow_from_local_path(self):
         with self.assertRaises(Exception):
             self.gi.workflows.import_workflow_from_local_path(None)
-        wk = self.gi.workflows.import_workflow_from_local_path('data/SampleWorkflow.ga')
+        wk = self.gi.workflows.import_workflow_from_local_path('tests/data/SampleWorkflow.ga')
         self.assertNotEqual(wk['id'], None)
 
     def test_export_workflow_to_local_path(self):
