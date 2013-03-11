@@ -5,8 +5,11 @@ The workflow is imported from a json file (previously exported from Galaxy), and
 
 This example creates a new Data Library, so you must be a Galaxy Admin on the instance you run the script against.
 
-Usage: python run_imported_workflow.py <galaxy-url> <galaxy-API-key>
+Also note that a Galaxy Workflow will only run without modification if it finds the expected versions of tool wrappers 
+installed on the Galaxy instance. This is to ensure reproducibility.
+In this case we expect Tophat wrapper 1.5.0 and Cufflinks wrapper 0.0.5. 
 
+Usage: python run_imported_workflow.py <galaxy-url> <galaxy-API-key>
 """
 
 import sys
