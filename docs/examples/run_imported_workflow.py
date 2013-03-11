@@ -1,9 +1,6 @@
-import sys
-from blend import galaxy
-
 """
 This example demonstrates running a tophat+cufflinks workflow over paired-end data. 
-This is a task we could not do Galaxy's GUI batch mode, because the inputs need to be paired.
+This is a task we could not do using Galaxy's GUI batch mode, because the inputs need to be paired.
 The workflow is imported from a json file (previously exported from Galaxy), and the input data files from URLs.
 
 This example creates a new Data Library, so you must be a Galaxy Admin on the instance you run the script against.
@@ -11,6 +8,9 @@ This example creates a new Data Library, so you must be a Galaxy Admin on the in
 Usage: python run_imported_workflow.py <galaxy-url> <galaxy-API-key>
 
 """
+
+import sys
+from bioblend import galaxy
 
 ## -----------------------------------
 ## Config information for this example
