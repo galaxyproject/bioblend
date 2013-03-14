@@ -25,6 +25,8 @@ Histories
 
 -----
 
+.. _workflows-api:
+
 Workflows
 ---------
 
