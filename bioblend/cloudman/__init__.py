@@ -450,6 +450,18 @@ class CloudManInstance(GenericVMInstance):
             bioblend.log.error(self.vm_error)
 
     @block_till_vm_ready
+    def get_cloudman_version(self):
+        """
+        Returns the cloudman version from the server. Versions prior to Cloudman 2 does not
+        support this call, and therefore, the default is to return 1
+        """
+        try:
+            r = self._make_get_request("cloudman_version")
+            return r['version']
+        except:
+            return 1
+
+    @block_till_vm_ready
     def initialize(self, cluster_type, initial_storage_size=None, shared_bucket=None):
         """
         Initialize CloudMan platform. This needs to be done before the cluster
@@ -459,10 +471,16 @@ class CloudManInstance(GenericVMInstance):
         of cluster platform to initialize.
         """
         if not self.initialized:
-            self._make_get_request("initialize_cluster", parameters={'startup_opt': cluster_type,
-                                                                     'pss': initial_storage_size,
+            if self.get_cloudman_version() < 2:
+                r = self._make_get_request("initialize_cluster", parameters={'startup_opt': cluster_type,
+                                                                         'g_pss': initial_storage_size,
+                                                                     'shared_bucket': shared_bucket})
+            else:
+                r = self._make_get_request("initialize_cluster", parameters={'startup_opt': cluster_type,
+                                                                         'pss': initial_storage_size,
                                                                      'shared_bucket': shared_bucket})
             self.initialized = True
+            return r
 
     @block_till_vm_ready
     def get_cluster_type(self):
@@ -656,6 +674,10 @@ class CloudManInstance(GenericVMInstance):
         before sending a response.
         """
         req_url = '/'.join([self.cloudman_url, 'root', url])
-        print "GET request url: %s params: %s timeout: %s" % (req_url, parameters, timeout)
+        # print "GET request url: %s params: %s timeout: %s" % (req_url, parameters, timeout)
         r = requests.get(req_url, params=parameters, auth=("", self.password), timeout=timeout)
-        return r.json()
+        try:
+            json = r.json()
+            return json
+        except:
+            return r.text
