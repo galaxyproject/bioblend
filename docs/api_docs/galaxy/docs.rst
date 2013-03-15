@@ -191,6 +191,40 @@ This returns a list of metadata dictionaries. We can get the details of a partic
      u'url': u'/api/workflows/e8b85ad72aefca86'
      }
 
+Export or import a Workflow
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Workflows can be exported from or imported into Galaxy as JSON. This makes it possible to archive Workflows, or to move them between Galaxy instances. 
+
+To export a workflow, we can call::
+
+    >>> workflow_string = gi.workflows.export_workflow_json('e8b85ad72aefca86')
+
+This gives us a (rather long) string with a JSON-encoded representation of the Workflow. We can import this string as a new Workflow with::
+
+    >>> gi.workflows.import_workflow_json(workflow_string)
+    {u'id': u'c0bacafdfe211f9a',
+     u'name': u'TopHat + cufflinks part 1 (imported from API)',
+     u'url': u'/api/workflows/c0bacafdfe211f9a'}
+     
+This call returns a dictionary containing basic metadata on the new Workflow object. Since in this case we have imported the JSON string into the original Galaxy instance, we now have a duplicate of the original Workflow in our account:
+
+    >>> gi.workflows.get_workflows()
+    [{u'id': u'c0bacafdfe211f9a',
+      u'name': u'TopHat + cufflinks part 1 (imported from API)',
+      u'url': u'/api/workflows/c0bacafdfe211f9a'},
+     {u'id': u'e8b85ad72aefca86',
+      u'name': u"TopHat + cufflinks part 1",
+      u'url': u'/api/workflows/e8b85ad72aefca86'},
+     {u'id': u'b0631c44aa74526d',
+      u'name': u'CuffDiff',
+      u'url': u'/api/workflows/b0631c44aa74526d'}]
+
+Instead of using JSON strings directly, Workflows can be exported to or imported from files on the local disk using the ``export_workflow_to_local_path`` and ``import_workflow_from_local_path`` methods. See the :ref:`workflows-api` API reference for details.
+
+.. Note:: If we export a Workflow from one Galaxy instance and import it into another, Galaxy will only run it without modification if it has the same versions of the tool wrappers installed. This is to ensure reproducibility. Otherwise, we will need to manually update the Workflow to use the new tool versions.
+
+
 Run a Workflow
 ~~~~~~~~~~~~~~
 
@@ -223,13 +257,14 @@ To specify the inputs, we build a data map and pass this to the ``run_workflow``
                   u'c54baf809e3036ac',
                   u'ba0db8ce6cd1fe8f',
                   u'c019e4cf08b2ac94'
-                  ]}
+                  ]
+    }
 
 In this case the only input id is '252' and the corresponding dataset id is '10a4b652da44e82a'. We have specified the dataset source to be 'hda' (HistoryDatasetAssociation) since the dataset is stored in a History. See the :ref:`workflows-api` API reference for allowed dataset specifications. We have also requested that a new History be created and used to store the results of the run, by setting ``history_name='New output history'``. 
 
 The ``run_workflow`` call submits all the jobs which need to be run to the Galaxy workflow engine, with the appropriate dependencies so that they will run in order. The call returns immediately, so we can continue to submit new jobs while waiting for this workflow to execute. ``run_workflow`` returns the id of the output History and of the datasets that will be created as a result of this run. Note that these dataset ids are valid immediately, so we can specify these datasets as inputs to new jobs even before the files have been created, and the new jobs will be added to the queue with the appropriate dependencies.
 
-If we view the output History after calling ``run_workflow``, we will see something like::
+If we view the output History immediately after calling ``run_workflow``, we will see something like::
 
     >>> gi.histories.show_history('0a7b7992a7cabaec')
     {u'annotation': u'',
@@ -275,7 +310,7 @@ In this case, because the submitted jobs have not had time to run, the output Hi
 View Users
 ~~~~~~~~~~
 
-User management is only available to Galaxy administrators, that is, the API key used to connect to Galaxy must be that of an admin account.
+Methods for managing users are grouped under ``GalaxyInstance.users.*``. User management is only available to Galaxy administrators, that is, the API key used to connect to Galaxy must be that of an admin account.
 
 To get a list of users, call:
     

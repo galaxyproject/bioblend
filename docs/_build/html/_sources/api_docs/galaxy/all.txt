@@ -11,6 +11,8 @@ GalaxyInstance
 
 -----
 
+.. _libraries-api:
+
 Libraries
 ---------
 
