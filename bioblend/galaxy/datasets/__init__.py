@@ -2,9 +2,9 @@
 Contains possible interactions with the Galaxy Datasets
 """
 from bioblend.galaxy.client import Client
-import shutil
-import urllib2
+import requests
 import os
+import shlex
 import time
 import logging
 
@@ -62,21 +62,33 @@ class DatasetClient(Client):
         if not dataset['state'] == 'ok':
             raise DatasetStateException("Dataset not ready. Dataset id: %s, current state: %s" % (dataset_id, dataset['state']))
 
-        # Append the dataset_id to the base history contents URL
-        url = '/'.join([self.gi.base_url, dataset['download_url']])
+        # Currently the Datasets REST API does not provide the download URL, so we construct it
+        download_url = '/datasets/' + dataset_id + '/display?to_ext=' + dataset['data_type']
+        url = '/'.join([self.gi.base_url, download_url])
+            
+        # Don't use self.gi.make_get_request as currently the download API does not require a key        
+        r = requests.get(url)
+        
         if file_path is None:
-            r = self.gi.make_get_request(url)
             return r.content
         else:
-            req = urllib2.urlopen(url)
-
             if use_default_filename:
-                file_local_path = os.path.join(file_path, dataset['name'])
+                try:
+                    # First try to get the filename from the response headers
+                    # We expect tokens 'filename' '=' to be followed by the quoted filename
+                    tokens = [x for x in shlex.shlex(r.headers['content-disposition'], posix=True)]
+                    header_filepath = tokens[ tokens.index('filename')+2 ]
+                    filename = os.path.basename(header_filepath)
+                except (ValueError, IndexError):
+                    # If the filename was not in the header, build a useable filename ourselves.
+                    filename = dataset['name'] + '.' + dataset['data_type']
+                
+                file_local_path = os.path.join(file_path, filename)
             else:
                 file_local_path = file_path
 
             with open(file_local_path, 'wb') as fp:
-                shutil.copyfileobj(req, fp)
+                fp.write(r.content)
 
     def _is_dataset_complete(self, dataset_id):
         dataset = self.show_dataset(dataset_id)
