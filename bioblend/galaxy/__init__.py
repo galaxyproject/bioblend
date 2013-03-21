@@ -6,7 +6,7 @@ import urlparse
 import poster
 import urllib2
 import simplejson
-from bioblend.galaxy import (libraries, histories, workflows, datasets, users)
+from bioblend.galaxy import (libraries, histories, workflows, datasets, users, genomes)
 
 
 class GalaxyInstance(object):
@@ -52,6 +52,7 @@ class GalaxyInstance(object):
         self.workflows = workflows.WorkflowClient(self)
         self.datasets = datasets.DatasetClient(self)
         self.users = users.UserClient(self)
+        self.genomes = genomes.GenomeClient(self)
 
     def _make_url(self, module, module_id=None, deleted=False, contents=False):
         """
@@ -119,7 +120,7 @@ class GalaxyInstance(object):
 
 
         if files_attached:
-            payload.update(params) # merge query string values into request body instead
+            payload.update(params)  # merge query string values into request body instead
             poster.streaminghttp.register_openers()
             datagen, headers = poster.encode.multipart_encode(payload)
             request = urllib2.Request(url, datagen, headers)
