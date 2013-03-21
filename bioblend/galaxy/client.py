@@ -19,7 +19,7 @@ class Client(object):
         self.gi = galaxy_instance
         self.url = '/'.join([self.gi.url, self.module])
 
-    def _get(self, id=None, deleted=False, contents=None, url=None):
+    def _get(self, id=None, deleted=False, contents=None, url=None, params=None):
         """
         Do a generic GET request, composing the url from the contents of the
         arguments. Alternatively, an explicit ``url`` can be provided
@@ -31,7 +31,7 @@ class Client(object):
         """
         if not url:
             url = self.gi._make_url(self, module_id=id, deleted=deleted, contents=contents)
-        r = self.gi.make_get_request(url)
+        r = self.gi.make_get_request(url, params)
         return r.json()
 
     def _post(self, payload, id=None, deleted=False, contents=None, url=None, files_attached=False):
@@ -51,7 +51,7 @@ class Client(object):
             url = self.gi._make_url(self, module_id=id, deleted=deleted, contents=contents)
 
         r = self.gi.make_post_request(url, payload=payload, files_attached=files_attached)
-        
+
         return r
 
     def _delete(self, payload, id=None, deleted=False, contents=None, url=None):
