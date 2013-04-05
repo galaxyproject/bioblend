@@ -78,11 +78,10 @@ outputhist = outputhist_dict['id']
 print "Will run workflow on %d pairs of files" % len(dataset_ids)
 
 # Get the input step IDs from the workflow.
-# Note that we are assuming inputs are in order readpair-1 then readpair-2 as that's how our workflow is set up. A more general solution would be to check the input names.
+# We use the BioBlend convenience function get_workflow_inputs to retrieve inputs by label.
 
-wf_dict = gi.workflows.show_workflow(workflow)
-input1 = wf_dict['inputs'].keys()[0]
-input2 = wf_dict['inputs'].keys()[1]
+input1 = gi.workflows.get_workflow_inputs(workflow, label='Input fastq readpair-1')[0]
+input2 = gi.workflows.get_workflow_inputs(workflow, label='Input fastq readpair-2')[0]
 
 # For each pair of datasets we imported, run the imported workflow
 # For each input we need to build a datamap dict with 'src' set to 'ld', as we stored our data in a Galaxy Library

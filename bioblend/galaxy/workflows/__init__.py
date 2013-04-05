@@ -44,6 +44,15 @@ class WorkflowClient(Client):
         """
         return Client._get(self, id=workflow_id)
 
+    def get_workflow_inputs(self, workflow_id, label):
+        """
+        Get a list of workflow input IDs that match the given label. 
+        If no input matches the given label, an empty list is returned. 
+        """
+        wf = Client._get(self, id=workflow_id)
+        inputs = wf['inputs']
+        return [id for id in inputs if inputs[id]['label'] == label]
+
     def import_workflow_json(self, workflow_json):
         """
         Imports a new workflow given a json representation of a previously exported
