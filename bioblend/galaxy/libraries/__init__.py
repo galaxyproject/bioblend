@@ -26,6 +26,17 @@ class LibraryClient(Client):
             payload['synopsis'] = synopsis
         return Client._post(self, payload)
 
+    def delete_library(self, library_id):
+        """
+        Delete a data library identified by `library_id`.
+
+        .. warning::
+            Deleting a data library is irreversible - all of the data from
+            the library will be permanently deleted.
+        """
+        payload = {}
+        return Client._delete(self, payload, id=library_id)
+
     def create_folder(self, library_id, folder_name, description=None, base_folder_id=None):
         """
         Create a folder in the given library and the base folder. If
@@ -121,7 +132,7 @@ class LibraryClient(Client):
             payload['server_dir'] = keywords['server_dir']
         elif keywords.get('file_local_path', None) is not None:
             payload['upload_option'] = 'upload_file'
-            payload['files_0|file_data'] =  open(keywords['file_local_path'], 'rb')
+            payload['files_0|file_data'] = open(keywords['file_local_path'], 'rb')
             files_attached = True
         elif keywords.get("filesystem_paths", None) is not None:
             payload["upload_option"] = "upload_paths"
@@ -154,7 +165,8 @@ class LibraryClient(Client):
         del vars['self']
         return self._do_upload(**vars)
 
-    def upload_file_from_local_path(self, library_id, file_local_path, folder_id=None, file_type='auto', dbkey='?'):
+    def upload_file_from_local_path(self, library_id, file_local_path,
+                                    folder_id=None, file_type='auto', dbkey='?'):
         """
         Read local file contents from file_local_path and upload data to a library.
         If ``folder_id`` is not specified, the file will be placed in the root folder.
