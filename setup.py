@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 from bioblend import get_version
 
@@ -9,10 +9,7 @@ setup(name="bioblend",
       author_email="afgane@gmail.com",
       url="http://bioblend.readthedocs.org/",
       install_requires=['requests>=1.1.0', 'poster', 'simplejson', 'boto', 'nose', 'mock', 'pyyaml'],
-      packages=['bioblend', 'bioblend.cloudman', 'bioblend.galaxy', 'bioblend.util',
-                  'bioblend.galaxy.datasets', 'bioblend.galaxy.histories',
-                  'bioblend.galaxy.libraries', 'bioblend.galaxy.users', 'bioblend.galaxy.genomes',
-                  'bioblend.galaxy.workflows'],
+      packages=find_packages(),
       license='MIT',
       platforms="Posix; MacOS X; Windows",
       classifiers=["Development Status :: 3 - Alpha",
