@@ -77,7 +77,7 @@ class LibraryClient(Client):
                 if name == lib['name'] or library_id == lib['id']:
                     filtered_libs.append(lib)
                 # Library ID's are unique so break now that the lib was found
-                if library_id is not None:
+                if library_id is not None and filtered_libs:
                     break
             libraries = filtered_libs
         return libraries
