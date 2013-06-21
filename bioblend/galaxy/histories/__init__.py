@@ -62,6 +62,19 @@ class HistoryClient(Client):
         url = '/'.join([url, dataset_id])
         return Client._get(self, url=url)
 
+    def update_history(self, history_id, name=None,annotation=None):
+        """
+        Update a history meta information. Only valid attribute are name and annotation.
+        """
+        payload = {}
+        if name:
+            payload['name'] = name
+        if annotation:
+            payload['annotation'] = annotation
+            
+        return Client._put(self, payload, id=history_id)
+
+    
     def upload_dataset_from_library(self, history_id, lib_dataset_id):
         """
         Upload a dataset into the history from a library. Requires the
