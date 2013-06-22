@@ -60,12 +60,8 @@ class Client(object):
         arguments. Alternatively, an explicit ``url`` can be provided to use
         for the request. ``payload`` must be a dict that contains additional
         request arguments which will be sent along with the request body.
-        The payload dict may contain file handles (in which case the files_attached
-        flag must be set to true).
-        
-        The request body will be encoded in a JSON format if files_attached=False
-        or will be encoded in a multipart/form-data format if files_attached=True.
-        The return value will contain the response body as a JSON object.
+
+        The return value will html status code
         """
         if not url:
             url = self.gi._make_url(self, module_id=id)
