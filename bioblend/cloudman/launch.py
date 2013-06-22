@@ -1,15 +1,15 @@
 """
 Setup and launch a CloudMan instance.
 """
+import yaml
 import datetime
 from httplib import HTTP
 from urlparse import urlparse
 
 import boto
 from boto.ec2.regioninfo import RegionInfo
-from boto.exception import EC2ResponseError
-
-import yaml
+from boto.exception import EC2ResponseError, S3ResponseError
+from boto.s3.connection import OrdinaryCallingFormat, S3Connection, SubdomainCallingFormat
 
 import bioblend
 from bioblend.util import Bunch
@@ -92,10 +92,12 @@ class CloudManLauncher(object):
         for sg in security_groups:
             ret['sg_names'].append(self.create_cm_security_group(sg))
         ret['kp_name'], ret['kp_material'] = self.create_key_pair(key_name)
-        # If not provided, find placement - see the method for potential issues!
-        if placement == '':
-            placement = self._find_placements(self.ec2_conn, instance_type,
-                    self.cloud.cloud_type)[0]
+        # If not provided, try to find a placement
+        if not placement:
+            placement = self._find_placement(cluster_name)
+            if not placement:
+                # Let the cloud middleware assign a zone
+                placement = None
         # Compose user data for launching an instance, ensuring we have the required fields
         kwargs['access_key'] = self.access_key
         kwargs['secret_key'] = self.secret_key
@@ -293,6 +295,59 @@ class CloudManLauncher(object):
             state['error'] = err
         return state
 
+    def get_clusters_pd(self):
+        """
+        Return a list containing the *persistent data* of all existing clusters
+        associated with this account. If no clusters are found, return ``None``.
+        Each list element is a dictionary with the ``cluster_name`` key and the
+        ``persistent_data``. ``persistent_data`` value is yet another dictionary
+        containing given cluster's persistent data.
+
+        .. versionadded:: 0.3
+        """
+        s3_conn = self.connect_s3(self.access_key, self.secret_key, self.cloud)
+        buckets = s3_conn.get_all_buckets()
+        clusters = []
+        for bucket in buckets:
+            try:
+                # TODO: first lookup if persistent_data.yaml key exists
+                pd = bucket.get_key('persistent_data.yaml')
+            except S3ResponseError, e:
+                # This can fail for a number of reasons for non-us and/or CNAME'd buckets.
+                err = ("Problem fetching persistent_data.yaml from bucket %s \n%s"
+                    % (bucket, e.body))
+                bioblend.log.error(err)
+                continue
+            if pd:
+                # We are dealign with a CloudMan bucket
+                pd_contents = pd.get_contents_as_string()
+                pd = yaml.load(pd_contents)
+                if 'cluster_name' in pd:
+                    cluster_name = pd['cluster_name']
+                else:
+                    for key in bucket.list():
+                        if key.name.endswith('.clusterName'):
+                            cluster_name = key.name.split('.clusterName')[0]
+                clusters.append({'cluster_name': cluster_name,
+                                 'persistent_data': pd})
+        return clusters
+
+    def get_cluster_pd(self, cluster_name):
+        """
+        Return *persistent data* associated with a cluster with the given
+        ``cluster_name``. If a cluster with the given name is not found,
+        return ``None``.
+
+        .. versionadded:: 0.3
+        """
+        cluster = None
+        clusters = self.get_clusters_pd()
+        for c in clusters:
+            if c['cluster_name'] == cluster_name:
+                cluster = c
+                break
+        return cluster
+
     def connect_ec2(self, a_key, s_key, cloud=None):
         """
         Create and return an EC2-compatible connection object for the given cloud.
@@ -314,6 +369,26 @@ class CloudManLauncher(object):
                               path=ci['ec2_conn_path'],
                               validate_certs=False)
         return ec2_conn
+
+    def connect_s3(self, a_key, s_key, cloud=None):
+        """
+        Create and return an S3-compatible connection object for the given cloud.
+
+        See ``_get_cloud_info`` method for more details on the requirements for
+        the ``cloud`` parameter. If no value is provided, the class field is used.
+        """
+        if cloud is None:
+            cloud = self.cloud
+        ci = self._get_cloud_info(cloud)
+        if ci['cloud_type'] == 'amazon':
+            calling_format = SubdomainCallingFormat()
+        else:
+            calling_format = OrdinaryCallingFormat()
+        s3_conn = S3Connection(
+            aws_access_key_id=a_key, aws_secret_access_key=s_key,
+            is_secure=ci['is_secure'], port=ci['s3_port'], host=ci['s3_host'],
+            path=ci['s3_conn_path'], calling_format=calling_format)
+        return s3_conn
 
     def _compose_user_data(self, user_provided_data):
         """
@@ -371,38 +446,74 @@ class CloudManLauncher(object):
             ci = yaml.dump(ci, default_flow_style=False, allow_unicode=False)
         return ci
 
-    def _find_placements(self, ec2_conn, instance_type, cloud_type):
+    def _find_placement(self, cluster_name):
         """
-        Find an EC2 region zone that supports the requested instance type.
+        Find a placement zone for a cluster with the name ``cluster_name``.
+        If a cluster with the given name cannot be found, return ``None``.
+        """
+        placement = None
+        cluster = self.get_cluster_pd(cluster_name)
+        if cluster and 'persistent_data' in cluster:
+            pd = cluster['persistent_data']
+            if 'placement' in pd:
+                placement = pd['placement']
+            elif 'data_filesystems' in pd:
+                try:
+                    # We have v1 format persistent data so get the volume first and
+                    # then the placement zone
+                    vol_id = pd['data_filesystems']['galaxyData'][0]['vol_id']
+                    vol = self.ec2_conn.get_all_volumes(volume_ids=[vol_id])
+                    if vol:
+                        placement = vol[0].zone
+                except:
+                    #If anything goes wrong with zone detection, use the default selection.
+                    placement = None
+        return placement
 
-        We do this by checking the spot prices in the potential availability zones
-        for support before deciding on a region:
+    def find_placements(self, ec2_conn, instance_type, cloud_type, cluster_name=None):
+        """
+        Find a list of placement zones that support the requested instance type.
+        If ``cluster_name`` is given and a cluster with the given name exist,
+        return a list with only one entry where the given cluster lives.
+
+        Searching for available zones for a given instance type is done by
+        checking the spot prices in the potential availability zones for
+        support before deciding on a region:
         http://blog.piefox.com/2011/07/ec2-availability-zones-and-instance.html
 
-        If instance_type is None, finds all zones that are currently available.
+        Note that, currently, instance-type based zone selection applies only to
+        AWS. For other clouds, all the available zones are returned (unless a
+        cluster is being recreated, in which case the cluste's placement zone is
+        returned sa stored in its persistent data.
 
-        Note that, currently, this only applies to AWS. For other clouds, all
-        the available zones are returned.
+        .. versionchanged:: 0.3
+            Changed method name from ``_find_placements`` to ``find_placements``.
+            Also added ``cluster_name`` parameter.
         """
         zones = []
-        in_the_past = datetime.datetime.now() - datetime.timedelta(hours=2)
-        back_compatible_zone = "us-east-1e"
-        for zone in ec2_conn.get_all_zones():
-            if zone.state in ["available"]:
-                # Non EC2 clouds may not support get_spot_price_history
-                if instance_type is not None and cloud_type == 'ec2':
-                    if (len(ec2_conn.get_spot_price_history(instance_type=instance_type,
-                                                            end_time=in_the_past.isoformat(),
-                                                            availability_zone=zone.name)) > 0):
+        # First look for a specific zone a given cluster is bound to
+        if cluster_name:
+            zones = self._find_placement(cluster_name)
+        # If placement is not found, look for a list of available zones
+        if not zones:
+            in_the_past = datetime.datetime.now() - datetime.timedelta(hours=1)
+            back_compatible_zone = "us-east-1e"
+            for zone in ec2_conn.get_all_zones():
+                if zone.state in ["available"]:
+                    # Non EC2 clouds may not support get_spot_price_history
+                    if instance_type is not None and cloud_type == 'ec2':
+                        if (len(ec2_conn.get_spot_price_history(instance_type=instance_type,
+                                                                end_time=in_the_past.isoformat(),
+                                                                availability_zone=zone.name)) > 0):
+                            zones.append(zone.name)
+                    else:
                         zones.append(zone.name)
-                else:
-                    zones.append(zone.name)
-        zones.sort(reverse=True)  # Higher-lettered zones seem to have more availability currently
-        if back_compatible_zone in zones:
-            zones = [back_compatible_zone] + [z for z in zones if z != back_compatible_zone]
-        if len(zones) == 0:
-            bioblend.log.error("Did not find availabilty zone for {1}".format(instance_type))
-            zones.append(back_compatible_zone)
+            zones.sort(reverse=True)  # Higher-lettered zones seem to have more availability currently
+            if back_compatible_zone in zones:
+                zones = [back_compatible_zone] + [z for z in zones if z != back_compatible_zone]
+            if len(zones) == 0:
+                bioblend.log.error("Did not find availabilty zone for {1}".format(instance_type))
+                zones.append(back_compatible_zone)
         return zones
 
     def _checkURL(self, url):

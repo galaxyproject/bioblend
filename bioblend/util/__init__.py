@@ -1,4 +1,5 @@
 
+
 class Bunch(object):
     """
     A convenience class to allow dict keys to be represented as object fields.
