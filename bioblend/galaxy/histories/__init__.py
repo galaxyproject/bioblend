@@ -64,8 +64,20 @@ class HistoryClient(Client):
 
     def update_history(self, history_id, name=None,annotation=None):
         """
-        Update a history meta information. Only valid attribute are name and annotation.
-        """
+        Update history metadata information. Current attributes that can be modified
+        for a history 'name' and 'annotation'. 
+
+        :type history_id: string
+        :param history_id: Encoded history ID
+        :type name: string
+        :param name: Replace history with the given string
+        :type annotation: string
+        :param annotation: Replace history annotation with given string
+
+        :rtype: status_code (int)
+
+        """        
+
         payload = {}
         if name:
             payload['name'] = name
