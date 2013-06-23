@@ -93,6 +93,8 @@ class CloudManLauncher(object):
             ret['sg_names'].append(self.create_cm_security_group(sg))
         ret['kp_name'], ret['kp_material'] = self.create_key_pair(key_name)
         # If not provided, try to find a placement
+        # TODO: Should placement always be checked? To make sure it's correct
+        # for existing clusters.
         if not placement:
             placement = self._find_placement(cluster_name)
             if not placement:
