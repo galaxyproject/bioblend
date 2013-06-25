@@ -62,6 +62,31 @@ class HistoryClient(Client):
         url = '/'.join([url, dataset_id])
         return Client._get(self, url=url)
 
+    def update_history(self, history_id, name=None,annotation=None):
+        """
+        Update history metadata information. Current attributes that can be modified
+        for a history 'name' and 'annotation'. 
+
+        :type history_id: string
+        :param history_id: Encoded history ID
+        :type name: string
+        :param name: Replace history with the given string
+        :type annotation: string
+        :param annotation: Replace history annotation with given string
+
+        :rtype: status_code (int)
+
+        """        
+
+        payload = {}
+        if name:
+            payload['name'] = name
+        if annotation:
+            payload['annotation'] = annotation
+            
+        return Client._put(self, payload, id=history_id)
+
+    
     def upload_dataset_from_library(self, history_id, lib_dataset_id):
         """
         Upload a dataset into the history from a library. Requires the
