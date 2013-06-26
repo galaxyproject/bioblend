@@ -86,9 +86,9 @@ class HistoryClient(Client):
             
         return Client._put(self, payload, id=history_id)
 
-    def create_history_tags(self,history_id,tag):
+    def create_history_tag(self,history_id,tag):
         """
-        Create history tags
+        Create history tag
 
         :type history_id: string
         :param history_id: Encoded history ID
