@@ -116,7 +116,7 @@ class WorkflowClient(Client):
 
         return workflow_json
 
-    def run_workflow(self, workflow_id, dataset_map, history_id=None, history_name=None,
+    def run_workflow(self, workflow_id, dataset_map,params=None, history_id=None, history_name=None,
             import_inputs_to_history=False):
         """
         Run the workflow identified by ``workflow_id``
@@ -131,6 +131,10 @@ class WorkflowClient(Client):
                             The map must be in the following format:
                             ``{'<input>': {'id': <encoded dataset ID>, 'src': '[ldda, ld, hda]'}}``
                             (eg, ``{'23': {'id': '29beef4fadeed09f', 'src': 'ld'}}``)
+        :type params: string or dict
+        :param params: A mapping of tool parameters that are non-datasets parameters. The map must be in the
+                         following format:
+                         ``{'blastn': {'param': 'evalue', 'value': '1e-06'}}``
 
         :type history_id: string
         :param history_id: The encoded history ID where to store the workflow output.
@@ -158,6 +162,10 @@ class WorkflowClient(Client):
         payload = {}
         payload['workflow_id'] = workflow_id
         payload['ds_map'] = dataset_map
+        
+        if params:
+            payload['parameters'] = params
+            
         if history_id:
             payload['history'] = 'hist_id={0}'.format(history_id)
         elif history_name:

@@ -151,3 +151,18 @@ class GalaxyInstance(object):
             params = self.default_params
         r = requests.delete(url, verify=self.verify, data=payload, params=params)
         return r
+
+    def make_put_request(self,url,payload=None,params=None):
+        """
+        Make a PUT request using the provided ``url`` with required playload
+        The ``payload`` must be a dict that can be converted into a JSON
+        object (via ``simplejson.dumps``)
+        """
+        if params is not None and params.get('key', False) is False:
+            params['key'] = self.key
+        else:
+            params = self.default_params
+            
+        payload = simplejson.dumps(payload)
+        r = requests.put(url,data=payload,params=params)
+        return r
