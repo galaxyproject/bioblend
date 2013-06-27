@@ -86,6 +86,33 @@ class HistoryClient(Client):
             
         return Client._put(self, payload, id=history_id)
 
+    def create_history_tag(self,history_id,tag):
+        """
+        Create history tag
+
+        :type history_id: string
+        :param history_id: Encoded history ID
+        :type tag: string
+        :param tag: Add tag to history
+
+        :rtype: json object
+        :return: Return json object
+                 For example::
+
+                 {'model_class':'HistoryTagAssociation', 'user_tname': 'NGS_PE_RUN', 'id': 'f792763bee8d277a', 'user_value': None}
+                 
+        """        
+
+        #empty payload since we are adding the new tag using the url
+        payload = {}
+
+        #creating the url
+        url = self.url
+        url = '/'.join([url, history_id,'tags',tag])
+        
+        return Client._post(self, payload, url=url)
+
+
     
     def upload_dataset_from_library(self, history_id, lib_dataset_id):
         """
