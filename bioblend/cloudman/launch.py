@@ -468,8 +468,20 @@ class CloudManLauncher(object):
                     if vol:
                         placement = vol[0].zone
                 except:
-                    #If anything goes wrong with zone detection, use the default selection.
+                    #If anything goes wrong with zone detection, default to None
                     placement = None
+            elif 'filesystems' in pd:
+                for fs in pd['filesystems']:
+                    if 'kind' in fs and fs['kind'] == 'volume':
+                        if 'ids' in fs:
+                            try:
+                                vol_id = fs['ids'][0]  # All volumes must be in the same zone
+                                vol = self.ec2_conn.get_all_volumes(volume_ids=[vol_id])
+                                if vol:
+                                    placement = vol[0].zone
+                            except:
+                                #If anything goes wrong with zone detection, default to None
+                                placement = None
         return placement
 
     def find_placements(self, ec2_conn, instance_type, cloud_type, cluster_name=None):
@@ -492,12 +504,13 @@ class CloudManLauncher(object):
             Changed method name from ``_find_placements`` to ``find_placements``.
             Also added ``cluster_name`` parameter.
         """
-        zones = []
         # First look for a specific zone a given cluster is bound to
+        zones = []
         if cluster_name:
             zones = self._find_placement(cluster_name)
         # If placement is not found, look for a list of available zones
         if not zones:
+            zones = []  # _find_placement can return None so ensure we have a list
             in_the_past = datetime.datetime.now() - datetime.timedelta(hours=1)
             back_compatible_zone = "us-east-1e"
             for zone in ec2_conn.get_all_zones():
@@ -516,6 +529,10 @@ class CloudManLauncher(object):
             if len(zones) == 0:
                 bioblend.log.error("Did not find availabilty zone for {1}".format(instance_type))
                 zones.append(back_compatible_zone)
+        else:
+            # Make sure we're returning a list
+            if not isinstance(zones, list):
+                zones = [zones]
         return zones
 
     def _checkURL(self, url):
