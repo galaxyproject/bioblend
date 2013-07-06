@@ -300,10 +300,10 @@ class CloudManLauncher(object):
     def get_clusters_pd(self):
         """
         Return a list containing the *persistent data* of all existing clusters
-        associated with this account. If no clusters are found, return ``None``.
-        Each list element is a dictionary with the ``cluster_name`` key and the
-        ``persistent_data``. ``persistent_data`` value is yet another dictionary
-        containing given cluster's persistent data.
+        associated with this account. If no clusters are found, return an empty
+        list. Each list element is a dictionary with the ``cluster_name`` key
+        and the ``persistent_data``. ``persistent_data`` value is yet another
+        dictionary containing given cluster's persistent data.
 
         .. versionadded:: 0.3
         """
@@ -336,13 +336,13 @@ class CloudManLauncher(object):
 
     def get_cluster_pd(self, cluster_name):
         """
-        Return *persistent data* associated with a cluster with the given
-        ``cluster_name``. If a cluster with the given name is not found,
-        return ``None``.
+        Return *persistent data* (as a dict) associated with a cluster with the
+        given ``cluster_name``. If a cluster with the given name is not found,
+        return an empty dict.
 
         .. versionadded:: 0.3
         """
-        cluster = None
+        cluster = {}
         clusters = self.get_clusters_pd()
         for c in clusters:
             if c['cluster_name'] == cluster_name:
@@ -450,8 +450,9 @@ class CloudManLauncher(object):
 
     def _find_placement(self, cluster_name):
         """
-        Find a placement zone for a cluster with the name ``cluster_name``.
-        If a cluster with the given name cannot be found, return ``None``.
+        Find a placement zone for a cluster with the name ``cluster_name`` and
+        return the zone name as a string. If the cluster or the volume associated
+        with the cluster cannot be found, return ``None``.
         """
         placement = None
         cluster = self.get_cluster_pd(cluster_name)
