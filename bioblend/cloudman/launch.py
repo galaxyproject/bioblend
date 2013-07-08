@@ -332,7 +332,8 @@ class CloudManLauncher(object):
                             cluster_name = key.name.split('.clusterName')[0]
                 clusters.append({'cluster_name': cluster_name,
                                  'persistent_data': pd,
-                                 'bucket_name': bucket})
+                                 'bucket_name': bucket.name
+                                 })
         return clusters
 
     def get_cluster_pd(self, cluster_name):
