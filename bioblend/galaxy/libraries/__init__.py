@@ -119,7 +119,7 @@ class LibraryClient(Client):
         if keywords.get("roles", None):
             payload["roles"] = keywords["roles"]
         if keywords.get("link_data_only", None):
-            payload["link_data_only"] = str(keywords["link_data_only"])
+            payload["link_data_only"] = 'link_to_files'
         # upload options
         if keywords.get('file_url', None) is not None:
             payload['upload_option'] = 'upload_file'
