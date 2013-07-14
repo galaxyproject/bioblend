@@ -297,13 +297,14 @@ class CloudManLauncher(object):
             state['error'] = err
         return state
 
-    def get_clusters_pd(self):
+    def get_clusters_pd(self, include_placement=True):
         """
         Return a list containing the *persistent data* of all existing clusters
         associated with this account. If no clusters are found, return an empty
-        list. Each list element is a dictionary with the ``cluster_name`` key
-        and the ``persistent_data``. ``persistent_data`` value is yet another
-        dictionary containing given cluster's persistent data.
+        list. Each list element is a dictionary with the following keys:
+        ``cluster_name``, ``persistent_data``, ``bucket_name`` and, optionally,
+        ``placement``. ``persistent_data`` value is yet another dictionary
+        containing given cluster's persistent data.
 
         .. versionadded:: 0.3
         """
@@ -330,10 +331,14 @@ class CloudManLauncher(object):
                     for key in bucket.list():
                         if key.name.endswith('.clusterName'):
                             cluster_name = key.name.split('.clusterName')[0]
-                clusters.append({'cluster_name': cluster_name,
-                                 'persistent_data': pd,
-                                 'bucket_name': bucket.name
-                                 })
+                cluster = {'cluster_name': cluster_name,
+                           'persistent_data': pd,
+                           'bucket_name': bucket.name}
+                # Look for cluster's placement too
+                if include_placement:
+                    placement = self._find_placement(cluster_name, cluster)
+                    cluster['placement'] = placement
+                clusters.append(cluster)
         return clusters
 
     def get_cluster_pd(self, cluster_name):
@@ -450,14 +455,19 @@ class CloudManLauncher(object):
             ci = yaml.dump(ci, default_flow_style=False, allow_unicode=False)
         return ci
 
-    def _find_placement(self, cluster_name):
+    def _find_placement(self, cluster_name, cluster=None):
         """
         Find a placement zone for a cluster with the name ``cluster_name`` and
-        return the zone name as a string. If the cluster or the volume associated
-        with the cluster cannot be found, return ``None``.
+        return the zone name as a string. By default, this method will search
+        for and fetch given cluster's persistent data; alternatively, persistent
+        data can be provided via ``cluster``. This dict needs to have
+        ``persistent_data`` key with the contents of cluster's persistent data.
+        If the cluster or the volume associated with the cluster cannot be found,
+        return ``None``.
         """
         placement = None
-        cluster = self.get_cluster_pd(cluster_name)
+        if not cluster:
+            cluster = self.get_cluster_pd(cluster_name)
         if cluster and 'persistent_data' in cluster:
             pd = cluster['persistent_data']
             if 'placement' in pd:
@@ -500,7 +510,7 @@ class CloudManLauncher(object):
 
         Note that, currently, instance-type based zone selection applies only to
         AWS. For other clouds, all the available zones are returned (unless a
-        cluster is being recreated, in which case the cluste's placement zone is
+        cluster is being recreated, in which case the cluster's placement zone is
         returned sa stored in its persistent data.
 
         .. versionchanged:: 0.3
