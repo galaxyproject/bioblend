@@ -6,7 +6,7 @@ import urlparse
 import poster
 import urllib2
 import simplejson
-from bioblend.galaxy import (libraries, histories, workflows, datasets, users, genomes, tools)
+from bioblend.galaxy import (libraries, histories, workflows, datasets, users, genomes, tools,toolshed)
 
 
 class GalaxyInstance(object):
@@ -54,6 +54,7 @@ class GalaxyInstance(object):
         self.users = users.UserClient(self)
         self.genomes = genomes.GenomeClient(self)
         self.tools = tools.ToolClient(self)
+        self.toolShed = toolshed.ToolShedClient(self)
 
     def _make_url(self, module, module_id=None, deleted=False, contents=False):
         """
