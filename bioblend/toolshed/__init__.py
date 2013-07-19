@@ -21,11 +21,11 @@ class ToolShedInstance(object):
         a repositories, and get a list of all the public repositories, the following
         should be done::
 
-            from bioblend import galaxy
+            from bioblend import toolshed
 
-            gi = galaxy.ToolshedInstance(url='http://127.0.0.1:8000', key='your_api_key')
+            ts = toolshed.ToolshedInstance(url='http://127.0.0.1:8000', key='your_api_key')
 
-            hl = gi.histories.get_repositories()
+            hl = ts.histories.get_repositories()
             print "List of repositories:", hl
 
         :type url: string
