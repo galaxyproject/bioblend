@@ -48,3 +48,23 @@ Users
 
 .. automodule:: bioblend.galaxy.users
 
+-----
+
+ToolShed
+--------
+
+.. automodule:: bioblend.galaxy.toolshed
+
+-----
+
+Tools
+-----
+
+.. automodule:: bioblend.galaxy.tools
+
+-----
+
+Genomes
+-------
+
+.. automodule:: bioblend.galaxy.genomes
