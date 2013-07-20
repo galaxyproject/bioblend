@@ -50,3 +50,29 @@ class ToolShedClient(Client):
         return Client._get(self, id=toolShed_id)
 
 
+
+    def get_ordered_installable_revisions(self,name,owner):
+        """
+        Returns the ordered list of changeset revision hash strings that are associated
+        with installable revisions.  As in the changelog, the list is ordered oldest to newest.
+
+        :type name: string
+        :param name: the name of the repository
+
+        :type owner: string
+        :param owner: the owner of the repository
+
+        
+        :rtype: list
+        :return: Information about the tool
+
+        """
+        url = self.url + '/get_ordered_installable_revisions'
+        params = {}
+        params['name'] = name
+        params['owner'] = owner
+        r= self.gi.make_get_request(url,params)
+        
+        return r.text
+
+    
