@@ -71,7 +71,7 @@ class ToolShedClient(Client):
         params = {}
         params['name'] = name
         params['owner'] = owner
-        r= self.gi.make_get_request(url,params)
+        r= Client._get(self,url,params)
         
         return r.text
 
