@@ -2,9 +2,11 @@
 A base representation of an instance of Tool Shed 
 """
 from bioblend.toolshed import (repositories)
+from bioblend.galaxyclient import GalaxyClient
+import urlparse
+import requests
 
-
-class ToolShedInstance(object):
+class ToolShedInstance(GalaxyClient):
     def __init__(self, url, key):
         """
         A base representation of an instance of ToolShed, identified by a
@@ -42,3 +44,5 @@ class ToolShedInstance(object):
         self.json_headers = {'Content-Type': 'application/json'}
         self.verify = False  # Should SSL verification be done
         self.repositories = repositories.ToolShedClient(self)
+
+
