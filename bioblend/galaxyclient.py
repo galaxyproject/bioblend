@@ -1,5 +1,5 @@
 """
-Helper class for Instance object
+Helper class for Galaxy and ToolShed Instance object
 
 This class is primarily a helper for the library and user code
 should not use it directly.
