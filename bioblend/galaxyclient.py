@@ -7,6 +7,7 @@ A base representation of an instance
 """
 import urlparse
 import requests
+import simplejson
 
 class GalaxyClient(object):
     def _make_url(self, module, module_id=None, deleted=False, contents=False):
