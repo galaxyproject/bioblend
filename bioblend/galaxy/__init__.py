@@ -6,7 +6,7 @@ import urlparse
 import poster
 import urllib2
 import simplejson
-from bioblend.galaxy import (libraries, histories, workflows, datasets, users, genomes, tools,toolshed)
+from bioblend.galaxy import (libraries, histories, workflows, datasets, users, genomes, tools,toolshed,visual)
 from bioblend.galaxyclient import GalaxyClient
 
 class GalaxyInstance(GalaxyClient):
@@ -55,4 +55,5 @@ class GalaxyInstance(GalaxyClient):
         self.genomes = genomes.GenomeClient(self)
         self.tools = tools.ToolClient(self)
         self.toolShed = toolshed.ToolShedClient(self)
+        self.visual = visual.VisualClient(self)
 
