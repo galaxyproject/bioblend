@@ -43,7 +43,7 @@ class VisualClient(Client):
         :type visual_id: string
         :param visual_id: Encoded visualization ID
 
-        :rtype: list
+        :rtype: dict
         :return: A description of visualization
                  For example::
 
