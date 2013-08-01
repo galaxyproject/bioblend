@@ -1,13 +1,11 @@
 """
 A base representation of an instance of Galaxy
 """
-import requests
 import urlparse
-import poster
-import urllib2
-import simplejson
-from bioblend.galaxy import (libraries, histories, workflows, datasets, users, genomes, tools, toolshed, config, visual,quotas)
+from bioblend.galaxy import (libraries, histories, workflows, datasets, users,
+                             genomes, tools, toolshed, config, visual, quotas)
 from bioblend.galaxyclient import GalaxyClient
+
 
 class GalaxyInstance(GalaxyClient):
     def __init__(self, url, key):
@@ -58,3 +56,9 @@ class GalaxyInstance(GalaxyClient):
         self.config = config.ConfigClient(self)
         self.visual = visual.VisualClient(self)
         self.quotas = quotas.QuotaClient(self)
+
+    def __repr__(self):
+        """
+        A nicer representation of this GalaxyInstance object
+        """
+        return "GalaxyInstance object for Galaxy at {0}".format(self.base_url)
