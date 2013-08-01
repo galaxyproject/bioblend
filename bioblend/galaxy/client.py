@@ -6,6 +6,21 @@ should not use it directly.
 """
 import simplejson
 
+class ConnectionError(Exception):
+    """
+    An exception class that is raised when unexpected HTTP responses come back.
+    
+    Should make it easier to debug when strange HTTP things happen such as a
+    proxy server getting in the way of the request etc.  
+    @see: body attribute to see the content of the http response
+    """
+    def __init__(self, message, body=None):
+        self.message = message
+        self.body = body
+        
+    def __str__(self):
+        return str(self.message)
+
 
 class Client(object):
     def __init__(self, galaxy_instance):
@@ -32,7 +47,9 @@ class Client(object):
         if not url:
             url = self.gi._make_url(self, module_id=id, deleted=deleted, contents=contents)
         r = self.gi.make_get_request(url, params)
-        return r.json()
+        if r.status_code == 200:
+            return r.json()
+        raise ConnectionError("Unexpected HTTP status code: %s" % r.status_code, body=r.text) # @see self.body for HTTP response body
 
     def _post(self, payload, id=None, deleted=False, contents=None, url=None, files_attached=False):
         """
@@ -82,4 +99,6 @@ class Client(object):
             url = self.gi._make_url(self, module_id=id, deleted=deleted, contents=contents)
         payload = simplejson.dumps(payload)
         r = self.gi.make_delete_request(url, payload=payload)
-        return r.json()
+        if r.status_code == 200:
+            return r.json()
+        raise ConnectionError("Unexpected HTTP status code: %s" % r.status_code, body=r.text) # @see self.body for HTTP response body
