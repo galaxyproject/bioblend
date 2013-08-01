@@ -3,11 +3,13 @@ Helper class for Galaxy and ToolShed Instance object
 
 This class is primarily a helper for the library and user code
 should not use it directly.
-A base representation of an instance 
+A base representation of an instance
 """
-import urlparse
+import urllib2
+import poster
 import requests
 import simplejson
+
 
 class GalaxyClient(object):
     def _make_url(self, module, module_id=None, deleted=False, contents=False):
@@ -41,7 +43,7 @@ class GalaxyClient(object):
 
     def make_get_request(self, url, params=None):
         """
-        Make a GET request using the provided url.
+        Make a GET request using the provided ``url``.
 
         If the ``params`` are not provided, use ``default_params`` class field.
         If params are provided and the provided dict does not have ``key`` key,
@@ -73,7 +75,6 @@ class GalaxyClient(object):
             params['key'] = self.key
         else:
             params = self.default_params
-
 
         if files_attached:
             payload.update(params)  # merge query string values into request body instead
@@ -107,7 +108,7 @@ class GalaxyClient(object):
         r = requests.delete(url, verify=self.verify, data=payload, params=params)
         return r
 
-    def make_put_request(self,url,payload=None,params=None):
+    def make_put_request(self, url, payload=None, params=None):
         """
         Make a PUT request using the provided ``url`` with required playload
         The ``payload`` must be a dict that can be converted into a JSON
@@ -117,7 +118,7 @@ class GalaxyClient(object):
             params['key'] = self.key
         else:
             params = self.default_params
-            
+
         payload = simplejson.dumps(payload)
-        r = requests.put(url,data=payload,params=params)
+        r = requests.put(url, data=payload, params=params)
         return r
