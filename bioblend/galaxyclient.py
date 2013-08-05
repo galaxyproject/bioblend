@@ -9,6 +9,7 @@ import urllib2
 import poster
 import requests
 import simplejson
+from galaxy.client import ConnectionError
 
 
 class GalaxyClient(object):
@@ -87,7 +88,10 @@ class GalaxyClient(object):
             payload = simplejson.dumps(payload)
             r = requests.post(url, data=payload, headers=self.json_headers,
                     verify=self.verify, params=params)
-            return r.json()
+            if r.status_code == 200:
+                return r.json()
+            raise ConnectionError("Unexpected response from galaxy: %s" %
+                r.status_code, body=r.text)     # @see self.body for HTTP response body
 
     def make_delete_request(self, url, payload=None, params=None):
         """
