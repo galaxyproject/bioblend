@@ -206,3 +206,29 @@ class LibraryClient(Client):
         vars = locals().copy()
         del vars['self']
         return self._do_upload(**vars)
+
+    def set_library_permissions(self, library_id, access_in=None, modify_in=None, 
+                                add_in=None, manage_in=None):
+        """
+        Sets the permissions for a library.  Note: it will override all 
+        security for this library even if you leave out a permission type.
+        
+        access_in, modify_in, add_in, manage_in expect a list of user id's OR None
+        """
+        
+        payload = {}
+        if access_in:
+            payload['LIBRARY_ACCESS_in'] = access_in
+        if modify_in:
+            payload['LIBRARY_MODIFY_in'] = modify_in
+        if add_in:
+            payload['LIBRARY_ADD_in'] = add_in
+        if manage_in:
+            payload['LIBRARY_MANAGE_in'] = manage_in
+        
+        # create the url
+        url = self.url
+        url = '/'.join([url, library_id, 'permissions'])
+        
+        return Client._post(self, payload, url=url)
+        
