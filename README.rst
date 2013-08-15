@@ -1,4 +1,4 @@
-`BioBlend <http://bioblend.readthedocs.org/>`_ is a Python (2.6 or higher)
+`BioBlend <http://bioblend.readthedocs.org/>`_ is a Python (2.6 or 2.7)
 library for interacting with `CloudMan`_ and `Galaxy`_'s API.
 
 Conceptually, it makes it possible to script and automate the process of
@@ -31,7 +31,7 @@ via Galaxy. In reality, it makes it possible to do things like this:
 
 .. note::
     Although this library allows you to blend these two services into a cohesive unit,
-    the library itself can be used with any single service irrespective of the other. For
+    the library itself can be used with either service irrespective of the other. For
     example, you can use it to just manipulate CloudMan clusters or to script the
     interactions with an instance of Galaxy running on your laptop.
 
