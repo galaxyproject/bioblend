@@ -10,9 +10,19 @@ class WorkflowClient(Client):
         self.module = 'workflows'
         super(WorkflowClient, self).__init__(galaxy_instance)
 
-    def get_workflows(self):
+    def get_workflows(self, workflow_id=None, name=None, deleted=False):
         """
-        Get a list of all workflows
+        Get all workflows or filter the specific one(s) via the provided ``name``
+        or ``workflow_id``. Provide only one argument, ``name`` or ``workflow_id``,
+        but not both.
+
+        If ``name`` is set and multiple names match the given name, all the
+        workflows matching the argument will be returned.
+
+        If ``deleted`` is set to ``True``, return workflows that have been deleted.
+
+        Return a list of JSON formatted dicts each containing basic information
+        about a workflow.
 
         :rtype: list
         :return: A list of workflow dicts.
@@ -23,7 +33,18 @@ class WorkflowClient(Client):
                      u'url': u'/api/workflows/92c56938c2f9b315'}]
 
         """
-        return Client._get(self)
+
+        workflows = Client._get(self, deleted=deleted)
+        if name is not None or workflow_id is not None:
+            filtered_wfs = []
+            for workflow in workflows:
+                if name == workflow['name'] or workflow_id == workflow['id']:
+                    filtered_wfs.append(workflow)
+                    # Workflows ID's are unique so break now that the wf was found
+                    if workflow_id is not None:
+                        break
+            workflows = filtered_wfs
+        return workflows
 
     def show_workflow(self, workflow_id):
         """
