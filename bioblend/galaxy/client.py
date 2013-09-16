@@ -6,20 +6,21 @@ should not use it directly.
 """
 import simplejson
 
+
 class ConnectionError(Exception):
     """
     An exception class that is raised when unexpected HTTP responses come back.
-    
+
     Should make it easier to debug when strange HTTP things happen such as a
-    proxy server getting in the way of the request etc.  
+    proxy server getting in the way of the request etc.
     @see: body attribute to see the content of the http response
     """
     def __init__(self, message, body=None):
         self.message = message
         self.body = body
-        
+
     def __str__(self):
-        return str(self.message)
+        return "{0}: {1}".format(self.message, self.body)
 
 
 class Client(object):
@@ -59,7 +60,7 @@ class Client(object):
         request arguments which will be sent along with the request body.
         The payload dict may contain file handles (in which case the files_attached
         flag must be set to true).
-        
+
         The request body will be encoded in a JSON format if files_attached=False
         or will be encoded in a multipart/form-data format if files_attached=True.
         The return value will contain the response body as a JSON object.
@@ -87,7 +88,7 @@ class Client(object):
 
         return r.status_code
 
-    
+
     def _delete(self, payload, id=None, deleted=False, contents=None, url=None):
         """
         Do a generic DELETE request, composing the url from the contents of the
