@@ -59,6 +59,34 @@ class LibraryClient(Client):
             payload['description'] = description
         return Client._post(self, payload, id=library_id, contents=True)
 
+    def get_folders(self, library_id, folder_id=None, name=None, deleted=False):
+        """
+        Get all the folders or filter specific one(s) via the provided ``name``
+        or ``folder_id`` in data library with id ``library_id``. Provide only one
+        argument: ``name`` or ``folder_id``, but not both.
+
+        If ``name`` is set and multiple names match the given name, all the
+        folders matching the argument will be returned.
+
+        If ``deleted`` is set to ``True``, return folders that have been deleted.
+
+        Return a list of JSON formatted dicts each containing basic information
+        about a folder.
+        """
+        library_contents = Client._get(self, id=library_id, contents=True)
+        folders = []
+        filtered_folders = []
+        for content in library_contents:
+            if content['type'] == 'folder':
+                folders.append(content)
+                if name == content['name'] or folder_id == content['id']:
+                    filtered_folders.append(content)
+                if folder_id is not None and filtered_folders:
+                    break
+        if name is not None or folder_id is not None:
+            folders = filtered_folders
+        return folders
+
     def get_libraries(self, library_id=None, name=None, deleted=False):
         """
         Get all the libraries or filter for specific one(s) via the provided name or ID.
