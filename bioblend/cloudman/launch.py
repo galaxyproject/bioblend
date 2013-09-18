@@ -178,34 +178,17 @@ class CloudManLauncher(object):
         except EC2ResponseError, e:
             bioblend.log.error("A problem with security group authorizations: %s" % e)
         # Add rule that allows communication between instances in the same SG
-        g_rule_exists = False  # Flag to indicate if group rule already exists
-        ci = self._get_cloud_info(self.cloud)
-        cloud_type = ci['cloud_type']
-        cidr_range = ci.get('cidr_range', '')
-        # AWS allows grants to be named, thus allowing communication within a group.
-        # Other cloud middlewares do now support that functionality so resort to CIDR grant.
-        if cloud_type == 'ec2':
-            for rule in cmsg.rules:
-                for grant in rule.grants:
-                    if grant.name == cmsg.name:
-                        g_rule_exists = True
-                        bioblend.log.debug("Group rule already exists in the SG")
-                if g_rule_exists:
-                    break
-        else:
-            for rule in cmsg.rules:
-                for grant in rule.grants:
-                    if grant.cidr_ip == cidr_range:
-                        g_rule_exists = True
-                        bioblend.log.debug("Group rule already exists in the SG")
-                    if g_rule_exists:
-                        break
-        if g_rule_exists is False:
+        g_rule_exists = False  # A flag to indicate if group rule already exists
+        for rule in cmsg.rules:
+            for grant in rule.grants:
+                if grant.name == cmsg.name:
+                    g_rule_exists = True
+                    bioblend.log.debug("Group rule already exists in the SG")
+            if g_rule_exists:
+                break
+        if not g_rule_exists:
             try:
-                if cloud_type == 'ec2':
-                    cmsg.authorize(src_group=cmsg)
-                else:
-                    cmsg.authorize(ip_protocol='tcp', from_port=1, to_port=65535, cidr_ip=cidr_range)
+                cmsg.authorize(src_group=cmsg)
             except EC2ResponseError, e:
                 bioblend.log.error("A problem w/ security group authorization: %s" % e)
         bioblend.log.info("Done configuring '%s' security group" % cmsg.name)
