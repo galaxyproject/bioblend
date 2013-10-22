@@ -143,15 +143,36 @@ class Workflow(Wrapper):
 
 
 class Library(Wrapper):
-    pass
+
+    def __init__(self, lib_dict, id=None):
+        super(Library, self).__init__(lib_dict)
+        setattr(self.core, 'id', id)
+
+    @property
+    def id(self):
+        return self.core.id
 
 
 class Folder(Wrapper):
-    pass
+
+    def __init__(self, f_dict, library):
+        super(Folder, self).__init__(f_dict)
+        setattr(self.core, 'library', library)
+
+    @property
+    def library(self):
+        return self.core.library
 
 
 class History(Wrapper):
-    pass
+
+    def __init__(self, hist_dict, hist_ds):
+        super(History, self).__init__(hist_dict)
+        setattr(self.core, 'datasets', hist_ds)
+
+    @property
+    def datasets(self):
+        return self.core.datasets
 
 
 class Dataset(Wrapper):
