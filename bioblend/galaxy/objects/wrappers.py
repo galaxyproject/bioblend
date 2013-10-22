@@ -105,15 +105,41 @@ class Workflow(Wrapper):
 
     KNOWN_FORMAT_VERSIONS = [u'0.1']
 
-    def __init__(self, wf_dict):
+    def __init__(self, wf_dict, id=None, links=None):
         super(Workflow, self).__init__(wf_dict)
         steps = wf_dict['steps']
         setattr(self.core, 'steps',
                 [Step(steps[str(i)], self) for i in xrange(len(steps))])
+        if id is None:
+            super(Workflow, self).touch()
+        if links is not None:
+            links = dict((d['label'], k) for k, d in links.iteritems())
+        setattr(self.core, 'id', id)
+        setattr(self.core, 'links', links)
 
     @property
     def steps(self):
         return self.core.steps
+
+    @property
+    def id(self):
+        return self.core.id
+
+    @property
+    def links(self):
+        return self.core.links
+
+    def touch(self):
+        super(Workflow, self).touch()
+        # forget all Galaxy connections
+        setattr(self.core, 'id', None)
+        setattr(self.core, 'links', None)
+
+    def clone(self):
+        return self.__class__(self.core.wrapped.copy())
+
+    def __eq__(self, other):
+        return self.id == other.id and super(Workflow, self).__eq__(other)
 
 
 class Library(Wrapper):

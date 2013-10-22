@@ -34,9 +34,11 @@ class TestWrapper(unittest.TestCase):
 class TestWorkflow(unittest.TestCase):
 
     def setUp(self):
-        self.wf = wrappers.Workflow(WF_DESC)
+        self.id = '123'
+        self.wf = wrappers.Workflow(WF_DESC, id=self.id)
 
     def test_initialize(self):
+        self.assertEqual(self.wf.id, self.id)
         for k, v in WF_DESC.iteritems():
             if k != 'steps':
                 self.assertEqual(getattr(self.wf, k), v)
@@ -65,6 +67,23 @@ class TestWorkflow(unittest.TestCase):
         self.assertFalse(self.wf.is_modified)
         self.wf.steps[2].tool['global_model'] = 'foo'
         self.assertTrue(self.wf.is_modified)
+
+    def test_clone(self):
+        wf = self.wf.clone()
+        self.assertTrue(wf.id is None)
+        self.assertNotEqual(wf, self.wf)
+        self.assertEqual(
+            json.loads(wf.to_json()), json.loads(self.wf.to_json())
+            )
+
+    def test_links(self):
+        links = {
+            '98': {'label': 'foo', 'value': 'bar'},
+            '99': {'label': 'boo', 'value': 'far'},
+            }
+        wf = wrappers.Workflow(WF_DESC, links=links)
+        self.assertEqual(wf.links['foo'], '98')
+        self.assertEqual(wf.links['boo'], '99')
 
 
 class TestTool(unittest.TestCase):
@@ -99,6 +118,8 @@ def suite():
         'test_steps',
         'test_step_taint',
         'test_tool_taint',
+        'test_clone',
+        'test_links',
         ):
         s.addTest(TestWorkflow(t))
     for t in (
