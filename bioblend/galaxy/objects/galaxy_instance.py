@@ -15,7 +15,7 @@ class GalaxyInstance(object):
         self.gi = bioblend.galaxy.GalaxyInstance(url, api_key)
         self.log = bioblend.log
 
-    def __error(self, err_type, msg):
+    def __error(self, msg, err_type=RuntimeError):
         self.log.error(msg)
         raise err_type(msg)
 
@@ -24,14 +24,13 @@ class GalaxyInstance(object):
         if isinstance(res, collections.Mapping):
             lib_info = res
         elif res is None:
-            self.__error(RuntimeError, "create_library: no reply")
+            self.__error("create_library: no reply")
         else:
             # older versions of Galaxy returned a list containing a dictionary
             try:
                 lib_info = res[0]
             except (TypeError, IndexError):
-                self.__error(RuntimeError,
-                             "create_library: unexpected reply: %r" % (res,))
+                self.__error("create_library: unexpected reply: %r" % (res,))
         return self.get_library(lib_info['id'])
 
     def get_library(self, id):
@@ -44,7 +43,7 @@ class GalaxyInstance(object):
 
     def delete_library(self, library):
         if library.id is None:
-            self.__error(RuntimeError, 'library does not have an id')
+            self.__error('library does not have an id')
         dlib = wrappers.Library(self.gi.libraries.delete_library(library.id))
         library.touch()
         return dlib
@@ -76,14 +75,12 @@ class GalaxyInstance(object):
             history.id, name=name, annotation=annotation
             )
         if res != httplib.OK:
-            self.__error(
-                RuntimeError, 'failed to update history "%s"' % history.id
-                )
+            self.__error('failed to update history "%s"' % history.id)
         return self.get_history(history.id)
 
     def import_workflow(self, workflow):
         if workflow.id is not None:
-            self.__error(RuntimeError, 'workflow already has an id')
+            self.__error('workflow already has an id')
         wf_info = self.gi.workflows.import_workflow_json(workflow.core.wrapped)
         return self.get_workflow(wf_info['id'])
 
@@ -98,7 +95,7 @@ class GalaxyInstance(object):
 
     def delete_workflow(self, workflow):
         if workflow.id is None:
-            self.__error(RuntimeError, 'workflow does not have an id')
+            self.__error('workflow does not have an id')
         msg = self.gi.workflows.delete_workflow(workflow.id)
         workflow.touch()
         return msg
