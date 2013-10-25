@@ -124,8 +124,13 @@ class TestGalaxyInstance(unittest.TestCase):
 
     def test_library(self):
         name = 'test_%s' % uuid.uuid4().hex
-        lib = self.gi.create_library(name)
+        description, synopsis = "D", "S"
+        lib = self.gi.create_library(
+            name, description=description, synopsis=synopsis
+            )
         self.assertEqual(lib.name, name)
+        self.assertEqual(lib.description, description)
+        self.assertEqual(lib.synopsis, synopsis)
         self.assertTrue(lib.id in [_.id for _ in self.gi.get_libraries()])
         dlib = self.gi.delete_library(lib)
         self.assertTrue(dlib.deleted)

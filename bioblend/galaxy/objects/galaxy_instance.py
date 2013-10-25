@@ -1,7 +1,7 @@
 """
 A representation of a Galaxy instance based on oo wrappers.
 """
-import httplib
+import httplib, collections
 
 import bioblend
 import bioblend.galaxy
@@ -19,8 +19,19 @@ class GalaxyInstance(object):
         self.log.error(msg)
         raise err_type(msg)
 
-    def create_library(self, name):
-        lib_info = self.gi.libraries.create_library(name)
+    def create_library(self, name, description=None, synopsis=None):
+        res = self.gi.libraries.create_library(name, description, synopsis)
+        if isinstance(res, collections.Mapping):
+            lib_info = res
+        elif res is None:
+            self.__error(RuntimeError, "create_library: no reply")
+        else:
+            # older versions of Galaxy returned a list containing a dictionary
+            try:
+                lib_info = res[0]
+            except (TypeError, IndexError):
+                self.__error(RuntimeError,
+                             "create_library: unexpected reply: %r" % (res,))
         return self.get_library(lib_info['id'])
 
     def get_library(self, id):
