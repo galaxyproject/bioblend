@@ -122,6 +122,15 @@ class TestGalaxyInstance(unittest.TestCase):
             if k not in keys_to_skip:
                 self.assertEqual(w2[k], v)
 
+    def test_library(self):
+        name = 'test_%s' % uuid.uuid4().hex
+        lib = self.gi.create_library(name)
+        self.assertEqual(lib.name, name)
+        self.assertTrue(lib.id in [_.id for _ in self.gi.get_libraries()])
+        dlib = self.gi.delete_library(lib)
+        self.assertTrue(dlib.deleted)
+        self.assertTrue(lib.id is None)
+
     def test_workflow(self):
         wf = wrappers.Workflow(WF_DESC)
         wf.name = 'test_%s' % uuid.uuid4().hex
@@ -136,6 +145,7 @@ class TestGalaxyInstance(unittest.TestCase):
                 )
             if step.type == 'tool':
                 self.assertWrappedEqual(step.tool.state, istep.tool.state)
+        self.assertTrue(imported.id in [_.id for _ in self.gi.get_workflows()])
 
 
 def suite():
@@ -161,6 +171,7 @@ def suite():
         ):
         s.addTest(TestTool(t))
     for t in (
+        'test_library',
         'test_workflow',
         ):
         s.addTest(TestGalaxyInstance(t))

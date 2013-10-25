@@ -152,6 +152,11 @@ class Library(Wrapper):
     def id(self):
         return self.core.id
 
+    def touch(self):
+        super(Library, self).touch()
+        # forget all Galaxy connections
+        setattr(self.core, 'id', None)
+
 
 class Folder(Wrapper):
 

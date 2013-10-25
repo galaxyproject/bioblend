@@ -19,15 +19,6 @@ class GalaxyInstance(object):
         self.log.error(msg)
         raise err_type(msg)
 
-    def get_workflow(self, id):
-        wf_dict = self.gi.workflows.export_workflow_json(id)
-        links = self.gi.workflows.show_workflow(id)['inputs']
-        return wrappers.Workflow(wf_dict, id=id, links=links)
-
-    def get_workflows(self):
-        wf_infos = self.gi.workflows.get_workflows()
-        return [self.get_workflow(wi['id']) for wi in wf_infos]
-
     def create_library(self, name):
         lib_info = self.gi.libraries.create_library(name)
         return self.get_library(lib_info['id'])
@@ -39,6 +30,11 @@ class GalaxyInstance(object):
     def get_libraries(self):
         lib_infos = self.gi.libraries.get_libraries()
         return [self.get_library(li['id']) for li in lib_infos]
+
+    def delete_library(self, library):
+        dlib = wrappers.Library(self.gi.libraries.delete_library(library.id))
+        library.touch()
+        return dlib
 
     def create_folder(self, library, name, description=None, base_folder=None):
         folder_infos = self.gi.libraries.create_folder(
@@ -77,3 +73,12 @@ class GalaxyInstance(object):
             self.__error(RuntimeError, 'workflow already has an id')
         wf_info = self.gi.workflows.import_workflow_json(workflow.core.wrapped)
         return self.get_workflow(wf_info['id'])
+
+    def get_workflow(self, id):
+        wf_dict = self.gi.workflows.export_workflow_json(id)
+        links = self.gi.workflows.show_workflow(id)['inputs']
+        return wrappers.Workflow(wf_dict, id=id, links=links)
+
+    def get_workflows(self):
+        wf_infos = self.gi.workflows.get_workflows()
+        return [self.get_workflow(wi['id']) for wi in wf_infos]
