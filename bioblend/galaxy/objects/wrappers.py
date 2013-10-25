@@ -166,9 +166,9 @@ class Folder(Wrapper):
 
 class History(Wrapper):
 
-    def __init__(self, hist_dict, hist_ds):
+    def __init__(self, hist_dict, datasets):
         super(History, self).__init__(hist_dict)
-        setattr(self.core, 'datasets', hist_ds)
+        setattr(self.core, 'datasets', datasets)
 
     @property
     def datasets(self):

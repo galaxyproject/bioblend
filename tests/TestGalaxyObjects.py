@@ -1,10 +1,14 @@
-import os, unittest, json
+import os, unittest, json, uuid
 import bioblend.galaxy.objects.wrappers as wrappers
+import bioblend.galaxy.objects.galaxy_instance as galaxy_instance
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
-SAMPLE_FN = os.path.join(THIS_DIR, "data", "SampleWorkflow.ga")
+SAMPLE_FN = os.path.join(THIS_DIR, "data", "SimpleWorkflow.ga")
 with open(SAMPLE_FN) as f:
     WF_DESC = json.load(f)
+
+URL = os.environ.get('BIOBLEND_GALAXY_URL', 'http://localhost:8080')
+API_KEY = os.environ['BIOBLEND_GALAXY_API_KEY']
 
 
 class TestWrapper(unittest.TestCase):
@@ -65,7 +69,7 @@ class TestWorkflow(unittest.TestCase):
 
     def test_tool_taint(self):
         self.assertFalse(self.wf.is_modified)
-        self.wf.steps[2].tool['global_model'] = 'foo'
+        self.wf.steps[1].tool['iterate'] = 'no'
         self.assertTrue(self.wf.is_modified)
 
     def test_clone(self):
@@ -89,7 +93,7 @@ class TestWorkflow(unittest.TestCase):
 class TestTool(unittest.TestCase):
 
     def setUp(self):
-        self.step = wrappers.Workflow(WF_DESC).steps[2]
+        self.step = wrappers.Workflow(WF_DESC).steps[1]
         self.tool = self.step.tool
 
     def test_initialize(self):
@@ -97,12 +101,41 @@ class TestTool(unittest.TestCase):
         self.assertFalse(self.step.is_modified)
 
     def test_params(self):
-        self.assertEqual(self.tool['do_normalization'], "No")
-        self.tool['do_normalization'] = "Yes"
-        self.assertEqual(self.tool['do_normalization'], "Yes")
+        self.assertEqual(self.tool['exp'], "1")
+        self.tool['exp'] = "2"
+        self.assertEqual(self.tool['exp'], "2")
         self.assertTrue(self.step.is_modified)
         self.assertRaises(KeyError, self.tool.__getitem__, 'foo')
         self.assertRaises(KeyError, self.tool.__setitem__, 'foo', 0)
+
+
+class TestGalaxyInstance(unittest.TestCase):
+
+    def setUp(self):
+        self.gi = galaxy_instance.GalaxyInstance(URL, API_KEY)
+
+    def assertWrappedEqual(self, w1, w2, keys_to_skip=None):
+        if keys_to_skip is None:
+            keys_to_skip = set()
+        for (k, v) in w1.iteritems():
+            self.assertTrue(k in w2)
+            if k not in keys_to_skip:
+                self.assertEqual(w2[k], v)
+
+    def test_workflow(self):
+        wf = wrappers.Workflow(WF_DESC)
+        wf.name = 'test_%s' % uuid.uuid4().hex
+        imported = self.gi.import_workflow(wf)
+        self.assertWrappedEqual(
+            wf.core.wrapped, imported.core.wrapped, set(["name", "steps"])
+            )
+        self.assertEqual(len(imported.steps), len(wf.steps))
+        for step, istep in zip(wf.steps, imported.steps):
+            self.assertWrappedEqual(
+                step.core.wrapped, istep.core.wrapped, set(["tool_state"])
+                )
+            if step.type == 'tool':
+                self.assertWrappedEqual(step.tool.state, istep.tool.state)
 
 
 def suite():
@@ -127,6 +160,10 @@ def suite():
         'test_params',
         ):
         s.addTest(TestTool(t))
+    for t in (
+        'test_workflow',
+        ):
+        s.addTest(TestGalaxyInstance(t))
     return s
 
 

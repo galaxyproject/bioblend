@@ -1,0 +1,60 @@
+{
+    "a_galaxy_workflow": "true",
+    "annotation": "",
+    "format-version": "0.1",
+    "name": "test",
+    "steps": {
+        "0": {
+            "annotation": "",
+            "id": 0,
+            "input_connections": {},
+            "inputs": [
+                {
+                    "description": "",
+                    "name": "Input Dataset"
+                }
+            ],
+            "name": "Input dataset",
+            "outputs": [],
+            "position": {
+                "left": 10,
+                "top": 10
+            },
+            "tool_errors": null,
+            "tool_id": null,
+            "tool_state": "{\"name\": \"Input Dataset\"}",
+            "tool_version": null,
+            "type": "data_input",
+            "user_outputs": []
+        },
+        "1": {
+            "annotation": "",
+            "id": 1,
+            "input_connections": {
+                "input": {
+                    "id": 0,
+                    "output_name": "output"
+                }
+            },
+            "inputs": [],
+            "name": "Add column",
+            "outputs": [
+                {
+                    "name": "out_file1",
+                    "type": "input"
+                }
+            ],
+            "position": {
+                "left": 230,
+                "top": 10
+            },
+            "post_job_actions": {},
+            "tool_errors": null,
+            "tool_id": "addValue",
+            "tool_state": "{\"__page__\": 0, \"__rerun_remap_job_id__\": null, \"exp\": \"\\\"1\\\"\", \"iterate\": \"\\\"yes\\\"\", \"input\": \"null\", \"chromInfo\": \"\\\"/home/simleo/hg/galaxy-dist/tool-data/shared/ucsc/chrom/?.len\\\"\"}",
+            "tool_version": "1.0.0",
+            "type": "tool",
+            "user_outputs": []
+        }
+    }
+}
