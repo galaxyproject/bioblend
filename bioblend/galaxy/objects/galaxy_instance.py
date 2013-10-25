@@ -32,6 +32,8 @@ class GalaxyInstance(object):
         return [self.get_library(li['id']) for li in lib_infos]
 
     def delete_library(self, library):
+        if library.id is None:
+            self.__error(RuntimeError, 'library does not have an id')
         dlib = wrappers.Library(self.gi.libraries.delete_library(library.id))
         library.touch()
         return dlib
@@ -82,3 +84,10 @@ class GalaxyInstance(object):
     def get_workflows(self):
         wf_infos = self.gi.workflows.get_workflows()
         return [self.get_workflow(wi['id']) for wi in wf_infos]
+
+    def delete_workflow(self, workflow):
+        if workflow.id is None:
+            self.__error(RuntimeError, 'workflow does not have an id')
+        msg = self.gi.workflows.delete_workflow(workflow.id)
+        workflow.touch()
+        return msg
