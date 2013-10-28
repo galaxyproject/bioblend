@@ -61,7 +61,11 @@ class GalaxyInstance(object):
 
     def get_history(self, id):
         hist_dict = self.gi.histories.show_history(id)
+        if not isinstance(hist_dict, collections.Mapping):
+            self.__error('get_history: unexpected reply: %r' % (hist_dict,))
         contents = self.gi.histories.show_history(id, contents=True)
+        if not isinstance(contents, collections.Mapping):
+            self.__error('get_history: unexpected reply: %r' % (contents,))
         hdas = [wrappers.HistoryDatasetAssociation(
             self.gi.histories.show_dataset(id, c['id'])
             ) for c in contents]
@@ -87,7 +91,10 @@ class GalaxyInstance(object):
 
     def get_workflow(self, id):
         wf_dict = self.gi.workflows.export_workflow_json(id)
-        links = self.gi.workflows.show_workflow(id)['inputs']
+        res = self.gi.workflows.show_workflow(id)
+        if not isinstance(res, collections.Mapping):
+            self.__error('get_workflow: unexpected reply: "%s"' % (res,))
+        links = res['inputs']
         return wrappers.Workflow(wf_dict, id=id, links=links)
 
     def get_workflows(self):
