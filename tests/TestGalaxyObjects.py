@@ -135,6 +135,14 @@ class TestGalaxyInstance(unittest.TestCase):
         self.gi.delete_library(lib)
         self.assertTrue(lib.id is None)
 
+    def test_history(self):
+        name = 'test_%s' % uuid.uuid4().hex
+        hist = self.gi.create_history(name)
+        self.assertEqual(hist.name, name)
+        self.assertTrue(hist.id in [_.id for _ in self.gi.get_histories()])
+        self.gi.delete_history(hist)
+        self.assertTrue(hist.id is None)
+
     def test_workflow(self):
         wf = wrappers.Workflow(WF_DESC)
         wf.name = 'test_%s' % uuid.uuid4().hex
@@ -179,6 +187,7 @@ def suite():
         s.addTest(TestTool(t))
     for t in (
         'test_library',
+        'test_history',
         'test_workflow',
         ):
         s.addTest(TestGalaxyInstance(t))

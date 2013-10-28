@@ -171,13 +171,26 @@ class Folder(Wrapper):
 
 class History(Wrapper):
 
-    def __init__(self, hist_dict, datasets):
+    def __init__(self, hist_dict, id=None, datasets=None):
         super(History, self).__init__(hist_dict)
+        if datasets is None:
+            datasets = []
+        setattr(self.core, 'id', id)
         setattr(self.core, 'datasets', datasets)
+
+    @property
+    def id(self):
+        return self.core.id
 
     @property
     def datasets(self):
         return self.core.datasets
+
+    def touch(self):
+        super(History, self).touch()
+        # forget all Galaxy connections
+        setattr(self.core, 'id', None)
+        setattr(self.core, 'datasets', [])
 
 
 class Dataset(Wrapper):

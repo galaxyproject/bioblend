@@ -43,7 +43,7 @@ class GalaxyInstance(object):
 
     def delete_library(self, library):
         if library.id is None:
-            self.__error('library does not have an id')
+            self.__error('delete_library: library does not have an id')
         res = self.gi.libraries.delete_library(library.id)
         if not isinstance(res, collections.Mapping):
             self.__error('delete_library: unexpected reply: %r' % (res,))
@@ -59,17 +59,23 @@ class GalaxyInstance(object):
         # for unknown reasons, create_folder returns a list
         return wrappers.Folder(folder_infos[0], library)
 
+    def create_history(self, name=None):
+        hist_info = self.gi.histories.create_history(name=name)
+        if not isinstance(hist_info, collections.Mapping):
+            self.__error('create_history: unexpected reply: %r' % (hist_info,))
+        return self.get_history(hist_info['id'])
+
     def get_history(self, id):
         hist_dict = self.gi.histories.show_history(id)
         if not isinstance(hist_dict, collections.Mapping):
             self.__error('get_history: unexpected reply: %r' % (hist_dict,))
         contents = self.gi.histories.show_history(id, contents=True)
-        if not isinstance(contents, collections.Mapping):
+        if not isinstance(contents, collections.Sequence):
             self.__error('get_history: unexpected reply: %r' % (contents,))
         hdas = [wrappers.HistoryDatasetAssociation(
             self.gi.histories.show_dataset(id, c['id'])
             ) for c in contents]
-        return wrappers.History(hist_dict, hdas)
+        return wrappers.History(hist_dict, id=hist_dict['id'], datasets=hdas)
 
     def get_histories(self):
         hist_infos = self.gi.histories.get_histories()
@@ -80,12 +86,20 @@ class GalaxyInstance(object):
             history.id, name=name, annotation=annotation
             )
         if res != httplib.OK:
-            self.__error('failed to update history "%s"' % history.id)
+            self.__error('update_history: failed to update "%s"' % history.id)
         return self.get_history(history.id)
+
+    def delete_history(self, history, purge=False):
+        if history.id is None:
+            self.__error('delete_history: history does not have an id')
+        res = self.gi.histories.delete_history(history.id, purge=purge)
+        if not isinstance(res, collections.Mapping):
+            self.__error('delete_history: unexpected reply: %r' % (res,))
+        history.touch()
 
     def import_workflow(self, workflow):
         if workflow.id is not None:
-            self.__error('workflow already has an id')
+            self.__error('import_workflow: workflow already has an id')
         wf_info = self.gi.workflows.import_workflow_json(workflow.core.wrapped)
         return self.get_workflow(wf_info['id'])
 
@@ -103,7 +117,7 @@ class GalaxyInstance(object):
 
     def delete_workflow(self, workflow):
         if workflow.id is None:
-            self.__error('workflow does not have an id')
+            self.__error('delete_workflow: workflow does not have an id')
         res = self.gi.workflows.delete_workflow(workflow.id)
         if not isinstance(res, basestring):
             self.__error('delete_workflow: unexpected reply: %r' % (res,))
