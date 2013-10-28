@@ -132,8 +132,7 @@ class TestGalaxyInstance(unittest.TestCase):
         self.assertEqual(lib.description, description)
         self.assertEqual(lib.synopsis, synopsis)
         self.assertTrue(lib.id in [_.id for _ in self.gi.get_libraries()])
-        dlib = self.gi.delete_library(lib)
-        self.assertTrue(dlib.deleted)
+        self.gi.delete_library(lib)
         self.assertTrue(lib.id is None)
 
     def test_workflow(self):
@@ -151,7 +150,7 @@ class TestGalaxyInstance(unittest.TestCase):
             if step.type == 'tool':
                 self.assertWrappedEqual(step.tool.state, istep.tool.state)
         self.assertTrue(imported.id in [_.id for _ in self.gi.get_workflows()])
-        _ = self.gi.delete_workflow(imported)
+        self.gi.delete_workflow(imported)
         for attr in imported.id, imported.links:
             self.assertTrue(attr is None)
 

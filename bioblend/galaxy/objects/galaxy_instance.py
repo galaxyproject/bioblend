@@ -24,13 +24,13 @@ class GalaxyInstance(object):
         if isinstance(res, collections.Mapping):
             lib_info = res
         elif res is None:
-            self.__error("create_library: no reply")
+            self.__error('create_library: no reply')
         else:
             # older versions of Galaxy returned a list containing a dictionary
             try:
                 lib_info = res[0]
             except (TypeError, IndexError):
-                self.__error("create_library: unexpected reply: %r" % (res,))
+                self.__error('create_library: unexpected reply: %r' % (res,))
         return self.get_library(lib_info['id'])
 
     def get_library(self, id):
@@ -44,9 +44,10 @@ class GalaxyInstance(object):
     def delete_library(self, library):
         if library.id is None:
             self.__error('library does not have an id')
-        dlib = wrappers.Library(self.gi.libraries.delete_library(library.id))
+        res = self.gi.libraries.delete_library(library.id)
+        if not isinstance(res, collections.Mapping):
+            self.__error('delete_library: unexpected reply: %r' % (res,))
         library.touch()
-        return dlib
 
     def create_folder(self, library, name, description=None, base_folder=None):
         folder_infos = self.gi.libraries.create_folder(
@@ -96,6 +97,7 @@ class GalaxyInstance(object):
     def delete_workflow(self, workflow):
         if workflow.id is None:
             self.__error('workflow does not have an id')
-        msg = self.gi.workflows.delete_workflow(workflow.id)
+        res = self.gi.workflows.delete_workflow(workflow.id)
+        if not isinstance(res, basestring):
+            self.__error('delete_workflow: unexpected reply: %r' % (res,))
         workflow.touch()
-        return msg
