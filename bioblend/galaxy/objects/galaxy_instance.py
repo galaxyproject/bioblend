@@ -19,18 +19,19 @@ class GalaxyInstance(object):
         self.log.error(msg)
         raise err_type(msg)
 
+    def __get_dict(self, meth_name, reply):
+        if reply is None:
+            self.__error('%s: no reply' % meth_name)
+        elif isinstance(reply, collections.Mapping):
+            return reply
+        try:
+            return reply[0]
+        except (TypeError, IndexError):
+            self.__error('%s: unexpected reply: %r' % (meth_name, reply))
+
     def create_library(self, name, description=None, synopsis=None):
         res = self.gi.libraries.create_library(name, description, synopsis)
-        if isinstance(res, collections.Mapping):
-            lib_info = res
-        elif res is None:
-            self.__error('create_library: no reply')
-        else:
-            # older versions of Galaxy returned a list containing a dictionary
-            try:
-                lib_info = res[0]
-            except (TypeError, IndexError):
-                self.__error('create_library: unexpected reply: %r' % (res,))
+        lib_info = self.__get_dict("create_library", res)
         return self.get_library(lib_info['id'])
 
     def get_library(self, id):
@@ -45,23 +46,12 @@ class GalaxyInstance(object):
         self, library, data, folder=None, file_type='auto', dbkey='?'
         ):
         if library.id is None:
-            self.__error('upload_file_contents: library does not have an id')
+            self.__error('library does not have an id')
         fid = None if folder is None else folder.id
         res = self.gi.libraries.upload_file_contents(
             library.id, data, folder_id=fid, file_type=file_type, dbkey=dbkey
             )
-        if isinstance(res, collections.Mapping):
-            ds_info = res
-        elif res is None:
-            self.__error('upload_file_contents: no reply')
-        else:
-            # older versions of Galaxy returned a list containing a dictionary
-            try:
-                ds_info = res[0]
-            except (TypeError, IndexError):
-                self.__error(
-                    'upload_file_contents: unexpected reply: %r' % (res,)
-                    )
+        ds_info = self.__get_dict("upload_file_contents", res)
         return self.get_library_dataset(library, ds_info['id'])
 
     def get_library_dataset(self, library, ds_id):
@@ -70,7 +60,7 @@ class GalaxyInstance(object):
 
     def delete_library(self, library):
         if library.id is None:
-            self.__error('delete_library: library does not have an id')
+            self.__error('library does not have an id')
         res = self.gi.libraries.delete_library(library.id)
         if not isinstance(res, collections.Mapping):
             self.__error('delete_library: unexpected reply: %r' % (res,))
@@ -78,11 +68,10 @@ class GalaxyInstance(object):
 
     def create_folder(self, library, name, description=None, base_folder=None):
         bfid = None if base_folder is None else base_folder.id
-        folder_infos = self.gi.libraries.create_folder(
+        res = self.gi.libraries.create_folder(
             library.id, name, description=description, base_folder_id=bfid,
             )
-        # for unknown reasons, create_folder returns a list
-        folder_info = folder_infos[0]
+        folder_info = self.__get_dict("create_folder", res)
         return self.get_folder(library, folder_info['id'])
 
     def get_folder(self, library, f_id):
@@ -90,18 +79,16 @@ class GalaxyInstance(object):
         return wrappers.Folder(f_dict, library)
 
     def create_history(self, name=None):
-        hist_info = self.gi.histories.create_history(name=name)
-        if not isinstance(hist_info, collections.Mapping):
-            self.__error('create_history: unexpected reply: %r' % (hist_info,))
+        res = self.gi.histories.create_history(name=name)
+        hist_info = self.__get_dict("create_history", res)
         return self.get_history(hist_info['id'])
 
     def get_history(self, id):
-        hist_dict = self.gi.histories.show_history(id)
-        if not isinstance(hist_dict, collections.Mapping):
-            self.__error('get_history: unexpected reply: %r' % (hist_dict,))
+        res = self.gi.histories.show_history(id)
+        hist_dict = self.__get_dict("show_history", res)
         contents = self.gi.histories.show_history(id, contents=True)
         if not isinstance(contents, collections.Sequence):
-            self.__error('get_history: unexpected reply: %r' % (contents,))
+            self.__error('show_history: unexpected reply: %r' % (contents,))
         hdas = [wrappers.HistoryDatasetAssociation(
             self.gi.histories.show_dataset(id, c['id'])
             ) for c in contents]
@@ -121,7 +108,7 @@ class GalaxyInstance(object):
 
     def delete_history(self, history, purge=False):
         if history.id is None:
-            self.__error('delete_history: history does not have an id')
+            self.__error('history does not have an id')
         res = self.gi.histories.delete_history(history.id, purge=purge)
         if not isinstance(res, collections.Mapping):
             self.__error('delete_history: unexpected reply: %r' % (res,))
@@ -129,16 +116,14 @@ class GalaxyInstance(object):
 
     def import_workflow(self, workflow):
         if workflow.id is not None:
-            self.__error('import_workflow: workflow already has an id')
+            self.__error('workflow already has an id')
         wf_info = self.gi.workflows.import_workflow_json(workflow.core.wrapped)
         return self.get_workflow(wf_info['id'])
 
     def get_workflow(self, id):
         wf_dict = self.gi.workflows.export_workflow_json(id)
         res = self.gi.workflows.show_workflow(id)
-        if not isinstance(res, collections.Mapping):
-            self.__error('get_workflow: unexpected reply: "%s"' % (res,))
-        links = res['inputs']
+        links = self.__get_dict("show_workflow", res)['inputs']
         return wrappers.Workflow(wf_dict, id=id, links=links)
 
     def get_workflows(self):
@@ -147,7 +132,7 @@ class GalaxyInstance(object):
 
     def delete_workflow(self, workflow):
         if workflow.id is None:
-            self.__error('delete_workflow: workflow does not have an id')
+            self.__error('workflow does not have an id')
         res = self.gi.workflows.delete_workflow(workflow.id)
         if not isinstance(res, basestring):
             self.__error('delete_workflow: unexpected reply: %r' % (res,))
