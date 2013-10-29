@@ -41,6 +41,33 @@ class GalaxyInstance(object):
         lib_infos = self.gi.libraries.get_libraries()
         return [self.get_library(li['id']) for li in lib_infos]
 
+    def upload_file_contents(
+        self, library, data, folder=None, file_type='auto', dbkey='?'
+        ):
+        if library.id is None:
+            self.__error('upload_file_contents: library does not have an id')
+        fid = None if folder is None else folder.id
+        res = self.gi.libraries.upload_file_contents(
+            library.id, data, folder_id=fid, file_type=file_type, dbkey=dbkey
+            )
+        if isinstance(res, collections.Mapping):
+            ds_info = res
+        elif res is None:
+            self.__error('upload_file_contents: no reply')
+        else:
+            # older versions of Galaxy returned a list containing a dictionary
+            try:
+                ds_info = res[0]
+            except (TypeError, IndexError):
+                self.__error(
+                    'upload_file_contents: unexpected reply: %r' % (res,)
+                    )
+        return self.get_library_dataset(library, ds_info['id'])
+
+    def get_library_dataset(self, library, ds_id):
+        ds_dict = self.gi.libraries.show_dataset(library.id, ds_id)
+        return wrappers.LibraryDataset(ds_dict)
+
     def delete_library(self, library):
         if library.id is None:
             self.__error('delete_library: library does not have an id')
@@ -50,14 +77,17 @@ class GalaxyInstance(object):
         library.touch()
 
     def create_folder(self, library, name, description=None, base_folder=None):
+        bfid = None if base_folder is None else base_folder.id
         folder_infos = self.gi.libraries.create_folder(
-            library.id,
-            name,
-            description=description,
-            base_folder_id=base_folder.id
+            library.id, name, description=description, base_folder_id=bfid,
             )
         # for unknown reasons, create_folder returns a list
-        return wrappers.Folder(folder_infos[0], library)
+        folder_info = folder_infos[0]
+        return self.get_folder(library, folder_info['id'])
+
+    def get_folder(self, library, f_id):
+        f_dict = self.gi.libraries.show_folder(library.id, f_id)
+        return wrappers.Folder(f_dict, library)
 
     def create_history(self, name=None):
         hist_info = self.gi.histories.create_history(name=name)

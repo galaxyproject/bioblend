@@ -13,7 +13,7 @@ API_KEY = os.environ['BIOBLEND_GALAXY_API_KEY']
 
 class TestWrapper(unittest.TestCase):
 
-    def setUp(self):
+    def setUp(self):  # pylint: disable=C0103
         self.d = {'a' : 1, 'b' : 2,  'c': 3}
         self.w = wrappers.Wrapper(self.d)
 
@@ -37,7 +37,7 @@ class TestWrapper(unittest.TestCase):
 
 class TestWorkflow(unittest.TestCase):
 
-    def setUp(self):
+    def setUp(self):  # pylint: disable=C0103
         self.id = '123'
         self.wf = wrappers.Workflow(WF_DESC, id=self.id)
 
@@ -92,7 +92,7 @@ class TestWorkflow(unittest.TestCase):
 
 class TestTool(unittest.TestCase):
 
-    def setUp(self):
+    def setUp(self):  # pylint: disable=C0103
         self.step = wrappers.Workflow(WF_DESC).steps[1]
         self.tool = self.step.tool
 
@@ -111,7 +111,7 @@ class TestTool(unittest.TestCase):
 
 class TestGalaxyInstance(unittest.TestCase):
 
-    def setUp(self):
+    def setUp(self):  # pylint: disable=C0103
         self.gi = galaxy_instance.GalaxyInstance(URL, API_KEY)
 
     def assertWrappedEqual(self, w1, w2, keys_to_skip=None):
@@ -163,6 +163,29 @@ class TestGalaxyInstance(unittest.TestCase):
             self.assertTrue(attr is None)
 
 
+class TestLibContents(TestGalaxyInstance):
+
+    def setUp(self):  # pylint: disable=C0103
+        super(TestLibContents, self).setUp()
+        self.lib = self.gi.create_library('test_%s' % uuid.uuid4().hex)
+
+    def tearDown(self):  # pylint: disable=C0103
+        self.gi.delete_library(self.lib)
+
+    def test_folder(self):
+        name, desc = 'test_%s' % uuid.uuid4().hex, "D"
+        folder = self.gi.create_folder(self.lib, name, description=desc)
+        self.assertEqual(folder.name, name)
+        self.assertEqual(folder.description, desc)
+        self.assertTrue(folder.library is self.lib)
+
+    def test_dataset(self):
+        folder = self.gi.create_folder(self.lib, 'test_%s' % uuid.uuid4().hex)
+        data = "foo\nbar\n"
+        ds = self.gi.upload_file_contents(self.lib, data, folder=folder)
+        self.assertEqual(ds.folder_id, folder.id)
+
+
 def suite():
     s = unittest.TestSuite()
     for t in (
@@ -191,6 +214,11 @@ def suite():
         'test_workflow',
         ):
         s.addTest(TestGalaxyInstance(t))
+    for t in (
+        'test_folder',
+        'test_dataset',
+        ):
+        s.addTest(TestLibContents(t))
     return s
 
 
