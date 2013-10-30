@@ -31,7 +31,7 @@ class GalaxyInstance(object):
 
     def create_library(self, name, description=None, synopsis=None):
         res = self.gi.libraries.create_library(name, description, synopsis)
-        lib_info = self.__get_dict("create_library", res)
+        lib_info = self.__get_dict('create_library', res)
         return self.get_library(lib_info['id'])
 
     def get_library(self, id):
@@ -42,17 +42,52 @@ class GalaxyInstance(object):
         lib_infos = self.gi.libraries.get_libraries()
         return [self.get_library(li['id']) for li in lib_infos]
 
-    def upload_file_contents(
-        self, library, data, folder=None, file_type='auto', dbkey='?'
-        ):
+    def __pre_upload(self, library, folder):
         if library.id is None:
             self.__error('library does not have an id')
-        fid = None if folder is None else folder.id
-        res = self.gi.libraries.upload_file_contents(
-            library.id, data, folder_id=fid, file_type=file_type, dbkey=dbkey
-            )
-        ds_info = self.__get_dict("upload_file_contents", res)
+        return None if folder is None else folder.id
+
+    def __post_upload(self, library, meth_name, reply):
+        ds_info = self.__get_dict(meth_name, reply)
         return self.get_library_dataset(library, ds_info['id'])
+
+    def upload_data(self, library, data, folder=None, **kwargs):
+        fid = self.__pre_upload(library, folder)
+        res = self.gi.libraries.upload_file_contents(
+            library.id, data, folder_id=fid, **kwargs
+            )
+        return self.__post_upload(library, 'upload_file_contents', res)
+
+    def upload_from_url(self, library, url, folder=None, **kwargs):
+        fid = self.__pre_upload(library, folder)
+        res = self.gi.libraries.upload_file_from_url(
+            library.id, url, fid, **kwargs
+            )
+        return self.__post_upload(library, 'upload_file_from_url', res)
+
+    def upload_from_local(self, library, path, folder=None, **kwargs):
+        fid = self.__pre_upload(library, folder)
+        res = self.gi.libraries.upload_file_from_local_path(
+            library.id, path, fid, **kwargs
+            )
+        return self.__post_upload(library, 'upload_file_from_local_path', res)
+
+    def upload_from_galaxy_fs(self, library, paths, folder=None, **kwargs):
+        fid = self.__pre_upload(library, folder)
+        if isinstance(paths, basestring):
+            paths = (paths,)
+        paths = '\n'.join(paths)
+        res = self.gi.libraries.upload_from_galaxy_filesystem(
+            library.id, paths, folder_id=fid, **kwargs
+            )
+        if res is None:
+            self.__error('upload_from_galaxy_filesystem: no reply')
+        if not isinstance(res, collections.Sequence):
+            self.__error(
+                'upload_from_galaxy_filesystem: unexpected reply: %r' % (res,)
+                )
+        return [self.get_library_dataset(library, ds_info['id'])
+                for ds_info in res]
 
     def get_library_dataset(self, library, ds_id):
         ds_dict = self.gi.libraries.show_dataset(library.id, ds_id)
@@ -71,7 +106,7 @@ class GalaxyInstance(object):
         res = self.gi.libraries.create_folder(
             library.id, name, description=description, base_folder_id=bfid,
             )
-        folder_info = self.__get_dict("create_folder", res)
+        folder_info = self.__get_dict('create_folder', res)
         return self.get_folder(library, folder_info['id'])
 
     def get_folder(self, library, f_id):
@@ -80,12 +115,12 @@ class GalaxyInstance(object):
 
     def create_history(self, name=None):
         res = self.gi.histories.create_history(name=name)
-        hist_info = self.__get_dict("create_history", res)
+        hist_info = self.__get_dict('create_history', res)
         return self.get_history(hist_info['id'])
 
     def get_history(self, id):
         res = self.gi.histories.show_history(id)
-        hist_dict = self.__get_dict("show_history", res)
+        hist_dict = self.__get_dict('show_history', res)
         contents = self.gi.histories.show_history(id, contents=True)
         if not isinstance(contents, collections.Sequence):
             self.__error('show_history: unexpected reply: %r' % (contents,))
@@ -103,7 +138,7 @@ class GalaxyInstance(object):
             history.id, name=name, annotation=annotation
             )
         if res != httplib.OK:
-            self.__error('update_history: failed to update "%s"' % history.id)
+            self.__error('update_history: failed to update %r' % (history.id,))
         return self.get_history(history.id)
 
     def delete_history(self, history, purge=False):
@@ -123,7 +158,7 @@ class GalaxyInstance(object):
     def get_workflow(self, id):
         wf_dict = self.gi.workflows.export_workflow_json(id)
         res = self.gi.workflows.show_workflow(id)
-        links = self.__get_dict("show_workflow", res)['inputs']
+        links = self.__get_dict('show_workflow', res)['inputs']
         return wrappers.Workflow(wf_dict, id=id, links=links)
 
     def get_workflows(self):

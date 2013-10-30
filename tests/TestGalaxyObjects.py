@@ -1,14 +1,25 @@
-import os, unittest, json, uuid
+import os, unittest, json, uuid, tempfile, urllib2, shutil
 import bioblend.galaxy.objects.wrappers as wrappers
 import bioblend.galaxy.objects.galaxy_instance as galaxy_instance
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
-SAMPLE_FN = os.path.join(THIS_DIR, "data", "SimpleWorkflow.ga")
+SAMPLE_FN = os.path.join(THIS_DIR, 'data', 'SimpleWorkflow.ga')
 with open(SAMPLE_FN) as f:
     WF_DESC = json.load(f)
 
 URL = os.environ.get('BIOBLEND_GALAXY_URL', 'http://localhost:8080')
 API_KEY = os.environ['BIOBLEND_GALAXY_API_KEY']
+
+
+def is_reachable(url):
+    res = None
+    try:
+        res = urllib2.urlopen(url, timeout=1)
+    except urllib2.URLError:
+        return False
+    if res is not None:
+        res.close()
+    return True
 
 
 class TestWrapper(unittest.TestCase):
@@ -101,9 +112,9 @@ class TestTool(unittest.TestCase):
         self.assertFalse(self.step.is_modified)
 
     def test_params(self):
-        self.assertEqual(self.tool['exp'], "1")
-        self.tool['exp'] = "2"
-        self.assertEqual(self.tool['exp'], "2")
+        self.assertEqual(self.tool['exp'], '1')
+        self.tool['exp'] = '2'
+        self.assertEqual(self.tool['exp'], '2')
         self.assertTrue(self.step.is_modified)
         self.assertRaises(KeyError, self.tool.__getitem__, 'foo')
         self.assertRaises(KeyError, self.tool.__setitem__, 'foo', 0)
@@ -124,7 +135,7 @@ class TestGalaxyInstance(unittest.TestCase):
 
     def test_library(self):
         name = 'test_%s' % uuid.uuid4().hex
-        description, synopsis = "D", "S"
+        description, synopsis = 'D', 'S'
         lib = self.gi.create_library(
             name, description=description, synopsis=synopsis
             )
@@ -148,12 +159,12 @@ class TestGalaxyInstance(unittest.TestCase):
         wf.name = 'test_%s' % uuid.uuid4().hex
         imported = self.gi.import_workflow(wf)
         self.assertWrappedEqual(
-            wf.core.wrapped, imported.core.wrapped, set(["name", "steps"])
+            wf.core.wrapped, imported.core.wrapped, set(['name', 'steps'])
             )
         self.assertEqual(len(imported.steps), len(wf.steps))
         for step, istep in zip(wf.steps, imported.steps):
             self.assertWrappedEqual(
-                step.core.wrapped, istep.core.wrapped, set(["tool_state"])
+                step.core.wrapped, istep.core.wrapped, set(['tool_state'])
                 )
             if step.type == 'tool':
                 self.assertWrappedEqual(step.tool.state, istep.tool.state)
@@ -165,6 +176,8 @@ class TestGalaxyInstance(unittest.TestCase):
 
 class TestLibContents(TestGalaxyInstance):
 
+    URL = 'http://tools.ietf.org/rfc/rfc1866.txt'
+
     def setUp(self):  # pylint: disable=C0103
         super(TestLibContents, self).setUp()
         self.lib = self.gi.create_library('test_%s' % uuid.uuid4().hex)
@@ -173,7 +186,7 @@ class TestLibContents(TestGalaxyInstance):
         self.gi.delete_library(self.lib)
 
     def test_folder(self):
-        name, desc = 'test_%s' % uuid.uuid4().hex, "D"
+        name, desc = 'test_%s' % uuid.uuid4().hex, 'D'
         folder = self.gi.create_folder(self.lib, name, description=desc)
         self.assertEqual(folder.name, name)
         self.assertEqual(folder.description, desc)
@@ -181,9 +194,41 @@ class TestLibContents(TestGalaxyInstance):
 
     def test_dataset(self):
         folder = self.gi.create_folder(self.lib, 'test_%s' % uuid.uuid4().hex)
-        data = "foo\nbar\n"
-        ds = self.gi.upload_file_contents(self.lib, data, folder=folder)
+        data = 'foo\nbar\n'
+        ds = self.gi.upload_data(self.lib, data, folder=folder)
         self.assertEqual(ds.folder_id, folder.id)
+
+    def test_dataset_from_url(self):
+        if is_reachable(self.URL):
+            ds = self.gi.upload_from_url(self.lib, self.URL)
+            assert isinstance(ds, wrappers.Dataset)
+        else:
+            print "skipped 'url not reachable'"
+
+    def test_dataset_from_local(self):
+        fd, path = tempfile.mkstemp(prefix='bioblend_test_')
+        os.write(fd, 'foo\nbar\n')
+        os.close(fd)
+        ds = self.gi.upload_from_local(self.lib, path)
+        assert isinstance(ds, wrappers.Dataset)
+        os.remove(path)
+
+    def test_datasets_from_fs(self):
+        tempdir = tempfile.mkdtemp(prefix='bioblend_test_')
+        fnames = [os.path.join(tempdir, 'data%d.txt' % i) for i in xrange(3)]
+        for fn in fnames:
+            with open(fn, 'w') as f:
+                f.write('foo\nbar\n')
+        dss = self.gi.upload_from_galaxy_fs(
+            self.lib, fnames[:2], link_data_only='link_to_files'
+            )
+        self.assertEqual(len(dss), 2)
+        for ds, fn in zip(dss, fnames):
+            self.assertEqual(ds.file_name, fn)
+        dss = self.gi.upload_from_galaxy_fs(self.lib, fnames[-1])
+        self.assertEqual(len(dss), 1)
+        self.assertNotEqual(dss[0].file_name, fnames[-1])
+        shutil.rmtree(tempdir)
 
 
 def suite():
@@ -217,6 +262,9 @@ def suite():
     for t in (
         'test_folder',
         'test_dataset',
+        'test_dataset_from_url',
+        'test_datasets_from_fs',
+        'test_dataset_from_local',
         ):
         s.addTest(TestLibContents(t))
     return s
