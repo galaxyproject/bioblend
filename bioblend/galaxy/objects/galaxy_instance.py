@@ -1,7 +1,7 @@
 """
 A representation of a Galaxy instance based on oo wrappers.
 """
-import httplib, collections
+import httplib, collections, json
 
 import bioblend
 import bioblend.galaxy
@@ -149,10 +149,19 @@ class GalaxyInstance(object):
             self.__error('delete_history: unexpected reply: %r' % (res,))
         history.touch()
 
-    def import_workflow(self, workflow):
-        if workflow.id is not None:
-            self.__error('workflow already has an id')
-        wf_info = self.gi.workflows.import_workflow_json(workflow.core.wrapped)
+    def import_workflow(self, src):
+        if isinstance(src, wrappers.Workflow):
+            if src.id is not None:
+                self.__error('workflow already has an id: %r' % (src.id,))
+            wf_dict = src.core.wrapped
+        elif isinstance(src, collections.Mapping):
+            wf_dict = src
+        else:
+            try:
+                wf_dict = json.loads(src)
+            except (TypeError, ValueError):
+                self.__error('src not supported: %r' % (src,))
+        wf_info = self.gi.workflows.import_workflow_json(wf_dict)
         return self.get_workflow(wf_info['id'])
 
     def get_workflow(self, id):

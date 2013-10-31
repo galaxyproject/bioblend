@@ -4,6 +4,20 @@ A basic object-oriented interface for Galaxy entities.
 
 import json, hashlib
 
+__all__ = [
+    'Wrapper',
+    'Tool',
+    'Step',
+    'Workflow',
+    'Library',
+    'Folder',
+    'History',
+    'Dataset',
+    'HistoryDatasetAssociation',
+    'LibraryDatasetDatasetAssociation',
+    'LibraryDataset',
+    ]
+
 
 class Wrapper(object):
 

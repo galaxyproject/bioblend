@@ -4,8 +4,8 @@ import bioblend.galaxy.objects.galaxy_instance as galaxy_instance
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 SAMPLE_FN = os.path.join(THIS_DIR, 'data', 'SimpleWorkflow.ga')
-with open(SAMPLE_FN) as f:
-    WF_DESC = json.load(f)
+with open(SAMPLE_FN) as F:
+    WF_DESC = json.load(F)
 
 URL = os.environ.get('BIOBLEND_GALAXY_URL', 'http://localhost:8080')
 API_KEY = os.environ['BIOBLEND_GALAXY_API_KEY']
@@ -173,6 +173,17 @@ class TestGalaxyInstance(unittest.TestCase):
         for attr in imported.id, imported.links:
             self.assertTrue(attr is None)
 
+    def test_workflow_from_dict(self):
+        imported = self.gi.import_workflow(WF_DESC)
+        self.assertTrue(imported.id in [_.id for _ in self.gi.get_workflows()])
+        self.gi.delete_workflow(imported)
+
+    def test_workflow_from_json(self):
+        with open(SAMPLE_FN) as f:
+            imported = self.gi.import_workflow(f.read())
+        self.assertTrue(imported.id in [_.id for _ in self.gi.get_workflows()])
+        self.gi.delete_workflow(imported)
+
 
 class TestLibContents(TestGalaxyInstance):
 
@@ -257,6 +268,8 @@ def suite():
         'test_library',
         'test_history',
         'test_workflow',
+        'test_workflow_from_dict',
+        'test_workflow_from_json',
         ):
         s.addTest(TestGalaxyInstance(t))
     for t in (
