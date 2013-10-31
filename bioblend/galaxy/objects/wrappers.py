@@ -158,13 +158,20 @@ class Workflow(Wrapper):
 
 class Library(Wrapper):
 
-    def __init__(self, lib_dict, id=None):
+    def __init__(self, lib_dict, id=None, datasets=None):
         super(Library, self).__init__(lib_dict)
+        if datasets is None:
+            datasets = []
         setattr(self.core, 'id', id)
+        setattr(self.core, 'datasets', datasets)
 
     @property
     def id(self):
         return self.core.id
+
+    @property
+    def datasets(self):
+        return self.core.datasets
 
     def touch(self):
         super(Library, self).touch()

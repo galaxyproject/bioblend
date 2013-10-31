@@ -35,8 +35,15 @@ class GalaxyInstance(object):
         return self.get_library(lib_info['id'])
 
     def get_library(self, id):
-        lib_dict = self.gi.libraries.show_library(id)
-        return wrappers.Library(lib_dict, id=id)
+        res = self.gi.libraries.show_library(id)
+        lib_dict = self.__get_dict('show_library', res)
+        lib_dict['id'] = id  # overwrite unencoded id
+        ds_infos = self.gi.libraries.show_library(id, contents=True)
+        if not isinstance(ds_infos, collections.Sequence):
+            self.__error('show_library: unexpected reply: %r' % (ds_infos,))
+        dss = [self.get_library_dataset(lib_dict, di['id'])
+               for di in ds_infos if di['type'] != 'folder']
+        return wrappers.Library(lib_dict, id=id, datasets=dss)
 
     def get_libraries(self):
         lib_infos = self.gi.libraries.get_libraries()
@@ -90,7 +97,13 @@ class GalaxyInstance(object):
                 for ds_info in res]
 
     def get_library_dataset(self, library, ds_id):
-        ds_dict = self.gi.libraries.show_dataset(library.id, ds_id)
+        if isinstance(library, wrappers.Library):
+            lib_id = library.id
+        elif isinstance(library, collections.Mapping):
+            lib_id = library['id']
+        else:
+            lib_id = library
+        ds_dict = self.gi.libraries.show_dataset(lib_id, ds_id)
         return wrappers.LibraryDataset(ds_dict)
 
     def delete_library(self, library):

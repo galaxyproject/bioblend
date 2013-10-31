@@ -208,6 +208,9 @@ class TestLibContents(TestGalaxyInstance):
         data = 'foo\nbar\n'
         ds = self.gi.upload_data(self.lib, data, folder=folder)
         self.assertEqual(ds.folder_id, folder.id)
+        lib = self.gi.get_library(self.lib.id)
+        self.assertEqual(len(lib.datasets), 1)
+        self.assertEqual(lib.datasets[0].id, ds.id)
 
     def test_dataset_from_url(self):
         if is_reachable(self.URL):
