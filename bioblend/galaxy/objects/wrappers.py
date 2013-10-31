@@ -2,7 +2,7 @@
 A basic object-oriented interface for Galaxy entities.
 """
 
-import json, hashlib
+import json, hashlib, abc
 
 __all__ = [
     'Wrapper',
@@ -21,6 +21,9 @@ __all__ = [
 
 class Wrapper(object):
 
+    __metaclass__ = abc.ABCMeta
+
+    @abc.abstractmethod
     def __init__(self, wrapped, parent=None):
         # http://stackoverflow.com/questions/2827623
         object.__setattr__(self, 'core', lambda: None)
@@ -156,10 +159,13 @@ class Workflow(Wrapper):
         return self.id == other.id and super(Workflow, self).__eq__(other)
 
 
-class Library(Wrapper):
+class DatasetContainer(Wrapper):
 
-    def __init__(self, lib_dict, id=None, datasets=None):
-        super(Library, self).__init__(lib_dict)
+    __metaclass__ = abc.ABCMeta
+
+    @abc.abstractmethod
+    def __init__(self, c_dict, id=None, datasets=None):
+        super(DatasetContainer, self).__init__(c_dict)
         if datasets is None:
             datasets = []
         setattr(self.core, 'id', id)
@@ -174,9 +180,20 @@ class Library(Wrapper):
         return self.core.datasets
 
     def touch(self):
-        super(Library, self).touch()
-        # forget all Galaxy connections
-        setattr(self.core, 'id', None)
+        super(DatasetContainer, self).touch()
+        setattr(self.core, 'id', None)  # forget all Galaxy connections
+
+
+class History(DatasetContainer):
+
+    def __init__(self, hist_dict, id=None, datasets=None):
+        super(History, self).__init__(hist_dict, id=id, datasets=datasets)
+
+
+class Library(DatasetContainer):
+
+    def __init__(self, lib_dict, id=None, datasets=None):
+        super(Library, self).__init__(lib_dict, id=id, datasets=datasets)
 
 
 class Folder(Wrapper):
@@ -190,32 +207,11 @@ class Folder(Wrapper):
         return self.core.library
 
 
-class History(Wrapper):
-
-    def __init__(self, hist_dict, id=None, datasets=None):
-        super(History, self).__init__(hist_dict)
-        if datasets is None:
-            datasets = []
-        setattr(self.core, 'id', id)
-        setattr(self.core, 'datasets', datasets)
-
-    @property
-    def id(self):
-        return self.core.id
-
-    @property
-    def datasets(self):
-        return self.core.datasets
-
-    def touch(self):
-        super(History, self).touch()
-        # forget all Galaxy connections
-        setattr(self.core, 'id', None)
-        setattr(self.core, 'datasets', [])
-
-
 class Dataset(Wrapper):
 
+    __metaclass__ = abc.ABCMeta
+
+    @abc.abstractmethod
     def __init__(self, ds_dict, src):
         super(Dataset, self).__init__(ds_dict)
         setattr(self.core, 'src', src)

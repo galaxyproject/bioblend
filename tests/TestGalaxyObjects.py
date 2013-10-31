@@ -22,11 +22,18 @@ def is_reachable(url):
     return True
 
 
+class MockWrapper(wrappers.Wrapper):
+
+    def __init__(self, wrapped, parent=None):
+        super(MockWrapper, self).__init__(wrapped, parent=parent)
+
+
 class TestWrapper(unittest.TestCase):
 
     def setUp(self):  # pylint: disable=C0103
         self.d = {'a' : 1, 'b' : 2,  'c': 3}
-        self.w = wrappers.Wrapper(self.d)
+        self.assertRaises(TypeError, wrappers.Wrapper, self.d)
+        self.w = MockWrapper(self.d)
 
     def test_initialize(self):
         for k, v in self.d.iteritems():
@@ -43,7 +50,7 @@ class TestWrapper(unittest.TestCase):
         self.assertTrue(self.w.is_modified)
 
     def test_serialize(self):
-        self.assertEqual(wrappers.Wrapper.from_json(self.w.to_json()), self.w)
+        self.assertEqual(MockWrapper.from_json(self.w.to_json()), self.w)
 
 
 class TestWorkflow(unittest.TestCase):
