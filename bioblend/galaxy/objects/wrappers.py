@@ -8,6 +8,7 @@ __all__ = [
     'Wrapper',
     'Tool',
     'Step',
+    'InputLink',
     'Workflow',
     'DatasetContainer',
     'History',
@@ -119,6 +120,12 @@ class Step(Wrapper):
         return self.core.tool
 
 
+class InputLink(Wrapper):
+
+    def __init__(self, input_dict):
+        super(InputLink, self).__init__(input_dict)
+
+
 class Workflow(Wrapper):
 
     KNOWN_FORMAT_VERSIONS = [u'0.1']
@@ -131,7 +138,7 @@ class Workflow(Wrapper):
         if id is None:
             super(Workflow, self).touch()
         if links is not None:
-            links = dict((d['label'], k) for k, d in links.iteritems())
+            links = dict((k, InputLink(v)) for k, v in links.iteritems())
         setattr(self.core, 'id', id)
         setattr(self.core, 'links', links)
 
