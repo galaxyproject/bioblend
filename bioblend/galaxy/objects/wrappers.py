@@ -9,9 +9,10 @@ __all__ = [
     'Tool',
     'Step',
     'Workflow',
+    'DatasetContainer',
+    'History',
     'Library',
     'Folder',
-    'History',
     'Dataset',
     'HistoryDatasetAssociation',
     'LibraryDatasetDatasetAssociation',
@@ -159,54 +160,6 @@ class Workflow(Wrapper):
         return self.id == other.id and super(Workflow, self).__eq__(other)
 
 
-class DatasetContainer(Wrapper):
-
-    __metaclass__ = abc.ABCMeta
-
-    @abc.abstractmethod
-    def __init__(self, c_dict, id=None, datasets=None):
-        super(DatasetContainer, self).__init__(c_dict)
-        if datasets is None:
-            datasets = []
-        setattr(self.core, 'id', id)
-        setattr(self.core, 'datasets', datasets)
-
-    @property
-    def id(self):
-        return self.core.id
-
-    @property
-    def datasets(self):
-        return self.core.datasets
-
-    def touch(self):
-        super(DatasetContainer, self).touch()
-        setattr(self.core, 'id', None)  # forget all Galaxy connections
-
-
-class History(DatasetContainer):
-
-    def __init__(self, hist_dict, id=None, datasets=None):
-        super(History, self).__init__(hist_dict, id=id, datasets=datasets)
-
-
-class Library(DatasetContainer):
-
-    def __init__(self, lib_dict, id=None, datasets=None):
-        super(Library, self).__init__(lib_dict, id=id, datasets=datasets)
-
-
-class Folder(Wrapper):
-
-    def __init__(self, f_dict, library):
-        super(Folder, self).__init__(f_dict)
-        setattr(self.core, 'library', library)
-
-    @property
-    def library(self):
-        return self.core.library
-
-
 class Dataset(Wrapper):
 
     __metaclass__ = abc.ABCMeta
@@ -237,3 +190,57 @@ class LibraryDataset(Dataset):
 
     def __init__(self, ds_dict):
         super(LibraryDataset, self).__init__(ds_dict, 'ld')
+
+
+class DatasetContainer(Wrapper):
+
+    __metaclass__ = abc.ABCMeta
+
+    @abc.abstractmethod
+    def __init__(self, c_dict, id=None, datasets=None):
+        super(DatasetContainer, self).__init__(c_dict)
+        if datasets is None:
+            datasets = []
+        setattr(self.core, 'id', id)
+        setattr(self.core, 'datasets', datasets)
+
+    @property
+    def id(self):
+        return self.core.id
+
+    @property
+    def datasets(self):
+        return self.core.datasets
+
+    def touch(self):
+        super(DatasetContainer, self).touch()
+        setattr(self.core, 'id', None)  # forget all Galaxy connections
+
+
+class History(DatasetContainer):
+
+    DS_TYPE = HistoryDatasetAssociation
+    API_MODULE = 'histories'
+
+    def __init__(self, hist_dict, id=None, datasets=None):
+        super(History, self).__init__(hist_dict, id=id, datasets=datasets)
+
+
+class Library(DatasetContainer):
+
+    DS_TYPE = LibraryDataset
+    API_MODULE = 'libraries'
+
+    def __init__(self, lib_dict, id=None, datasets=None):
+        super(Library, self).__init__(lib_dict, id=id, datasets=datasets)
+
+
+class Folder(Wrapper):
+
+    def __init__(self, f_dict, library):
+        super(Folder, self).__init__(f_dict)
+        setattr(self.core, 'library', library)
+
+    @property
+    def library(self):
+        return self.core.library

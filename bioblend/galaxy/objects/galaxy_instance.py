@@ -34,16 +34,25 @@ class GalaxyInstance(object):
         lib_info = self.__get_dict('create_library', res)
         return self.get_library(lib_info['id'])
 
-    def get_library(self, id):
-        res = self.gi.libraries.show_library(id)
-        lib_dict = self.__get_dict('show_library', res)
-        lib_dict['id'] = id  # overwrite unencoded id
-        ds_infos = self.gi.libraries.show_library(id, contents=True)
+    def __get_container(self, id, ctype):
+        show_fname = 'show_%s' % ctype.__name__.lower()
+        gi_client = getattr(self.gi, ctype.API_MODULE)
+        show_f = getattr(gi_client, show_fname)
+        res = show_f(id)
+        cdict = self.__get_dict(show_fname, res)
+        cdict['id'] = id  # overwrite unencoded id
+        ds_infos = show_f(id, contents=True)
         if not isinstance(ds_infos, collections.Sequence):
-            self.__error('show_library: unexpected reply: %r' % (ds_infos,))
-        dss = [self.get_library_dataset(lib_dict, di['id'])
+            self.__error('%s: unexpected reply: %r' % (show_fname, ds_infos))
+        dss = [self.get_library_dataset(cdict, di['id'])
                for di in ds_infos if di['type'] != 'folder']
-        return wrappers.Library(lib_dict, id=id, datasets=dss)
+        return ctype(cdict, id=id, datasets=dss)
+
+    def get_library(self, id):
+        return self.__get_container(id, wrappers.Library)
+
+    def get_history(self, id):
+        return self.__get_container(id, wrappers.History)
 
     def get_libraries(self):
         lib_infos = self.gi.libraries.get_libraries()
@@ -96,15 +105,25 @@ class GalaxyInstance(object):
         return [self.get_library_dataset(library, ds_info['id'])
                 for ds_info in res]
 
-    def get_library_dataset(self, library, ds_id):
-        if isinstance(library, wrappers.Library):
-            lib_id = library.id
-        elif isinstance(library, collections.Mapping):
-            lib_id = library['id']
+    def __get_container_dataset(self, src, ds_id, ctype=None):
+        if isinstance(src, wrappers.DatasetContainer):
+            ctype = type(src)
+            container_id = src.id
         else:
-            lib_id = library
-        ds_dict = self.gi.libraries.show_dataset(lib_id, ds_id)
-        return wrappers.LibraryDataset(ds_dict)
+            assert ctype is not None
+            if isinstance(src, collections.Mapping):
+                container_id = src['id']
+            else:
+                container_id = src
+        gi_client = getattr(self.gi, ctype.API_MODULE)
+        ds_dict = gi_client.show_dataset(container_id, ds_id)
+        return ctype.DS_TYPE(ds_dict)
+
+    def get_history_dataset(self, src, ds_id):
+        return self.__get_container_dataset(src, ds_id, wrappers.History)
+
+    def get_library_dataset(self, src, ds_id):
+        return self.__get_container_dataset(src, ds_id, wrappers.Library)
 
     def delete_library(self, library):
         if library.id is None:
@@ -130,17 +149,6 @@ class GalaxyInstance(object):
         res = self.gi.histories.create_history(name=name)
         hist_info = self.__get_dict('create_history', res)
         return self.get_history(hist_info['id'])
-
-    def get_history(self, id):
-        res = self.gi.histories.show_history(id)
-        hist_dict = self.__get_dict('show_history', res)
-        contents = self.gi.histories.show_history(id, contents=True)
-        if not isinstance(contents, collections.Sequence):
-            self.__error('show_history: unexpected reply: %r' % (contents,))
-        hdas = [wrappers.HistoryDatasetAssociation(
-            self.gi.histories.show_dataset(id, c['id'])
-            ) for c in contents]
-        return wrappers.History(hist_dict, id=hist_dict['id'], datasets=hdas)
 
     def get_histories(self):
         hist_infos = self.gi.histories.get_histories()
