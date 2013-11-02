@@ -15,57 +15,29 @@ class GalaxyInstance(object):
         self.gi = bioblend.galaxy.GalaxyInstance(url, api_key)
         self.log = bioblend.log
 
-    def __error(self, msg, err_type=RuntimeError):
-        self.log.error(msg)
-        raise err_type(msg)
-
-    def __get_dict(self, meth_name, reply):
-        if reply is None:
-            self.__error('%s: no reply' % meth_name)
-        elif isinstance(reply, collections.Mapping):
-            return reply
-        try:
-            return reply[0]
-        except (TypeError, IndexError):
-            self.__error('%s: unexpected reply: %r' % (meth_name, reply))
+    #-- library --
 
     def create_library(self, name, description=None, synopsis=None):
         res = self.gi.libraries.create_library(name, description, synopsis)
         lib_info = self.__get_dict('create_library', res)
         return self.get_library(lib_info['id'])
 
-    def __get_container(self, id, ctype):
-        show_fname = 'show_%s' % ctype.__name__.lower()
-        gi_client = getattr(self.gi, ctype.API_MODULE)
-        show_f = getattr(gi_client, show_fname)
-        res = show_f(id)
-        cdict = self.__get_dict(show_fname, res)
-        cdict['id'] = id  # overwrite unencoded id
-        ds_infos = show_f(id, contents=True)
-        if not isinstance(ds_infos, collections.Sequence):
-            self.__error('%s: unexpected reply: %r' % (show_fname, ds_infos))
-        dss = [self.get_library_dataset(cdict, di['id'])
-               for di in ds_infos if di['type'] != 'folder']
-        return ctype(cdict, id=id, datasets=dss)
-
     def get_library(self, id):
         return self.__get_container(id, wrappers.Library)
-
-    def get_history(self, id):
-        return self.__get_container(id, wrappers.History)
 
     def get_libraries(self):
         lib_infos = self.gi.libraries.get_libraries()
         return [self.get_library(li['id']) for li in lib_infos]
 
-    def __pre_upload(self, library, folder):
+    def delete_library(self, library):
         if library.id is None:
             self.__error('library does not have an id')
-        return None if folder is None else folder.id
+        res = self.gi.libraries.delete_library(library.id)
+        if not isinstance(res, collections.Mapping):
+            self.__error('delete_library: unexpected reply: %r' % (res,))
+        library.touch()
 
-    def __post_upload(self, library, meth_name, reply):
-        ds_info = self.__get_dict(meth_name, reply)
-        return self.get_library_dataset(library, ds_info['id'])
+    #-- library contents --
 
     def upload_data(self, library, data, folder=None, **kwargs):
         fid = self.__pre_upload(library, folder)
@@ -105,33 +77,8 @@ class GalaxyInstance(object):
         return [self.get_library_dataset(library, ds_info['id'])
                 for ds_info in res]
 
-    def __get_container_dataset(self, src, ds_id, ctype=None):
-        if isinstance(src, wrappers.DatasetContainer):
-            ctype = type(src)
-            container_id = src.id
-        else:
-            assert ctype is not None
-            if isinstance(src, collections.Mapping):
-                container_id = src['id']
-            else:
-                container_id = src
-        gi_client = getattr(self.gi, ctype.API_MODULE)
-        ds_dict = gi_client.show_dataset(container_id, ds_id)
-        return ctype.DS_TYPE(ds_dict)
-
-    def get_history_dataset(self, src, ds_id):
-        return self.__get_container_dataset(src, ds_id, wrappers.History)
-
     def get_library_dataset(self, src, ds_id):
         return self.__get_container_dataset(src, ds_id, wrappers.Library)
-
-    def delete_library(self, library):
-        if library.id is None:
-            self.__error('library does not have an id')
-        res = self.gi.libraries.delete_library(library.id)
-        if not isinstance(res, collections.Mapping):
-            self.__error('delete_library: unexpected reply: %r' % (res,))
-        library.touch()
 
     def create_folder(self, library, name, description=None, base_folder=None):
         bfid = None if base_folder is None else base_folder.id
@@ -145,10 +92,15 @@ class GalaxyInstance(object):
         f_dict = self.gi.libraries.show_folder(library.id, f_id)
         return wrappers.Folder(f_dict, library)
 
+    #-- history --
+
     def create_history(self, name=None):
         res = self.gi.histories.create_history(name=name)
         hist_info = self.__get_dict('create_history', res)
         return self.get_history(hist_info['id'])
+
+    def get_history(self, id):
+        return self.__get_container(id, wrappers.History)
 
     def get_histories(self):
         hist_infos = self.gi.histories.get_histories()
@@ -169,6 +121,11 @@ class GalaxyInstance(object):
         if not isinstance(res, collections.Mapping):
             self.__error('delete_history: unexpected reply: %r' % (res,))
         history.touch()
+
+    def get_history_dataset(self, src, ds_id):
+        return self.__get_container_dataset(src, ds_id, wrappers.History)
+
+    #-- workflow --
 
     def import_workflow(self, src):
         if isinstance(src, wrappers.Workflow):
@@ -202,3 +159,56 @@ class GalaxyInstance(object):
         if not isinstance(res, basestring):
             self.__error('delete_workflow: unexpected reply: %r' % (res,))
         workflow.touch()
+
+    #-- helpers --
+
+    def __error(self, msg, err_type=RuntimeError):
+        self.log.error(msg)
+        raise err_type(msg)
+
+    def __get_dict(self, meth_name, reply):
+        if reply is None:
+            self.__error('%s: no reply' % meth_name)
+        elif isinstance(reply, collections.Mapping):
+            return reply
+        try:
+            return reply[0]
+        except (TypeError, IndexError):
+            self.__error('%s: unexpected reply: %r' % (meth_name, reply))
+
+    def __get_container(self, id, ctype):
+        show_fname = 'show_%s' % ctype.__name__.lower()
+        gi_client = getattr(self.gi, ctype.API_MODULE)
+        show_f = getattr(gi_client, show_fname)
+        res = show_f(id)
+        cdict = self.__get_dict(show_fname, res)
+        cdict['id'] = id  # overwrite unencoded id
+        ds_infos = show_f(id, contents=True)
+        if not isinstance(ds_infos, collections.Sequence):
+            self.__error('%s: unexpected reply: %r' % (show_fname, ds_infos))
+        dss = [self.get_library_dataset(cdict, di['id'])
+               for di in ds_infos if di['type'] != 'folder']
+        return ctype(cdict, id=id, datasets=dss)
+
+    def __get_container_dataset(self, src, ds_id, ctype=None):
+        if isinstance(src, wrappers.DatasetContainer):
+            ctype = type(src)
+            container_id = src.id
+        else:
+            assert ctype is not None
+            if isinstance(src, collections.Mapping):
+                container_id = src['id']
+            else:
+                container_id = src
+        gi_client = getattr(self.gi, ctype.API_MODULE)
+        ds_dict = gi_client.show_dataset(container_id, ds_id)
+        return ctype.DS_TYPE(ds_dict)
+
+    def __pre_upload(self, library, folder):
+        if library.id is None:
+            self.__error('library does not have an id')
+        return None if folder is None else folder.id
+
+    def __post_upload(self, library, meth_name, reply):
+        ds_info = self.__get_dict(meth_name, reply)
+        return self.get_library_dataset(library, ds_info['id'])
