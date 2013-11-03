@@ -254,6 +254,25 @@ class TestLibContents(TestGalaxyInstance):
         shutil.rmtree(tempdir)
 
 
+class TestHistContents(TestGalaxyInstance):
+
+    def setUp(self):  # pylint: disable=C0103
+        super(TestHistContents, self).setUp()
+        self.hist = self.gi.create_history('test_%s' % uuid.uuid4().hex)
+
+    def tearDown(self):  # pylint: disable=C0103
+        self.gi.delete_history(self.hist)
+
+    def test_dataset(self):
+        lib = self.gi.create_library('test_%s' % uuid.uuid4().hex)
+        lds = self.gi.upload_data(lib, 'foo\nbar\n')
+        hda = self.gi.import_dataset_to_history(self.hist, lds)
+        self.assertTrue(isinstance(hda, wrappers.HistoryDatasetAssociation))
+        updated_hist = self.gi.get_history(self.hist.id)
+        self.assertTrue(hda.id in set(_.id for _ in updated_hist.datasets))
+        self.gi.delete_library(lib)
+
+
 def suite():
     s = unittest.TestSuite()
     for t in (
@@ -292,6 +311,10 @@ def suite():
         'test_dataset_from_local',
         ):
         s.addTest(TestLibContents(t))
+    for t in (
+        'test_dataset',
+        ):
+        s.addTest(TestHistContents(t))
     return s
 
 

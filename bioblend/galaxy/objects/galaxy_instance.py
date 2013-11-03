@@ -122,6 +122,28 @@ class GalaxyInstance(object):
             self.__error('delete_history: unexpected reply: %r' % (res,))
         history.touch()
 
+    #-- history contents --
+
+    def import_dataset_to_history(self, history, lds):
+        if history.id is None:
+            self.__error('history does not have an id')
+        if not isinstance(lds, wrappers.LibraryDataset):
+            self.__error('lds is not a LibraryDataset', err_type=TypeError)
+        # upload_dataset_from_library returns a dict with the unencoded id
+        # to get the encoded id, we have to detect the new entry by diff
+        dataset_ids = lambda h: set(_.id for _ in h.datasets)
+        old_ids = dataset_ids(history)
+        res = self.gi.histories.upload_dataset_from_library(history.id, lds.id)
+        if not isinstance(res, collections.Mapping):
+            self.__error(
+                'upload_dataset_from_library: unexpected reply: %r' % (res,)
+                )
+        history = self.get_history(history.id)  # refresh
+        diff = dataset_ids(history) - old_ids
+        if len(diff) != 1:
+            self.__error('cannot retrieve hda id')
+        return self.get_history_dataset(history, diff.pop())
+
     def get_history_dataset(self, src, ds_id):
         return self.__get_container_dataset(src, ds_id, wrappers.History)
 
@@ -186,7 +208,7 @@ class GalaxyInstance(object):
         ds_infos = show_f(id, contents=True)
         if not isinstance(ds_infos, collections.Sequence):
             self.__error('%s: unexpected reply: %r' % (show_fname, ds_infos))
-        dss = [self.get_library_dataset(cdict, di['id'])
+        dss = [self.__get_container_dataset(cdict, di['id'], ctype=ctype)
                for di in ds_infos if di['type'] != 'folder']
         return ctype(cdict, id=id, datasets=dss)
 
