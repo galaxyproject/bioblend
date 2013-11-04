@@ -104,10 +104,13 @@ class TestWorkflow(unittest.TestCase):
             '99': {'label': 'boo', 'value': 'far'},
             }
         wf = wrappers.Workflow(WF_DESC, links=links)
-        self.assertEqual(wf.links.keys(), links.keys())
-        for link_id, link_dict in links.iteritems():
+        self.assertEqual(len(wf.links), len(links))
+        for input_link in wf.links:
+            link_dict = links.get(input_link.id)
+            self.assertTrue(link_dict is not None)
             for k, v in link_dict.iteritems():
-                self.assertEqual(getattr(wf.links[link_id], k), v)
+                a = getattr(input_link, k, None)
+                self.assertEqual(a, v)
 
 
 class TestTool(unittest.TestCase):

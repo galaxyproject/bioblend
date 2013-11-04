@@ -137,8 +137,9 @@ class Workflow(Wrapper):
                 [Step(steps[str(i)], self) for i in xrange(len(steps))])
         if id is None:
             super(Workflow, self).touch()
-        if links is not None:
-            links = dict((k, InputLink(v)) for k, v in links.iteritems())
+        if links is not None:  # outer keys = unencoded ids
+            links = [InputLink(dict(v.items() + [('id', k)]))
+                     for k, v in links.iteritems()]
         setattr(self.core, 'id', id)
         setattr(self.core, 'links', links)
 
