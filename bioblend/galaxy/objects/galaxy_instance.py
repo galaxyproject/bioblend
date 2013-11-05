@@ -174,6 +174,41 @@ class GalaxyInstance(object):
         wf_infos = self.gi.workflows.get_workflows()
         return [self.get_workflow(wi['id']) for wi in wf_infos]
 
+    def run_workflow(self, workflow, inputs, history, import_inputs=False):
+        """
+        Run ``workflow`` with input datasets from the ``input`` sequence.
+
+        Input datasets are assigned to the workflow's input slots in
+        the order they appear in ``inputs``; any extra items are
+        ignored.  The ``history`` param can be either a valid history
+        object (results will be stored there) or a string (a new
+        history will be created with the given name).
+        """
+        if workflow.id is None or not workflow.links:
+            self.__error('workflow is not runnable (no id and/or links)')
+        if len(inputs) < len(workflow.links):
+            self.__error('not enough inputs', err_type=ValueError)
+        ds_map = workflow.map_links(inputs)
+        # FIXME: deal with the 'params' param
+        kwargs = {'import_inputs_to_history': import_inputs}
+        if isinstance(history, wrappers.History):
+            try:
+                kwargs['history_id'] = history.id
+            except AttributeError:
+                self.__error('history does not have an id')
+        elif not isinstance(history, basestring):
+            self.__error(
+                'history must be either a history wrapper or a string',
+                err_type=TypeError,
+                )
+        else:
+            kwargs['history_name'] = history
+        res = self.gi.workflows.run_workflow(workflow.id, ds_map, **kwargs)
+        res = self.__get_dict('run_workflow', res)
+        history = self.get_history(res['history'])
+        res['outputs'] = set(res['outputs'])
+        return history, [_ for _ in history.datasets if _.id in res['outputs']]
+
     def delete_workflow(self, workflow):
         if workflow.id is None:
             self.__error('workflow does not have an id')

@@ -155,6 +155,12 @@ class Workflow(Wrapper):
     def links(self):
         return self.core.links
 
+    def map_links(self, inputs):
+        m = {}
+        for link, ds in zip(self.links, inputs):
+            m[link.id] = {'id': ds.id, 'src': ds.src}
+        return m
+
     def touch(self):
         super(Workflow, self).touch()
         # forget all Galaxy connections

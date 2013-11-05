@@ -283,6 +283,40 @@ class TestHistContents(TestGalaxyInstance):
         self.gi.delete_library(lib)
 
 
+class TestRunWorkflow(TestGalaxyInstance):
+
+    def setUp(self):  # pylint: disable=C0103
+        super(TestRunWorkflow, self).setUp()
+        self.lib = self.gi.create_library('test_%s' % uuid.uuid4().hex)
+        self.wf = self.gi.import_workflow(WF_DICT)
+        self.contents = ['one\ntwo\n', '1\n2\n']
+        self.inputs = [self.gi.upload_data(self.lib, c) for c in self.contents]
+        self.hist_name = 'test_%s' % uuid.uuid4().hex
+
+    def tearDown(self):  # pylint: disable=C0103
+        self.gi.delete_workflow(self.wf)
+        self.gi.delete_library(self.lib)
+
+    def __test(self, existing_hist=False):
+        if existing_hist:
+            hist = self.gi.create_history(self.hist_name)
+        else:
+            hist = self.hist_name
+        out_hist, outputs = self.gi.run_workflow(self.wf, self.inputs, hist)
+        self.assertEqual(len(outputs), 1)
+        out_ds = outputs[0]
+        self.assertTrue(out_ds.id in set(_.id for _ in out_hist.datasets))
+        if existing_hist:
+            self.assertEqual(out_hist.id, hist.id)
+            self.gi.delete_history(hist)
+
+    def test_existing_history(self):
+        self.__test(existing_hist=True)
+
+    def test_new_history(self):
+        self.__test(existing_hist=False)
+
+
 def suite():
     s = unittest.TestSuite()
     for t in (
@@ -325,6 +359,11 @@ def suite():
         'test_dataset',
         ):
         s.addTest(TestHistContents(t))
+    for t in (
+        'test_existing_history',
+        'test_new_history',
+        ):
+        s.addTest(TestRunWorkflow(t))
     return s
 
 
