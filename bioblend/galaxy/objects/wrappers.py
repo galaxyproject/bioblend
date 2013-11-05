@@ -74,8 +74,8 @@ class Wrapper(object):
 class Tool(object):
 
     def __init__(self, step_dict, parent):
-        self.step_dict = step_dict
-        self.state = json.loads(step_dict['tool_state'])
+        self.step_dict = step_dict.copy()
+        self.state = json.loads(self.step_dict['tool_state'])
         self.parent = parent
 
     @property

@@ -3,12 +3,18 @@ import bioblend.galaxy.objects.wrappers as wrappers
 import bioblend.galaxy.objects.galaxy_instance as galaxy_instance
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
-SAMPLE_FN = os.path.join(THIS_DIR, 'data', 'SimpleWorkflow.ga')
+SAMPLE_FN = os.path.join(THIS_DIR, 'data', 'paste_columns.ga')
 with open(SAMPLE_FN) as F:
-    WF_DESC = json.load(F)
+    WF_DICT = json.load(F)
 
 URL = os.environ.get('BIOBLEND_GALAXY_URL', 'http://localhost:8080')
 API_KEY = os.environ['BIOBLEND_GALAXY_API_KEY']
+
+
+def first_tool_idx(wf_dict):
+    return int((
+        k for k, v in wf_dict['steps'].iteritems() if v['type'] == 'tool'
+        ).next())
 
 
 def is_reachable(url):
@@ -57,11 +63,11 @@ class TestWorkflow(unittest.TestCase):
 
     def setUp(self):  # pylint: disable=C0103
         self.id = '123'
-        self.wf = wrappers.Workflow(WF_DESC, id=self.id)
+        self.wf = wrappers.Workflow(WF_DICT, id=self.id)
 
     def test_initialize(self):
         self.assertEqual(self.wf.id, self.id)
-        for k, v in WF_DESC.iteritems():
+        for k, v in WF_DICT.iteritems():
             if k != 'steps':
                 self.assertEqual(getattr(self.wf, k), v)
         self.assertFalse(self.wf.is_modified)
@@ -72,7 +78,7 @@ class TestWorkflow(unittest.TestCase):
         simple_tool_attrs = set(('tool_errors', 'tool_id', 'tool_version'))
         for s in self.wf.steps:
             self.assertTrue(s.parent is self.wf)
-            s_desc = WF_DESC['steps'][str(s.id)]
+            s_desc = WF_DICT['steps'][str(s.id)]
             for k, v in s_desc.iteritems():
                 if s.type == 'tool' and k in simple_tool_attrs:
                     self.assertEqual(getattr(s.tool, k.replace('tool_', '')), v)
@@ -87,7 +93,7 @@ class TestWorkflow(unittest.TestCase):
 
     def test_tool_taint(self):
         self.assertFalse(self.wf.is_modified)
-        self.wf.steps[1].tool['iterate'] = 'no'
+        self.wf.steps[first_tool_idx(WF_DICT)].tool['chromInfo'] = 'foo'
         self.assertTrue(self.wf.is_modified)
 
     def test_clone(self):
@@ -103,7 +109,7 @@ class TestWorkflow(unittest.TestCase):
             '98': {'label': 'foo', 'value': 'bar'},
             '99': {'label': 'boo', 'value': 'far'},
             }
-        wf = wrappers.Workflow(WF_DESC, links=links)
+        wf = wrappers.Workflow(WF_DICT, links=links)
         self.assertEqual(len(wf.links), len(links))
         for input_link in wf.links:
             link_dict = links.get(input_link.id)
@@ -116,7 +122,7 @@ class TestWorkflow(unittest.TestCase):
 class TestTool(unittest.TestCase):
 
     def setUp(self):  # pylint: disable=C0103
-        self.step = wrappers.Workflow(WF_DESC).steps[1]
+        self.step = wrappers.Workflow(WF_DICT).steps[first_tool_idx(WF_DICT)]
         self.tool = self.step.tool
 
     def test_initialize(self):
@@ -124,9 +130,9 @@ class TestTool(unittest.TestCase):
         self.assertFalse(self.step.is_modified)
 
     def test_params(self):
-        self.assertEqual(self.tool['exp'], '1')
-        self.tool['exp'] = '2'
-        self.assertEqual(self.tool['exp'], '2')
+        self.assertNotEqual(self.tool['chromInfo'], 'foo')
+        self.tool['chromInfo'] = 'foo'
+        self.assertEqual(self.tool['chromInfo'], 'foo')
         self.assertTrue(self.step.is_modified)
         self.assertRaises(KeyError, self.tool.__getitem__, 'foo')
         self.assertRaises(KeyError, self.tool.__setitem__, 'foo', 0)
@@ -143,7 +149,7 @@ class TestGalaxyInstance(unittest.TestCase):
         for (k, v) in w1.iteritems():
             self.assertTrue(k in w2)
             if k not in keys_to_skip:
-                self.assertEqual(w2[k], v)
+                self.assertEqual(w2[k], v, "%r: %r != %r" % (k, w2[k], v))
 
     def test_library(self):
         name = 'test_%s' % uuid.uuid4().hex
@@ -167,16 +173,17 @@ class TestGalaxyInstance(unittest.TestCase):
         self.assertTrue(hist.id is None)
 
     def test_workflow(self):
-        wf = wrappers.Workflow(WF_DESC)
+        wf = wrappers.Workflow(WF_DICT)
         wf.name = 'test_%s' % uuid.uuid4().hex
         imported = self.gi.import_workflow(wf)
         self.assertWrappedEqual(
             wf.core.wrapped, imported.core.wrapped, set(['name', 'steps'])
             )
         self.assertEqual(len(imported.steps), len(wf.steps))
+        keys_to_skip = set(['tool_state', 'tool_version'])
         for step, istep in zip(wf.steps, imported.steps):
             self.assertWrappedEqual(
-                step.core.wrapped, istep.core.wrapped, set(['tool_state'])
+                step.core.wrapped, istep.core.wrapped, keys_to_skip
                 )
             if step.type == 'tool':
                 self.assertWrappedEqual(step.tool.state, istep.tool.state)
@@ -186,7 +193,7 @@ class TestGalaxyInstance(unittest.TestCase):
             self.assertTrue(attr is None)
 
     def test_workflow_from_dict(self):
-        imported = self.gi.import_workflow(WF_DESC)
+        imported = self.gi.import_workflow(WF_DICT)
         self.assertTrue(imported.id in [_.id for _ in self.gi.get_workflows()])
         self.gi.delete_workflow(imported)
 
