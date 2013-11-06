@@ -1,6 +1,12 @@
-import os, unittest, json, uuid, tempfile, urllib2, shutil
+# pylint: disable=C0103
+
+import sys, os, unittest, json, uuid, tempfile, urllib2, shutil
+
+import bioblend
+bioblend.set_stream_logger('test', level='INFO')
 import bioblend.galaxy.objects.wrappers as wrappers
 import bioblend.galaxy.objects.galaxy_instance as galaxy_instance
+
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 SAMPLE_FN = os.path.join(THIS_DIR, 'data', 'paste_columns.ga')
@@ -36,7 +42,7 @@ class MockWrapper(wrappers.Wrapper):
 
 class TestWrapper(unittest.TestCase):
 
-    def setUp(self):  # pylint: disable=C0103
+    def setUp(self):
         self.d = {'a' : 1, 'b' : 2,  'c': 3}
         self.assertRaises(TypeError, wrappers.Wrapper, self.d)
         self.w = MockWrapper(self.d)
@@ -61,7 +67,7 @@ class TestWrapper(unittest.TestCase):
 
 class TestWorkflow(unittest.TestCase):
 
-    def setUp(self):  # pylint: disable=C0103
+    def setUp(self):
         self.id = '123'
         self.wf = wrappers.Workflow(WF_DICT, id=self.id)
 
@@ -121,7 +127,7 @@ class TestWorkflow(unittest.TestCase):
 
 class TestTool(unittest.TestCase):
 
-    def setUp(self):  # pylint: disable=C0103
+    def setUp(self):
         self.step = wrappers.Workflow(WF_DICT).steps[first_tool_idx(WF_DICT)]
         self.tool = self.step.tool
 
@@ -140,7 +146,7 @@ class TestTool(unittest.TestCase):
 
 class TestGalaxyInstance(unittest.TestCase):
 
-    def setUp(self):  # pylint: disable=C0103
+    def setUp(self):
         self.gi = galaxy_instance.GalaxyInstance(URL, API_KEY)
 
     def assertWrappedEqual(self, w1, w2, keys_to_skip=None):
@@ -208,11 +214,11 @@ class TestLibContents(TestGalaxyInstance):
 
     URL = 'http://tools.ietf.org/rfc/rfc1866.txt'
 
-    def setUp(self):  # pylint: disable=C0103
+    def setUp(self):
         super(TestLibContents, self).setUp()
         self.lib = self.gi.create_library('test_%s' % uuid.uuid4().hex)
 
-    def tearDown(self):  # pylint: disable=C0103
+    def tearDown(self):
         self.gi.delete_library(self.lib)
 
     def test_folder(self):
@@ -266,11 +272,11 @@ class TestLibContents(TestGalaxyInstance):
 
 class TestHistContents(TestGalaxyInstance):
 
-    def setUp(self):  # pylint: disable=C0103
+    def setUp(self):
         super(TestHistContents, self).setUp()
         self.hist = self.gi.create_history('test_%s' % uuid.uuid4().hex)
 
-    def tearDown(self):  # pylint: disable=C0103
+    def tearDown(self):
         self.gi.delete_history(self.hist)
 
     def test_dataset(self):
@@ -285,7 +291,7 @@ class TestHistContents(TestGalaxyInstance):
 
 class TestRunWorkflow(TestGalaxyInstance):
 
-    def setUp(self):  # pylint: disable=C0103
+    def setUp(self):
         super(TestRunWorkflow, self).setUp()
         self.lib = self.gi.create_library('test_%s' % uuid.uuid4().hex)
         self.wf = self.gi.import_workflow(WF_DICT)
@@ -293,7 +299,7 @@ class TestRunWorkflow(TestGalaxyInstance):
         self.inputs = [self.gi.upload_data(self.lib, c) for c in self.contents]
         self.hist_name = 'test_%s' % uuid.uuid4().hex
 
-    def tearDown(self):  # pylint: disable=C0103
+    def tearDown(self):
         self.gi.delete_workflow(self.wf)
         self.gi.delete_library(self.lib)
 
@@ -302,7 +308,9 @@ class TestRunWorkflow(TestGalaxyInstance):
             hist = self.gi.create_history(self.hist_name)
         else:
             hist = self.hist_name
-        out_hist, outputs = self.gi.run_workflow(self.wf, self.inputs, hist)
+        outputs, out_hist = self.gi.run_workflow(self.wf, self.inputs, hist)
+        sys.stdout.write(os.linesep)
+        self.gi.wait(outputs, out_hist, polling_interval=5)
         self.assertEqual(len(outputs), 1)
         out_ds = outputs[0]
         self.assertTrue(out_ds.id in set(_.id for _ in out_hist.datasets))

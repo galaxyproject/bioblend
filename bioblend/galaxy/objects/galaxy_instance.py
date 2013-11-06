@@ -1,12 +1,29 @@
 """
 A representation of a Galaxy instance based on oo wrappers.
 """
-import httplib, collections, json
+import httplib, collections, json, time
 
 import bioblend
 import bioblend.galaxy
 
 import wrappers
+
+# dataset states corresponding to a 'pending' condition
+_PENDING = set(["new", "upload", "queued", "running", "setting_metadata"])
+
+# default polling interval for output state monitoring
+_POLLING_INTERVAL = 10
+
+
+def _get_ds_states(hist_dict):
+    """
+    Get a dataset_id-to-state mapping from the given history dict.
+    """
+    return dict(
+        (id_, state)
+        for state, ids in hist_dict['state_ids'].iteritems()
+        for id_ in ids
+        )
 
 
 class GalaxyInstance(object):
@@ -207,7 +224,32 @@ class GalaxyInstance(object):
         res = self.__get_dict('run_workflow', res)
         history = self.get_history(res['history'])
         res['outputs'] = set(res['outputs'])
-        return history, [_ for _ in history.datasets if _.id in res['outputs']]
+        return [_ for _ in history.datasets if _.id in res['outputs']], history
+
+    def wait(self, outputs, history, polling_interval=_POLLING_INTERVAL):
+        """
+        Wait until the given outputs are either ready or in error.
+
+        The datasets in ``outputs`` should belong to ``history`` (if
+        they don't, the method will exit immediately). Note that this
+        method does not return anything: if needed, updated versions
+        of the output datasets and history must be retrieved explicitly.
+        """
+        out_ids = set(_.id for _ in outputs)
+        self.log.info('waiting for output datasets')
+        while True:
+            res = self.gi.histories.show_history(history.id)
+            hist_dict = self.__get_dict('show_history', res)
+            ds_states = _get_ds_states(hist_dict)
+            pending = 0
+            for ds_id in out_ids:
+                state = ds_states.get(ds_id)
+                self.log.info('%s: %s' % (ds_id, state))
+                if state in _PENDING:
+                    pending += 1
+            if not pending:
+                break
+            time.sleep(polling_interval)
 
     def delete_workflow(self, workflow):
         if workflow.id is None:
