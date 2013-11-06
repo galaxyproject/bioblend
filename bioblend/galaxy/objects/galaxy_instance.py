@@ -22,8 +22,8 @@ class GalaxyInstance(object):
         lib_info = self.__get_dict('create_library', res)
         return self.get_library(lib_info['id'])
 
-    def get_library(self, id):
-        return self.__get_container(id, wrappers.Library)
+    def get_library(self, id_):
+        return self.__get_container(id_, wrappers.Library)
 
     def get_libraries(self):
         lib_infos = self.gi.libraries.get_libraries()
@@ -99,8 +99,8 @@ class GalaxyInstance(object):
         hist_info = self.__get_dict('create_history', res)
         return self.get_history(hist_info['id'])
 
-    def get_history(self, id):
-        return self.__get_container(id, wrappers.History)
+    def get_history(self, id_):
+        return self.__get_container(id_, wrappers.History)
 
     def get_histories(self):
         hist_infos = self.gi.histories.get_histories()
@@ -164,11 +164,11 @@ class GalaxyInstance(object):
         wf_info = self.gi.workflows.import_workflow_json(wf_dict)
         return self.get_workflow(wf_info['id'])
 
-    def get_workflow(self, id):
-        wf_dict = self.gi.workflows.export_workflow_json(id)
-        res = self.gi.workflows.show_workflow(id)
+    def get_workflow(self, id_):
+        wf_dict = self.gi.workflows.export_workflow_json(id_)
+        res = self.gi.workflows.show_workflow(id_)
         links = self.__get_dict('show_workflow', res)['inputs']
-        return wrappers.Workflow(wf_dict, id=id, links=links)
+        return wrappers.Workflow(wf_dict, id=id_, links=links)
 
     def get_workflows(self):
         wf_infos = self.gi.workflows.get_workflows()
@@ -233,19 +233,19 @@ class GalaxyInstance(object):
         except (TypeError, IndexError):
             self.__error('%s: unexpected reply: %r' % (meth_name, reply))
 
-    def __get_container(self, id, ctype):
+    def __get_container(self, id_, ctype):
         show_fname = 'show_%s' % ctype.__name__.lower()
         gi_client = getattr(self.gi, ctype.API_MODULE)
         show_f = getattr(gi_client, show_fname)
-        res = show_f(id)
+        res = show_f(id_)
         cdict = self.__get_dict(show_fname, res)
-        cdict['id'] = id  # overwrite unencoded id
-        ds_infos = show_f(id, contents=True)
+        cdict['id'] = id_  # overwrite unencoded id
+        ds_infos = show_f(id_, contents=True)
         if not isinstance(ds_infos, collections.Sequence):
             self.__error('%s: unexpected reply: %r' % (show_fname, ds_infos))
         dss = [self.__get_container_dataset(cdict, di['id'], ctype=ctype)
                for di in ds_infos if di['type'] != 'folder']
-        return ctype(cdict, id=id, datasets=dss)
+        return ctype(cdict, id=id_, datasets=dss)
 
     def __get_container_dataset(self, src, ds_id, ctype=None):
         if isinstance(src, wrappers.DatasetContainer):
