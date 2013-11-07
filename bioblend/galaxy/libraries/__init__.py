@@ -37,6 +37,17 @@ class LibraryClient(Client):
         payload = {}
         return Client._delete(self, payload, id=library_id)
 
+    def show_dataset(self, library_id, dataset_id):
+        """
+        Get details about a given library dataset. The required ``library_id``
+        can be obtained from the datasets's library content details.
+        """
+        url = self.gi._make_url(self, library_id, contents=True)
+        # Append the dataset_id to the base library contents URL
+        url = '/'.join([url, dataset_id])
+        return Client._get(self, url=url)
+
+    
     def create_folder(self, library_id, folder_name, description=None, base_folder_id=None):
         """
         Create a folder in the given library and the base folder. If
