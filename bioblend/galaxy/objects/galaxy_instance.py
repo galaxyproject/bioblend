@@ -3,16 +3,26 @@ A representation of a Galaxy instance based on oo wrappers.
 """
 import httplib, collections, json, time
 
+import requests
+
 import bioblend
 import bioblend.galaxy
 
 import wrappers
+
 
 # dataset states corresponding to a 'pending' condition
 _PENDING = set(["new", "upload", "queued", "running", "setting_metadata"])
 
 # default polling interval for output state monitoring
 _POLLING_INTERVAL = 10
+
+# default chunk size for reading remote data
+try:
+    import resource
+    _CHUNK_SIZE = resource.getpagesize()
+except StandardError:
+    _CHUNK_SIZE = 4096
 
 
 def _get_ds_states(hist_dict):
@@ -250,6 +260,31 @@ class GalaxyInstance(object):
             if not pending:
                 break
             time.sleep(polling_interval)
+
+    def get_stream(self, dataset, history, chunk_size=_CHUNK_SIZE):
+        if dataset.id not in set(_.id for _ in history.datasets):
+            self.__error('dataset does not belong to history')
+        if dataset.state in _PENDING:  # FIXME: add wait option
+            self.__error('dataset is not ready')
+        base_url = self.gi._make_url(
+            self.gi.histories, module_id=history.id, contents=True
+            )
+        url = "%s/%s/display" % (base_url, dataset.id)
+        get_options = {
+            'verify': self.gi.verify,
+            'params': {'key': self.gi.key},
+            'stream': True,
+            }
+        r = requests.get(url, **get_options)
+        r.raise_for_status()
+        return r.iter_content(chunk_size)  # FIXME: client can't close r
+
+    def peek(self, dataset, history, chunk_size=_CHUNK_SIZE):
+        return self.get_stream(dataset, history, chunk_size=chunk_size).next()
+
+    def download(self, dataset, history, outf, chunk_size=_CHUNK_SIZE):
+        for chunk in self.get_stream(dataset, history, chunk_size=chunk_size):
+            outf.write(chunk)
 
     def delete_workflow(self, workflow):
         if workflow.id is None:
