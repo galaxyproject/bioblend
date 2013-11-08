@@ -303,17 +303,30 @@ class TestRunWorkflow(TestGalaxyInstance):
         self.gi.delete_workflow(self.wf)
         self.gi.delete_library(self.lib)
 
-    def __test(self, existing_hist=False):
+    def __test(self, existing_hist=False, params=False):
         if existing_hist:
             hist = self.gi.create_history(self.hist_name)
         else:
             hist = self.hist_name
-        outputs, out_hist = self.gi.run_workflow(self.wf, self.inputs, hist)
+        if params:
+            params = [{'delimiter': 'U'}]
+            sep = '_'  # 'U' maps to '_' in the paste tool
+        else:
+            params = None
+            sep = '\t'  # default
+        exp_res = '\n'.join(
+            sep.join(t) for t in zip(*[_.splitlines() for _ in self.contents])
+            )
+        outputs, out_hist = self.gi.run_workflow(
+            self.wf, self.inputs, hist, params=params
+            )
         sys.stdout.write(os.linesep)
         self.gi.wait(outputs, out_hist, polling_interval=5)
         self.assertEqual(len(outputs), 1)
         out_ds = outputs[0]
         self.assertTrue(out_ds.id in set(_.id for _ in out_hist.datasets))
+        res = self.gi.get_contents(out_ds, out_hist)
+        self.assertEqual(res.rstrip(), exp_res.rstrip())
         if existing_hist:
             self.assertEqual(out_hist.id, hist.id)
             self.gi.delete_history(hist)
@@ -323,6 +336,9 @@ class TestRunWorkflow(TestGalaxyInstance):
 
     def test_new_history(self):
         self.__test(existing_hist=False)
+
+    def test_params(self):
+        self.__test(params=True)
 
 
 def suite():
@@ -370,6 +386,7 @@ def suite():
     for t in (
         'test_existing_history',
         'test_new_history',
+        'test_params',
         ):
         s.addTest(TestRunWorkflow(t))
     return s

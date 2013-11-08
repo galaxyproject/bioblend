@@ -201,7 +201,8 @@ class GalaxyInstance(object):
         wf_infos = self.gi.workflows.get_workflows()
         return [self.get_workflow(wi['id']) for wi in wf_infos]
 
-    def run_workflow(self, workflow, inputs, history, import_inputs=False):
+    def run_workflow(self, workflow, inputs, history, params=None,
+                     import_inputs=False):
         """
         Run ``workflow`` with input datasets from the ``input`` sequence.
 
@@ -210,14 +211,20 @@ class GalaxyInstance(object):
         ignored.  The ``history`` param can be either a valid history
         object (results will be stored there) or a string (a new
         history will be created with the given name).
+
+        If present, ``params`` must be a sequence of dictionaries that
+        will be matched with workflow tools in the order they appear;
+        each dict must contain a single name-to-value mapping for one
+        of the tool's params (setting multiple params is currently not
+        allowed by the Galaxy API).
         """
         if workflow.id is None or not workflow.links:
             self.__error('workflow is not runnable (no id and/or links)')
         if len(inputs) < len(workflow.links):
             self.__error('not enough inputs', err_type=ValueError)
         ds_map = workflow.map_links(inputs)
-        # FIXME: deal with the 'params' param
-        kwargs = {'import_inputs_to_history': import_inputs}
+        params = self.__build_params_payload(params, workflow)
+        kwargs = {'import_inputs_to_history': import_inputs, 'params': params}
         if isinstance(history, wrappers.History):
             try:
                 kwargs['history_id'] = history.id
@@ -236,17 +243,17 @@ class GalaxyInstance(object):
         res['outputs'] = set(res['outputs'])
         return [_ for _ in history.datasets if _.id in res['outputs']], history
 
-    def wait(self, outputs, history, polling_interval=_POLLING_INTERVAL):
+    def wait(self, datasets, history, polling_interval=_POLLING_INTERVAL):
         """
-        Wait until the given outputs are either ready or in error.
+        Wait until the given datasets are either ready or in error.
 
-        The datasets in ``outputs`` should belong to ``history`` (if
-        they don't, the method will exit immediately). Note that this
-        method does not return anything: if needed, updated versions
-        of the output datasets and history must be retrieved explicitly.
+        The datasets should belong to ``history`` (if they don't, the
+        method will exit immediately). Note that this method does not
+        return anything: if needed, updated versions of the datasets
+        and history must be retrieved explicitly.
         """
-        out_ids = set(_.id for _ in outputs)
-        self.log.info('waiting for output datasets')
+        out_ids = set(_.id for _ in datasets)
+        self.log.info('waiting for datasets')
         while True:
             res = self.gi.histories.show_history(history.id)
             hist_dict = self.__get_dict('show_history', res)
@@ -260,12 +267,12 @@ class GalaxyInstance(object):
             if not pending:
                 break
             time.sleep(polling_interval)
+        time.sleep(polling_interval)  # small margin of safety
 
     def get_stream(self, dataset, history, chunk_size=_CHUNK_SIZE):
         if dataset.id not in set(_.id for _ in history.datasets):
             self.__error('dataset does not belong to history')
-        if dataset.state in _PENDING:  # FIXME: add wait option
-            self.__error('dataset is not ready')
+        self.wait([dataset], history)
         base_url = self.gi._make_url(
             self.gi.histories, module_id=history.id, contents=True
             )
@@ -285,6 +292,12 @@ class GalaxyInstance(object):
     def download(self, dataset, history, outf, chunk_size=_CHUNK_SIZE):
         for chunk in self.get_stream(dataset, history, chunk_size=chunk_size):
             outf.write(chunk)
+
+    def get_contents(self, dataset, history, chunk_size=_CHUNK_SIZE):
+        """
+        Return the *full* contents of ``dataset`` as a string.
+        """
+        return ''.join(self.get_stream(dataset, history, chunk_size=chunk_size))
 
     def delete_workflow(self, workflow):
         if workflow.id is None:
@@ -346,3 +359,15 @@ class GalaxyInstance(object):
     def __post_upload(self, library, meth_name, reply):
         ds_info = self.__get_dict(meth_name, reply)
         return self.get_library_dataset(library, ds_info['id'])
+
+    def __build_params_payload(self, params, workflow):
+        if params is None:
+            return None
+        payload = {}
+        tools = [_ for _ in workflow.steps if _.type == 'tool']
+        for t, d in zip(tools, params):
+            if len(d) != 1:
+                self.__error('param dicts must contain exactly one mapping')
+            k, v = d.items()[0]
+            payload[t.tool_id] = {'param': k, 'value': v}
+        return payload
