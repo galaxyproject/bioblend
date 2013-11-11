@@ -2,7 +2,8 @@
 A basic object-oriented interface for Galaxy entities.
 """
 
-import json, hashlib, abc
+import abc, collections, json
+
 
 __all__ = [
     'Wrapper',
@@ -31,18 +32,19 @@ class Wrapper(object):
         object.__setattr__(self, 'core', lambda: None)
         object.__setattr__(self, 'is_modified', False)
         object.__setattr__(self, 'parent', parent)
-        setattr(self.core, 'wrapped', wrapped.copy())
-        self.update_md5()
-
-    def update_md5(self):
-        md5 = hashlib.md5(json.dumps(self.core.wrapped)).hexdigest()
-        object.__setattr__(self, 'md5', md5)
+        # loads(dumps(x)) is a bit faster than deepcopy and allows type checks
+        try:
+            if not isinstance(wrapped, collections.Mapping):
+                raise TypeError
+            dumped = json.dumps(wrapped)
+        except (TypeError, ValueError):
+            raise TypeError('wrapped object must be a JSON serializable dict')
+        setattr(self.core, 'wrapped', json.loads(dumped))
 
     def touch(self):
         object.__setattr__(self, 'is_modified', True)
         if self.parent:
             self.parent.touch()
-        self.update_md5()
 
     def __getattr__(self, name):
         try:
@@ -56,12 +58,6 @@ class Wrapper(object):
         else:
             self.core.wrapped[name] = value
             self.touch()
-
-    def __eq__(self, other):
-        return  self.md5 == other.md5
-
-    def __hash__(self):
-        return self.md5
 
     def to_json(self):
         return json.dumps(self.core.wrapped)

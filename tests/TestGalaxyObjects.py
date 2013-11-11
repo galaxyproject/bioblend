@@ -43,7 +43,7 @@ class MockWrapper(wrappers.Wrapper):
 class TestWrapper(unittest.TestCase):
 
     def setUp(self):
-        self.d = {'a' : 1, 'b' : 2,  'c': 3}
+        self.d = {'a' : 1, 'b' : [2, 3],  'c': {'x': 4}}
         self.assertRaises(TypeError, wrappers.Wrapper, self.d)
         self.w = MockWrapper(self.d)
 
@@ -51,8 +51,11 @@ class TestWrapper(unittest.TestCase):
         for k, v in self.d.iteritems():
             self.assertEqual(getattr(self.w, k), v)
         self.w.a = 222
+        self.w.b[0] = 222
         self.assertEqual(self.w.a, 222)
+        self.assertEqual(self.w.b[0], 222)
         self.assertEqual(self.d['a'], 1)
+        self.assertEqual(self.d['b'][0], 2)
         self.assertRaises(KeyError, getattr, self.w, 'foo')
         self.assertRaises(KeyError, setattr, self.w, 'foo', 0)
 
@@ -62,7 +65,8 @@ class TestWrapper(unittest.TestCase):
         self.assertTrue(self.w.is_modified)
 
     def test_serialize(self):
-        self.assertEqual(MockWrapper.from_json(self.w.to_json()), self.w)
+        w2 = MockWrapper.from_json(self.w.to_json())
+        self.assertEqual(w2.core.wrapped, self.w.core.wrapped)
 
 
 class TestWorkflow(unittest.TestCase):
@@ -303,6 +307,14 @@ class TestRunWorkflow(TestGalaxyInstance):
         self.gi.delete_workflow(self.wf)
         self.gi.delete_library(self.lib)
 
+    def __check_res(self, res, sep):
+        exp_rows = zip(*(_.splitlines() for _ in self.contents))
+        exp_res = "\n".join(sep.join(t) for t in exp_rows)
+        # sometimes inputs are swapped - this is not deterministic
+        alt_exp_res = "\n".join(sep.join(t[::-1]) for t in exp_rows)
+        res = res.strip()
+        self.assertTrue(res == exp_res or res == alt_exp_res)
+
     def __test(self, existing_hist=False, params=False):
         if existing_hist:
             hist = self.gi.create_history(self.hist_name)
@@ -314,9 +326,6 @@ class TestRunWorkflow(TestGalaxyInstance):
         else:
             params = None
             sep = '\t'  # default
-        exp_res = '\n'.join(
-            sep.join(t) for t in zip(*[_.splitlines() for _ in self.contents])
-            )
         outputs, out_hist = self.gi.run_workflow(
             self.wf, self.inputs, hist, params=params
             )
@@ -326,7 +335,7 @@ class TestRunWorkflow(TestGalaxyInstance):
         out_ds = outputs[0]
         self.assertTrue(out_ds.id in set(_.id for _ in out_hist.datasets))
         res = self.gi.get_contents(out_ds, out_hist)
-        self.assertEqual(res.rstrip(), exp_res.rstrip())
+        self.__check_res(res, sep)
         if existing_hist:
             self.assertEqual(out_hist.id, hist.id)
             self.gi.delete_history(hist)
@@ -363,6 +372,7 @@ def suite():
         'test_params',
         ):
         s.addTest(TestTool(t))
+    #--
     for t in (
         'test_library',
         'test_history',
