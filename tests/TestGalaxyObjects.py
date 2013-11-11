@@ -1,6 +1,10 @@
 # pylint: disable=C0103
 
 import sys, os, unittest, json, uuid, tempfile, urllib2, shutil
+try:
+    from collections import OrderedDict  # Python 2.7
+except ImportError:
+    OrderedDict = dict
 
 import bioblend
 bioblend.set_stream_logger('test', level='INFO')
@@ -65,8 +69,14 @@ class TestWrapper(unittest.TestCase):
         self.assertTrue(self.w.is_modified)
 
     def test_serialize(self):
-        w2 = MockWrapper.from_json(self.w.to_json())
-        self.assertEqual(w2.core.wrapped, self.w.core.wrapped)
+        w = MockWrapper.from_json(self.w.to_json())
+        self.assertEqual(w.core.wrapped, self.w.core.wrapped)
+
+    def test_clone(self):
+        w = self.w.clone()
+        self.assertEqual(w.core.wrapped, self.w.core.wrapped)
+        w.c['x'] = 111
+        self.assertEqual(self.w.c['x'], 4)
 
 
 class TestWorkflow(unittest.TestCase):
@@ -106,21 +116,15 @@ class TestWorkflow(unittest.TestCase):
         self.wf.steps[first_tool_idx(WF_DICT)].tool['chromInfo'] = 'foo'
         self.assertTrue(self.wf.is_modified)
 
-    def test_clone(self):
-        wf = self.wf.clone()
-        self.assertTrue(wf.id is None)
-        self.assertNotEqual(wf, self.wf)
-        self.assertEqual(
-            json.loads(wf.to_json()), json.loads(self.wf.to_json())
-            )
-
+    # may pass automatically if OrderedDict is dict
     def test_links(self):
-        links = {
-            '98': {'label': 'foo', 'value': 'bar'},
-            '99': {'label': 'boo', 'value': 'far'},
-            }
+        links = OrderedDict([
+            ('100', {'label': 'foo', 'value': 'bar'}),
+            ('99', {'label': 'boo', 'value': 'far'}),
+            ])
         wf = wrappers.Workflow(WF_DICT, links=links)
         self.assertEqual(len(wf.links), len(links))
+        self.assertEqual([_.id for _ in wf.links], ['99', '100'])
         for input_link in wf.links:
             link_dict = links.get(input_link.id)
             self.assertTrue(link_dict is not None)
@@ -310,10 +314,7 @@ class TestRunWorkflow(TestGalaxyInstance):
     def __check_res(self, res, sep):
         exp_rows = zip(*(_.splitlines() for _ in self.contents))
         exp_res = "\n".join(sep.join(t) for t in exp_rows)
-        # sometimes inputs are swapped - this is not deterministic
-        alt_exp_res = "\n".join(sep.join(t[::-1]) for t in exp_rows)
-        res = res.strip()
-        self.assertTrue(res == exp_res or res == alt_exp_res)
+        self.assertEqual(res.strip(), exp_res)
 
     def __test(self, existing_hist=False, params=False):
         if existing_hist:
@@ -356,6 +357,7 @@ def suite():
         'test_initialize',
         'test_taint',
         'test_serialize',
+        'test_clone',
         ):
         s.addTest(TestWrapper(t))
     for t in (
@@ -363,7 +365,6 @@ def suite():
         'test_steps',
         'test_step_taint',
         'test_tool_taint',
-        'test_clone',
         'test_links',
         ):
         s.addTest(TestWorkflow(t))

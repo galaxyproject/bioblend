@@ -41,6 +41,9 @@ class Wrapper(object):
             raise TypeError('wrapped object must be a JSON serializable dict')
         setattr(self.core, 'wrapped', json.loads(dumped))
 
+    def clone(self):
+        return self.__class__(self.core.wrapped)
+
     def touch(self):
         object.__setattr__(self, 'is_modified', True)
         if self.parent:
@@ -52,6 +55,7 @@ class Wrapper(object):
         except KeyError:
             raise KeyError('no property with name "%s"' % name)
 
+    # FIXME: things like self.x[0] = 'y' do NOT call self.__setattr__
     def __setattr__(self, name, value):
         if name not in self.core.wrapped:
             raise KeyError('no property with name "%s"' % name)
@@ -65,6 +69,9 @@ class Wrapper(object):
     @classmethod
     def from_json(cls, jdef):
         return cls(json.loads(jdef))
+
+    def __repr__(self):
+        return "%s(%r)" % (self.__class__.__name__, self.core.wrapped)
 
 
 class Tool(object):
@@ -124,8 +131,6 @@ class InputLink(Wrapper):
 
 class Workflow(Wrapper):
 
-    KNOWN_FORMAT_VERSIONS = [u'0.1']
-
     def __init__(self, wf_dict, id=None, links=None):
         super(Workflow, self).__init__(wf_dict)
         steps = wf_dict['steps']
@@ -133,9 +138,11 @@ class Workflow(Wrapper):
                 [Step(steps[str(i)], self) for i in xrange(len(steps))])
         if id is None:
             super(Workflow, self).touch()
-        if links is not None:  # outer keys = unencoded ids
-            links = [InputLink(dict(v.items() + [('id', k)]))
-                     for k, v in links.iteritems()]
+        if links is not None:  # outer keys = unencoded ids, e.g., '99', '100'
+            links = [
+                InputLink(dict(v.items() + [('id', k)]))
+                for k, v in sorted(links.items(), key=lambda t: int(t[0]))
+                ]
         setattr(self.core, 'id', id)
         setattr(self.core, 'links', links)
 
@@ -162,9 +169,6 @@ class Workflow(Wrapper):
         # forget all Galaxy connections
         setattr(self.core, 'id', None)
         setattr(self.core, 'links', None)
-
-    def clone(self):
-        return self.__class__(self.core.wrapped.copy())
 
     def __eq__(self, other):
         return self.id == other.id and super(Workflow, self).__eq__(other)
