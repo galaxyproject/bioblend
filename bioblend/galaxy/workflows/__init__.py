@@ -196,3 +196,14 @@ class WorkflowClient(Client):
         if import_inputs_to_history is False:
             payload['no_add_to_history'] = True
         return Client._post(self, payload)
+
+    def delete_workflow(self, workflow_id):
+        """
+        Delete a workflow identified by `workflow_id`.
+
+        .. warning::
+            Deleting a workflow is irreversible - all workflow data
+            will be permanently deleted.
+        """
+        payload = {}
+        return Client._delete(self, payload, id=workflow_id)
