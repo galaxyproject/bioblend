@@ -3,6 +3,7 @@ Contains possible interactions with the Galaxy Histories
 """
 from bioblend.galaxy.client import Client
 
+import re
 import shutil
 import urllib2
 
@@ -61,6 +62,20 @@ class HistoryClient(Client):
         # Append the dataset_id to the base history contents URL
         url = '/'.join([url, dataset_id])
         return Client._get(self, url=url)
+
+    def show_matching_datasets(self, history_id, name_filter=None):
+        """
+        Get dataset details for matching datasets within a history.
+
+        Only datasets whose name matches the ``name_filter`` regular
+        expression will be returned; use plain strings for exact
+        matches and None to match all datasets in the history.
+        """
+        if isinstance(name_filter, basestring):
+            name_filter = re.compile(name_filter + '$')
+        return [self.show_dataset(history_id, h['id'])
+                for h in self.show_history(history_id, contents=True)
+                if name_filter is None or name_filter.match(h['name'])]
 
     def update_history(self, history_id, name=None,annotation=None):
         """
