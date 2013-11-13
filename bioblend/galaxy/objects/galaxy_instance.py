@@ -57,12 +57,12 @@ class GalaxyInstance(object):
         return [self.get_library(li['id']) for li in lib_infos]
 
     def delete_library(self, library):
-        if library.id is None:
-            self.__error('library does not have an id')
+        if not library.is_mapped():
+            self.__error('library is not mapped to a Galaxy object')
         res = self.gi.libraries.delete_library(library.id)
         if not isinstance(res, collections.Mapping):
             self.__error('delete_library: unexpected reply: %r' % (res,))
-        library.touch()
+        library.unmap()
 
     #-- library contents --
 
@@ -117,7 +117,7 @@ class GalaxyInstance(object):
 
     def get_folder(self, library, f_id):
         f_dict = self.gi.libraries.show_folder(library.id, f_id)
-        return wrappers.Folder(f_dict, library)
+        return wrappers.Folder(f_dict, f_id)
 
     #-- history --
 
@@ -142,18 +142,18 @@ class GalaxyInstance(object):
         return self.get_history(history.id)
 
     def delete_history(self, history, purge=False):
-        if history.id is None:
-            self.__error('history does not have an id')
+        if not history.is_mapped():
+            self.__error('history is not mapped to a Galaxy object')
         res = self.gi.histories.delete_history(history.id, purge=purge)
         if not isinstance(res, collections.Mapping):
             self.__error('delete_history: unexpected reply: %r' % (res,))
-        history.touch()
+        history.unmap()
 
     #-- history contents --
 
     def import_dataset_to_history(self, history, lds):
-        if history.id is None:
-            self.__error('history does not have an id')
+        if not history.is_mapped():
+            self.__error('history is not mapped to a Galaxy object')
         if not isinstance(lds, wrappers.LibraryDataset):
             self.__error('lds is not a LibraryDataset', err_type=TypeError)
         # upload_dataset_from_library returns a dict with the unencoded id
@@ -178,8 +178,8 @@ class GalaxyInstance(object):
 
     def import_workflow(self, src):
         if isinstance(src, wrappers.Workflow):
-            if src.id is not None:
-                self.__error('workflow already has an id: %r' % (src.id,))
+            if src.is_mapped():
+                self.__error('workflow already imported')
             wf_dict = src.core.wrapped
         elif isinstance(src, collections.Mapping):
             wf_dict = src
@@ -194,8 +194,8 @@ class GalaxyInstance(object):
     def get_workflow(self, id_):
         wf_dict = self.gi.workflows.export_workflow_json(id_)
         res = self.gi.workflows.show_workflow(id_)
-        links = self.__get_dict('show_workflow', res)['inputs']
-        return wrappers.Workflow(wf_dict, id=id_, links=links)
+        inputs = self.__get_dict('show_workflow', res)['inputs']
+        return wrappers.Workflow(wf_dict, id=id_, inputs=inputs)
 
     def get_workflows(self):
         wf_infos = self.gi.workflows.get_workflows()
@@ -218,11 +218,11 @@ class GalaxyInstance(object):
         of the tool's params (setting multiple params is currently not
         allowed by the Galaxy API).
         """
-        if workflow.id is None or not workflow.links:
-            self.__error('workflow is not runnable (no id and/or links)')
-        if len(inputs) < len(workflow.links):
+        if not workflow.is_mapped():
+            self.__error('workflow is not mapped to a Galaxy object')
+        if len(inputs) < len(workflow.inputs):
             self.__error('not enough inputs', err_type=ValueError)
-        ds_map = workflow.map_links(inputs)
+        ds_map = workflow.get_input_map(inputs)
         params = self.__build_params_payload(params, workflow)
         kwargs = {'import_inputs_to_history': import_inputs, 'params': params}
         if isinstance(history, wrappers.History):
@@ -300,12 +300,12 @@ class GalaxyInstance(object):
         return ''.join(self.get_stream(dataset, history, chunk_size=chunk_size))
 
     def delete_workflow(self, workflow):
-        if workflow.id is None:
-            self.__error('workflow does not have an id')
+        if not workflow.is_mapped():
+            self.__error('workflow is not mapped to a Galaxy object')
         res = self.gi.workflows.delete_workflow(workflow.id)
         if not isinstance(res, basestring):
             self.__error('delete_workflow: unexpected reply: %r' % (res,))
-        workflow.touch()
+        workflow.unmap()
 
     #-- helpers --
 
@@ -335,7 +335,7 @@ class GalaxyInstance(object):
             self.__error('%s: unexpected reply: %r' % (show_fname, ds_infos))
         dss = [self.__get_container_dataset(cdict, di['id'], ctype=ctype)
                for di in ds_infos if di['type'] != 'folder']
-        return ctype(cdict, id=id_, datasets=dss)
+        return ctype(cdict, id_, datasets=dss)
 
     def __get_container_dataset(self, src, ds_id, ctype=None):
         if isinstance(src, wrappers.DatasetContainer):
@@ -349,11 +349,11 @@ class GalaxyInstance(object):
                 container_id = src
         gi_client = getattr(self.gi, ctype.API_MODULE)
         ds_dict = gi_client.show_dataset(container_id, ds_id)
-        return ctype.DS_TYPE(ds_dict)
+        return ctype.DS_TYPE(ds_dict, ds_id)
 
     def __pre_upload(self, library, folder):
-        if library.id is None:
-            self.__error('library does not have an id')
+        if not library.is_mapped():
+            self.__error('library is not mapped to a Galaxy object')
         return None if folder is None else folder.id
 
     def __post_upload(self, library, meth_name, reply):

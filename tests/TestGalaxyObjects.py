@@ -5,6 +5,8 @@ try:
     from collections import OrderedDict  # Python 2.7
 except ImportError:
     OrderedDict = dict
+import socket
+socket.setdefaulttimeout(10.0)
 
 import bioblend
 bioblend.set_stream_logger('test', level='INFO')
@@ -40,8 +42,8 @@ def is_reachable(url):
 
 class MockWrapper(wrappers.Wrapper):
 
-    def __init__(self, wrapped, parent=None):
-        super(MockWrapper, self).__init__(wrapped, parent=parent)
+    def __init__(self, *args, **kwargs):
+        super(MockWrapper, self).__init__(*args, **kwargs)
 
 
 class TestWrapper(unittest.TestCase):
@@ -60,8 +62,8 @@ class TestWrapper(unittest.TestCase):
         self.assertEqual(self.w.b[0], 222)
         self.assertEqual(self.d['a'], 1)
         self.assertEqual(self.d['b'][0], 2)
-        self.assertRaises(KeyError, getattr, self.w, 'foo')
-        self.assertRaises(KeyError, setattr, self.w, 'foo', 0)
+        self.assertRaises(AttributeError, getattr, self.w, 'foo')
+        self.assertRaises(AttributeError, setattr, self.w, 'foo', 0)
 
     def test_taint(self):
         self.assertFalse(self.w.is_modified)
@@ -77,6 +79,14 @@ class TestWrapper(unittest.TestCase):
         self.assertEqual(w.core.wrapped, self.w.core.wrapped)
         w.c['x'] = 111
         self.assertEqual(self.w.c['x'], 4)
+
+    def test_kwargs(self):
+        id_, parent = 'ID', 'PARENT'
+        w = MockWrapper(self.d, id=id_, parent=parent)
+        self.assertEqual(w.id, id_)
+        self.assertEqual(w.parent, parent)
+        self.assertRaises(AttributeError, setattr, w, 'parent', 0)
+        self.assertRaises(AttributeError, setattr, w, 'id', 0)
 
 
 class TestWorkflow(unittest.TestCase):
@@ -95,61 +105,35 @@ class TestWorkflow(unittest.TestCase):
         self.assertTrue(self.wf.is_modified)
 
     def test_steps(self):
-        simple_tool_attrs = set(('tool_errors', 'tool_id', 'tool_version'))
-        for s in self.wf.steps:
+        step_dicts = [v for k, v in sorted(
+            WF_DICT['steps'].items(), key=lambda t: int(t[0])
+            )]
+        keys_to_skip = set(['id', 'tool_state'])
+        for i, s in enumerate(self.wf.steps):
+            self.assertTrue(isinstance(s, wrappers.Step))
+            if step_dicts[i]['type'] == 'data_input':
+                self.assertTrue(isinstance(s, wrappers.DataInput))
+            if step_dicts[i]['type'] == 'tool':
+                self.assertTrue(isinstance(s, wrappers.Tool))
             self.assertTrue(s.parent is self.wf)
-            s_desc = WF_DICT['steps'][str(s.id)]
-            for k, v in s_desc.iteritems():
-                if s.type == 'tool' and k in simple_tool_attrs:
-                    self.assertEqual(getattr(s.tool, k.replace('tool_', '')), v)
-                else:
+            for k, v in step_dicts[i].iteritems():
+                if k not in keys_to_skip:
                     self.assertEqual(getattr(s, k), v)
         self.assertFalse(self.wf.is_modified)
 
-    def test_step_taint(self):
+    def test_taint(self):
         self.assertFalse(self.wf.is_modified)
         self.wf.steps[0].annotation = 'foo'
         self.assertTrue(self.wf.is_modified)
 
-    def test_tool_taint(self):
-        self.assertFalse(self.wf.is_modified)
-        self.wf.steps[first_tool_idx(WF_DICT)].tool['chromInfo'] = 'foo'
-        self.assertTrue(self.wf.is_modified)
-
     # may pass automatically if OrderedDict is dict
-    def test_links(self):
-        links = OrderedDict([
+    def test_inputs(self):
+        inputs = OrderedDict([
             ('100', {'label': 'foo', 'value': 'bar'}),
             ('99', {'label': 'boo', 'value': 'far'}),
             ])
-        wf = wrappers.Workflow(WF_DICT, links=links)
-        self.assertEqual(len(wf.links), len(links))
-        self.assertEqual([_.id for _ in wf.links], ['99', '100'])
-        for input_link in wf.links:
-            link_dict = links.get(input_link.id)
-            self.assertTrue(link_dict is not None)
-            for k, v in link_dict.iteritems():
-                a = getattr(input_link, k, None)
-                self.assertEqual(a, v)
-
-
-class TestTool(unittest.TestCase):
-
-    def setUp(self):
-        self.step = wrappers.Workflow(WF_DICT).steps[first_tool_idx(WF_DICT)]
-        self.tool = self.step.tool
-
-    def test_initialize(self):
-        self.assertTrue(self.tool.parent is self.step)
-        self.assertFalse(self.step.is_modified)
-
-    def test_params(self):
-        self.assertNotEqual(self.tool['chromInfo'], 'foo')
-        self.tool['chromInfo'] = 'foo'
-        self.assertEqual(self.tool['chromInfo'], 'foo')
-        self.assertTrue(self.step.is_modified)
-        self.assertRaises(KeyError, self.tool.__getitem__, 'foo')
-        self.assertRaises(KeyError, self.tool.__setitem__, 'foo', 0)
+        wf = wrappers.Workflow(WF_DICT, inputs=inputs)
+        self.assertEqual(wf.inputs, ['99', '100'])
 
 
 class TestGalaxyInstance(unittest.TestCase):
@@ -194,17 +178,14 @@ class TestGalaxyInstance(unittest.TestCase):
             wf.core.wrapped, imported.core.wrapped, set(['name', 'steps'])
             )
         self.assertEqual(len(imported.steps), len(wf.steps))
-        keys_to_skip = set(['tool_state', 'tool_version'])
+        keys_to_skip = set(['tool_version'])
         for step, istep in zip(wf.steps, imported.steps):
             self.assertWrappedEqual(
                 step.core.wrapped, istep.core.wrapped, keys_to_skip
                 )
-            if step.type == 'tool':
-                self.assertWrappedEqual(step.tool.state, istep.tool.state)
         self.assertTrue(imported.id in [_.id for _ in self.gi.get_workflows()])
         self.gi.delete_workflow(imported)
-        for attr in imported.id, imported.links:
-            self.assertTrue(attr is None)
+        self.assertTrue(imported.id is None)
 
     def test_workflow_from_dict(self):
         imported = self.gi.import_workflow(WF_DICT)
@@ -234,7 +215,6 @@ class TestLibContents(TestGalaxyInstance):
         folder = self.gi.create_folder(self.lib, name, description=desc)
         self.assertEqual(folder.name, name)
         self.assertEqual(folder.description, desc)
-        self.assertTrue(folder.library is self.lib)
 
     def test_dataset(self):
         folder = self.gi.create_folder(self.lib, 'test_%s' % uuid.uuid4().hex)
@@ -358,21 +338,16 @@ def suite():
         'test_taint',
         'test_serialize',
         'test_clone',
+        'test_kwargs',
         ):
         s.addTest(TestWrapper(t))
     for t in (
         'test_initialize',
         'test_steps',
-        'test_step_taint',
-        'test_tool_taint',
-        'test_links',
+        'test_taint',
+        'test_inputs',
         ):
         s.addTest(TestWorkflow(t))
-    for t in (
-        'test_initialize',
-        'test_params',
-        ):
-        s.addTest(TestTool(t))
     #--
     for t in (
         'test_library',
