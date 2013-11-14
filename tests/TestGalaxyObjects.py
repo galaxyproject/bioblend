@@ -169,7 +169,7 @@ class TestGalaxyInstance(unittest.TestCase):
         hist = self.gi.create_history(name)
         self.assertEqual(hist.name, name)
         self.assertTrue(hist.id in [_.id for _ in self.gi.get_histories()])
-        self.gi.delete_history(hist)
+        self.gi.delete_history(hist, purge=True)
         self.assertTrue(hist.id is None)
 
     def test_workflow(self):
@@ -224,8 +224,8 @@ class TestLibContents(TestGalaxyInstance):
         ds = self.gi.upload_data(self.lib, data, folder=folder)
         self.assertEqual(ds.folder_id, folder.id)
         lib = self.gi.get_library(self.lib.id)
-        self.assertEqual(len(lib.datasets), 1)
-        self.assertEqual(lib.datasets[0].id, ds.id)
+        self.assertEqual(len(lib.dataset_ids), 1)
+        self.assertEqual(lib.dataset_ids[0], ds.id)
 
     def test_dataset_from_url(self):
         if is_reachable(self.URL):
@@ -267,7 +267,7 @@ class TestHistContents(TestGalaxyInstance):
         self.hist = self.gi.create_history('test_%s' % uuid.uuid4().hex)
 
     def tearDown(self):
-        self.gi.delete_history(self.hist)
+        self.gi.delete_history(self.hist, purge=True)
 
     def test_dataset(self):
         lib = self.gi.create_library('test_%s' % uuid.uuid4().hex)
@@ -275,7 +275,7 @@ class TestHistContents(TestGalaxyInstance):
         hda = self.gi.import_dataset_to_history(self.hist, lds)
         self.assertTrue(isinstance(hda, wrappers.HistoryDatasetAssociation))
         updated_hist = self.gi.get_history(self.hist.id)
-        self.assertTrue(hda.id in set(_.id for _ in updated_hist.datasets))
+        self.assertTrue(hda.id in updated_hist.dataset_ids)
         self.gi.delete_library(lib)
 
 
@@ -309,19 +309,20 @@ class TestRunWorkflow(TestGalaxyInstance):
         else:
             params = None
             sep = '\t'  # default
-        outputs, out_hist = self.gi.run_workflow(
+        output_ids, out_hist = self.gi.run_workflow(
             self.wf, self.inputs, hist, params=params
             )
         sys.stdout.write(os.linesep)
-        self.gi.wait(outputs, out_hist, polling_interval=5)
-        self.assertEqual(len(outputs), 1)
-        out_ds = outputs[0]
-        self.assertTrue(out_ds.id in set(_.id for _ in out_hist.datasets))
+        self.gi.wait(output_ids, out_hist, polling_interval=5)
+        self.assertEqual(len(output_ids), 1)
+        out_ds_id = output_ids[0]
+        self.assertTrue(out_ds_id in out_hist.dataset_ids)
+        out_ds = self.gi.get_history_dataset(out_hist, out_ds_id)
         res = self.gi.get_contents(out_ds, out_hist)
         self.__check_res(res, sep)
         if existing_hist:
             self.assertEqual(out_hist.id, hist.id)
-            self.gi.delete_history(hist)
+            self.gi.delete_history(hist, purge=True)
 
     def test_existing_history(self):
         self.__test(existing_hist=True)

@@ -158,15 +158,14 @@ class GalaxyInstance(object):
             self.__error('lds is not a LibraryDataset', err_type=TypeError)
         # upload_dataset_from_library returns a dict with the unencoded id
         # to get the encoded id, we have to detect the new entry by diff
-        dataset_ids = lambda h: set(_.id for _ in h.datasets)
-        old_ids = dataset_ids(history)
+        old_ids = set(history.dataset_ids)
         res = self.gi.histories.upload_dataset_from_library(history.id, lds.id)
         if not isinstance(res, collections.Mapping):
             self.__error(
                 'upload_dataset_from_library: unexpected reply: %r' % (res,)
                 )
         history = self.get_history(history.id)  # refresh
-        diff = dataset_ids(history) - old_ids
+        diff = set(history.dataset_ids) - old_ids
         if len(diff) != 1:
             self.__error('cannot retrieve hda id')
         return self.get_history_dataset(history, diff.pop())
@@ -204,7 +203,7 @@ class GalaxyInstance(object):
     def run_workflow(self, workflow, inputs, history, params=None,
                      import_inputs=False):
         """
-        Run ``workflow`` with input datasets from the ``input`` sequence.
+        Run ``workflow`` with input datasets from the ``inputs`` sequence.
 
         Input datasets are assigned to the workflow's input slots in
         the order they appear in ``inputs``; any extra items are
@@ -240,29 +239,28 @@ class GalaxyInstance(object):
             kwargs['history_name'] = history
         res = self.gi.workflows.run_workflow(workflow.id, ds_map, **kwargs)
         res = self.__get_dict('run_workflow', res)
-        history = self.get_history(res['history'])
-        res['outputs'] = set(res['outputs'])
-        return [_ for _ in history.datasets if _.id in res['outputs']], history
+        # res structure: {'history': HIST_ID, 'outputs': [DS_ID, DS_ID, ...]}
+        return res['outputs'], self.get_history(res['history'])
 
-    def wait(self, datasets, history, polling_interval=_POLLING_INTERVAL):
+    def wait(self, ds_ids, history, polling_interval=_POLLING_INTERVAL):
         """
-        Wait until the given datasets are either ready or in error.
+        Wait until one or more datasets are either ready or in error.
 
-        The datasets should belong to ``history`` (if they don't, the
-        method will exit immediately). Note that this method does not
-        return anything: if needed, updated versions of the datasets
-        and history must be retrieved explicitly.
+        ``ds_ids`` must be a sequence of dataset ids, which should
+        belong to ``history`` (if they don't, the method will exit
+        immediately).  Note that this method does not return anything:
+        if needed, the datasets and updated history must be retrieved
+        explicitly.
         """
-        out_ids = set(_.id for _ in datasets)
         self.log.info('waiting for datasets')
         while True:
             res = self.gi.histories.show_history(history.id)
             hist_dict = self.__get_dict('show_history', res)
             ds_states = _get_ds_states(hist_dict)
             pending = 0
-            for ds_id in out_ids:
-                state = ds_states.get(ds_id)
-                self.log.info('%s: %s' % (ds_id, state))
+            for id_ in ds_ids:
+                state = ds_states.get(id_)
+                self.log.info('%s: %s' % (id_, state))
                 if state in _PENDING:
                     pending += 1
             if not pending:
@@ -271,9 +269,9 @@ class GalaxyInstance(object):
         time.sleep(polling_interval)  # small margin of safety
 
     def get_stream(self, dataset, history, chunk_size=_CHUNK_SIZE):
-        if dataset.id not in set(_.id for _ in history.datasets):
+        if dataset.id not in history.dataset_ids:
             self.__error('dataset does not belong to history')
-        self.wait([dataset], history)
+        self.wait([dataset.id], history)
         base_url = self.gi._make_url(
             self.gi.histories, module_id=history.id, contents=True
             )
@@ -334,9 +332,16 @@ class GalaxyInstance(object):
         ds_infos = show_f(id_, contents=True)
         if not isinstance(ds_infos, collections.Sequence):
             self.__error('%s: unexpected reply: %r' % (show_fname, ds_infos))
-        dss = [self.__get_container_dataset(cdict, di['id'], ctype=ctype)
-               for di in ds_infos if di['type'] != 'folder']
-        return ctype(cdict, id_, datasets=dss)
+        f_ids, ds_ids = [], []
+        for di in ds_infos:
+            if di['type'] == 'folder':
+                f_ids.append(di['id'])
+            else:
+                ds_ids.append(di['id'])
+        kwargs = {'dataset_ids': ds_ids}
+        if issubclass(ctype, wrappers.Library):
+            kwargs['folder_ids'] = f_ids
+        return ctype(cdict, id_, **kwargs)
 
     def __get_container_dataset(self, src, ds_id, ctype=None):
         if isinstance(src, wrappers.DatasetContainer):

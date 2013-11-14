@@ -201,11 +201,11 @@ class DatasetContainer(Wrapper):
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
-    def __init__(self, c_dict, id, datasets=None):
+    def __init__(self, c_dict, id, dataset_ids=None):
         super(DatasetContainer, self).__init__(c_dict, id=id)
-        if datasets is None:
-            datasets = []
-        object.__setattr__(self, 'datasets', datasets)
+        if dataset_ids is None:
+            dataset_ids = []
+        object.__setattr__(self, 'dataset_ids', dataset_ids)
 
 
 class History(DatasetContainer):
@@ -213,8 +213,8 @@ class History(DatasetContainer):
     DS_TYPE = HistoryDatasetAssociation
     API_MODULE = 'histories'
 
-    def __init__(self, hist_dict, id, datasets=None):
-        super(History, self).__init__(hist_dict, id, datasets=datasets)
+    def __init__(self, hist_dict, id, dataset_ids=None):
+        super(History, self).__init__(hist_dict, id, dataset_ids=dataset_ids)
 
 
 class Library(DatasetContainer):
@@ -222,8 +222,11 @@ class Library(DatasetContainer):
     DS_TYPE = LibraryDataset
     API_MODULE = 'libraries'
 
-    def __init__(self, lib_dict, id, datasets=None):
-        super(Library, self).__init__(lib_dict, id, datasets=datasets)
+    def __init__(self, lib_dict, id, dataset_ids=None, folder_ids=None):
+        super(Library, self).__init__(lib_dict, id, dataset_ids=dataset_ids)
+        if folder_ids is None:
+            folder_ids = []
+        object.__setattr__(self, 'folder_ids', folder_ids)
 
 
 class Folder(Wrapper):
