@@ -244,7 +244,7 @@ class GalaxyInstance(object):
 
     def wait(self, ds_ids, history, polling_interval=_POLLING_INTERVAL):
         """
-        Wait until one or more datasets are either ready or in error.
+        Wait until all datasets are ready or one of them is in error.
 
         ``ds_ids`` must be a sequence of dataset ids, which should
         belong to ``history`` (if they don't, the method will exit
@@ -261,6 +261,8 @@ class GalaxyInstance(object):
             for id_ in ds_ids:
                 state = ds_states.get(id_)
                 self.log.info('%s: %s' % (id_, state))
+                if state == 'error':
+                    self.__error(self.__get_error_info(id_, history))
                 if state in _PENDING:
                     pending += 1
             if not pending:
@@ -376,3 +378,13 @@ class GalaxyInstance(object):
             k, v = d.items()[0]
             payload[t.tool_id] = {'param': k, 'value': v}
         return payload
+
+    def __get_error_info(self, ds_id, history):
+        msg = ds_id
+        try:
+            ds = self.get_history_dataset(history, ds_id)
+            msg += ' (%s): ' % ds.name
+            msg += ds.misc_info
+        except StandardError:  # avoid 'error while generating an error report'
+            msg += ': error'
+        return msg
