@@ -145,11 +145,22 @@ class Workflow(Wrapper):
         super(Workflow, self).unmap()
         object.__setattr__(self, 'inputs', None)
 
+    def data_inputs(self):
+        return self.__itersteps(DataInput)
+
+    def tools(self):
+        return self.__itersteps(Tool)
+
     def get_input_map(self, datasets):
         m = {}
         for i, ds in zip(self.inputs, datasets):
             m[i] = {'id': ds.id, 'src': ds.SRC}
         return m
+
+    def __itersteps(self, step_type):
+        for s in self.steps:
+            if isinstance(s, step_type):
+                yield s
 
 
 class Dataset(Wrapper):

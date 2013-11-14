@@ -120,6 +120,8 @@ class TestWorkflow(unittest.TestCase):
                 if k not in keys_to_skip:
                     self.assertEqual(getattr(s, k), v)
         self.assertFalse(self.wf.is_modified)
+        self.assertEqual(sum(1 for _ in self.wf.data_inputs()), 2)
+        self.assertEqual(sum(1 for _ in self.wf.tools()), 1)
 
     def test_taint(self):
         self.assertFalse(self.wf.is_modified)

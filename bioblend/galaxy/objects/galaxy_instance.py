@@ -216,7 +216,8 @@ class GalaxyInstance(object):
         will be matched with workflow tools in the order they appear;
         each dict must contain a single name-to-value mapping for one
         of the tool's params (setting multiple params is currently not
-        allowed by the Galaxy API).
+        allowed by the Galaxy API).  For instance, ``params=[{'a': 0},
+        {'b': 1}]`` sets 'a' for the first tool and 'b' for the second.
         """
         if not workflow.is_mapped():
             self.__error('workflow is not mapped to a Galaxy object')
@@ -364,8 +365,7 @@ class GalaxyInstance(object):
         if params is None:
             return None
         payload = {}
-        tools = [_ for _ in workflow.steps if _.type == 'tool']
-        for t, d in zip(tools, params):
+        for t, d in zip(workflow.tools(), params):
             if len(d) != 1:
                 self.__error('param dicts must contain exactly one mapping')
             k, v = d.items()[0]
