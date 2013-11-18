@@ -24,6 +24,21 @@ __all__ = [
     ]
 
 
+# sometimes the Galaxy API returns JSONs that contain other JSONs
+def _recursive_loads(jdef):
+    try:
+        r = json.loads(jdef)
+    except (TypeError, ValueError):
+        r = jdef
+    if isinstance(r, collections.Sequence) and not isinstance(r, basestring):
+        for i, v in enumerate(r):
+            r[i] = _recursive_loads(v)
+    elif isinstance(r, collections.Mapping):
+        for k, v in r.iteritems():
+            r[k] = _recursive_loads(v)
+    return r
+
+
 class Wrapper(object):
 
     __metaclass__ = abc.ABCMeta
@@ -93,7 +108,9 @@ class Step(Wrapper):
     def __init__(self, step_dict, parent):
         super(Step, self).__init__(step_dict, parent=parent)
         if not isinstance(self.tool_state, collections.Mapping):
-            object.__setattr__(self, 'tool_state', json.loads(self.tool_state))
+            object.__setattr__(
+                self, 'tool_state', _recursive_loads(self.tool_state)
+                )
 
 
 class DataInput(Step):
