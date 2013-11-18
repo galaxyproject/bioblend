@@ -304,7 +304,7 @@ class TestRunWorkflow(TestGalaxyInstance):
         else:
             hist = self.hist_name
         if params:
-            params = [{'delimiter': 'U'}]
+            params = {0: {'delimiter': 'U'}}
             sep = '_'  # 'U' maps to '_' in the paste tool
         else:
             params = None

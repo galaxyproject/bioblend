@@ -36,6 +36,17 @@ def _get_ds_states(hist_dict):
         )
 
 
+def _build_params_payload(params, workflow):
+    if params is None:
+        return None
+    payload = {}
+    tools = workflow.tools()
+    for i, pdict in params.iteritems():
+        k, v = pdict.items()[0]
+        payload[tools[i].tool_id] = {'param': k, 'value': v}
+    return payload
+
+
 class GalaxyInstance(object):
 
     def __init__(self, url, api_key):
@@ -211,19 +222,20 @@ class GalaxyInstance(object):
         object (results will be stored there) or a string (a new
         history will be created with the given name).
 
-        If present, ``params`` must be a sequence of dictionaries that
-        will be matched with workflow tools in the order they appear;
-        each dict must contain a single name-to-value mapping for one
-        of the tool's params (setting multiple params is currently not
-        allowed by the Galaxy API).  For instance, ``params=[{'a': 0},
-        {'b': 1}]`` sets 'a' for the first tool and 'b' for the second.
+        If present, ``params`` must be a mapping type that maps
+        workflow tool indices to param dicts, such as::
+
+          {1: {'a': 0}, 3: {'b': 1}}
+
+        that sets ``a`` to 0 for ``workflows.tools[1]`` and ``b`` to 1
+        for ``workflows.tools[3]``.
         """
         if not workflow.is_mapped():
             self.__error('workflow is not mapped to a Galaxy object')
         if len(inputs) < len(workflow.inputs):
             self.__error('not enough inputs', err_type=ValueError)
         ds_map = workflow.get_input_map(inputs)
-        params = self.__build_params_payload(params, workflow)
+        params = _build_params_payload(params, workflow)
         kwargs = {'import_inputs_to_history': import_inputs, 'params': params}
         if isinstance(history, wrappers.History):
             try:
@@ -367,17 +379,6 @@ class GalaxyInstance(object):
     def __post_upload(self, library, meth_name, reply):
         ds_info = self.__get_dict(meth_name, reply)
         return self.get_library_dataset(library, ds_info['id'])
-
-    def __build_params_payload(self, params, workflow):
-        if params is None:
-            return None
-        payload = {}
-        for t, d in zip(workflow.tools(), params):
-            if len(d) != 1:
-                self.__error('param dicts must contain exactly one mapping')
-            k, v = d.items()[0]
-            payload[t.tool_id] = {'param': k, 'value': v}
-        return payload
 
     def __get_error_info(self, ds_id, history):
         msg = ds_id
