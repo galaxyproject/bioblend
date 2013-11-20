@@ -265,18 +265,18 @@ class TestHistContents(TestGalaxyInstance):
     def setUp(self):
         super(TestHistContents, self).setUp()
         self.hist = self.gi.create_history('test_%s' % uuid.uuid4().hex)
+        self.lib = self.gi.create_library('test_%s' % uuid.uuid4().hex)
 
     def tearDown(self):
         self.gi.delete_history(self.hist, purge=True)
+        self.gi.delete_library(self.lib)
 
     def test_dataset(self):
-        lib = self.gi.create_library('test_%s' % uuid.uuid4().hex)
-        lds = self.gi.upload_data(lib, 'foo\nbar\n')
+        lds = self.gi.upload_data(self.lib, 'foo\nbar\n')
         hda = self.gi.import_dataset_to_history(self.hist, lds)
         self.assertTrue(isinstance(hda, wrappers.HistoryDatasetAssociation))
         updated_hist = self.gi.get_history(self.hist.id)
         self.assertTrue(hda.id in updated_hist.dataset_ids)
-        self.gi.delete_library(lib)
 
 
 class TestRunWorkflow(TestGalaxyInstance):
@@ -322,7 +322,7 @@ class TestRunWorkflow(TestGalaxyInstance):
         self.__check_res(res, sep)
         if existing_hist:
             self.assertEqual(out_hist.id, hist.id)
-            self.gi.delete_history(hist, purge=True)
+        self.gi.delete_history(out_hist, purge=True)
 
     def test_existing_history(self):
         self.__test(existing_hist=True)
