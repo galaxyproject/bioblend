@@ -135,7 +135,11 @@ class HistoryClient(Client):
         library dataset ID, which can be obtained from the library
         contents.
         """
-        payload = {'from_ld_id': lib_dataset_id}
+        payload = {
+            'content': lib_dataset_id,
+            'source': 'library',
+            'from_ld_id': lib_dataset_id,  # compatibility with old API
+            }
         return Client._post(self, payload, id=history_id, contents=True)
 
     def download_dataset(self, history_id, dataset_id, file_path=None, use_default_filename=True, to_ext=None):
