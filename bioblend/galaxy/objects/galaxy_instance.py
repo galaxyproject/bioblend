@@ -184,6 +184,14 @@ class GalaxyInstance(object):
     def get_history_dataset(self, src, ds_id):
         return self.__get_container_dataset(src, ds_id, wrappers.History)
 
+    #-- datasets --
+
+    def get_datasets(self, src):
+        if not isinstance(src, wrappers.DatasetContainer):
+            self.__error('not a history or library object', err_type=TypeError)
+        return [self.__get_container_dataset(src, _, ctype=type(src))
+                for _ in src.dataset_ids]
+
     #-- workflow --
 
     def import_workflow(self, src):
