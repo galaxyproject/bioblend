@@ -80,3 +80,10 @@ Workflows
 .. automodule:: bioblend.galaxy.workflows
 
 -----
+
+Objects
+-------
+
+.. automodule:: bioblend.galaxy.objects.wrappers
+
+-----

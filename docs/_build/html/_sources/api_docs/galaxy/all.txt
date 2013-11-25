@@ -13,12 +13,17 @@ GalaxyInstance
 
 .. _libraries-api:
 
-Libraries
----------
+Datasets
+--------
 
-.. automodule:: bioblend.galaxy.libraries
+.. automodule:: bioblend.galaxy.datasets
 
 -----
+
+Genomes
+-------
+
+.. automodule:: bioblend.galaxy.genomes
 
 Histories
 ---------
@@ -27,19 +32,31 @@ Histories
 
 -----
 
-.. _workflows-api:
-
-Workflows
+Libraries
 ---------
 
-.. automodule:: bioblend.galaxy.workflows
+.. automodule:: bioblend.galaxy.libraries
 
 -----
 
-Datasets
+Quotas
 --------
 
-.. automodule:: bioblend.galaxy.datasets
+.. automodule:: bioblend.galaxy.quotas
+
+-----
+
+Tools
+-----
+
+.. automodule:: bioblend.galaxy.tools
+
+-----
+
+ToolShed
+--------
+
+.. automodule:: bioblend.galaxy.toolshed
 
 -----
 
@@ -48,3 +65,25 @@ Users
 
 .. automodule:: bioblend.galaxy.users
 
+-----
+
+Visual
+--------
+
+.. automodule:: bioblend.galaxy.visual
+
+-----
+
+Workflows
+---------
+
+.. automodule:: bioblend.galaxy.workflows
+
+-----
+
+Objects
+-------
+
+.. automodule:: bioblend.galaxy.objects.wrappers
+
+-----

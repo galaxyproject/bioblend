@@ -40,11 +40,29 @@ def _recursive_loads(jdef):
 
 
 class Wrapper(object):
+    """
+    Abstract base class for Galaxy entity wrappers.
+
+    Wrapper instances wrap deserialized JSON dictionaries such as the
+    ones obtained by the Galaxy web API, converting key-based access to
+    attribute-based access (e.g., ``library['name'] -> library.name``).
+    """
 
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
     def __init__(self, wrapped, parent=None, id=None):
+        """
+        :type wrapped: dict
+        :param wrapped: JSON serializable dictionary
+
+        :type parent: :class:`Wrapper`
+        :param parent: the parent of this wrapper
+
+        :type id: str
+        :param id: the id with which this wrapper is registered into
+          Galaxy, or None if it's not mapped to a Galaxy entity.
+        """
         # http://stackoverflow.com/questions/2827623
         object.__setattr__(self, 'core', lambda: None)
         object.__setattr__(self, 'is_modified', False)
@@ -60,18 +78,46 @@ class Wrapper(object):
         setattr(self.core, 'wrapped', json.loads(dumped))
 
     def is_mapped(self):
+        """
+        Check whether this wrapper is mapped to an actual Galaxy entity.
+
+        :rtype: bool
+        :return: :obj:`True` if this wrapper is mapped
+        """
         return self.id is not None
 
     def unmap(self):
+        """
+        Disconnect this wrapper from Galaxy.
+        """
         object.__setattr__(self, 'id', None)
 
     def clone(self):
+        """
+        Return an independent copy of this wrapper.
+        """
         return self.__class__(self.core.wrapped)
 
     def touch(self):
+        """
+        Mark this wrapper as having been modified since its creation.
+        """
         object.__setattr__(self, 'is_modified', True)
         if self.parent:
             self.parent.touch()
+
+    def to_json(self):
+        """
+        Return a JSON dump of this wrapper.
+        """
+        return json.dumps(self.core.wrapped)
+
+    @classmethod
+    def from_json(cls, jdef):
+        """
+        Build a new wrapper from a JSON dump.
+        """
+        return cls(json.loads(jdef))
 
     def __getattr__(self, name):
         try:
@@ -89,18 +135,21 @@ class Wrapper(object):
             self.core.wrapped[name] = value
             self.touch()
 
-    def to_json(self):
-        return json.dumps(self.core.wrapped)
-
-    @classmethod
-    def from_json(cls, jdef):
-        return cls(json.loads(jdef))
-
     def __repr__(self):
         return "%s(%r)" % (self.__class__.__name__, self.core.wrapped)
 
 
 class Step(Wrapper):
+    """
+    Abstract base class for workflow steps.
+
+    Steps are the main building blocks of a Galaxy workflow.  A step
+    can refer to either an input dataset (:class:`DataInput`) or a
+    computational tool (:class:`Tool`).
+
+    Step dicts should be taken from the JSON dump of a workflow, and
+    their parent should be the workflow itself.
+    """
 
     __metaclass__ = abc.ABCMeta
 
@@ -114,6 +163,9 @@ class Step(Wrapper):
 
 
 class DataInput(Step):
+    """
+    DataInputs model input datasets for Galaxy tools.
+    """
 
     def __init__(self, step_dict, parent):
         if step_dict['type'] != 'data_input':
@@ -122,6 +174,9 @@ class DataInput(Step):
 
 
 class Tool(Step):
+    """
+    Tools model Galaxy tools.
+    """
 
     def __init__(self, step_dict, parent):
         if step_dict['type'] != 'tool':
@@ -143,8 +198,31 @@ def _build_step(step_dict, parent):
 
 
 class Workflow(Wrapper):
+    """
+    Workflows represent ordered sequences of computations on Galaxy.
+
+    A workflow defines a sequence of steps that produce one or more
+    results from an input dataset.
+    """
 
     def __init__(self, wf_dict, id=None, inputs=None):
+        """
+        :type wf_dict: dict
+        :param wf_dict: a JSON-deserialized dictionary such as the one
+          produced by the download/export Galaxy feature.
+
+        :type id: str
+        :param id: the id with which this workflow is registered into
+          Galaxy, or None if it's not mapped to an actual Galaxy workflow.
+
+        :type inputs: dict
+        :param inputs: the 'inputs' field of the dictionary returned
+          by the Galaxy web API for this workflow, or None if it's not
+          mapped to an actual Galaxy workflow.  The 'inputs' field is
+          in turn a dictionary with the following structure: ``{ID:
+          {'label': LABEL, 'value': VALUE}, ...}``.  Currently, only
+          the IDs are used.
+        """
         super(Workflow, self).__init__(wf_dict, id=id)
         # outer keys = unencoded ids, e.g., '99', '100'
         steps = [_build_step(v, self) for _, v in sorted(
@@ -163,12 +241,28 @@ class Workflow(Wrapper):
         object.__setattr__(self, 'inputs', None)
 
     def data_inputs(self):
+        """
+        Return the list of :class:`DataInput` steps for this workflow.
+        """
         return [_ for _ in self.steps if isinstance(_, DataInput)]
 
     def tools(self):
+        """
+        Return the list of :class:`Tool` steps for this workflow.
+        """
         return [_ for _ in self.steps if isinstance(_, Tool)]
 
     def get_input_map(self, datasets):
+        """
+        Map ``datasets`` to input slots in this workflow.
+
+        :type datasets: :class:`~collections.Iterable` of :class:`Dataset`
+        :param datasets: datasets to map to workflow inputs.
+
+        :rtype: dict
+        :return: a mapping from input slot ids to datasets in the
+          format required by the Galaxy web API.
+        """
         m = {}
         for i, ds in zip(self.inputs, datasets):
             m[i] = {'id': ds.id, 'src': ds.SRC}
@@ -176,6 +270,9 @@ class Workflow(Wrapper):
 
 
 class Dataset(Wrapper):
+    """
+    Abstract base class for Galaxy datasets.
+    """
 
     __metaclass__ = abc.ABCMeta
 
@@ -185,6 +282,9 @@ class Dataset(Wrapper):
 
 
 class HistoryDatasetAssociation(Dataset):
+    """
+    Maps to a Galaxy ``HistoryDatasetAssociation``.
+    """
 
     SRC = 'hda'
 
@@ -193,6 +293,9 @@ class HistoryDatasetAssociation(Dataset):
 
 
 class LibraryDatasetDatasetAssociation(Dataset):
+    """
+    Maps to a Galaxy ``LibraryDatasetDatasetAssociation``.
+    """
 
     SRC = 'ldda'
 
@@ -201,6 +304,9 @@ class LibraryDatasetDatasetAssociation(Dataset):
 
 
 class LibraryDataset(Dataset):
+    """
+    Maps to a Galaxy ``LibraryDataset``.
+    """
 
     SRC = 'ld'
 
@@ -209,11 +315,18 @@ class LibraryDataset(Dataset):
 
 
 class DatasetContainer(Wrapper):
+    """
+    Abstract base class for dataset containers (histories and libraries).
+    """
 
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
     def __init__(self, c_dict, id, dataset_ids=None):
+        """
+        :type dataset_ids: list of str
+        :param dataset_ids: ids of datasets associated with this container
+        """
         super(DatasetContainer, self).__init__(c_dict, id=id)
         if dataset_ids is None:
             dataset_ids = []
@@ -221,6 +334,9 @@ class DatasetContainer(Wrapper):
 
 
 class History(DatasetContainer):
+    """
+    Maps to a Galaxy history.
+    """
 
     DS_TYPE = HistoryDatasetAssociation
     API_MODULE = 'histories'
@@ -230,6 +346,9 @@ class History(DatasetContainer):
 
 
 class Library(DatasetContainer):
+    """
+    Maps to a Galaxy library.
+    """
 
     DS_TYPE = LibraryDataset
     API_MODULE = 'libraries'
@@ -242,6 +361,9 @@ class Library(DatasetContainer):
 
 
 class Folder(Wrapper):
+    """
+    Maps to a folder in a Galaxy library.
+    """
 
     def __init__(self, f_dict, id):
         if id.startswith('F'):  # folder id from library contents
