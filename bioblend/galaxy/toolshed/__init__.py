@@ -55,3 +55,79 @@ class ToolShedClient(Client):
             better align with the Tool Shed concepts
         """
         return Client._get(self, id=toolShed_id)
+
+    def install_repository_revision(self, tool_shed_url, name, owner, changeset_revision,
+          install_tool_dependencies=False, install_repository_dependencies=False,
+          tool_panel_section_id=None, new_tool_panel_section_label=None):
+        """
+        Install a specified repository revision from a specified Tool Shed into
+        this Galaxy instance. This example demonstrates installation of a repository
+        that contains valid tools, loading them into a section of the Galaxy tool
+        panel or creating a new tool panel section.
+        You can choose if tool dependencies or repository dependencies should be
+        installed, use ``install_tool_dependencies`` or ``install_repository_dependencies``.
+
+        Installing the repository into an existing tool panel section requires
+        the tool panel config file (e.g., tool_conf.xml, shed_tool_conf.xml, etc)
+        to contain the given tool panel section:
+
+            <section id="from_test_tool_shed" name="From Test Tool Shed" version="">
+            </section>
+
+        :type tool_shed_url: string
+        :param tool_shed_url: URL of the Tool Shed from which the repository should
+                              be installed from (e.g., ``http://testtoolshed.g2.bx.psu.edu``)
+
+        :type name: string
+        :param name: The name of the repository that should be installed
+
+        :type owner: string
+        :param owner: The name of the repository owner
+
+        :type changeset_revision: string
+        :param changeset_revision: The revision of the repository to be installed
+
+        :type install_tool_dependencies: Boolean
+        :param install_tool_dependencies: Whether or not to automatically handle
+                                          tool dependencies (see
+                                          http://wiki.galaxyproject.org/AToolOrASuitePerRepository
+                                          for more details)
+
+        :type install_repository_dependencies: Boolean
+        :param install_repository_dependencies: Whether or not to automatically
+                                                handle repository dependencies
+                                                (see http://wiki.galaxyproject.org/DefiningRepositoryDependencies
+                                                for more details)
+
+        :type tool_panel_section_id: string
+        :param tool_panel_section_id: The ID of the Galaxy tool panel section
+                                      where the tool should be insterted under.
+                                      Note that you should specify either this
+                                      parameter or the ``new_tool_panel_section_label``.
+                                      If both are specified, this one will take
+                                      precedence.
+
+        :type new_tool_panel_section_label: string
+        :param new_tool_panel_section_label: The name of a Galaxy tool panel section
+                                             that should be created and the repository
+                                             installed into.
+        """
+        payload = {}
+        payload['tool_shed_url'] = tool_shed_url
+        payload['name'] = name
+        payload['owner'] = owner
+        payload['changeset_revision'] = changeset_revision
+        payload['install_tool_dependencies'] = install_tool_dependencies
+        payload['install_repository_dependencies'] = install_repository_dependencies
+        if tool_panel_section_id:
+            # Galaxy requires 'section_' to be prepended to the section ID so ensure it's there
+            if 'section_' not in tool_panel_section_id:
+                payload['tool_panel_section_id'] = 'section_%s' % tool_panel_section_id
+            else:
+                payload['tool_panel_section_id'] = tool_panel_section_id
+        elif new_tool_panel_section_label:
+            payload['new_tool_panel_section_label'] = new_tool_panel_section_label
+
+        url = "%s%s" % (self.gi.url, '/tool_shed_repositories/new/install_repository_revision')
+
+        return Client._post(self, url=url, payload=payload)
