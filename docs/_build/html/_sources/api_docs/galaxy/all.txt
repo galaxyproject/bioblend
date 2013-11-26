@@ -84,6 +84,9 @@ Workflows
 Objects
 -------
 
-.. automodule:: bioblend.galaxy.objects.wrappers
+.. autoclass:: bioblend.galaxy.objects.galaxy_instance.GalaxyInstance
 
------
+Wrappers
+........
+
+.. automodule:: bioblend.galaxy.objects.wrappers

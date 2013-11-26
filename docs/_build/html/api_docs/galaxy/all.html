@@ -1010,8 +1010,533 @@ For example:<div class="highlight-python"><div class="highlight"><pre><span clas
 
 </div>
 <hr class="docutils" />
+<div class="section" id="objects">
+<h2>Objects<a class="headerlink" href="#objects" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance">
+<em class="property">class </em><tt class="descclassname">bioblend.galaxy.objects.galaxy_instance.</tt><tt class="descname">GalaxyInstance</tt><big>(</big><em>url</em>, <em>api_key</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance" title="Permalink to this definition">¶</a></dt>
+<dd><p>A representation of an instance of Galaxy, identified by a URL and
+a user&#8217;s API key.</p>
+<p>Example: get a list of all histories for a user with API key &#8216;foo&#8217;:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">bioblend.galaxy.objects</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="n">gi</span> <span class="o">=</span> <span class="n">GalaxyInstance</span><span class="p">(</span><span class="s">&#39;http://127.0.0.1:8080&#39;</span><span class="p">,</span> <span class="s">&#39;foo&#39;</span><span class="p">)</span>
+<span class="n">histories</span> <span class="o">=</span> <span class="n">gi</span><span class="o">.</span><span class="n">get_histories</span><span class="p">()</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>url</strong> (<em>str</em>) &#8211; a FQDN or IP for a given instance of Galaxy. For example:
+<tt class="docutils literal"><span class="pre">http://127.0.0.1:8080</span></tt></li>
+<li><strong>key</strong> (<em>str</em>) &#8211; user&#8217;s API key for the given instance of Galaxy, obtained
+from the Galaxy web UI.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.create_folder">
+<tt class="descname">create_folder</tt><big>(</big><em>library</em>, <em>name</em>, <em>description=None</em>, <em>base_folder=None</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance.create_folder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.create_folder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a folder in the given library.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>library</strong> (<a class="reference internal" href="#bioblend.galaxy.objects.wrappers.Library" title="bioblend.galaxy.objects.wrappers.Library"><tt class="xref py py-class docutils literal"><span class="pre">Library</span></tt></a>) &#8211; a library object</li>
+<li><strong>name</strong> (<em>str</em>) &#8211; folder name</li>
+<li><strong>description</strong> (<em>str</em>) &#8211; optional folder description</li>
+<li><strong>base_folder</strong> (<a class="reference internal" href="#bioblend.galaxy.objects.wrappers.Folder" title="bioblend.galaxy.objects.wrappers.Folder"><tt class="xref py py-class docutils literal"><span class="pre">Folder</span></tt></a>) &#8211; parent folder, or <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt> to create in
+the root folder</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.create_history">
+<tt class="descname">create_history</tt><big>(</big><em>name=None</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance.create_history"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.create_history" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new Galaxy history, optionally setting its name.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#bioblend.galaxy.objects.wrappers.History" title="bioblend.galaxy.objects.wrappers.History"><tt class="xref py py-class docutils literal"><span class="pre">History</span></tt></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the history just created</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.create_library">
+<tt class="descname">create_library</tt><big>(</big><em>name</em>, <em>description=None</em>, <em>synopsis=None</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance.create_library"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.create_library" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a data library with the properties defined in the arguments.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#bioblend.galaxy.objects.wrappers.Library" title="bioblend.galaxy.objects.wrappers.Library"><tt class="xref py py-class docutils literal"><span class="pre">Library</span></tt></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the library just created</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.delete_history">
+<tt class="descname">delete_history</tt><big>(</big><em>history</em>, <em>purge=False</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance.delete_history"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.delete_history" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete the given history.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Deleting a history is irreversible - all of the data from
+the history will be permanently deleted.</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.delete_library">
+<tt class="descname">delete_library</tt><big>(</big><em>library</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance.delete_library"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.delete_library" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete the given data library.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Deleting a data library is irreversible - all of the data from
+the library will be permanently deleted.</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.delete_workflow">
+<tt class="descname">delete_workflow</tt><big>(</big><em>workflow</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance.delete_workflow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.delete_workflow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete the given workflow.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Deleting a workflow is irreversible - all of the data from
+the workflow will be permanently deleted.</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.download">
+<tt class="descname">download</tt><big>(</big><em>dataset</em>, <em>history</em>, <em>outf</em>, <em>chunk_size=4096</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance.download"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.download" title="Permalink to this definition">¶</a></dt>
+<dd><p>Open <tt class="docutils literal"><span class="pre">dataset</span></tt> for reading and save its contents to <tt class="docutils literal"><span class="pre">outf</span></tt>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>outf</strong> (<tt class="xref py py-obj docutils literal"><span class="pre">file</span></tt>) &#8211; output file object</td>
+</tr>
+</tbody>
+</table>
+<p>See <tt class="xref py py-meth docutils literal"><span class="pre">get_stream()</span></tt> for info on other params.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_contents">
+<tt class="descname">get_contents</tt><big>(</big><em>dataset</em>, <em>history</em>, <em>chunk_size=4096</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance.get_contents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_contents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Open <tt class="docutils literal"><span class="pre">dataset</span></tt> for reading and return its <strong>full</strong> contents.</p>
+<p>See <tt class="xref py py-meth docutils literal"><span class="pre">get_stream()</span></tt> for param info.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_datasets">
+<tt class="descname">get_datasets</tt><big>(</big><em>src</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance.get_datasets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_datasets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get all datasets contained by the given dataset container.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>src</strong> (<a class="reference internal" href="#bioblend.galaxy.objects.wrappers.History" title="bioblend.galaxy.objects.wrappers.History"><tt class="xref py py-class docutils literal"><span class="pre">History</span></tt></a>
+or <a class="reference internal" href="#bioblend.galaxy.objects.wrappers.Library" title="bioblend.galaxy.objects.wrappers.Library"><tt class="xref py py-class docutils literal"><span class="pre">Library</span></tt></a>) &#8211; the dataset container</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">list of
+<a class="reference internal" href="#bioblend.galaxy.objects.wrappers.LibraryDataset" title="bioblend.galaxy.objects.wrappers.LibraryDataset"><tt class="xref py py-class docutils literal"><span class="pre">LibraryDataset</span></tt></a> or list of
+<a class="reference internal" href="#bioblend.galaxy.objects.wrappers.HistoryDatasetAssociation" title="bioblend.galaxy.objects.wrappers.HistoryDatasetAssociation"><tt class="xref py py-class docutils literal"><span class="pre">HistoryDatasetAssociation</span></tt></a></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">datasets associated with the given container</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_folder">
+<tt class="descname">get_folder</tt><big>(</big><em>library</em>, <em>f_id</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance.get_folder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_folder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve the folder corresponding to the given id.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#bioblend.galaxy.objects.wrappers.Folder" title="bioblend.galaxy.objects.wrappers.Folder"><tt class="xref py py-class docutils literal"><span class="pre">Folder</span></tt></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the folder corresponding to <tt class="docutils literal"><span class="pre">id_</span></tt></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_histories">
+<tt class="descname">get_histories</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance.get_histories"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_histories" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get all histories for the user.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list of <a class="reference internal" href="#bioblend.galaxy.objects.wrappers.History" title="bioblend.galaxy.objects.wrappers.History"><tt class="xref py py-class docutils literal"><span class="pre">History</span></tt></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">all histories owned by the user of this galaxy instance</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_history">
+<tt class="descname">get_history</tt><big>(</big><em>id_</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance.get_history"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_history" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve the history corresponding to the given id.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#bioblend.galaxy.objects.wrappers.History" title="bioblend.galaxy.objects.wrappers.History"><tt class="xref py py-class docutils literal"><span class="pre">History</span></tt></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the history corresponding to <tt class="docutils literal"><span class="pre">id_</span></tt></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_history_dataset">
+<tt class="descname">get_history_dataset</tt><big>(</big><em>src</em>, <em>ds_id</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance.get_history_dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_history_dataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve the history dataset corresponding to the given id.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#bioblend.galaxy.objects.wrappers.HistoryDatasetAssociation" title="bioblend.galaxy.objects.wrappers.HistoryDatasetAssociation"><tt class="xref py py-class docutils literal"><span class="pre">HistoryDatasetAssociation</span></tt></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the history dataset corresponding to <tt class="docutils literal"><span class="pre">id_</span></tt></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_libraries">
+<tt class="descname">get_libraries</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance.get_libraries"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_libraries" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get all libraries for the user.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list of <a class="reference internal" href="#bioblend.galaxy.objects.wrappers.Library" title="bioblend.galaxy.objects.wrappers.Library"><tt class="xref py py-class docutils literal"><span class="pre">Library</span></tt></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">all libraries owned by the user of this galaxy instance</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_library">
+<tt class="descname">get_library</tt><big>(</big><em>id_</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance.get_library"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_library" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve the data library corresponding to the given id.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#bioblend.galaxy.objects.wrappers.Library" title="bioblend.galaxy.objects.wrappers.Library"><tt class="xref py py-class docutils literal"><span class="pre">Library</span></tt></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the library corresponding to <tt class="docutils literal"><span class="pre">id_</span></tt></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_library_dataset">
+<tt class="descname">get_library_dataset</tt><big>(</big><em>src</em>, <em>ds_id</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance.get_library_dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_library_dataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve the library dataset corresponding to the given id.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#bioblend.galaxy.objects.wrappers.LibraryDataset" title="bioblend.galaxy.objects.wrappers.LibraryDataset"><tt class="xref py py-class docutils literal"><span class="pre">LibraryDataset</span></tt></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the library dataset corresponding to <tt class="docutils literal"><span class="pre">id_</span></tt></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_stream">
+<tt class="descname">get_stream</tt><big>(</big><em>dataset</em>, <em>history</em>, <em>chunk_size=4096</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance.get_stream"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_stream" title="Permalink to this definition">¶</a></dt>
+<dd><p>Open <tt class="docutils literal"><span class="pre">dataset</span></tt> for reading and return an iterator over its contents.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>dataset</strong> (<a class="reference internal" href="#bioblend.galaxy.objects.wrappers.HistoryDatasetAssociation" title="bioblend.galaxy.objects.wrappers.HistoryDatasetAssociation"><tt class="xref py py-class docutils literal"><span class="pre">HistoryDatasetAssociation</span></tt></a>) &#8211; the dataset to read from</li>
+<li><strong>history</strong> (<a class="reference internal" href="#bioblend.galaxy.objects.wrappers.History" title="bioblend.galaxy.objects.wrappers.History"><tt class="xref py py-class docutils literal"><span class="pre">History</span></tt></a>) &#8211; the history to which <tt class="docutils literal"><span class="pre">dataset</span></tt> belongs</li>
+<li><strong>chunk_size</strong> (<em>int</em>) &#8211; read this amount of bytes at a time</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_workflow">
+<tt class="descname">get_workflow</tt><big>(</big><em>id_</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance.get_workflow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_workflow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve the workflow corresponding to the given id.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#bioblend.galaxy.objects.wrappers.Workflow" title="bioblend.galaxy.objects.wrappers.Workflow"><tt class="xref py py-class docutils literal"><span class="pre">Workflow</span></tt></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the workflow corresponding to <tt class="docutils literal"><span class="pre">id_</span></tt></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_workflows">
+<tt class="descname">get_workflows</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance.get_workflows"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_workflows" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get all workflows for the user.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list of <a class="reference internal" href="#bioblend.galaxy.objects.wrappers.Workflow" title="bioblend.galaxy.objects.wrappers.Workflow"><tt class="xref py py-class docutils literal"><span class="pre">Workflow</span></tt></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">all workflows owned by the user of this galaxy instance</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.import_dataset_to_history">
+<tt class="descname">import_dataset_to_history</tt><big>(</big><em>history</em>, <em>lds</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance.import_dataset_to_history"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.import_dataset_to_history" title="Permalink to this definition">¶</a></dt>
+<dd><p>Import a dataset into the history from a library.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>history</strong> (<a class="reference internal" href="#bioblend.galaxy.objects.wrappers.History" title="bioblend.galaxy.objects.wrappers.History"><tt class="xref py py-class docutils literal"><span class="pre">History</span></tt></a>) &#8211; target history</li>
+<li><strong>lds</strong> (<a class="reference internal" href="#bioblend.galaxy.objects.wrappers.LibraryDataset" title="bioblend.galaxy.objects.wrappers.LibraryDataset"><tt class="xref py py-class docutils literal"><span class="pre">LibraryDataset</span></tt></a>) &#8211; the library dataset to import</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.import_workflow">
+<tt class="descname">import_workflow</tt><big>(</big><em>src</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance.import_workflow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.import_workflow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Imports a new workflow into Galaxy.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>src</strong> (<a class="reference internal" href="#bioblend.galaxy.objects.wrappers.Workflow" title="bioblend.galaxy.objects.wrappers.Workflow"><tt class="xref py py-class docutils literal"><span class="pre">Workflow</span></tt></a>
+or dict or str) &#8211; the workflow to import as a workflow object, or
+deserialized JSON (dictionary), or serialized JSON (unicode).</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#bioblend.galaxy.objects.wrappers.Workflow" title="bioblend.galaxy.objects.wrappers.Workflow"><tt class="xref py py-class docutils literal"><span class="pre">Workflow</span></tt></a></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the workflow just imported</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.peek">
+<tt class="descname">peek</tt><big>(</big><em>dataset</em>, <em>history</em>, <em>chunk_size=4096</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance.peek"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.peek" title="Permalink to this definition">¶</a></dt>
+<dd><p>Open <tt class="docutils literal"><span class="pre">dataset</span></tt> for reading and return the first chunk.</p>
+<p>See <tt class="xref py py-meth docutils literal"><span class="pre">get_stream()</span></tt> for param info.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.run_workflow">
+<tt class="descname">run_workflow</tt><big>(</big><em>workflow</em>, <em>inputs</em>, <em>history</em>, <em>params=None</em>, <em>import_inputs=False</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance.run_workflow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.run_workflow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run <tt class="docutils literal"><span class="pre">workflow</span></tt> with input datasets from the <tt class="docutils literal"><span class="pre">inputs</span></tt> sequence.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>workflow</strong> (<a class="reference internal" href="#bioblend.galaxy.objects.wrappers.Workflow" title="bioblend.galaxy.objects.wrappers.Workflow"><tt class="xref py py-class docutils literal"><span class="pre">Workflow</span></tt></a>) &#8211; the workflow that should be run</li>
+<li><strong>inputs</strong> (<tt class="xref py py-class docutils literal"><span class="pre">Iterable</span></tt> of
+<a class="reference internal" href="#bioblend.galaxy.objects.wrappers.Dataset" title="bioblend.galaxy.objects.wrappers.Dataset"><tt class="xref py py-class docutils literal"><span class="pre">Dataset</span></tt></a>) &#8211; input datasets for the workflow, which will be
+assigned to the workflow&#8217;s input slots in the order they
+appear in <tt class="docutils literal"><span class="pre">inputs</span></tt>; any extra items will be ignored.</li>
+<li><strong>history</strong> (<a class="reference internal" href="#bioblend.galaxy.objects.wrappers.History" title="bioblend.galaxy.objects.wrappers.History"><tt class="xref py py-class docutils literal"><span class="pre">History</span></tt></a> or str) &#8211; either a valid history object (results will be
+stored there) or a string (a new history will be created with
+the given name).</li>
+<li><strong>params</strong> (<tt class="xref py py-class docutils literal"><span class="pre">Mapping</span></tt>) &#8211; <p>an optional mapping of workflow tool indices to
+param dicts, such as:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;a&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">},</span> <span class="mi">3</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;b&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}}</span>
+</pre></div>
+</div>
+<p>that sets <tt class="docutils literal"><span class="pre">a</span></tt> to 0 for <tt class="docutils literal"><span class="pre">workflow.tools[1]</span></tt> and <tt class="docutils literal"><span class="pre">b</span></tt> to 1
+for <tt class="docutils literal"><span class="pre">workflow.tools[3]</span></tt>.</p>
+</li>
+<li><strong>import_inputs</strong> (<em>bool</em>) &#8211; If <tt class="xref py py-obj docutils literal"><span class="pre">True</span></tt>, workflow inputs will be
+imported into the history; if <tt class="xref py py-obj docutils literal"><span class="pre">False</span></tt>, only workflow
+outputs will be visible in the history.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">This is an asynchronous operation: when the method returns,
+the output datasets and history will most likely <strong>not</strong> be
+in their final state.  Use <tt class="xref py py-meth docutils literal"><span class="pre">wait()</span></tt> if you want to block
+until they&#8217;re ready.</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.update_history">
+<tt class="descname">update_history</tt><big>(</big><em>history</em>, <em>name=None</em>, <em>annotation=None</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance.update_history"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.update_history" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update history metadata with the given name and annotation.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.upload_data">
+<tt class="descname">upload_data</tt><big>(</big><em>library</em>, <em>data</em>, <em>folder=None</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance.upload_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.upload_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Upload data to a Galaxy library.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>library</strong> (<a class="reference internal" href="#bioblend.galaxy.objects.wrappers.Library" title="bioblend.galaxy.objects.wrappers.Library"><tt class="xref py py-class docutils literal"><span class="pre">Library</span></tt></a>) &#8211; a library object</li>
+<li><strong>data</strong> (<em>str</em>) &#8211; dataset contents</li>
+<li><strong>folder</strong> (<a class="reference internal" href="#bioblend.galaxy.objects.wrappers.Folder" title="bioblend.galaxy.objects.wrappers.Folder"><tt class="xref py py-class docutils literal"><span class="pre">Folder</span></tt></a>) &#8211; a folder object, or <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt> to upload to
+the root folder</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Optional keyword arguments: <tt class="docutils literal"><span class="pre">file_type</span></tt>, <tt class="docutils literal"><span class="pre">dbkey</span></tt>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.upload_from_galaxy_fs">
+<tt class="descname">upload_from_galaxy_fs</tt><big>(</big><em>library</em>, <em>paths</em>, <em>folder=None</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance.upload_from_galaxy_fs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.upload_from_galaxy_fs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Upload data to a Galaxy library from filesystem paths on the server.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>library</strong> (<a class="reference internal" href="#bioblend.galaxy.objects.wrappers.Library" title="bioblend.galaxy.objects.wrappers.Library"><tt class="xref py py-class docutils literal"><span class="pre">Library</span></tt></a>) &#8211; a library object</li>
+<li><strong>paths</strong> (str or <tt class="xref py py-class docutils literal"><span class="pre">Iterable</span></tt> of str) &#8211; server-side file paths from which data should be read</li>
+<li><strong>folder</strong> (<a class="reference internal" href="#bioblend.galaxy.objects.wrappers.Folder" title="bioblend.galaxy.objects.wrappers.Folder"><tt class="xref py py-class docutils literal"><span class="pre">Folder</span></tt></a>) &#8211; a folder object, or <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt> to upload to
+the root folder</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Optional keyword arguments: <tt class="docutils literal"><span class="pre">file_type</span></tt>, <tt class="docutils literal"><span class="pre">dbkey</span></tt>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.upload_from_local">
+<tt class="descname">upload_from_local</tt><big>(</big><em>library</em>, <em>path</em>, <em>folder=None</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance.upload_from_local"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.upload_from_local" title="Permalink to this definition">¶</a></dt>
+<dd><p>Upload data to a Galaxy library from a local file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>library</strong> (<a class="reference internal" href="#bioblend.galaxy.objects.wrappers.Library" title="bioblend.galaxy.objects.wrappers.Library"><tt class="xref py py-class docutils literal"><span class="pre">Library</span></tt></a>) &#8211; a library object</li>
+<li><strong>path</strong> (<em>str</em>) &#8211; local file path from which data should be read</li>
+<li><strong>folder</strong> (<a class="reference internal" href="#bioblend.galaxy.objects.wrappers.Folder" title="bioblend.galaxy.objects.wrappers.Folder"><tt class="xref py py-class docutils literal"><span class="pre">Folder</span></tt></a>) &#8211; a folder object, or <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt> to upload to
+the root folder</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Optional keyword arguments: <tt class="docutils literal"><span class="pre">file_type</span></tt>, <tt class="docutils literal"><span class="pre">dbkey</span></tt>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.upload_from_url">
+<tt class="descname">upload_from_url</tt><big>(</big><em>library</em>, <em>url</em>, <em>folder=None</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance.upload_from_url"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.upload_from_url" title="Permalink to this definition">¶</a></dt>
+<dd><p>Upload data to a Galaxy library from the given URL.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>library</strong> (<a class="reference internal" href="#bioblend.galaxy.objects.wrappers.Library" title="bioblend.galaxy.objects.wrappers.Library"><tt class="xref py py-class docutils literal"><span class="pre">Library</span></tt></a>) &#8211; a library object</li>
+<li><strong>url</strong> (<em>str</em>) &#8211; URL from which data should be read</li>
+<li><strong>folder</strong> (<a class="reference internal" href="#bioblend.galaxy.objects.wrappers.Folder" title="bioblend.galaxy.objects.wrappers.Folder"><tt class="xref py py-class docutils literal"><span class="pre">Folder</span></tt></a>) &#8211; a folder object, or <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt> to upload to
+the root folder</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Optional keyword arguments: <tt class="docutils literal"><span class="pre">file_type</span></tt>, <tt class="docutils literal"><span class="pre">dbkey</span></tt>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.wait">
+<tt class="descname">wait</tt><big>(</big><em>ds_ids</em>, <em>history</em>, <em>polling_interval=10</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance.wait"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.wait" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wait until all datasets are ready or one of them is in error.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ds_ids</strong> (<tt class="xref py py-class docutils literal"><span class="pre">Iterable</span></tt> of str) &#8211; dataset ids, which should belong to <tt class="docutils literal"><span class="pre">history</span></tt>
+(if they don&#8217;t, the method will exit immediately)</li>
+<li><strong>history</strong> (<a class="reference internal" href="#bioblend.galaxy.objects.wrappers.History" title="bioblend.galaxy.objects.wrappers.History"><tt class="xref py py-class docutils literal"><span class="pre">History</span></tt></a>) &#8211; the history to which the desired datasets belong</li>
+<li><strong>polling_interval</strong> (<em>float</em>) &#8211; polling interval in seconds</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">This is a blocking operation that can take a very long time.
+Also, note that this method does not return anything: if
+needed, the datasets and updated history must be retrieved
+explicitly.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
 <div class="section" id="module-bioblend.galaxy.objects.wrappers">
-<span id="objects"></span><h2>Objects<a class="headerlink" href="#module-bioblend.galaxy.objects.wrappers" title="Permalink to this headline">¶</a></h2>
+<span id="wrappers"></span><h3>Wrappers<a class="headerlink" href="#module-bioblend.galaxy.objects.wrappers" title="Permalink to this headline">¶</a></h3>
 <p>A basic object-oriented interface for Galaxy entities.</p>
 <dl class="class">
 <dt id="bioblend.galaxy.objects.wrappers.Wrapper">
@@ -1085,7 +1610,7 @@ Galaxy, or None if it&#8217;s not mapped to a Galaxy entity.</li>
 <dl class="class">
 <dt id="bioblend.galaxy.objects.wrappers.Step">
 <em class="property">class </em><tt class="descclassname">bioblend.galaxy.objects.wrappers.</tt><tt class="descname">Step</tt><big>(</big><em>step_dict</em>, <em>parent</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/wrappers.html#Step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.Step" title="Permalink to this definition">¶</a></dt>
-<dd><p>Abstract base class for a workflow step.</p>
+<dd><p>Abstract base class for workflow steps.</p>
 <p>Steps are the main building blocks of a Galaxy workflow.  A step
 can refer to either an input dataset (<a class="reference internal" href="#bioblend.galaxy.objects.wrappers.DataInput" title="bioblend.galaxy.objects.wrappers.DataInput"><tt class="xref py py-class docutils literal"><span class="pre">DataInput</span></tt></a>) or a
 computational tool (<a class="reference internal" href="#bioblend.galaxy.objects.wrappers.Tool" title="bioblend.galaxy.objects.wrappers.Tool"><tt class="xref py py-class docutils literal"><span class="pre">Tool</span></tt></a>).</p>
@@ -1267,7 +1792,7 @@ format required by the Galaxy web API.</td>
 
 </dd></dl>
 
-<hr class="docutils" />
+</div>
 </div>
 </div>
 
@@ -1291,7 +1816,10 @@ format required by the Galaxy web API.</td>
 <li><a class="reference internal" href="#module-bioblend.galaxy.users">Users</a></li>
 <li><a class="reference internal" href="#module-bioblend.galaxy.visual">Visual</a></li>
 <li><a class="reference internal" href="#module-bioblend.galaxy.workflows">Workflows</a></li>
-<li><a class="reference internal" href="#module-bioblend.galaxy.objects.wrappers">Objects</a></li>
+<li><a class="reference internal" href="#objects">Objects</a><ul>
+<li><a class="reference internal" href="#module-bioblend.galaxy.objects.wrappers">Wrappers</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

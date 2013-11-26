@@ -48,7 +48,24 @@ def _build_params_payload(params, workflow):
 
 
 class GalaxyInstance(object):
+    """
+    A representation of an instance of Galaxy, identified by a URL and
+    a user's API key.
 
+    Example: get a list of all histories for a user with API key 'foo'::
+
+      from bioblend.galaxy.objects import *
+      gi = GalaxyInstance('http://127.0.0.1:8080', 'foo')
+      histories = gi.get_histories()
+
+    :type url: str
+    :param url: a FQDN or IP for a given instance of Galaxy. For example:
+      ``http://127.0.0.1:8080``
+
+    :type key: str
+    :param key: user's API key for the given instance of Galaxy, obtained
+      from the Galaxy web UI.
+    """
     def __init__(self, url, api_key):
         self.gi = bioblend.galaxy.GalaxyInstance(url, api_key)
         self.log = bioblend.log
@@ -56,18 +73,43 @@ class GalaxyInstance(object):
     #-- library --
 
     def create_library(self, name, description=None, synopsis=None):
+        """
+        Create a data library with the properties defined in the arguments.
+
+        :rtype: :class:`~bioblend.galaxy.objects.wrappers.Library`
+        :return: the library just created
+        """
         res = self.gi.libraries.create_library(name, description, synopsis)
         lib_info = self.__get_dict('create_library', res)
         return self.get_library(lib_info['id'])
 
     def get_library(self, id_):
+        """
+        Retrieve the data library corresponding to the given id.
+
+        :rtype: :class:`~bioblend.galaxy.objects.wrappers.Library`
+        :return: the library corresponding to ``id_``
+        """
         return self.__get_container(id_, wrappers.Library)
 
     def get_libraries(self):
+        """
+        Get all libraries for the user.
+
+        :rtype: list of :class:`~bioblend.galaxy.objects.wrappers.Library`
+        :return: all libraries owned by the user of this galaxy instance
+        """
         lib_infos = self.gi.libraries.get_libraries()
         return [self.get_library(li['id']) for li in lib_infos]
 
     def delete_library(self, library):
+        """
+        Delete the given data library.
+
+        .. warning::
+          Deleting a data library is irreversible - all of the data from
+          the library will be permanently deleted.
+        """
         if not library.is_mapped():
             self.__error('library is not mapped to a Galaxy object')
         res = self.gi.libraries.delete_library(library.id)
@@ -78,6 +120,21 @@ class GalaxyInstance(object):
     #-- library contents --
 
     def upload_data(self, library, data, folder=None, **kwargs):
+        """
+        Upload data to a Galaxy library.
+
+        :type library: :class:`~bioblend.galaxy.objects.wrappers.Library`
+        :param library: a library object
+
+        :type data: str
+        :param data: dataset contents
+
+        :type folder: :class:`~bioblend.galaxy.objects.wrappers.Folder`
+        :param folder: a folder object, or :obj:`None` to upload to
+          the root folder
+
+        Optional keyword arguments: ``file_type``, ``dbkey``.
+        """
         fid = self.__pre_upload(library, folder)
         res = self.gi.libraries.upload_file_contents(
             library.id, data, folder_id=fid, **kwargs
@@ -85,6 +142,21 @@ class GalaxyInstance(object):
         return self.__post_upload(library, 'upload_file_contents', res)
 
     def upload_from_url(self, library, url, folder=None, **kwargs):
+        """
+        Upload data to a Galaxy library from the given URL.
+
+        :type library: :class:`~bioblend.galaxy.objects.wrappers.Library`
+        :param library: a library object
+
+        :type url: str
+        :param url: URL from which data should be read
+
+        :type folder: :class:`~bioblend.galaxy.objects.wrappers.Folder`
+        :param folder: a folder object, or :obj:`None` to upload to
+          the root folder
+
+        Optional keyword arguments: ``file_type``, ``dbkey``.
+        """
         fid = self.__pre_upload(library, folder)
         res = self.gi.libraries.upload_file_from_url(
             library.id, url, fid, **kwargs
@@ -92,6 +164,21 @@ class GalaxyInstance(object):
         return self.__post_upload(library, 'upload_file_from_url', res)
 
     def upload_from_local(self, library, path, folder=None, **kwargs):
+        """
+        Upload data to a Galaxy library from a local file.
+
+        :type library: :class:`~bioblend.galaxy.objects.wrappers.Library`
+        :param library: a library object
+
+        :type path: str
+        :param path: local file path from which data should be read
+
+        :type folder: :class:`~bioblend.galaxy.objects.wrappers.Folder`
+        :param folder: a folder object, or :obj:`None` to upload to
+          the root folder
+
+        Optional keyword arguments: ``file_type``, ``dbkey``.
+        """
         fid = self.__pre_upload(library, folder)
         res = self.gi.libraries.upload_file_from_local_path(
             library.id, path, fid, **kwargs
@@ -99,6 +186,21 @@ class GalaxyInstance(object):
         return self.__post_upload(library, 'upload_file_from_local_path', res)
 
     def upload_from_galaxy_fs(self, library, paths, folder=None, **kwargs):
+        """
+        Upload data to a Galaxy library from filesystem paths on the server.
+
+        :type library: :class:`~bioblend.galaxy.objects.wrappers.Library`
+        :param library: a library object
+
+        :type paths: str or :class:`~collections.Iterable` of str
+        :param paths: server-side file paths from which data should be read
+
+        :type folder: :class:`~bioblend.galaxy.objects.wrappers.Folder`
+        :param folder: a folder object, or :obj:`None` to upload to
+          the root folder
+
+        Optional keyword arguments: ``file_type``, ``dbkey``.
+        """
         fid = self.__pre_upload(library, folder)
         if isinstance(paths, basestring):
             paths = (paths,)
@@ -116,9 +218,32 @@ class GalaxyInstance(object):
                 for ds_info in res]
 
     def get_library_dataset(self, src, ds_id):
+        """
+        Retrieve the library dataset corresponding to the given id.
+
+        :rtype: :class:`~bioblend.galaxy.objects.wrappers.LibraryDataset`
+        :return: the library dataset corresponding to ``id_``
+        """
         return self.__get_container_dataset(src, ds_id, wrappers.Library)
 
     def create_folder(self, library, name, description=None, base_folder=None):
+        """
+        Create a folder in the given library.
+
+        :type library: :class:`~bioblend.galaxy.objects.wrappers.Library`
+        :param library: a library object
+
+        :type name: str
+        :param name: folder name
+
+        :type description: str
+        :param description: optional folder description
+
+        :type base_folder: :class:`~bioblend.galaxy.objects.wrappers.Folder`
+
+        :param base_folder: parent folder, or :obj:`None` to create in
+          the root folder
+        """
         bfid = None if base_folder is None else base_folder.id
         res = self.gi.libraries.create_folder(
             library.id, name, description=description, base_folder_id=bfid,
@@ -127,24 +252,51 @@ class GalaxyInstance(object):
         return self.get_folder(library, folder_info['id'])
 
     def get_folder(self, library, f_id):
+        """
+        Retrieve the folder corresponding to the given id.
+
+        :rtype: :class:`~bioblend.galaxy.objects.wrappers.Folder`
+        :return: the folder corresponding to ``id_``
+        """
         f_dict = self.gi.libraries.show_folder(library.id, f_id)
         return wrappers.Folder(f_dict, f_id)
 
     #-- history --
 
     def create_history(self, name=None):
+        """
+        Create a new Galaxy history, optionally setting its name.
+
+        :rtype: :class:`~bioblend.galaxy.objects.wrappers.History`
+        :return: the history just created
+        """
         res = self.gi.histories.create_history(name=name)
         hist_info = self.__get_dict('create_history', res)
         return self.get_history(hist_info['id'])
 
     def get_history(self, id_):
+        """
+        Retrieve the history corresponding to the given id.
+
+        :rtype: :class:`~bioblend.galaxy.objects.wrappers.History`
+        :return: the history corresponding to ``id_``
+        """
         return self.__get_container(id_, wrappers.History)
 
     def get_histories(self):
+        """
+        Get all histories for the user.
+
+        :rtype: list of :class:`~bioblend.galaxy.objects.wrappers.History`
+        :return: all histories owned by the user of this galaxy instance
+        """
         hist_infos = self.gi.histories.get_histories()
         return [self.get_history(hi['id']) for hi in hist_infos]
 
     def update_history(self, history, name=None, annotation=None):
+        """
+        Update history metadata with the given name and annotation.
+        """
         res = self.gi.histories.update_history(
             history.id, name=name, annotation=annotation
             )
@@ -153,6 +305,13 @@ class GalaxyInstance(object):
         return self.get_history(history.id)
 
     def delete_history(self, history, purge=False):
+        """
+        Delete the given history.
+
+        .. warning::
+          Deleting a history is irreversible - all of the data from
+          the history will be permanently deleted.
+        """
         if not history.is_mapped():
             self.__error('history is not mapped to a Galaxy object')
         res = self.gi.histories.delete_history(history.id, purge=purge)
@@ -163,6 +322,15 @@ class GalaxyInstance(object):
     #-- history contents --
 
     def import_dataset_to_history(self, history, lds):
+        """
+        Import a dataset into the history from a library.
+
+        :type history: :class:`~bioblend.galaxy.objects.wrappers.History`
+        :param history: target history
+
+        :type lds: :class:`~bioblend.galaxy.objects.wrappers.LibraryDataset`
+        :param lds: the library dataset to import
+        """
         if not history.is_mapped():
             self.__error('history is not mapped to a Galaxy object')
         if not isinstance(lds, wrappers.LibraryDataset):
@@ -182,11 +350,30 @@ class GalaxyInstance(object):
         return self.get_history_dataset(history, diff.pop())
 
     def get_history_dataset(self, src, ds_id):
+        """
+        Retrieve the history dataset corresponding to the given id.
+
+        :rtype:
+          :class:`~bioblend.galaxy.objects.wrappers.HistoryDatasetAssociation`
+        :return: the history dataset corresponding to ``id_``
+        """
         return self.__get_container_dataset(src, ds_id, wrappers.History)
 
     #-- datasets --
 
     def get_datasets(self, src):
+        """
+        Get all datasets contained by the given dataset container.
+
+        :type src: :class:`~bioblend.galaxy.objects.wrappers.History`
+          or :class:`~bioblend.galaxy.objects.wrappers.Library`
+        :param src: the dataset container
+
+        :rtype: list of
+          :class:`~bioblend.galaxy.objects.wrappers.LibraryDataset` or list of
+          :class:`~bioblend.galaxy.objects.wrappers.HistoryDatasetAssociation`
+        :return: datasets associated with the given container
+        """
         if not isinstance(src, wrappers.DatasetContainer):
             self.__error('not a history or library object', err_type=TypeError)
         return [self.__get_container_dataset(src, _, ctype=type(src))
@@ -195,6 +382,17 @@ class GalaxyInstance(object):
     #-- workflow --
 
     def import_workflow(self, src):
+        """
+        Imports a new workflow into Galaxy.
+
+        :type src: :class:`~bioblend.galaxy.objects.wrappers.Workflow`
+          or dict or str
+        :param src: the workflow to import as a workflow object, or
+          deserialized JSON (dictionary), or serialized JSON (unicode).
+
+        :rtype: :class:`~bioblend.galaxy.objects.wrappers.Workflow`
+        :return: the workflow just imported
+        """
         if isinstance(src, wrappers.Workflow):
             if src.is_mapped():
                 self.__error('workflow already imported')
@@ -210,12 +408,24 @@ class GalaxyInstance(object):
         return self.get_workflow(wf_info['id'])
 
     def get_workflow(self, id_):
+        """
+        Retrieve the workflow corresponding to the given id.
+
+        :rtype: :class:`~bioblend.galaxy.objects.wrappers.Workflow`
+        :return: the workflow corresponding to ``id_``
+        """
         wf_dict = self.gi.workflows.export_workflow_json(id_)
         res = self.gi.workflows.show_workflow(id_)
         inputs = self.__get_dict('show_workflow', res)['inputs']
         return wrappers.Workflow(wf_dict, id=id_, inputs=inputs)
 
     def get_workflows(self):
+        """
+        Get all workflows for the user.
+
+        :rtype: list of :class:`~bioblend.galaxy.objects.wrappers.Workflow`
+        :return: all workflows owned by the user of this galaxy instance
+        """
         wf_infos = self.gi.workflows.get_workflows()
         return [self.get_workflow(wi['id']) for wi in wf_infos]
 
@@ -224,19 +434,42 @@ class GalaxyInstance(object):
         """
         Run ``workflow`` with input datasets from the ``inputs`` sequence.
 
-        Input datasets are assigned to the workflow's input slots in
-        the order they appear in ``inputs``; any extra items are
-        ignored.  The ``history`` param can be either a valid history
-        object (results will be stored there) or a string (a new
-        history will be created with the given name).
+        :type workflow: :class:`~bioblend.galaxy.objects.wrappers.Workflow`
+        :param workflow: the workflow that should be run
 
-        If present, ``params`` must be a mapping type that maps
-        workflow tool indices to param dicts, such as::
+        :type inputs: :class:`~collections.Iterable` of
+          :class:`~bioblend.galaxy.objects.wrappers.Dataset`
+        :param inputs: input datasets for the workflow, which will be
+          assigned to the workflow's input slots in the order they
+          appear in ``inputs``; any extra items will be ignored.
 
-          {1: {'a': 0}, 3: {'b': 1}}
+        :type history:
+          :class:`~bioblend.galaxy.objects.wrappers.History` or str
+        :param history: either a valid history object (results will be
+          stored there) or a string (a new history will be created with
+          the given name).
 
-        that sets ``a`` to 0 for ``workflows.tools[1]`` and ``b`` to 1
-        for ``workflows.tools[3]``.
+        :type params: :class:`~collections.Mapping`
+
+        :param params: an optional mapping of workflow tool indices to
+          param dicts, such as::
+
+            {1: {'a': 0}, 3: {'b': 1}}
+
+          that sets ``a`` to 0 for ``workflow.tools[1]`` and ``b`` to 1
+          for ``workflow.tools[3]``.
+
+        :type import_inputs: bool
+
+        :param import_inputs: If :obj:`True`, workflow inputs will be
+          imported into the history; if :obj:`False`, only workflow
+          outputs will be visible in the history.
+
+        .. warning::
+          This is an asynchronous operation: when the method returns,
+          the output datasets and history will most likely **not** be
+          in their final state.  Use :meth:`wait` if you want to block
+          until they're ready.
         """
         if not workflow.is_mapped():
             self.__error('workflow is not mapped to a Galaxy object')
@@ -266,11 +499,21 @@ class GalaxyInstance(object):
         """
         Wait until all datasets are ready or one of them is in error.
 
-        ``ds_ids`` must be a sequence of dataset ids, which should
-        belong to ``history`` (if they don't, the method will exit
-        immediately).  Note that this method does not return anything:
-        if needed, the datasets and updated history must be retrieved
-        explicitly.
+        :type ds_ids: :class:`~collections.Iterable` of str
+        :param ds_ids: dataset ids, which should belong to ``history``
+          (if they don't, the method will exit immediately)
+
+        :type history: :class:`~bioblend.galaxy.objects.wrappers.History`
+        :param history: the history to which the desired datasets belong
+
+        :type polling_interval: float
+        :param polling_interval: polling interval in seconds
+
+        .. warning::
+          This is a blocking operation that can take a very long time.
+          Also, note that this method does not return anything: if
+          needed, the datasets and updated history must be retrieved
+          explicitly.
         """
         self.log.info('waiting for datasets')
         while True:
@@ -291,6 +534,19 @@ class GalaxyInstance(object):
         time.sleep(polling_interval)  # small margin of safety
 
     def get_stream(self, dataset, history, chunk_size=_CHUNK_SIZE):
+        """
+        Open ``dataset`` for reading and return an iterator over its contents.
+
+        :type dataset:
+          :class:`~bioblend.galaxy.objects.wrappers.HistoryDatasetAssociation`
+        :param dataset: the dataset to read from
+
+        :type history: :class:`~bioblend.galaxy.objects.wrappers.History`
+        :param history: the history to which ``dataset`` belongs
+
+        :type chunk_size: int
+        :param chunk_size: read this amount of bytes at a time
+        """
         if dataset.id not in history.dataset_ids:
             self.__error('dataset does not belong to history')
         self.wait([dataset.id], history)
@@ -308,19 +564,41 @@ class GalaxyInstance(object):
         return r.iter_content(chunk_size)  # FIXME: client can't close r
 
     def peek(self, dataset, history, chunk_size=_CHUNK_SIZE):
+        """
+        Open ``dataset`` for reading and return the first chunk.
+
+        See :meth:`get_stream` for param info.
+        """
         return self.get_stream(dataset, history, chunk_size=chunk_size).next()
 
     def download(self, dataset, history, outf, chunk_size=_CHUNK_SIZE):
+        """
+        Open ``dataset`` for reading and save its contents to ``outf``.
+
+        :type outf: :obj:`file`
+        :param outf: output file object
+
+        See :meth:`get_stream` for info on other params.
+        """
         for chunk in self.get_stream(dataset, history, chunk_size=chunk_size):
             outf.write(chunk)
 
     def get_contents(self, dataset, history, chunk_size=_CHUNK_SIZE):
         """
-        Return the *full* contents of ``dataset`` as a string.
+        Open ``dataset`` for reading and return its **full** contents.
+
+        See :meth:`get_stream` for param info.
         """
         return ''.join(self.get_stream(dataset, history, chunk_size=chunk_size))
 
     def delete_workflow(self, workflow):
+        """
+        Delete the given workflow.
+
+        .. warning::
+          Deleting a workflow is irreversible - all of the data from
+          the workflow will be permanently deleted.
+        """
         if not workflow.is_mapped():
             self.__error('workflow is not mapped to a Galaxy object')
         res = self.gi.workflows.delete_workflow(workflow.id)
