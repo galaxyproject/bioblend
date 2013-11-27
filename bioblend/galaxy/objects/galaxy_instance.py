@@ -76,6 +76,9 @@ class GalaxyInstance(object):
         """
         Create a data library with the properties defined in the arguments.
 
+        Requires ``allow_library_path_paste = True`` to be set in
+        Galaxy's configuration file ``universe_wsgi.ini``.
+
         :rtype: :class:`~bioblend.galaxy.objects.wrappers.Library`
         :return: the library just created
         """
@@ -240,9 +243,11 @@ class GalaxyInstance(object):
         :param description: optional folder description
 
         :type base_folder: :class:`~bioblend.galaxy.objects.wrappers.Folder`
-
         :param base_folder: parent folder, or :obj:`None` to create in
           the root folder
+
+        :rtype: :class:`~bioblend.galaxy.objects.wrappers.Folder`
+        :return: the folder just created
         """
         bfid = None if base_folder is None else base_folder.id
         res = self.gi.libraries.create_folder(
@@ -308,9 +313,10 @@ class GalaxyInstance(object):
         """
         Delete the given history.
 
-        .. warning::
-          Deleting a history is irreversible - all of the data from
-          the history will be permanently deleted.
+        :type purge: bool
+        :param purge: if :obj:`True`, also purge the history (requires
+          ``allow_user_dataset_purge = True`` to be set in Galaxy's
+          configuration file ``universe_wsgi.ini``)
         """
         if not history.is_mapped():
             self.__error('history is not mapped to a Galaxy object')
@@ -450,7 +456,6 @@ class GalaxyInstance(object):
           the given name).
 
         :type params: :class:`~collections.Mapping`
-
         :param params: an optional mapping of workflow tool indices to
           param dicts, such as::
 
@@ -460,7 +465,6 @@ class GalaxyInstance(object):
           for ``workflow.tools[3]``.
 
         :type import_inputs: bool
-
         :param import_inputs: If :obj:`True`, workflow inputs will be
           imported into the history; if :obj:`False`, only workflow
           outputs will be visible in the history.
@@ -468,7 +472,7 @@ class GalaxyInstance(object):
         .. warning::
           This is an asynchronous operation: when the method returns,
           the output datasets and history will most likely **not** be
-          in their final state.  Use :meth:`wait` if you want to block
+          in their final state.  Use :meth:`.wait` if you want to block
           until they're ready.
         """
         if not workflow.is_mapped():
@@ -567,7 +571,7 @@ class GalaxyInstance(object):
         """
         Open ``dataset`` for reading and return the first chunk.
 
-        See :meth:`get_stream` for param info.
+        See :meth:`.get_stream` for param info.
         """
         return self.get_stream(dataset, history, chunk_size=chunk_size).next()
 
@@ -578,7 +582,7 @@ class GalaxyInstance(object):
         :type outf: :obj:`file`
         :param outf: output file object
 
-        See :meth:`get_stream` for info on other params.
+        See :meth:`.get_stream` for info on other params.
         """
         for chunk in self.get_stream(dataset, history, chunk_size=chunk_size):
             outf.write(chunk)
@@ -587,7 +591,7 @@ class GalaxyInstance(object):
         """
         Open ``dataset`` for reading and return its **full** contents.
 
-        See :meth:`get_stream` for param info.
+        See :meth:`.get_stream` for param info.
         """
         return ''.join(self.get_stream(dataset, history, chunk_size=chunk_size))
 

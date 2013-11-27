@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>API documentation for interacting with Galaxy &mdash; BioBlend 0.4.1-dev documentation</title>
+    <title>API documentation for interacting with Galaxy &mdash; BioBlend 0.4.2-dev documentation</title>
     
     <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '0.4.1-dev',
+        VERSION:     '0.4.2-dev',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
-    <link rel="top" title="BioBlend 0.4.1-dev documentation" href="../../index.html" />
+    <link rel="top" title="BioBlend 0.4.2-dev documentation" href="../../index.html" />
     <link rel="next" title="Usage documentation" href="docs.html" />
     <link rel="prev" title="Usage documentation" href="../cloudman/docs.html" /> 
   </head>
@@ -45,7 +45,7 @@
         <li class="right" >
           <a href="../cloudman/docs.html" title="Usage documentation"
              accesskey="P">previous</a> |</li>
-        <li><a href="../../index.html">BioBlend 0.4.1-dev documentation</a> &raquo;</li> 
+        <li><a href="../../index.html">BioBlend 0.4.2-dev documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -664,6 +664,55 @@ better align with the Tool Shed concepts</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="bioblend.galaxy.toolshed.ToolShedClient.install_repository_revision">
+<tt class="descname">install_repository_revision</tt><big>(</big><em>tool_shed_url</em>, <em>name</em>, <em>owner</em>, <em>changeset_revision</em>, <em>install_tool_dependencies=False</em>, <em>install_repository_dependencies=False</em>, <em>tool_panel_section_id=None</em>, <em>new_tool_panel_section_label=None</em><big>)</big><a class="headerlink" href="#bioblend.galaxy.toolshed.ToolShedClient.install_repository_revision" title="Permalink to this definition">¶</a></dt>
+<dd><p>Install a specified repository revision from a specified Tool Shed into
+this Galaxy instance. This example demonstrates installation of a repository
+that contains valid tools, loading them into a section of the Galaxy tool
+panel or creating a new tool panel section.
+You can choose if tool dependencies or repository dependencies should be
+installed, use <tt class="docutils literal"><span class="pre">install_tool_dependencies</span></tt> or <tt class="docutils literal"><span class="pre">install_repository_dependencies</span></tt>.</p>
+<p>Installing the repository into an existing tool panel section requires
+the tool panel config file (e.g., tool_conf.xml, shed_tool_conf.xml, etc)
+to contain the given tool panel section:</p>
+<blockquote>
+<div>&lt;section id=&#8221;from_test_tool_shed&#8221; name=&#8221;From Test Tool Shed&#8221; version=&#8221;&#8220;&gt;
+&lt;/section&gt;</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>tool_shed_url</strong> (<em>string</em>) &#8211; URL of the Tool Shed from which the repository should
+be installed from (e.g., <tt class="docutils literal"><span class="pre">http://testtoolshed.g2.bx.psu.edu</span></tt>)</li>
+<li><strong>name</strong> (<em>string</em>) &#8211; The name of the repository that should be installed</li>
+<li><strong>owner</strong> (<em>string</em>) &#8211; The name of the repository owner</li>
+<li><strong>changeset_revision</strong> (<em>string</em>) &#8211; The revision of the repository to be installed</li>
+<li><strong>install_tool_dependencies</strong> (<em>Boolean</em>) &#8211; Whether or not to automatically handle
+tool dependencies (see
+<a class="reference external" href="http://wiki.galaxyproject.org/AToolOrASuitePerRepository">http://wiki.galaxyproject.org/AToolOrASuitePerRepository</a>
+for more details)</li>
+<li><strong>install_repository_dependencies</strong> (<em>Boolean</em>) &#8211; Whether or not to automatically
+handle repository dependencies
+(see <a class="reference external" href="http://wiki.galaxyproject.org/DefiningRepositoryDependencies">http://wiki.galaxyproject.org/DefiningRepositoryDependencies</a>
+for more details)</li>
+<li><strong>tool_panel_section_id</strong> (<em>string</em>) &#8211; The ID of the Galaxy tool panel section
+where the tool should be insterted under.
+Note that you should specify either this
+parameter or the <tt class="docutils literal"><span class="pre">new_tool_panel_section_label</span></tt>.
+If both are specified, this one will take
+precedence.</li>
+<li><strong>new_tool_panel_section_label</strong> (<em>string</em>) &#8211; The name of a Galaxy tool panel section
+that should be created and the repository
+installed into.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="bioblend.galaxy.toolshed.ToolShedClient.show_repository">
 <tt class="descname">show_repository</tt><big>(</big><em>toolShed_id</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/toolshed.html#ToolShedClient.show_repository"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.toolshed.ToolShedClient.show_repository" title="Permalink to this definition">¶</a></dt>
 <dd><p>Display information of a repository from the Tool Shed</p>
@@ -1045,13 +1094,19 @@ from the Galaxy web UI.</li>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>library</strong> (<a class="reference internal" href="#bioblend.galaxy.objects.wrappers.Library" title="bioblend.galaxy.objects.wrappers.Library"><tt class="xref py py-class docutils literal"><span class="pre">Library</span></tt></a>) &#8211; a library object</li>
 <li><strong>name</strong> (<em>str</em>) &#8211; folder name</li>
 <li><strong>description</strong> (<em>str</em>) &#8211; optional folder description</li>
 <li><strong>base_folder</strong> (<a class="reference internal" href="#bioblend.galaxy.objects.wrappers.Folder" title="bioblend.galaxy.objects.wrappers.Folder"><tt class="xref py py-class docutils literal"><span class="pre">Folder</span></tt></a>) &#8211; parent folder, or <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt> to create in
 the root folder</li>
 </ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><a class="reference internal" href="#bioblend.galaxy.objects.wrappers.Folder" title="bioblend.galaxy.objects.wrappers.Folder"><tt class="xref py py-class docutils literal"><span class="pre">Folder</span></tt></a></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the folder just created</p>
 </td>
 </tr>
 </tbody>
@@ -1078,6 +1133,8 @@ the root folder</li>
 <dt id="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.create_library">
 <tt class="descname">create_library</tt><big>(</big><em>name</em>, <em>description=None</em>, <em>synopsis=None</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance.create_library"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.create_library" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a data library with the properties defined in the arguments.</p>
+<p>Requires <tt class="docutils literal"><span class="pre">allow_library_path_paste</span> <span class="pre">=</span> <span class="pre">True</span></tt> to be set in
+Galaxy&#8217;s configuration file <tt class="docutils literal"><span class="pre">universe_wsgi.ini</span></tt>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1094,11 +1151,16 @@ the root folder</li>
 <dt id="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.delete_history">
 <tt class="descname">delete_history</tt><big>(</big><em>history</em>, <em>purge=False</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance.delete_history"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.delete_history" title="Permalink to this definition">¶</a></dt>
 <dd><p>Delete the given history.</p>
-<div class="admonition warning">
-<p class="first admonition-title">Warning</p>
-<p class="last">Deleting a history is irreversible - all of the data from
-the history will be permanently deleted.</p>
-</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>purge</strong> (<em>bool</em>) &#8211; if <tt class="xref py py-obj docutils literal"><span class="pre">True</span></tt>, also purge the history (requires
+<tt class="docutils literal"><span class="pre">allow_user_dataset_purge</span> <span class="pre">=</span> <span class="pre">True</span></tt> to be set in Galaxy&#8217;s
+configuration file <tt class="docutils literal"><span class="pre">universe_wsgi.ini</span></tt>)</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -1135,14 +1197,14 @@ the workflow will be permanently deleted.</p>
 </tr>
 </tbody>
 </table>
-<p>See <tt class="xref py py-meth docutils literal"><span class="pre">get_stream()</span></tt> for info on other params.</p>
+<p>See <a class="reference internal" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_stream" title="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_stream"><tt class="xref py py-meth docutils literal"><span class="pre">get_stream()</span></tt></a> for info on other params.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_contents">
 <tt class="descname">get_contents</tt><big>(</big><em>dataset</em>, <em>history</em>, <em>chunk_size=4096</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance.get_contents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_contents" title="Permalink to this definition">¶</a></dt>
 <dd><p>Open <tt class="docutils literal"><span class="pre">dataset</span></tt> for reading and return its <strong>full</strong> contents.</p>
-<p>See <tt class="xref py py-meth docutils literal"><span class="pre">get_stream()</span></tt> for param info.</p>
+<p>See <a class="reference internal" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_stream" title="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_stream"><tt class="xref py py-meth docutils literal"><span class="pre">get_stream()</span></tt></a> for param info.</p>
 </dd></dl>
 
 <dl class="method">
@@ -1371,7 +1433,7 @@ deserialized JSON (dictionary), or serialized JSON (unicode).</td>
 <dt id="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.peek">
 <tt class="descname">peek</tt><big>(</big><em>dataset</em>, <em>history</em>, <em>chunk_size=4096</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance.peek"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.peek" title="Permalink to this definition">¶</a></dt>
 <dd><p>Open <tt class="docutils literal"><span class="pre">dataset</span></tt> for reading and return the first chunk.</p>
-<p>See <tt class="xref py py-meth docutils literal"><span class="pre">get_stream()</span></tt> for param info.</p>
+<p>See <a class="reference internal" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_stream" title="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_stream"><tt class="xref py py-meth docutils literal"><span class="pre">get_stream()</span></tt></a> for param info.</p>
 </dd></dl>
 
 <dl class="method">
@@ -1411,7 +1473,7 @@ outputs will be visible in the history.</li>
 <p class="first admonition-title">Warning</p>
 <p class="last">This is an asynchronous operation: when the method returns,
 the output datasets and history will most likely <strong>not</strong> be
-in their final state.  Use <tt class="xref py py-meth docutils literal"><span class="pre">wait()</span></tt> if you want to block
+in their final state.  Use <a class="reference internal" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.wait" title="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.wait"><tt class="xref py py-meth docutils literal"><span class="pre">wait()</span></tt></a> if you want to block
 until they&#8217;re ready.</p>
 </div>
 </dd></dl>
@@ -1867,7 +1929,7 @@ format required by the Galaxy web API.</td>
         <li class="right" >
           <a href="../cloudman/docs.html" title="Usage documentation"
              >previous</a> |</li>
-        <li><a href="../../index.html">BioBlend 0.4.1-dev documentation</a> &raquo;</li> 
+        <li><a href="../../index.html">BioBlend 0.4.2-dev documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
