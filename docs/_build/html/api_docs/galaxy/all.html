@@ -1187,7 +1187,7 @@ the workflow will be permanently deleted.</p>
 
 <dl class="method">
 <dt id="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.download">
-<tt class="descname">download</tt><big>(</big><em>dataset</em>, <em>history</em>, <em>outf</em>, <em>chunk_size=4096</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance.download"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.download" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">download</tt><big>(</big><em>dataset</em>, <em>outf</em>, <em>chunk_size=4096</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance.download"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.download" title="Permalink to this definition">¶</a></dt>
 <dd><p>Open <tt class="docutils literal"><span class="pre">dataset</span></tt> for reading and save its contents to <tt class="docutils literal"><span class="pre">outf</span></tt>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1202,7 +1202,7 @@ the workflow will be permanently deleted.</p>
 
 <dl class="method">
 <dt id="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_contents">
-<tt class="descname">get_contents</tt><big>(</big><em>dataset</em>, <em>history</em>, <em>chunk_size=4096</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance.get_contents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_contents" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_contents</tt><big>(</big><em>dataset</em>, <em>chunk_size=4096</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance.get_contents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_contents" title="Permalink to this definition">¶</a></dt>
 <dd><p>Open <tt class="docutils literal"><span class="pre">dataset</span></tt> for reading and return its <strong>full</strong> contents.</p>
 <p>See <a class="reference internal" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_stream" title="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_stream"><tt class="xref py py-meth docutils literal"><span class="pre">get_stream()</span></tt></a> for param info.</p>
 </dd></dl>
@@ -1342,7 +1342,7 @@ or <a class="reference internal" href="#bioblend.galaxy.objects.wrappers.Library
 
 <dl class="method">
 <dt id="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_stream">
-<tt class="descname">get_stream</tt><big>(</big><em>dataset</em>, <em>history</em>, <em>chunk_size=4096</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance.get_stream"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_stream" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_stream</tt><big>(</big><em>dataset</em>, <em>chunk_size=4096</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance.get_stream"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_stream" title="Permalink to this definition">¶</a></dt>
 <dd><p>Open <tt class="docutils literal"><span class="pre">dataset</span></tt> for reading and return an iterator over its contents.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1350,7 +1350,6 @@ or <a class="reference internal" href="#bioblend.galaxy.objects.wrappers.Library
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>dataset</strong> (<a class="reference internal" href="#bioblend.galaxy.objects.wrappers.HistoryDatasetAssociation" title="bioblend.galaxy.objects.wrappers.HistoryDatasetAssociation"><tt class="xref py py-class docutils literal"><span class="pre">HistoryDatasetAssociation</span></tt></a>) &#8211; the dataset to read from</li>
-<li><strong>history</strong> (<a class="reference internal" href="#bioblend.galaxy.objects.wrappers.History" title="bioblend.galaxy.objects.wrappers.History"><tt class="xref py py-class docutils literal"><span class="pre">History</span></tt></a>) &#8211; the history to which <tt class="docutils literal"><span class="pre">dataset</span></tt> belongs</li>
 <li><strong>chunk_size</strong> (<em>int</em>) &#8211; read this amount of bytes at a time</li>
 </ul>
 </td>
@@ -1399,10 +1398,16 @@ or <a class="reference internal" href="#bioblend.galaxy.objects.wrappers.Library
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>history</strong> (<a class="reference internal" href="#bioblend.galaxy.objects.wrappers.History" title="bioblend.galaxy.objects.wrappers.History"><tt class="xref py py-class docutils literal"><span class="pre">History</span></tt></a>) &#8211; target history</li>
 <li><strong>lds</strong> (<a class="reference internal" href="#bioblend.galaxy.objects.wrappers.LibraryDataset" title="bioblend.galaxy.objects.wrappers.LibraryDataset"><tt class="xref py py-class docutils literal"><span class="pre">LibraryDataset</span></tt></a>) &#8211; the library dataset to import</li>
 </ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><a class="reference internal" href="#bioblend.galaxy.objects.wrappers.HistoryDatasetAssociation" title="bioblend.galaxy.objects.wrappers.HistoryDatasetAssociation"><tt class="xref py py-class docutils literal"><span class="pre">HistoryDatasetAssociation</span></tt></a></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the imported history dataset</p>
 </td>
 </tr>
 </tbody>
@@ -1431,7 +1436,7 @@ deserialized JSON (dictionary), or serialized JSON (unicode).</td>
 
 <dl class="method">
 <dt id="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.peek">
-<tt class="descname">peek</tt><big>(</big><em>dataset</em>, <em>history</em>, <em>chunk_size=4096</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance.peek"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.peek" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">peek</tt><big>(</big><em>dataset</em>, <em>chunk_size=4096</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance.peek"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.peek" title="Permalink to this definition">¶</a></dt>
 <dd><p>Open <tt class="docutils literal"><span class="pre">dataset</span></tt> for reading and return the first chunk.</p>
 <p>See <a class="reference internal" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_stream" title="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_stream"><tt class="xref py py-meth docutils literal"><span class="pre">get_stream()</span></tt></a> for param info.</p>
 </dd></dl>
@@ -1444,7 +1449,7 @@ deserialized JSON (dictionary), or serialized JSON (unicode).</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>workflow</strong> (<a class="reference internal" href="#bioblend.galaxy.objects.wrappers.Workflow" title="bioblend.galaxy.objects.wrappers.Workflow"><tt class="xref py py-class docutils literal"><span class="pre">Workflow</span></tt></a>) &#8211; the workflow that should be run</li>
 <li><strong>inputs</strong> (<tt class="xref py py-class docutils literal"><span class="pre">Iterable</span></tt> of
 <a class="reference internal" href="#bioblend.galaxy.objects.wrappers.Dataset" title="bioblend.galaxy.objects.wrappers.Dataset"><tt class="xref py py-class docutils literal"><span class="pre">Dataset</span></tt></a>) &#8211; input datasets for the workflow, which will be
@@ -1465,6 +1470,12 @@ for <tt class="docutils literal"><span class="pre">workflow.tools[3]</span></tt>
 imported into the history; if <tt class="xref py py-obj docutils literal"><span class="pre">False</span></tt>, only workflow
 outputs will be visible in the history.</li>
 </ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">list of str, str</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">list of output dataset ids, output history id</p>
 </td>
 </tr>
 </tbody>
@@ -1492,12 +1503,18 @@ until they&#8217;re ready.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>library</strong> (<a class="reference internal" href="#bioblend.galaxy.objects.wrappers.Library" title="bioblend.galaxy.objects.wrappers.Library"><tt class="xref py py-class docutils literal"><span class="pre">Library</span></tt></a>) &#8211; a library object</li>
 <li><strong>data</strong> (<em>str</em>) &#8211; dataset contents</li>
 <li><strong>folder</strong> (<a class="reference internal" href="#bioblend.galaxy.objects.wrappers.Folder" title="bioblend.galaxy.objects.wrappers.Folder"><tt class="xref py py-class docutils literal"><span class="pre">Folder</span></tt></a>) &#8211; a folder object, or <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt> to upload to
 the root folder</li>
 </ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><a class="reference internal" href="#bioblend.galaxy.objects.wrappers.LibraryDataset" title="bioblend.galaxy.objects.wrappers.LibraryDataset"><tt class="xref py py-class docutils literal"><span class="pre">LibraryDataset</span></tt></a></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the dataset object that represents the uploaded content</p>
 </td>
 </tr>
 </tbody>
@@ -1513,17 +1530,11 @@ the root folder</li>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>library</strong> (<a class="reference internal" href="#bioblend.galaxy.objects.wrappers.Library" title="bioblend.galaxy.objects.wrappers.Library"><tt class="xref py py-class docutils literal"><span class="pre">Library</span></tt></a>) &#8211; a library object</li>
-<li><strong>paths</strong> (str or <tt class="xref py py-class docutils literal"><span class="pre">Iterable</span></tt> of str) &#8211; server-side file paths from which data should be read</li>
-<li><strong>folder</strong> (<a class="reference internal" href="#bioblend.galaxy.objects.wrappers.Folder" title="bioblend.galaxy.objects.wrappers.Folder"><tt class="xref py py-class docutils literal"><span class="pre">Folder</span></tt></a>) &#8211; a folder object, or <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt> to upload to
-the root folder</li>
-</ul>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>paths</strong> (str or <tt class="xref py py-class docutils literal"><span class="pre">Iterable</span></tt> of str) &#8211; server-side file paths from which data should be read</td>
 </tr>
 </tbody>
 </table>
-<p>Optional keyword arguments: <tt class="docutils literal"><span class="pre">file_type</span></tt>, <tt class="docutils literal"><span class="pre">dbkey</span></tt>.</p>
+<p>See <a class="reference internal" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.upload_data" title="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.upload_data"><tt class="xref py py-meth docutils literal"><span class="pre">upload_data()</span></tt></a> for info on other params.</p>
 </dd></dl>
 
 <dl class="method">
@@ -1534,17 +1545,11 @@ the root folder</li>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>library</strong> (<a class="reference internal" href="#bioblend.galaxy.objects.wrappers.Library" title="bioblend.galaxy.objects.wrappers.Library"><tt class="xref py py-class docutils literal"><span class="pre">Library</span></tt></a>) &#8211; a library object</li>
-<li><strong>path</strong> (<em>str</em>) &#8211; local file path from which data should be read</li>
-<li><strong>folder</strong> (<a class="reference internal" href="#bioblend.galaxy.objects.wrappers.Folder" title="bioblend.galaxy.objects.wrappers.Folder"><tt class="xref py py-class docutils literal"><span class="pre">Folder</span></tt></a>) &#8211; a folder object, or <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt> to upload to
-the root folder</li>
-</ul>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> (<em>str</em>) &#8211; local file path from which data should be read</td>
 </tr>
 </tbody>
 </table>
-<p>Optional keyword arguments: <tt class="docutils literal"><span class="pre">file_type</span></tt>, <tt class="docutils literal"><span class="pre">dbkey</span></tt>.</p>
+<p>See <a class="reference internal" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.upload_data" title="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.upload_data"><tt class="xref py py-meth docutils literal"><span class="pre">upload_data()</span></tt></a> for info on other params.</p>
 </dd></dl>
 
 <dl class="method">
@@ -1555,31 +1560,24 @@ the root folder</li>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>library</strong> (<a class="reference internal" href="#bioblend.galaxy.objects.wrappers.Library" title="bioblend.galaxy.objects.wrappers.Library"><tt class="xref py py-class docutils literal"><span class="pre">Library</span></tt></a>) &#8211; a library object</li>
-<li><strong>url</strong> (<em>str</em>) &#8211; URL from which data should be read</li>
-<li><strong>folder</strong> (<a class="reference internal" href="#bioblend.galaxy.objects.wrappers.Folder" title="bioblend.galaxy.objects.wrappers.Folder"><tt class="xref py py-class docutils literal"><span class="pre">Folder</span></tt></a>) &#8211; a folder object, or <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt> to upload to
-the root folder</li>
-</ul>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>url</strong> (<em>str</em>) &#8211; URL from which data should be read</td>
 </tr>
 </tbody>
 </table>
-<p>Optional keyword arguments: <tt class="docutils literal"><span class="pre">file_type</span></tt>, <tt class="docutils literal"><span class="pre">dbkey</span></tt>.</p>
+<p>See <a class="reference internal" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.upload_data" title="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.upload_data"><tt class="xref py py-meth docutils literal"><span class="pre">upload_data()</span></tt></a> for info on other params.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.wait">
-<tt class="descname">wait</tt><big>(</big><em>ds_ids</em>, <em>history</em>, <em>polling_interval=10</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance.wait"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.wait" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">wait</tt><big>(</big><em>ds_ids</em>, <em>hist_id</em>, <em>polling_interval=10</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance.wait"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.wait" title="Permalink to this definition">¶</a></dt>
 <dd><p>Wait until all datasets are ready or one of them is in error.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>ds_ids</strong> (<tt class="xref py py-class docutils literal"><span class="pre">Iterable</span></tt> of str) &#8211; dataset ids, which should belong to <tt class="docutils literal"><span class="pre">history</span></tt>
-(if they don&#8217;t, the method will exit immediately)</li>
-<li><strong>history</strong> (<a class="reference internal" href="#bioblend.galaxy.objects.wrappers.History" title="bioblend.galaxy.objects.wrappers.History"><tt class="xref py py-class docutils literal"><span class="pre">History</span></tt></a>) &#8211; the history to which the desired datasets belong</li>
+<li><strong>ds_ids</strong> (<tt class="xref py py-class docutils literal"><span class="pre">Iterable</span></tt> of str) &#8211; dataset ids, which should belong to the history
+identified by <tt class="docutils literal"><span class="pre">hist_id</span></tt> (any that doesn&#8217;t will be ignored)</li>
 <li><strong>polling_interval</strong> (<em>float</em>) &#8211; polling interval in seconds</li>
 </ul>
 </td>
@@ -1811,19 +1809,19 @@ format required by the Galaxy web API.</td>
 
 <dl class="class">
 <dt id="bioblend.galaxy.objects.wrappers.Folder">
-<em class="property">class </em><tt class="descclassname">bioblend.galaxy.objects.wrappers.</tt><tt class="descname">Folder</tt><big>(</big><em>f_dict</em>, <em>id</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/wrappers.html#Folder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.Folder" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">bioblend.galaxy.objects.wrappers.</tt><tt class="descname">Folder</tt><big>(</big><em>f_dict</em>, <em>id</em>, <em>container_id</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/wrappers.html#Folder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.Folder" title="Permalink to this definition">¶</a></dt>
 <dd><p>Maps to a folder in a Galaxy library.</p>
 </dd></dl>
 
 <dl class="class">
 <dt id="bioblend.galaxy.objects.wrappers.Dataset">
-<em class="property">class </em><tt class="descclassname">bioblend.galaxy.objects.wrappers.</tt><tt class="descname">Dataset</tt><big>(</big><em>ds_dict</em>, <em>id</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/wrappers.html#Dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.Dataset" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">bioblend.galaxy.objects.wrappers.</tt><tt class="descname">Dataset</tt><big>(</big><em>ds_dict</em>, <em>id</em>, <em>container_id</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/wrappers.html#Dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.Dataset" title="Permalink to this definition">¶</a></dt>
 <dd><p>Abstract base class for Galaxy datasets.</p>
 </dd></dl>
 
 <dl class="class">
 <dt id="bioblend.galaxy.objects.wrappers.HistoryDatasetAssociation">
-<em class="property">class </em><tt class="descclassname">bioblend.galaxy.objects.wrappers.</tt><tt class="descname">HistoryDatasetAssociation</tt><big>(</big><em>ds_dict</em>, <em>id</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/wrappers.html#HistoryDatasetAssociation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.HistoryDatasetAssociation" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">bioblend.galaxy.objects.wrappers.</tt><tt class="descname">HistoryDatasetAssociation</tt><big>(</big><em>ds_dict</em>, <em>id</em>, <em>container_id</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/wrappers.html#HistoryDatasetAssociation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.HistoryDatasetAssociation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Maps to a Galaxy <tt class="docutils literal"><span class="pre">HistoryDatasetAssociation</span></tt>.</p>
 <dl class="attribute">
 <dt id="bioblend.galaxy.objects.wrappers.HistoryDatasetAssociation.SRC">
@@ -1834,7 +1832,7 @@ format required by the Galaxy web API.</td>
 
 <dl class="class">
 <dt id="bioblend.galaxy.objects.wrappers.LibraryDatasetDatasetAssociation">
-<em class="property">class </em><tt class="descclassname">bioblend.galaxy.objects.wrappers.</tt><tt class="descname">LibraryDatasetDatasetAssociation</tt><big>(</big><em>ds_dict</em>, <em>id</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/wrappers.html#LibraryDatasetDatasetAssociation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.LibraryDatasetDatasetAssociation" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">bioblend.galaxy.objects.wrappers.</tt><tt class="descname">LibraryDatasetDatasetAssociation</tt><big>(</big><em>ds_dict</em>, <em>id</em>, <em>container_id</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/wrappers.html#LibraryDatasetDatasetAssociation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.LibraryDatasetDatasetAssociation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Maps to a Galaxy <tt class="docutils literal"><span class="pre">LibraryDatasetDatasetAssociation</span></tt>.</p>
 <dl class="attribute">
 <dt id="bioblend.galaxy.objects.wrappers.LibraryDatasetDatasetAssociation.SRC">
@@ -1845,7 +1843,7 @@ format required by the Galaxy web API.</td>
 
 <dl class="class">
 <dt id="bioblend.galaxy.objects.wrappers.LibraryDataset">
-<em class="property">class </em><tt class="descclassname">bioblend.galaxy.objects.wrappers.</tt><tt class="descname">LibraryDataset</tt><big>(</big><em>ds_dict</em>, <em>id</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/wrappers.html#LibraryDataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.LibraryDataset" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">bioblend.galaxy.objects.wrappers.</tt><tt class="descname">LibraryDataset</tt><big>(</big><em>ds_dict</em>, <em>id</em>, <em>container_id</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/wrappers.html#LibraryDataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.LibraryDataset" title="Permalink to this definition">¶</a></dt>
 <dd><p>Maps to a Galaxy <tt class="docutils literal"><span class="pre">LibraryDataset</span></tt>.</p>
 <dl class="attribute">
 <dt id="bioblend.galaxy.objects.wrappers.LibraryDataset.SRC">

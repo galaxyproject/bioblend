@@ -217,11 +217,13 @@ class TestLibContents(TestGalaxyInstance):
         folder = self.gi.create_folder(self.lib, name, description=desc)
         self.assertEqual(folder.name, name)
         self.assertEqual(folder.description, desc)
+        self.assertEqual(folder.container_id, self.lib.id)
 
     def test_dataset(self):
         folder = self.gi.create_folder(self.lib, 'test_%s' % uuid.uuid4().hex)
         data = 'foo\nbar\n'
         ds = self.gi.upload_data(self.lib, data, folder=folder)
+        self.assertEqual(ds.container_id, self.lib.id)
         self.assertEqual(ds.folder_id, folder.id)
         lib = self.gi.get_library(self.lib.id)
         self.assertEqual(len(lib.dataset_ids), 1)
@@ -230,6 +232,7 @@ class TestLibContents(TestGalaxyInstance):
     def test_dataset_from_url(self):
         if is_reachable(self.URL):
             ds = self.gi.upload_from_url(self.lib, self.URL)
+            self.assertEqual(ds.container_id, self.lib.id)
             assert isinstance(ds, wrappers.Dataset)
         else:
             print "skipped 'url not reachable'"
@@ -240,6 +243,7 @@ class TestLibContents(TestGalaxyInstance):
         os.close(fd)
         ds = self.gi.upload_from_local(self.lib, path)
         assert isinstance(ds, wrappers.Dataset)
+        self.assertEqual(ds.container_id, self.lib.id)
         os.remove(path)
 
     def test_datasets_from_fs(self):
@@ -253,6 +257,7 @@ class TestLibContents(TestGalaxyInstance):
             )
         self.assertEqual(len(dss), 2)
         for ds, fn in zip(dss, fnames):
+            self.assertEqual(ds.container_id, self.lib.id)
             self.assertEqual(ds.file_name, fn)
         dss = self.gi.upload_from_galaxy_fs(self.lib, fnames[-1])
         self.assertEqual(len(dss), 1)
@@ -275,6 +280,7 @@ class TestHistContents(TestGalaxyInstance):
         lds = self.gi.upload_data(self.lib, 'foo\nbar\n')
         hda = self.gi.import_dataset_to_history(self.hist, lds)
         self.assertTrue(isinstance(hda, wrappers.HistoryDatasetAssociation))
+        self.assertEqual(hda.container_id, self.hist.id)
         updated_hist = self.gi.get_history(self.hist.id)
         self.assertTrue(hda.id in updated_hist.dataset_ids)
 
@@ -309,16 +315,17 @@ class TestRunWorkflow(TestGalaxyInstance):
         else:
             params = None
             sep = '\t'  # default
-        output_ids, out_hist = self.gi.run_workflow(
+        output_ids, out_hist_id = self.gi.run_workflow(
             self.wf, self.inputs, hist, params=params
             )
         sys.stdout.write(os.linesep)
-        self.gi.wait(output_ids, out_hist, polling_interval=5)
+        self.gi.wait(output_ids, out_hist_id, polling_interval=5)
         self.assertEqual(len(output_ids), 1)
         out_ds_id = output_ids[0]
+        out_hist = self.gi.get_history(out_hist_id)
         self.assertTrue(out_ds_id in out_hist.dataset_ids)
         out_ds = self.gi.get_history_dataset(out_hist, out_ds_id)
-        res = self.gi.get_contents(out_ds, out_hist)
+        res = self.gi.get_contents(out_ds)
         self.__check_res(res, sep)
         if existing_hist:
             self.assertEqual(out_hist.id, hist.id)

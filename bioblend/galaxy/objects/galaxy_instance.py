@@ -136,6 +136,9 @@ class GalaxyInstance(object):
         :param folder: a folder object, or :obj:`None` to upload to
           the root folder
 
+        :rtype: :class:`~bioblend.galaxy.objects.wrappers.LibraryDataset`
+        :return: the dataset object that represents the uploaded content
+
         Optional keyword arguments: ``file_type``, ``dbkey``.
         """
         fid = self.__pre_upload(library, folder)
@@ -148,17 +151,10 @@ class GalaxyInstance(object):
         """
         Upload data to a Galaxy library from the given URL.
 
-        :type library: :class:`~bioblend.galaxy.objects.wrappers.Library`
-        :param library: a library object
-
         :type url: str
         :param url: URL from which data should be read
 
-        :type folder: :class:`~bioblend.galaxy.objects.wrappers.Folder`
-        :param folder: a folder object, or :obj:`None` to upload to
-          the root folder
-
-        Optional keyword arguments: ``file_type``, ``dbkey``.
+        See :meth:`.upload_data` for info on other params.
         """
         fid = self.__pre_upload(library, folder)
         res = self.gi.libraries.upload_file_from_url(
@@ -170,17 +166,10 @@ class GalaxyInstance(object):
         """
         Upload data to a Galaxy library from a local file.
 
-        :type library: :class:`~bioblend.galaxy.objects.wrappers.Library`
-        :param library: a library object
-
         :type path: str
         :param path: local file path from which data should be read
 
-        :type folder: :class:`~bioblend.galaxy.objects.wrappers.Folder`
-        :param folder: a folder object, or :obj:`None` to upload to
-          the root folder
-
-        Optional keyword arguments: ``file_type``, ``dbkey``.
+        See :meth:`.upload_data` for info on other params.
         """
         fid = self.__pre_upload(library, folder)
         res = self.gi.libraries.upload_file_from_local_path(
@@ -192,17 +181,10 @@ class GalaxyInstance(object):
         """
         Upload data to a Galaxy library from filesystem paths on the server.
 
-        :type library: :class:`~bioblend.galaxy.objects.wrappers.Library`
-        :param library: a library object
-
         :type paths: str or :class:`~collections.Iterable` of str
         :param paths: server-side file paths from which data should be read
 
-        :type folder: :class:`~bioblend.galaxy.objects.wrappers.Folder`
-        :param folder: a folder object, or :obj:`None` to upload to
-          the root folder
-
-        Optional keyword arguments: ``file_type``, ``dbkey``.
+        See :meth:`.upload_data` for info on other params.
         """
         fid = self.__pre_upload(library, folder)
         if isinstance(paths, basestring):
@@ -264,7 +246,7 @@ class GalaxyInstance(object):
         :return: the folder corresponding to ``id_``
         """
         f_dict = self.gi.libraries.show_folder(library.id, f_id)
-        return wrappers.Folder(f_dict, f_id)
+        return wrappers.Folder(f_dict, f_id, library.id)
 
     #-- history --
 
@@ -336,6 +318,10 @@ class GalaxyInstance(object):
 
         :type lds: :class:`~bioblend.galaxy.objects.wrappers.LibraryDataset`
         :param lds: the library dataset to import
+
+        :rtype:
+          :class:`~bioblend.galaxy.objects.wrappers.HistoryDatasetAssociation`
+        :return: the imported history dataset
         """
         if not history.is_mapped():
             self.__error('history is not mapped to a Galaxy object')
@@ -469,6 +455,9 @@ class GalaxyInstance(object):
           imported into the history; if :obj:`False`, only workflow
           outputs will be visible in the history.
 
+        :rtype: list of str, str
+        :return: list of output dataset ids, output history id
+
         .. warning::
           This is an asynchronous operation: when the method returns,
           the output datasets and history will most likely **not** be
@@ -497,18 +486,15 @@ class GalaxyInstance(object):
         res = self.gi.workflows.run_workflow(workflow.id, ds_map, **kwargs)
         res = self.__get_dict('run_workflow', res)
         # res structure: {'history': HIST_ID, 'outputs': [DS_ID, DS_ID, ...]}
-        return res['outputs'], self.get_history(res['history'])
+        return res['outputs'], res['history']
 
-    def wait(self, ds_ids, history, polling_interval=_POLLING_INTERVAL):
+    def wait(self, ds_ids, hist_id, polling_interval=_POLLING_INTERVAL):
         """
         Wait until all datasets are ready or one of them is in error.
 
         :type ds_ids: :class:`~collections.Iterable` of str
-        :param ds_ids: dataset ids, which should belong to ``history``
-          (if they don't, the method will exit immediately)
-
-        :type history: :class:`~bioblend.galaxy.objects.wrappers.History`
-        :param history: the history to which the desired datasets belong
+        :param ds_ids: dataset ids, which should belong to the history
+          identified by ``hist_id`` (any that doesn't will be ignored)
 
         :type polling_interval: float
         :param polling_interval: polling interval in seconds
@@ -521,7 +507,7 @@ class GalaxyInstance(object):
         """
         self.log.info('waiting for datasets')
         while True:
-            res = self.gi.histories.show_history(history.id)
+            res = self.gi.histories.show_history(hist_id)
             hist_dict = self.__get_dict('show_history', res)
             ds_states = _get_ds_states(hist_dict)
             pending = 0
@@ -529,7 +515,7 @@ class GalaxyInstance(object):
                 state = ds_states.get(id_)
                 self.log.info('%s: %s' % (id_, state))
                 if state == 'error':
-                    self.__error(self.__get_error_info(id_, history))
+                    self.__error(self.__get_error_info(id_, hist_dict))
                 if state in _PENDING:
                     pending += 1
             if not pending:
@@ -537,7 +523,7 @@ class GalaxyInstance(object):
             time.sleep(polling_interval)
         time.sleep(polling_interval)  # small margin of safety
 
-    def get_stream(self, dataset, history, chunk_size=_CHUNK_SIZE):
+    def get_stream(self, dataset, chunk_size=_CHUNK_SIZE):
         """
         Open ``dataset`` for reading and return an iterator over its contents.
 
@@ -545,17 +531,13 @@ class GalaxyInstance(object):
           :class:`~bioblend.galaxy.objects.wrappers.HistoryDatasetAssociation`
         :param dataset: the dataset to read from
 
-        :type history: :class:`~bioblend.galaxy.objects.wrappers.History`
-        :param history: the history to which ``dataset`` belongs
-
         :type chunk_size: int
         :param chunk_size: read this amount of bytes at a time
         """
-        if dataset.id not in history.dataset_ids:
-            self.__error('dataset does not belong to history')
-        self.wait([dataset.id], history)
+        hist_id = dataset.container_id
+        self.wait([dataset.id], hist_id)
         base_url = self.gi._make_url(
-            self.gi.histories, module_id=history.id, contents=True
+            self.gi.histories, module_id=hist_id, contents=True
             )
         url = "%s/%s/display" % (base_url, dataset.id)
         get_options = {
@@ -567,15 +549,15 @@ class GalaxyInstance(object):
         r.raise_for_status()
         return r.iter_content(chunk_size)  # FIXME: client can't close r
 
-    def peek(self, dataset, history, chunk_size=_CHUNK_SIZE):
+    def peek(self, dataset, chunk_size=_CHUNK_SIZE):
         """
         Open ``dataset`` for reading and return the first chunk.
 
         See :meth:`.get_stream` for param info.
         """
-        return self.get_stream(dataset, history, chunk_size=chunk_size).next()
+        return self.get_stream(dataset, chunk_size=chunk_size).next()
 
-    def download(self, dataset, history, outf, chunk_size=_CHUNK_SIZE):
+    def download(self, dataset, outf, chunk_size=_CHUNK_SIZE):
         """
         Open ``dataset`` for reading and save its contents to ``outf``.
 
@@ -584,16 +566,16 @@ class GalaxyInstance(object):
 
         See :meth:`.get_stream` for info on other params.
         """
-        for chunk in self.get_stream(dataset, history, chunk_size=chunk_size):
+        for chunk in self.get_stream(dataset, chunk_size=chunk_size):
             outf.write(chunk)
 
-    def get_contents(self, dataset, history, chunk_size=_CHUNK_SIZE):
+    def get_contents(self, dataset, chunk_size=_CHUNK_SIZE):
         """
         Open ``dataset`` for reading and return its **full** contents.
 
         See :meth:`.get_stream` for param info.
         """
-        return ''.join(self.get_stream(dataset, history, chunk_size=chunk_size))
+        return ''.join(self.get_stream(dataset, chunk_size=chunk_size))
 
     def delete_workflow(self, workflow):
         """
@@ -659,7 +641,7 @@ class GalaxyInstance(object):
                 container_id = src
         gi_client = getattr(self.gi, ctype.API_MODULE)
         ds_dict = gi_client.show_dataset(container_id, ds_id)
-        return ctype.DS_TYPE(ds_dict, ds_id)
+        return ctype.DS_TYPE(ds_dict, ds_id, container_id)
 
     def __pre_upload(self, library, folder):
         if not library.is_mapped():
@@ -670,10 +652,10 @@ class GalaxyInstance(object):
         ds_info = self.__get_dict(meth_name, reply)
         return self.get_library_dataset(library, ds_info['id'])
 
-    def __get_error_info(self, ds_id, history):
+    def __get_error_info(self, ds_id, hist_dict):
         msg = ds_id
         try:
-            ds = self.get_history_dataset(history, ds_id)
+            ds = self.get_history_dataset(hist_dict, ds_id)
             msg += ' (%s): ' % ds.name
             msg += ds.misc_info
         except StandardError:  # avoid 'error while generating an error report'

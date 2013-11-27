@@ -277,8 +277,9 @@ class Dataset(Wrapper):
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
-    def __init__(self, ds_dict, id):
+    def __init__(self, ds_dict, id, container_id):
         super(Dataset, self).__init__(ds_dict, id=id)
+        object.__setattr__(self, 'container_id', container_id)
 
 
 class HistoryDatasetAssociation(Dataset):
@@ -288,8 +289,10 @@ class HistoryDatasetAssociation(Dataset):
 
     SRC = 'hda'
 
-    def __init__(self, ds_dict, id):
-        super(HistoryDatasetAssociation, self).__init__(ds_dict, id)
+    def __init__(self, ds_dict, id, container_id):
+        super(HistoryDatasetAssociation, self).__init__(
+            ds_dict, id, container_id
+            )
 
 
 class LibraryDatasetDatasetAssociation(Dataset):
@@ -299,8 +302,10 @@ class LibraryDatasetDatasetAssociation(Dataset):
 
     SRC = 'ldda'
 
-    def __init__(self, ds_dict, id):
-        super(LibraryDatasetDatasetAssociation, self).__init__(ds_dict, id)
+    def __init__(self, ds_dict, id, container_id):
+        super(LibraryDatasetDatasetAssociation, self).__init__(
+            ds_dict, id, container_id
+            )
 
 
 class LibraryDataset(Dataset):
@@ -310,8 +315,8 @@ class LibraryDataset(Dataset):
 
     SRC = 'ld'
 
-    def __init__(self, ds_dict, id):
-        super(LibraryDataset, self).__init__(ds_dict, id)
+    def __init__(self, ds_dict, id, container_id):
+        super(LibraryDataset, self).__init__(ds_dict, id, container_id)
 
 
 class DatasetContainer(Wrapper):
@@ -365,7 +370,8 @@ class Folder(Wrapper):
     Maps to a folder in a Galaxy library.
     """
 
-    def __init__(self, f_dict, id):
+    def __init__(self, f_dict, id, container_id):
         if id.startswith('F'):  # folder id from library contents
             id = id[1:]
         super(Folder, self).__init__(f_dict, id=id)
+        object.__setattr__(self, 'container_id', container_id)
