@@ -1246,15 +1246,15 @@ or <a class="reference internal" href="#bioblend.galaxy.objects.wrappers.Library
 
 <dl class="method">
 <dt id="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_histories">
-<tt class="descname">get_histories</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance.get_histories"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_histories" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get all histories for the user.</p>
+<tt class="descname">get_histories</tt><big>(</big><em>name=None</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance.get_histories"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_histories" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get histories owned by the user of this Galaxy instance.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list of <a class="reference internal" href="#bioblend.galaxy.objects.wrappers.History" title="bioblend.galaxy.objects.wrappers.History"><tt class="xref py py-class docutils literal"><span class="pre">History</span></tt></a></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> (<em>str</em>) &#8211; return only histories with this name</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">all histories owned by the user of this galaxy instance</td>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">list of <a class="reference internal" href="#bioblend.galaxy.objects.wrappers.History" title="bioblend.galaxy.objects.wrappers.History"><tt class="xref py py-class docutils literal"><span class="pre">History</span></tt></a></td>
 </tr>
 </tbody>
 </table>
@@ -1293,16 +1293,38 @@ or <a class="reference internal" href="#bioblend.galaxy.objects.wrappers.Library
 </dd></dl>
 
 <dl class="method">
-<dt id="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_libraries">
-<tt class="descname">get_libraries</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance.get_libraries"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_libraries" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get all libraries for the user.</p>
+<dt id="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_history_previews">
+<tt class="descname">get_history_previews</tt><big>(</big><em>name=None</em>, <em>deleted=False</em><big>)</big><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_history_previews" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get history previews for the user of this Galaxy instance.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list of <a class="reference internal" href="#bioblend.galaxy.objects.wrappers.Library" title="bioblend.galaxy.objects.wrappers.Library"><tt class="xref py py-class docutils literal"><span class="pre">Library</span></tt></a></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<em>str</em>) &#8211; return only histories with this name</li>
+<li><strong>deleted</strong> (<em>bool</em>) &#8211; if <tt class="xref py py-obj docutils literal"><span class="pre">True</span></tt>, return only deleted histories</li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">all libraries owned by the user of this galaxy instance</td>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list of
+<a class="reference internal" href="#bioblend.galaxy.objects.wrappers.HistoryPreview" title="bioblend.galaxy.objects.wrappers.HistoryPreview"><tt class="xref py py-class docutils literal"><span class="pre">HistoryPreview</span></tt></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_libraries">
+<tt class="descname">get_libraries</tt><big>(</big><em>name=None</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance.get_libraries"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_libraries" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get libraries owned by the user of this Galaxy instance.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> (<em>str</em>) &#8211; return only libraries with this name</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">list of <a class="reference internal" href="#bioblend.galaxy.objects.wrappers.Library" title="bioblend.galaxy.objects.wrappers.Library"><tt class="xref py py-class docutils literal"><span class="pre">Library</span></tt></a></td>
 </tr>
 </tbody>
 </table>
@@ -1335,6 +1357,28 @@ or <a class="reference internal" href="#bioblend.galaxy.objects.wrappers.Library
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#bioblend.galaxy.objects.wrappers.LibraryDataset" title="bioblend.galaxy.objects.wrappers.LibraryDataset"><tt class="xref py py-class docutils literal"><span class="pre">LibraryDataset</span></tt></a></td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the library dataset corresponding to <tt class="docutils literal"><span class="pre">id_</span></tt></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_library_previews">
+<tt class="descname">get_library_previews</tt><big>(</big><em>name=None</em>, <em>deleted=False</em><big>)</big><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_library_previews" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get library previews for the user of this Galaxy instance.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<em>str</em>) &#8211; return only libraries with this name</li>
+<li><strong>deleted</strong> (<em>bool</em>) &#8211; if <tt class="xref py py-obj docutils literal"><span class="pre">True</span></tt>, return only deleted libraries</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list of
+<a class="reference internal" href="#bioblend.galaxy.objects.wrappers.LibraryPreview" title="bioblend.galaxy.objects.wrappers.LibraryPreview"><tt class="xref py py-class docutils literal"><span class="pre">LibraryPreview</span></tt></a></p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -1375,16 +1419,33 @@ or <a class="reference internal" href="#bioblend.galaxy.objects.wrappers.Library
 </dd></dl>
 
 <dl class="method">
-<dt id="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_workflows">
-<tt class="descname">get_workflows</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance.get_workflows"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_workflows" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get all workflows for the user.</p>
+<dt id="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_workflow_previews">
+<tt class="descname">get_workflow_previews</tt><big>(</big><em>name=None</em><big>)</big><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_workflow_previews" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get workflow previews for the user of this Galaxy instance.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list of <a class="reference internal" href="#bioblend.galaxy.objects.wrappers.Workflow" title="bioblend.galaxy.objects.wrappers.Workflow"><tt class="xref py py-class docutils literal"><span class="pre">Workflow</span></tt></a></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> (<em>str</em>) &#8211; return only workflows with this name</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">all workflows owned by the user of this galaxy instance</td>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">list of
+<a class="reference internal" href="#bioblend.galaxy.objects.wrappers.WorkflowPreview" title="bioblend.galaxy.objects.wrappers.WorkflowPreview"><tt class="xref py py-class docutils literal"><span class="pre">WorkflowPreview</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_workflows">
+<tt class="descname">get_workflows</tt><big>(</big><em>name=None</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/galaxy_instance.html#GalaxyInstance.get_workflows"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.galaxy_instance.GalaxyInstance.get_workflows" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get workflows owned by the user of this Galaxy instance.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> (<em>str</em>) &#8211; return only workflows with this name</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">list of <a class="reference internal" href="#bioblend.galaxy.objects.wrappers.Workflow" title="bioblend.galaxy.objects.wrappers.Workflow"><tt class="xref py py-class docutils literal"><span class="pre">Workflow</span></tt></a></td>
 </tr>
 </tbody>
 </table>
@@ -1850,6 +1911,39 @@ format required by the Galaxy web API.</td>
 <tt class="descname">SRC</tt><em class="property"> = 'ld'</em><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.LibraryDataset.SRC" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+</dd></dl>
+
+<dl class="class">
+<dt id="bioblend.galaxy.objects.wrappers.Preview">
+<em class="property">class </em><tt class="descclassname">bioblend.galaxy.objects.wrappers.</tt><tt class="descname">Preview</tt><big>(</big><em>pw_dict</em>, <em>id</em><big>)</big><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.Preview" title="Permalink to this definition">¶</a></dt>
+<dd><p>Abstract base class for Galaxy entity &#8216;previews&#8217;.</p>
+<p>Classes derived from this one model the short summaries returned
+by global getters such as <tt class="docutils literal"><span class="pre">/api/libraries</span></tt>.  Previews typically
+have a small numbers of attributes including the name and id.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="bioblend.galaxy.objects.wrappers.LibraryPreview">
+<em class="property">class </em><tt class="descclassname">bioblend.galaxy.objects.wrappers.</tt><tt class="descname">LibraryPreview</tt><big>(</big><em>pw_dict</em>, <em>id</em><big>)</big><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.LibraryPreview" title="Permalink to this definition">¶</a></dt>
+<dd><p>Models Galaxy library &#8216;previews&#8217;.</p>
+<p>Instances of this class wrap dictionaries obtained by getting
+<tt class="docutils literal"><span class="pre">/api/libraries</span></tt> from Galaxy.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="bioblend.galaxy.objects.wrappers.HistoryPreview">
+<em class="property">class </em><tt class="descclassname">bioblend.galaxy.objects.wrappers.</tt><tt class="descname">HistoryPreview</tt><big>(</big><em>pw_dict</em>, <em>id</em><big>)</big><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.HistoryPreview" title="Permalink to this definition">¶</a></dt>
+<dd><p>Models Galaxy history &#8216;previews&#8217;.</p>
+<p>Instances of this class wrap dictionaries obtained by getting
+<tt class="docutils literal"><span class="pre">/api/histories</span></tt> from Galaxy.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="bioblend.galaxy.objects.wrappers.WorkflowPreview">
+<em class="property">class </em><tt class="descclassname">bioblend.galaxy.objects.wrappers.</tt><tt class="descname">WorkflowPreview</tt><big>(</big><em>pw_dict</em>, <em>id</em><big>)</big><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.WorkflowPreview" title="Permalink to this definition">¶</a></dt>
+<dd><p>Models Galaxy workflow &#8216;previews&#8217;.</p>
+<p>Instances of this class wrap dictionaries obtained by getting
+<tt class="docutils literal"><span class="pre">/api/workflows</span></tt> from Galaxy.</p>
 </dd></dl>
 
 </div>

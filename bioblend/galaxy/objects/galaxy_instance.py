@@ -95,15 +95,33 @@ class GalaxyInstance(object):
         """
         return self.__get_container(id_, wrappers.Library)
 
-    def get_libraries(self):
+    def get_library_previews(self, name=None, deleted=False):
         """
-        Get all libraries for the user.
+        Get library previews for the user of this Galaxy instance.
+
+        :type name: str
+        :param name: return only libraries with this name
+
+        :type deleted: bool
+        :param deleted: if :obj:`True`, return only deleted libraries
+
+        :rtype: list of
+          :class:`~bioblend.galaxy.objects.wrappers.LibraryPreview`
+        """
+        dicts = self.gi.libraries.get_libraries(name=name, deleted=deleted)
+        return [wrappers.LibraryPreview(_, _['id']) for _ in dicts]
+
+    def get_libraries(self, name=None):
+        """
+        Get libraries owned by the user of this Galaxy instance.
+
+        :type name: str
+        :param name: return only libraries with this name
 
         :rtype: list of :class:`~bioblend.galaxy.objects.wrappers.Library`
-        :return: all libraries owned by the user of this galaxy instance
         """
-        lib_infos = self.gi.libraries.get_libraries()
-        return [self.get_library(li['id']) for li in lib_infos]
+        dicts = self.gi.libraries.get_libraries(name=name)
+        return [self.get_library(_['id']) for _ in dicts]
 
     def delete_library(self, library):
         """
@@ -270,15 +288,35 @@ class GalaxyInstance(object):
         """
         return self.__get_container(id_, wrappers.History)
 
-    def get_histories(self):
+    def get_history_previews(self, name=None, deleted=False):
         """
-        Get all histories for the user.
+        Get history previews for the user of this Galaxy instance.
+
+        :type name: str
+        :param name: return only histories with this name
+
+        :type deleted: bool
+        :param deleted: if :obj:`True`, return only deleted histories
+
+        :rtype: list of
+          :class:`~bioblend.galaxy.objects.wrappers.HistoryPreview`
+        """
+        dicts = self.gi.histories.get_histories(name=name, deleted=deleted)
+        return [wrappers.HistoryPreview(_, _['id']) for _ in dicts]
+
+    def get_histories(self, name=None):
+        """
+        Get histories owned by the user of this Galaxy instance.
+
+        :type name: str
+        :param name: return only histories with this name
 
         :rtype: list of :class:`~bioblend.galaxy.objects.wrappers.History`
-        :return: all histories owned by the user of this galaxy instance
         """
-        hist_infos = self.gi.histories.get_histories()
-        return [self.get_history(hi['id']) for hi in hist_infos]
+        dicts = self.gi.histories.get_histories(name=name)
+        return [self.get_history(_['id']) for _ in dicts]
+
+
 
     def update_history(self, history, name=None, annotation=None):
         """
@@ -411,15 +449,31 @@ class GalaxyInstance(object):
         inputs = self.__get_dict('show_workflow', res)['inputs']
         return wrappers.Workflow(wf_dict, id=id_, inputs=inputs)
 
-    def get_workflows(self):
+    # the 'deleted' option is not available for workflows
+    def get_workflow_previews(self, name=None):
         """
-        Get all workflows for the user.
+        Get workflow previews for the user of this Galaxy instance.
+
+        :type name: str
+        :param name: return only workflows with this name
+
+        :rtype: list of
+          :class:`~bioblend.galaxy.objects.wrappers.WorkflowPreview`
+        """
+        dicts = self.gi.workflows.get_workflows(name=name)
+        return [wrappers.WorkflowPreview(_, _['id']) for _ in dicts]
+
+    def get_workflows(self, name=None):
+        """
+        Get workflows owned by the user of this Galaxy instance.
+
+        :type name: str
+        :param name: return only workflows with this name
 
         :rtype: list of :class:`~bioblend.galaxy.objects.wrappers.Workflow`
-        :return: all workflows owned by the user of this galaxy instance
         """
-        wf_infos = self.gi.workflows.get_workflows()
-        return [self.get_workflow(wi['id']) for wi in wf_infos]
+        dicts = self.gi.workflows.get_workflows(name=name)
+        return [self.get_workflow(_['id']) for _ in dicts]
 
     def run_workflow(self, workflow, inputs, history, params=None,
                      import_inputs=False):

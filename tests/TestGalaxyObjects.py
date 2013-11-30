@@ -200,6 +200,58 @@ class TestGalaxyInstance(unittest.TestCase):
         self.assertTrue(imported.id in [_.id for _ in self.gi.get_workflows()])
         self.gi.delete_workflow(imported)
 
+    def test_get_libraries(self):
+        self.__test_multi_get('library')
+
+    def test_get_histories(self):
+        self.__test_multi_get('history')
+
+    def test_get_workflows(self):
+        self.__test_multi_get('workflow')
+
+    def __test_multi_get(self, obj_type):
+        if obj_type == 'library':
+            create = self.gi.create_library
+            get_objs = self.gi.get_libraries
+            get_prevs = self.gi.get_library_previews
+            delete = self.gi.delete_library
+        elif obj_type == 'history':
+            create = self.gi.create_history
+            get_objs = self.gi.get_histories
+            get_prevs = self.gi.get_history_previews
+            delete = self.gi.delete_history
+        elif obj_type == 'workflow':
+            def create(name):
+                wf = wrappers.Workflow(WF_DICT)
+                wf.name = name
+                return self.gi.import_workflow(wf)
+            get_objs = self.gi.get_workflows
+            get_prevs = self.gi.get_workflow_previews
+            delete = self.gi.delete_workflow
+        #--
+        ids = lambda seq: set(_.id for _ in seq)
+        names = ['test_%s' % uuid.uuid4().hex for _ in xrange(2)]
+        objs = []
+        try:
+            objs = [create(_) for _ in names]
+            self.assertTrue(ids(objs) <= ids(get_objs()))
+            if obj_type != 'workflow':
+                filtered = get_objs(name=names[0])
+                self.assertEqual(len(filtered), 1)
+                self.assertEqual(filtered[0].id, objs[0].id)
+                del_id = objs[-1].id
+                delete(objs.pop())
+                self.assertTrue(del_id in ids(get_prevs(deleted=True)))
+            else:
+                # Galaxy appends info strings to imported workflow names
+                prev = get_prevs()[0]
+                filtered = get_objs(name=prev.name)
+                self.assertEqual(len(filtered), 1)
+                self.assertEqual(filtered[0].id, prev.id)
+        finally:
+            for o in objs:
+                delete(o)
+
 
 class TestLibContents(TestGalaxyInstance):
 
@@ -365,6 +417,9 @@ def suite():
         'test_workflow',
         'test_workflow_from_dict',
         'test_workflow_from_json',
+        'test_get_libraries',
+        'test_get_histories',
+        'test_get_workflows',
         ):
         s.addTest(TestGalaxyInstance(t))
     for t in (

@@ -21,6 +21,10 @@ __all__ = [
     'HistoryDatasetAssociation',
     'LibraryDatasetDatasetAssociation',
     'LibraryDataset',
+    'Preview',
+    'LibraryPreview',
+    'HistoryPreview',
+    'WorkflowPreview',
     ]
 
 
@@ -375,3 +379,52 @@ class Folder(Wrapper):
             id = id[1:]
         super(Folder, self).__init__(f_dict, id=id)
         object.__setattr__(self, 'container_id', container_id)
+
+
+class Preview(Wrapper):
+    """
+    Abstract base class for Galaxy entity 'previews'.
+
+    Classes derived from this one model the short summaries returned
+    by global getters such as ``/api/libraries``.  Previews typically
+    have a small numbers of attributes including the name and id.
+    """
+
+    __metaclass__ = abc.ABCMeta
+
+    @abc.abstractmethod
+    def __init__(self, pw_dict, id):
+        super(Preview, self).__init__(pw_dict, id=id)
+
+
+class LibraryPreview(Preview):
+    """
+    Models Galaxy library 'previews'.
+
+    Instances of this class wrap dictionaries obtained by getting
+    ``/api/libraries`` from Galaxy.
+    """
+    def __init__(self, pw_dict, id):
+        super(LibraryPreview, self).__init__(pw_dict, id=id)
+
+
+class HistoryPreview(Preview):
+    """
+    Models Galaxy history 'previews'.
+
+    Instances of this class wrap dictionaries obtained by getting
+    ``/api/histories`` from Galaxy.
+    """
+    def __init__(self, pw_dict, id):
+        super(HistoryPreview, self).__init__(pw_dict, id=id)
+
+
+class WorkflowPreview(Preview):
+    """
+    Models Galaxy workflow 'previews'.
+
+    Instances of this class wrap dictionaries obtained by getting
+    ``/api/workflows`` from Galaxy.
+    """
+    def __init__(self, pw_dict, id):
+        super(WorkflowPreview, self).__init__(pw_dict, id=id)
