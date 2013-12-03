@@ -109,7 +109,7 @@ class GalaxyInstance(object):
           :class:`~bioblend.galaxy.objects.wrappers.LibraryPreview`
         """
         dicts = self.gi.libraries.get_libraries(name=name, deleted=deleted)
-        return [wrappers.LibraryPreview(_, _['id']) for _ in dicts]
+        return [wrappers.LibraryPreview(_) for _ in dicts]
 
     def get_libraries(self, name=None):
         """
@@ -131,7 +131,7 @@ class GalaxyInstance(object):
           Deleting a data library is irreversible - all of the data from
           the library will be permanently deleted.
         """
-        if not library.is_mapped():
+        if not library.is_mapped:
             self.__error('library is not mapped to a Galaxy object')
         res = self.gi.libraries.delete_library(library.id)
         if not isinstance(res, collections.Mapping):
@@ -264,7 +264,7 @@ class GalaxyInstance(object):
         :return: the folder corresponding to ``id_``
         """
         f_dict = self.gi.libraries.show_folder(library.id, f_id)
-        return wrappers.Folder(f_dict, f_id, library.id)
+        return wrappers.Folder(f_dict, library.id)
 
     #-- history --
 
@@ -302,7 +302,7 @@ class GalaxyInstance(object):
           :class:`~bioblend.galaxy.objects.wrappers.HistoryPreview`
         """
         dicts = self.gi.histories.get_histories(name=name, deleted=deleted)
-        return [wrappers.HistoryPreview(_, _['id']) for _ in dicts]
+        return [wrappers.HistoryPreview(_) for _ in dicts]
 
     def get_histories(self, name=None):
         """
@@ -315,8 +315,6 @@ class GalaxyInstance(object):
         """
         dicts = self.gi.histories.get_histories(name=name)
         return [self.get_history(_['id']) for _ in dicts]
-
-
 
     def update_history(self, history, name=None, annotation=None):
         """
@@ -338,7 +336,7 @@ class GalaxyInstance(object):
           ``allow_user_dataset_purge = True`` to be set in Galaxy's
           configuration file ``universe_wsgi.ini``)
         """
-        if not history.is_mapped():
+        if not history.is_mapped:
             self.__error('history is not mapped to a Galaxy object')
         res = self.gi.histories.delete_history(history.id, purge=purge)
         if not isinstance(res, collections.Mapping):
@@ -361,7 +359,7 @@ class GalaxyInstance(object):
           :class:`~bioblend.galaxy.objects.wrappers.HistoryDatasetAssociation`
         :return: the imported history dataset
         """
-        if not history.is_mapped():
+        if not history.is_mapped:
             self.__error('history is not mapped to a Galaxy object')
         if not isinstance(lds, wrappers.LibraryDataset):
             self.__error('lds is not a LibraryDataset', err_type=TypeError)
@@ -424,9 +422,9 @@ class GalaxyInstance(object):
         :return: the workflow just imported
         """
         if isinstance(src, wrappers.Workflow):
-            if src.is_mapped():
+            if src.is_mapped:
                 self.__error('workflow already imported')
-            wf_dict = src.core.wrapped
+            wf_dict = src.wrapped
         elif isinstance(src, collections.Mapping):
             wf_dict = src
         else:
@@ -461,7 +459,7 @@ class GalaxyInstance(object):
           :class:`~bioblend.galaxy.objects.wrappers.WorkflowPreview`
         """
         dicts = self.gi.workflows.get_workflows(name=name)
-        return [wrappers.WorkflowPreview(_, _['id']) for _ in dicts]
+        return [wrappers.WorkflowPreview(_) for _ in dicts]
 
     def get_workflows(self, name=None):
         """
@@ -518,7 +516,7 @@ class GalaxyInstance(object):
           in their final state.  Use :meth:`.wait` if you want to block
           until they're ready.
         """
-        if not workflow.is_mapped():
+        if not workflow.is_mapped:
             self.__error('workflow is not mapped to a Galaxy object')
         if len(inputs) < len(workflow.inputs):
             self.__error('not enough inputs', err_type=ValueError)
@@ -639,7 +637,7 @@ class GalaxyInstance(object):
           Deleting a workflow is irreversible - all of the data from
           the workflow will be permanently deleted.
         """
-        if not workflow.is_mapped():
+        if not workflow.is_mapped:
             self.__error('workflow is not mapped to a Galaxy object')
         res = self.gi.workflows.delete_workflow(workflow.id)
         if not isinstance(res, basestring):
@@ -681,7 +679,7 @@ class GalaxyInstance(object):
         kwargs = {'dataset_ids': ds_ids}
         if issubclass(ctype, wrappers.Library):
             kwargs['folder_ids'] = f_ids
-        return ctype(cdict, id_, **kwargs)
+        return ctype(cdict, **kwargs)
 
     def __get_container_dataset(self, src, ds_id, ctype=None):
         if isinstance(src, wrappers.DatasetContainer):
@@ -695,10 +693,10 @@ class GalaxyInstance(object):
                 container_id = src
         gi_client = getattr(self.gi, ctype.API_MODULE)
         ds_dict = gi_client.show_dataset(container_id, ds_id)
-        return ctype.DS_TYPE(ds_dict, ds_id, container_id)
+        return ctype.DS_TYPE(ds_dict, container_id)
 
     def __pre_upload(self, library, folder):
-        if not library.is_mapped():
+        if not library.is_mapped:
             self.__error('library is not mapped to a Galaxy object')
         return None if folder is None else folder.id
 

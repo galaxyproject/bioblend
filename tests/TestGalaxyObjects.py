@@ -42,6 +42,8 @@ def is_reachable(url):
 
 class MockWrapper(wrappers.Wrapper):
 
+    BASE_ATTRS = frozenset(['a', 'b'])
+
     def __init__(self, *args, **kwargs):
         super(MockWrapper, self).__init__(*args, **kwargs)
 
@@ -54,8 +56,8 @@ class TestWrapper(unittest.TestCase):
         self.w = MockWrapper(self.d)
 
     def test_initialize(self):
-        for k, v in self.d.iteritems():
-            self.assertEqual(getattr(self.w, k), v)
+        for k in MockWrapper.BASE_ATTRS:
+            self.assertEqual(getattr(self.w, k), self.d[k])
         self.w.a = 222
         self.w.b[0] = 222
         self.assertEqual(self.w.a, 222)
@@ -72,21 +74,19 @@ class TestWrapper(unittest.TestCase):
 
     def test_serialize(self):
         w = MockWrapper.from_json(self.w.to_json())
-        self.assertEqual(w.core.wrapped, self.w.core.wrapped)
+        self.assertEqual(w.wrapped, self.w.wrapped)
 
     def test_clone(self):
         w = self.w.clone()
-        self.assertEqual(w.core.wrapped, self.w.core.wrapped)
-        w.c['x'] = 111
-        self.assertEqual(self.w.c['x'], 4)
+        self.assertEqual(w.wrapped, self.w.wrapped)
+        w.b[0] = 111
+        self.assertEqual(self.w.b[0], 2)
 
     def test_kwargs(self):
-        id_, parent = 'ID', 'PARENT'
-        w = MockWrapper(self.d, id=id_, parent=parent)
-        self.assertEqual(w.id, id_)
+        parent = MockWrapper({'a': 10})
+        w = MockWrapper(self.d, parent=parent)
         self.assertEqual(w.parent, parent)
         self.assertRaises(AttributeError, setattr, w, 'parent', 0)
-        self.assertRaises(AttributeError, setattr, w, 'id', 0)
 
 
 class TestWorkflow(unittest.TestCase):
@@ -97,9 +97,7 @@ class TestWorkflow(unittest.TestCase):
 
     def test_initialize(self):
         self.assertEqual(self.wf.id, self.id)
-        for k, v in WF_DICT.iteritems():
-            if k != 'steps':
-                self.assertEqual(getattr(self.wf, k), v)
+        self.assertEqual(self.wf.name, WF_DICT['name'])
         self.assertFalse(self.wf.is_modified)
         self.wf.annotation = 'foo'
         self.assertTrue(self.wf.is_modified)
@@ -108,17 +106,14 @@ class TestWorkflow(unittest.TestCase):
         step_dicts = [v for k, v in sorted(
             WF_DICT['steps'].items(), key=lambda t: int(t[0])
             )]
-        keys_to_skip = set(['id', 'tool_state'])
         for i, s in enumerate(self.wf.steps):
             self.assertTrue(isinstance(s, wrappers.Step))
+            self.assertEqual(s.name, step_dicts[i]['name'])
             if step_dicts[i]['type'] == 'data_input':
                 self.assertTrue(isinstance(s, wrappers.DataInput))
             if step_dicts[i]['type'] == 'tool':
                 self.assertTrue(isinstance(s, wrappers.Tool))
             self.assertTrue(s.parent is self.wf)
-            for k, v in step_dicts[i].iteritems():
-                if k not in keys_to_skip:
-                    self.assertEqual(getattr(s, k), v)
         self.assertFalse(self.wf.is_modified)
         self.assertEqual(len(self.wf.data_inputs()), 2)
         self.assertEqual(len(self.wf.tools()), 1)
@@ -143,14 +138,6 @@ class TestGalaxyInstance(unittest.TestCase):
     def setUp(self):
         self.gi = galaxy_instance.GalaxyInstance(URL, API_KEY)
 
-    def assertWrappedEqual(self, w1, w2, keys_to_skip=None):
-        if keys_to_skip is None:
-            keys_to_skip = set()
-        for (k, v) in w1.iteritems():
-            self.assertTrue(k in w2)
-            if k not in keys_to_skip:
-                self.assertEqual(w2[k], v, "%r: %r != %r" % (k, w2[k], v))
-
     def test_library(self):
         name = 'test_%s' % uuid.uuid4().hex
         description, synopsis = 'D', 'S'
@@ -162,7 +149,7 @@ class TestGalaxyInstance(unittest.TestCase):
         self.assertEqual(lib.synopsis, synopsis)
         self.assertTrue(lib.id in [_.id for _ in self.gi.get_libraries()])
         self.gi.delete_library(lib)
-        self.assertTrue(lib.id is None)
+        self.assertFalse(lib.is_mapped)
 
     def test_history(self):
         name = 'test_%s' % uuid.uuid4().hex
@@ -170,24 +157,19 @@ class TestGalaxyInstance(unittest.TestCase):
         self.assertEqual(hist.name, name)
         self.assertTrue(hist.id in [_.id for _ in self.gi.get_histories()])
         self.gi.delete_history(hist, purge=True)
-        self.assertTrue(hist.id is None)
+        self.assertFalse(hist.is_mapped)
 
     def test_workflow(self):
         wf = wrappers.Workflow(WF_DICT)
         wf.name = 'test_%s' % uuid.uuid4().hex
         imported = self.gi.import_workflow(wf)
-        self.assertWrappedEqual(
-            wf.core.wrapped, imported.core.wrapped, set(['name', 'steps'])
-            )
         self.assertEqual(len(imported.steps), len(wf.steps))
         keys_to_skip = set(['tool_version'])
         for step, istep in zip(wf.steps, imported.steps):
-            self.assertWrappedEqual(
-                step.core.wrapped, istep.core.wrapped, keys_to_skip
-                )
+            self.assertEqual(step.name, istep.name)
         self.assertTrue(imported.id in [_.id for _ in self.gi.get_workflows()])
         self.gi.delete_workflow(imported)
-        self.assertTrue(imported.id is None)
+        self.assertFalse(imported.is_mapped)
 
     def test_workflow_from_dict(self):
         imported = self.gi.import_workflow(WF_DICT)
@@ -276,10 +258,11 @@ class TestLibContents(TestGalaxyInstance):
         data = 'foo\nbar\n'
         ds = self.gi.upload_data(self.lib, data, folder=folder)
         self.assertEqual(ds.container_id, self.lib.id)
-        self.assertEqual(ds.folder_id, folder.id)
         lib = self.gi.get_library(self.lib.id)
         self.assertEqual(len(lib.dataset_ids), 1)
-        self.assertEqual(lib.dataset_ids[0], ds.id)
+        ds_id = lib.dataset_ids[0]
+        self.assertEqual(ds_id, ds.id)
+        self.assertEqual(self.gi.get_library_dataset(lib, ds_id).id, ds.id)
 
     def test_dataset_from_url(self):
         if is_reachable(self.URL):

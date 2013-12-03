@@ -1,4 +1,4 @@
-# pylint: disable=W0622
+# pylint: disable=W0622,E1101
 
 """
 A basic object-oriented interface for Galaxy entities.
@@ -52,35 +52,35 @@ class Wrapper(object):
     attribute-based access (e.g., ``library['name'] -> library.name``).
     """
 
+    BASE_ATTRS = frozenset(['id', 'name'])
+
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
-    def __init__(self, wrapped, parent=None, id=None):
+    def __init__(self, wrapped, parent=None):
         """
         :type wrapped: dict
-        :param wrapped: JSON serializable dictionary
+        :param wrapped: JSON-serializable dictionary
 
         :type parent: :class:`Wrapper`
         :param parent: the parent of this wrapper
-
-        :type id: str
-        :param id: the id with which this wrapper is registered into
-          Galaxy, or None if it's not mapped to a Galaxy entity.
         """
-        # http://stackoverflow.com/questions/2827623
-        object.__setattr__(self, 'core', lambda: None)
-        object.__setattr__(self, 'is_modified', False)
-        object.__setattr__(self, 'parent', parent)
-        object.__setattr__(self, 'id', id)
+        if not isinstance(wrapped, collections.Mapping):
+            raise TypeError('wrapped object must be a mapping type')
         # loads(dumps(x)) is a bit faster than deepcopy and allows type checks
         try:
-            if not isinstance(wrapped, collections.Mapping):
-                raise TypeError
             dumped = json.dumps(wrapped)
         except (TypeError, ValueError):
-            raise TypeError('wrapped object must be a JSON serializable dict')
-        setattr(self.core, 'wrapped', json.loads(dumped))
+            raise ValueError('wrapped object must be JSON-serializable')
+        object.__setattr__(self, 'wrapped', json.loads(dumped))
+        for k in self.BASE_ATTRS:
+            object.__setattr__(self, k, self.wrapped.get(k))
+        for k in (set(self.wrapped) - self.BASE_ATTRS):
+            object.__setattr__(self, '_%s' % k, self.wrapped[k])
+        object.__setattr__(self, 'parent', parent)
+        object.__setattr__(self, 'is_modified', False)
 
+    @property
     def is_mapped(self):
         """
         Check whether this wrapper is mapped to an actual Galaxy entity.
@@ -100,7 +100,7 @@ class Wrapper(object):
         """
         Return an independent copy of this wrapper.
         """
-        return self.__class__(self.core.wrapped)
+        return self.__class__(self.wrapped)
 
     def touch(self):
         """
@@ -114,7 +114,7 @@ class Wrapper(object):
         """
         Return a JSON dump of this wrapper.
         """
-        return json.dumps(self.core.wrapped)
+        return json.dumps(self.wrapped)
 
     @classmethod
     def from_json(cls, jdef):
@@ -123,24 +123,17 @@ class Wrapper(object):
         """
         return cls(json.loads(jdef))
 
-    def __getattr__(self, name):
-        try:
-            return self.core.wrapped[name]
-        except KeyError:
-            raise AttributeError('%r object has no attribute %r' % (
-                self.__class__.__name__, name
-                ))
-
     # FIXME: things like self.x[0] = 'y' do NOT call self.__setattr__
     def __setattr__(self, name, value):
-        if name not in self.core.wrapped:
+        if name not in self.wrapped:
             raise AttributeError("can't set attribute")
         else:
-            self.core.wrapped[name] = value
+            self.wrapped[name] = value
+            object.__setattr__(self, name, value)
             self.touch()
 
     def __repr__(self):
-        return "%s(%r)" % (self.__class__.__name__, self.core.wrapped)
+        return "%s(%r)" % (self.__class__.__name__, self.wrapped)
 
 
 class Step(Wrapper):
@@ -155,15 +148,13 @@ class Step(Wrapper):
     their parent should be the workflow itself.
     """
 
+    BASE_ATTRS = frozenset(['name'])
+
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
     def __init__(self, step_dict, parent):
         super(Step, self).__init__(step_dict, parent=parent)
-        if not isinstance(self.tool_state, collections.Mapping):
-            object.__setattr__(
-                self, 'tool_state', _recursive_loads(self.tool_state)
-                )
 
 
 class DataInput(Step):
@@ -182,10 +173,18 @@ class Tool(Step):
     Tools model Galaxy tools.
     """
 
+    BASE_ATTRS = Step.BASE_ATTRS.union(
+        ['tool_id', 'tool_version', 'tool_state']
+        )
+
     def __init__(self, step_dict, parent):
         if step_dict['type'] != 'tool':
             raise ValueError('not a tool')
         super(Tool, self).__init__(step_dict, parent)
+        if not isinstance(self.tool_state, collections.Mapping):
+            object.__setattr__(
+                self, 'tool_state', _recursive_loads(self.tool_state)
+                )
 
 
 def _build_step(step_dict, parent):
@@ -227,7 +226,7 @@ class Workflow(Wrapper):
           {'label': LABEL, 'value': VALUE}, ...}``.  Currently, only
           the IDs are used.
         """
-        super(Workflow, self).__init__(wf_dict, id=id)
+        super(Workflow, self).__init__(wf_dict)
         # outer keys = unencoded ids, e.g., '99', '100'
         steps = [_build_step(v, self) for _, v in sorted(
             wf_dict['steps'].items(), key=lambda t: int(t[0])
@@ -235,10 +234,12 @@ class Workflow(Wrapper):
         if inputs is not None:
             inputs = sorted(inputs, key=int)
         object.__setattr__(self, 'steps', steps)
+        object.__setattr__(self, 'id', id)
         object.__setattr__(self, 'inputs', inputs)
 
+    @property
     def is_mapped(self):
-        return super(Workflow, self).is_mapped() and self.inputs
+        return super(Workflow, self).is_mapped and self.inputs
 
     def unmap(self):
         super(Workflow, self).unmap()
@@ -278,11 +279,15 @@ class Dataset(Wrapper):
     Abstract base class for Galaxy datasets.
     """
 
+    BASE_ATTRS = Wrapper.BASE_ATTRS.union(
+        ['data_type', 'file_name', 'file_size']
+        )
+
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
-    def __init__(self, ds_dict, id, container_id):
-        super(Dataset, self).__init__(ds_dict, id=id)
+    def __init__(self, ds_dict, container_id):
+        super(Dataset, self).__init__(ds_dict)
         object.__setattr__(self, 'container_id', container_id)
 
 
@@ -291,12 +296,11 @@ class HistoryDatasetAssociation(Dataset):
     Maps to a Galaxy ``HistoryDatasetAssociation``.
     """
 
+    BASE_ATTRS = Dataset.BASE_ATTRS.union(['state'])
     SRC = 'hda'
 
-    def __init__(self, ds_dict, id, container_id):
-        super(HistoryDatasetAssociation, self).__init__(
-            ds_dict, id, container_id
-            )
+    def __init__(self, ds_dict, container_id):
+        super(HistoryDatasetAssociation, self).__init__(ds_dict, container_id)
 
 
 class LibraryDatasetDatasetAssociation(Dataset):
@@ -306,9 +310,9 @@ class LibraryDatasetDatasetAssociation(Dataset):
 
     SRC = 'ldda'
 
-    def __init__(self, ds_dict, id, container_id):
+    def __init__(self, ds_dict, container_id):
         super(LibraryDatasetDatasetAssociation, self).__init__(
-            ds_dict, id, container_id
+            ds_dict, container_id
             )
 
 
@@ -319,8 +323,8 @@ class LibraryDataset(Dataset):
 
     SRC = 'ld'
 
-    def __init__(self, ds_dict, id, container_id):
-        super(LibraryDataset, self).__init__(ds_dict, id, container_id)
+    def __init__(self, ds_dict, container_id):
+        super(LibraryDataset, self).__init__(ds_dict, container_id)
 
 
 class DatasetContainer(Wrapper):
@@ -331,12 +335,12 @@ class DatasetContainer(Wrapper):
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
-    def __init__(self, c_dict, id, dataset_ids=None):
+    def __init__(self, c_dict, dataset_ids=None):
         """
         :type dataset_ids: list of str
         :param dataset_ids: ids of datasets associated with this container
         """
-        super(DatasetContainer, self).__init__(c_dict, id=id)
+        super(DatasetContainer, self).__init__(c_dict)
         if dataset_ids is None:
             dataset_ids = []
         object.__setattr__(self, 'dataset_ids', dataset_ids)
@@ -347,11 +351,12 @@ class History(DatasetContainer):
     Maps to a Galaxy history.
     """
 
+    BASE_ATTRS = DatasetContainer.BASE_ATTRS.union(['annotation'])
     DS_TYPE = HistoryDatasetAssociation
     API_MODULE = 'histories'
 
-    def __init__(self, hist_dict, id, dataset_ids=None):
-        super(History, self).__init__(hist_dict, id, dataset_ids=dataset_ids)
+    def __init__(self, hist_dict, dataset_ids=None):
+        super(History, self).__init__(hist_dict, dataset_ids=dataset_ids)
 
 
 class Library(DatasetContainer):
@@ -359,11 +364,12 @@ class Library(DatasetContainer):
     Maps to a Galaxy library.
     """
 
+    BASE_ATTRS = DatasetContainer.BASE_ATTRS.union(['description', 'synopsis'])
     DS_TYPE = LibraryDataset
     API_MODULE = 'libraries'
 
-    def __init__(self, lib_dict, id, dataset_ids=None, folder_ids=None):
-        super(Library, self).__init__(lib_dict, id, dataset_ids=dataset_ids)
+    def __init__(self, lib_dict, dataset_ids=None, folder_ids=None):
+        super(Library, self).__init__(lib_dict, dataset_ids=dataset_ids)
         if folder_ids is None:
             folder_ids = []
         object.__setattr__(self, 'folder_ids', folder_ids)
@@ -374,10 +380,12 @@ class Folder(Wrapper):
     Maps to a folder in a Galaxy library.
     """
 
-    def __init__(self, f_dict, id, container_id):
-        if id.startswith('F'):  # folder id from library contents
-            id = id[1:]
-        super(Folder, self).__init__(f_dict, id=id)
+    BASE_ATTRS = Wrapper.BASE_ATTRS.union(['description', 'item_count'])
+
+    def __init__(self, f_dict, container_id):
+        super(Folder, self).__init__(f_dict)
+        if self.id.startswith('F'):  # folder id from library contents
+            object.__setattr__(self, 'id', self.id[1:])
         object.__setattr__(self, 'container_id', container_id)
 
 
@@ -393,8 +401,8 @@ class Preview(Wrapper):
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
-    def __init__(self, pw_dict, id):
-        super(Preview, self).__init__(pw_dict, id=id)
+    def __init__(self, pw_dict):
+        super(Preview, self).__init__(pw_dict)
 
 
 class LibraryPreview(Preview):
@@ -404,8 +412,8 @@ class LibraryPreview(Preview):
     Instances of this class wrap dictionaries obtained by getting
     ``/api/libraries`` from Galaxy.
     """
-    def __init__(self, pw_dict, id):
-        super(LibraryPreview, self).__init__(pw_dict, id=id)
+    def __init__(self, pw_dict):
+        super(LibraryPreview, self).__init__(pw_dict)
 
 
 class HistoryPreview(Preview):
@@ -415,8 +423,8 @@ class HistoryPreview(Preview):
     Instances of this class wrap dictionaries obtained by getting
     ``/api/histories`` from Galaxy.
     """
-    def __init__(self, pw_dict, id):
-        super(HistoryPreview, self).__init__(pw_dict, id=id)
+    def __init__(self, pw_dict):
+        super(HistoryPreview, self).__init__(pw_dict)
 
 
 class WorkflowPreview(Preview):
@@ -426,5 +434,5 @@ class WorkflowPreview(Preview):
     Instances of this class wrap dictionaries obtained by getting
     ``/api/workflows`` from Galaxy.
     """
-    def __init__(self, pw_dict, id):
-        super(WorkflowPreview, self).__init__(pw_dict, id=id)
+    def __init__(self, pw_dict):
+        super(WorkflowPreview, self).__init__(pw_dict)
