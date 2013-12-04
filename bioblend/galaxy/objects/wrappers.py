@@ -200,6 +200,7 @@ class Workflow(Wrapper):
     A workflow defines a sequence of steps that produce one or more
     results from an input dataset.
     """
+    BASE_ATTRS = Wrapper.BASE_ATTRS + ('annotation',)
 
     def __init__(self, wf_dict, id=None, inputs=None):
         """
@@ -335,7 +336,7 @@ class History(DatasetContainer):
     """
     Maps to a Galaxy history.
     """
-    BASE_ATTRS = DatasetContainer.BASE_ATTRS + ('annotation',)
+    BASE_ATTRS = DatasetContainer.BASE_ATTRS + ('annotation', 'state_ids')
     DS_TYPE = HistoryDatasetAssociation
     API_MODULE = 'histories'
 
