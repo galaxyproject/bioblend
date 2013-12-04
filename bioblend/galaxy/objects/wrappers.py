@@ -50,10 +50,13 @@ class Wrapper(object):
     Wrapper instances wrap deserialized JSON dictionaries such as the
     ones obtained by the Galaxy web API, converting key-based access to
     attribute-based access (e.g., ``library['name'] -> library.name``).
+
+    Dict keys that are converted to attributes are listed in the
+    ``BASE_ATTRS`` class variable: this is the 'stable' interface.
+    Note that the wrapped dictionary is accessible via the ``wrapped``
+    attribute.
     """
-
-    BASE_ATTRS = frozenset(['id', 'name'])
-
+    BASE_ATTRS = ('id', 'name')
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
@@ -75,18 +78,13 @@ class Wrapper(object):
         object.__setattr__(self, 'wrapped', json.loads(dumped))
         for k in self.BASE_ATTRS:
             object.__setattr__(self, k, self.wrapped.get(k))
-        for k in (set(self.wrapped) - self.BASE_ATTRS):
-            object.__setattr__(self, '_%s' % k, self.wrapped[k])
         object.__setattr__(self, 'parent', parent)
         object.__setattr__(self, 'is_modified', False)
 
     @property
     def is_mapped(self):
         """
-        Check whether this wrapper is mapped to an actual Galaxy entity.
-
-        :rtype: bool
-        :return: :obj:`True` if this wrapper is mapped
+        :obj:`True` if this wrapper is mapped to an actual Galaxy entity.
         """
         return self.id is not None
 
@@ -147,9 +145,7 @@ class Step(Wrapper):
     Step dicts should be taken from the JSON dump of a workflow, and
     their parent should be the workflow itself.
     """
-
-    BASE_ATTRS = frozenset(['name'])
-
+    BASE_ATTRS = ('name',)
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
@@ -172,10 +168,7 @@ class Tool(Step):
     """
     Tools model Galaxy tools.
     """
-
-    BASE_ATTRS = Step.BASE_ATTRS.union(
-        ['tool_id', 'tool_version', 'tool_state']
-        )
+    BASE_ATTRS = Step.BASE_ATTRS + ('tool_id', 'tool_version', 'tool_state')
 
     def __init__(self, step_dict, parent):
         if step_dict['type'] != 'tool':
@@ -278,11 +271,7 @@ class Dataset(Wrapper):
     """
     Abstract base class for Galaxy datasets.
     """
-
-    BASE_ATTRS = Wrapper.BASE_ATTRS.union(
-        ['data_type', 'file_name', 'file_size']
-        )
-
+    BASE_ATTRS = Wrapper.BASE_ATTRS + ('data_type', 'file_name', 'file_size')
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
@@ -295,8 +284,7 @@ class HistoryDatasetAssociation(Dataset):
     """
     Maps to a Galaxy ``HistoryDatasetAssociation``.
     """
-
-    BASE_ATTRS = Dataset.BASE_ATTRS.union(['state'])
+    BASE_ATTRS = Dataset.BASE_ATTRS + ('state',)
     SRC = 'hda'
 
     def __init__(self, ds_dict, container_id):
@@ -307,7 +295,6 @@ class LibraryDatasetDatasetAssociation(Dataset):
     """
     Maps to a Galaxy ``LibraryDatasetDatasetAssociation``.
     """
-
     SRC = 'ldda'
 
     def __init__(self, ds_dict, container_id):
@@ -320,7 +307,6 @@ class LibraryDataset(Dataset):
     """
     Maps to a Galaxy ``LibraryDataset``.
     """
-
     SRC = 'ld'
 
     def __init__(self, ds_dict, container_id):
@@ -331,7 +317,6 @@ class DatasetContainer(Wrapper):
     """
     Abstract base class for dataset containers (histories and libraries).
     """
-
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
@@ -350,8 +335,7 @@ class History(DatasetContainer):
     """
     Maps to a Galaxy history.
     """
-
-    BASE_ATTRS = DatasetContainer.BASE_ATTRS.union(['annotation'])
+    BASE_ATTRS = DatasetContainer.BASE_ATTRS + ('annotation',)
     DS_TYPE = HistoryDatasetAssociation
     API_MODULE = 'histories'
 
@@ -363,8 +347,7 @@ class Library(DatasetContainer):
     """
     Maps to a Galaxy library.
     """
-
-    BASE_ATTRS = DatasetContainer.BASE_ATTRS.union(['description', 'synopsis'])
+    BASE_ATTRS = DatasetContainer.BASE_ATTRS + ('description', 'synopsis')
     DS_TYPE = LibraryDataset
     API_MODULE = 'libraries'
 
@@ -379,8 +362,7 @@ class Folder(Wrapper):
     """
     Maps to a folder in a Galaxy library.
     """
-
-    BASE_ATTRS = Wrapper.BASE_ATTRS.union(['description', 'item_count'])
+    BASE_ATTRS = Wrapper.BASE_ATTRS + ('description', 'item_count')
 
     def __init__(self, f_dict, container_id):
         super(Folder, self).__init__(f_dict)
@@ -394,10 +376,8 @@ class Preview(Wrapper):
     Abstract base class for Galaxy entity 'previews'.
 
     Classes derived from this one model the short summaries returned
-    by global getters such as ``/api/libraries``.  Previews typically
-    have a small numbers of attributes including the name and id.
+    by global getters such as ``/api/libraries``.
     """
-
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod

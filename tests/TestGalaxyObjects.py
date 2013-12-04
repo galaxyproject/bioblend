@@ -23,12 +23,6 @@ URL = os.environ.get('BIOBLEND_GALAXY_URL', 'http://localhost:8080')
 API_KEY = os.environ['BIOBLEND_GALAXY_API_KEY']
 
 
-def first_tool_idx(wf_dict):
-    return int((
-        k for k, v in wf_dict['steps'].iteritems() if v['type'] == 'tool'
-        ).next())
-
-
 def is_reachable(url):
     res = None
     try:

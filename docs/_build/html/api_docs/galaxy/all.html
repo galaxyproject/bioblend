@@ -1661,25 +1661,32 @@ explicitly.</p>
 <p>A basic object-oriented interface for Galaxy entities.</p>
 <dl class="class">
 <dt id="bioblend.galaxy.objects.wrappers.Wrapper">
-<em class="property">class </em><tt class="descclassname">bioblend.galaxy.objects.wrappers.</tt><tt class="descname">Wrapper</tt><big>(</big><em>wrapped</em>, <em>parent=None</em>, <em>id=None</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/wrappers.html#Wrapper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.Wrapper" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">bioblend.galaxy.objects.wrappers.</tt><tt class="descname">Wrapper</tt><big>(</big><em>wrapped</em>, <em>parent=None</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/wrappers.html#Wrapper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.Wrapper" title="Permalink to this definition">¶</a></dt>
 <dd><p>Abstract base class for Galaxy entity wrappers.</p>
 <p>Wrapper instances wrap deserialized JSON dictionaries such as the
 ones obtained by the Galaxy web API, converting key-based access to
 attribute-based access (e.g., <tt class="docutils literal"><span class="pre">library['name']</span> <span class="pre">-&gt;</span> <span class="pre">library.name</span></tt>).</p>
+<p>Dict keys that are converted to attributes are listed in the
+<tt class="docutils literal"><span class="pre">BASE_ATTRS</span></tt> class variable: this is the &#8216;stable&#8217; interface.
+Note that the wrapped dictionary is accessible via the <tt class="docutils literal"><span class="pre">wrapped</span></tt>
+attribute.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>wrapped</strong> (<em>dict</em>) &#8211; JSON serializable dictionary</li>
+<li><strong>wrapped</strong> (<em>dict</em>) &#8211; JSON-serializable dictionary</li>
 <li><strong>parent</strong> (<a class="reference internal" href="#bioblend.galaxy.objects.wrappers.Wrapper" title="bioblend.galaxy.objects.wrappers.Wrapper"><tt class="xref py py-class docutils literal"><span class="pre">Wrapper</span></tt></a>) &#8211; the parent of this wrapper</li>
-<li><strong>id</strong> (<em>str</em>) &#8211; the id with which this wrapper is registered into
-Galaxy, or None if it&#8217;s not mapped to a Galaxy entity.</li>
 </ul>
 </td>
 </tr>
 </tbody>
 </table>
+<dl class="attribute">
+<dt id="bioblend.galaxy.objects.wrappers.Wrapper.BASE_ATTRS">
+<tt class="descname">BASE_ATTRS</tt><em class="property"> = ('id', 'name')</em><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.Wrapper.BASE_ATTRS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="bioblend.galaxy.objects.wrappers.Wrapper.clone">
 <tt class="descname">clone</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/wrappers.html#Wrapper.clone"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.Wrapper.clone" title="Permalink to this definition">¶</a></dt>
@@ -1692,20 +1699,10 @@ Galaxy, or None if it&#8217;s not mapped to a Galaxy entity.</li>
 <dd><p>Build a new wrapper from a JSON dump.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="attribute">
 <dt id="bioblend.galaxy.objects.wrappers.Wrapper.is_mapped">
-<tt class="descname">is_mapped</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/wrappers.html#Wrapper.is_mapped"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.Wrapper.is_mapped" title="Permalink to this definition">¶</a></dt>
-<dd><p>Check whether this wrapper is mapped to an actual Galaxy entity.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><tt class="xref py py-obj docutils literal"><span class="pre">True</span></tt> if this wrapper is mapped</td>
-</tr>
-</tbody>
-</table>
+<tt class="descname">is_mapped</tt><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/wrappers.html#Wrapper.is_mapped"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.Wrapper.is_mapped" title="Permalink to this definition">¶</a></dt>
+<dd><p><tt class="xref py py-obj docutils literal"><span class="pre">True</span></tt> if this wrapper is mapped to an actual Galaxy entity.</p>
 </dd></dl>
 
 <dl class="method">
@@ -1737,6 +1734,11 @@ can refer to either an input dataset (<a class="reference internal" href="#biobl
 computational tool (<a class="reference internal" href="#bioblend.galaxy.objects.wrappers.Tool" title="bioblend.galaxy.objects.wrappers.Tool"><tt class="xref py py-class docutils literal"><span class="pre">Tool</span></tt></a>).</p>
 <p>Step dicts should be taken from the JSON dump of a workflow, and
 their parent should be the workflow itself.</p>
+<dl class="attribute">
+<dt id="bioblend.galaxy.objects.wrappers.Step.BASE_ATTRS">
+<tt class="descname">BASE_ATTRS</tt><em class="property"> = ('name',)</em><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.Step.BASE_ATTRS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="class">
@@ -1749,6 +1751,11 @@ their parent should be the workflow itself.</p>
 <dt id="bioblend.galaxy.objects.wrappers.Tool">
 <em class="property">class </em><tt class="descclassname">bioblend.galaxy.objects.wrappers.</tt><tt class="descname">Tool</tt><big>(</big><em>step_dict</em>, <em>parent</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/wrappers.html#Tool"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.Tool" title="Permalink to this definition">¶</a></dt>
 <dd><p>Tools model Galaxy tools.</p>
+<dl class="attribute">
+<dt id="bioblend.galaxy.objects.wrappers.Tool.BASE_ATTRS">
+<tt class="descname">BASE_ATTRS</tt><em class="property"> = ('name', 'tool_id', 'tool_version', 'tool_state')</em><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.Tool.BASE_ATTRS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="class">
@@ -1802,9 +1809,9 @@ format required by the Galaxy web API.</td>
 </table>
 </dd></dl>
 
-<dl class="method">
+<dl class="attribute">
 <dt id="bioblend.galaxy.objects.wrappers.Workflow.is_mapped">
-<tt class="descname">is_mapped</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/wrappers.html#Workflow.is_mapped"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.Workflow.is_mapped" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">is_mapped</tt><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/wrappers.html#Workflow.is_mapped"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.Workflow.is_mapped" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1822,7 +1829,7 @@ format required by the Galaxy web API.</td>
 
 <dl class="class">
 <dt id="bioblend.galaxy.objects.wrappers.DatasetContainer">
-<em class="property">class </em><tt class="descclassname">bioblend.galaxy.objects.wrappers.</tt><tt class="descname">DatasetContainer</tt><big>(</big><em>c_dict</em>, <em>id</em>, <em>dataset_ids=None</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/wrappers.html#DatasetContainer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.DatasetContainer" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">bioblend.galaxy.objects.wrappers.</tt><tt class="descname">DatasetContainer</tt><big>(</big><em>c_dict</em>, <em>dataset_ids=None</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/wrappers.html#DatasetContainer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.DatasetContainer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Abstract base class for dataset containers (histories and libraries).</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1836,11 +1843,16 @@ format required by the Galaxy web API.</td>
 
 <dl class="class">
 <dt id="bioblend.galaxy.objects.wrappers.History">
-<em class="property">class </em><tt class="descclassname">bioblend.galaxy.objects.wrappers.</tt><tt class="descname">History</tt><big>(</big><em>hist_dict</em>, <em>id</em>, <em>dataset_ids=None</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/wrappers.html#History"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.History" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">bioblend.galaxy.objects.wrappers.</tt><tt class="descname">History</tt><big>(</big><em>hist_dict</em>, <em>dataset_ids=None</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/wrappers.html#History"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.History" title="Permalink to this definition">¶</a></dt>
 <dd><p>Maps to a Galaxy history.</p>
 <dl class="attribute">
 <dt id="bioblend.galaxy.objects.wrappers.History.API_MODULE">
 <tt class="descname">API_MODULE</tt><em class="property"> = 'histories'</em><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.History.API_MODULE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bioblend.galaxy.objects.wrappers.History.BASE_ATTRS">
+<tt class="descname">BASE_ATTRS</tt><em class="property"> = ('id', 'name', 'annotation')</em><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.History.BASE_ATTRS" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -1853,11 +1865,16 @@ format required by the Galaxy web API.</td>
 
 <dl class="class">
 <dt id="bioblend.galaxy.objects.wrappers.Library">
-<em class="property">class </em><tt class="descclassname">bioblend.galaxy.objects.wrappers.</tt><tt class="descname">Library</tt><big>(</big><em>lib_dict</em>, <em>id</em>, <em>dataset_ids=None</em>, <em>folder_ids=None</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/wrappers.html#Library"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.Library" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">bioblend.galaxy.objects.wrappers.</tt><tt class="descname">Library</tt><big>(</big><em>lib_dict</em>, <em>dataset_ids=None</em>, <em>folder_ids=None</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/wrappers.html#Library"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.Library" title="Permalink to this definition">¶</a></dt>
 <dd><p>Maps to a Galaxy library.</p>
 <dl class="attribute">
 <dt id="bioblend.galaxy.objects.wrappers.Library.API_MODULE">
 <tt class="descname">API_MODULE</tt><em class="property"> = 'libraries'</em><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.Library.API_MODULE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bioblend.galaxy.objects.wrappers.Library.BASE_ATTRS">
+<tt class="descname">BASE_ATTRS</tt><em class="property"> = ('id', 'name', 'description', 'synopsis')</em><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.Library.BASE_ATTRS" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -1870,20 +1887,35 @@ format required by the Galaxy web API.</td>
 
 <dl class="class">
 <dt id="bioblend.galaxy.objects.wrappers.Folder">
-<em class="property">class </em><tt class="descclassname">bioblend.galaxy.objects.wrappers.</tt><tt class="descname">Folder</tt><big>(</big><em>f_dict</em>, <em>id</em>, <em>container_id</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/wrappers.html#Folder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.Folder" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">bioblend.galaxy.objects.wrappers.</tt><tt class="descname">Folder</tt><big>(</big><em>f_dict</em>, <em>container_id</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/wrappers.html#Folder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.Folder" title="Permalink to this definition">¶</a></dt>
 <dd><p>Maps to a folder in a Galaxy library.</p>
+<dl class="attribute">
+<dt id="bioblend.galaxy.objects.wrappers.Folder.BASE_ATTRS">
+<tt class="descname">BASE_ATTRS</tt><em class="property"> = ('id', 'name', 'description', 'item_count')</em><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.Folder.BASE_ATTRS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="class">
 <dt id="bioblend.galaxy.objects.wrappers.Dataset">
-<em class="property">class </em><tt class="descclassname">bioblend.galaxy.objects.wrappers.</tt><tt class="descname">Dataset</tt><big>(</big><em>ds_dict</em>, <em>id</em>, <em>container_id</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/wrappers.html#Dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.Dataset" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">bioblend.galaxy.objects.wrappers.</tt><tt class="descname">Dataset</tt><big>(</big><em>ds_dict</em>, <em>container_id</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/wrappers.html#Dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.Dataset" title="Permalink to this definition">¶</a></dt>
 <dd><p>Abstract base class for Galaxy datasets.</p>
+<dl class="attribute">
+<dt id="bioblend.galaxy.objects.wrappers.Dataset.BASE_ATTRS">
+<tt class="descname">BASE_ATTRS</tt><em class="property"> = ('id', 'name', 'data_type', 'file_name', 'file_size')</em><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.Dataset.BASE_ATTRS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="class">
 <dt id="bioblend.galaxy.objects.wrappers.HistoryDatasetAssociation">
-<em class="property">class </em><tt class="descclassname">bioblend.galaxy.objects.wrappers.</tt><tt class="descname">HistoryDatasetAssociation</tt><big>(</big><em>ds_dict</em>, <em>id</em>, <em>container_id</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/wrappers.html#HistoryDatasetAssociation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.HistoryDatasetAssociation" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">bioblend.galaxy.objects.wrappers.</tt><tt class="descname">HistoryDatasetAssociation</tt><big>(</big><em>ds_dict</em>, <em>container_id</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/wrappers.html#HistoryDatasetAssociation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.HistoryDatasetAssociation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Maps to a Galaxy <tt class="docutils literal"><span class="pre">HistoryDatasetAssociation</span></tt>.</p>
+<dl class="attribute">
+<dt id="bioblend.galaxy.objects.wrappers.HistoryDatasetAssociation.BASE_ATTRS">
+<tt class="descname">BASE_ATTRS</tt><em class="property"> = ('id', 'name', 'data_type', 'file_name', 'file_size', 'state')</em><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.HistoryDatasetAssociation.BASE_ATTRS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="attribute">
 <dt id="bioblend.galaxy.objects.wrappers.HistoryDatasetAssociation.SRC">
 <tt class="descname">SRC</tt><em class="property"> = 'hda'</em><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.HistoryDatasetAssociation.SRC" title="Permalink to this definition">¶</a></dt>
@@ -1893,7 +1925,7 @@ format required by the Galaxy web API.</td>
 
 <dl class="class">
 <dt id="bioblend.galaxy.objects.wrappers.LibraryDatasetDatasetAssociation">
-<em class="property">class </em><tt class="descclassname">bioblend.galaxy.objects.wrappers.</tt><tt class="descname">LibraryDatasetDatasetAssociation</tt><big>(</big><em>ds_dict</em>, <em>id</em>, <em>container_id</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/wrappers.html#LibraryDatasetDatasetAssociation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.LibraryDatasetDatasetAssociation" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">bioblend.galaxy.objects.wrappers.</tt><tt class="descname">LibraryDatasetDatasetAssociation</tt><big>(</big><em>ds_dict</em>, <em>container_id</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/wrappers.html#LibraryDatasetDatasetAssociation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.LibraryDatasetDatasetAssociation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Maps to a Galaxy <tt class="docutils literal"><span class="pre">LibraryDatasetDatasetAssociation</span></tt>.</p>
 <dl class="attribute">
 <dt id="bioblend.galaxy.objects.wrappers.LibraryDatasetDatasetAssociation.SRC">
@@ -1904,7 +1936,7 @@ format required by the Galaxy web API.</td>
 
 <dl class="class">
 <dt id="bioblend.galaxy.objects.wrappers.LibraryDataset">
-<em class="property">class </em><tt class="descclassname">bioblend.galaxy.objects.wrappers.</tt><tt class="descname">LibraryDataset</tt><big>(</big><em>ds_dict</em>, <em>id</em>, <em>container_id</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/wrappers.html#LibraryDataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.LibraryDataset" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">bioblend.galaxy.objects.wrappers.</tt><tt class="descname">LibraryDataset</tt><big>(</big><em>ds_dict</em>, <em>container_id</em><big>)</big><a class="reference internal" href="../../_modules/bioblend/galaxy/objects/wrappers.html#LibraryDataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.LibraryDataset" title="Permalink to this definition">¶</a></dt>
 <dd><p>Maps to a Galaxy <tt class="docutils literal"><span class="pre">LibraryDataset</span></tt>.</p>
 <dl class="attribute">
 <dt id="bioblend.galaxy.objects.wrappers.LibraryDataset.SRC">
@@ -1915,16 +1947,15 @@ format required by the Galaxy web API.</td>
 
 <dl class="class">
 <dt id="bioblend.galaxy.objects.wrappers.Preview">
-<em class="property">class </em><tt class="descclassname">bioblend.galaxy.objects.wrappers.</tt><tt class="descname">Preview</tt><big>(</big><em>pw_dict</em>, <em>id</em><big>)</big><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.Preview" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">bioblend.galaxy.objects.wrappers.</tt><tt class="descname">Preview</tt><big>(</big><em>pw_dict</em><big>)</big><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.Preview" title="Permalink to this definition">¶</a></dt>
 <dd><p>Abstract base class for Galaxy entity &#8216;previews&#8217;.</p>
 <p>Classes derived from this one model the short summaries returned
-by global getters such as <tt class="docutils literal"><span class="pre">/api/libraries</span></tt>.  Previews typically
-have a small numbers of attributes including the name and id.</p>
+by global getters such as <tt class="docutils literal"><span class="pre">/api/libraries</span></tt>.</p>
 </dd></dl>
 
 <dl class="class">
 <dt id="bioblend.galaxy.objects.wrappers.LibraryPreview">
-<em class="property">class </em><tt class="descclassname">bioblend.galaxy.objects.wrappers.</tt><tt class="descname">LibraryPreview</tt><big>(</big><em>pw_dict</em>, <em>id</em><big>)</big><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.LibraryPreview" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">bioblend.galaxy.objects.wrappers.</tt><tt class="descname">LibraryPreview</tt><big>(</big><em>pw_dict</em><big>)</big><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.LibraryPreview" title="Permalink to this definition">¶</a></dt>
 <dd><p>Models Galaxy library &#8216;previews&#8217;.</p>
 <p>Instances of this class wrap dictionaries obtained by getting
 <tt class="docutils literal"><span class="pre">/api/libraries</span></tt> from Galaxy.</p>
@@ -1932,7 +1963,7 @@ have a small numbers of attributes including the name and id.</p>
 
 <dl class="class">
 <dt id="bioblend.galaxy.objects.wrappers.HistoryPreview">
-<em class="property">class </em><tt class="descclassname">bioblend.galaxy.objects.wrappers.</tt><tt class="descname">HistoryPreview</tt><big>(</big><em>pw_dict</em>, <em>id</em><big>)</big><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.HistoryPreview" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">bioblend.galaxy.objects.wrappers.</tt><tt class="descname">HistoryPreview</tt><big>(</big><em>pw_dict</em><big>)</big><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.HistoryPreview" title="Permalink to this definition">¶</a></dt>
 <dd><p>Models Galaxy history &#8216;previews&#8217;.</p>
 <p>Instances of this class wrap dictionaries obtained by getting
 <tt class="docutils literal"><span class="pre">/api/histories</span></tt> from Galaxy.</p>
@@ -1940,7 +1971,7 @@ have a small numbers of attributes including the name and id.</p>
 
 <dl class="class">
 <dt id="bioblend.galaxy.objects.wrappers.WorkflowPreview">
-<em class="property">class </em><tt class="descclassname">bioblend.galaxy.objects.wrappers.</tt><tt class="descname">WorkflowPreview</tt><big>(</big><em>pw_dict</em>, <em>id</em><big>)</big><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.WorkflowPreview" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">bioblend.galaxy.objects.wrappers.</tt><tt class="descname">WorkflowPreview</tt><big>(</big><em>pw_dict</em><big>)</big><a class="headerlink" href="#bioblend.galaxy.objects.wrappers.WorkflowPreview" title="Permalink to this definition">¶</a></dt>
 <dd><p>Models Galaxy workflow &#8216;previews&#8217;.</p>
 <p>Instances of this class wrap dictionaries obtained by getting
 <tt class="docutils literal"><span class="pre">/api/workflows</span></tt> from Galaxy.</p>
