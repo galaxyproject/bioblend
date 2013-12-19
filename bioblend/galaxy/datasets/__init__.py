@@ -7,6 +7,7 @@ import os
 import shlex
 import time
 import logging
+import urlparse
 
 log = logging.getLogger(__name__)
 
@@ -64,7 +65,7 @@ class DatasetClient(Client):
 
         # Currently the Datasets REST API does not provide the download URL, so we construct it
         download_url = 'datasets/' + dataset_id + '/display?to_ext=' + dataset['data_type']
-        url = '/'.join([self.gi.base_url, download_url])
+        url = urlparse.urljoin(self.gi.base_url, download_url)
             
         # Don't use self.gi.make_get_request as currently the download API does not require a key        
         r = requests.get(url)
