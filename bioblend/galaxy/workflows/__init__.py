@@ -138,7 +138,7 @@ class WorkflowClient(Client):
         return workflow_json
 
     def run_workflow(self, workflow_id, dataset_map,params=None, history_id=None, history_name=None,
-            import_inputs_to_history=False):
+            import_inputs_to_history=False, replacement_params=None):
         """
         Run the workflow identified by ``workflow_id``
 
@@ -171,6 +171,11 @@ class WorkflowClient(Client):
                                          into the history. If ``False``, only workflow outputs
                                          will be visible in the given history.
 
+        :type replacement_params: dict
+        :param params: A mapping from workflow replacement params to values. The map must be in the following
+                       format: 
+                       ``{'output_name': 'my_output_name', 'threshold': '10'}``
+
         :rtype: dict
         :return: A dict containing the history ID where the outputs are placed as well as
                  output dataset IDs.
@@ -186,6 +191,9 @@ class WorkflowClient(Client):
         
         if params:
             payload['parameters'] = params
+
+        if replacement_params:
+            payload['replacement_params'] = replacement_params
             
         if history_id:
             payload['history'] = 'hist_id={0}'.format(history_id)
