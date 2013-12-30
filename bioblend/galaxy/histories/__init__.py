@@ -45,13 +45,24 @@ class HistoryClient(Client):
             histories = filtered_hists
         return histories
 
-    def show_history(self, history_id, contents=False):
+    def show_history(self, history_id, contents=False, deleted=None, visible=None, details=None):
         """
         Get details of a given history. By default, just get the history meta
         information. If ``contents`` is set to ``True``, get the complete list of
-        datasets in the given history.
+        datasets in the given history. ``deleted``, ``visible``, and ``details`` are 
+        used only if ``contents`` is ``True`` and are used to modify the datasets returned
+        and their contents. Set ``details`` to 'all' to get more information
+        about each dataset.
         """
-        return Client._get(self, id=history_id, contents=contents)
+        params = {}
+        if contents:
+            if details:
+                params['details'] = details
+            if deleted is not None:
+                params['deleted'] = deleted
+            if visible is not None:
+                params['visible'] = visible
+        return Client._get(self, id=history_id, contents=contents, params=params)
 
     def show_dataset(self, history_id, dataset_id):
         """
