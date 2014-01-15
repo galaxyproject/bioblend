@@ -42,6 +42,33 @@ class LibraryClient(Client):
         url = '/'.join([url, item_id])
         return Client._get(self, url=url)
 
+    def delete_library_dataset(self, library_id,dataset_id,purged=False):
+        """
+        Deleta a library dataset in a data library
+
+        :type library_id: string
+        :param library_id: Encoded Library id where dataset is found in
+        
+        :type dataset_id: string
+        :param dataset_id: Encoded dataset id to be deleted
+
+        :type purged: Boolean
+        :param purged: Indicate that the dataset should be purged (permanently deleted)
+
+        :rtype: dict
+        :return: A dictionary containing the datset id and whether the dataset has been deleted
+                 For example::
+
+                 {u'deleted': True, u'id': u'60e680a037f41974'}
+                                                    
+        
+        """
+
+        url = self.gi._make_url(self, library_id, contents=True)
+        # Append the dataset_id to the base history contents URL
+        url = '/'.join([url, dataset_id])
+        return Client._delete(self, url=url,payload={'purged':purged})
+    
     def show_dataset(self, library_id, dataset_id):
         """
         Get details about a given library dataset. The required ``library_id``
