@@ -3,7 +3,7 @@ import logging
 from bioblend.config import Config, BioBlendConfigLocations
 
 # Current version of the library
-__version__ = '0.4.2-dev'
+__version__ = '0.4.3-dev'
 
 config = Config()
 
