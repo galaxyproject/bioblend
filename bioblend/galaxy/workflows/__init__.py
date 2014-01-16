@@ -10,7 +10,7 @@ class WorkflowClient(Client):
         self.module = 'workflows'
         super(WorkflowClient, self).__init__(galaxy_instance)
 
-    def get_workflows(self, workflow_id=None, name=None, deleted=False):
+    def get_workflows(self, workflow_id=None, name=None, deleted=False, published=False):
         """
         Get all workflows or filter the specific one(s) via the provided ``name``
         or ``workflow_id``. Provide only one argument, ``name`` or ``workflow_id``,
@@ -20,6 +20,8 @@ class WorkflowClient(Client):
         workflows matching the argument will be returned.
 
         If ``deleted`` is set to ``True``, return workflows that have been deleted.
+
+        If ``published`` is set to ``True``, return published workflows.
 
         Return a list of JSON formatted dicts each containing basic information
         about a workflow.
@@ -33,8 +35,10 @@ class WorkflowClient(Client):
                      u'url': u'/api/workflows/92c56938c2f9b315'}]
 
         """
-
-        workflows = Client._get(self, deleted=deleted)
+        kwargs = {'deleted': deleted}
+        if published:
+            kwargs['params'] = {'show_published': 'True'}
+        workflows = Client._get(self, **kwargs)
         if name is not None or workflow_id is not None:
             filtered_wfs = []
             for workflow in workflows:
@@ -95,6 +99,16 @@ class WorkflowClient(Client):
             workflow_json = simplejson.load(fp)
 
         return self.import_workflow_json(workflow_json)
+
+    def import_shared_workflow(self, workflow_id):
+        """
+        Imports a shared workflow.
+        """
+        payload = {}
+        payload['workflow_id'] = workflow_id
+        url = self.gi._make_url(self)
+        url = '/'.join([url, 'import'])
+        return Client._post(self, url=url, payload=payload)
 
     def export_workflow_json(self, workflow_id):
         """
