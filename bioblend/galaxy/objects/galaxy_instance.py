@@ -5,7 +5,7 @@ A representation of a Galaxy instance based on oo wrappers.
 import bioblend
 import bioblend.galaxy
 
-from client import DatasetClient, HistoryClient, LibraryClient, WorkflowClient
+from client import ObjDatasetClient, ObjHistoryClient, ObjLibraryClient, ObjWorkflowClient
 
 
 class GalaxyInstance(object):
@@ -33,7 +33,7 @@ class GalaxyInstance(object):
     def __init__(self, url, api_key):
         self.gi = bioblend.galaxy.GalaxyInstance(url, api_key)
         self.log = bioblend.log
-        self.datasets = ObjDatasetClient(self.gi)
-        self.histories = ObjHistoryClient(self.gi)
-        self.libraries = ObjLibraryClient(self.gi)
-        self.workflows = ObjWorkflowClient(self.gi)
+        self.datasets = ObjDatasetClient(self)
+        self.histories = ObjHistoryClient(self)
+        self.libraries = ObjLibraryClient(self)
+        self.workflows = ObjWorkflowClient(self)
