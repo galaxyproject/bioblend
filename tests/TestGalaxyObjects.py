@@ -1,4 +1,4 @@
-# pylint: disable=C0103
+# pylint: disable=C0103,E1101
 
 import sys, os, unittest, json, uuid, tempfile, urllib2, shutil
 try:
@@ -97,7 +97,7 @@ class TestWorkflow(unittest.TestCase):
         self.assertTrue(self.wf.is_modified)
 
     def test_steps(self):
-        step_dicts = [v for k, v in sorted(
+        step_dicts = [v for _, v in sorted(
             WF_DICT['steps'].items(), key=lambda t: int(t[0])
             )]
         for i, s in enumerate(self.wf.steps):
@@ -153,14 +153,16 @@ class TestGalaxyInstance(unittest.TestCase):
         self.gi.delete_history(hist, purge=True)
         self.assertFalse(hist.is_mapped)
 
+    def assertWorkflowEqual(self, wf1, wf2):
+        self.assertEqual(len(wf1.steps), len(wf2.steps))
+        for step, istep in zip(wf1.steps, wf2.steps):
+            self.assertEqual(step.name, istep.name)
+
     def test_workflow(self):
         wf = wrappers.Workflow(WF_DICT)
         wf.name = 'test_%s' % uuid.uuid4().hex
         imported = self.gi.import_workflow(wf)
-        self.assertEqual(len(imported.steps), len(wf.steps))
-        keys_to_skip = set(['tool_version'])
-        for step, istep in zip(wf.steps, imported.steps):
-            self.assertEqual(step.name, istep.name)
+        self.assertWorkflowEqual(imported, wf)
         self.assertTrue(imported.id in [_.id for _ in self.gi.get_workflows()])
         self.gi.delete_workflow(imported)
         self.assertFalse(imported.is_mapped)
@@ -175,6 +177,24 @@ class TestGalaxyInstance(unittest.TestCase):
             imported = self.gi.import_workflow(f.read())
         self.assertTrue(imported.id in [_.id for _ in self.gi.get_workflows()])
         self.gi.delete_workflow(imported)
+
+    # not very accurate:
+    #   * we can't publish a wf from the API
+    #   * we can't directly get another user's wf
+    def test_workflow_from_shared(self):
+        all_prevs = dict(
+            (_.id, _) for _ in self.gi.get_workflow_previews(published=True)
+            )
+        pub_only_ids = set(all_prevs).difference(
+            _.id for _ in self.gi.get_workflow_previews()
+            )
+        if pub_only_ids:
+            wf_id = pub_only_ids.pop()
+            imported = self.gi.import_shared_workflow(wf_id)
+            self.assertTrue(isinstance(imported, wrappers.Workflow))
+            self.gi.delete_workflow(imported)
+        else:
+            print "skipped 'manually publish a workflow to run this test'"
 
     def test_get_libraries(self):
         self.__test_multi_get('library')
@@ -394,6 +414,7 @@ def suite():
         'test_workflow',
         'test_workflow_from_dict',
         'test_workflow_from_json',
+        'test_workflow_from_shared',
         'test_get_libraries',
         'test_get_histories',
         'test_get_workflows',

@@ -435,6 +435,19 @@ class GalaxyInstance(object):
         wf_info = self.gi.workflows.import_workflow_json(wf_dict)
         return self.get_workflow(wf_info['id'])
 
+    def import_shared_workflow(self, id_):
+        """
+        Imports a shared workflow to the user's space.
+
+        :type id_: str
+        :param id_: workflow id
+
+        :rtype: :class:`~bioblend.galaxy.objects.wrappers.Workflow`
+        :return: the workflow just imported
+        """
+        wf_dict = self.gi.workflows.import_shared_workflow(id_)
+        return self.get_workflow(wf_dict['id'])
+
     def get_workflow(self, id_):
         """
         Retrieve the workflow corresponding to the given id.
@@ -448,29 +461,33 @@ class GalaxyInstance(object):
         return wrappers.Workflow(wf_dict, id=id_, inputs=inputs)
 
     # the 'deleted' option is not available for workflows
-    def get_workflow_previews(self, name=None):
+    def get_workflow_previews(self, name=None, published=False):
         """
         Get workflow previews for the user of this Galaxy instance.
 
         :type name: str
         :param name: return only workflows with this name
+        :type published: bool
+        :param published: return published workflows
 
         :rtype: list of
           :class:`~bioblend.galaxy.objects.wrappers.WorkflowPreview`
         """
-        dicts = self.gi.workflows.get_workflows(name=name)
+        dicts = self.gi.workflows.get_workflows(name=name, published=published)
         return [wrappers.WorkflowPreview(_) for _ in dicts]
 
-    def get_workflows(self, name=None):
+    def get_workflows(self, name=None, published=False):
         """
         Get workflows owned by the user of this Galaxy instance.
 
         :type name: str
         :param name: return only workflows with this name
+        :type published: bool
+        :param published: return published workflows
 
         :rtype: list of :class:`~bioblend.galaxy.objects.wrappers.Workflow`
         """
-        dicts = self.gi.workflows.get_workflows(name=name)
+        dicts = self.gi.workflows.get_workflows(name=name, published=published)
         return [self.get_workflow(_['id']) for _ in dicts]
 
     def run_workflow(self, workflow, inputs, history, params=None,
