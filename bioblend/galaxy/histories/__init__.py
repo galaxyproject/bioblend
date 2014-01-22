@@ -49,7 +49,7 @@ class HistoryClient(Client):
         """
         Get details of a given history. By default, just get the history meta
         information. If ``contents`` is set to ``True``, get the complete list of
-        datasets in the given history. ``deleted``, ``visible``, and ``details`` are 
+        datasets in the given history. ``deleted``, ``visible``, and ``details`` are
         used only if ``contents`` is ``True`` and are used to modify the datasets returned
         and their contents. Set ``details`` to 'all' to get more information
         about each dataset.
@@ -91,7 +91,7 @@ class HistoryClient(Client):
     def update_history(self, history_id, name=None,annotation=None):
         """
         Update history metadata information. Current attributes that can be modified
-        for a history 'name' and 'annotation'. 
+        for a history 'name' and 'annotation'.
 
         :type history_id: string
         :param history_id: Encoded history ID
@@ -102,14 +102,14 @@ class HistoryClient(Client):
 
         :rtype: status_code (int)
 
-        """        
+        """
 
         payload = {}
         if name:
             payload['name'] = name
         if annotation:
             payload['annotation'] = annotation
-            
+
         return Client._put(self, payload, id=history_id)
 
     def create_history_tag(self,history_id,tag):
@@ -126,8 +126,8 @@ class HistoryClient(Client):
                  For example::
 
                  {'model_class':'HistoryTagAssociation', 'user_tname': 'NGS_PE_RUN', 'id': 'f792763bee8d277a', 'user_value': None}
-                 
-        """        
+
+        """
 
         #empty payload since we are adding the new tag using the url
         payload = {}
@@ -135,12 +135,11 @@ class HistoryClient(Client):
         #creating the url
         url = self.url
         url = '/'.join([url, history_id,'tags',tag])
-        
+
         return Client._post(self, payload, url=url)
 
 
-    
-    def upload_dataset_from_library(self, history_id, lib_dataset_id, source):
+    def upload_dataset_from_library(self, history_id, lib_dataset_id):
         """
         Upload a dataset into the history from a library. Requires the
         library dataset ID, which can be obtained from the library
