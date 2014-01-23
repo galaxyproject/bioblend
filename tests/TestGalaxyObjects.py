@@ -253,6 +253,9 @@ class TestGalaxyInstance(unittest.TestCase):
 
 
 class TestLibContents(TestGalaxyInstance):
+    """
+    Test the ObjLibraryClient
+    """
 
     URL = 'http://tools.ietf.org/rfc/rfc1866.txt'
 
@@ -314,6 +317,80 @@ class TestLibContents(TestGalaxyInstance):
         dss = self.gi.libraries.upload_from_galaxy_fs(self.lib, fnames[-1])
         self.assertEqual(len(dss), 1)
         self.assertNotEqual(dss[0].file_name, fnames[-1])
+        shutil.rmtree(tempdir)
+
+class TestLibraryObject(TestGalaxyInstance):
+    """
+    Test the library wrapper.
+    """
+
+    URL = 'http://tools.ietf.org/rfc/rfc1866.txt'
+
+    def setUp(self):
+        super(TestLibraryObject, self).setUp()
+        self.lib = self.gi.libraries.create('test_%s' % uuid.uuid4().hex)
+
+    def tearDown(self):
+        self.lib.delete()
+
+    def test_folder(self):
+        name, desc = 'test_%s' % uuid.uuid4().hex, 'D'
+        folder = self.lib.create_folder(name, description=desc)
+        self.assertEqual(folder.name, name)
+        self.assertEqual(folder.description, desc)
+        self.assertEqual(folder.container_id, self.lib.id)
+
+    def test_dataset(self):
+        folder = self.lib.create_folder('test_%s' % uuid.uuid4().hex)
+        self.assertEqual(0, len(self.lib.dataset_ids))
+        ds = self.lib.upload_data('foo\nbar\n', folder=folder)
+        self.assertEqual(ds.container_id, self.lib.id)
+        # ensure the list of dataset ids has been updated correctly
+        self.assertEqual(1, len(self.lib.dataset_ids))
+        lib = self.gi.libraries.get(self.lib.id)
+        self.assertEqual(lib.dataset_ids, self.lib.dataset_ids)
+        ds_id = lib.dataset_ids[0]
+        self.assertEqual(ds_id, ds.id)
+        self.assertEqual(self.lib.get_dataset(ds_id).id, ds.id)
+
+    def test_dataset_from_url(self):
+        if is_reachable(self.URL):
+            ds = self.lib.upload_from_url(self.URL)
+            self.assertEqual(ds.container_id, self.lib.id)
+            assert isinstance(ds, wrappers.Dataset)
+        else:
+            print "skipped 'url not reachable'"
+
+    def test_dataset_from_local(self):
+        # TODO:  use context manager with NamedTemporaryFile
+        fd, path = tempfile.mkstemp(prefix='bioblend_test_')
+        os.write(fd, 'foo\nbar\n')
+        os.close(fd)
+        ds = self.lib.upload_from_local(path)
+        assert isinstance(ds, wrappers.Dataset)
+        self.assertEqual(ds.container_id, self.lib.id)
+        lib = self.gi.libraries.get(self.lib.id)
+        self.assertEqual(lib.dataset_ids, self.lib.dataset_ids)
+        os.remove(path)
+
+    def test_datasets_from_fs(self):
+        tempdir = tempfile.mkdtemp(prefix='bioblend_test_')
+        fnames = [os.path.join(tempdir, 'data%d.txt' % i) for i in xrange(3)]
+        for fn in fnames:
+            with open(fn, 'w') as f:
+                f.write('foo\nbar\n')
+        dss = self.lib.upload_from_galaxy_fs(
+            fnames[:2], link_data_only='link_to_files'
+            )
+        self.assertEqual(len(dss), 2)
+        for ds, fn in zip(dss, fnames):
+            self.assertEqual(ds.container_id, self.lib.id)
+            self.assertEqual(ds.file_name, fn)
+        dss = self.lib.upload_from_galaxy_fs(fnames[-1])
+        self.assertEqual(len(dss), 1)
+        self.assertNotEqual(dss[0].file_name, fnames[-1])
+        lib = self.gi.libraries.get(self.lib.id)
+        self.assertEqual(lib.dataset_ids, self.lib.dataset_ids)
         shutil.rmtree(tempdir)
 
 
@@ -466,6 +543,14 @@ def suite():
         'test_dataset_from_local',
         ):
         s.addTest(TestLibContents(t))
+    for t in (
+        'test_folder',
+        'test_dataset',
+        'test_dataset_from_url',
+        'test_datasets_from_fs',
+        'test_dataset_from_local',
+        ):
+        s.addTest(TestLibraryObject(t))
     for t in (
         'test_dataset',
         'test_delete',
