@@ -11,6 +11,7 @@ import urlparse
 
 log = logging.getLogger(__name__)
 
+
 class DatasetClient(Client):
     def __init__(self, galaxy_instance):
         self.module = 'datasets'
@@ -23,7 +24,8 @@ class DatasetClient(Client):
         """
         return Client._get(self, id=dataset_id, deleted=deleted)
 
-    def download_dataset(self, dataset_id, file_path=None, use_default_filename=True, wait_for_completion=False, maxwait=12000):
+    def download_dataset(self, dataset_id, file_path=None, use_default_filename=True,
+         wait_for_completion=False, maxwait=12000):
         """
         Downloads the dataset identified by 'id'.
 
@@ -66,10 +68,10 @@ class DatasetClient(Client):
         # Currently the Datasets REST API does not provide the download URL, so we construct it
         download_url = 'datasets/' + dataset_id + '/display?to_ext=' + dataset['data_type']
         url = urlparse.urljoin(self.gi.base_url, download_url)
-            
-        # Don't use self.gi.make_get_request as currently the download API does not require a key        
+
+        # Don't use self.gi.make_get_request as currently the download API does not require a key
         r = requests.get(url)
-        
+
         if file_path is None:
             return r.content
         else:
@@ -78,12 +80,12 @@ class DatasetClient(Client):
                     # First try to get the filename from the response headers
                     # We expect tokens 'filename' '=' to be followed by the quoted filename
                     tokens = [x for x in shlex.shlex(r.headers['content-disposition'], posix=True)]
-                    header_filepath = tokens[ tokens.index('filename')+2 ]
+                    header_filepath = tokens[tokens.index('filename') + 2]
                     filename = os.path.basename(header_filepath)
                 except (ValueError, IndexError):
                     # If the filename was not in the header, build a useable filename ourselves.
                     filename = dataset['name'] + '.' + dataset['data_type']
-                
+
                 file_local_path = os.path.join(file_path, filename)
             else:
                 file_local_path = file_path
@@ -108,20 +110,24 @@ class DatasetClient(Client):
         for time_left in xrange(maxwait, 0, -interval):
             if self._is_dataset_complete(dataset_id):
                 return
-            log.warn( "Waiting for dataset %s to complete. Will wait another %is" % (dataset_id, time_left))
+            log.warn("Waiting for dataset %s to complete. Will wait another %is" % (dataset_id, time_left))
             time.sleep(interval)
         if raise_on_timeout:
             #noinspection PyUnboundLocalVariable
             raise DatasetTimeoutException("Waited too long for dataset to complete: %s" % dataset_id)
 
+
 class DatasetStateException(Exception):
     def __init__(self, value):
         self.value = value
+
     def __str__(self):
         return repr(self.value)
+
 
 class DatasetTimeoutException(Exception):
     def __init__(self, value):
         self.value = value
+
     def __str__(self):
         return repr(self.value)

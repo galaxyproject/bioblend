@@ -42,13 +42,13 @@ class LibraryClient(Client):
         url = '/'.join([url, item_id])
         return Client._get(self, url=url)
 
-    def delete_library_dataset(self, library_id,dataset_id,purged=False):
+    def delete_library_dataset(self, library_id, dataset_id, purged=False):
         """
         Deleta a library dataset in a data library
 
         :type library_id: string
         :param library_id: Encoded Library id where dataset is found in
-        
+
         :type dataset_id: string
         :param dataset_id: Encoded dataset id to be deleted
 
@@ -60,15 +60,15 @@ class LibraryClient(Client):
                  For example::
 
                  {u'deleted': True, u'id': u'60e680a037f41974'}
-                                                    
-        
+
+
         """
 
         url = self.gi._make_url(self, library_id, contents=True)
         # Append the dataset_id to the base history contents URL
         url = '/'.join([url, dataset_id])
-        return Client._delete(self, url=url,payload={'purged':purged})
-    
+        return Client._delete(self, url=url, payload={'purged': purged})
+
     def show_dataset(self, library_id, dataset_id):
         """
         Get details about a given library dataset. The required ``library_id``
@@ -281,15 +281,15 @@ class LibraryClient(Client):
         del vars['self']
         return self._do_upload(**vars)
 
-    def set_library_permissions(self, library_id, access_in=None, modify_in=None, 
+    def set_library_permissions(self, library_id, access_in=None, modify_in=None,
                                 add_in=None, manage_in=None):
         """
-        Sets the permissions for a library.  Note: it will override all 
+        Sets the permissions for a library.  Note: it will override all
         security for this library even if you leave out a permission type.
-        
+
         access_in, modify_in, add_in, manage_in expect a list of user id's OR None
         """
-        
+
         payload = {}
         if access_in:
             payload['LIBRARY_ACCESS_in'] = access_in
@@ -299,10 +299,9 @@ class LibraryClient(Client):
             payload['LIBRARY_ADD_in'] = add_in
         if manage_in:
             payload['LIBRARY_MANAGE_in'] = manage_in
-        
+
         # create the url
         url = self.url
         url = '/'.join([url, library_id, 'permissions'])
-        
+
         return Client._post(self, payload, url=url)
-        

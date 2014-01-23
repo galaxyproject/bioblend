@@ -50,7 +50,8 @@ class Client(object):
         r = self.gi.make_get_request(url, params)
         if r.status_code == 200:
             return r.json()
-        raise ConnectionError("Unexpected HTTP status code: %s" % r.status_code, body=r.text) # @see self.body for HTTP response body
+        # @see self.body for HTTP response body
+        raise ConnectionError("Unexpected HTTP status code: %s" % r.status_code, body=r.text)
 
     def _post(self, payload, id=None, deleted=False, contents=None, url=None, files_attached=False):
         """
@@ -72,7 +73,7 @@ class Client(object):
 
         return r
 
-    def _put(self, payload, id=None, url=None,params=None):
+    def _put(self, payload, id=None, url=None, params=None):
         """
         Do a generic PUT request, composing the url from the contents of the
         arguments. Alternatively, an explicit ``url`` can be provided to use
@@ -84,10 +85,9 @@ class Client(object):
         if not url:
             url = self.gi._make_url(self, module_id=id)
 
-        r = self.gi.make_put_request(url, payload=payload,params=params)
+        r = self.gi.make_put_request(url, payload=payload, params=params)
 
         return r.status_code
-
 
     def _delete(self, payload, id=None, deleted=False, contents=None, url=None):
         """
@@ -102,4 +102,5 @@ class Client(object):
         r = self.gi.make_delete_request(url, payload=payload)
         if r.status_code == 200:
             return r.json()
-        raise ConnectionError("Unexpected HTTP status code: %s" % r.status_code, body=r.text) # @see self.body for HTTP response body
+        # @see self.body for HTTP response body
+        raise ConnectionError("Unexpected HTTP status code: %s" % r.status_code, body=r.text)

@@ -3,9 +3,11 @@ Contains possible interactions with the Galaxy Histories
 """
 from bioblend.galaxy.client import Client
 
+import os
 import re
 import shutil
 import urllib2
+
 
 class HistoryClient(Client):
     def __init__(self, galaxy_instance):
@@ -88,7 +90,7 @@ class HistoryClient(Client):
                 for h in self.show_history(history_id, contents=True)
                 if name_filter is None or name_filter.match(h['name'])]
 
-    def update_history(self, history_id, name=None,annotation=None):
+    def update_history(self, history_id, name=None, annotation=None):
         """
         Update history metadata information. Current attributes that can be modified
         for a history 'name' and 'annotation'.
@@ -112,7 +114,7 @@ class HistoryClient(Client):
 
         return Client._put(self, payload, id=history_id)
 
-    def create_history_tag(self,history_id,tag):
+    def create_history_tag(self, history_id, tag):
         """
         Create history tag
 
@@ -134,10 +136,9 @@ class HistoryClient(Client):
 
         #creating the url
         url = self.url
-        url = '/'.join([url, history_id,'tags',tag])
+        url = '/'.join([url, history_id, 'tags', tag])
 
         return Client._post(self, payload, url=url)
-
 
     def upload_dataset_from_library(self, history_id, lib_dataset_id):
         """
@@ -149,27 +150,28 @@ class HistoryClient(Client):
             'content': lib_dataset_id,
             'source': 'library',
             'from_ld_id': lib_dataset_id,  # compatibility with old API
-            }
+        }
         return Client._post(self, payload, id=history_id, contents=True)
 
-    def download_dataset(self, history_id, dataset_id, file_path=None, use_default_filename=True, to_ext=None):
+    def download_dataset(self, history_id, dataset_id, file_path,
+         use_default_filename=True, to_ext=None):
+        """
+        Download a ``dataset_id`` from history with ``history_id`` to a
+        file on the local file system, saving it to ``file_path``.
+        """
+        meta = self.show_dataset(history_id, dataset_id)
+        d_type = to_ext
+        if d_type is None and 'data_type' in meta:
+            d_type = meta['data_type']
+        url = '/'.join([self.gi.base_url, 'datasets', meta['id'], "display"]) + "?to_ext=" + d_type
+        req = urllib2.urlopen(url)
+        if use_default_filename:
+            file_local_path = os.path.join(file_path, meta['name'])
+        else:
+            file_local_path = file_path
 
-            meta = self.show_dataset(history_id, dataset_id)
-
-            d_type = to_ext
-            if d_type is None and 'data_type' in meta :
-                d_type = meta['data_type']
-            url = '/'.join([self.gi.base_url, 'datasets', meta['id'], "display"]) + "?to_ext=" + d_type
-            req = urllib2.urlopen(url)
-            if use_default_filename:
-                file_local_path = os.path.join(file_path, dataset['name'])
-            else:
-                file_local_path = file_path
-
-            with open(file_local_path, 'wb') as fp:
-                shutil.copyfileobj(req, fp)
-
-
+        with open(file_local_path, 'wb') as fp:
+            shutil.copyfileobj(req, fp)
 
     def delete_history(self, history_id, purge=False):
         """

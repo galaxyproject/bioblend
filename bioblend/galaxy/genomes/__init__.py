@@ -3,8 +3,6 @@ Contains possible interactions with the Galaxy Histories
 """
 from bioblend.galaxy.client import Client
 
-import shutil
-import urllib2
 
 class GenomeClient(Client):
     def __init__(self, galaxy_instance):
@@ -36,9 +34,9 @@ class GenomeClient(Client):
     def install_genome(self, func='download', source=None, dbkey=None, ncbi_name=None, ensembl_dbkey=None, url_dbkey=None, indexers=None):
         """
         Download and/or index a genome.
-        
+
         Parameters::
-        
+
             dbkey           DB key of the build to download, ignored unless 'UCSC' is specified as the source
             ncbi_name       NCBI's genome identifier, ignored unless NCBI is specified as the source
             ensembl_dbkey   Ensembl's genome identifier, ignored unless Ensembl is specified as the source
@@ -50,10 +48,10 @@ class GenomeClient(Client):
                             'index'     Index only
 
         Returns::
-        
+
             If no error:
             dict( status: 'ok', job: <job ID> )
-        
+
             If error:
             dict( status: 'error', error: <error message> )
         """
