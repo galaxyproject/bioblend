@@ -4,11 +4,11 @@ An interface the clients should implement.
 This class is primarily a helper for the library and user code
 should not use it directly.
 """
-import logging
 import requests
 import simplejson
 import time
 
+import bioblend as bb
 
 class ConnectionError(Exception):
     """
@@ -73,7 +73,6 @@ class Client(object):
         """
         self.gi = galaxy_instance
         self.url = '/'.join([self.gi.url, self.module])
-        self.logger = logging.getLogger(self.module)
 
     def _get(self, id=None, deleted=False, contents=None, url=None, params=None):
         """
@@ -123,7 +122,7 @@ class Client(object):
 
         attempts_left = self.max_get_retries()
         retry_delay = self.get_retry_delay()
-        self.logger.debug("Client._get_retry - attempts left: %s; retry delay: %s",
+        bb.log.debug("Client._get_retry - attempts left: %s; retry delay: %s",
                 attempts_left, retry_delay)
         r = None
         while attempts_left > 0:
@@ -133,18 +132,18 @@ class Client(object):
                 if r.status_code == 200 and r.content:
                     return r.json()
                 else:
-                    self.logger.info("GET request failed (code: %s; body: %s). %s attempts left",
+                    bb.log.info("GET request failed (code: %s; body: %s). %s attempts left",
                             r.status_code, r.body, attempts_left)
             except requests.exceptions.ConnectionError as e:
                 if attempts_left <= 0:
                     raise ConnectionError(e.message) # raise client.ConnectionError
                 else:
-                    self.logger.warn("Error connecting to Galaxy: %s. Going to retry %s more times.", e, attempts_left)
+                    bb.log.warn("Error connecting to Galaxy: %s. Going to retry %s more times.", e, attempts_left)
             except simplejson.JSONDecodeError as e:
                 if attempts_left <= 0:
                     raise
                 else:
-                    self.logger.warn("Received invalid JSON reply from Galaxy: %s. Going to retry %s more times.", e, attempts_left)
+                    bb.log.warn("Received invalid JSON reply from Galaxy: %s. Going to retry %s more times.", e, attempts_left)
             if attempts_left > 0:
                 time.sleep(retry_delay)
         if r is None:
