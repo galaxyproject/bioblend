@@ -398,7 +398,7 @@ class History(DatasetContainer):
         self.gi.histories.delete(self, purge)
 
     def import_dataset(self, lds):
-        return self.gi.histories.import_dataset_info(self, lds)
+        return self.gi.histories.import_dataset(self, lds)
 
     def get_dataset(self, ds_id):
         return self.gi.histories.get_dataset(self, ds_id)

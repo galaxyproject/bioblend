@@ -431,7 +431,7 @@ class ObjHistoryClient(ObjClient):
 
     #-- history contents --
 
-    def import_dataset_into(self, history, lds):
+    def import_dataset(self, history, lds):
         """
         Import a dataset into the history from a library.
 
