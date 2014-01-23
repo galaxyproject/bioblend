@@ -457,8 +457,10 @@ class ObjHistoryClient(ObjClient):
             self._error(
                 'upload_dataset_from_library: unexpected reply: %r' % (res,)
                 )
-        history = self.get(history.id)  # refresh
-        diff = set(history.dataset_ids) - old_ids
+        new_history = self.get(history.id)  # refresh
+        # update the dataset ids of the history object we received
+        object.__setattr__(history, 'dataset_ids', new_history.dataset_ids)
+        diff = set(new_history.dataset_ids) - old_ids
         if len(diff) != 1:
             self._error('cannot retrieve hda id')
         return self.get_dataset(history, diff.pop())
