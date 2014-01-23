@@ -423,8 +423,8 @@ class Library(DatasetContainer):
     def preview(self):
         return self._preview(self, self.gi.libraries)
 
-    def delete(self, purge=False):
-        self.gi.libraries.delete(self, purge)
+    def delete(self):
+        self.gi.libraries.delete(self)
 
     def upload_data(self, data, folder=None, **kwargs):
         return self.gi.libraries.upload_data(self, data, folder, **kwargs)
