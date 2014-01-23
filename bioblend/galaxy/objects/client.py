@@ -187,7 +187,9 @@ class ObjLibraryClient(ObjClient):
         res = self.low_level_gi.libraries.upload_file_contents(
             library.id, data, folder_id=fid, **kwargs
             )
-        return self.__post_upload(library, 'upload_file_contents', res)
+        new_dataset = self.__post_upload(library, 'upload_file_contents', res)
+        library.dataset_ids.append(new_dataset.id)
+        return new_dataset
 
     def upload_from_url(self, library, url, folder=None, **kwargs):
         """
@@ -202,7 +204,9 @@ class ObjLibraryClient(ObjClient):
         res = self.low_level_gi.libraries.upload_file_from_url(
             library.id, url, fid, **kwargs
             )
-        return self.__post_upload(library, 'upload_file_from_url', res)
+        new_dataset = self.__post_upload(library, 'upload_file_from_url', res)
+        library.dataset_ids.append(new_dataset.id)
+        return new_dataset
 
     def upload_from_local(self, library, path, folder=None, **kwargs):
         """
@@ -217,7 +221,9 @@ class ObjLibraryClient(ObjClient):
         res = self.low_level_gi.libraries.upload_file_from_local_path(
             library.id, path, fid, **kwargs
             )
-        return self.__post_upload(library, 'upload_file_from_local_path', res)
+        new_dataset = self.__post_upload(library, 'upload_file_from_local_path', res)
+        library.dataset_ids.append(new_dataset.id)
+        return new_dataset
 
     def upload_from_galaxy_fs(self, library, paths, folder=None, **kwargs):
         """
@@ -241,8 +247,9 @@ class ObjLibraryClient(ObjClient):
             self._error(
                 'upload_from_galaxy_filesystem: unexpected reply: %r' % (res,)
                 )
-        return [self.get_dataset(library, ds_info['id'])
-                for ds_info in res]
+        new_datasets = [self.get_dataset(library, ds_info['id']) for ds_info in res]
+        library.dataset_ids.extend( nd.id for nd in new_datasets )
+        return new_datasets
 
     def get_dataset(self, src, ds_id):
         """
