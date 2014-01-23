@@ -12,6 +12,7 @@ import bioblend
 bioblend.set_stream_logger('test', level='INFO')
 import bioblend.galaxy.objects.wrappers as wrappers
 import bioblend.galaxy.objects.galaxy_instance as galaxy_instance
+from bioblend.galaxy.client import ConnectionError
 
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -316,10 +317,10 @@ class TestLibContents(TestGalaxyInstance):
         shutil.rmtree(tempdir)
 
 
-class TestHistContents(TestGalaxyInstance):
+class TestHistory(TestGalaxyInstance):
 
     def setUp(self):
-        super(TestHistContents, self).setUp()
+        super(TestHistory, self).setUp()
         self.hist = self.gi.histories.create('test_%s' % uuid.uuid4().hex)
         self.lib = self.gi.libraries.create('test_%s' % uuid.uuid4().hex)
 
@@ -334,6 +335,41 @@ class TestHistContents(TestGalaxyInstance):
         self.assertEqual(hda.container_id, self.hist.id)
         updated_hist = self.gi.histories.get(self.hist.id)
         self.assertTrue(hda.id in updated_hist.dataset_ids)
+
+    def test_delete(self):
+        hist = self.gi.histories.create('test_%s' % uuid.uuid4().hex)
+        hist_id = hist.id
+        hist.delete(purge=True)
+        self.assertFalse(hist.is_mapped)
+        try:
+            h = self.gi.histories.get(hist_id)
+            self.fail("Expected to get a ConnectionError but GET returned %s" % str(h))
+        except ConnectionError:
+            pass
+
+    def test_import_dataset(self):
+        lds = self.gi.libraries.upload_data(self.lib, 'foo\nbar\n')
+        self.assertEqual(len(self.hist.dataset_ids), 0)
+        hda = self.hist.import_dataset(lds)
+        self.assertTrue(isinstance(hda, wrappers.HistoryDatasetAssociation))
+        self.assertEqual(hda.container_id, self.hist.id)
+        self.assertEqual(len(self.hist.dataset_ids), 1)
+        self.assertTrue(hda.id in self.hist.dataset_ids)
+
+    def test_get_dataset(self):
+        lds = self.gi.libraries.upload_data(self.lib, 'foo\nbar\n')
+        hda = self.hist.import_dataset(lds)
+        retrieved = self.hist.get_dataset(hda.id)
+        self.assertEqual(hda.id, retrieved.id)
+
+    def test_get_datasets(self):
+        lds = [ self.gi.libraries.upload_data(self.lib, 'foo\nbar\n'),
+                self.gi.libraries.upload_data(self.lib, 'foo2\nbar2\n') ]
+        hdas = [ self.hist.import_dataset(_) for _ in lds ]
+        datasets = self.hist.get_datasets()
+        self.assertEqual(len(lds), len(datasets))
+        self.assertEqual( [ _.id for _ in hdas ], [ _.id for _ in datasets ])
+
 
 class TestRunWorkflow(TestGalaxyInstance):
 
@@ -432,8 +468,12 @@ def suite():
         s.addTest(TestLibContents(t))
     for t in (
         'test_dataset',
+        'test_delete',
+        'test_import_dataset',
+        'test_get_dataset',
+        'test_get_datasets',
         ):
-        s.addTest(TestHistContents(t))
+        s.addTest(TestHistory(t))
     for t in (
         'test_existing_history',
         'test_new_history',
