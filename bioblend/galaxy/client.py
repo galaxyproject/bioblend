@@ -4,8 +4,11 @@ An interface the clients should implement.
 This class is primarily a helper for the library and user code
 should not use it directly.
 """
+import requests
 import simplejson
+import time
 
+import bioblend as bb
 
 class ConnectionError(Exception):
     """
@@ -24,6 +27,42 @@ class ConnectionError(Exception):
 
 
 class Client(object):
+
+    # Class variables that configure GET request retries.  Note that since these
+    # are class variables their values are shared by all Client instances --
+    # i.e., HistoryClient, WorkflowClient, etc.
+    #
+    # Number of times to retry a failed request.
+    _max_get_retries = 1
+    # Delay in seconds between subsequent retries.
+    _get_retry_delay = 10
+
+    @classmethod
+    def max_get_retries(cls):
+        """The number of times to retry a failed request."""
+        return cls._max_get_retries
+
+    @classmethod
+    def set_max_get_retries(cls, value):
+        """Set how many times to retry a failed request.  Default: 1"""
+        if value < 1:
+            raise ValueError("Number of retries must be >= 1 (got: %s)" % value)
+        cls._max_get_retries = value
+        return cls
+
+    @classmethod
+    def get_retry_delay(cls):
+        """The delay (in seconds) to wait before retrying a failed GET request."""
+        return cls._get_retry_delay
+
+    @classmethod
+    def set_get_retry_delay(cls, value):
+        """Set the delay (in seconds) to wait before retrying a failed GET request. Default: 1"""
+        if value < 0:
+            raise ValueError("Retry delay must be >= 0 (got: %s)" % value)
+        cls._get_retry_delay = value
+        return cls
+
     def __init__(self, galaxy_instance):
         """
         A generic Client interface defining the common fields.
@@ -44,14 +83,76 @@ class Client(object):
         This action often repeats itself in this library, so use this as a
         generic method that can easily be replaced if it does not do what's
         needed.
+
+        raises: ConnectionError (the one in this module)
         """
         if not url:
             url = self.gi._make_url(self, module_id=id, deleted=deleted, contents=contents)
-        r = self.gi.make_get_request(url, params)
-        if r.status_code == 200:
-            return r.json()
-        # @see self.body for HTTP response body
-        raise ConnectionError("Unexpected HTTP status code: %s" % r.status_code, body=r.text)
+        return self._get_retry(url, params)
+
+    def _get_retry(self, url, params):
+        """
+        Make a GET request to the given `url`.  Retry as configured by
+        `Client.max_get_retries` and `Client.get_retry_delay`.
+
+        
+        Sometimes request failures are temporary.  We may want our client to
+        insist and keep retrying issueing a request periodically for a some
+        time, rather than throwing an error.  Also, Galaxy sometimes gets into a
+        bad state where it temporarily returns an empty body with HTTP 200 even
+        when an API call went bad.
+
+        This method lets bioblend retry a GET request as configured through
+        the class methods `max_get_retries` and `get_retry_delay`. The idea is
+        to let the client easily acquire some resistance to transient failures.
+
+        Raises:
+            ConnectionError
+            simplejson.JSONDecodeError
+        """
+        # Why is this method in Client instead of GalaxyInstance?
+        # When some API calls go bad Galaxy returns HTTP 200 with an empty body
+        # or a text error message in the reply. To know whether there was a
+        # problem we need to parse the body -- which implies that we assume it's
+        # JSON and that we returned the parsed contents rather than a Request
+        # object. GalaxyInstance doesn't make any assumptions regarding the
+        # contents of the  the reply.  Instead, the body is parsed here in the
+        # Client class (`GalaxyInstance.make_get_request` returns a `Request`
+        # object). This kind of forces to put the logic here.
+
+        attempts_left = self.max_get_retries()
+        retry_delay = self.get_retry_delay()
+        bb.log.debug("Client._get_retry - attempts left: %s; retry delay: %s",
+                attempts_left, retry_delay)
+        r = None
+        while attempts_left > 0:
+            attempts_left -= 1
+            try:
+                r = self.gi.make_get_request(url, params)
+                if r.status_code == 200 and r.content:
+                    return r.json()
+                else:
+                    bb.log.info("GET request failed (code: %s; body: %s). %s attempts left",
+                            r.status_code, r.body, attempts_left)
+            except requests.exceptions.ConnectionError as e:
+                if attempts_left <= 0:
+                    raise ConnectionError(e.message) # raise client.ConnectionError
+                else:
+                    bb.log.warn("Error connecting to Galaxy: %s. Going to retry %s more times.", e, attempts_left)
+            except simplejson.JSONDecodeError as e:
+                if attempts_left <= 0:
+                    raise
+                else:
+                    bb.log.warn("Received invalid JSON reply from Galaxy: %s. Going to retry %s more times.", e, attempts_left)
+            if attempts_left > 0:
+                time.sleep(retry_delay)
+        if r is None:
+            msg = "Unable to issue request. gi.make_get_request returned None!"
+        elif r.status_code != 200:
+            msg = "Unexpected HTTP status code: %s" % r.status_code
+        else:
+            msg = "Empty reply from GET API call"
+        raise ConnectionError(msg, r.text if r else None)
 
     def _post(self, payload, id=None, deleted=False, contents=None, url=None, files_attached=False):
         """
