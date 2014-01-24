@@ -8,6 +8,8 @@ import time
 
 import wrappers
 
+_PENDING_DS_STATES = set(["new", "upload", "queued", "running", "setting_metadata"])
+
 class ObjClient(object):
     def __init__(self, obj_ginstance, log=None):
         self.obj_gi = obj_ginstance
@@ -50,7 +52,6 @@ class ObjClient(object):
             kwargs['folder_ids'] = f_ids
         return ctype(cdict, **kwargs)
 
-
     def _get_container_dataset(self, src, ds_id, ctype=None):
         if isinstance(src, wrappers.DatasetContainer):
             ctype = type(src)
@@ -83,8 +84,79 @@ class ObjClient(object):
         return [self._get_container_dataset(src, _, ctype=type(src))
                 for _ in src.dataset_ids]
 
+class ObjDatasetClient(ObjClient):
+    """
+    Handles receiving datasets.
+    """
+    # default chunk size for reading remote data
+    try:
+        import resource
+        _CHUNK_SIZE = resource.getpagesize()
+    except StandardError:
+        _CHUNK_SIZE = 4096
 
-class ObjLibraryClient(ObjClient):
+    def _dataset_stream_url(self, dataset):
+        """Abstract method"""
+        raise NotImplementedError()
+
+    def get_stream(self, dataset, chunk_size=_CHUNK_SIZE):
+        """
+        Open ``dataset`` for reading and return an iterator over its contents.
+
+        :type dataset:
+          :class:`~bioblend.galaxy.objects.wrappers.HistoryDatasetAssociation`
+        :param dataset: the dataset to read from
+
+        :type chunk_size: int
+        :param chunk_size: read this amount of bytes at a time
+        """
+        if not chunk_size:
+            chunk_size = self._CHUNK_SIZE
+        url = self._dataset_stream_url(dataset)
+        get_options = {
+            'verify': self.low_level_gi.verify,
+            'params': {'key': self.low_level_gi.key},
+            'stream': True,
+            }
+        r = requests.get(url, **get_options)
+        r.raise_for_status()
+        return r.iter_content(chunk_size)  # FIXME: client can't close r
+
+    def peek(self, dataset, chunk_size=_CHUNK_SIZE):
+        """
+        Open ``dataset`` for reading and return the first chunk.
+
+        See :meth:`.get_stream` for param info.
+        """
+        return self.get_stream(dataset, chunk_size=chunk_size).next()
+
+    def download(self, dataset, outf, chunk_size=_CHUNK_SIZE):
+        """
+        Open ``dataset`` for reading and save its contents to ``outf``.
+
+        :type outf: :obj:`file`
+        :param outf: output file object
+
+        See :meth:`.get_stream` for info on other params.
+        """
+        for chunk in self.get_stream(dataset, chunk_size=chunk_size):
+            outf.write(chunk)
+
+    def get_contents(self, dataset, chunk_size=_CHUNK_SIZE):
+        """
+        Open ``dataset`` for reading and return its **full** contents.
+
+        See :meth:`.get_stream` for param info.
+        """
+        return ''.join(self.get_stream(dataset, chunk_size=chunk_size))
+
+class ObjLibraryClient(ObjDatasetClient):
+
+    def _dataset_stream_url(self, dataset):
+        base_url = self.low_level_gi._make_url(
+            self.low_level_gi.libraries, module_id=dataset.container_id, contents=True
+            )
+        return "%s/%s/display" % (base_url, dataset.id)
 
     def create(self, name, description=None, synopsis=None):
         """
@@ -162,7 +234,6 @@ class ObjLibraryClient(ObjClient):
     def __post_upload(self, library, meth_name, reply):
         ds_info = self._get_dict(meth_name, reply)
         return self.get_dataset(library, ds_info['id'])
-
 
     def upload_data(self, library, data, folder=None, **kwargs):
         """
@@ -298,68 +369,17 @@ class ObjLibraryClient(ObjClient):
         return wrappers.Folder(f_dict, library.id, gi=self.obj_gi)
 
 
-class ObjDatasetClient(ObjClient):
-    # default chunk size for reading remote data
-    try:
-        import resource
-        _CHUNK_SIZE = resource.getpagesize()
-    except StandardError:
-        _CHUNK_SIZE = 4096
 
-    def get_stream(self, dataset, chunk_size=_CHUNK_SIZE):
-        """
-        Open ``dataset`` for reading and return an iterator over its contents.
+class ObjHistoryClient(ObjDatasetClient):
 
-        :type dataset:
-          :class:`~bioblend.galaxy.objects.wrappers.HistoryDatasetAssociation`
-        :param dataset: the dataset to read from
+    # default polling interval for dataset state monitoring
+    _POLLING_INTERVAL = 1
 
-        :type chunk_size: int
-        :param chunk_size: read this amount of bytes at a time
-        """
-        hist_id = dataset.container_id
+    def _dataset_stream_url(self, dataset):
         base_url = self.low_level_gi._make_url(
-            self.low_level_gi.histories, module_id=hist_id, contents=True
+            self.low_level_gi.histories, module_id=dataset.container_id, contents=True
             )
-        url = "%s/%s/display" % (base_url, dataset.id)
-        get_options = {
-            'verify': self.low_level_gi.verify,
-            'params': {'key': self.low_level_gi.key},
-            'stream': True,
-            }
-        r = requests.get(url, **get_options)
-        r.raise_for_status()
-        return r.iter_content(chunk_size)  # FIXME: client can't close r
-
-    def peek(self, dataset, chunk_size=_CHUNK_SIZE):
-        """
-        Open ``dataset`` for reading and return the first chunk.
-
-        See :meth:`.get_stream` for param info.
-        """
-        return self.get_stream(dataset, chunk_size=chunk_size).next()
-
-    def download(self, dataset, outf, chunk_size=_CHUNK_SIZE):
-        """
-        Open ``dataset`` for reading and save its contents to ``outf``.
-
-        :type outf: :obj:`file`
-        :param outf: output file object
-
-        See :meth:`.get_stream` for info on other params.
-        """
-        for chunk in self.get_stream(dataset, chunk_size=chunk_size):
-            outf.write(chunk)
-
-    def get_contents(self, dataset, chunk_size=_CHUNK_SIZE):
-        """
-        Open ``dataset`` for reading and return its **full** contents.
-
-        See :meth:`.get_stream` for param info.
-        """
-        return ''.join(self.get_stream(dataset, chunk_size=chunk_size))
-
-class ObjHistoryClient(ObjClient):
+        return "%s/%s/display" % (base_url, dataset.id)
 
     def create(self, name=None):
         """
@@ -481,6 +501,29 @@ class ObjHistoryClient(ObjClient):
         :return: the history dataset corresponding to ``id_``
         """
         return self._get_container_dataset(src, ds_id, wrappers.History)
+
+    @staticmethod
+    def wait(datasets, polling_interval=_POLLING_INTERVAL):
+        """
+        Wait for datasets to come out of the pending states. Useful to endure
+        """
+        if polling_interval is None:
+            polling_interval = ObjHistoryClient._POLLING_INTERVAL
+        try:
+            ds_iter = iter(datasets)
+        except TypeError:
+            ds_iter = iter([datasets])
+        wait_list = [ d for d in ds_iter if d.state in _PENDING_DS_STATES ]
+        while wait_list:
+            time.sleep(polling_interval)
+            # refresh state and pop the ones that are no longer pending. We break as soon
+            # as we find one that is pending.
+            while wait_list:
+                wait_list[0].refresh()
+                if wait_list[0].state in _PENDING_DS_STATES:
+                    break
+                else:
+                    wait_list.pop()
 
 class ObjWorkflowClient(ObjClient):
     # dataset states corresponding to a 'pending' condition

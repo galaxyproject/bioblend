@@ -6,6 +6,7 @@ A basic object-oriented interface for Galaxy entities.
 
 import abc, collections, json
 
+from client import ObjHistoryClient
 
 __all__ = [
     'Wrapper',
@@ -301,17 +302,36 @@ class Dataset(Wrapper):
         object.__setattr__(self, 'container_id', container_id)
 
     def get_stream(self, chunk_size=None):
-        return self.gi.datasets.get_stream(self, chunk_size if chunk_size else self.gi.datasets._CHUNK_SIZE)
+        """
+        Open ``dataset`` for reading and return an iterator over its contents.
+
+        :type chunk_size: int
+        :param chunk_size: read this amount of bytes at a time
+        """
+        raise NotImplementedError()
 
     def peek(self, chunk_size=None):
        return self.get_stream(chunk_size).next()
 
-    def download(self, outf, chunk_size=None):
-        self.gi.datasets.download(self, outf, chunk_size if chunk_size else self.gi.datasets._CHUNK_SIZE)
+    def download(self, file_object, chunk_size=None):
+        for chunk in self.get_stream(chunk_size=chunk_size):
+            file_object.write(chunk)
 
     def get_contents(self, chunk_size=None):
-        self.gi.datasets.get_contents(self, chunk_size if chunk_size else self.gi.datasets._CHUNK_SIZE)
+        return ''.join(self.get_stream(chunk_size=chunk_size))
 
+    def refresh(self):
+        """
+        Re-fetch the attributes pertaining to this object.
+
+        Returns: self
+        """
+        raise NotImplementedError()
+
+    def _refresh_imp(self, gi_module):
+        fresh = gi_module.get_dataset(self.container_id, self.id)
+        self.__init__(fresh.wrapped, self.container_id, self.gi)
+        return self
 
 class HistoryDatasetAssociation(Dataset):
     """
@@ -323,6 +343,14 @@ class HistoryDatasetAssociation(Dataset):
     def __init__(self, ds_dict, container_id, gi=None):
         super(HistoryDatasetAssociation, self).__init__(ds_dict, container_id, gi=gi)
 
+    def get_stream(self, chunk_size=None):
+        return self.gi.histories.get_stream(self, chunk_size)
+
+    def refresh(self):
+        return self._refresh_imp(self.gi.histories)
+
+    def wait(self, polling_interval=None):
+        ObjHistoryClient.wait(self, polling_interval)
 
 class LibraryDatasetDatasetAssociation(Dataset):
     """
@@ -335,6 +363,12 @@ class LibraryDatasetDatasetAssociation(Dataset):
             ds_dict, container_id, gi=gi
             )
 
+    def get_stream(self, chunk_size=None):
+        return self.gi.libraries.get_stream(self, chunk_size)
+
+    def refresh(self):
+        return self._refresh_imp(self.gi.libraries)
+
 
 class LibraryDataset(Dataset):
     """
@@ -344,6 +378,12 @@ class LibraryDataset(Dataset):
 
     def __init__(self, ds_dict, container_id, gi=None):
         super(LibraryDataset, self).__init__(ds_dict, container_id, gi=gi)
+
+    def get_stream(self, chunk_size=None):
+        return self.gi.libraries.get_stream(self, chunk_size)
+
+    def refresh(self):
+        return self._refresh_imp(self.gi.libraries)
 
 
 class DatasetContainer(Wrapper):
