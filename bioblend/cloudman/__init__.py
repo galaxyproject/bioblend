@@ -43,7 +43,7 @@ def block_till_vm_ready(func):
         try:
             obj.wait_till_instance_ready(timeout, interval)
         except AttributeError:
-            raise VMLaunchException("Decorated object does not define a wait_till_instance_ready method."\
+            raise VMLaunchException("Decorated object does not define a wait_till_instance_ready method."
                                     "Make sure that the object is of type GenericVMInstance.")
         return func(*args, **kwargs)
     return wrapper
@@ -320,7 +320,7 @@ class GenericVMInstance(object):
                 bioblend.log.error(msg)
                 raise VMLaunchException(msg)
             else:
-                bioblend.log.warn("Instance not ready yet (it's in state '{0}'); waiting another {1} seconds..."\
+                bioblend.log.warn("Instance not ready yet (it's in state '{0}'); waiting another {1} seconds..."
                                .format(status['instance_state'], time_left))
                 time.sleep(vm_ready_check_interval)
 
@@ -418,7 +418,7 @@ class CloudManInstance(GenericVMInstance):
             cfg.password, cfg.kernel_id, cfg.ramdisk_id, cfg.key_name,
             cfg.security_groups, cfg.placement)
         if (result['error'] is not None):
-            raise VMLaunchException("Error launching cloudman instance: " % result['error'])
+            raise VMLaunchException("Error launching cloudman instance: %s" % result['error'])
         instance = CloudManInstance(None, None, launcher=launcher, launch_result=result,
             cloudman_config=cfg)
         if cfg.block_till_ready and cfg.cluster_type:
