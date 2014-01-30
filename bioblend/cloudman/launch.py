@@ -228,22 +228,25 @@ class CloudManLauncher(object):
 
     def get_status(self, instance_id):
         """
-        Check on the status of an instance. If ``instance_id`` is not provided,
-        the ID obtained when launching *the most recent* instance is used. Note
-        that this assumes the instance being checked on was launched using this
-        class. Also note that the same class may be used to launch multiple instances
-        but only the most recent ``instance_id`` is kept while any others will
-        need to be explicitly specified.
+        Check on the status of an instance. ``instance_id`` needs to be a
+        ``boto``-library copatible instance ID (e.g., ``i-8fehrdss``).If
+        ``instance_id`` is not provided, the ID obtained when launching
+        *the most recent* instance is used. Note that this assumes the instance
+        being checked on was launched using this  class. Also note that the same
+        class may be used to launch multiple instances but only the most recent
+        ``instance_id`` is kept while any others will  to be explicitly specified.
 
         This method also allows the required ``ec2_conn`` connection object to be
         provided at invocation time. If the object is not provided, credentials
         defined for the class are used (ability to specify a custom ``ec2_conn``
         helps in case of stateless method invocations).
 
-        Return a ``state`` dict with the current ``instance_state``, ``public_ip``,
-        ``placement``, and ``error`` keys, which capture the current state (the
-        values for those keys default to empty string if no data is available from
-        the cloud).
+        Return a ``state`` dict containing the following keys: ``instance_state``,
+        ``public_ip``, ``placement``, and ``error``, which capture CloudMan's
+        current state. For ``instance_state``, expected values are: ``pending``,
+        ``booting``, ``running``, or ``error`` and represent the state of the
+        underlying instance. Other keys will return an empty  value until the
+        ``instance_state`` enters ``running`` state.
         """
         ec2_conn = self.ec2_conn
         rs = None
