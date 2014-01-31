@@ -352,38 +352,29 @@ class HistoryDatasetAssociation(Dataset):
     def wait(self, polling_interval=None):
         ObjHistoryClient.wait(self, polling_interval)
 
-class LibraryDatasetDatasetAssociation(Dataset):
+
+class LibRelatedDataset(Dataset):
+    def __init__(self, ds_dict, container_id, gi=None):
+        super(LibRelatedDataset, self).__init__(ds_dict, container_id, gi=gi)
+
+    def get_stream(self, chunk_size=None):
+        return self.gi.libraries.get_stream(self, chunk_size)
+
+    def refresh(self):
+        return self._refresh_imp(self.gi.libraries)
+
+
+class LibraryDatasetDatasetAssociation(LibRelatedDataset):
     """
     Maps to a Galaxy ``LibraryDatasetDatasetAssociation``.
     """
     SRC = 'ldda'
 
-    def __init__(self, ds_dict, container_id, gi=None):
-        super(LibraryDatasetDatasetAssociation, self).__init__(
-            ds_dict, container_id, gi=gi
-            )
-
-    def get_stream(self, chunk_size=None):
-        return self.gi.libraries.get_stream(self, chunk_size)
-
-    def refresh(self):
-        return self._refresh_imp(self.gi.libraries)
-
-
-class LibraryDataset(Dataset):
+class LibraryDataset(LibRelatedDataset):
     """
     Maps to a Galaxy ``LibraryDataset``.
     """
     SRC = 'ld'
-
-    def __init__(self, ds_dict, container_id, gi=None):
-        super(LibraryDataset, self).__init__(ds_dict, container_id, gi=gi)
-
-    def get_stream(self, chunk_size=None):
-        return self.gi.libraries.get_stream(self, chunk_size)
-
-    def refresh(self):
-        return self._refresh_imp(self.gi.libraries)
 
 
 class DatasetContainer(Wrapper):
