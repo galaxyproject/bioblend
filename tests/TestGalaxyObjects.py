@@ -632,10 +632,10 @@ def suite():
         s.addTest(TestLibContents(t))
     for t in (
         'test_folder',
-        'test_dataset_upload',
+        'test_dataset',
         'test_dataset_from_url',
-        'test_datasets_from_fs',
         'test_dataset_from_local',
+        'test_datasets_from_fs',
         'test_dataset_get_stream',
         'test_dataset_peek',
         'test_dataset_download',
@@ -643,7 +643,7 @@ def suite():
         ):
         s.addTest(TestLibraryObject(t))
     for t in (
-        'test_dataset',
+        'test_dataset_upload',
         'test_delete',
         'test_import_dataset',
         'test_get_dataset',
