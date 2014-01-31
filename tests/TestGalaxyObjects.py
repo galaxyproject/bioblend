@@ -186,16 +186,16 @@ class TestGalaxyInstance(unittest.TestCase):
     #   * we can't directly get another user's wf
     def test_workflow_from_shared(self):
         all_prevs = dict(
-            (_.id, _) for _ in self.gi.get_workflow_previews(published=True)
+            (_.id, _) for _ in self.gi.workflows.get_previews(published=True)
             )
         pub_only_ids = set(all_prevs).difference(
-            _.id for _ in self.gi.get_workflow_previews()
+            _.id for _ in self.gi.workflows.get_previews()
             )
         if pub_only_ids:
             wf_id = pub_only_ids.pop()
-            imported = self.gi.import_shared_workflow(wf_id)
+            imported = self.gi.workflows.import_shared(wf_id)
             self.assertTrue(isinstance(imported, wrappers.Workflow))
-            self.gi.delete_workflow(imported)
+            self.gi.workflows.delete(imported)
         else:
             print "skipped 'manually publish a workflow to run this test'"
 
