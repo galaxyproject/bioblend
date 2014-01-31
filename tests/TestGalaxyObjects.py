@@ -664,5 +664,18 @@ def suite():
 
 
 if __name__ == '__main__':
+    try:
+        klass = sys.argv[1]
+        meth = sys.argv[2]
+    except IndexError:
+        tests = suite()
+    else:
+        try:
+            klass = getattr(sys.modules['__main__'], klass)
+            getattr(klass, meth)
+        except AttributeError:
+            sys.exit("ERROR: test %s.%s not found" % (klass, meth))
+        else:
+            tests = klass(meth)
     RUNNER = unittest.TextTestRunner(verbosity=2)
-    RUNNER.run((suite()))
+    RUNNER.run(tests)
