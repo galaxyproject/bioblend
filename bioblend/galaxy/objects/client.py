@@ -580,7 +580,9 @@ class ObjWorkflowClient(ObjClient):
         """
         wf_dict = self.low_level_gi.workflows.export_workflow_json(id_)
         res = self.low_level_gi.workflows.show_workflow(id_)
-        inputs = self._get_dict('show_workflow', res)['inputs']
+        wf_info = self._get_dict('show_workflow', res)
+        wf_dict['published'] = wf_info['published']
+        inputs = wf_info['inputs']
         return wrappers.Workflow(wf_dict, id=id_, inputs=inputs, gi=self.obj_gi)
 
     # the 'deleted' option is not available for workflows
@@ -601,7 +603,7 @@ class ObjWorkflowClient(ObjClient):
             )
         return [wrappers.WorkflowPreview(_, gi=self.obj_gi) for _ in dicts]
 
-    def list(self, name=None, published=False):
+    def list(self, name=None, deleted=False, published=False):
         """
         Get workflows owned by the user of this Galaxy instance.
 
@@ -613,7 +615,7 @@ class ObjWorkflowClient(ObjClient):
         :rtype: list of :class:`~bioblend.galaxy.objects.wrappers.Workflow`
         """
         dicts = self.low_level_gi.workflows.get_workflows(
-            name=name, published=published
+            name=name, deleted=deleted, published=published
             )
         return [self.get(_['id']) for _ in dicts]
 

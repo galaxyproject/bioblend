@@ -191,7 +191,7 @@ class Workflow(Wrapper):
     A workflow defines a sequence of steps that produce one or more
     results from an input dataset.
     """
-    BASE_ATTRS = Wrapper.BASE_ATTRS + ('annotation',)
+    BASE_ATTRS = Wrapper.BASE_ATTRS + ('annotation', 'published')
 
     def __init__(self, wf_dict, id=None, inputs=None, gi=None):
         """
