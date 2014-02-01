@@ -184,6 +184,7 @@ class Tool(Step):
                 self, 'tool_state', _recursive_loads(self.tool_state)
                 )
 
+
 class Workflow(Wrapper):
     """
     Workflows represent ordered sequences of computations on Galaxy.
@@ -275,19 +276,25 @@ class Workflow(Wrapper):
         return self.gi.workflows.import_one(self)
 
     def preview(self):
-        ws = [ _ for _ in self.gi.workflows.get_previews(name=self.name) if _.id == self.id ]
+        ws = [_ for _ in self.gi.workflows.get_previews(name=self.name)
+              if _.id == self.id]
         if len(ws) > 1:
-            raise NotImplementedError("Didn't think there could be more than one preview. File a bug report")
+            raise NotImplementedError(
+                "Unexpected number of previews (%d > 1)" % len(ws)
+                )
         return ws[0] if len(ws) > 0 else None
 
     def run(self, inputs, history, params=None, import_inputs=False, wait=True):
-        outputs, history = self.gi.workflows.run(self, inputs, history, params, import_inputs)
+        outputs, history = self.gi.workflows.run(
+            self, inputs, history, params, import_inputs
+            )
         if wait:
             self.gi.workflows.wait(outputs, history)
         return outputs, history
 
     def delete(self):
         self.gi.workflows.delete(self)
+
 
 class Dataset(Wrapper):
     """
@@ -311,7 +318,7 @@ class Dataset(Wrapper):
         raise NotImplementedError()
 
     def peek(self, chunk_size=None):
-       return self.get_stream(chunk_size).next()
+        return self.get_stream(chunk_size).next()
 
     def download(self, file_object, chunk_size=None):
         for chunk in self.get_stream(chunk_size=chunk_size):
@@ -333,6 +340,7 @@ class Dataset(Wrapper):
         self.__init__(fresh.wrapped, self.container_id, self.gi)
         return self
 
+
 class HistoryDatasetAssociation(Dataset):
     """
     Maps to a Galaxy ``HistoryDatasetAssociation``.
@@ -341,7 +349,9 @@ class HistoryDatasetAssociation(Dataset):
     SRC = 'hda'
 
     def __init__(self, ds_dict, container_id, gi=None):
-        super(HistoryDatasetAssociation, self).__init__(ds_dict, container_id, gi=gi)
+        super(HistoryDatasetAssociation, self).__init__(
+            ds_dict, container_id, gi=gi
+            )
 
     def get_stream(self, chunk_size=None):
         return self.gi.histories.get_stream(self, chunk_size)
@@ -354,6 +364,7 @@ class HistoryDatasetAssociation(Dataset):
 
 
 class LibRelatedDataset(Dataset):
+
     def __init__(self, ds_dict, container_id, gi=None):
         super(LibRelatedDataset, self).__init__(ds_dict, container_id, gi=gi)
 
@@ -369,6 +380,7 @@ class LibraryDatasetDatasetAssociation(LibRelatedDataset):
     Maps to a Galaxy ``LibraryDatasetDatasetAssociation``.
     """
     SRC = 'ldda'
+
 
 class LibraryDataset(LibRelatedDataset):
     """
@@ -397,12 +409,16 @@ class DatasetContainer(Wrapper):
     @staticmethod
     def _preview(obj, gi_module):
         raise NotImplementedError()
-        # TODO: how do I know whether this history has been deleted? Figure it out
-        # and fix the deleted= argument below
-        hs = [ _ for _ in gi_module.get_previews(name=obj.name, deleted=obj.state) if _.id == obj.id ]
+        # TODO: how do I know whether this history has been deleted?
+        # Figure it out and fix the deleted= argument below
+        prevs = gi_module.get_previews(name=obj.name, deleted=obj.state)
+        hs = [_ for _ in prevs if _.id == obj.id]
         if len(hs) > 1:
-            raise NotImplementedError("Didn't think there could be more than one preview. File a bug report")
+            raise NotImplementedError(
+                "Unexpected number of previews (%d > 1)" % len(hs)
+                )
         return hs[0] if len(hs) > 0 else None
+
 
 class History(DatasetContainer):
     """
@@ -413,7 +429,8 @@ class History(DatasetContainer):
     API_MODULE = 'histories'
 
     def __init__(self, hist_dict, dataset_ids=None, gi=None):
-        # XXX: how do we keep this local dataset id list synchronized with the remote contents?
+        # XXX: how do we keep this local dataset id list synchronized
+        # with the remote contents?
         super(History, self).__init__(hist_dict, dataset_ids=dataset_ids, gi=gi)
 
     def preview(self):
@@ -436,6 +453,7 @@ class History(DatasetContainer):
 
     def get_datasets(self):
         return self.gi.histories.get_datasets(self)
+
 
 class Library(DatasetContainer):
     """
@@ -467,7 +485,9 @@ class Library(DatasetContainer):
         return self.gi.libraries.upload_from_local(self, path, folder, **kwargs)
 
     def upload_from_galaxy_fs(self, paths, folder=None, **kwargs):
-        return self.gi.libraries.upload_from_galaxy_fs(self, paths, folder, **kwargs)
+        return self.gi.libraries.upload_from_galaxy_fs(
+            self, paths, folder, **kwargs
+            )
 
     def get_dataset(self, ds_id):
         return self.gi.libraries.get_dataset(self, ds_id)
@@ -476,10 +496,13 @@ class Library(DatasetContainer):
         return self.gi.libraries.get_datasets(self)
 
     def create_folder(self, name, description=None, base_folder=None):
-        return self.gi.libraries.create_folder(self, name, description, base_folder)
+        return self.gi.libraries.create_folder(
+            self, name, description, base_folder
+            )
 
     def get_folder(self, f_id):
         return self.gi.libraries.get_folder(self, f_id)
+
 
 class Folder(Wrapper):
     """

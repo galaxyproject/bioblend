@@ -1,4 +1,3 @@
-
 import collections
 import httplib
 import json
@@ -8,12 +7,18 @@ import time
 
 import wrappers
 
-_PENDING_DS_STATES = set(["new", "upload", "queued", "running", "setting_metadata"])
+
+# dataset states corresponding to a 'pending' condition
+_PENDING_DS_STATES = set(
+    ["new", "upload", "queued", "running", "setting_metadata"]
+    )
+
 
 class ObjClient(object):
-    def __init__(self, obj_ginstance, log=None):
-        self.obj_gi = obj_ginstance
-        self.low_level_gi = self.obj_gi.gi
+
+    def __init__(self, obj_gi, log=None):
+        self.obj_gi = obj_gi
+        self.gi = self.obj_gi.gi
         self.log = log if log else logging.getLogger(self.__class__.__name__)
 
     #-- helpers --
@@ -33,7 +38,7 @@ class ObjClient(object):
 
     def _get_container(self, id_, ctype):
         show_fname = 'show_%s' % ctype.__name__.lower()
-        gi_client = getattr(self.low_level_gi, ctype.API_MODULE)
+        gi_client = getattr(self.gi, ctype.API_MODULE)
         show_f = getattr(gi_client, show_fname)
         res = show_f(id_)
         cdict = self._get_dict(show_fname, res)
@@ -62,7 +67,7 @@ class ObjClient(object):
                 container_id = src['id']
             else:
                 container_id = src
-        gi_client = getattr(self.low_level_gi, ctype.API_MODULE)
+        gi_client = getattr(self.gi, ctype.API_MODULE)
         ds_dict = gi_client.show_dataset(container_id, ds_id)
         return ctype.DS_TYPE(ds_dict, container_id, gi=self.obj_gi)
 
@@ -84,6 +89,7 @@ class ObjClient(object):
         return [self._get_container_dataset(src, _, ctype=type(src))
                 for _ in src.dataset_ids]
 
+
 class ObjDatasetClient(ObjClient):
     """
     Handles receiving datasets.
@@ -96,7 +102,6 @@ class ObjDatasetClient(ObjClient):
         _CHUNK_SIZE = 4096
 
     def _dataset_stream_url(self, dataset):
-        """Abstract method"""
         raise NotImplementedError()
 
     def get_stream(self, dataset, chunk_size=_CHUNK_SIZE):
@@ -114,8 +119,8 @@ class ObjDatasetClient(ObjClient):
             chunk_size = self._CHUNK_SIZE
         url = self._dataset_stream_url(dataset)
         get_options = {
-            'verify': self.low_level_gi.verify,
-            'params': {'key': self.low_level_gi.key},
+            'verify': self.gi.verify,
+            'params': {'key': self.gi.key},
             'stream': True,
             }
         r = requests.get(url, **get_options)
@@ -150,11 +155,12 @@ class ObjDatasetClient(ObjClient):
         """
         return ''.join(self.get_stream(dataset, chunk_size=chunk_size))
 
+
 class ObjLibraryClient(ObjDatasetClient):
 
     def _dataset_stream_url(self, dataset):
-        base_url = self.low_level_gi._make_url(
-            self.low_level_gi.libraries, module_id=dataset.container_id, contents=True
+        base_url = self.gi._make_url(
+            self.gi.libraries, module_id=dataset.container_id, contents=True
             )
         return "%s/%s/display" % (base_url, dataset.id)
 
@@ -168,7 +174,7 @@ class ObjLibraryClient(ObjDatasetClient):
         :rtype: :class:`~bioblend.galaxy.objects.wrappers.Library`
         :return: the library just created
         """
-        res = self.low_level_gi.libraries.create_library(name, description, synopsis)
+        res = self.gi.libraries.create_library(name, description, synopsis)
         lib_info = self._get_dict('create_library', res)
         return self.get(lib_info['id'])
 
@@ -194,7 +200,7 @@ class ObjLibraryClient(ObjDatasetClient):
         :rtype: list of
           :class:`~bioblend.galaxy.objects.wrappers.LibraryPreview`
         """
-        dicts = self.low_level_gi.libraries.get_libraries(name=name, deleted=deleted)
+        dicts = self.gi.libraries.get_libraries(name=name, deleted=deleted)
         return [wrappers.LibraryPreview(_, gi=self.obj_gi) for _ in dicts]
 
     def list(self, name=None):
@@ -206,7 +212,7 @@ class ObjLibraryClient(ObjDatasetClient):
 
         :rtype: list of :class:`~bioblend.galaxy.objects.wrappers.Library`
         """
-        dicts = self.low_level_gi.libraries.get_libraries(name=name)
+        dicts = self.gi.libraries.get_libraries(name=name)
         return [self.get(_['id']) for _ in dicts]
 
     def delete(self, library):
@@ -219,7 +225,7 @@ class ObjLibraryClient(ObjDatasetClient):
         """
         if not library.is_mapped:
             self._error('library is not mapped to a Galaxy object')
-        res = self.low_level_gi.libraries.delete_library(library.id)
+        res = self.gi.libraries.delete_library(library.id)
         if not isinstance(res, collections.Mapping):
             self._error('delete_library: unexpected reply: %r' % (res,))
         library.unmap()
@@ -255,7 +261,7 @@ class ObjLibraryClient(ObjDatasetClient):
         Optional keyword arguments: ``file_type``, ``dbkey``.
         """
         fid = self.__pre_upload(library, folder)
-        res = self.low_level_gi.libraries.upload_file_contents(
+        res = self.gi.libraries.upload_file_contents(
             library.id, data, folder_id=fid, **kwargs
             )
         new_dataset = self.__post_upload(library, 'upload_file_contents', res)
@@ -272,7 +278,7 @@ class ObjLibraryClient(ObjDatasetClient):
         See :meth:`.upload_data` for info on other params.
         """
         fid = self.__pre_upload(library, folder)
-        res = self.low_level_gi.libraries.upload_file_from_url(
+        res = self.gi.libraries.upload_file_from_url(
             library.id, url, fid, **kwargs
             )
         new_dataset = self.__post_upload(library, 'upload_file_from_url', res)
@@ -289,10 +295,12 @@ class ObjLibraryClient(ObjDatasetClient):
         See :meth:`.upload_data` for info on other params.
         """
         fid = self.__pre_upload(library, folder)
-        res = self.low_level_gi.libraries.upload_file_from_local_path(
+        res = self.gi.libraries.upload_file_from_local_path(
             library.id, path, fid, **kwargs
             )
-        new_dataset = self.__post_upload(library, 'upload_file_from_local_path', res)
+        new_dataset = self.__post_upload(
+            library, 'upload_file_from_local_path', res
+            )
         library.dataset_ids.append(new_dataset.id)
         return new_dataset
 
@@ -309,7 +317,7 @@ class ObjLibraryClient(ObjDatasetClient):
         if isinstance(paths, basestring):
             paths = (paths,)
         paths = '\n'.join(paths)
-        res = self.low_level_gi.libraries.upload_from_galaxy_filesystem(
+        res = self.gi.libraries.upload_from_galaxy_filesystem(
             library.id, paths, folder_id=fid, **kwargs
             )
         if res is None:
@@ -318,7 +326,9 @@ class ObjLibraryClient(ObjDatasetClient):
             self._error(
                 'upload_from_galaxy_filesystem: unexpected reply: %r' % (res,)
                 )
-        new_datasets = [self.get_dataset(library, ds_info['id']) for ds_info in res]
+        new_datasets = [
+            self.get_dataset(library, ds_info['id']) for ds_info in res
+            ]
         library.dataset_ids.extend( nd.id for nd in new_datasets )
         return new_datasets
 
@@ -352,7 +362,7 @@ class ObjLibraryClient(ObjDatasetClient):
         :return: the folder just created
         """
         bfid = None if base_folder is None else base_folder.id
-        res = self.low_level_gi.libraries.create_folder(
+        res = self.gi.libraries.create_folder(
             library.id, name, description=description, base_folder_id=bfid,
             )
         folder_info = self._get_dict('create_folder', res)
@@ -365,9 +375,8 @@ class ObjLibraryClient(ObjDatasetClient):
         :rtype: :class:`~bioblend.galaxy.objects.wrappers.Folder`
         :return: the folder corresponding to ``id_``
         """
-        f_dict = self.low_level_gi.libraries.show_folder(library.id, f_id)
+        f_dict = self.gi.libraries.show_folder(library.id, f_id)
         return wrappers.Folder(f_dict, library.id, gi=self.obj_gi)
-
 
 
 class ObjHistoryClient(ObjDatasetClient):
@@ -376,8 +385,8 @@ class ObjHistoryClient(ObjDatasetClient):
     _POLLING_INTERVAL = 1
 
     def _dataset_stream_url(self, dataset):
-        base_url = self.low_level_gi._make_url(
-            self.low_level_gi.histories, module_id=dataset.container_id, contents=True
+        base_url = self.gi._make_url(
+            self.gi.histories, module_id=dataset.container_id, contents=True
             )
         return "%s/%s/display" % (base_url, dataset.id)
 
@@ -388,7 +397,7 @@ class ObjHistoryClient(ObjDatasetClient):
         :rtype: :class:`~bioblend.galaxy.objects.wrappers.History`
         :return: the history just created
         """
-        res = self.low_level_gi.histories.create_history(name=name)
+        res = self.gi.histories.create_history(name=name)
         hist_info = self._get_dict('create_history', res)
         return self.get(hist_info['id'])
 
@@ -414,7 +423,7 @@ class ObjHistoryClient(ObjDatasetClient):
         :rtype: list of
           :class:`~bioblend.galaxy.objects.wrappers.HistoryPreview`
         """
-        dicts = self.low_level_gi.histories.get_histories(name=name, deleted=deleted)
+        dicts = self.gi.histories.get_histories(name=name, deleted=deleted)
         return [wrappers.HistoryPreview(_, gi=self.obj_gi) for _ in dicts]
 
     def list(self, name=None):
@@ -426,14 +435,14 @@ class ObjHistoryClient(ObjDatasetClient):
 
         :rtype: list of :class:`~bioblend.galaxy.objects.wrappers.History`
         """
-        dicts = self.low_level_gi.histories.get_histories(name=name)
+        dicts = self.gi.histories.get_histories(name=name)
         return [self.get(_['id']) for _ in dicts]
 
     def update(self, history, name=None, annotation=None):
         """
         Update history metadata with the given name and annotation.
         """
-        res = self.low_level_gi.histories.update_history(
+        res = self.gi.histories.update_history(
             history.id, name=name, annotation=annotation
             )
         if res != httplib.OK:
@@ -451,7 +460,7 @@ class ObjHistoryClient(ObjDatasetClient):
         """
         if not history.is_mapped:
             self._error('history is not mapped to a Galaxy object')
-        res = self.low_level_gi.histories.delete_history(history.id, purge=purge)
+        res = self.gi.histories.delete_history(history.id, purge=purge)
         if not isinstance(res, collections.Mapping):
             self._error('delete_history: unexpected reply: %r' % (res,))
         history.unmap()
@@ -479,7 +488,7 @@ class ObjHistoryClient(ObjDatasetClient):
         # upload_dataset_from_library returns a dict with the unencoded id
         # to get the encoded id, we have to detect the new entry by diff
         old_ids = set(history.dataset_ids)
-        res = self.low_level_gi.histories.upload_dataset_from_library(history.id, lds.id)
+        res = self.gi.histories.upload_dataset_from_library(history.id, lds.id)
         if not isinstance(res, collections.Mapping):
             self._error(
                 'upload_dataset_from_library: unexpected reply: %r' % (res,)
@@ -505,7 +514,7 @@ class ObjHistoryClient(ObjDatasetClient):
     @staticmethod
     def wait(datasets, polling_interval=_POLLING_INTERVAL):
         """
-        Wait for datasets to come out of the pending states. Useful to endure
+        Wait for datasets to come out of the pending states.
         """
         if polling_interval is None:
             polling_interval = ObjHistoryClient._POLLING_INTERVAL
@@ -513,11 +522,11 @@ class ObjHistoryClient(ObjDatasetClient):
             ds_iter = iter(datasets)
         except TypeError:
             ds_iter = iter([datasets])
-        wait_list = [ d for d in ds_iter if d.state in _PENDING_DS_STATES ]
+        wait_list = [d for d in ds_iter if d.state in _PENDING_DS_STATES]
         while wait_list:
             time.sleep(polling_interval)
-            # refresh state and pop the ones that are no longer pending. We break as soon
-            # as we find one that is pending.
+            # refresh state and pop the ones that are no longer pending.
+            # We break as soon as we find one that is pending.
             while wait_list:
                 wait_list[0].refresh()
                 if wait_list[0].state in _PENDING_DS_STATES:
@@ -525,9 +534,8 @@ class ObjHistoryClient(ObjDatasetClient):
                 else:
                     wait_list.pop()
 
+
 class ObjWorkflowClient(ObjClient):
-    # dataset states corresponding to a 'pending' condition
-    _PENDING = set(["new", "upload", "queued", "running", "setting_metadata"])
 
     # default polling interval for output state monitoring
     _POLLING_INTERVAL = 10
@@ -555,7 +563,7 @@ class ObjWorkflowClient(ObjClient):
                 wf_dict = json.loads(src)
             except (TypeError, ValueError):
                 self._error('src not supported: %r' % (src,))
-        wf_info = self.low_level_gi.workflows.import_workflow_json(wf_dict)
+        wf_info = self.gi.workflows.import_workflow_json(wf_dict)
         return self.get(wf_info['id'])
 
     def import_shared(self, id_):
@@ -568,7 +576,7 @@ class ObjWorkflowClient(ObjClient):
         :rtype: :class:`~bioblend.galaxy.objects.wrappers.Workflow`
         :return: the workflow just imported
         """
-        wf_info = self.low_level_gi.workflows.import_shared_workflow(id_)
+        wf_info = self.gi.workflows.import_shared_workflow(id_)
         return self.get(wf_info['id'])
 
     def get(self, id_):
@@ -578,8 +586,8 @@ class ObjWorkflowClient(ObjClient):
         :rtype: :class:`~bioblend.galaxy.objects.wrappers.Workflow`
         :return: the workflow corresponding to ``id_``
         """
-        wf_dict = self.low_level_gi.workflows.export_workflow_json(id_)
-        res = self.low_level_gi.workflows.show_workflow(id_)
+        wf_dict = self.gi.workflows.export_workflow_json(id_)
+        res = self.gi.workflows.show_workflow(id_)
         wf_info = self._get_dict('show_workflow', res)
         wf_dict['published'] = wf_info['published']
         inputs = wf_info['inputs']
@@ -598,7 +606,7 @@ class ObjWorkflowClient(ObjClient):
         :rtype: list of
           :class:`~bioblend.galaxy.objects.wrappers.WorkflowPreview`
         """
-        dicts = self.low_level_gi.workflows.get_workflows(
+        dicts = self.gi.workflows.get_workflows(
             name=name, published=published
             )
         return [wrappers.WorkflowPreview(_, gi=self.obj_gi) for _ in dicts]
@@ -614,13 +622,12 @@ class ObjWorkflowClient(ObjClient):
 
         :rtype: list of :class:`~bioblend.galaxy.objects.wrappers.Workflow`
         """
-        dicts = self.low_level_gi.workflows.get_workflows(
+        dicts = self.gi.workflows.get_workflows(
             name=name, deleted=deleted, published=published
             )
         return [self.get(_['id']) for _ in dicts]
 
-    def run(self, workflow, inputs, history, params=None,
-                     import_inputs=False):
+    def run(self, workflow, inputs, history, params=None, import_inputs=False):
         """
         Run ``workflow`` with input datasets from the ``inputs`` sequence.
 
@@ -681,7 +688,7 @@ class ObjWorkflowClient(ObjClient):
                 )
         else:
             kwargs['history_name'] = history
-        res = self.low_level_gi.workflows.run_workflow(workflow.id, ds_map, **kwargs)
+        res = self.gi.workflows.run_workflow(workflow.id, ds_map, **kwargs)
         res = self._get_dict('run_workflow', res)
         # res structure: {'history': HIST_ID, 'outputs': [DS_ID, DS_ID, ...]}
         return res['outputs'], res['history']
@@ -705,7 +712,7 @@ class ObjWorkflowClient(ObjClient):
         """
         self.log.info('waiting for datasets')
         while True:
-            res = self.low_level_gi.histories.show_history(hist_id)
+            res = self.gi.histories.show_history(hist_id)
             hist_dict = self._get_dict('show_history', res)
             ds_states = self._get_ds_states(hist_dict)
             pending = 0
@@ -714,7 +721,7 @@ class ObjWorkflowClient(ObjClient):
                 self.log.info('%s: %s' % (id_, state))
                 if state == 'error':
                     self._error(self.__get_error_info(id_, hist_dict))
-                if state in self._PENDING:
+                if state in _PENDING_DS_STATES:
                     pending += 1
             if not pending:
                 break
@@ -730,7 +737,7 @@ class ObjWorkflowClient(ObjClient):
         """
         if not workflow.is_mapped:
             self._error('workflow is not mapped to a Galaxy object')
-        res = self.low_level_gi.workflows.delete_workflow(workflow.id)
+        res = self.gi.workflows.delete_workflow(workflow.id)
         if not isinstance(res, basestring):
             self._error('delete_workflow: unexpected reply: %r' % (res,))
         workflow.unmap()
@@ -767,5 +774,3 @@ class ObjWorkflowClient(ObjClient):
             k, v = pdict.items()[0]
             payload[tools[i].tool_id] = {'param': k, 'value': v}
         return payload
-
-
