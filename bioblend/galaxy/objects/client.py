@@ -118,9 +118,12 @@ class ObjDatasetClient(ObjClient):
         if not chunk_size:
             chunk_size = self._CHUNK_SIZE
         url = self._dataset_stream_url(dataset)
+        params = {'key': self.gi.key}
+        if isinstance(dataset, wrappers.LibraryDataset):
+            params['ldda_ids%5B%5D'] = dataset.id
         get_options = {
             'verify': self.gi.verify,
-            'params': {'key': self.gi.key},
+            'params': params,
             'stream': True,
             }
         r = requests.get(url, **get_options)
@@ -159,10 +162,8 @@ class ObjDatasetClient(ObjClient):
 class ObjLibraryClient(ObjDatasetClient):
 
     def _dataset_stream_url(self, dataset):
-        base_url = self.gi._make_url(
-            self.gi.libraries, module_id=dataset.container_id, contents=True
-            )
-        return "%s/%s/display" % (base_url, dataset.id)
+        base_url = self.gi._make_url(self.gi.libraries)
+        return "%s/datasets/download/uncompressed" % base_url
 
     def create(self, name, description=None, synopsis=None):
         """
