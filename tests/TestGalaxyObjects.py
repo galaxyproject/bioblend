@@ -1,6 +1,6 @@
 # pylint: disable=C0103,E1101
 
-import sys, os, unittest, json, uuid, tempfile, urllib2, shutil
+import sys, os, unittest, json, uuid, tempfile, urllib2, shutil, time
 try:
     from collections import OrderedDict  # Python 2.7
 except ImportError:
@@ -331,6 +331,12 @@ class TestLibraryObject(TestGalaxyInstance):
     """
     URL = 'http://tools.ietf.org/rfc/rfc1866.txt'
     FOO_DATA = 'foo\nbar\n'
+    FETCH_DELAY = 3  # dataset is not immediately ready after upload
+
+    def __safe_upload(self):
+        ds = self.lib.upload_data(self.FOO_DATA)
+        time.sleep(self.FETCH_DELAY)
+        return ds
 
     def setUp(self):
         super(TestLibraryObject, self).setUp()
@@ -401,24 +407,24 @@ class TestLibraryObject(TestGalaxyInstance):
             shutil.rmtree(tempdir)
 
     def test_dataset_get_stream(self):
-        ds = self.lib.upload_data(self.FOO_DATA)
+        ds = self.__safe_upload()
         for idx, c in enumerate(ds.get_stream(chunk_size=1)):
             self.assertEqual(str(self.FOO_DATA[idx]), c)
 
     def test_dataset_peek(self):
-        ds = self.lib.upload_data(self.FOO_DATA)
+        ds = self.__safe_upload()
         fetched_data = ds.peek(chunk_size=4)
         self.assertEqual(self.FOO_DATA[0:4], fetched_data)
 
     def test_dataset_download(self):
-        ds = self.lib.upload_data(self.FOO_DATA)
+        ds = self.__safe_upload()
         with tempfile.TemporaryFile() as f:
             ds.download(f)
             f.seek(0)
             self.assertEqual(self.FOO_DATA, f.read())
 
     def test_dataset_get_contents(self):
-        ds = self.lib.upload_data(self.FOO_DATA)
+        ds = self.__safe_upload()
         self.assertEqual(self.FOO_DATA, ds.get_contents())
 
 
