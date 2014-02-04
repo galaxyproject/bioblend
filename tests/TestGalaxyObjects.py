@@ -675,18 +675,11 @@ def suite():
 
 
 if __name__ == '__main__':
-    try:
-        klass = sys.argv[1]
-        meth = sys.argv[2]
-    except IndexError:
-        tests = suite()
-    else:
-        try:
-            klass = getattr(sys.modules['__main__'], klass)
-            getattr(klass, meth)
-        except AttributeError:
-            sys.exit("ERROR: test %s.%s not found" % (klass, meth))
-        else:
-            tests = klass(meth)
+    # To run single tests, use the functionality built directly into unittest:
+    # `python -m unittest package.module.class`
+    # or even, more specific,
+    # `python -m unittest package.module.class.test_method`.
+    # Just remember to add the test directory to the PYTHONPATH!
+    tests = suite()
     RUNNER = unittest.TextTestRunner(verbosity=2)
     RUNNER.run(tests)
