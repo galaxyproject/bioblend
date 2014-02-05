@@ -1,6 +1,7 @@
 # pylint: disable=C0103,E1101
 
 import sys, os, unittest, json, uuid, tempfile, urllib2, shutil, time
+from functools import wraps
 try:
     from collections import OrderedDict  # Python 2.7
 except ImportError:
@@ -33,6 +34,27 @@ def is_reachable(url):
     if res is not None:
         res.close()
     return True
+
+
+def keep_trying(f):
+    """
+    Don't give up immediately if decorated test fails.
+    """
+    delay = 1
+    max_retries = 5
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        r = 1
+        while True:
+            try:
+                f(*args, **kwargs)
+                break
+            except AssertionError:
+                if r >= max_retries:
+                    raise RuntimeError('max n. of retries (%d) reached' % r)
+            r += 1
+            time.sleep(delay)
+    return decorated
 
 
 class MockWrapper(wrappers.Wrapper):
@@ -253,9 +275,7 @@ class TestGalaxyInstance(unittest.TestCase):
 
 
 class TestLibContents(TestGalaxyInstance):
-    """
-    Test the ObjLibraryClient
-    """
+
     URL = 'http://tools.ietf.org/rfc/rfc1866.txt'
 
     def setUp(self):
@@ -326,9 +346,7 @@ class TestLibContents(TestGalaxyInstance):
 
 
 class TestLibraryObject(TestGalaxyInstance):
-    """
-    Test the library wrapper.
-    """
+
     URL = 'http://tools.ietf.org/rfc/rfc1866.txt'
     FOO_DATA = 'foo\nbar\n'
     FETCH_DELAY = 3  # dataset is not immediately ready after upload
@@ -406,29 +424,43 @@ class TestLibraryObject(TestGalaxyInstance):
         finally:
             shutil.rmtree(tempdir)
 
+
+class TestLDContents(TestGalaxyInstance):
+
+    FOO_DATA = 'foo\nbar\n'
+
+    def setUp(self):
+        super(TestLDContents, self).setUp()
+        self.lib = self.gi.libraries.create('test_%s' % uuid.uuid4().hex)
+        self.ds = self.lib.upload_data(self.FOO_DATA)
+
+    def tearDown(self):
+        self.lib.delete()
+
+    @keep_trying
     def test_dataset_get_stream(self):
-        ds = self.__safe_upload()
-        for idx, c in enumerate(ds.get_stream(chunk_size=1)):
+        for idx, c in enumerate(self.ds.get_stream(chunk_size=1)):
             self.assertEqual(str(self.FOO_DATA[idx]), c)
 
+    @keep_trying
     def test_dataset_peek(self):
-        ds = self.__safe_upload()
-        fetched_data = ds.peek(chunk_size=4)
+        fetched_data = self.ds.peek(chunk_size=4)
         self.assertEqual(self.FOO_DATA[0:4], fetched_data)
 
+    @keep_trying
     def test_dataset_download(self):
-        ds = self.__safe_upload()
         with tempfile.TemporaryFile() as f:
-            ds.download(f)
+            self.ds.download(f)
             f.seek(0)
             self.assertEqual(self.FOO_DATA, f.read())
 
+    @keep_trying
     def test_dataset_get_contents(self):
-        ds = self.__safe_upload()
-        self.assertEqual(self.FOO_DATA, ds.get_contents())
+        self.assertEqual(self.FOO_DATA, self.ds.get_contents())
 
 
 class TestHistory(TestGalaxyInstance):
+
     FOO_DATA = 'foo\nbar\n'
 
     def setUp(self):
@@ -647,12 +679,15 @@ def suite():
         'test_dataset_from_url',
         'test_dataset_from_local',
         'test_datasets_from_fs',
+        ):
+        s.addTest(TestLibraryObject(t))
+    for t in (
         'test_dataset_get_stream',
         'test_dataset_peek',
         'test_dataset_download',
         'test_dataset_get_contents',
         ):
-        s.addTest(TestLibraryObject(t))
+        s.addTest(TestLDContents(t))
     for t in (
         'test_dataset_upload',
         'test_delete',
@@ -675,11 +710,9 @@ def suite():
 
 
 if __name__ == '__main__':
-    # To run single tests, use the functionality built directly into unittest:
-    # `python -m unittest package.module.class`
-    # or even, more specific,
-    # `python -m unittest package.module.class.test_method`.
-    # Just remember to add the test directory to the PYTHONPATH!
+    # By default, run all tests.  To run specific tests, do the following:
+    #   python -m unittest <module>.<class>
+    #   python -m unittest <module>.<class>.<test_method>
     tests = suite()
     RUNNER = unittest.TextTestRunner(verbosity=2)
     RUNNER.run(tests)
