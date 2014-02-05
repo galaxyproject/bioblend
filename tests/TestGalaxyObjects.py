@@ -20,6 +20,7 @@ THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 SAMPLE_FN = os.path.join(THIS_DIR, 'data', 'paste_columns.ga')
 with open(SAMPLE_FN) as F:
     WF_DICT = json.load(F)
+FOO_DATA = 'foo\nbar\n'
 
 URL = os.environ.get('BIOBLEND_GALAXY_URL', 'http://localhost:8080')
 API_KEY = os.environ['BIOBLEND_GALAXY_API_KEY']
@@ -39,6 +40,9 @@ def is_reachable(url):
 def keep_trying(f):
     """
     Don't give up immediately if decorated test fails.
+
+    This is useful for testing LibraryDataset contents, since LDs are
+    not immediately ready after upload.
     """
     delay = 1
     max_retries = 5
@@ -274,90 +278,12 @@ class TestGalaxyInstance(unittest.TestCase):
                 delete(o)
 
 
-class TestLibContents(TestGalaxyInstance):
+class TestLibraryContents(TestGalaxyInstance):
 
     URL = 'http://tools.ietf.org/rfc/rfc1866.txt'
 
     def setUp(self):
-        super(TestLibContents, self).setUp()
-        self.lib = self.gi.libraries.create('test_%s' % uuid.uuid4().hex)
-
-    def tearDown(self):
-        self.gi.libraries.delete(self.lib)
-
-    def test_folder(self):
-        name, desc = 'test_%s' % uuid.uuid4().hex, 'D'
-        folder = self.gi.libraries.create_folder(
-            self.lib, name, description=desc
-            )
-        self.assertEqual(folder.name, name)
-        self.assertEqual(folder.description, desc)
-        self.assertEqual(folder.container_id, self.lib.id)
-
-    def test_dataset_upload(self):
-        folder = self.gi.libraries.create_folder(
-            self.lib, 'test_%s' % uuid.uuid4().hex
-            )
-        data = 'foo\nbar\n'
-        ds = self.gi.libraries.upload_data(self.lib, data, folder=folder)
-        self.assertEqual(ds.container_id, self.lib.id)
-        lib = self.gi.libraries.get(self.lib.id)
-        self.assertEqual(len(lib.dataset_ids), 1)
-        ds_id = lib.dataset_ids[0]
-        self.assertEqual(ds_id, ds.id)
-        self.assertEqual(self.gi.libraries.get_dataset(lib, ds_id).id, ds.id)
-
-    def test_dataset_from_url(self):
-        if is_reachable(self.URL):
-            ds = self.gi.libraries.upload_from_url(self.lib, self.URL)
-            self.assertEqual(ds.container_id, self.lib.id)
-            assert isinstance(ds, wrappers.Dataset)
-        else:
-            print "skipped 'url not reachable'"
-
-    def test_dataset_from_local(self):
-        with tempfile.NamedTemporaryFile(prefix='bioblend_test_') as f:
-            f.write('foo\nbar\n')
-            f.flush()
-            ds = self.gi.libraries.upload_from_local(self.lib, f.name)
-        assert isinstance(ds, wrappers.Dataset)
-        self.assertEqual(ds.container_id, self.lib.id)
-
-    def test_datasets_from_fs(self):
-        tempdir = tempfile.mkdtemp(prefix='bioblend_test_')
-        try:
-            fnames = [os.path.join(tempdir, 'data%d.txt' % i)
-                      for i in xrange(3)]
-            for fn in fnames:
-                with open(fn, 'w') as f:
-                    f.write('foo\nbar\n')
-            dss = self.gi.libraries.upload_from_galaxy_fs(
-                self.lib, fnames[:2], link_data_only='link_to_files'
-                )
-            self.assertEqual(len(dss), 2)
-            for ds, fn in zip(dss, fnames):
-                self.assertEqual(ds.container_id, self.lib.id)
-                self.assertEqual(ds.file_name, fn)
-            dss = self.gi.libraries.upload_from_galaxy_fs(self.lib, fnames[-1])
-            self.assertEqual(len(dss), 1)
-            self.assertNotEqual(dss[0].file_name, fnames[-1])
-        finally:
-            shutil.rmtree(tempdir)
-
-
-class TestLibraryObject(TestGalaxyInstance):
-
-    URL = 'http://tools.ietf.org/rfc/rfc1866.txt'
-    FOO_DATA = 'foo\nbar\n'
-    FETCH_DELAY = 3  # dataset is not immediately ready after upload
-
-    def __safe_upload(self):
-        ds = self.lib.upload_data(self.FOO_DATA)
-        time.sleep(self.FETCH_DELAY)
-        return ds
-
-    def setUp(self):
-        super(TestLibraryObject, self).setUp()
+        super(TestLibraryContents, self).setUp()
         self.lib = self.gi.libraries.create('test_%s' % uuid.uuid4().hex)
 
     def tearDown(self):
@@ -373,7 +299,7 @@ class TestLibraryObject(TestGalaxyInstance):
     def test_dataset(self):
         folder = self.lib.create_folder('test_%s' % uuid.uuid4().hex)
         self.assertEqual(0, len(self.lib.dataset_ids))
-        ds = self.lib.upload_data(self.FOO_DATA, folder=folder)
+        ds = self.lib.upload_data(FOO_DATA, folder=folder)
         self.assertEqual(ds.container_id, self.lib.id)
         # ensure the list of dataset ids has been updated correctly
         self.assertEqual(1, len(self.lib.dataset_ids))
@@ -393,7 +319,7 @@ class TestLibraryObject(TestGalaxyInstance):
 
     def test_dataset_from_local(self):
         with tempfile.NamedTemporaryFile(prefix='bioblend_test_') as f:
-            f.write(self.FOO_DATA)
+            f.write(FOO_DATA)
             f.flush()
             ds = self.lib.upload_from_local(f.name)
         assert isinstance(ds, wrappers.Dataset)
@@ -408,7 +334,7 @@ class TestLibraryObject(TestGalaxyInstance):
                       for i in xrange(3)]
             for fn in fnames:
                 with open(fn, 'w') as f:
-                    f.write(self.FOO_DATA)
+                    f.write(FOO_DATA)
             dss = self.lib.upload_from_galaxy_fs(
                 fnames[:2], link_data_only='link_to_files'
                 )
@@ -427,12 +353,10 @@ class TestLibraryObject(TestGalaxyInstance):
 
 class TestLDContents(TestGalaxyInstance):
 
-    FOO_DATA = 'foo\nbar\n'
-
     def setUp(self):
         super(TestLDContents, self).setUp()
         self.lib = self.gi.libraries.create('test_%s' % uuid.uuid4().hex)
-        self.ds = self.lib.upload_data(self.FOO_DATA)
+        self.ds = self.lib.upload_data(FOO_DATA)
 
     def tearDown(self):
         self.lib.delete()
@@ -440,31 +364,29 @@ class TestLDContents(TestGalaxyInstance):
     @keep_trying
     def test_dataset_get_stream(self):
         for idx, c in enumerate(self.ds.get_stream(chunk_size=1)):
-            self.assertEqual(str(self.FOO_DATA[idx]), c)
+            self.assertEqual(str(FOO_DATA[idx]), c)
 
     @keep_trying
     def test_dataset_peek(self):
         fetched_data = self.ds.peek(chunk_size=4)
-        self.assertEqual(self.FOO_DATA[0:4], fetched_data)
+        self.assertEqual(FOO_DATA[0:4], fetched_data)
 
     @keep_trying
     def test_dataset_download(self):
         with tempfile.TemporaryFile() as f:
             self.ds.download(f)
             f.seek(0)
-            self.assertEqual(self.FOO_DATA, f.read())
+            self.assertEqual(FOO_DATA, f.read())
 
     @keep_trying
     def test_dataset_get_contents(self):
-        self.assertEqual(self.FOO_DATA, self.ds.get_contents())
+        self.assertEqual(FOO_DATA, self.ds.get_contents())
 
 
-class TestHistory(TestGalaxyInstance):
-
-    FOO_DATA = 'foo\nbar\n'
+class TestHistoryContents(TestGalaxyInstance):
 
     def setUp(self):
-        super(TestHistory, self).setUp()
+        super(TestHistoryContents, self).setUp()
         self.hist = self.gi.histories.create('test_%s' % uuid.uuid4().hex)
         self.lib = self.gi.libraries.create('test_%s' % uuid.uuid4().hex)
 
@@ -473,7 +395,7 @@ class TestHistory(TestGalaxyInstance):
         self.gi.libraries.delete(self.lib)
 
     def test_dataset_upload(self):
-        lds = self.gi.libraries.upload_data(self.lib, self.FOO_DATA)
+        lds = self.gi.libraries.upload_data(self.lib, FOO_DATA)
         hda = self.gi.histories.import_dataset(self.hist, lds)
         self.assertTrue(isinstance(hda, wrappers.HistoryDatasetAssociation))
         self.assertEqual(hda.container_id, self.hist.id)
@@ -492,7 +414,7 @@ class TestHistory(TestGalaxyInstance):
             pass
 
     def test_import_dataset(self):
-        lds = self.gi.libraries.upload_data(self.lib, self.FOO_DATA)
+        lds = self.gi.libraries.upload_data(self.lib, FOO_DATA)
         self.assertEqual(len(self.hist.dataset_ids), 0)
         hda = self.hist.import_dataset(lds)
         self.assertTrue(isinstance(hda, wrappers.HistoryDatasetAssociation))
@@ -501,46 +423,48 @@ class TestHistory(TestGalaxyInstance):
         self.assertTrue(hda.id in self.hist.dataset_ids)
 
     def test_get_dataset(self):
-        lds = self.gi.libraries.upload_data(self.lib, self.FOO_DATA)
+        lds = self.gi.libraries.upload_data(self.lib, FOO_DATA)
         hda = self.hist.import_dataset(lds)
         retrieved = self.hist.get_dataset(hda.id)
         self.assertEqual(hda.id, retrieved.id)
 
     def test_get_datasets(self):
-        lds = [self.gi.libraries.upload_data(self.lib, self.FOO_DATA),
+        lds = [self.gi.libraries.upload_data(self.lib, FOO_DATA),
                self.gi.libraries.upload_data(self.lib, 'foo2\nbar2\n')]
         hdas = [self.hist.import_dataset(_) for _ in lds]
         datasets = self.hist.get_datasets()
         self.assertEqual(len(lds), len(datasets))
         self.assertEqual([_.id for _ in hdas], [_.id for _ in datasets])
 
-    def _upload_dataset(self):
-        lds = self.lib.upload_data(self.FOO_DATA)
-        ds = self.hist.import_dataset(lds)
-        ds.wait()
-        return ds
+
+class TestHDAContents(TestHistoryContents):
+
+    def setUp(self):
+        super(TestHDAContents, self).setUp()
+        ld = self.lib.upload_data(FOO_DATA)
+        self.ds = self.hist.import_dataset(ld)
+        self.ds.wait()
+
+    def tearDown(self):
+        super(TestHDAContents, self).tearDown()
 
     def test_dataset_get_stream(self):
-        ds = self._upload_dataset()
-        for idx, c in enumerate(ds.get_stream(chunk_size=1)):
-            self.assertEqual(str(self.FOO_DATA[idx]), c)
+        for idx, c in enumerate(self.ds.get_stream(chunk_size=1)):
+            self.assertEqual(str(FOO_DATA[idx]), c)
 
     def test_dataset_peek(self):
-        ds = self._upload_dataset()
-        fetched_data = ds.peek(chunk_size=4)
-        self.assertEqual(self.FOO_DATA[0:4], fetched_data)
+        fetched_data = self.ds.peek(chunk_size=4)
+        self.assertEqual(FOO_DATA[0:4], fetched_data)
 
     def test_dataset_download(self):
-        ds = self._upload_dataset()
         with tempfile.TemporaryFile() as f:
-            ds.download(f)
+            self.ds.download(f)
             f.seek(0)
             data = f.read()
-            self.assertEqual(self.FOO_DATA, data)
+            self.assertEqual(FOO_DATA, data)
 
     def test_dataset_get_contents(self):
-        ds = self._upload_dataset()
-        self.assertEqual(self.FOO_DATA, ds.get_contents())
+        self.assertEqual(FOO_DATA, self.ds.get_contents())
 
 
 class TestRunWorkflow(TestGalaxyInstance):
@@ -574,36 +498,10 @@ class TestRunWorkflow(TestGalaxyInstance):
         else:
             params = None
             sep = '\t'  # default
-        output_ids, out_hist_id = self.gi.workflows.run(
-            self.wf, self.inputs, hist, params=params
-            )
-        sys.stdout.write(os.linesep)
-        self.gi.workflows.wait(output_ids, out_hist_id, polling_interval=5)
-        self.assertEqual(len(output_ids), 1)
-        out_ds_id = output_ids[0]
-        out_hist = self.gi.histories.get(out_hist_id)
-        self.assertTrue(out_ds_id in out_hist.dataset_ids)
-        out_ds = self.gi.histories.get_dataset(out_hist, out_ds_id)
-        res = self.gi.histories.get_contents(out_ds)
-        self.__check_res(res, sep)
-        if existing_hist:
-            self.assertEqual(out_hist.id, hist.id)
-        self.gi.histories.delete(out_hist, purge=True)
-
-    def __test_workflow_obj(self, existing_hist=False, params=False):
-        if existing_hist:
-            hist = self.gi.histories.create(self.hist_name)
-        else:
-            hist = self.hist_name
-        if params:
-            params = {0: {'delimiter': 'U'}}
-            sep = '_'  # 'U' maps to '_' in the paste tool
-        else:
-            params = None
-            sep = '\t'  # default
         output_ids, out_hist_id = self.wf.run(
             self.inputs, hist, params=params, wait=True
             )
+        sys.stderr.write(os.linesep)
         self.assertEqual(len(output_ids), 1)
         out_ds_id = output_ids[0]
         out_hist = self.gi.histories.get(out_hist_id)
@@ -623,15 +521,6 @@ class TestRunWorkflow(TestGalaxyInstance):
 
     def test_params(self):
         self.__test(params=True)
-
-    def test_existing_history_obj(self):
-        self.__test_workflow_obj(existing_hist=True)
-
-    def test_new_history_obj(self):
-        self.__test_workflow_obj(existing_hist=False)
-
-    def test_params_obj(self):
-        self.__test_workflow_obj(params=True)
 
 
 # XXX: don't use TestLoader.loadTests* until support for Python 2.6 is dropped
@@ -667,20 +556,12 @@ def suite():
         s.addTest(TestGalaxyInstance(t))
     for t in (
         'test_folder',
-        'test_dataset_upload',
-        'test_dataset_from_url',
-        'test_datasets_from_fs',
-        'test_dataset_from_local',
-        ):
-        s.addTest(TestLibContents(t))
-    for t in (
-        'test_folder',
         'test_dataset',
         'test_dataset_from_url',
         'test_dataset_from_local',
         'test_datasets_from_fs',
         ):
-        s.addTest(TestLibraryObject(t))
+        s.addTest(TestLibraryContents(t))
     for t in (
         'test_dataset_get_stream',
         'test_dataset_peek',
@@ -694,12 +575,15 @@ def suite():
         'test_import_dataset',
         'test_get_dataset',
         'test_get_datasets',
+        ):
+        s.addTest(TestHistoryContents(t))
+    for t in (
         'test_dataset_get_stream',
         'test_dataset_peek',
         'test_dataset_download',
         'test_dataset_get_contents',
         ):
-        s.addTest(TestHistory(t))
+        s.addTest(TestHDAContents(t))
     for t in (
         'test_existing_history',
         'test_new_history',
@@ -711,7 +595,6 @@ def suite():
 
 if __name__ == '__main__':
     # By default, run all tests.  To run specific tests, do the following:
-    #   python -m unittest <module>.<class>
     #   python -m unittest <module>.<class>.<test_method>
     tests = suite()
     RUNNER = unittest.TextTestRunner(verbosity=2)
