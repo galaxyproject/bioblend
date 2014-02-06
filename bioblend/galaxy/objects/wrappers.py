@@ -308,23 +308,45 @@ class Dataset(Wrapper):
         super(Dataset, self).__init__(ds_dict, gi=gi)
         object.__setattr__(self, 'container_id', container_id)
 
+    @abc.abstractmethod
     def get_stream(self, chunk_size=None):
         """
-        Open ``dataset`` for reading and return an iterator over its contents.
+        Open dataset for reading and return an iterator over its contents.
 
         :type chunk_size: int
         :param chunk_size: read this amount of bytes at a time
         """
-        raise NotImplementedError()
+        pass
 
     def peek(self, chunk_size=None):
-        return self.get_stream(chunk_size).next()
+        """
+        Open dataset for reading and return the first chunk.
+
+        See :meth:`.get_stream` for param info.
+        """
+        try:
+            return self.get_stream(chunk_size=chunk_size).next()
+        except StopIteration:
+            return ''
 
     def download(self, file_object, chunk_size=None):
+        """
+        Open dataset for reading and save its contents to ``file_object``.
+
+        :type outf: :obj:`file`
+        :param outf: output file object
+
+        See :meth:`.get_stream` for info on other params.
+        """
         for chunk in self.get_stream(chunk_size=chunk_size):
             file_object.write(chunk)
 
     def get_contents(self, chunk_size=None):
+        """
+        Open dataset for reading and return its **full** contents.
+
+        See :meth:`.get_stream` for param info.
+        """
         return ''.join(self.get_stream(chunk_size=chunk_size))
 
     def refresh(self):
@@ -354,7 +376,7 @@ class HistoryDatasetAssociation(Dataset):
             )
 
     def get_stream(self, chunk_size=None):
-        return self.gi.histories.get_stream(self, chunk_size)
+        return self.gi.histories.get_stream(self, chunk_size=chunk_size)
 
     def refresh(self):
         return self._refresh_imp(self.gi.histories)
@@ -369,7 +391,7 @@ class LibRelatedDataset(Dataset):
         super(LibRelatedDataset, self).__init__(ds_dict, container_id, gi=gi)
 
     def get_stream(self, chunk_size=None):
-        return self.gi.libraries.get_stream(self, chunk_size)
+        return self.gi.libraries.get_stream(self, chunk_size=chunk_size)
 
     def refresh(self):
         return self._refresh_imp(self.gi.libraries)

@@ -130,34 +130,6 @@ class ObjDatasetClient(ObjClient):
         r.raise_for_status()
         return r.iter_content(chunk_size)  # FIXME: client can't close r
 
-    def peek(self, dataset, chunk_size=_CHUNK_SIZE):
-        """
-        Open ``dataset`` for reading and return the first chunk.
-
-        See :meth:`.get_stream` for param info.
-        """
-        return self.get_stream(dataset, chunk_size=chunk_size).next()
-
-    def download(self, dataset, outf, chunk_size=_CHUNK_SIZE):
-        """
-        Open ``dataset`` for reading and save its contents to ``outf``.
-
-        :type outf: :obj:`file`
-        :param outf: output file object
-
-        See :meth:`.get_stream` for info on other params.
-        """
-        for chunk in self.get_stream(dataset, chunk_size=chunk_size):
-            outf.write(chunk)
-
-    def get_contents(self, dataset, chunk_size=_CHUNK_SIZE):
-        """
-        Open ``dataset`` for reading and return its **full** contents.
-
-        See :meth:`.get_stream` for param info.
-        """
-        return ''.join(self.get_stream(dataset, chunk_size=chunk_size))
-
 
 class ObjLibraryClient(ObjDatasetClient):
 
