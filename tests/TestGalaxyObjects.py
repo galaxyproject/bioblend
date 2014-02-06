@@ -278,12 +278,12 @@ class TestGalaxyInstance(unittest.TestCase):
                 delete(o)
 
 
-class TestLibraryContents(TestGalaxyInstance):
+class TestLibraryContents(unittest.TestCase):
 
     URL = 'http://tools.ietf.org/rfc/rfc1866.txt'
 
     def setUp(self):
-        super(TestLibraryContents, self).setUp()
+        self.gi = galaxy_instance.GalaxyInstance(URL, API_KEY)
         self.lib = self.gi.libraries.create('test_%s' % uuid.uuid4().hex)
 
     def tearDown(self):
@@ -351,10 +351,10 @@ class TestLibraryContents(TestGalaxyInstance):
             shutil.rmtree(tempdir)
 
 
-class TestLDContents(TestGalaxyInstance):
+class TestLDContents(unittest.TestCase):
 
     def setUp(self):
-        super(TestLDContents, self).setUp()
+        self.gi = galaxy_instance.GalaxyInstance(URL, API_KEY)
         self.lib = self.gi.libraries.create('test_%s' % uuid.uuid4().hex)
         self.ds = self.lib.upload_data(FOO_DATA)
 
@@ -383,10 +383,10 @@ class TestLDContents(TestGalaxyInstance):
         self.assertEqual(FOO_DATA, self.ds.get_contents())
 
 
-class TestHistoryContents(TestGalaxyInstance):
+class TestHistoryContents(unittest.TestCase):
 
     def setUp(self):
-        super(TestHistoryContents, self).setUp()
+        self.gi = galaxy_instance.GalaxyInstance(URL, API_KEY)
         self.hist = self.gi.histories.create('test_%s' % uuid.uuid4().hex)
         self.lib = self.gi.libraries.create('test_%s' % uuid.uuid4().hex)
 
@@ -437,10 +437,12 @@ class TestHistoryContents(TestGalaxyInstance):
         self.assertEqual([_.id for _ in hdas], [_.id for _ in datasets])
 
 
-class TestHDAContents(TestHistoryContents):
+class TestHDAContents(unittest.TestCase):
 
     def setUp(self):
-        super(TestHDAContents, self).setUp()
+        self.gi = galaxy_instance.GalaxyInstance(URL, API_KEY)
+        self.hist = self.gi.histories.create('test_%s' % uuid.uuid4().hex)
+        self.lib = self.gi.libraries.create('test_%s' % uuid.uuid4().hex)
         ld = self.lib.upload_data(FOO_DATA)
         self.ds = self.hist.import_dataset(ld)
         self.ds.wait()
@@ -467,10 +469,10 @@ class TestHDAContents(TestHistoryContents):
         self.assertEqual(FOO_DATA, self.ds.get_contents())
 
 
-class TestRunWorkflow(TestGalaxyInstance):
+class TestRunWorkflow(unittest.TestCase):
 
     def setUp(self):
-        super(TestRunWorkflow, self).setUp()
+        self.gi = galaxy_instance.GalaxyInstance(URL, API_KEY)
         self.lib = self.gi.libraries.create('test_%s' % uuid.uuid4().hex)
         self.wf = self.gi.workflows.import_one(WF_DICT)
         self.contents = ['one\ntwo\n', '1\n2\n']
@@ -525,71 +527,18 @@ class TestRunWorkflow(TestGalaxyInstance):
 
 # XXX: don't use TestLoader.loadTests* until support for Python 2.6 is dropped
 def suite():
+    loader = unittest.TestLoader()
     s = unittest.TestSuite()
-    for t in (
-        'test_initialize',
-        'test_taint',
-        'test_serialize',
-        'test_clone',
-        'test_kwargs',
-        ):
-        s.addTest(TestWrapper(t))
-    for t in (
-        'test_initialize',
-        'test_steps',
-        'test_taint',
-        'test_inputs',
-        ):
-        s.addTest(TestWorkflow(t))
-    #--
-    for t in (
-        'test_library',
-        'test_history',
-        'test_workflow',
-        'test_workflow_from_dict',
-        'test_workflow_from_json',
-        'test_workflow_from_shared',
-        'test_get_libraries',
-        'test_get_histories',
-        'test_get_workflows',
-        ):
-        s.addTest(TestGalaxyInstance(t))
-    for t in (
-        'test_folder',
-        'test_dataset',
-        'test_dataset_from_url',
-        'test_dataset_from_local',
-        'test_datasets_from_fs',
-        ):
-        s.addTest(TestLibraryContents(t))
-    for t in (
-        'test_dataset_get_stream',
-        'test_dataset_peek',
-        'test_dataset_download',
-        'test_dataset_get_contents',
-        ):
-        s.addTest(TestLDContents(t))
-    for t in (
-        'test_dataset_upload',
-        'test_delete',
-        'test_import_dataset',
-        'test_get_dataset',
-        'test_get_datasets',
-        ):
-        s.addTest(TestHistoryContents(t))
-    for t in (
-        'test_dataset_get_stream',
-        'test_dataset_peek',
-        'test_dataset_download',
-        'test_dataset_get_contents',
-        ):
-        s.addTest(TestHDAContents(t))
-    for t in (
-        'test_existing_history',
-        'test_new_history',
-        'test_params',
-        ):
-        s.addTest(TestRunWorkflow(t))
+    s.addTests([loader.loadTestsFromTestCase(c) for c in (
+        TestWrapper,
+        TestWorkflow,
+        TestGalaxyInstance,
+        TestLibraryContents,
+        TestLDContents,
+        TestHistoryContents,
+        TestHDAContents,
+        TestRunWorkflow,
+        )])
     return s
 
 
