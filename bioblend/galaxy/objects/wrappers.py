@@ -276,13 +276,12 @@ class Workflow(Wrapper):
         return self.gi.workflows.import_one(self)
 
     def preview(self):
-        ws = [_ for _ in self.gi.workflows.get_previews(name=self.name)
-              if _.id == self.id]
-        if len(ws) > 1:
-            raise NotImplementedError(
-                "Unexpected number of previews (%d > 1)" % len(ws)
-                )
-        return ws[0] if len(ws) > 0 else None
+        getf = self.gi.workflows.get_previews
+        try:
+            p = [_ for _ in getf(published=True) if _.id == self.id][0]
+        except IndexError:
+            raise ValueError('no object for id %s' % self.id)
+        return p
 
     def run(self, inputs, history, params=None, import_inputs=False,
             wait=False, polling_interval=POLLING_INTERVAL):
@@ -430,18 +429,21 @@ class DatasetContainer(Wrapper):
             dataset_ids = []
         object.__setattr__(self, 'dataset_ids', dataset_ids)
 
-    @staticmethod
-    def _preview(obj, gi_module):
-        raise NotImplementedError()
-        # TODO: how do I know whether this history has been deleted?
-        # Figure it out and fix the deleted= argument below
-        prevs = gi_module.get_previews(name=obj.name, deleted=obj.state)
-        hs = [_ for _ in prevs if _.id == obj.id]
-        if len(hs) > 1:
-            raise NotImplementedError(
-                "Unexpected number of previews (%d > 1)" % len(hs)
-                )
-        return hs[0] if len(hs) > 0 else None
+    def preview(self):
+        if isinstance(self, History):
+            getf = self.gi.histories.get_previews
+        else:
+            assert isinstance(self, Library)
+            getf = self.gi.libraries.get_previews
+        # self.state could be stale: check both regular and deleted containers
+        try:
+            p = [_ for _ in getf() if _.id == self.id][0]
+        except IndexError:
+            try:
+                p = [_ for _ in getf(deleted=True) if _.id == self.id][0]
+            except IndexError:
+                raise ValueError('no object for id %s' % self.id)
+        return p
 
 
 class History(DatasetContainer):
@@ -456,9 +458,6 @@ class History(DatasetContainer):
         # XXX: how do we keep this local dataset id list synchronized
         # with the remote contents?
         super(History, self).__init__(hist_dict, dataset_ids=dataset_ids, gi=gi)
-
-    def preview(self):
-        return self._preview(self, self.gi.histories)
 
     def update(self, name=None, annotation=None):
         # TODO: wouldn't it be better if name and annotation were attributes?
@@ -492,9 +491,6 @@ class Library(DatasetContainer):
         if folder_ids is None:
             folder_ids = []
         object.__setattr__(self, 'folder_ids', folder_ids)
-
-    def preview(self):
-        return self._preview(self, self.gi.libraries)
 
     def delete(self):
         self.gi.libraries.delete(self)
