@@ -500,15 +500,13 @@ class TestRunWorkflow(unittest.TestCase):
         else:
             params = None
             sep = '\t'  # default
-        output_ids, out_hist_id = self.wf.run(
-            self.inputs, hist, params=params, wait=True
-            )
         sys.stderr.write(os.linesep)
-        self.assertEqual(len(output_ids), 1)
-        out_ds_id = output_ids[0]
-        out_hist = self.gi.histories.get(out_hist_id)
-        self.assertTrue(out_ds_id in out_hist.dataset_ids)
-        out_ds = out_hist.get_dataset(out_ds_id)
+        outputs, out_hist = self.wf.run(
+            self.inputs, hist, params=params, wait=True, polling_interval=1
+            )
+        self.assertEqual(len(outputs), 1)
+        out_ds = outputs[0]
+        self.assertTrue(out_ds.id in out_hist.dataset_ids)
         res = out_ds.get_contents()
         self.__check_res(res, sep)
         if existing_hist:

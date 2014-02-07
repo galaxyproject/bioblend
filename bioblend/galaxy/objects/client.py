@@ -1,10 +1,10 @@
 import collections
 import httplib
 import json
-import logging
 import requests
 import time
 
+import bioblend
 import wrappers
 
 
@@ -14,12 +14,22 @@ _PENDING_DS_STATES = set(
     )
 
 
+def _get_error_info(hda):
+    msg = hda.id
+    try:
+        msg += ' (%s): ' % hda.name
+        msg += hda.wrapped['misc_info']
+    except StandardError:  # avoid 'error while generating an error report'
+        msg += ': error'
+    return msg
+
+
 class ObjClient(object):
 
-    def __init__(self, obj_gi, log=None):
+    def __init__(self, obj_gi):
         self.obj_gi = obj_gi
         self.gi = self.obj_gi.gi
-        self.log = log if log else logging.getLogger(self.__class__.__name__)
+        self.log = bioblend.log
 
     #-- helpers --
     def _error(self, msg, err_type=RuntimeError):
@@ -52,7 +62,7 @@ class ObjClient(object):
                 f_ids.append(di['id'])
             else:
                 ds_ids.append(di['id'])
-        kwargs = {'dataset_ids': ds_ids, 'gi': self.obj_gi }
+        kwargs = {'dataset_ids': ds_ids, 'gi': self.obj_gi}
         if issubclass(ctype, wrappers.Library):
             kwargs['folder_ids'] = f_ids
         return ctype(cdict, **kwargs)
@@ -354,8 +364,7 @@ class ObjLibraryClient(ObjDatasetClient):
 
 class ObjHistoryClient(ObjDatasetClient):
 
-    # default polling interval for dataset state monitoring
-    _POLLING_INTERVAL = 1
+    POLLING_INTERVAL = wrappers.HistoryDatasetAssociation.POLLING_INTERVAL
 
     def _dataset_stream_url(self, dataset):
         base_url = self.gi._make_url(
@@ -484,34 +493,44 @@ class ObjHistoryClient(ObjDatasetClient):
         """
         return self._get_container_dataset(src, ds_id, wrappers.History)
 
-    @staticmethod
-    def wait(datasets, polling_interval=_POLLING_INTERVAL):
+    def wait(self, datasets, polling_interval=POLLING_INTERVAL,
+             break_on_error=False):
         """
         Wait for datasets to come out of the pending states.
+
+        :type datasets: :class:`~collections.Iterable` of
+          :class:`~bioblend.galaxy.objects.wrappers.HistoryDatasetAssociation`
+        :param datasets: history datasets
+
+        :type polling_interval: float
+        :param polling_interval: polling interval in seconds
+
+        :type break_on_error: bool
+        :param break_on_error: if :obj:`True`, break as soon as at least
+          one of the datasets is in the 'error' state.
+
+        .. warning::
+
+          This is a blocking operation that can take a very long time.
+          Also, note that this method does not return anything;
+          however, each input dataset is refreshed (possibly multiple
+          times) during the execution.
         """
-        if polling_interval is None:
-            polling_interval = ObjHistoryClient._POLLING_INTERVAL
-        try:
-            ds_iter = iter(datasets)
-        except TypeError:
-            ds_iter = iter([datasets])
-        wait_list = [d for d in ds_iter if d.state in _PENDING_DS_STATES]
-        while wait_list:
+        self.log.info('waiting for datasets')
+        datasets = [_ for _ in datasets if _.state in _PENDING_DS_STATES]
+        while datasets:
             time.sleep(polling_interval)
-            # refresh state and pop the ones that are no longer pending.
-            # We break as soon as we find one that is pending.
-            while wait_list:
-                wait_list[0].refresh()
-                if wait_list[0].state in _PENDING_DS_STATES:
-                    break
-                else:
-                    wait_list.pop()
+            for i in xrange(len(datasets)-1, -1, -1):
+                ds = datasets[i]
+                ds.refresh()
+                self.log.info('{0.id}: {0.state}'.format(ds))
+                if break_on_error and ds.state == 'error':
+                    self._error(_get_error_info(ds))
+                if ds.state not in _PENDING_DS_STATES:
+                    del datasets[i]
 
 
 class ObjWorkflowClient(ObjClient):
-
-    # default polling interval for output state monitoring
-    _POLLING_INTERVAL = 10
 
     def import_one(self, src):
         """
@@ -629,18 +648,18 @@ class ObjWorkflowClient(ObjClient):
           for ``workflow.tools[3]``.
 
         :type import_inputs: bool
-        :param import_inputs: If :obj:`True`, workflow inputs will be
+        :param import_inputs: if :obj:`True`, workflow inputs will be
           imported into the history; if :obj:`False`, only workflow
           outputs will be visible in the history.
 
-        :rtype: list of str, str
-        :return: list of output dataset ids, output history id
+        :rtype: tuple
+        :return: list of output datasets, output history
 
         .. warning::
           This is an asynchronous operation: when the method returns,
           the output datasets and history will most likely **not** be
-          in their final state.  Use :meth:`.wait` if you want to block
-          until they're ready.
+          in their final state.  Use :meth:`ObjHistoryClient.wait` if
+          you want to block until they're ready.
         """
         if not workflow.is_mapped:
             self._error('workflow is not mapped to a Galaxy object')
@@ -664,41 +683,10 @@ class ObjWorkflowClient(ObjClient):
         res = self.gi.workflows.run_workflow(workflow.id, ds_map, **kwargs)
         res = self._get_dict('run_workflow', res)
         # res structure: {'history': HIST_ID, 'outputs': [DS_ID, DS_ID, ...]}
-        return res['outputs'], res['history']
-
-    def wait(self, ds_ids, hist_id, polling_interval=_POLLING_INTERVAL):
-        """
-        Wait until all datasets are ready or one of them is in error.
-
-        :type ds_ids: :class:`~collections.Iterable` of str
-        :param ds_ids: dataset ids, which should belong to the history
-          identified by ``hist_id`` (any that doesn't will be ignored)
-
-        :type polling_interval: float
-        :param polling_interval: polling interval in seconds
-
-        .. warning::
-          This is a blocking operation that can take a very long time.
-          Also, note that this method does not return anything: if
-          needed, the datasets and updated history must be retrieved
-          explicitly.
-        """
-        self.log.info('waiting for datasets')
-        while True:
-            res = self.gi.histories.show_history(hist_id)
-            hist_dict = self._get_dict('show_history', res)
-            ds_states = self._get_ds_states(hist_dict)
-            pending = 0
-            for id_ in ds_ids:
-                state = ds_states.get(id_)
-                self.log.info('%s: %s' % (id_, state))
-                if state == 'error':
-                    self._error(self.__get_error_info(id_, hist_dict))
-                if state in _PENDING_DS_STATES:
-                    pending += 1
-            if not pending:
-                break
-            time.sleep(polling_interval)
+        out_hist = self.obj_gi.histories.get(res['history'])
+        assert set(res['outputs']).issubset(out_hist.dataset_ids)
+        out_dss = [out_hist.get_dataset(_) for _ in res['outputs']]
+        return out_dss, out_hist
 
     def delete(self, workflow):
         """
@@ -714,17 +702,6 @@ class ObjWorkflowClient(ObjClient):
         if not isinstance(res, basestring):
             self._error('delete_workflow: unexpected reply: %r' % (res,))
         workflow.unmap()
-
-    def __get_error_info(self, ds_id, hist_dict):
-        msg = ds_id
-        try:
-            # get history's dataset
-            ds = self._get_container_dataset(hist_dict, ds_id, wrappers.History)
-            msg += ' (%s): ' % ds.name
-            msg += ds.misc_info
-        except StandardError:  # avoid 'error while generating an error report'
-            msg += ': error'
-        return msg
 
     @staticmethod
     def _get_ds_states(hist_dict):

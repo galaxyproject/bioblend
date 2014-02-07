@@ -6,7 +6,6 @@ A basic object-oriented interface for Galaxy entities.
 
 import abc, collections, json
 
-from client import ObjHistoryClient
 
 __all__ = [
     'Wrapper',
@@ -193,6 +192,7 @@ class Workflow(Wrapper):
     results from an input dataset.
     """
     BASE_ATTRS = Wrapper.BASE_ATTRS + ('annotation', 'published')
+    POLLING_INTERVAL = 10  # for output state monitoring
 
     def __init__(self, wf_dict, id=None, inputs=None, gi=None):
         """
@@ -284,12 +284,13 @@ class Workflow(Wrapper):
                 )
         return ws[0] if len(ws) > 0 else None
 
-    def run(self, inputs, history, params=None, import_inputs=False, wait=True):
+    def run(self, inputs, history, params=None, import_inputs=False,
+            wait=False, polling_interval=POLLING_INTERVAL):
         outputs, history = self.gi.workflows.run(
             self, inputs, history, params, import_inputs
             )
         if wait:
-            self.gi.workflows.wait(outputs, history)
+            self.gi.histories.wait(outputs, polling_interval=polling_interval)
         return outputs, history
 
     def delete(self):
@@ -369,6 +370,7 @@ class HistoryDatasetAssociation(Dataset):
     """
     BASE_ATTRS = Dataset.BASE_ATTRS + ('state',)
     SRC = 'hda'
+    POLLING_INTERVAL = 1  # for state monitoring
 
     def __init__(self, ds_dict, container_id, gi=None):
         super(HistoryDatasetAssociation, self).__init__(
@@ -381,8 +383,8 @@ class HistoryDatasetAssociation(Dataset):
     def refresh(self):
         return self._refresh_imp(self.gi.histories)
 
-    def wait(self, polling_interval=None):
-        ObjHistoryClient.wait(self, polling_interval)
+    def wait(self, polling_interval=POLLING_INTERVAL):
+        self.gi.histories.wait([self], polling_interval=polling_interval)
 
 
 class LibRelatedDataset(Dataset):
