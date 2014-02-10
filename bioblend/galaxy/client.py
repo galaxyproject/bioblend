@@ -32,19 +32,26 @@ class Client(object):
     # are class variables their values are shared by all Client instances --
     # i.e., HistoryClient, WorkflowClient, etc.
     #
-    # Number of times to retry a failed request.
+    # Number of attempts before giving up on a GET request.
     _max_get_retries = 1
     # Delay in seconds between subsequent retries.
     _get_retry_delay = 10
 
     @classmethod
     def max_get_retries(cls):
-        """The number of times to retry a failed request."""
+        """
+        The maximum number of attempts for a GET request.
+        """
         return cls._max_get_retries
 
     @classmethod
     def set_max_get_retries(cls, value):
-        """Set how many times to retry a failed request.  Default: 1"""
+        """
+        Set the maximum number of attempts for GET requests. A value greater
+        than one causes failed GET requests to be retried `value` - 1 times.
+
+        Default: 1
+        """
         if value < 1:
             raise ValueError("Number of retries must be >= 1 (got: %s)" % value)
         cls._max_get_retries = value
