@@ -286,9 +286,6 @@ class Workflow(Wrapper):
             m[i] = {'id': ds.id, 'src': ds.SRC}
         return m
 
-    def import_me(self):
-        return self.gi.workflows.import_one(self)
-
     def preview(self):
         getf = self.gi.workflows.get_previews
         try:

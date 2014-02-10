@@ -1,9 +1,5 @@
-import collections
-import httplib
-import json
-import requests
-import time
-import abc
+import collections, httplib, json, requests, time, abc
+from functools import wraps
 
 import bioblend
 import wrappers
@@ -23,6 +19,16 @@ def _get_error_info(hda):
     except StandardError:  # avoid 'error while generating an error report'
         msg += ': error'
     return msg
+
+
+def _break_if_unmapped(f):
+    @wraps(f)
+    def decorated(self, wrapper, *args, **kwargs):
+        if not wrapper.is_mapped:
+            type_ = wrapper.__class__.__name__
+            self._error('%s is not mapped to a Galaxy object' % type_)
+        return f(self, wrapper, *args, **kwargs)
+    return decorated
 
 
 class ObjClient(object):
@@ -204,6 +210,7 @@ class ObjLibraryClient(ObjDatasetClient):
         dicts = self.gi.libraries.get_libraries(name=name)
         return [self.get(_['id']) for _ in dicts]
 
+    @_break_if_unmapped
     def delete(self, library):
         """
         Delete the given data library.
@@ -212,8 +219,6 @@ class ObjLibraryClient(ObjDatasetClient):
           Deleting a data library is irreversible - all of the data from
           the library will be permanently deleted.
         """
-        if not library.is_mapped:
-            self._error('library is not mapped to a Galaxy object')
         res = self.gi.libraries.delete_library(library.id)
         if not isinstance(res, collections.Mapping):
             self._error('delete_library: unexpected reply: %r' % (res,))
@@ -221,9 +226,8 @@ class ObjLibraryClient(ObjDatasetClient):
 
     #-- library contents --
 
+    @_break_if_unmapped
     def __pre_upload(self, library, folder):
-        if not library.is_mapped:
-            self._error('library is not mapped to a Galaxy object')
         return None if folder is None else folder.id
 
     def __post_upload(self, library, meth_name, reply):
@@ -440,6 +444,7 @@ class ObjHistoryClient(ObjDatasetClient):
             self._error('update_history: failed to update %r' % (history.id,))
         return self.get(history.id)
 
+    @_break_if_unmapped
     def delete(self, history, purge=False):
         """
         Delete the given history.
@@ -449,8 +454,6 @@ class ObjHistoryClient(ObjDatasetClient):
           ``allow_user_dataset_purge = True`` to be set in Galaxy's
           configuration file ``universe_wsgi.ini``)
         """
-        if not history.is_mapped:
-            self._error('history is not mapped to a Galaxy object')
         res = self.gi.histories.delete_history(history.id, purge=purge)
         if not isinstance(res, collections.Mapping):
             self._error('delete_history: unexpected reply: %r' % (res,))
@@ -458,6 +461,7 @@ class ObjHistoryClient(ObjDatasetClient):
 
     #-- history contents --
 
+    @_break_if_unmapped
     def import_dataset(self, history, lds):
         """
         Import a dataset into the history from a library.
@@ -472,8 +476,6 @@ class ObjHistoryClient(ObjDatasetClient):
           :class:`~bioblend.galaxy.objects.wrappers.HistoryDatasetAssociation`
         :return: the imported history dataset
         """
-        if not history.is_mapped:
-            self._error('history is not mapped to a Galaxy object')
         if not isinstance(lds, wrappers.LibraryDataset):
             self._error('lds is not a LibraryDataset', err_type=TypeError)
         # upload_dataset_from_library returns a dict with the unencoded id
@@ -544,7 +546,7 @@ class ObjWorkflowClient(ObjClient):
     def __init__(self, obj_gi):
         super(ObjWorkflowClient, self).__init__(obj_gi)
 
-    def import_one(self, src):
+    def import_new(self, src):
         """
         Imports a new workflow into Galaxy.
 
@@ -631,6 +633,7 @@ class ObjWorkflowClient(ObjClient):
             )
         return [self.get(_['id']) for _ in dicts]
 
+    @_break_if_unmapped
     def run(self, workflow, inputs, history, params=None, import_inputs=False):
         """
         Run ``workflow`` with input datasets from the ``inputs`` sequence.
@@ -673,8 +676,6 @@ class ObjWorkflowClient(ObjClient):
           in their final state.  Use :meth:`ObjHistoryClient.wait` if
           you want to block until they're ready.
         """
-        if not workflow.is_mapped:
-            self._error('workflow is not mapped to a Galaxy object')
         if len(inputs) < len(workflow.inputs):
             self._error('not enough inputs', err_type=ValueError)
         ds_map = workflow.get_input_map(inputs)
@@ -700,6 +701,7 @@ class ObjWorkflowClient(ObjClient):
         out_dss = [out_hist.get_dataset(_) for _ in res['outputs']]
         return out_dss, out_hist
 
+    @_break_if_unmapped
     def delete(self, workflow):
         """
         Delete the given workflow.
@@ -708,8 +710,6 @@ class ObjWorkflowClient(ObjClient):
           Deleting a workflow is irreversible - all of the data from
           the workflow will be permanently deleted.
         """
-        if not workflow.is_mapped:
-            self._error('workflow is not mapped to a Galaxy object')
         res = self.gi.workflows.delete_workflow(workflow.id)
         if not isinstance(res, basestring):
             self._error('delete_workflow: unexpected reply: %r' % (res,))

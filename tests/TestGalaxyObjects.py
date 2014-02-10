@@ -192,7 +192,7 @@ class TestGalaxyInstance(unittest.TestCase):
     def test_workflow(self):
         wf = wrappers.Workflow(WF_DICT)
         wf.name = 'test_%s' % uuid.uuid4().hex
-        imported = self.gi.workflows.import_one(wf)
+        imported = self.gi.workflows.import_new(wf)
         self.assertWorkflowEqual(imported, wf)
         for step, istep in zip(wf.steps, imported.steps):
             self.assertEqual(step.name, istep.name)
@@ -201,13 +201,13 @@ class TestGalaxyInstance(unittest.TestCase):
         self.assertFalse(imported.is_mapped)
 
     def test_workflow_from_dict(self):
-        imported = self.gi.workflows.import_one(WF_DICT)
+        imported = self.gi.workflows.import_new(WF_DICT)
         self.assertTrue(imported.id in [_.id for _ in self.gi.workflows.list()])
         self.gi.workflows.delete(imported)
 
     def test_workflow_from_json(self):
         with open(SAMPLE_FN) as f:
-            imported = self.gi.workflows.import_one(f.read())
+            imported = self.gi.workflows.import_new(f.read())
         self.assertTrue(imported.id in [_.id for _ in self.gi.workflows.list()])
         self.gi.workflows.delete(imported)
 
@@ -253,7 +253,7 @@ class TestGalaxyInstance(unittest.TestCase):
             def create(name):
                 wf = wrappers.Workflow(WF_DICT)
                 wf.name = name
-                return self.gi.workflows.import_one(wf)
+                return self.gi.workflows.import_new(wf)
             get_objs = self.gi.workflows.list
             get_prevs = self.gi.workflows.get_previews
             delete = self.gi.workflows.delete
@@ -478,7 +478,7 @@ class TestRunWorkflow(unittest.TestCase):
     def setUp(self):
         self.gi = galaxy_instance.GalaxyInstance(URL, API_KEY)
         self.lib = self.gi.libraries.create('test_%s' % uuid.uuid4().hex)
-        self.wf = self.gi.workflows.import_one(WF_DICT)
+        self.wf = self.gi.workflows.import_new(WF_DICT)
         self.contents = ['one\ntwo\n', '1\n2\n']
         self.inputs = [self.gi.libraries.upload_data(self.lib, c)
                        for c in self.contents]
