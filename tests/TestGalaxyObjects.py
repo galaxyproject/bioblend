@@ -68,6 +68,10 @@ class MockWrapper(wrappers.Wrapper):
     def __init__(self, *args, **kwargs):
         super(MockWrapper, self).__init__(*args, **kwargs)
 
+    @property
+    def gi_module(self):
+        return super(MockWrapper, self).gi_module()
+
 
 class TestWrapper(unittest.TestCase):
 

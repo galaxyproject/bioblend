@@ -85,6 +85,13 @@ class Wrapper(object):
         object.__setattr__(self, 'is_modified', False)
         object.__setattr__(self, 'gi', gi)
 
+    @abc.abstractproperty
+    def gi_module(self):
+        """
+        The GalaxyInstance module that deals with objects of this type.
+        """
+        pass
+
     @property
     def is_mapped(self):
         """
@@ -156,6 +163,10 @@ class Step(Wrapper):
     def __init__(self, step_dict, parent):
         super(Step, self).__init__(step_dict, parent=parent, gi=parent.gi)
 
+    @property
+    def gi_module(self):
+        return self.gi.workflows
+
 
 class DataInput(Step):
     """
@@ -222,6 +233,10 @@ class Workflow(Wrapper):
         object.__setattr__(self, 'steps', steps)
         object.__setattr__(self, 'id', id)
         object.__setattr__(self, 'inputs', inputs)
+
+    @property
+    def gi_module(self):
+        return self.gi.workflows
 
     @staticmethod
     def _build_step(step_dict, parent):
@@ -355,10 +370,7 @@ class Dataset(Wrapper):
 
         Returns: self
         """
-        raise NotImplementedError()
-
-    def _refresh_imp(self, gi_module):
-        fresh = gi_module.get_dataset(self.container_id, self.id)
+        fresh = self.gi_module.get_dataset(self.container_id, self.id)
         self.__init__(fresh.wrapped, self.container_id, self.gi)
         return self
 
@@ -376,11 +388,12 @@ class HistoryDatasetAssociation(Dataset):
             ds_dict, container_id, gi=gi
             )
 
+    @property
+    def gi_module(self):
+        return self.gi.histories
+
     def get_stream(self, chunk_size=None):
         return self.gi.histories.get_stream(self, chunk_size=chunk_size)
-
-    def refresh(self):
-        return self._refresh_imp(self.gi.histories)
 
     def wait(self, polling_interval=POLLING_INTERVAL):
         self.gi.histories.wait([self], polling_interval=polling_interval)
@@ -391,11 +404,12 @@ class LibRelatedDataset(Dataset):
     def __init__(self, ds_dict, container_id, gi=None):
         super(LibRelatedDataset, self).__init__(ds_dict, container_id, gi=gi)
 
+    @property
+    def gi_module(self):
+        return self.gi.libraries
+
     def get_stream(self, chunk_size=None):
         return self.gi.libraries.get_stream(self, chunk_size=chunk_size)
-
-    def refresh(self):
-        return self._refresh_imp(self.gi.libraries)
 
 
 class LibraryDatasetDatasetAssociation(LibRelatedDataset):
@@ -430,11 +444,7 @@ class DatasetContainer(Wrapper):
         object.__setattr__(self, 'dataset_ids', dataset_ids)
 
     def preview(self):
-        if isinstance(self, History):
-            getf = self.gi.histories.get_previews
-        else:
-            assert isinstance(self, Library)
-            getf = self.gi.libraries.get_previews
+        getf = self.gi_module.get_previews
         # self.state could be stale: check both regular and deleted containers
         try:
             p = [_ for _ in getf() if _.id == self.id][0]
@@ -458,6 +468,10 @@ class History(DatasetContainer):
         # XXX: how do we keep this local dataset id list synchronized
         # with the remote contents?
         super(History, self).__init__(hist_dict, dataset_ids=dataset_ids, gi=gi)
+
+    @property
+    def gi_module(self):
+        return self.gi.histories
 
     def update(self, name=None, annotation=None):
         # TODO: wouldn't it be better if name and annotation were attributes?
@@ -491,6 +505,10 @@ class Library(DatasetContainer):
         if folder_ids is None:
             folder_ids = []
         object.__setattr__(self, 'folder_ids', folder_ids)
+
+    @property
+    def gi_module(self):
+        return self.gi.libraries
 
     def delete(self):
         self.gi.libraries.delete(self)
@@ -536,6 +554,10 @@ class Folder(Wrapper):
             object.__setattr__(self, 'id', self.id[1:])
         object.__setattr__(self, 'container_id', container_id)
 
+    @property
+    def gi_module(self):
+        return self.gi.libraries
+
 
 class Preview(Wrapper):
     """
@@ -561,6 +583,10 @@ class LibraryPreview(Preview):
     def __init__(self, pw_dict, gi=None):
         super(LibraryPreview, self).__init__(pw_dict, gi=gi)
 
+    @property
+    def gi_module(self):
+        return self.gi.libraries
+
 
 class HistoryPreview(Preview):
     """
@@ -572,6 +598,10 @@ class HistoryPreview(Preview):
     def __init__(self, pw_dict, gi=None):
         super(HistoryPreview, self).__init__(pw_dict, gi=gi)
 
+    @property
+    def gi_module(self):
+        return self.gi.histories
+
 
 class WorkflowPreview(Preview):
     """
@@ -582,3 +612,7 @@ class WorkflowPreview(Preview):
     """
     def __init__(self, pw_dict, gi=None):
         super(WorkflowPreview, self).__init__(pw_dict, gi=gi)
+
+    @property
+    def gi_module(self):
+        return self.gi.workflows
