@@ -3,6 +3,7 @@ import httplib
 import json
 import requests
 import time
+import abc
 
 import bioblend
 import wrappers
@@ -26,6 +27,7 @@ def _get_error_info(hda):
 
 class ObjClient(object):
 
+    @abc.abstractmethod
     def __init__(self, obj_gi):
         self.obj_gi = obj_gi
         self.gi = self.obj_gi.gi
@@ -111,8 +113,9 @@ class ObjDatasetClient(ObjClient):
     except StandardError:
         _CHUNK_SIZE = 4096
 
+    @abc.abstractmethod
     def _dataset_stream_url(self, dataset):
-        raise NotImplementedError()
+        pass
 
     def get_stream(self, dataset, chunk_size=_CHUNK_SIZE):
         """
@@ -142,6 +145,9 @@ class ObjDatasetClient(ObjClient):
 
 
 class ObjLibraryClient(ObjDatasetClient):
+
+    def __init__(self, obj_gi):
+        super(ObjLibraryClient, self).__init__(obj_gi)
 
     def _dataset_stream_url(self, dataset):
         base_url = self.gi._make_url(self.gi.libraries)
@@ -366,6 +372,9 @@ class ObjHistoryClient(ObjDatasetClient):
 
     POLLING_INTERVAL = wrappers.HistoryDatasetAssociation.POLLING_INTERVAL
 
+    def __init__(self, obj_gi):
+        super(ObjHistoryClient, self).__init__(obj_gi)
+
     def _dataset_stream_url(self, dataset):
         base_url = self.gi._make_url(
             self.gi.histories, module_id=dataset.container_id, contents=True
@@ -531,6 +540,9 @@ class ObjHistoryClient(ObjDatasetClient):
 
 
 class ObjWorkflowClient(ObjClient):
+
+    def __init__(self, obj_gi):
+        super(ObjWorkflowClient, self).__init__(obj_gi)
 
     def import_one(self, src):
         """

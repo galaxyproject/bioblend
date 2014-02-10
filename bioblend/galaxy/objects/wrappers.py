@@ -172,7 +172,6 @@ class DataInput(Step):
     """
     DataInputs model input datasets for Galaxy tools.
     """
-
     def __init__(self, step_dict, parent):
         if step_dict['type'] != 'data_input':
             raise ValueError('not a data input')
