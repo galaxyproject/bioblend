@@ -156,7 +156,6 @@ class Step(Wrapper):
     Step dicts should be taken from the JSON dump of a workflow, and
     their parent should be the workflow itself.
     """
-    BASE_ATTRS = ('name',)
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
@@ -201,7 +200,7 @@ class Workflow(Wrapper):
     A workflow defines a sequence of steps that produce one or more
     results from an input dataset.
     """
-    BASE_ATTRS = Wrapper.BASE_ATTRS + ('annotation', 'published')
+    BASE_ATTRS = Wrapper.BASE_ATTRS + ('annotation', 'deleted', 'published')
     POLLING_INTERVAL = 10  # for output state monitoring
 
     def __init__(self, wf_dict, id=None, inputs=None, gi=None):
