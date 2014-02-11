@@ -305,7 +305,8 @@ class Workflow(Wrapper):
         return outputs, history
 
     def delete(self):
-        self.gi.workflows.delete(self)
+        self.gi.workflows.delete(self.id)
+        self.unmap()
 
 
 class Dataset(Wrapper):
@@ -477,7 +478,8 @@ class History(DatasetContainer):
         return self.gi.histories.update(self, name, annotation)
 
     def delete(self, purge=False):
-        self.gi.histories.delete(self, purge)
+        self.gi.histories.delete(self.id, purge=purge)
+        self.unmap()
 
     def import_dataset(self, lds):
         return self.gi.histories.import_dataset(self, lds)
@@ -508,7 +510,8 @@ class Library(DatasetContainer):
         return self.gi.libraries
 
     def delete(self):
-        self.gi.libraries.delete(self)
+        self.gi.libraries.delete(self.id)
+        self.unmap()
 
     def upload_data(self, data, folder=None, **kwargs):
         return self.gi.libraries.upload_data(self, data, folder, **kwargs)

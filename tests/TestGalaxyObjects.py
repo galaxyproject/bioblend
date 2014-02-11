@@ -173,7 +173,7 @@ class TestGalaxyInstance(unittest.TestCase):
         self.assertEqual(lib.description, description)
         self.assertEqual(lib.synopsis, synopsis)
         self.assertTrue(lib.id in [_.id for _ in self.gi.libraries.list()])
-        self.gi.libraries.delete(lib)
+        lib.delete()
         self.assertFalse(lib.is_mapped)
 
     def test_history(self):
@@ -181,7 +181,7 @@ class TestGalaxyInstance(unittest.TestCase):
         hist = self.gi.histories.create(name)
         self.assertEqual(hist.name, name)
         self.assertTrue(hist.id in [_.id for _ in self.gi.histories.list()])
-        self.gi.histories.delete(hist, purge=True)
+        hist.delete(purge=True)
         self.assertFalse(hist.is_mapped)
 
     def assertWorkflowEqual(self, wf1, wf2):
@@ -197,19 +197,19 @@ class TestGalaxyInstance(unittest.TestCase):
         for step, istep in zip(wf.steps, imported.steps):
             self.assertEqual(step.name, istep.name)
         self.assertTrue(imported.id in [_.id for _ in self.gi.workflows.list()])
-        self.gi.workflows.delete(imported)
+        imported.delete()
         self.assertFalse(imported.is_mapped)
 
     def test_workflow_from_dict(self):
         imported = self.gi.workflows.import_new(WF_DICT)
         self.assertTrue(imported.id in [_.id for _ in self.gi.workflows.list()])
-        self.gi.workflows.delete(imported)
+        imported.delete()
 
     def test_workflow_from_json(self):
         with open(SAMPLE_FN) as f:
             imported = self.gi.workflows.import_new(f.read())
         self.assertTrue(imported.id in [_.id for _ in self.gi.workflows.list()])
-        self.gi.workflows.delete(imported)
+        imported.delete()
 
     # not very accurate:
     #   * we can't publish a wf from the API
@@ -225,7 +225,7 @@ class TestGalaxyInstance(unittest.TestCase):
             wf_id = pub_only_ids.pop()
             imported = self.gi.workflows.import_shared(wf_id)
             self.assertTrue(isinstance(imported, wrappers.Workflow))
-            self.gi.workflows.delete(imported)
+            imported.delete()
         else:
             print "skipped 'manually publish a workflow to run this test'"
 
@@ -243,12 +243,10 @@ class TestGalaxyInstance(unittest.TestCase):
             create = self.gi.libraries.create
             get_objs = self.gi.libraries.list
             get_prevs = self.gi.libraries.get_previews
-            delete = self.gi.libraries.delete
         elif obj_type == 'history':
             create = self.gi.histories.create
             get_objs = self.gi.histories.list
             get_prevs = self.gi.histories.get_previews
-            delete = self.gi.histories.delete
         elif obj_type == 'workflow':
             def create(name):
                 wf = wrappers.Workflow(WF_DICT)
@@ -256,7 +254,6 @@ class TestGalaxyInstance(unittest.TestCase):
                 return self.gi.workflows.import_new(wf)
             get_objs = self.gi.workflows.list
             get_prevs = self.gi.workflows.get_previews
-            delete = self.gi.workflows.delete
         #--
         ids = lambda seq: set(_.id for _ in seq)
         names = ['test_%s' % uuid.uuid4().hex for _ in xrange(2)]
@@ -269,7 +266,7 @@ class TestGalaxyInstance(unittest.TestCase):
                 self.assertEqual(len(filtered), 1)
                 self.assertEqual(filtered[0].id, objs[0].id)
                 del_id = objs[-1].id
-                delete(objs.pop())
+                objs.pop().delete()
                 self.assertTrue(del_id in ids(get_prevs(deleted=True)))
             else:
                 # Galaxy appends info strings to imported workflow names
@@ -279,7 +276,7 @@ class TestGalaxyInstance(unittest.TestCase):
                 self.assertEqual(filtered[0].id, prev.id)
         finally:
             for o in objs:
-                delete(o)
+                o.delete()
 
 
 class TestLibraryContents(unittest.TestCase):
@@ -395,8 +392,8 @@ class TestHistoryContents(unittest.TestCase):
         self.lib = self.gi.libraries.create('test_%s' % uuid.uuid4().hex)
 
     def tearDown(self):
-        self.gi.histories.delete(self.hist, purge=True)
-        self.gi.libraries.delete(self.lib)
+        self.hist.delete(purge=True)
+        self.lib.delete()
 
     def test_dataset_upload(self):
         lds = self.gi.libraries.upload_data(self.lib, FOO_DATA)
@@ -485,8 +482,8 @@ class TestRunWorkflow(unittest.TestCase):
         self.hist_name = 'test_%s' % uuid.uuid4().hex
 
     def tearDown(self):
-        self.gi.workflows.delete(self.wf)
-        self.gi.libraries.delete(self.lib)
+        self.wf.delete()
+        self.lib.delete()
 
     def __check_res(self, res, sep):
         exp_rows = zip(*(_.splitlines() for _ in self.contents))

@@ -210,19 +210,17 @@ class ObjLibraryClient(ObjDatasetClient):
         dicts = self.gi.libraries.get_libraries(name=name)
         return [self.get(_['id']) for _ in dicts]
 
-    @_break_if_unmapped
-    def delete(self, library):
+    def delete(self, id_):
         """
-        Delete the given data library.
+        Delete the library with the given id.
 
         .. warning::
           Deleting a data library is irreversible - all of the data from
           the library will be permanently deleted.
         """
-        res = self.gi.libraries.delete_library(library.id)
+        res = self.gi.libraries.delete_library(id_)
         if not isinstance(res, collections.Mapping):
             self._error('delete_library: unexpected reply: %r' % (res,))
-        library.unmap()
 
     #-- library contents --
 
@@ -444,20 +442,18 @@ class ObjHistoryClient(ObjDatasetClient):
             self._error('update_history: failed to update %r' % (history.id,))
         return self.get(history.id)
 
-    @_break_if_unmapped
-    def delete(self, history, purge=False):
+    def delete(self, id_, purge=False):
         """
-        Delete the given history.
+        Delete the history with the given id.
 
         :type purge: bool
         :param purge: if :obj:`True`, also purge the history (requires
           ``allow_user_dataset_purge = True`` to be set in Galaxy's
           configuration file ``universe_wsgi.ini``)
         """
-        res = self.gi.histories.delete_history(history.id, purge=purge)
+        res = self.gi.histories.delete_history(id_, purge=purge)
         if not isinstance(res, collections.Mapping):
             self._error('delete_history: unexpected reply: %r' % (res,))
-        history.unmap()
 
     #-- history contents --
 
@@ -722,19 +718,17 @@ class ObjWorkflowClient(ObjClient):
         out_dss = [out_hist.get_dataset(_) for _ in res['outputs']]
         return out_dss, out_hist
 
-    @_break_if_unmapped
-    def delete(self, workflow):
+    def delete(self, id_):
         """
-        Delete the given workflow.
+        Delete the workflow with the given id.
 
         .. warning::
           Deleting a workflow is irreversible - all of the data from
           the workflow will be permanently deleted.
         """
-        res = self.gi.workflows.delete_workflow(workflow.id)
+        res = self.gi.workflows.delete_workflow(id_)
         if not isinstance(res, basestring):
             self._error('delete_workflow: unexpected reply: %r' % (res,))
-        workflow.unmap()
 
     @staticmethod
     def _get_ds_states(hist_dict):
