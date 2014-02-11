@@ -226,14 +226,11 @@ class ObjLibraryClient(ObjDatasetClient):
 
     #-- library contents --
 
-    @_break_if_unmapped
-    def __pre_upload(self, library, folder):
-        return None if folder is None else folder.id
-
     def __post_upload(self, library, meth_name, reply):
         ds_info = self._get_dict(meth_name, reply)
         return self.get_dataset(library, ds_info['id'])
 
+    @_break_if_unmapped
     def upload_data(self, library, data, folder=None, **kwargs):
         """
         Upload data to a Galaxy library.
@@ -253,7 +250,7 @@ class ObjLibraryClient(ObjDatasetClient):
 
         Optional keyword arguments: ``file_type``, ``dbkey``.
         """
-        fid = self.__pre_upload(library, folder)
+        fid = None if folder is None else folder.id
         res = self.gi.libraries.upload_file_contents(
             library.id, data, folder_id=fid, **kwargs
             )
@@ -261,6 +258,7 @@ class ObjLibraryClient(ObjDatasetClient):
         library.dataset_ids.append(new_dataset.id)
         return new_dataset
 
+    @_break_if_unmapped
     def upload_from_url(self, library, url, folder=None, **kwargs):
         """
         Upload data to a Galaxy library from the given URL.
@@ -270,7 +268,7 @@ class ObjLibraryClient(ObjDatasetClient):
 
         See :meth:`.upload_data` for info on other params.
         """
-        fid = self.__pre_upload(library, folder)
+        fid = None if folder is None else folder.id
         res = self.gi.libraries.upload_file_from_url(
             library.id, url, fid, **kwargs
             )
@@ -278,6 +276,7 @@ class ObjLibraryClient(ObjDatasetClient):
         library.dataset_ids.append(new_dataset.id)
         return new_dataset
 
+    @_break_if_unmapped
     def upload_from_local(self, library, path, folder=None, **kwargs):
         """
         Upload data to a Galaxy library from a local file.
@@ -287,7 +286,7 @@ class ObjLibraryClient(ObjDatasetClient):
 
         See :meth:`.upload_data` for info on other params.
         """
-        fid = self.__pre_upload(library, folder)
+        fid = None if folder is None else folder.id
         res = self.gi.libraries.upload_file_from_local_path(
             library.id, path, fid, **kwargs
             )
@@ -297,6 +296,7 @@ class ObjLibraryClient(ObjDatasetClient):
         library.dataset_ids.append(new_dataset.id)
         return new_dataset
 
+    @_break_if_unmapped
     def upload_from_galaxy_fs(self, library, paths, folder=None, **kwargs):
         """
         Upload data to a Galaxy library from filesystem paths on the server.
@@ -306,7 +306,7 @@ class ObjLibraryClient(ObjDatasetClient):
 
         See :meth:`.upload_data` for info on other params.
         """
-        fid = self.__pre_upload(library, folder)
+        fid = None if folder is None else folder.id
         if isinstance(paths, basestring):
             paths = (paths,)
         paths = '\n'.join(paths)
@@ -604,7 +604,7 @@ class ObjWorkflowClient(ObjClient):
             wf_info['steps'].iteritems(), key=lambda t: int(t[0])
             )):
             assert k == str(step_info['id'])
-            wf.steps[i].id = k
+            wf.steps[i].id = k  # pylint: disable=E1101
         return wf
 
     # the 'deleted' option is not available for workflows

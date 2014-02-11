@@ -257,12 +257,14 @@ class Workflow(Wrapper):
         super(Workflow, self).unmap()
         object.__setattr__(self, 'inputs', None)
 
+    @property
     def data_inputs(self):
         """
         Return the list of :class:`DataInput` steps for this workflow.
         """
         return [_ for _ in self.steps if isinstance(_, DataInput)]
 
+    @property
     def tools(self):
         """
         Return the list of :class:`Tool` steps for this workflow.

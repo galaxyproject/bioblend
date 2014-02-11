@@ -140,8 +140,8 @@ class TestWorkflow(unittest.TestCase):
                 self.assertTrue(isinstance(s, wrappers.Tool))
             self.assertTrue(s.parent is self.wf)
         self.assertFalse(self.wf.is_modified)
-        self.assertEqual(len(self.wf.data_inputs()), 2)
-        self.assertEqual(len(self.wf.tools()), 1)
+        self.assertEqual(len(self.wf.data_inputs), 2)
+        self.assertEqual(len(self.wf.tools), 1)
 
     def test_taint(self):
         self.assertFalse(self.wf.is_modified)
