@@ -499,7 +499,7 @@ class TestRunWorkflow(unittest.TestCase):
         else:
             hist = self.hist_name
         if params:
-            params = {0: {'delimiter': 'U'}}
+            params = {self.wf.steps[2].id: {'delimiter': 'U'}}
             sep = '_'  # 'U' maps to '_' in the paste tool
         else:
             params = None

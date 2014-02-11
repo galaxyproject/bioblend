@@ -662,21 +662,35 @@ class ObjWorkflowClient(ObjClient):
           the given name).
 
         :type params: :class:`~collections.Mapping`
-        :param params: an optional mapping of workflow tool indices to
-          param dicts, such as::
-
-            {1: {'a': 0}, 3: {'b': 1}}
-
-          that sets ``a`` to 0 for ``workflow.tools[1]`` and ``b`` to 1
-          for ``workflow.tools[3]``.
-
-        :type import_inputs: bool
-        :param import_inputs: if :obj:`True`, workflow inputs will be
-          imported into the history; if :obj:`False`, only workflow
-          outputs will be visible in the history.
+        :param params: parameter settings for workflow steps (see below)
 
         :rtype: tuple
         :return: list of output datasets, output history
+
+        The ``params`` dict should be structured as follows::
+
+          PARAMS = {STEP_ID: PARAM_DICT, ...}
+          PARAM_DICT = {NAME: VALUE, ...}
+
+        For backwards compatibility, the following (deprecated) format is
+        also supported::
+
+          PARAMS = {TOOL_ID: PARAM_DICT, ...}
+
+        in which case PARAM_DICT affects all steps with the given tool id.
+        If both by-tool-id and by-step-id specifications are used, the
+        latter takes precedence.
+
+        Finally (again, for backwards compatibility), PARAM_DICT can also
+        be specified as::
+
+          PARAM_DICT = {'param': NAME, 'value': VALUE}
+
+        Note that this format allows only one parameter to be set per step.
+
+        Example: set 'a' to 1 for the third workflow step::
+
+          params = {workflow.steps[2].id: {'a': 1}}
 
         .. warning::
           This is an asynchronous operation: when the method returns,
@@ -687,7 +701,6 @@ class ObjWorkflowClient(ObjClient):
         if len(inputs) < len(workflow.inputs):
             self._error('not enough inputs', err_type=ValueError)
         ds_map = workflow.get_input_map(inputs)
-        params = self._build_params_payload(params, workflow)
         kwargs = {'import_inputs_to_history': import_inputs, 'params': params}
         if isinstance(history, wrappers.History):
             try:
@@ -733,14 +746,3 @@ class ObjWorkflowClient(ObjClient):
             for state, ids in hist_dict['state_ids'].iteritems()
             for id_ in ids
             )
-
-    @staticmethod
-    def _build_params_payload(params, workflow):
-        if params is None:
-            return None
-        payload = {}
-        tools = workflow.tools()
-        for i, pdict in params.iteritems():
-            k, v = pdict.items()[0]
-            payload[tools[i].tool_id] = {'param': k, 'value': v}
-        return payload
