@@ -14,6 +14,12 @@ import wrappers
 _PENDING_DS_STATES = set(
     ["new", "upload", "queued", "running", "setting_metadata"]
     )
+# default chunk size for reading remote data
+try:
+    import resource
+    _CHUNK_SIZE = resource.getpagesize()
+except StandardError:
+    _CHUNK_SIZE = 4096
 
 
 def _get_error_info(hda):
@@ -84,6 +90,13 @@ class ObjClient(object):
         ds_dict = gi_client.show_dataset(container_id, ds_id)
         return ctype.DS_TYPE(ds_dict, container_id, gi=self.obj_gi)
 
+
+class ObjDatasetClient(ObjClient):
+
+    @abc.abstractmethod
+    def _dataset_stream_url(self, dataset):
+        pass
+
     def get_datasets(self, src):
         """
         Get all datasets contained by the given dataset container.
@@ -100,20 +113,6 @@ class ObjClient(object):
         return [self._get_container_dataset(src, _, ctype=type(src))
                 for _ in src.dataset_ids]
 
-
-class ObjDatasetClient(ObjClient):
-
-    # default chunk size for reading remote data
-    try:
-        import resource
-        _CHUNK_SIZE = resource.getpagesize()
-    except StandardError:
-        _CHUNK_SIZE = 4096
-
-    @abc.abstractmethod
-    def _dataset_stream_url(self, dataset):
-        pass
-
     def get_stream(self, dataset, chunk_size=_CHUNK_SIZE):
         """
         Open ``dataset`` for reading and return an iterator over its contents.
@@ -125,8 +124,6 @@ class ObjDatasetClient(ObjClient):
         :type chunk_size: int
         :param chunk_size: read this amount of bytes at a time
         """
-        if not chunk_size:
-            chunk_size = self._CHUNK_SIZE
         url = self._dataset_stream_url(dataset)
         params = {'key': self.gi.key}
         if isinstance(dataset, wrappers.LibraryDataset):
@@ -142,7 +139,9 @@ class ObjDatasetClient(ObjClient):
 
 
 class ObjLibraryClient(ObjDatasetClient):
-
+    """
+    Interacts with Galaxy libraries.
+    """
     def __init__(self, obj_gi):
         super(ObjLibraryClient, self).__init__(obj_gi)
 
@@ -363,6 +362,9 @@ class ObjLibraryClient(ObjDatasetClient):
 
 
 class ObjHistoryClient(ObjDatasetClient):
+    """
+    Interacts with Galaxy histories.
+    """
 
     POLLING_INTERVAL = wrappers.HistoryDatasetAssociation.POLLING_INTERVAL
 
@@ -531,6 +533,9 @@ class ObjHistoryClient(ObjDatasetClient):
 
 
 class ObjWorkflowClient(ObjClient):
+    """
+    Interacts with Galaxy workflows.
+    """
 
     def __init__(self, obj_gi):
         super(ObjWorkflowClient, self).__init__(obj_gi)
@@ -752,14 +757,3 @@ class ObjWorkflowClient(ObjClient):
         res = self.gi.workflows.delete_workflow(id_)
         if not isinstance(res, basestring):
             self._error('delete_workflow: unexpected reply: %r' % (res,))
-
-    @staticmethod
-    def _get_ds_states(hist_dict):
-        """
-        Get a dataset_id-to-state mapping from the given history dict.
-        """
-        return dict(
-            (id_, state)
-            for state, ids in hist_dict['state_ids'].iteritems()
-            for id_ in ids
-            )
