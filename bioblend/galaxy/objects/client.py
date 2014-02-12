@@ -5,7 +5,6 @@ Classes in this module should not be instantiated directly, but used
 via their handles in :class:`~.galaxy_instance.GalaxyInstance`.
 """
 import collections, httplib, json, requests, time, abc
-from functools import wraps
 
 import bioblend
 import wrappers
@@ -25,16 +24,6 @@ def _get_error_info(hda):
     except StandardError:  # avoid 'error while generating an error report'
         msg += ': error'
     return msg
-
-
-def _break_if_unmapped(f):
-    @wraps(f)
-    def decorated(self, wrapper, *args, **kwargs):
-        if not wrapper.is_mapped:
-            type_ = wrapper.__class__.__name__
-            self._error('%s is not mapped to a Galaxy object' % type_)
-        return f(self, wrapper, *args, **kwargs)
-    return decorated
 
 
 class ObjClient(object):
@@ -226,11 +215,15 @@ class ObjLibraryClient(ObjDatasetClient):
 
     #-- library contents --
 
+    def __pre_upload(self, library, folder):
+        if not library.is_mapped:
+            self._error('library is not mapped to a Galaxy object')
+        return None if folder is None else folder.id
+
     def __post_upload(self, library, meth_name, reply):
         ds_info = self._get_dict(meth_name, reply)
         return self.get_dataset(library, ds_info['id'])
 
-    @_break_if_unmapped
     def upload_data(self, library, data, folder=None, **kwargs):
         """
         Upload data to a Galaxy library.
@@ -250,7 +243,7 @@ class ObjLibraryClient(ObjDatasetClient):
 
         Optional keyword arguments: ``file_type``, ``dbkey``.
         """
-        fid = None if folder is None else folder.id
+        fid = self.__pre_upload(library, folder)
         res = self.gi.libraries.upload_file_contents(
             library.id, data, folder_id=fid, **kwargs
             )
@@ -258,7 +251,6 @@ class ObjLibraryClient(ObjDatasetClient):
         library.dataset_ids.append(new_dataset.id)
         return new_dataset
 
-    @_break_if_unmapped
     def upload_from_url(self, library, url, folder=None, **kwargs):
         """
         Upload data to a Galaxy library from the given URL.
@@ -268,7 +260,7 @@ class ObjLibraryClient(ObjDatasetClient):
 
         See :meth:`.upload_data` for info on other params.
         """
-        fid = None if folder is None else folder.id
+        fid = self.__pre_upload(library, folder)
         res = self.gi.libraries.upload_file_from_url(
             library.id, url, fid, **kwargs
             )
@@ -276,7 +268,6 @@ class ObjLibraryClient(ObjDatasetClient):
         library.dataset_ids.append(new_dataset.id)
         return new_dataset
 
-    @_break_if_unmapped
     def upload_from_local(self, library, path, folder=None, **kwargs):
         """
         Upload data to a Galaxy library from a local file.
@@ -286,7 +277,7 @@ class ObjLibraryClient(ObjDatasetClient):
 
         See :meth:`.upload_data` for info on other params.
         """
-        fid = None if folder is None else folder.id
+        fid = self.__pre_upload(library, folder)
         res = self.gi.libraries.upload_file_from_local_path(
             library.id, path, fid, **kwargs
             )
@@ -296,7 +287,6 @@ class ObjLibraryClient(ObjDatasetClient):
         library.dataset_ids.append(new_dataset.id)
         return new_dataset
 
-    @_break_if_unmapped
     def upload_from_galaxy_fs(self, library, paths, folder=None, **kwargs):
         """
         Upload data to a Galaxy library from filesystem paths on the server.
@@ -306,7 +296,7 @@ class ObjLibraryClient(ObjDatasetClient):
 
         See :meth:`.upload_data` for info on other params.
         """
-        fid = None if folder is None else folder.id
+        fid = self.__pre_upload(library, folder)
         if isinstance(paths, basestring):
             paths = (paths,)
         paths = '\n'.join(paths)
@@ -459,7 +449,6 @@ class ObjHistoryClient(ObjDatasetClient):
 
     #-- history contents --
 
-    @_break_if_unmapped
     def import_dataset(self, history, lds):
         """
         Import a dataset into the history from a library.
@@ -474,6 +463,8 @@ class ObjHistoryClient(ObjDatasetClient):
           :class:`~.wrappers.HistoryDatasetAssociation`
         :return: the imported history dataset
         """
+        if not history.is_mapped:
+            self._error('history is not mapped to a Galaxy object')
         if not isinstance(lds, wrappers.LibraryDataset):
             self._error('lds is not a LibraryDataset', err_type=TypeError)
         # upload_dataset_from_library returns a dict with the unencoded id
@@ -639,7 +630,6 @@ class ObjWorkflowClient(ObjClient):
             )
         return [self.get(_['id']) for _ in dicts]
 
-    @_break_if_unmapped
     def run(self, workflow, inputs, history, params=None, import_inputs=False,
             replacement_params=None):
         """
@@ -721,6 +711,8 @@ class ObjWorkflowClient(ObjClient):
           in their final state.  Use :meth:`ObjHistoryClient.wait` if
           you want to block until they're ready.
         """
+        if not workflow.is_mapped:
+            self._error('workflow is not mapped to a Galaxy object')
         if len(inputs) < len(workflow.inputs):
             self._error('not enough inputs', err_type=ValueError)
         ds_map = workflow.get_input_map(inputs)
