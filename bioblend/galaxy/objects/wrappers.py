@@ -295,10 +295,11 @@ class Workflow(Wrapper):
             raise ValueError('no object for id %s' % self.id)
         return p
 
-    def run(self, inputs, history, params=None, import_inputs=False,
-            wait=False, polling_interval=POLLING_INTERVAL):
+    def run(self, inputs, history, params=None, import_inputs=False, wait=False,
+            polling_interval=POLLING_INTERVAL, replacement_params=None):
         outputs, history = self.gi.workflows.run(
-            self, inputs, history, params, import_inputs
+            self, inputs, history, params=params, import_inputs=import_inputs,
+            replacement_params=replacement_params
             )
         if wait:
             self.gi.histories.wait(outputs, polling_interval=polling_interval)

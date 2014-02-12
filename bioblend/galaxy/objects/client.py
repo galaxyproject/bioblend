@@ -1,3 +1,9 @@
+"""
+Clients for interacting with specific Galaxy entity types.
+
+Classes in this module should not be instantiated directly, but used
+via their handles in :class:`~.galaxy_instance.GalaxyInstance`.
+"""
 import collections, httplib, json, requests, time, abc
 from functools import wraps
 
@@ -93,13 +99,11 @@ class ObjClient(object):
         """
         Get all datasets contained by the given dataset container.
 
-        :type src: :class:`~bioblend.galaxy.objects.wrappers.History`
-          or :class:`~bioblend.galaxy.objects.wrappers.Library`
+        :type src: :class:`~.wrappers.History` or :class:`~.wrappers.Library`
         :param src: the dataset container
 
-        :rtype: list of
-          :class:`~bioblend.galaxy.objects.wrappers.LibraryDataset` or list of
-          :class:`~bioblend.galaxy.objects.wrappers.HistoryDatasetAssociation`
+        :rtype: list of :class:`~.wrappers.LibraryDataset` or list of
+          :class:`~.wrappers.HistoryDatasetAssociation`
         :return: datasets associated with the given container
         """
         if not isinstance(src, wrappers.DatasetContainer):
@@ -109,9 +113,7 @@ class ObjClient(object):
 
 
 class ObjDatasetClient(ObjClient):
-    """
-    Handles receiving datasets.
-    """
+
     # default chunk size for reading remote data
     try:
         import resource
@@ -128,7 +130,7 @@ class ObjDatasetClient(ObjClient):
         Open ``dataset`` for reading and return an iterator over its contents.
 
         :type dataset:
-          :class:`~bioblend.galaxy.objects.wrappers.HistoryDatasetAssociation`
+          :class:`~.wrappers.HistoryDatasetAssociation`
         :param dataset: the dataset to read from
 
         :type chunk_size: int
@@ -166,7 +168,7 @@ class ObjLibraryClient(ObjDatasetClient):
         Requires ``allow_library_path_paste = True`` to be set in
         Galaxy's configuration file ``universe_wsgi.ini``.
 
-        :rtype: :class:`~bioblend.galaxy.objects.wrappers.Library`
+        :rtype: :class:`~.wrappers.Library`
         :return: the library just created
         """
         res = self.gi.libraries.create_library(name, description, synopsis)
@@ -177,7 +179,7 @@ class ObjLibraryClient(ObjDatasetClient):
         """
         Retrieve the data library corresponding to the given id.
 
-        :rtype: :class:`~bioblend.galaxy.objects.wrappers.Library`
+        :rtype: :class:`~.wrappers.Library`
         :return: the library corresponding to ``id_``
         """
         return self._get_container(id_, wrappers.Library)
@@ -193,7 +195,7 @@ class ObjLibraryClient(ObjDatasetClient):
         :param deleted: if :obj:`True`, return only deleted libraries
 
         :rtype: list of
-          :class:`~bioblend.galaxy.objects.wrappers.LibraryPreview`
+          :class:`~.wrappers.LibraryPreview`
         """
         dicts = self.gi.libraries.get_libraries(name=name, deleted=deleted)
         return [wrappers.LibraryPreview(_, gi=self.obj_gi) for _ in dicts]
@@ -205,7 +207,7 @@ class ObjLibraryClient(ObjDatasetClient):
         :type name: str
         :param name: return only libraries with this name
 
-        :rtype: list of :class:`~bioblend.galaxy.objects.wrappers.Library`
+        :rtype: list of :class:`~.wrappers.Library`
         """
         dicts = self.gi.libraries.get_libraries(name=name)
         return [self.get(_['id']) for _ in dicts]
@@ -233,17 +235,17 @@ class ObjLibraryClient(ObjDatasetClient):
         """
         Upload data to a Galaxy library.
 
-        :type library: :class:`~bioblend.galaxy.objects.wrappers.Library`
+        :type library: :class:`~.wrappers.Library`
         :param library: a library object
 
         :type data: str
         :param data: dataset contents
 
-        :type folder: :class:`~bioblend.galaxy.objects.wrappers.Folder`
+        :type folder: :class:`~.wrappers.Folder`
         :param folder: a folder object, or :obj:`None` to upload to
           the root folder
 
-        :rtype: :class:`~bioblend.galaxy.objects.wrappers.LibraryDataset`
+        :rtype: :class:`~.wrappers.LibraryDataset`
         :return: the dataset object that represents the uploaded content
 
         Optional keyword arguments: ``file_type``, ``dbkey``.
@@ -327,7 +329,7 @@ class ObjLibraryClient(ObjDatasetClient):
         """
         Retrieve the library dataset corresponding to the given id.
 
-        :rtype: :class:`~bioblend.galaxy.objects.wrappers.LibraryDataset`
+        :rtype: :class:`~.wrappers.LibraryDataset`
         :return: the library dataset corresponding to ``id_``
         """
         return self._get_container_dataset(src, ds_id, wrappers.Library)
@@ -336,7 +338,7 @@ class ObjLibraryClient(ObjDatasetClient):
         """
         Create a folder in the given library.
 
-        :type library: :class:`~bioblend.galaxy.objects.wrappers.Library`
+        :type library: :class:`~.wrappers.Library`
         :param library: a library object
 
         :type name: str
@@ -345,11 +347,11 @@ class ObjLibraryClient(ObjDatasetClient):
         :type description: str
         :param description: optional folder description
 
-        :type base_folder: :class:`~bioblend.galaxy.objects.wrappers.Folder`
+        :type base_folder: :class:`~.wrappers.Folder`
         :param base_folder: parent folder, or :obj:`None` to create in
           the root folder
 
-        :rtype: :class:`~bioblend.galaxy.objects.wrappers.Folder`
+        :rtype: :class:`~.wrappers.Folder`
         :return: the folder just created
         """
         bfid = None if base_folder is None else base_folder.id
@@ -363,7 +365,7 @@ class ObjLibraryClient(ObjDatasetClient):
         """
         Retrieve the folder corresponding to the given id.
 
-        :rtype: :class:`~bioblend.galaxy.objects.wrappers.Folder`
+        :rtype: :class:`~.wrappers.Folder`
         :return: the folder corresponding to ``id_``
         """
         f_dict = self.gi.libraries.show_folder(library.id, f_id)
@@ -387,7 +389,7 @@ class ObjHistoryClient(ObjDatasetClient):
         """
         Create a new Galaxy history, optionally setting its name.
 
-        :rtype: :class:`~bioblend.galaxy.objects.wrappers.History`
+        :rtype: :class:`~.wrappers.History`
         :return: the history just created
         """
         res = self.gi.histories.create_history(name=name)
@@ -398,7 +400,7 @@ class ObjHistoryClient(ObjDatasetClient):
         """
         Retrieve the history corresponding to the given id.
 
-        :rtype: :class:`~bioblend.galaxy.objects.wrappers.History`
+        :rtype: :class:`~.wrappers.History`
         :return: the history corresponding to ``id_``
         """
         return self._get_container(id_, wrappers.History)
@@ -414,7 +416,7 @@ class ObjHistoryClient(ObjDatasetClient):
         :param deleted: if :obj:`True`, return only deleted histories
 
         :rtype: list of
-          :class:`~bioblend.galaxy.objects.wrappers.HistoryPreview`
+          :class:`~.wrappers.HistoryPreview`
         """
         dicts = self.gi.histories.get_histories(name=name, deleted=deleted)
         return [wrappers.HistoryPreview(_, gi=self.obj_gi) for _ in dicts]
@@ -426,7 +428,7 @@ class ObjHistoryClient(ObjDatasetClient):
         :type name: str
         :param name: return only histories with this name
 
-        :rtype: list of :class:`~bioblend.galaxy.objects.wrappers.History`
+        :rtype: list of :class:`~.wrappers.History`
         """
         dicts = self.gi.histories.get_histories(name=name)
         return [self.get(_['id']) for _ in dicts]
@@ -462,14 +464,14 @@ class ObjHistoryClient(ObjDatasetClient):
         """
         Import a dataset into the history from a library.
 
-        :type history: :class:`~bioblend.galaxy.objects.wrappers.History`
+        :type history: :class:`~.wrappers.History`
         :param history: target history
 
-        :type lds: :class:`~bioblend.galaxy.objects.wrappers.LibraryDataset`
+        :type lds: :class:`~.wrappers.LibraryDataset`
         :param lds: the library dataset to import
 
         :rtype:
-          :class:`~bioblend.galaxy.objects.wrappers.HistoryDatasetAssociation`
+          :class:`~.wrappers.HistoryDatasetAssociation`
         :return: the imported history dataset
         """
         if not isinstance(lds, wrappers.LibraryDataset):
@@ -495,7 +497,7 @@ class ObjHistoryClient(ObjDatasetClient):
         Retrieve the history dataset corresponding to the given id.
 
         :rtype:
-          :class:`~bioblend.galaxy.objects.wrappers.HistoryDatasetAssociation`
+          :class:`~.wrappers.HistoryDatasetAssociation`
         :return: the history dataset corresponding to ``id_``
         """
         return self._get_container_dataset(src, ds_id, wrappers.History)
@@ -506,7 +508,7 @@ class ObjHistoryClient(ObjDatasetClient):
         Wait for datasets to come out of the pending states.
 
         :type datasets: :class:`~collections.Iterable` of
-          :class:`~bioblend.galaxy.objects.wrappers.HistoryDatasetAssociation`
+          :class:`~.wrappers.HistoryDatasetAssociation`
         :param datasets: history datasets
 
         :type polling_interval: float
@@ -546,12 +548,12 @@ class ObjWorkflowClient(ObjClient):
         """
         Imports a new workflow into Galaxy.
 
-        :type src: :class:`~bioblend.galaxy.objects.wrappers.Workflow`
+        :type src: :class:`~.wrappers.Workflow`
           or dict or str
         :param src: the workflow to import as a workflow object, or
           deserialized JSON (dictionary), or serialized JSON (unicode).
 
-        :rtype: :class:`~bioblend.galaxy.objects.wrappers.Workflow`
+        :rtype: :class:`~.wrappers.Workflow`
         :return: the workflow just imported
         """
         if isinstance(src, wrappers.Workflow):
@@ -575,7 +577,7 @@ class ObjWorkflowClient(ObjClient):
         :type id_: str
         :param id_: workflow id
 
-        :rtype: :class:`~bioblend.galaxy.objects.wrappers.Workflow`
+        :rtype: :class:`~.wrappers.Workflow`
         :return: the workflow just imported
         """
         wf_info = self.gi.workflows.import_shared_workflow(id_)
@@ -585,7 +587,7 @@ class ObjWorkflowClient(ObjClient):
         """
         Retrieve the workflow corresponding to the given id.
 
-        :rtype: :class:`~bioblend.galaxy.objects.wrappers.Workflow`
+        :rtype: :class:`~.wrappers.Workflow`
         :return: the workflow corresponding to ``id_``
         """
         wf_dict = self.gi.workflows.export_workflow_json(id_)
@@ -614,7 +616,7 @@ class ObjWorkflowClient(ObjClient):
         :param published: return published workflows
 
         :rtype: list of
-          :class:`~bioblend.galaxy.objects.wrappers.WorkflowPreview`
+          :class:`~.wrappers.WorkflowPreview`
         """
         dicts = self.gi.workflows.get_workflows(
             name=name, published=published
@@ -630,7 +632,7 @@ class ObjWorkflowClient(ObjClient):
         :type published: bool
         :param published: return published workflows
 
-        :rtype: list of :class:`~bioblend.galaxy.objects.wrappers.Workflow`
+        :rtype: list of :class:`~.wrappers.Workflow`
         """
         dicts = self.gi.workflows.get_workflows(
             name=name, deleted=deleted, published=published
@@ -638,27 +640,36 @@ class ObjWorkflowClient(ObjClient):
         return [self.get(_['id']) for _ in dicts]
 
     @_break_if_unmapped
-    def run(self, workflow, inputs, history, params=None, import_inputs=False):
+    def run(self, workflow, inputs, history, params=None, import_inputs=False,
+            replacement_params=None):
         """
         Run ``workflow`` with input datasets from the ``inputs`` sequence.
 
-        :type workflow: :class:`~bioblend.galaxy.objects.wrappers.Workflow`
+        :type workflow: :class:`~.wrappers.Workflow`
         :param workflow: the workflow that should be run
 
         :type inputs: :class:`~collections.Iterable` of
-          :class:`~bioblend.galaxy.objects.wrappers.Dataset`
+          :class:`~.wrappers.Dataset`
         :param inputs: input datasets for the workflow, which will be
           assigned to the workflow's input slots in the order they
           appear in ``inputs``; any extra items will be ignored.
 
-        :type history:
-          :class:`~bioblend.galaxy.objects.wrappers.History` or str
+        :type history: :class:`~.wrappers.History` or str
         :param history: either a valid history object (results will be
           stored there) or a string (a new history will be created with
           the given name).
 
         :type params: :class:`~collections.Mapping`
         :param params: parameter settings for workflow steps (see below)
+
+        :type import_inputs: bool
+        :param import_inputs: If :obj:`True`, workflow inputs will be
+          imported into the history; if :obj:`False`, only workflow
+          outputs will be visible in the history.
+
+        :type replacement_params: :class:`~collections.Mapping`
+        :param replacement_params: pattern-based replacements for
+          post-job actions (see below)
 
         :rtype: tuple
         :return: list of output datasets, output history
@@ -688,6 +699,22 @@ class ObjWorkflowClient(ObjClient):
 
           params = {workflow.steps[2].id: {'a': 1}}
 
+        The ``replacement_params`` dict should map parameter names in
+        post-job actions (PJAs) to their runtime values.  For
+        instance, if the final step has a PJA like the following::
+
+          {u'RenameDatasetActionout_file1': {
+             u'action_arguments': {u'newname': u'${output}'},
+             u'action_type': u'RenameDatasetAction',
+             u'output_name': u'out_file1'}}
+
+        then the following renames the output dataset to 'foo'::
+
+          replacement_params = {'output': 'foo'}
+
+        see also `this thread
+        <http://lists.bx.psu.edu/pipermail/galaxy-dev/2011-September/006875.html>`_
+
         .. warning::
           This is an asynchronous operation: when the method returns,
           the output datasets and history will most likely **not** be
@@ -697,7 +724,11 @@ class ObjWorkflowClient(ObjClient):
         if len(inputs) < len(workflow.inputs):
             self._error('not enough inputs', err_type=ValueError)
         ds_map = workflow.get_input_map(inputs)
-        kwargs = {'import_inputs_to_history': import_inputs, 'params': params}
+        kwargs = {
+            'params': params,
+            'import_inputs_to_history': import_inputs,
+            'replacement_params': replacement_params,
+            }
         if isinstance(history, wrappers.History):
             try:
                 kwargs['history_id'] = history.id

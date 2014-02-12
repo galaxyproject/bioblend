@@ -90,3 +90,8 @@ Wrappers
 ........
 
 .. automodule:: bioblend.galaxy.objects.wrappers
+
+Client
+......
+
+.. automodule:: bioblend.galaxy.objects.client
