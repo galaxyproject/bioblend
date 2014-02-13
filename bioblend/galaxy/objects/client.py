@@ -590,7 +590,7 @@ class ObjWorkflowClient(ObjClient):
         res = self.gi.workflows.show_workflow(id_)
         wf_info = self._get_dict('show_workflow', res)
         for k in 'deleted', 'published':
-            wf_dict[k] = wf_info[k]
+            wf_dict[k] = wf_info.get(k)
         inputs = wf_info['inputs']
         wf = wrappers.Workflow(wf_dict, id=id_, inputs=inputs, gi=self.obj_gi)
         # update step IDs to mapped values
