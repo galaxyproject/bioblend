@@ -139,8 +139,9 @@ class Client(object):
                 if r.status_code == 200 and r.content:
                     return r.json()
                 else:
-                    bb.log.info("GET request failed (code: %s; body: %s). %s attempts left",
-                            r.status_code, r.body, attempts_left)
+                    bb.log.info("GET request failed (response code: %s). %s attempts left",
+                            r.status_code, attempts_left)
+                    bb.log.debug("Response content: %s", r.content)
             except requests.exceptions.ConnectionError as e:
                 if attempts_left <= 0:
                     raise ConnectionError(e.message) # raise client.ConnectionError
@@ -159,7 +160,7 @@ class Client(object):
             msg = "Unexpected HTTP status code: %s" % r.status_code
         else:
             msg = "Empty reply from GET API call"
-        raise ConnectionError(msg, r.text if r else None)
+        raise ConnectionError(msg, r.content if r else None)
 
     def _post(self, payload, id=None, deleted=False, contents=None, url=None, files_attached=False):
         """
