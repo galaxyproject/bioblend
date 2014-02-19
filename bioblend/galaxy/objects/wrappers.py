@@ -295,14 +295,16 @@ class Workflow(Wrapper):
             raise ValueError('no object for id %s' % self.id)
         return p
 
-    def run(self, inputs, history, params=None, import_inputs=False, wait=False,
-            polling_interval=POLLING_INTERVAL, replacement_params=None):
+    def run(self, inputs, history, params=None, import_inputs=False,
+            replacement_params=None, wait=False,
+            polling_interval=POLLING_INTERVAL, break_on_error=True):
         outputs, history = self.gi.workflows.run(
             self, inputs, history, params=params, import_inputs=import_inputs,
             replacement_params=replacement_params
             )
         if wait:
-            self.gi.histories.wait(outputs, polling_interval=polling_interval)
+            self.gi.histories.wait(outputs, polling_interval=polling_interval,
+                                   break_on_error=break_on_error)
         return outputs, history
 
     def delete(self):
@@ -394,8 +396,9 @@ class HistoryDatasetAssociation(Dataset):
     def get_stream(self, chunk_size=None):
         return self.gi.histories.get_stream(self, chunk_size=chunk_size)
 
-    def wait(self, polling_interval=POLLING_INTERVAL):
-        self.gi.histories.wait([self], polling_interval=polling_interval)
+    def wait(self, polling_interval=POLLING_INTERVAL, break_on_error=True):
+        self.gi.histories.wait([self], polling_interval=polling_interval,
+                               break_on_error=break_on_error)
 
 
 class LibRelatedDataset(Dataset):

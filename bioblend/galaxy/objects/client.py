@@ -496,7 +496,7 @@ class ObjHistoryClient(ObjDatasetClient):
         return self._get_container_dataset(src, ds_id, wrappers.History)
 
     def wait(self, datasets, polling_interval=POLLING_INTERVAL,
-             break_on_error=False):
+             break_on_error=True):
         """
         Wait for datasets to come out of the pending states.
 

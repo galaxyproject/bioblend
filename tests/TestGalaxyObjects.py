@@ -243,10 +243,12 @@ class TestGalaxyInstance(unittest.TestCase):
             create = self.gi.libraries.create
             get_objs = self.gi.libraries.list
             get_prevs = self.gi.libraries.get_previews
+            del_kwargs = {}
         elif obj_type == 'history':
             create = self.gi.histories.create
             get_objs = self.gi.histories.list
             get_prevs = self.gi.histories.get_previews
+            del_kwargs = {'purge': True}
         elif obj_type == 'workflow':
             def create(name):
                 wf = wrappers.Workflow(WF_DICT)
@@ -254,6 +256,7 @@ class TestGalaxyInstance(unittest.TestCase):
                 return self.gi.workflows.import_new(wf)
             get_objs = self.gi.workflows.list
             get_prevs = self.gi.workflows.get_previews
+            del_kwargs = {}
         #--
         ids = lambda seq: set(_.id for _ in seq)
         names = ['test_%s' % uuid.uuid4().hex for _ in xrange(2)]
@@ -266,7 +269,7 @@ class TestGalaxyInstance(unittest.TestCase):
                 self.assertEqual(len(filtered), 1)
                 self.assertEqual(filtered[0].id, objs[0].id)
                 del_id = objs[-1].id
-                objs.pop().delete()
+                objs.pop().delete(**del_kwargs)
                 self.assertTrue(del_id in ids(get_prevs(deleted=True)))
             else:
                 # Galaxy appends info strings to imported workflow names
@@ -276,7 +279,7 @@ class TestGalaxyInstance(unittest.TestCase):
                 self.assertEqual(filtered[0].id, prev.id)
         finally:
             for o in objs:
-                o.delete()
+                o.delete(**del_kwargs)
 
 
 class TestLibraryContents(unittest.TestCase):
