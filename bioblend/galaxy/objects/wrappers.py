@@ -12,6 +12,7 @@ __all__ = [
     'Step',
     'DataInput',
     'Tool',
+    'WorkflowInfo',
     'Workflow',
     'DatasetContainer',
     'History',
@@ -193,6 +194,58 @@ class Tool(Step):
                 )
 
 
+class WorkflowInfo(Wrapper):
+    """
+    Workflow data related to a specific Galaxy instance.
+
+    Wraps dictionaries returned by lower level ``show`` calls.
+    """
+    BASE_ATTRS = Wrapper.BASE_ATTRS + ('inputs', 'published', 'steps', 'tags')
+
+    def __init__(self, wf_info_dict, gi=None):
+        super(WorkflowInfo, self).__init__(wf_info_dict, gi=gi)
+
+    def get_dag(self):
+        """
+        Return the workflow's DAG as a mapping from steps to their successors.
+
+        For instance, a workflow with a single tool *c*, two inputs
+        *a, b* and three outputs *d, e, f* is represented by::
+
+          {'a': {'c'}, 'b': {'c'}, 'c': {'d', 'e', 'f'}}
+        """
+        dag = {}
+        for s in self.steps.itervalues():
+            for i in s['input_steps'].itervalues():
+                dag.setdefault(i['source_step'], set()).add(s['id'])
+        return dag
+
+    def sorted_step_ids(self):
+        """
+        Return a topological sort of the workflow's DAG.
+
+        This can be useful for mapping :class:`Workflow` step ids (0
+        to n_steps - 1) to :class:`WorkflowInfo` step ids (actual step
+        ids from a Galaxy instance).
+        """
+        ids = []
+        inputs = set(self.inputs)
+        edges = self.get_dag()
+        rev_edges = {}
+        for h, tails in edges.iteritems():
+            for t in tails:
+                rev_edges.setdefault(t, set()).add(h)
+        while inputs:
+            h = inputs.pop()
+            ids.append(h)
+            for t in edges.get(h, []):
+                incoming = rev_edges[t]
+                incoming.remove(h)
+                if not incoming:
+                    inputs.add(t)
+        return ids
+
+
 class Workflow(Wrapper):
     """
     Workflows represent ordered sequences of computations on Galaxy.
@@ -200,10 +253,10 @@ class Workflow(Wrapper):
     A workflow defines a sequence of steps that produce one or more
     results from an input dataset.
     """
-    BASE_ATTRS = Wrapper.BASE_ATTRS + ('annotation', 'deleted', 'published')
+    BASE_ATTRS = Wrapper.BASE_ATTRS + ('annotation',)
     POLLING_INTERVAL = 10  # for output state monitoring
 
-    def __init__(self, wf_dict, id=None, inputs=None, gi=None):
+    def __init__(self, wf_dict, id=None, wf_info=None, gi=None):
         """
         :type wf_dict: dict
         :param wf_dict: a JSON-deserialized dictionary such as the one
@@ -213,24 +266,22 @@ class Workflow(Wrapper):
         :param id: the id with which this workflow is registered into
           Galaxy, or None if it's not mapped to an actual Galaxy workflow.
 
-        :type inputs: dict
-        :param inputs: the 'inputs' field of the dictionary returned
-          by the Galaxy web API for this workflow, or None if it's not
-          mapped to an actual Galaxy workflow.  The 'inputs' field is
-          in turn a dictionary with the following structure: ``{ID:
-          {'label': LABEL, 'value': VALUE}, ...}``.  Currently, only
-          the IDs are used.
+        :type wf_info: :class:`WorkflowInfo`
+        :param wf_info: instance-specific info for this workflow, or
+          None if it's not mapped to an actual Galaxy workflow.
         """
         super(Workflow, self).__init__(wf_dict, gi=gi)
         # outer keys = unencoded ids, e.g., '99', '100'
         steps = [self._build_step(v, self) for _, v in sorted(
             wf_dict['steps'].items(), key=lambda t: int(t[0])
             )]
-        if inputs is not None:
-            inputs = sorted(inputs, key=int)
         object.__setattr__(self, 'steps', steps)
         object.__setattr__(self, 'id', id)
-        object.__setattr__(self, 'inputs', inputs)
+        object.__setattr__(self, 'wf_info', wf_info)
+        # add direct bindings for attributes not available through wf_dict
+        if wf_info is not None:
+            for a in 'inputs', 'published', 'tags':
+                object.__setattr__(self, a, getattr(wf_info, a))
 
     @property
     def gi_module(self):
@@ -251,11 +302,11 @@ class Workflow(Wrapper):
 
     @property
     def is_mapped(self):
-        return super(Workflow, self).is_mapped and self.inputs
+        return super(Workflow, self).is_mapped and self.wf_info
 
     def unmap(self):
         super(Workflow, self).unmap()
-        object.__setattr__(self, 'inputs', None)
+        object.__setattr__(self, 'wf_info', None)
 
     @property
     def data_inputs(self):
@@ -282,8 +333,11 @@ class Workflow(Wrapper):
         :return: a mapping from input slot ids to datasets in the
           format required by the Galaxy web API.
         """
+        if self.inputs is None:
+            raise RuntimeError('workflow is not mapped to a Galaxy instance')
+        inputs = sorted(self.inputs, key=int)
         m = {}
-        for i, ds in zip(self.inputs, datasets):
+        for i, ds in zip(inputs, datasets):
             m[i] = {'id': ds.id, 'src': ds.SRC}
         return m
 

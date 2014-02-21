@@ -589,17 +589,9 @@ class ObjWorkflowClient(ObjClient):
         wf_dict = self.gi.workflows.export_workflow_json(id_)
         res = self.gi.workflows.show_workflow(id_)
         wf_info = self._get_dict('show_workflow', res)
-        for k in 'deleted', 'published':
-            wf_dict[k] = wf_info.get(k)
-        inputs = wf_info['inputs']
-        wf = wrappers.Workflow(wf_dict, id=id_, inputs=inputs, gi=self.obj_gi)
-        # update step IDs to mapped values
-        for i, (k, step_info) in enumerate(sorted(
-            wf_info['steps'].iteritems(), key=lambda t: int(t[0])
-            )):
-            assert k == str(step_info['id'])
-            wf.steps[i].id = k  # pylint: disable=E1101
-        return wf
+        return wrappers.Workflow(
+            wf_dict, id=id_, wf_info=wf_info, gi=self.obj_gi
+            )
 
     # the 'deleted' option is not available for workflows
     def get_previews(self, name=None, published=False):
