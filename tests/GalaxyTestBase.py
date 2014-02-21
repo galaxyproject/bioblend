@@ -12,4 +12,5 @@ class GalaxyTestBase(unittest.TestCase):
 
     def setUp(self):
         galaxy_key = os.environ['BIOBLEND_GALAXY_API_KEY']
-        self.gi = galaxy.GalaxyInstance(url='https://galaxy-vic.genome.edu.au/', key=galaxy_key)
+        galaxy_url = os.environ['BIOBLEND_GALAXY_URL']
+        self.gi = galaxy.GalaxyInstance(url=galaxy_url, key=galaxy_key)
