@@ -154,7 +154,14 @@ class TestWorkflow(unittest.TestCase):
             ('100', {'label': 'foo', 'value': 'bar'}),
             ('99', {'label': 'boo', 'value': 'far'}),
             ])
-        wf = wrappers.Workflow(WF_DICT, inputs=inputs)
+        dummy_wf_info = wrappers.WorkflowInfo({
+            'inputs': inputs,
+            'steps': {'12284': {
+                'id': 12284,
+                'input_steps': {u'input': {u'source_step': 12285}},
+                }},
+            })
+        wf = wrappers.Workflow(WF_DICT, wf_info=dummy_wf_info)
         self.assertEqual(wf.inputs, ['99', '100'])
 
 
@@ -499,7 +506,7 @@ class TestRunWorkflow(unittest.TestCase):
         else:
             hist = self.hist_name
         if params:
-            params = {self.wf.steps[2].id: {'delimiter': 'U'}}
+            params = {self.wf.tools[0].tool_id: {'delimiter': 'U'}}
             sep = '_'  # 'U' maps to '_' in the paste tool
         else:
             params = None

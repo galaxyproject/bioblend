@@ -204,21 +204,45 @@ class WorkflowInfo(Wrapper):
 
     def __init__(self, wf_info_dict, gi=None):
         super(WorkflowInfo, self).__init__(wf_info_dict, gi=gi)
+        dag, inv_dag = self.__get_dag()
+        object.__setattr__(self, '__dag', dag)
+        object.__setattr__(self, '__inv_dag', inv_dag)
 
-    def get_dag(self):
+    @property
+    def gi_module(self):
+        return self.gi.workflows
+
+    def __get_dag(self):
         """
-        Return the workflow's DAG as a mapping from steps to their successors.
+        Return the workflow's DAG.
+
+        For convenience, this method computes a 'direct' (step =>
+        successors) and an 'inverse' (step => predecessors)
+        representation of the same DAG.
 
         For instance, a workflow with a single tool *c*, two inputs
-        *a, b* and three outputs *d, e, f* is represented by::
+        *a, b* and three outputs *d, e, f* is represented by (direct)::
 
           {'a': {'c'}, 'b': {'c'}, 'c': {'d', 'e', 'f'}}
+
+        and by (inverse)::
+
+          {'c': {'a', 'b'}, 'd': {'c'}, 'e': {'c'}, 'f': {'c'}}
         """
-        dag = {}
+        dag, inv_dag = {}, {}
         for s in self.steps.itervalues():
             for i in s['input_steps'].itervalues():
                 dag.setdefault(i['source_step'], set()).add(s['id'])
-        return dag
+                inv_dag.setdefault(s['id'], set()).add(i['source_step'])
+        return dag, inv_dag
+
+    @property
+    def dag(self):
+        return self.__dag
+
+    @property
+    def inv_dag(self):
+        return self.__inv_dag
 
     def sorted_step_ids(self):
         """
@@ -230,16 +254,12 @@ class WorkflowInfo(Wrapper):
         """
         ids = []
         inputs = set(self.inputs)
-        edges = self.get_dag()
-        rev_edges = {}
-        for h, tails in edges.iteritems():
-            for t in tails:
-                rev_edges.setdefault(t, set()).add(h)
+        inv_dag = dict((k, v.copy()) for k, v in self.inv_dag.iteritems())
         while inputs:
             h = inputs.pop()
             ids.append(h)
-            for t in edges.get(h, []):
-                incoming = rev_edges[t]
+            for t in self.dag.get(h, []):
+                incoming = inv_dag[t]
                 incoming.remove(h)
                 if not incoming:
                     inputs.add(t)
@@ -280,8 +300,9 @@ class Workflow(Wrapper):
         object.__setattr__(self, 'wf_info', wf_info)
         # add direct bindings for attributes not available through wf_dict
         if wf_info is not None:
-            for a in 'inputs', 'published', 'tags':
+            for a in 'published', 'tags':
                 object.__setattr__(self, a, getattr(wf_info, a))
+            object.__setattr__(self, 'inputs', sorted(wf_info.inputs, key=int))
 
     @property
     def gi_module(self):
@@ -335,9 +356,8 @@ class Workflow(Wrapper):
         """
         if self.inputs is None:
             raise RuntimeError('workflow is not mapped to a Galaxy instance')
-        inputs = sorted(self.inputs, key=int)
         m = {}
-        for i, ds in zip(inputs, datasets):
+        for i, ds in zip(self.inputs, datasets):
             m[i] = {'id': ds.id, 'src': ds.SRC}
         return m
 

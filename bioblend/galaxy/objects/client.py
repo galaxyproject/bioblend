@@ -588,7 +588,7 @@ class ObjWorkflowClient(ObjClient):
         """
         wf_dict = self.gi.workflows.export_workflow_json(id_)
         res = self.gi.workflows.show_workflow(id_)
-        wf_info = self._get_dict('show_workflow', res)
+        wf_info = wrappers.WorkflowInfo(self._get_dict('show_workflow', res))
         return wrappers.Workflow(
             wf_dict, id=id_, wf_info=wf_info, gi=self.obj_gi
             )
