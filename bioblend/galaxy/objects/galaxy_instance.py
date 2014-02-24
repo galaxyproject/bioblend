@@ -33,6 +33,27 @@ class GalaxyInstance(object):
     def __init__(self, url, api_key):
         self.gi = bioblend.galaxy.GalaxyInstance(url, api_key)
         self.log = bioblend.log
-        self.histories = ObjHistoryClient(self)
-        self.libraries = ObjLibraryClient(self)
-        self.workflows = ObjWorkflowClient(self)
+        self.__histories = ObjHistoryClient(self)
+        self.__libraries = ObjLibraryClient(self)
+        self.__workflows = ObjWorkflowClient(self)
+
+    @property
+    def histories(self):
+        """
+        Client module for Galaxy histories.
+        """
+        return self.__histories
+
+    @property
+    def libraries(self):
+        """
+        Client module for Galaxy libraries.
+        """
+        return self.__libraries
+
+    @property
+    def workflows(self):
+        """
+        Client module for Galaxy workflows.
+        """
+        return self.__workflows
