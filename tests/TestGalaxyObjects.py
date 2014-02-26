@@ -236,6 +236,25 @@ class TestGalaxyInstance(unittest.TestCase):
         else:
             print "skipped 'manually publish a workflow to run this test'"
 
+    def test_workflow_info(self):
+        imported = self.gi.workflows.import_new(WF_DICT)
+        wi = imported.wf_info
+        inv_dag = {}
+        for h, tails in wi.dag.iteritems():
+            for t in tails:
+                inv_dag.setdefault(t, set()).add(h)
+        self.assertEqual(wi.inv_dag, inv_dag)
+        heads = set(wi.dag)
+        self.assertEqual(heads, set.union(*wi.inv_dag.itervalues()))
+        tails = set(wi.inv_dag)
+        self.assertEqual(tails, set.union(*wi.dag.itervalues()))
+        ids = wi.sorted_step_ids()
+        self.assertEqual(set(ids), heads | tails)
+        for h, tails in wi.dag.iteritems():
+            for t in tails:
+                self.assertTrue(ids.index(h) < ids.index(t))
+        imported.delete()
+
     def test_get_libraries(self):
         self.__test_multi_get('library')
 

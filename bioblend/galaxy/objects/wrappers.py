@@ -204,15 +204,15 @@ class WorkflowInfo(Wrapper):
 
     def __init__(self, wf_info_dict, gi=None):
         super(WorkflowInfo, self).__init__(wf_info_dict, gi=gi)
-        dag, inv_dag = self.__get_dag()
-        object.__setattr__(self, '__dag', dag)
-        object.__setattr__(self, '__inv_dag', inv_dag)
+        dag, inv_dag = self._get_dag()
+        object.__setattr__(self, '_dag', dag)
+        object.__setattr__(self, '_inv_dag', inv_dag)
 
     @property
     def gi_module(self):
         return self.gi.workflows
 
-    def __get_dag(self):
+    def _get_dag(self):
         """
         Return the workflow's DAG.
 
@@ -238,11 +238,11 @@ class WorkflowInfo(Wrapper):
 
     @property
     def dag(self):
-        return self.__dag
+        return self._dag
 
     @property
     def inv_dag(self):
-        return self.__inv_dag
+        return self._inv_dag
 
     def sorted_step_ids(self):
         """
@@ -253,7 +253,8 @@ class WorkflowInfo(Wrapper):
         ids from a Galaxy instance).
         """
         ids = []
-        inputs = set(self.inputs)
+        inputs = set(map(int, self.inputs))
+        assert inputs == set(self.dag) - set(self.inv_dag)
         inv_dag = dict((k, v.copy()) for k, v in self.inv_dag.iteritems())
         while inputs:
             h = inputs.pop()
