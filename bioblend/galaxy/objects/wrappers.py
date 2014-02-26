@@ -298,7 +298,7 @@ class Workflow(Wrapper):
             )]
         object.__setattr__(self, 'steps', steps)
         object.__setattr__(self, 'id', id)
-        object.__setattr__(self, 'wf_info', wf_info)
+        object.__setattr__(self, 'info', wf_info)
         # add direct bindings for attributes not available through wf_dict
         if wf_info is not None:
             for a in 'published', 'tags':
@@ -324,7 +324,7 @@ class Workflow(Wrapper):
 
     @property
     def is_mapped(self):
-        return super(Workflow, self).is_mapped and self.wf_info
+        return super(Workflow, self).is_mapped and self.info
 
     def unmap(self):
         super(Workflow, self).unmap()

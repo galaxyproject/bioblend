@@ -238,7 +238,7 @@ class TestGalaxyInstance(unittest.TestCase):
 
     def test_workflow_info(self):
         imported = self.gi.workflows.import_new(WF_DICT)
-        wi = imported.wf_info
+        wi = imported.info
         inv_dag = {}
         for h, tails in wi.dag.iteritems():
             for t in tails:
