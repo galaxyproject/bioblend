@@ -102,8 +102,23 @@ class WorkflowClient(Client):
 
     def import_shared_workflow(self, workflow_id):
         """
-        Imports a shared workflow.
-        """
+        Imports a new workflow from the shared published workflows 
+
+        :type workflow_id: string
+        :param workflow_id: Encoded workflow ID
+
+        :rtype: Dict
+        :return: A description of the workflow.
+                 For example::
+
+                 {u'id': u'ee0e2b4b696d9092',
+                 u'model_class': u'StoredWorkflow',
+                 u'name': u'Super workflow that solves everything!',
+                 u'published': False,
+                 u'tags': [],
+                 u'url': u'/api/workflows/ee0e2b4b696d9092'}
+     
+        """        
         payload = {}
         payload['workflow_id'] = workflow_id
         url = self.gi._make_url(self)
