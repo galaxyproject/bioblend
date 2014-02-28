@@ -242,7 +242,7 @@ class TestGalaxyInstance(unittest.TestCase):
         inv_dag = {}
         for h, tails in wi.dag.iteritems():
             for t in tails:
-                inv_dag.setdefault(t, set()).add(h)
+                inv_dag.setdefault(str(t), set()).add(h)
         self.assertEqual(wi.inv_dag, inv_dag)
         heads = set(wi.dag)
         self.assertEqual(heads, set.union(*wi.inv_dag.itervalues()))

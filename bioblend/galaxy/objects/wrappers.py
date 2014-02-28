@@ -232,8 +232,10 @@ class WorkflowInfo(Wrapper):
         dag, inv_dag = {}, {}
         for s in self.steps.itervalues():
             for i in s['input_steps'].itervalues():
-                dag.setdefault(i['source_step'], set()).add(s['id'])
-                inv_dag.setdefault(s['id'], set()).add(i['source_step'])
+                # force ids to str so they can index the steps dict
+                head, tail = str(i['source_step']), str(s['id'])
+                dag.setdefault(head, set()).add(tail)
+                inv_dag.setdefault(tail, set()).add(head)
         return dag, inv_dag
 
     @property
@@ -253,17 +255,17 @@ class WorkflowInfo(Wrapper):
         ids from a Galaxy instance).
         """
         ids = []
-        inputs = set(map(int, self.inputs))
+        inputs = set(self.inputs)
         assert inputs == set(self.dag) - set(self.inv_dag)
         inv_dag = dict((k, v.copy()) for k, v in self.inv_dag.iteritems())
         while inputs:
-            h = inputs.pop()
-            ids.append(h)
-            for t in self.dag.get(h, []):
-                incoming = inv_dag[t]
-                incoming.remove(h)
+            head = inputs.pop()
+            ids.append(head)
+            for tail in self.dag.get(head, []):
+                incoming = inv_dag[tail]
+                incoming.remove(head)
                 if not incoming:
-                    inputs.add(t)
+                    inputs.add(tail)
         return ids
 
 
