@@ -57,3 +57,25 @@ class UserClient(Client):
         url = self.gi._make_url(self, None)
         url = '/'.join([url, 'current'])
         return Client._get(self, url=url)
+
+
+    def create_user_apikey(self, user_id):
+        
+        """
+        Create a new api key for a user
+
+        :type user_id: string
+        :param user_id: Encoded user ID
+
+        
+        :rtype: string
+        :return: The api key for the user
+        
+        """
+
+        url = self.gi._make_url(self, None)
+        url = '/'.join([url, user_id,'api_key'])
+        payload = {}
+        payload['user_id'] = user_id
+        
+        return Client._post(self, payload, url=url)

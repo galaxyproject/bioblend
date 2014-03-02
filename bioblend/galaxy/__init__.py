@@ -2,8 +2,9 @@
 A base representation of an instance of Galaxy
 """
 import urlparse
+from bioblend.galaxy.client import Client
 from bioblend.galaxy import (libraries, histories, workflows, datasets, users,
-                             genomes, tools, toolshed, config, visual, quotas)
+                             genomes, tools, toolshed, config, visual, quotas,groups,datatypes)
 from bioblend.galaxyclient import GalaxyClient
 
 
@@ -56,6 +57,24 @@ class GalaxyInstance(GalaxyClient):
         self.config = config.ConfigClient(self)
         self.visual = visual.VisualClient(self)
         self.quotas = quotas.QuotaClient(self)
+        self.groups = groups.GroupsClient(self)
+        self.datatypes = datatypes.DatatypesClient(self)
+
+    @property
+    def max_get_attempts(self):
+        return Client.max_get_retries()
+
+    @max_get_attempts.setter
+    def max_get_attempts(self, v):
+        Client.set_max_get_retries(v)
+
+    @property
+    def get_retry_delay(self):
+        return Client.get_retry_delay()
+
+    @get_retry_delay.setter
+    def get_retry_delay(self, v):
+        Client.set_get_retry_delay(v)
 
     def __repr__(self):
         """
