@@ -4,7 +4,7 @@ A base representation of an instance of Galaxy
 import urlparse
 from bioblend.galaxy.client import Client
 from bioblend.galaxy import (libraries, histories, workflows, datasets, users,
-                             genomes, tools, toolshed, config, visual, quotas,groups)
+                             genomes, tools, toolshed, config, visual, quotas,groups,datatypes)
 from bioblend.galaxyclient import GalaxyClient
 
 
@@ -58,6 +58,7 @@ class GalaxyInstance(GalaxyClient):
         self.visual = visual.VisualClient(self)
         self.quotas = quotas.QuotaClient(self)
         self.groups = groups.GroupsClient(self)
+        self.datatypes = datatypes.DatatypesClient(self)
 
     @property
     def max_get_attempts(self):
