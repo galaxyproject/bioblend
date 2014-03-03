@@ -56,3 +56,25 @@ class GroupsClient(Client):
         """
 
         return Client._get(self, id=group_id)
+
+    def create_group(self, group_name, user_ids=[], role_ids=[]):
+        """
+        Create a new Galaxy group
+
+        :param group_name: string
+        :type group_name: A name for new group
+        
+        :rtype: list
+        :return: A (size 1) list with newly created group
+                 details, like::
+        
+                    [{u'id': u'7c9636938c3e83bf',
+                      u'model_class': u'Group',
+                      u'name': u'My Group Name',
+                      u'url': u'/api/groups/7c9636938c3e83bf'}]
+        """
+        payload = {}
+        payload['name'] = group_name
+        payload['user_ids'] = user_ids
+        payload['role_ids'] = role_ids
+        return Client._post(self, payload)
