@@ -1,9 +1,10 @@
-import sys, os, json
+import sys, os, json, urlparse
 
 # This example uses a workflow and datasets publicly available on
 # CRS4's Orione Galaxy server.
 
 URL = 'http://orione.crs4.it'
+API_URL = urlparse.urljoin(URL, 'api')
 
 # To use the Galaxy API you need an API key. To get one, proceed as follows:
 #   1) go to http://orione.crs4.it and register, or log in if you are
@@ -27,7 +28,7 @@ import common
 # Select "W5 - Metagenomics" from published workflows
 
 workflow_name = 'W5 - Metagenomics'
-workflows = common.get(API_KEY, '%s/api/workflows?show_published=True' % URL)
+workflows = common.get(API_KEY, '%s/workflows?show_published=True' % API_URL)
 w = [_ for _ in workflows if _['published'] and _['name'] == workflow_name]
 assert len(w) == 1
 w = w[0]
@@ -35,13 +36,13 @@ w = w[0]
 # Import the workflow to user space
 
 data = {'workflow_id': w['id']}
-iw = common.post(API_KEY, '%s/api/workflows/import' % URL, data)
-iw_details = common.get(API_KEY, '%s/api/workflows/%s' % (URL, iw['id']))
+iw = common.post(API_KEY, '%s/workflows/import' % API_URL, data)
+iw_details = common.get(API_KEY, '%s/workflows/%s' % (API_URL, iw['id']))
 
 # Select the "Orione SupMat" library
 
 library_name = 'Orione SupMat'
-libraries = common.get(API_KEY, '%s/api/libraries' % URL)
+libraries = common.get(API_KEY, '%s/libraries' % API_URL)
 l = [_ for _ in libraries if _['name'] == library_name]
 assert len(l) == 1
 l = l[0]
@@ -49,7 +50,7 @@ l = l[0]
 # Select the "/Metagenomics/MetagenomicsDataset.fq" dataset
 
 ds_name = '/Metagenomics/MetagenomicsDataset.fq'
-contents = common.get(API_KEY, '%s/api/libraries/%s/contents' % (URL, l['id']))
+contents = common.get(API_KEY, '%s/libraries/%s/contents' % (API_URL, l['id']))
 ld = [_ for _ in contents if _['type'] == 'file' and _['name'] == ds_name]
 assert len(ld) == 1
 ld = ld[0]
@@ -80,7 +81,7 @@ assert len(iw_details['inputs']) == 1
 input_step_id = iw_details['inputs'].keys()[0]
 data['ds_map'] = {input_step_id: {'src': 'ld', 'id' : ld['id']}}
 data['history'] = history_name
-r_dict = common.post(API_KEY, '%s/api/workflows' % URL, data)
+r_dict = common.post(API_KEY, '%s/workflows' % API_URL, data)
 
 print "Running workflow: %s [%s]" % (iw['name'], iw['id'])
 print "Output history: %s [%s]" % (history_name, r_dict['history'])
