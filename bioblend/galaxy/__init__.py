@@ -5,7 +5,7 @@ import urlparse
 from bioblend.galaxy.client import Client
 from bioblend.galaxy import (libraries, histories, workflows, datasets, users,
                              genomes, tools, toolshed, config, visual, quotas,
-                             groups,datatypes,jobs)
+                             groups,datatypes,jobs,forms)
 from bioblend.galaxyclient import GalaxyClient
 
 
@@ -61,6 +61,7 @@ class GalaxyInstance(GalaxyClient):
         self.groups = groups.GroupsClient(self)
         self.datatypes = datatypes.DatatypesClient(self)
         self.jobs = jobs.JobsClient(self)
+        self.forms = forms.FormsClient(self)
 
     @property
     def max_get_attempts(self):
