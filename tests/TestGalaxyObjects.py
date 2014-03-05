@@ -310,7 +310,8 @@ class TestGalaxyInstance(unittest.TestCase):
 
 class TestLibraryContents(unittest.TestCase):
 
-    URL = 'http://tools.ietf.org/rfc/rfc1866.txt'
+    # just something that can be expected to be always up
+    DS_URL = 'http://tools.ietf.org/rfc/rfc1866.txt'
 
     def setUp(self):
         self.gi = galaxy_instance.GalaxyInstance(URL, API_KEY)
@@ -340,8 +341,8 @@ class TestLibraryContents(unittest.TestCase):
         self.assertEqual(self.lib.get_dataset(ds_id).id, ds.id)
 
     def test_dataset_from_url(self):
-        if is_reachable(self.URL):
-            ds = self.lib.upload_from_url(self.URL)
+        if is_reachable(self.DS_URL):
+            ds = self.lib.upload_from_url(self.DS_URL)
             self.assertEqual(ds.container_id, self.lib.id)
             assert isinstance(ds, wrappers.Dataset)
         else:
