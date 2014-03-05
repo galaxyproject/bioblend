@@ -388,10 +388,25 @@ class TestLibraryContents(unittest.TestCase):
         self.assertEqual(ds.id, retrieved.id)
 
     def test_get_datasets(self):
-        dss = [self.lib.upload_data(_) for _ in (FOO_DATA, FOO_DATA_2)]
+        tempdir = tempfile.mkdtemp(prefix='bioblend_test_')
+        try:
+            bnames = ['f%d.txt' % _ for _ in xrange(2)]
+            fnames = [os.path.join(tempdir, _) for _ in bnames]
+            for fn in fnames:
+                with open(fn, 'w') as f:
+                    f.write(FOO_DATA)
+            dss = self.lib.upload_from_galaxy_fs(
+                fnames[:2], link_data_only='link_to_files'
+                )
+        finally:
+            shutil.rmtree(tempdir)
         retrieved = self.lib.get_datasets()
         self.assertEqual(len(dss), len(retrieved))
         self.assertEqual(set(_.id for _ in dss), set(_.id for _ in retrieved))
+        name = '/%s' % bnames[0]
+        selected = self.lib.get_datasets(name=name)
+        self.assertEqual(len(selected), 1)
+        self.assertEqual(selected[0].name, bnames[0])
 
 
 class TestLDContents(unittest.TestCase):

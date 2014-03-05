@@ -89,12 +89,15 @@ class ObjDatasetClient(ObjClient):
     def _dataset_stream_url(self, dataset):
         pass
 
-    def get_datasets(self, src):
+    def get_datasets(self, src, name=None):
         """
         Get all datasets contained by the given dataset container.
 
         :type src: :class:`~.wrappers.History` or :class:`~.wrappers.Library`
         :param src: the dataset container
+
+        :type name: str
+        :param name: return only datasets with this name
 
         :rtype: list of :class:`~.wrappers.LibraryDataset` or list of
           :class:`~.wrappers.HistoryDatasetAssociation`
@@ -102,8 +105,12 @@ class ObjDatasetClient(ObjClient):
         """
         if not isinstance(src, wrappers.DatasetContainer):
             self._error('not a history or library object', err_type=TypeError)
+        if name is None:
+            ds_ids = src.dataset_ids
+        else:
+            ds_ids = [_.id for _ in src.content_infos if _.name == name]
         return [self._get_container_dataset(src, _, ctype=type(src))
-                for _ in src.dataset_ids]
+                for _ in ds_ids]
 
     def get_stream(self, dataset, chunk_size=_CHUNK_SIZE):
         """

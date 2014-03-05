@@ -629,8 +629,8 @@ class History(DatasetContainer):
     def get_dataset(self, ds_id):
         return self.gi.histories.get_dataset(self, ds_id)
 
-    def get_datasets(self):
-        return self.gi.histories.get_datasets(self)
+    def get_datasets(self, name=None):
+        return self.gi.histories.get_datasets(self, name=name)
 
 
 class Library(DatasetContainer):
@@ -676,8 +676,8 @@ class Library(DatasetContainer):
     def get_dataset(self, ds_id):
         return self.gi.libraries.get_dataset(self, ds_id)
 
-    def get_datasets(self):
-        return self.gi.libraries.get_datasets(self)
+    def get_datasets(self, name=None):
+        return self.gi.libraries.get_datasets(self, name=name)
 
     def create_folder(self, name, description=None, base_folder=None):
         return self.gi.libraries.create_folder(
