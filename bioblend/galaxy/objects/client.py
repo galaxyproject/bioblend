@@ -62,19 +62,11 @@ class ObjClient(object):
         res = show_f(id_)
         cdict = self._get_dict(show_fname, res)
         cdict['id'] = id_  # overwrite unencoded id
-        ds_infos = show_f(id_, contents=True)
-        if not isinstance(ds_infos, collections.Sequence):
-            self._error('%s: unexpected reply: %r' % (show_fname, ds_infos))
-        f_ids, ds_ids = [], []
-        for di in ds_infos:
-            if di['type'] == 'folder':
-                f_ids.append(di['id'])
-            else:
-                ds_ids.append(di['id'])
-        kwargs = {'dataset_ids': ds_ids, 'gi': self.obj_gi}
-        if issubclass(ctype, wrappers.Library):
-            kwargs['folder_ids'] = f_ids
-        return ctype(cdict, **kwargs)
+        c_infos = show_f(id_, contents=True)
+        if not isinstance(c_infos, collections.Sequence):
+            self._error('%s: unexpected reply: %r' % (show_fname, c_infos))
+        c_infos = [ctype.CONTENT_INFO_TYPE(_) for _ in c_infos]
+        return ctype(cdict, content_infos=c_infos, gi=self.obj_gi)
 
     def _get_container_dataset(self, src, ds_id, ctype=None):
         if isinstance(src, wrappers.DatasetContainer):
@@ -247,7 +239,7 @@ class ObjLibraryClient(ObjDatasetClient):
             library.id, data, folder_id=fid, **kwargs
             )
         new_dataset = self.__post_upload(library, 'upload_file_contents', res)
-        library.dataset_ids.append(new_dataset.id)
+        library.refresh()
         return new_dataset
 
     def upload_from_url(self, library, url, folder=None, **kwargs):
@@ -264,7 +256,7 @@ class ObjLibraryClient(ObjDatasetClient):
             library.id, url, fid, **kwargs
             )
         new_dataset = self.__post_upload(library, 'upload_file_from_url', res)
-        library.dataset_ids.append(new_dataset.id)
+        library.refresh()
         return new_dataset
 
     def upload_from_local(self, library, path, folder=None, **kwargs):
@@ -283,7 +275,7 @@ class ObjLibraryClient(ObjDatasetClient):
         new_dataset = self.__post_upload(
             library, 'upload_file_from_local_path', res
             )
-        library.dataset_ids.append(new_dataset.id)
+        library.refresh()
         return new_dataset
 
     def upload_from_galaxy_fs(self, library, paths, folder=None, **kwargs):
@@ -311,7 +303,7 @@ class ObjLibraryClient(ObjDatasetClient):
         new_datasets = [
             self.get_dataset(library, ds_info['id']) for ds_info in res
             ]
-        library.dataset_ids.extend( nd.id for nd in new_datasets )
+        library.refresh()
         return new_datasets
 
     def get_dataset(self, src, ds_id):
@@ -348,6 +340,7 @@ class ObjLibraryClient(ObjDatasetClient):
             library.id, name, description=description, base_folder_id=bfid,
             )
         folder_info = self._get_dict('create_folder', res)
+        library.refresh()
         return self.get_folder(library, folder_info['id'])
 
     def get_folder(self, library, f_id):
@@ -477,10 +470,8 @@ class ObjHistoryClient(ObjDatasetClient):
             self._error(
                 'upload_dataset_from_library: unexpected reply: %r' % (res,)
                 )
-        new_history = self.get(history.id)  # refresh
-        # update the dataset ids of the history object we received
-        object.__setattr__(history, 'dataset_ids', new_history.dataset_ids)
-        diff = set(new_history.dataset_ids) - old_ids
+        history.refresh()
+        diff = set(history.dataset_ids) - old_ids
         if len(diff) != 1:
             self._error('cannot retrieve hda id')
         return self.get_dataset(history, diff.pop())

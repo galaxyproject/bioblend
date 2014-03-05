@@ -21,6 +21,7 @@ SAMPLE_FN = os.path.join(THIS_DIR, 'data', 'paste_columns.ga')
 with open(SAMPLE_FN) as F:
     WF_DICT = json.load(F)
 FOO_DATA = 'foo\nbar\n'
+FOO_DATA_2 = 'foo2\nbar2\n'
 
 URL = os.environ.get('BIOBLEND_GALAXY_URL', 'http://localhost:8080')
 API_KEY = os.environ['BIOBLEND_GALAXY_API_KEY']
@@ -179,6 +180,9 @@ class TestGalaxyInstance(unittest.TestCase):
         self.assertEqual(lib.name, name)
         self.assertEqual(lib.description, description)
         self.assertEqual(lib.synopsis, synopsis)
+        self.assertEqual(len(lib.content_infos), 1)  # root folder
+        self.assertEqual(len(lib.folder_ids), 1)
+        self.assertEqual(len(lib.dataset_ids), 0)
         self.assertTrue(lib.id in [_.id for _ in self.gi.libraries.list()])
         lib.delete()
         self.assertFalse(lib.is_mapped)
@@ -326,25 +330,28 @@ class TestLibraryContents(unittest.TestCase):
         self.assertEqual(folder.name, name)
         self.assertEqual(folder.description, desc)
         self.assertEqual(folder.container_id, self.lib.id)
+        self.assertEqual(len(self.lib.content_infos), 2)
+        self.assertEqual(len(self.lib.folder_ids), 2)
+        self.assertEqual(len(self.lib.dataset_ids), 0)
+        self.assertTrue(folder.id in self.lib.folder_ids)
+
+    def __check_datasets(self, dss):
+        self.assertEqual(len(dss), len(self.lib.dataset_ids))
+        self.assertEqual(set(_.id for _ in dss), set(self.lib.dataset_ids))
+        for ds in dss:
+            self.assertEqual(ds.container_id, self.lib.id)
 
     def test_dataset(self):
         folder = self.lib.create_folder('test_%s' % uuid.uuid4().hex)
-        self.assertEqual(0, len(self.lib.dataset_ids))
         ds = self.lib.upload_data(FOO_DATA, folder=folder)
-        self.assertEqual(ds.container_id, self.lib.id)
-        # ensure the list of dataset ids has been updated correctly
-        self.assertEqual(1, len(self.lib.dataset_ids))
-        lib = self.gi.libraries.get(self.lib.id)
-        self.assertEqual(lib.dataset_ids, self.lib.dataset_ids)
-        ds_id = lib.dataset_ids[0]
-        self.assertEqual(ds_id, ds.id)
-        self.assertEqual(self.lib.get_dataset(ds_id).id, ds.id)
+        self.assertEqual(len(self.lib.content_infos), 3)
+        self.assertEqual(len(self.lib.folder_ids), 2)
+        self.__check_datasets([ds])
 
     def test_dataset_from_url(self):
         if is_reachable(self.DS_URL):
             ds = self.lib.upload_from_url(self.DS_URL)
-            self.assertEqual(ds.container_id, self.lib.id)
-            assert isinstance(ds, wrappers.Dataset)
+            self.__check_datasets([ds])
         else:
             print "skipped 'url not reachable'"
 
@@ -353,10 +360,7 @@ class TestLibraryContents(unittest.TestCase):
             f.write(FOO_DATA)
             f.flush()
             ds = self.lib.upload_from_local(f.name)
-        assert isinstance(ds, wrappers.Dataset)
-        self.assertEqual(ds.container_id, self.lib.id)
-        lib = self.gi.libraries.get(self.lib.id)
-        self.assertEqual(lib.dataset_ids, self.lib.dataset_ids)
+        self.__check_datasets([ds])
 
     def test_datasets_from_fs(self):
         tempdir = tempfile.mkdtemp(prefix='bioblend_test_')
@@ -369,17 +373,25 @@ class TestLibraryContents(unittest.TestCase):
             dss = self.lib.upload_from_galaxy_fs(
                 fnames[:2], link_data_only='link_to_files'
                 )
-            self.assertEqual(len(dss), 2)
+            self.__check_datasets(dss)
             for ds, fn in zip(dss, fnames):
-                self.assertEqual(ds.container_id, self.lib.id)
                 self.assertEqual(ds.file_name, fn)
             dss = self.lib.upload_from_galaxy_fs(fnames[-1])
             self.assertEqual(len(dss), 1)
             self.assertNotEqual(dss[0].file_name, fnames[-1])
-            lib = self.gi.libraries.get(self.lib.id)
-            self.assertEqual(lib.dataset_ids, self.lib.dataset_ids)
         finally:
             shutil.rmtree(tempdir)
+
+    def test_get_dataset(self):
+        ds = self.lib.upload_data(FOO_DATA)
+        retrieved = self.lib.get_dataset(ds.id)
+        self.assertEqual(ds.id, retrieved.id)
+
+    def test_get_datasets(self):
+        dss = [self.lib.upload_data(_) for _ in (FOO_DATA, FOO_DATA_2)]
+        retrieved = self.lib.get_datasets()
+        self.assertEqual(len(dss), len(retrieved))
+        self.assertEqual(set(_.id for _ in dss), set(_.id for _ in retrieved))
 
 
 class TestLDContents(unittest.TestCase):
@@ -425,14 +437,6 @@ class TestHistoryContents(unittest.TestCase):
         self.hist.delete(purge=True)
         self.lib.delete()
 
-    def test_dataset_upload(self):
-        lds = self.gi.libraries.upload_data(self.lib, FOO_DATA)
-        hda = self.gi.histories.import_dataset(self.hist, lds)
-        self.assertTrue(isinstance(hda, wrappers.HistoryDatasetAssociation))
-        self.assertEqual(hda.container_id, self.hist.id)
-        updated_hist = self.gi.histories.get(self.hist.id)
-        self.assertTrue(hda.id in updated_hist.dataset_ids)
-
     def test_delete(self):
         hist = self.gi.histories.create('test_%s' % uuid.uuid4().hex)
         hist_id = hist.id
@@ -445,27 +449,26 @@ class TestHistoryContents(unittest.TestCase):
             pass
 
     def test_import_dataset(self):
-        lds = self.gi.libraries.upload_data(self.lib, FOO_DATA)
+        lds = self.lib.upload_data(FOO_DATA)
         self.assertEqual(len(self.hist.dataset_ids), 0)
         hda = self.hist.import_dataset(lds)
         self.assertTrue(isinstance(hda, wrappers.HistoryDatasetAssociation))
         self.assertEqual(hda.container_id, self.hist.id)
         self.assertEqual(len(self.hist.dataset_ids), 1)
-        self.assertTrue(hda.id in self.hist.dataset_ids)
+        self.assertEqual(self.hist.dataset_ids[0], hda.id)
 
     def test_get_dataset(self):
-        lds = self.gi.libraries.upload_data(self.lib, FOO_DATA)
+        lds = self.lib.upload_data(FOO_DATA)
         hda = self.hist.import_dataset(lds)
         retrieved = self.hist.get_dataset(hda.id)
         self.assertEqual(hda.id, retrieved.id)
 
     def test_get_datasets(self):
-        lds = [self.gi.libraries.upload_data(self.lib, FOO_DATA),
-               self.gi.libraries.upload_data(self.lib, 'foo2\nbar2\n')]
+        lds = [self.lib.upload_data(_) for _ in (FOO_DATA, FOO_DATA_2)]
         hdas = [self.hist.import_dataset(_) for _ in lds]
-        datasets = self.hist.get_datasets()
-        self.assertEqual(len(lds), len(datasets))
-        self.assertEqual([_.id for _ in hdas], [_.id for _ in datasets])
+        retrieved = self.hist.get_datasets()
+        self.assertEqual(len(lds), len(retrieved))
+        self.assertEqual(set(_.id for _ in hdas), set(_.id for _ in retrieved))
 
 
 class TestHDAContents(unittest.TestCase):
@@ -507,8 +510,7 @@ class TestRunWorkflow(unittest.TestCase):
         self.lib = self.gi.libraries.create('test_%s' % uuid.uuid4().hex)
         self.wf = self.gi.workflows.import_new(WF_DICT)
         self.contents = ['one\ntwo\n', '1\n2\n']
-        self.inputs = [self.gi.libraries.upload_data(self.lib, c)
-                       for c in self.contents]
+        self.inputs = [self.lib.upload_data(_) for _ in self.contents]
         self.hist_name = 'test_%s' % uuid.uuid4().hex
 
     def tearDown(self):

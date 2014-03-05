@@ -14,6 +14,9 @@ __all__ = [
     'Tool',
     'WorkflowInfo',
     'Workflow',
+    'ContentInfo',
+    'LibraryContentInfo',
+    'HistoryContentInfo',
     'DatasetContainer',
     'History',
     'Library',
@@ -505,6 +508,47 @@ class LibraryDataset(LibRelatedDataset):
     SRC = 'ld'
 
 
+class ContentInfo(Wrapper):
+    """
+    Instances of this class wrap dictionaries obtained by getting
+    ``/api/{histories,libraries}/<ID>/contents`` from Galaxy.
+    """
+    BASE_ATTRS = Wrapper.BASE_ATTRS + ('type',)
+    __metaclass__ = abc.ABCMeta
+
+    @abc.abstractmethod
+    def __init__(self, info_dict, gi=None):
+        super(ContentInfo, self).__init__(info_dict, gi=gi)
+
+
+class LibraryContentInfo(ContentInfo):
+    """
+    Instances of this class wrap dictionaries obtained by getting
+    ``/api/libraries/<ID>/contents`` from Galaxy.
+    """
+    def __init__(self, info_dict, gi=None):
+        super(LibraryContentInfo, self).__init__(info_dict, gi=gi)
+        if self.id.startswith('F'):
+            object.__setattr__(self, 'id', self.id[1:])
+
+    @property
+    def gi_module(self):
+        return self.gi.libraries
+
+
+class HistoryContentInfo(ContentInfo):
+    """
+    Instances of this class wrap dictionaries obtained by getting
+    ``/api/histories/<ID>/contents`` from Galaxy.
+    """
+    def __init__(self, info_dict, gi=None):
+        super(HistoryContentInfo, self).__init__(info_dict, gi=gi)
+
+    @property
+    def gi_module(self):
+        return self.gi.histories
+
+
 class DatasetContainer(Wrapper):
     """
     Abstract base class for dataset containers (histories and libraries).
@@ -512,15 +556,19 @@ class DatasetContainer(Wrapper):
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
-    def __init__(self, c_dict, dataset_ids=None, gi=None):
+    def __init__(self, c_dict, content_infos=None, gi=None):
         """
-        :type dataset_ids: list of str
-        :param dataset_ids: ids of datasets associated with this container
+        :type content_infos: list of :class:`ContentInfo`
+        :param content_infos: info objects for the container's contents
         """
         super(DatasetContainer, self).__init__(c_dict, gi=gi)
-        if dataset_ids is None:
-            dataset_ids = []
-        object.__setattr__(self, 'dataset_ids', dataset_ids)
+        if content_infos is None:
+            content_infos = []
+        object.__setattr__(self, 'content_infos', content_infos)
+
+    @property
+    def dataset_ids(self):
+        return [_.id for _ in self.content_infos if _.type == 'file']
 
     def preview(self):
         getf = self.gi_module.get_previews
@@ -534,6 +582,18 @@ class DatasetContainer(Wrapper):
                 raise ValueError('no object for id %s' % self.id)
         return p
 
+    def refresh(self):
+        """
+        Re-fetch the attributes pertaining to this object.
+
+        Returns: self
+        """
+        fresh = self.gi_module.get(self.id)
+        self.__init__(
+            fresh.wrapped, content_infos=fresh.content_infos, gi=self.gi
+            )
+        return self
+
 
 class History(DatasetContainer):
     """
@@ -541,12 +601,13 @@ class History(DatasetContainer):
     """
     BASE_ATTRS = DatasetContainer.BASE_ATTRS + ('annotation', 'state_ids')
     DS_TYPE = HistoryDatasetAssociation
+    CONTENT_INFO_TYPE = HistoryContentInfo
     API_MODULE = 'histories'
 
-    def __init__(self, hist_dict, dataset_ids=None, gi=None):
-        # XXX: how do we keep this local dataset id list synchronized
-        # with the remote contents?
-        super(History, self).__init__(hist_dict, dataset_ids=dataset_ids, gi=gi)
+    def __init__(self, hist_dict, content_infos=None, gi=None):
+        super(History, self).__init__(
+            hist_dict, content_infos=content_infos, gi=gi
+            )
 
     @property
     def gi_module(self):
@@ -578,17 +639,21 @@ class Library(DatasetContainer):
     """
     BASE_ATTRS = DatasetContainer.BASE_ATTRS + ('description', 'synopsis')
     DS_TYPE = LibraryDataset
+    CONTENT_INFO_TYPE = LibraryContentInfo
     API_MODULE = 'libraries'
 
-    def __init__(self, lib_dict, dataset_ids=None, folder_ids=None, gi=None):
-        super(Library, self).__init__(lib_dict, dataset_ids=dataset_ids, gi=gi)
-        if folder_ids is None:
-            folder_ids = []
-        object.__setattr__(self, 'folder_ids', folder_ids)
+    def __init__(self, lib_dict, content_infos=None, gi=None):
+        super(Library, self).__init__(
+            lib_dict, content_infos=content_infos, gi=gi
+            )
 
     @property
     def gi_module(self):
         return self.gi.libraries
+
+    @property
+    def folder_ids(self):
+        return [_.id for _ in self.content_infos if _.type == 'folder']
 
     def delete(self):
         self.gi.libraries.delete(self.id)
@@ -691,6 +756,8 @@ class WorkflowPreview(Preview):
     Instances of this class wrap dictionaries obtained by getting
     ``/api/workflows`` from Galaxy.
     """
+    BASE_ATTRS = Wrapper.BASE_ATTRS + ('published', 'tags')
+
     def __init__(self, pw_dict, gi=None):
         super(WorkflowPreview, self).__init__(pw_dict, gi=gi)
 
