@@ -207,6 +207,13 @@ class WorkflowInfo(Wrapper):
 
     def __init__(self, wf_info_dict, gi=None):
         super(WorkflowInfo, self).__init__(wf_info_dict, gi=gi)
+        for step_dict in self.steps.itervalues():
+            try:
+                params = step_dict['tool_inputs']
+            except KeyError:
+                pass
+            else:
+                step_dict['tool_inputs'] = _recursive_loads(params)
         dag, inv_dag = self._get_dag()
         object.__setattr__(self, '_dag', dag)
         object.__setattr__(self, '_inv_dag', inv_dag)
