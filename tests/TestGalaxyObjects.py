@@ -62,6 +62,19 @@ def keep_trying(f):
     return decorated
 
 
+def upload_from_fs(lib, bnames, **kwargs):
+    tempdir = tempfile.mkdtemp(prefix='bioblend_test_')
+    try:
+        fnames = [os.path.join(tempdir, _) for _ in bnames]
+        for fn in fnames:
+            with open(fn, 'w') as f:
+                f.write(FOO_DATA)
+        dss = lib.upload_from_galaxy_fs(fnames, **kwargs)
+    finally:
+        shutil.rmtree(tempdir)
+    return dss, fnames
+
+
 class MockWrapper(wrappers.Wrapper):
 
     BASE_ATTRS = frozenset(['a', 'b'])
@@ -363,24 +376,14 @@ class TestLibraryContents(unittest.TestCase):
         self.__check_datasets([ds])
 
     def test_datasets_from_fs(self):
-        tempdir = tempfile.mkdtemp(prefix='bioblend_test_')
-        try:
-            fnames = [os.path.join(tempdir, 'data%d.txt' % i)
-                      for i in xrange(3)]
-            for fn in fnames:
-                with open(fn, 'w') as f:
-                    f.write(FOO_DATA)
-            dss = self.lib.upload_from_galaxy_fs(
-                fnames[:2], link_data_only='link_to_files'
-                )
-            self.__check_datasets(dss)
-            for ds, fn in zip(dss, fnames):
-                self.assertEqual(ds.file_name, fn)
-            dss = self.lib.upload_from_galaxy_fs(fnames[-1])
-            self.assertEqual(len(dss), 1)
-            self.assertNotEqual(dss[0].file_name, fnames[-1])
-        finally:
-            shutil.rmtree(tempdir)
+        bnames = ['f%d.txt' % i for i in xrange(2)]
+        dss, fnames = upload_from_fs(self.lib, bnames)
+        self.__check_datasets(dss)
+        dss, fnames = upload_from_fs(
+            self.lib, bnames, link_data_only='link_to_files'
+            )
+        for ds, fn in zip(dss, fnames):
+            self.assertEqual(ds.file_name, fn)
 
     def test_get_dataset(self):
         ds = self.lib.upload_data(FOO_DATA)
@@ -388,18 +391,8 @@ class TestLibraryContents(unittest.TestCase):
         self.assertEqual(ds.id, retrieved.id)
 
     def test_get_datasets(self):
-        tempdir = tempfile.mkdtemp(prefix='bioblend_test_')
-        try:
-            bnames = ['f%d.txt' % _ for _ in xrange(2)]
-            fnames = [os.path.join(tempdir, _) for _ in bnames]
-            for fn in fnames:
-                with open(fn, 'w') as f:
-                    f.write(FOO_DATA)
-            dss = self.lib.upload_from_galaxy_fs(
-                fnames[:2], link_data_only='link_to_files'
-                )
-        finally:
-            shutil.rmtree(tempdir)
+        bnames = ['f%d.txt' % _ for _ in xrange(2)]
+        dss, _ = upload_from_fs(self.lib, bnames)
         retrieved = self.lib.get_datasets()
         self.assertEqual(len(dss), len(retrieved))
         self.assertEqual(set(_.id for _ in dss), set(_.id for _ in retrieved))
@@ -479,11 +472,15 @@ class TestHistoryContents(unittest.TestCase):
         self.assertEqual(hda.id, retrieved.id)
 
     def test_get_datasets(self):
-        lds = [self.lib.upload_data(_) for _ in (FOO_DATA, FOO_DATA_2)]
+        bnames = ['f%d.txt' % _ for _ in xrange(2)]
+        lds, _ = upload_from_fs(self.lib, bnames)
         hdas = [self.hist.import_dataset(_) for _ in lds]
         retrieved = self.hist.get_datasets()
-        self.assertEqual(len(lds), len(retrieved))
+        self.assertEqual(len(hdas), len(retrieved))
         self.assertEqual(set(_.id for _ in hdas), set(_.id for _ in retrieved))
+        selected = self.hist.get_datasets(name=bnames[0])
+        self.assertEqual(len(selected), 1)
+        self.assertEqual(selected[0].name, bnames[0])
 
 
 class TestHDAContents(unittest.TestCase):

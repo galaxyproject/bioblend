@@ -102,6 +102,14 @@ class ObjDatasetClient(ObjClient):
         :rtype: list of :class:`~.wrappers.LibraryDataset` or list of
           :class:`~.wrappers.HistoryDatasetAssociation`
         :return: datasets associated with the given container
+
+        .. note::
+
+          when filtering library datasets by name, specify their full
+          paths starting from the library's root folder, e.g.,
+          ``/seqdata/reads.fastq``.  Full paths are available through
+          the ``content_infos`` attribute of
+          :class:`~.wrappers.Library` objects.
         """
         if not isinstance(src, wrappers.DatasetContainer):
             self._error('not a history or library object', err_type=TypeError)
