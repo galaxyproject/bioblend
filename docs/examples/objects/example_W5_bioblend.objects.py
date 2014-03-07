@@ -1,4 +1,4 @@
-from bioblend.galaxy.objects import *
+from bioblend.galaxy.objects import GalaxyInstance
 
 # This example uses a workflow and datasets publicly available on
 # CRS4's Orione Galaxy server.
@@ -55,7 +55,11 @@ ws_parameters = ws['tool_inputs'].copy()
 # Run the workflow on a new history with the selected dataset
 # as input, setting the BLAST db to "16SMicrobial-20131106"
 
-history_name = workflow_name
+history_name = '%s output' % workflow_name
 params = {tool_id: {'db_opts': ws_parameters['db_opts']}}
 params[tool_id]['db_opts']['database'] = '16SMicrobial-20131106'
-iw.run([ld], history_name, params=params)
+outputs, out_hist = iw.run([ld], history_name, params=params)
+assert out_hist.name == history_name
+
+print 'Running workflow: %s [%s]' % (iw.name, iw.id)
+print 'Output history: %s [%s]' % (out_hist.name, out_hist.id)

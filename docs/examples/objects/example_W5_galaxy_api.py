@@ -71,7 +71,7 @@ for k, v in ws_parameters.iteritems():
 # Run the workflow on a new history with the selected dataset
 # as input, setting the BLAST db to "16SMicrobial-20131106"
 
-history_name = workflow_name
+history_name = '%s output' % workflow_name
 ws_parameters['db_opts']['database'] = '16SMicrobial-20131106'
 data = {
     'workflow_id': iw['id'],
@@ -83,5 +83,5 @@ data['ds_map'] = {input_step_id: {'src': 'ld', 'id' : ld['id']}}
 data['history'] = history_name
 r_dict = common.post(API_KEY, '%s/workflows' % API_URL, data)
 
-print "Running workflow: %s [%s]" % (iw['name'], iw['id'])
-print "Output history: %s [%s]" % (history_name, r_dict['history'])
+print 'Running workflow: %s [%s]' % (iw['name'], iw['id'])
+print 'Output history: %s [%s]' % (history_name, r_dict['history'])
