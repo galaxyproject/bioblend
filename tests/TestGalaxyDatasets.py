@@ -5,7 +5,10 @@ credentials to supported cloud infrastructure.
 Use ``nose`` to run these unit tests.
 """
 import GalaxyTestBase
+import test_util
 
+
+@test_util.skip_unless_galaxy()
 class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
 
     def test_show_dataset(self):

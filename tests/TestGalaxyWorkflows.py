@@ -7,7 +7,10 @@ Use ``nose`` to run these unit tests.
 import os
 import simplejson
 import GalaxyTestBase
+import test_util
 
+
+@test_util.skip_unless_galaxy()
 class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
 
     def test_import_workflow_from_local_path(self):

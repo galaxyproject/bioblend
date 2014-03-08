@@ -9,7 +9,10 @@ from bioblend.cloudman.launch import Bunch
 from bioblend.cloudman import CloudManConfig
 from bioblend.cloudman import CloudManInstance
 import CloudmanTestBase
+import test_util
 
+
+@test_util.skip_unless_cloudman()
 class TestCloudmanLaunch(CloudmanTestBase.CloudmanTestBase):
 
     def setUp(self):
