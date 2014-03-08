@@ -9,7 +9,10 @@ from bioblend.cloudman.launch import Bunch
 from bioblend.cloudman import CloudManConfig
 from bioblend.cloudman import CloudManInstance
 import GalaxyTestBase
+import test_util
 
+
+@test_util.skip_unless_galaxy()
 class TestGalaxyLibraries(GalaxyTestBase.GalaxyTestBase):
 
     def setUp(self):

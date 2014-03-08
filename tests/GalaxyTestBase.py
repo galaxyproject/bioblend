@@ -8,6 +8,7 @@ import unittest
 import os
 from bioblend import galaxy
 
+
 class GalaxyTestBase(unittest.TestCase):
 
     def setUp(self):

@@ -7,7 +7,10 @@ Use ``nose`` to run these unit tests.
 from bioblend.cloudman import CloudManConfig
 from bioblend.cloudman import CloudManInstance
 import CloudmanTestBase
+import test_util
 
+
+@test_util.skip_unless_cloudman()
 class TestCloudmanServices(CloudmanTestBase.CloudmanTestBase):
 
     @classmethod
