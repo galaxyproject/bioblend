@@ -633,19 +633,18 @@ class ObjWorkflowClient(ObjClient):
             )
         return [self.get(_['id']) for _ in dicts]
 
-    def run(self, workflow, inputs, history, params=None, import_inputs=False,
-            replacement_params=None):
+    def run(self, workflow, input_map, history, params=None,
+            import_inputs=False, replacement_params=None):
         """
-        Run ``workflow`` with input datasets from the ``inputs`` sequence.
+        Run ``workflow`` in the current Galaxy instance.
 
         :type workflow: :class:`~.wrappers.Workflow`
         :param workflow: the workflow that should be run
 
-        :type inputs: :class:`~collections.Iterable` of
-          :class:`~.wrappers.Dataset`
-        :param inputs: input datasets for the workflow, which will be
-          assigned to the workflow's input slots in the order they
-          appear in ``inputs``; any extra items will be ignored.
+        :type input_map: dict
+        :param input_map: a mapping from workflow input labels to
+          datasets, e.g.: ``dict(zip(workflow.input_labels,
+          library.get_datasets()))``
 
         :type history: :class:`~.wrappers.History` or str
         :param history: either a valid history object (results will be
@@ -716,9 +715,7 @@ class ObjWorkflowClient(ObjClient):
         """
         if not workflow.is_mapped:
             self._error('workflow is not mapped to a Galaxy object')
-        if len(inputs) < len(workflow.inputs):
-            self._error('not enough inputs', err_type=ValueError)
-        ds_map = workflow.get_input_map(inputs)
+        ds_map = workflow.convert_input_map(input_map)
         kwargs = {
             'params': params,
             'import_inputs_to_history': import_inputs,

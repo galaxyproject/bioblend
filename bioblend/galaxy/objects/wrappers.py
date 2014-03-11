@@ -313,9 +313,12 @@ class Workflow(Wrapper):
         object.__setattr__(self, 'info', wf_info)
         # add direct bindings for attributes not available through wf_dict
         if wf_info is not None:
+            input_labels_to_ids = {}
+            for id_, d in wf_info.inputs.iteritems():
+                input_labels_to_ids.setdefault(d['label'], set()).add(id_)
             for a in 'published', 'tags':
                 object.__setattr__(self, a, getattr(wf_info, a))
-            object.__setattr__(self, 'inputs', sorted(wf_info.inputs, key=int))
+            object.__setattr__(self, 'input_labels_to_ids', input_labels_to_ids)
 
     @property
     def gi_module(self):
@@ -356,22 +359,35 @@ class Workflow(Wrapper):
         """
         return [_ for _ in self.steps if isinstance(_, Tool)]
 
-    def get_input_map(self, datasets):
+    @property
+    def input_labels(self):
         """
-        Map ``datasets`` to input slots in this workflow.
+        Return the labels of this workflow's input steps.
+        """
+        return set(self.input_labels_to_ids)
 
-        :type datasets: :class:`~collections.Iterable` of :class:`Dataset`
-        :param datasets: datasets to map to workflow inputs.
+    def convert_input_map(self, input_map):
+        """
+        Convert ``input_map`` to the format required by the Galaxy web API.
+
+        :type input_map: dict
+        :param input_map: a mapping from input labels to datasets
 
         :rtype: dict
-        :return: a mapping from input slot ids to datasets in the
+        :return: a mapping from input slot ids to dataset ids in the
           format required by the Galaxy web API.
         """
-        if self.inputs is None:
+        if not self.input_labels_to_ids:
             raise RuntimeError('workflow is not mapped to a Galaxy instance')
         m = {}
-        for i, ds in zip(self.inputs, datasets):
-            m[i] = {'id': ds.id, 'src': ds.SRC}
+        for label, slot_ids in self.input_labels_to_ids.iteritems():
+            datasets = input_map.get(label, [])
+            if not isinstance(datasets, collections.Iterable):
+                datasets = [datasets]
+            if len(datasets) < len(slot_ids):
+                raise RuntimeError('not enough datasets for "%s"' % label)
+            for id_, ds in zip(slot_ids, datasets):
+                m[id_] = {'id': ds.id, 'src': ds.SRC}
         return m
 
     def preview(self):

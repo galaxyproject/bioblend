@@ -2,10 +2,6 @@
 
 import sys, os, unittest, json, uuid, tempfile, urllib2, shutil, time
 from functools import wraps
-try:
-    from collections import OrderedDict  # Python 2.7
-except ImportError:
-    OrderedDict = dict
 import socket
 socket.setdefaulttimeout(10.0)
 
@@ -162,12 +158,11 @@ class TestWorkflow(unittest.TestCase):
         self.wf.steps[0].annotation = 'foo'
         self.assertTrue(self.wf.is_modified)
 
-    # may pass automatically if OrderedDict is dict
-    def test_inputs(self):
-        inputs = OrderedDict([
-            ('100', {'label': 'foo', 'value': 'bar'}),
-            ('99', {'label': 'boo', 'value': 'far'}),
-            ])
+    def test_input_map(self):
+        inputs = {
+            '100': {'label': 'foo', 'value': 'far'},
+            '99': {'label': 'boo', 'value': 'bar'},
+            }
         dummy_wf_info = wrappers.WorkflowInfo({
             'inputs': inputs,
             'steps': {'12284': {
@@ -175,8 +170,16 @@ class TestWorkflow(unittest.TestCase):
                 'input_steps': {u'input': {u'source_step': 12285}},
                 }},
             })
+        class DummyLD(object):
+            SRC = 'ld'
+            def __init__(self, id_):
+                self.id = id_
         wf = wrappers.Workflow(WF_DICT, wf_info=dummy_wf_info)
-        self.assertEqual(wf.inputs, ['99', '100'])
+        self.assertEqual(wf.input_labels, {'foo', 'boo'})
+        self.assertEqual(
+            wf.convert_input_map({'foo': DummyLD('f'), 'boo': DummyLD('b')}),
+            {'100': {'id': 'f', 'src': 'ld'}, '99': {'id': 'b', 'src': 'ld'}}
+            )
 
 
 class TestGalaxyInstance(unittest.TestCase):
@@ -545,9 +548,10 @@ class TestRunWorkflow(unittest.TestCase):
         else:
             params = None
             sep = '\t'  # default
+        input_map = {'Input 1': self.inputs[0], 'Input 2': self.inputs[1]}
         sys.stderr.write(os.linesep)
         outputs, out_hist = self.wf.run(
-            self.inputs, hist, params=params, wait=True, polling_interval=1
+            input_map, hist, params=params, wait=True, polling_interval=1
             )
         self.assertEqual(len(outputs), 1)
         out_ds = outputs[0]

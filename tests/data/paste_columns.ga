@@ -11,7 +11,7 @@
             "inputs": [
                 {
                     "description": "",
-                    "name": "Input Dataset"
+                    "name": "Input 1"
                 }
             ],
             "name": "Input dataset",
@@ -22,7 +22,7 @@
             },
             "tool_errors": null,
             "tool_id": null,
-            "tool_state": "{\"name\": \"Input Dataset\"}",
+            "tool_state": "{\"name\": \"Input 1\"}",
             "tool_version": null,
             "type": "data_input",
             "user_outputs": []
@@ -34,7 +34,7 @@
             "inputs": [
                 {
                     "description": "",
-                    "name": "Input Dataset"
+                    "name": "Input 2"
                 }
             ],
             "name": "Input dataset",
@@ -45,7 +45,7 @@
             },
             "tool_errors": null,
             "tool_id": null,
-            "tool_state": "{\"name\": \"Input Dataset\"}",
+            "tool_state": "{\"name\": \"Input 2\"}",
             "tool_version": null,
             "type": "data_input",
             "user_outputs": []
@@ -79,7 +79,7 @@
             "tool_errors": null,
             "tool_id": "Paste1",
             "tool_state": "{\"input2\": \"null\", \"__page__\": 0, \"input1\": \"null\", \"__rerun_remap_job_id__\": null, \"delimiter\": \"\\\"T\\\"\", \"chromInfo\": \"\\\"/home/simleo/hg/galaxy-dist/tool-data/shared/ucsc/chrom/?.len\\\"\"}",
-            "tool_version": null,
+            "tool_version": "1.0.0",
             "type": "tool",
             "user_outputs": []
         }
