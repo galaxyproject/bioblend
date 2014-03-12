@@ -39,7 +39,7 @@ l = l[0]
 ds_name = '/Metagenomics/MetagenomicsDataset.fq'
 ld = l.get_datasets(name=ds_name)
 assert len(ld) == 1
-ld = ld[0]
+input_map = {'Input Dataset': ld[0]}
 
 # Select the "ncbi_blastn_wrapper" step
 
@@ -58,7 +58,7 @@ ws_parameters = ws['tool_inputs'].copy()
 history_name = '%s output' % workflow_name
 params = {tool_id: {'db_opts': ws_parameters['db_opts']}}
 params[tool_id]['db_opts']['database'] = '16SMicrobial-20131106'
-outputs, out_hist = iw.run([ld], history_name, params=params)
+outputs, out_hist = iw.run(input_map, history_name, params=params)
 assert out_hist.name == history_name
 
 print 'Running workflow: %s [%s]' % (iw.name, iw.id)

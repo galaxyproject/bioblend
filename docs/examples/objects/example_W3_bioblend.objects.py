@@ -37,14 +37,18 @@ l = l[0]
 # Select the datasets
 
 ds_names = [
+    '/Whole genome - Escherichia coli/E coli DH10B MiSeq R1.fastq',
     '/Whole genome - Escherichia coli/E coli DH10B MiSeq R2.fastq',
-    '/Whole genome - Escherichia coli/E coli DH10B MiSeq R1.fastq'
     ]
-lds = []
-for name in ds_names:
-    ld = l.get_datasets(name=name)
+input_labels = [
+    'Left/Forward FASTQ Reads',
+    'Right/Reverse FASTQ Reads',
+    ]
+input_map = {}
+for i in range(len(ds_names)):
+    ld = l.get_datasets(name=ds_names[i])
     assert len(ld) == 1
-    lds.extend(ld)
+    input_map[input_labels[i]] = ld[0]
 
 # Set "hash_length" parameter to a different value for each of the 3 "velveth" steps
 
@@ -77,7 +81,7 @@ params['check_contigs'] = {'genomesize': 5.0}
 # Run the workflow on a new history with the selected datasets as inputs
 
 history_name = '%s output' % workflow_name
-outputs, out_hist = iw.run(lds, history_name, params=params)
+outputs, out_hist = iw.run(input_map, history_name, params=params)
 assert out_hist.name == history_name
 
 print 'Running workflow: %s [%s]' % (iw.name, iw.id)
