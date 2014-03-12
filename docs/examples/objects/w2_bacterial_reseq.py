@@ -1,4 +1,5 @@
 from bioblend.galaxy.objects import GalaxyInstance
+from common import get_one
 
 # This example uses a workflow and datasets publicly available on
 # CRS4's Orione Galaxy server.
@@ -13,15 +14,14 @@ URL = 'http://orione.crs4.it'
 #   4) in the following code, replace YOUR_API_KEY with your API key.
 
 API_KEY = 'YOUR_API_KEY'
+
 gi = GalaxyInstance(URL, API_KEY)
 
 # Select "W2 - Bacterial re-sequencing | Paired-end" from published workflows
 
 workflow_name = 'W2 - Bacterial re-sequencing | Paired-end'
 previews = gi.workflows.get_previews(name=workflow_name, published=True)
-p = [_ for _ in previews if _.published]
-assert len(p) == 1
-p = p[0]
+p = get_one(_ for _ in previews if _.published)
 
 # Import the workflow to user space
 
@@ -30,9 +30,7 @@ iw = gi.workflows.import_shared(p.id)
 # Select the "Orione SupMat" library
 
 library_name = 'Orione SupMat'
-l = gi.libraries.list(name=library_name)
-assert len(l) == 1
-l = l[0]
+l = get_one(gi.libraries.list(name=library_name))
 
 # Select the datasets
 
@@ -46,11 +44,8 @@ input_labels = [
     'Reverse Reads',
     'Reference Genome',
     ]
-input_map = {}
-for i in range(len(ds_names)):
-    ld = l.get_datasets(name=ds_names[i])
-    assert len(ld) == 1
-    input_map[input_labels[i]] = ld[0]
+input_map = dict((label, get_one(l.get_datasets(name=name)))
+                  for name, label in zip(ds_names, input_labels))
 
 # Set custom parameters for the "check_contigs" and "sspace" tools
 

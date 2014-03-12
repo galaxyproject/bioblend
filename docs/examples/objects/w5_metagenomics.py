@@ -1,4 +1,5 @@
 from bioblend.galaxy.objects import GalaxyInstance
+from common import get_one
 
 # This example uses a workflow and datasets publicly available on
 # CRS4's Orione Galaxy server.
@@ -19,9 +20,7 @@ gi = GalaxyInstance(URL, API_KEY)
 
 workflow_name = 'W5 - Metagenomics'
 previews = gi.workflows.get_previews(name=workflow_name, published=True)
-p = [_ for _ in previews if _.published]
-assert len(p) == 1
-p = p[0]
+p = get_one(_ for _ in previews if _.published)
 
 # Import the workflow to user space
 
@@ -30,23 +29,18 @@ iw = gi.workflows.import_shared(p.id)
 # Select the "Orione SupMat" library
 
 library_name = 'Orione SupMat'
-l = gi.libraries.list(name=library_name)
-assert len(l) == 1
-l = l[0]
+l = get_one(gi.libraries.list(name=library_name))
 
 # Select the "/Metagenomics/MetagenomicsDataset.fq" dataset
 
 ds_name = '/Metagenomics/MetagenomicsDataset.fq'
-ld = l.get_datasets(name=ds_name)
-assert len(ld) == 1
-input_map = {'Input Dataset': ld[0]}
+ld = get_one(l.get_datasets(name=ds_name))
+input_map = {'Input Dataset': ld}
 
 # Select the "ncbi_blastn_wrapper" step
 
 tool_id = 'ncbi_blastn_wrapper'
-ws = [_ for _ in iw.info.steps.itervalues() if _['tool_id'] == tool_id]
-assert len(ws) == 1
-ws = ws[0]
+ws = get_one(_ for _ in iw.info.steps.itervalues() if _['tool_id'] == tool_id)
 
 # Get (a copy of) the parameters dict for the selected step
 
