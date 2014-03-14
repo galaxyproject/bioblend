@@ -44,7 +44,7 @@ class CloudmanTestBase(unittest.TestCase):
                                   name="NeCTAR",
                                   cloud_type='openstack',
                                   bucket_default='cloudman-os',
-                                  region_name='NeCTAR',
+                                  region_name='melbourne',
                                   region_endpoint='nova.rc.nectar.org.au',
                                   ec2_port=8773,
                                   ec2_conn_path='/services/Cloud',
