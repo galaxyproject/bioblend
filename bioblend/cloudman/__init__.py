@@ -42,7 +42,7 @@ def block_till_vm_ready(func):
         interval = kwargs.pop('vm_ready_check_interval', 10)
         try:
             obj.wait_till_instance_ready(timeout, interval)
-        except AttributeError:
+        except AttributeError, e:
             raise VMLaunchException("Decorated object does not define a wait_till_instance_ready method."
                                     "Make sure that the object is of type GenericVMInstance.")
         return func(*args, **kwargs)
@@ -68,6 +68,7 @@ class CloudManConfig(object):
                  password=None,
                  cloud_metadata=None,
                  cluster_type=None,
+                 galaxy_data_option='',
                  initial_storage_size=10,
                  key_name='cloudman_key_pair',
                  security_groups=['CloudMan'],
@@ -132,15 +133,23 @@ class CloudManConfig(object):
         :param cluster_type: The ``type``, either 'Galaxy', 'Data', or
                              'SGE', defines the type of cluster platform to initialize.
 
+        :type galaxy_data_option: string
+        :param galaxy_data_option: The storage type to use for this instance.
+                             May be 'transient', 'custom_size' or ''. The default is '',
+                             which will result in ignoring the bioblend specified
+                             initial_storage_size. 'custom_size' must be used for
+                             initial_storage_size to come into effect.
+
         :type initial_storage_size: int
         :param initial_storage_size: The initial storage to allocate for the instance.
                                      This only applies if ``cluster_type`` is set
-                                     to either ``Galaxy`` or ``Data``.
+                                     to either ``Galaxy`` or ``Data`` and ``galaxy_data_option``
+                                     is set to ``custom_size``
 
         :type block_till_ready: boolean
         :param block_till_ready: Specifies whether the launch method will block
                                  till the instance is ready and only return once
-                                 all initialization is complete. The default is True.
+                                 all initialization is complete. The default is False.
                                  If False, the launch method will return immediately
                                  without blocking. However, any subsequent calls
                                  made will automatically block if the instance is
@@ -153,7 +162,7 @@ class CloudManConfig(object):
         self.set_pre_launch_parameters(cluster_name, image_id, instance_type,
             password, kernel_id, ramdisk_id, key_name, security_groups,
             placement, block_till_ready)
-        self.set_post_launch_parameters(cluster_type, initial_storage_size)
+        self.set_post_launch_parameters(cluster_type, galaxy_data_option, initial_storage_size)
         self.set_extra_parameters(**kwargs)
 
     def set_connection_parameters(self, access_key, secret_key, cloud_metadata=None):
@@ -175,8 +184,9 @@ class CloudManConfig(object):
         self.placement = placement
         self.block_till_ready = block_till_ready
 
-    def set_post_launch_parameters(self, cluster_type=None, initial_storage_size=10):
+    def set_post_launch_parameters(self, cluster_type=None, galaxy_data_option='', initial_storage_size=10):
         self.cluster_type = cluster_type
+        self.galaxy_data_option = galaxy_data_option
         self.initial_storage_size = initial_storage_size
 
     def set_extra_parameters(self, **kwargs):
@@ -220,6 +230,8 @@ class CloudManConfig(object):
             return "Password must not be null"
         elif self.cluster_type not in [None, 'SGE', 'Data', 'Galaxy']:
             return "Unrecognized cluster type ({0})".format(self.cluster_type)
+        elif self.galaxy_data_option not in [None, '', 'custom-size', 'transient']:
+            return "Unrecognized galaxy data option ({0})".format(self.galaxy_data_option)
         elif self.key_name is None:
             return "Key-pair name must not be null"
         else:
@@ -367,7 +379,7 @@ class CloudManInstance(GenericVMInstance):
     def _init_instance(self, hostname):
         super(CloudManInstance, self)._init_instance(hostname)
         if self.config.cluster_type:
-            self.initialize(self.config.cluster_type, self.config.initial_storage_size)
+            self.initialize(self.config.cluster_type, galaxy_data_option=self.config.galaxy_data_option, initial_storage_size=self.config.initial_storage_size)
 
     def _set_url(self, url):
         """
@@ -422,7 +434,7 @@ class CloudManInstance(GenericVMInstance):
         instance = CloudManInstance(None, None, launcher=launcher, launch_result=result,
             cloudman_config=cfg)
         if cfg.block_till_ready and cfg.cluster_type:
-            instance.initialize(cfg.cluster_type, cfg.initial_storage_size)
+            instance.get_status()  # this will indirect result in initialize being invoked
         return instance
 
     def update(self):
@@ -462,7 +474,7 @@ class CloudManInstance(GenericVMInstance):
             return 1
 
     @block_till_vm_ready
-    def initialize(self, cluster_type, initial_storage_size=None, shared_bucket=None):
+    def initialize(self, cluster_type, galaxy_data_option='', initial_storage_size=None, shared_bucket=None):
         """
         Initialize CloudMan platform. This needs to be done before the cluster
         can be used.
@@ -477,6 +489,7 @@ class CloudManInstance(GenericVMInstance):
                                                                      'shared_bucket': shared_bucket})
             else:
                 r = self._make_get_request("initialize_cluster", parameters={'startup_opt': cluster_type,
+                                                                             'galaxy_data_option': galaxy_data_option,
                                                                          'pss': initial_storage_size,
                                                                      'shared_bucket': shared_bucket})
             self.initialized = True

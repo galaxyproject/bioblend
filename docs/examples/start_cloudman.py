@@ -33,7 +33,7 @@ def start_cloudman(name, pwd, cm_type, inst_type, ami, ak, sk):
                   name="NeCTAR",
                   cloud_type='openstack',
                   bucket_default='cloudman-os',
-                  region_name='NeCTAR',
+                  region_name='melbourne',
                   region_endpoint='nova.rc.nectar.org.au',
                   ec2_port=8773,
                   ec2_conn_path='/services/Cloud',
@@ -43,7 +43,7 @@ def start_cloudman(name, pwd, cm_type, inst_type, ami, ak, sk):
                   s3_port=8888,
                   s3_conn_path='/')
     # Create an instance of the CloudManConfig class and launch a CloudMan instance
-    cmc = CloudManConfig(ak, sk, name,  ami, inst_type, pwd, cloud_metadata=cloud,
+    cmc = CloudManConfig(ak, sk, name, ami, inst_type, pwd, cloud_metadata=cloud,
       cloudman_type=cm_type, initial_storage_size=2, placement='melbourne-np')
     print "Configured an instance; waiting to launch and boot..."
     cmi = CloudManInstance.launch_instance(cmc)
