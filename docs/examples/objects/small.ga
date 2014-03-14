@@ -48,7 +48,13 @@
                 "left": 420,
                 "top": 200
             },
-            "post_job_actions": {},
+            "post_job_actions": {
+                "HideDatasetActionout_file1": {
+                    "action_arguments": {},
+                    "action_type": "HideDatasetAction",
+                    "output_name": "out_file1"
+                }
+            },
             "tool_errors": null,
             "tool_id": "Remove beginning1",
             "tool_state": "{\"input\": \"null\", \"__rerun_remap_job_id__\": null, \"chromInfo\": \"\\\"/SHARE/USERFS/els7/users/biobank/galaxy/tool-data/shared/ucsc/chrom/?.len\\\"\", \"num_lines\": \"\\\"2\\\"\", \"__page__\": 0}",
