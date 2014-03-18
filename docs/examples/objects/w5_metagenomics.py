@@ -32,7 +32,8 @@ input_map = {'Input Dataset': ld}
 # Select the "ncbi_blastn_wrapper" step
 
 tool_id = 'ncbi_blastn_wrapper'
-ws = get_one(_ for _ in iw.info.steps.itervalues() if _['tool_id'] == tool_id)
+ws = get_one(_ for _ in iw.info.steps.itervalues()
+             if _['tool_id'] and tool_id in _['tool_id'])
 
 # Get (a copy of) the parameters dict for the selected step
 
