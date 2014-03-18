@@ -1,20 +1,11 @@
+import sys, os
 from bioblend.galaxy.objects import GalaxyInstance
 from common import get_one
 
-# This example uses a workflow and datasets publicly available on
-# CRS4's Orione Galaxy server.
-
 URL = 'http://orione.crs4.it'
-
-# To use the Galaxy API you need an API key. To get one, proceed as follows:
-#   1) go to http://orione.crs4.it and register, or log in if you are
-#      already registered, through the "User" menu on the top;
-#   2) open "User" -> "API Keys";
-#   3) generate your API key if you don't have one;
-#   4) in the following code, replace YOUR_API_KEY with your API key.
-
-API_KEY = 'YOUR_API_KEY'
-
+API_KEY = os.getenv('GALAXY_API_KEY', 'YOUR_API_KEY')
+if API_KEY == 'YOUR_API_KEY':
+    sys.exit('API_KEY not set, see the README.txt file')
 gi = GalaxyInstance(URL, API_KEY)
 
 # Select "W2 - Bacterial re-sequencing | Paired-end" from published workflows
