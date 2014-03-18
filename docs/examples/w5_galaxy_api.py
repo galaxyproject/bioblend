@@ -3,7 +3,7 @@ import sys, os, json, urlparse
 # This example uses a workflow and datasets publicly available on
 # CRS4's Orione Galaxy server.
 
-URL = 'http://orione.crs4.it'
+URL = os.getenv('GALAXY_URL', 'http://orione.crs4.it')
 API_URL = urlparse.urljoin(URL, 'api')
 
 # To use the Galaxy API you need an API key. To get one, proceed as follows:
@@ -11,9 +11,11 @@ API_URL = urlparse.urljoin(URL, 'api')
 #      already registered, through the "User" menu at the top of the page;
 #   2) open "User" -> "API Keys";
 #   3) generate your API key if you don't have one;
-#   4) in the following code, replace YOUR_API_KEY with your API key.
+# In the following line, replace YOUR_API_KEY with your API key.
 
-API_KEY = 'YOUR_API_KEY'
+API_KEY = os.getenv('GALAXY_API_KEY', 'YOUR_API_KEY')
+if API_KEY == 'YOUR_API_KEY':
+    sys.exit('API_KEY not set, see the README.txt file')
 
 # Clone the galaxy-dist mercurial repository and replace
 # YOUR_GALAXY_PATH with the clone's local path in the following code, e.g.:
@@ -55,12 +57,13 @@ ld = [_ for _ in contents if _['type'] == 'file' and _['name'] == ds_name]
 assert len(ld) == 1
 ld = ld[0]
 
-# Select the "ncbi_blastn_wrapper" step
+# Select the blastn step
 
-tool_id = 'ncbi_blastn_wrapper'
-ws = [_ for _ in iw_details['steps'].itervalues() if _['tool_id'] == tool_id]
+ws = [_ for _ in iw_details['steps'].itervalues()
+      if _['tool_id'] and 'blastn' in _['tool_id']]
 assert len(ws) == 1
 ws = ws[0]
+tool_id = ws['tool_id']
 
 # Get (a copy of) the parameters dict for the selected step
 
