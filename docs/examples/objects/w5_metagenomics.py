@@ -29,11 +29,11 @@ ds_name = '/Metagenomics/MetagenomicsDataset.fq'
 ld = get_one(l.get_datasets(name=ds_name))
 input_map = {'Input Dataset': ld}
 
-# Select the "ncbi_blastn_wrapper" step
+# Select the blastn step
 
-tool_id = 'ncbi_blastn_wrapper'
 ws = get_one(_ for _ in iw.info.steps.itervalues()
-             if _['tool_id'] and tool_id in _['tool_id'])
+             if _['tool_id'] and 'blastn' in _['tool_id'])
+tool_id = ws['tool_id']
 
 # Get (a copy of) the parameters dict for the selected step
 
