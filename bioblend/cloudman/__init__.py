@@ -430,7 +430,7 @@ class CloudManInstance(GenericVMInstance):
             cfg.password, cfg.kernel_id, cfg.ramdisk_id, cfg.key_name,
             cfg.security_groups, cfg.placement)
         if (result['error'] is not None):
-            raise VMLaunchException("Error launching cloudman instance: %s" % result['error'])
+            raise VMLaunchException("Error launching cloudman instance: {0}".format(result['error']))
         instance = CloudManInstance(None, None, launcher=launcher, launch_result=result,
             cloudman_config=cfg)
         if cfg.block_till_ready and cfg.cluster_type:
@@ -651,6 +651,24 @@ class CloudManInstance(GenericVMInstance):
         if (self.autoscaling_enabled()):
             payload = {'as_min_adj': minimum_nodes, 'as_max_adj': maximum_nodes}
             self._make_get_request("adjust_autoscaling", parameters=payload)
+
+    @block_till_vm_ready
+    def is_master_execution_host(self):
+        """
+        Checks whether the master node has job execution enabled.
+
+        """
+        status = self._make_get_request("get_all_services_status")
+        return bool(status['master_is_exec_host'])
+
+    @block_till_vm_ready
+    def enable_master_as_execution_host(self, enable):
+        """
+        Enables/disables master as execution host.
+
+        """
+        if not(self.is_master_execution_host()):
+            self._make_get_request("toggle_master_as_exec_host")
 
     @block_till_vm_ready
     def get_galaxy_state(self):
