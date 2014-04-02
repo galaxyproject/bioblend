@@ -12,7 +12,6 @@ __all__ = [
     'Step',
     'DataInput',
     'Tool',
-    'WorkflowInfo',
     'Workflow',
     'ContentInfo',
     'LibraryContentInfo',
@@ -156,11 +155,9 @@ class Step(Wrapper):
     Steps are the main building blocks of a Galaxy workflow.  A step
     can refer to either an input dataset (:class:`DataInput`) or a
     computational tool (:class:`Tool`).
-
-    Step dicts should be taken from the JSON dump of a workflow, and
-    their parent should be the workflow itself.
     """
     __metaclass__ = abc.ABCMeta
+    BASE_ATTRS = Wrapper.BASE_ATTRS + ('input_steps',)
 
     @abc.abstractmethod
     def __init__(self, step_dict, parent):
@@ -185,38 +182,47 @@ class Tool(Step):
     """
     Tools model Galaxy tools.
     """
-    BASE_ATTRS = Step.BASE_ATTRS + ('tool_id', 'tool_version', 'tool_state')
+    BASE_ATTRS = Step.BASE_ATTRS + ('tool_id', 'tool_inputs', 'tool_version')
 
     def __init__(self, step_dict, parent):
         if step_dict['type'] != 'tool':
             raise ValueError('not a tool')
         super(Tool, self).__init__(step_dict, parent)
-        if not isinstance(self.tool_state, collections.Mapping):
-            object.__setattr__(
-                self, 'tool_state', _recursive_loads(self.tool_state)
-                )
+        for k, v in self.tool_inputs.iteritems():
+            self.tool_inputs[k] = json.loads(v)
 
 
-class WorkflowInfo(Wrapper):
+class Workflow(Wrapper):
     """
-    Workflow data related to a specific Galaxy instance.
+    Workflows represent ordered sequences of computations on Galaxy.
 
-    Wraps dictionaries returned by lower level ``show`` calls.
+    A workflow defines a sequence of steps that produce one or more
+    results from an input dataset.
     """
-    BASE_ATTRS = Wrapper.BASE_ATTRS + ('inputs', 'published', 'steps', 'tags')
+    BASE_ATTRS = Wrapper.BASE_ATTRS + (
+        'deleted', 'inputs', 'published', 'steps', 'tags'
+        )
+    POLLING_INTERVAL = 10  # for output state monitoring
 
-    def __init__(self, wf_info_dict, gi=None):
-        super(WorkflowInfo, self).__init__(wf_info_dict, gi=gi)
-        for step_dict in self.steps.itervalues():
-            try:
-                params = step_dict['tool_inputs']
-            except KeyError:
-                pass
-            else:
-                step_dict['tool_inputs'] = _recursive_loads(params)
+    def __init__(self, wf_dict, gi=None):
+        super(Workflow, self).__init__(wf_dict, gi=gi)
+        for k, v in self.steps.iteritems():
+            # convert step ids to str for consistency with outer keys
+            v['id'] = str(v['id'])
+            for i in v['input_steps'].itervalues():
+                i['source_step'] = str(i['source_step'])
+            self.steps[k] = self._build_step(v, self)
+        input_labels_to_ids = {}
+        for id_, d in self.inputs.iteritems():
+            input_labels_to_ids.setdefault(d['label'], set()).add(id_)
+        object.__setattr__(self, 'input_labels_to_ids', input_labels_to_ids)
         dag, inv_dag = self._get_dag()
+        heads, tails = set(dag), set(inv_dag)
         object.__setattr__(self, '_dag', dag)
         object.__setattr__(self, '_inv_dag', inv_dag)
+        object.__setattr__(self, 'input_ids', heads - tails)
+        assert self.input_ids == set(self.inputs)
+        object.__setattr__(self, 'output_ids', tails - heads)
 
     @property
     def gi_module(self):
@@ -241,9 +247,8 @@ class WorkflowInfo(Wrapper):
         """
         dag, inv_dag = {}, {}
         for s in self.steps.itervalues():
-            for i in s['input_steps'].itervalues():
-                # force ids to str so they can index the steps dict
-                head, tail = str(i['source_step']), str(s['id'])
+            for i in s.input_steps.itervalues():
+                head, tail = i['source_step'], s.id
                 dag.setdefault(head, set()).add(tail)
                 inv_dag.setdefault(tail, set()).add(head)
         return dag, inv_dag
@@ -259,70 +264,19 @@ class WorkflowInfo(Wrapper):
     def sorted_step_ids(self):
         """
         Return a topological sort of the workflow's DAG.
-
-        This can be useful for mapping :class:`Workflow` step ids (0
-        to n_steps - 1) to :class:`WorkflowInfo` step ids (actual step
-        ids from a Galaxy instance).
         """
         ids = []
-        inputs = set(self.inputs)
-        assert inputs == set(self.dag) - set(self.inv_dag)
+        input_ids = self.input_ids.copy()
         inv_dag = dict((k, v.copy()) for k, v in self.inv_dag.iteritems())
-        while inputs:
-            head = inputs.pop()
+        while input_ids:
+            head = input_ids.pop()
             ids.append(head)
             for tail in self.dag.get(head, []):
                 incoming = inv_dag[tail]
                 incoming.remove(head)
                 if not incoming:
-                    inputs.add(tail)
+                    input_ids.add(tail)
         return ids
-
-
-class Workflow(Wrapper):
-    """
-    Workflows represent ordered sequences of computations on Galaxy.
-
-    A workflow defines a sequence of steps that produce one or more
-    results from an input dataset.
-    """
-    BASE_ATTRS = Wrapper.BASE_ATTRS + ('annotation',)
-    POLLING_INTERVAL = 10  # for output state monitoring
-
-    def __init__(self, wf_dict, id=None, wf_info=None, gi=None):
-        """
-        :type wf_dict: dict
-        :param wf_dict: a JSON-deserialized dictionary such as the one
-          produced by the download/export Galaxy feature.
-
-        :type id: str
-        :param id: the id with which this workflow is registered into
-          Galaxy, or None if it's not mapped to an actual Galaxy workflow.
-
-        :type wf_info: :class:`WorkflowInfo`
-        :param wf_info: instance-specific info for this workflow, or
-          None if it's not mapped to an actual Galaxy workflow.
-        """
-        super(Workflow, self).__init__(wf_dict, gi=gi)
-        # outer keys = unencoded ids, e.g., '99', '100'
-        steps = [self._build_step(v, self) for _, v in sorted(
-            wf_dict['steps'].items(), key=lambda t: int(t[0])
-            )]
-        object.__setattr__(self, 'steps', steps)
-        object.__setattr__(self, 'id', id)
-        object.__setattr__(self, 'info', wf_info)
-        # add direct bindings for attributes not available through wf_dict
-        if wf_info is not None:
-            input_labels_to_ids = {}
-            for id_, d in wf_info.inputs.iteritems():
-                input_labels_to_ids.setdefault(d['label'], set()).add(id_)
-            for a in 'published', 'tags':
-                object.__setattr__(self, a, getattr(wf_info, a))
-            object.__setattr__(self, 'input_labels_to_ids', input_labels_to_ids)
-
-    @property
-    def gi_module(self):
-        return self.gi.workflows
 
     @staticmethod
     def _build_step(step_dict, parent):
@@ -338,26 +292,20 @@ class Workflow(Wrapper):
             raise ValueError('unknown step type: %r' % (stype,))
 
     @property
-    def is_mapped(self):
-        return super(Workflow, self).is_mapped and self.info
-
-    def unmap(self):
-        super(Workflow, self).unmap()
-        object.__setattr__(self, 'wf_info', None)
-
-    @property
-    def data_inputs(self):
+    def data_input_ids(self):
         """
         Return the list of :class:`DataInput` steps for this workflow.
         """
-        return [_ for _ in self.steps if isinstance(_, DataInput)]
+        return set(id_ for id_, s in self.steps.iteritems()
+                   if isinstance(s, DataInput))
 
     @property
-    def tools(self):
+    def tool_ids(self):
         """
         Return the list of :class:`Tool` steps for this workflow.
         """
-        return [_ for _ in self.steps if isinstance(_, Tool)]
+        return set(id_ for id_, s in self.steps.iteritems()
+                   if isinstance(s, Tool))
 
     @property
     def input_labels(self):
@@ -377,8 +325,6 @@ class Workflow(Wrapper):
         :return: a mapping from input slot ids to dataset ids in the
           format required by the Galaxy web API.
         """
-        if not self.input_labels_to_ids:
-            raise RuntimeError('workflow is not mapped to a Galaxy instance')
         m = {}
         for label, slot_ids in self.input_labels_to_ids.iteritems():
             datasets = input_map.get(label, [])
