@@ -12,15 +12,59 @@ import bioblend.galaxy.objects.galaxy_instance as galaxy_instance
 from bioblend.galaxy.client import ConnectionError
 
 
-THIS_DIR = os.path.dirname(os.path.abspath(__file__))
-SAMPLE_FN = os.path.join(THIS_DIR, 'data', 'paste_columns.ga')
-with open(SAMPLE_FN) as F:
-    WF_DICT = json.load(F)
-FOO_DATA = 'foo\nbar\n'
-FOO_DATA_2 = 'foo2\nbar2\n'
-
 URL = os.environ.get('BIOBLEND_GALAXY_URL', 'http://localhost:8080')
 API_KEY = os.environ['BIOBLEND_GALAXY_API_KEY']
+
+THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+SAMPLE_FN = os.path.join(THIS_DIR, 'data', 'paste_columns.ga')
+FOO_DATA = 'foo\nbar\n'
+FOO_DATA_2 = 'foo2\nbar2\n'
+SAMPLE_WF_DICT = {
+    u'deleted': False,
+    u'id': u'9005c5112febe774',
+    u'inputs': {
+        u'571': {u'label': u'Input Dataset', u'value': u''},
+        u'572': {u'label': u'Input Dataset', u'value': u''},
+        },
+    u'model_class': u'StoredWorkflow',
+    u'name': u'paste_columns',
+    u'published': False,
+    u'steps': {
+        u'571': {
+            u'id': 571,
+            u'input_steps': {},
+            u'tool_id': None,
+            u'tool_inputs': {u'name': u'Input Dataset'},
+            u'tool_version': None,
+            u'type': u'data_input',
+            },
+        u'572': {
+            u'id': 572,
+            u'input_steps': {},
+            u'tool_id': None,
+            u'tool_inputs': {u'name': u'Input Dataset'},
+            u'tool_version': None,
+            u'type': u'data_input',
+            },
+        u'573': {
+            u'id': 573,
+            u'input_steps': {
+                u'input1': {u'source_step': 571, u'step_output': u'output'},
+                u'input2': {u'source_step': 572, u'step_output': u'output'},
+                },
+            u'tool_id': u'Paste1',
+            u'tool_inputs': {
+                u'delimiter': u'"T"',
+                u'input1': u'null',
+                u'input2': u'null',
+                },
+            u'tool_version': u'1.0.0',
+            u'type': u'tool',
+            }
+        },
+    u'tags': [],
+    u'url': u'/api/workflows/9005c5112febe774',
+    }
 
 
 def is_reachable(url):
@@ -127,59 +171,57 @@ class TestWrapper(unittest.TestCase):
 class TestWorkflow(unittest.TestCase):
 
     def setUp(self):
-        self.id = '123'
-        self.wf = wrappers.Workflow(WF_DICT, id=self.id)
+        self.wf = wrappers.Workflow(SAMPLE_WF_DICT)
 
     def test_initialize(self):
-        self.assertEqual(self.wf.id, self.id)
-        self.assertEqual(self.wf.name, WF_DICT['name'])
-        self.assertFalse(self.wf.is_modified)
-        self.wf.annotation = 'foo'
-        self.assertTrue(self.wf.is_modified)
+        self.assertEqual(self.wf.id, '9005c5112febe774')
+        self.assertEqual(self.wf.name, 'paste_columns')
+        self.assertEqual(self.wf.deleted, False)
+        self.assertEqual(self.wf.published, False)
+        self.assertEqual(self.wf.tags, [])
+        self.assertEqual(
+            self.wf.input_labels_to_ids, {'Input Dataset': {'571', '572'}}
+            )
+        self.assertEqual(self.wf.input_ids, {'571', '572'})
+        self.assertEqual(self.wf.output_ids, {'573'})
 
     def test_steps(self):
-        step_dicts = [v for _, v in sorted(
-            WF_DICT['steps'].items(), key=lambda t: int(t[0])
-            )]
-        for i, s in enumerate(self.wf.steps):
+        steps = SAMPLE_WF_DICT['steps']
+        for sid, s in self.wf.steps.iteritems():
             self.assertTrue(isinstance(s, wrappers.Step))
-            self.assertEqual(s.name, step_dicts[i]['name'])
-            if step_dicts[i]['type'] == 'data_input':
+            self.assertEqual(s.id, sid)
+            d = steps[sid]
+            if d['type'] == 'data_input':
                 self.assertTrue(isinstance(s, wrappers.DataInput))
-            if step_dicts[i]['type'] == 'tool':
+            if d['type'] == 'tool':
                 self.assertTrue(isinstance(s, wrappers.Tool))
             self.assertTrue(s.parent is self.wf)
-        self.assertFalse(self.wf.is_modified)
-        self.assertEqual(len(self.wf.data_inputs), 2)
-        self.assertEqual(len(self.wf.tools), 1)
+        self.assertEqual(self.wf.data_input_ids, {'571', '572'})
+        self.assertEqual(self.wf.tool_ids, {'573'})
 
     def test_taint(self):
         self.assertFalse(self.wf.is_modified)
-        self.wf.steps[0].annotation = 'foo'
+        self.wf.steps['571'].tool_id = 'foo'
         self.assertTrue(self.wf.is_modified)
 
     def test_input_map(self):
-        inputs = {
-            '100': {'label': 'foo', 'value': 'far'},
-            '99': {'label': 'boo', 'value': 'bar'},
-            }
-        dummy_wf_info = wrappers.WorkflowInfo({
-            'inputs': inputs,
-            'steps': {'12284': {
-                'id': 12284,
-                'input_steps': {u'input': {u'source_step': 12285}},
-                }},
-            })
         class DummyLD(object):
             SRC = 'ld'
             def __init__(self, id_):
                 self.id = id_
-        wf = wrappers.Workflow(WF_DICT, wf_info=dummy_wf_info)
-        self.assertEqual(wf.input_labels, {'foo', 'boo'})
-        self.assertEqual(
-            wf.convert_input_map({'foo': DummyLD('f'), 'boo': DummyLD('b')}),
-            {'100': {'id': 'f', 'src': 'ld'}, '99': {'id': 'b', 'src': 'ld'}}
+        label = 'Input Dataset'
+        self.assertEqual(self.wf.input_labels, {label})
+        input_map = self.wf.convert_input_map(
+            {label: [DummyLD('a'), DummyLD('b')]}
             )
+        # {'571': {'id': 'a', 'src': 'ld'}, '572': {'id': 'b', 'src': 'ld'}}
+        # OR
+        # {'571': {'id': 'b', 'src': 'ld'}, '572': {'id': 'a', 'src': 'ld'}}
+        self.assertEqual(set(input_map), {'571', '572'})
+        for d in input_map.itervalues():
+            self.assertEqual(set(d), {'id', 'src'})
+            self.assertEqual(d['src'], 'ld')
+            self.assertTrue(d['id'] in 'ab')
 
 
 class TestGalaxyInstance(unittest.TestCase):
