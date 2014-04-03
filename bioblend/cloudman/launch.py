@@ -306,7 +306,7 @@ class CloudManLauncher(object):
                 bioblend.log.error(err)
                 continue
             if pd:
-                # We are dealign with a CloudMan bucket
+                # We are dealing with a CloudMan bucket
                 pd_contents = pd.get_contents_as_string()
                 pd = yaml.load(pd_contents)
                 if 'cluster_name' in pd:
