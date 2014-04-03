@@ -37,21 +37,19 @@ class CloudManLauncher(object):
         self.secret_key = secret_key
         if cloud is None:
             # Default to an EC2-compatible object
-            self.cloud = Bunch(
-                    id='1',  # for compatibility w/ DB representation
-                    name="Amazon",
-                    cloud_type="ec2",
-                    bucket_default="cloudman",
-                    region_name="us-east-1",
-                    region_endpoint="ec2.amazonaws.com",
-                    ec2_port="",
-                    ec2_conn_path="/",
-                    cidr_range="",
-                    is_secure=True,
-                    s3_host="s3.amazonaws.com",
-                    s3_port="",
-                    s3_conn_path='/',
-            )
+            self.cloud = Bunch(id='1',  # for compatibility w/ DB representation
+                               name="Amazon",
+                               cloud_type="ec2",
+                               bucket_default="cloudman",
+                               region_name="us-east-1",
+                               region_endpoint="ec2.amazonaws.com",
+                               ec2_port="",
+                               ec2_conn_path="/",
+                               cidr_range="",
+                               is_secure=True,
+                               s3_host="s3.amazonaws.com",
+                               s3_port="",
+                               s3_conn_path='/')
         else:
             self.cloud = cloud
         self.ec2_conn = self.connect_ec2(self.access_key, self.secret_key, self.cloud)
@@ -111,13 +109,13 @@ class CloudManLauncher(object):
         try:
             rs = None
             rs = self.ec2_conn.run_instances(image_id=image_id,
-                                        instance_type=instance_type,
-                                        key_name=key_name,
-                                        security_groups=security_groups,
-                                        user_data=ud,
-                                        kernel_id=kernel_id,
-                                        ramdisk_id=ramdisk_id,
-                                        placement=placement)
+                                             instance_type=instance_type,
+                                             key_name=key_name,
+                                             security_groups=security_groups,
+                                             user_data=ud,
+                                             kernel_id=kernel_id,
+                                             ramdisk_id=ramdisk_id,
+                                             placement=placement)
             ret['rs'] = rs
         except EC2ResponseError, e:
             err = "Problem launching an instance: %s" % e
@@ -304,7 +302,7 @@ class CloudManLauncher(object):
             except S3ResponseError, e:
                 # This can fail for a number of reasons for non-us and/or CNAME'd buckets.
                 err = ("Problem fetching persistent_data.yaml from bucket %s \n%s"
-                    % (bucket, e.body))
+                       % (bucket, e.body))
                 bioblend.log.error(err)
                 continue
             if pd:
@@ -355,14 +353,14 @@ class CloudManLauncher(object):
         ci = self._get_cloud_info(cloud)
         r = RegionInfo(name=ci['region_name'], endpoint=ci['region_endpoint'])
         ec2_conn = boto.connect_ec2(aws_access_key_id=a_key,
-                              aws_secret_access_key=s_key,
-                              # api_version is needed for availability zone support for EC2
-                              api_version='2012-06-01' if ci['cloud_type'] == 'ec2' else None,
-                              is_secure=ci['is_secure'],
-                              region=r,
-                              port=ci['ec2_port'],
-                              path=ci['ec2_conn_path'],
-                              validate_certs=False)
+                                    aws_secret_access_key=s_key,
+                                    # api_version is needed for availability zone support for EC2
+                                    api_version='2012-06-01' if ci['cloud_type'] == 'ec2' else None,
+                                    is_secure=ci['is_secure'],
+                                    region=r,
+                                    port=ci['ec2_port'],
+                                    path=ci['ec2_conn_path'],
+                                    validate_certs=False)
         return ec2_conn
 
     def connect_s3(self, a_key, s_key, cloud=None):
@@ -396,8 +394,9 @@ class CloudManLauncher(object):
         form_data = {}
         # Do not include the following fields in the user data but do include
         # any 'advanced startup fields' that might be added in the future
-        excluded_fields = ['sg_name', 'image_id', 'instance_id', 'kp_name', 'cloud', 'cloud_type',
-            'public_dns', 'cidr_range', 'kp_material', 'placement']
+        excluded_fields = ['sg_name', 'image_id', 'instance_id', 'kp_name',
+                           'cloud', 'cloud_type', 'public_dns', 'cidr_range',
+                           'kp_material', 'placement']
         for key, value in user_provided_data.iteritems():
             if key not in excluded_fields:
                 form_data[key] = value
