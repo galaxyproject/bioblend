@@ -1,23 +1,18 @@
-import tempfile
+import sys, os, tempfile
 from bioblend.galaxy.objects import GalaxyInstance
 from common import get_one
 
-# This is a "toy" example that should run much faster than the
+# This is a "toy" example that should run much faster
+# (once the cluster's resource manager allows it to run) than the
 # real-world ones.  The workflow, which is imported from local disk,
 # removes two header lines from a tabular file, then extracts one of
 # the columns.  The input dataset is publicly available on CRS4's
 # Orione Galaxy server.
 
 URL = 'http://orione.crs4.it'
-
-# To use the Galaxy API you need an API key. To get one, proceed as follows:
-#   1) go to http://orione.crs4.it and register, or log in if you are
-#      already registered, through the "User" menu on the top;
-#   2) open "User" -> "API Keys";
-#   3) generate your API key if you don't have one;
-#   4) in the following code, replace YOUR_API_KEY with your API key.
-
-API_KEY = 'YOUR_API_KEY'
+API_KEY = os.getenv('GALAXY_API_KEY', 'YOUR_API_KEY')
+if API_KEY == 'YOUR_API_KEY':
+    sys.exit('API_KEY not set, see the README.txt file')
 gi = GalaxyInstance(URL, API_KEY)
 
 # import the workflow from the JSON dump

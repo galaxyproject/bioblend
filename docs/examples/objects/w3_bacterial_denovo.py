@@ -38,17 +38,18 @@ input_map = dict((label, get_one(l.get_datasets(name=name)))
 
 # Set the "hash_length" parameter to different values for the 3 "velveth" steps
 
-tool_id = 'velveth'
-lengths = ('19', '23', '29')
-ws_ids = [k for k, v in iw.info.steps.iteritems() if v['tool_id'] == tool_id]
+lengths = {'19', '23', '29'}
+ws_ids = iw.tool_labels_to_ids['velveth']
 assert len(ws_ids) == len(lengths)
 params = dict((id_, {'hash_length': v}) for id_, v in zip(ws_ids, lengths))
 
-# Set the "ins_length" runtime parameter for the "velvetg" steps
+# Set the "ins_length" runtime parameter to the same value for the 3
+# "velvetg" steps
 
 tool_id = 'velvetg'
-steps = [_ for _ in iw.info.steps.itervalues() if _['tool_id'] == tool_id]
-params[tool_id] = {'reads': steps[0]['tool_inputs']['reads'].copy()}
+ws_ids = iw.tool_labels_to_ids[tool_id]
+step = iw.steps[iter(ws_ids).next()]  # arbitrarily pick one
+params[tool_id] = {'reads': step.tool_inputs['reads'].copy()}
 params[tool_id]['reads']['ins_length'] = -1
 
 # Set more custom parameters

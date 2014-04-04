@@ -31,13 +31,13 @@ input_map = {'Input Dataset': ld}
 
 # Select the blastn step
 
-ws = get_one(_ for _ in iw.info.steps.itervalues()
-             if _['tool_id'] and 'blastn' in _['tool_id'])
-tool_id = ws['tool_id']
+tool_id = 'toolshed.g2.bx.psu.edu/repos/devteam/ncbi_blast_plus/ncbi_blastn_wrapper/0.1.00'
+step_id = get_one(iw.tool_labels_to_ids[tool_id])
+ws = iw.steps[step_id]
 
 # Get (a copy of) the parameters dict for the selected step
 
-ws_parameters = ws['tool_inputs'].copy()
+ws_parameters = ws.tool_inputs.copy()
 
 # Run the workflow on a new history with the selected dataset
 # as input, setting the BLAST db to "16SMicrobial-20131106"

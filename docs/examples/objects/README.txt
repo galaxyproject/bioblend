@@ -37,6 +37,7 @@ Toy Example
 -----------
 
 The small.py file contains a "toy" example that should run much faster
+(once the cluster's resource manager allows it to run)
 than the above ones.  In this case, the script waits for the job to
 complete and downloads its results to a local file.
 
