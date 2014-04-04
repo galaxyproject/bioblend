@@ -581,6 +581,18 @@ class ObjWorkflowClient(ObjClient):
         wf_info = self.gi.workflows.import_shared_workflow(id_)
         return self.get(wf_info['id'])
 
+    def export(self, id_):
+        """
+        Export a re-importable representation of a workflow.
+
+        :type id_: str
+        :param id_: workflow id
+
+        :rtype: dict
+        :return: a JSON-serializable dump of the workflow identified by ``id_``
+        """
+        return self.gi.workflows.export_workflow_json(id_)
+
     def get(self, id_):
         """
         Retrieve the workflow corresponding to the given id.
@@ -588,7 +600,6 @@ class ObjWorkflowClient(ObjClient):
         :rtype: :class:`~.wrappers.Workflow`
         :return: the workflow corresponding to ``id_``
         """
-        #wf_dict = self.gi.workflows.export_workflow_json(id_)
         res = self.gi.workflows.show_workflow(id_)
         wf_dict = self._get_dict('show_workflow', res)
         return wrappers.Workflow(wf_dict, gi=self.obj_gi)

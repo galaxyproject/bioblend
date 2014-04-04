@@ -361,6 +361,9 @@ class Workflow(Wrapper):
                                    break_on_error=break_on_error)
         return outputs, history
 
+    def export(self):
+        return self.gi.workflows.export(self.id)
+
     def delete(self):
         self.gi.workflows.delete(self.id)
         self.unmap()

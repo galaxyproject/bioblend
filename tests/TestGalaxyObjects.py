@@ -282,9 +282,18 @@ class TestGalaxyInstance(unittest.TestCase):
             wf = self.gi.workflows.import_new(json.load(f))
         self.__check_and_del_workflow(wf)
 
+    def test_export(self):
+        with open(SAMPLE_FN) as f:
+            wf1 = self.gi.workflows.import_new(f.read())
+        wf2 = self.gi.workflows.import_new(wf1.export())
+        self.assertNotEqual(wf1.id, wf2.id)
+        for wf in wf1, wf2:
+            self.__check_and_del_workflow(wf)
+
     def __check_and_del_workflow(self, wf):
         # Galaxy appends additional text to imported workflow names
         self.assertTrue(wf.name.startswith('paste_columns'))
+        self.assertEqual(len(wf.steps), 3)
         wf_ids = set(_.id for _ in self.gi.workflows.list())
         self.assertTrue(wf.id in wf_ids)
         wf.delete()
