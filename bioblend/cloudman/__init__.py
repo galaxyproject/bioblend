@@ -662,7 +662,7 @@ class CloudManInstance(GenericVMInstance):
         return bool(status['master_is_exec_host'])
 
     @block_till_vm_ready
-    def enable_master_as_execution_host(self, enable):
+    def set_master_as_execution_host(self, enable):
         """
         Enables/disables master as execution host.
 
