@@ -550,19 +550,15 @@ class ObjWorkflowClient(ObjClient):
         """
         Imports a new workflow into Galaxy.
 
-        :type src: :class:`~.wrappers.Workflow`
-          or dict or str
-        :param src: the workflow to import as a workflow object, or
-          deserialized JSON (dictionary), or serialized JSON (unicode).
+        :type src: dict or str
+        :param src: deserialized (dictionary) or serialized (str) JSON
+          dump of the workflow (this is normally obtained by exporting
+          a workflow from Galaxy).
 
         :rtype: :class:`~.wrappers.Workflow`
         :return: the workflow just imported
         """
-        if isinstance(src, wrappers.Workflow):
-            if src.is_mapped:
-                self._error('workflow already imported')
-            wf_dict = src.wrapped
-        elif isinstance(src, collections.Mapping):
+        if isinstance(src, collections.Mapping):
             wf_dict = src
         else:
             try:
@@ -592,12 +588,10 @@ class ObjWorkflowClient(ObjClient):
         :rtype: :class:`~.wrappers.Workflow`
         :return: the workflow corresponding to ``id_``
         """
-        wf_dict = self.gi.workflows.export_workflow_json(id_)
+        #wf_dict = self.gi.workflows.export_workflow_json(id_)
         res = self.gi.workflows.show_workflow(id_)
-        wf_info = wrappers.WorkflowInfo(self._get_dict('show_workflow', res))
-        return wrappers.Workflow(
-            wf_dict, id=id_, wf_info=wf_info, gi=self.obj_gi
-            )
+        wf_dict = self._get_dict('show_workflow', res)
+        return wrappers.Workflow(wf_dict, gi=self.obj_gi)
 
     # the 'deleted' option is not available for workflows
     def get_previews(self, name=None, published=False):

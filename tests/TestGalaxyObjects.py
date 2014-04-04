@@ -185,6 +185,22 @@ class TestWorkflow(unittest.TestCase):
         self.assertEqual(self.wf.input_ids, {'571', '572'})
         self.assertEqual(self.wf.output_ids, {'573'})
 
+    def test_dag(self):
+        inv_dag = {}
+        for h, tails in self.wf.dag.iteritems():
+            for t in tails:
+                inv_dag.setdefault(str(t), set()).add(h)
+        self.assertEqual(self.wf.inv_dag, inv_dag)
+        heads = set(self.wf.dag)
+        self.assertEqual(heads, set.union(*self.wf.inv_dag.itervalues()))
+        tails = set(self.wf.inv_dag)
+        self.assertEqual(tails, set.union(*self.wf.dag.itervalues()))
+        ids = self.wf.sorted_step_ids()
+        self.assertEqual(set(ids), heads | tails)
+        for h, tails in self.wf.dag.iteritems():
+            for t in tails:
+                self.assertTrue(ids.index(h) < ids.index(t))
+
     def test_steps(self):
         steps = SAMPLE_WF_DICT['steps']
         for sid, s in self.wf.steps.iteritems():
@@ -253,32 +269,22 @@ class TestGalaxyInstance(unittest.TestCase):
         hist.delete(purge=True)
         self.assertFalse(hist.is_mapped)
 
-    def assertWorkflowEqual(self, wf1, wf2):
-        self.assertEqual(len(wf1.steps), len(wf2.steps))
-        for step, istep in zip(wf1.steps, wf2.steps):
-            self.assertEqual(step.name, istep.name)
-
-    def test_workflow(self):
-        wf = wrappers.Workflow(WF_DICT)
-        wf.name = 'test_%s' % uuid.uuid4().hex
-        imported = self.gi.workflows.import_new(wf)
-        self.assertWorkflowEqual(imported, wf)
-        for step, istep in zip(wf.steps, imported.steps):
-            self.assertEqual(step.name, istep.name)
-        self.assertTrue(imported.id in [_.id for _ in self.gi.workflows.list()])
-        imported.delete()
-        self.assertFalse(imported.is_mapped)
+    def test_workflow_from_str(self):
+        with open(SAMPLE_FN) as f:
+            wf = self.gi.workflows.import_new(f.read())
+        self.__check_and_del_workflow(wf)
 
     def test_workflow_from_dict(self):
-        imported = self.gi.workflows.import_new(WF_DICT)
-        self.assertTrue(imported.id in [_.id for _ in self.gi.workflows.list()])
-        imported.delete()
-
-    def test_workflow_from_json(self):
         with open(SAMPLE_FN) as f:
-            imported = self.gi.workflows.import_new(f.read())
-        self.assertTrue(imported.id in [_.id for _ in self.gi.workflows.list()])
-        imported.delete()
+            wf = self.gi.workflows.import_new(json.load(f))
+        self.__check_and_del_workflow(wf)
+
+    def __check_and_del_workflow(self, wf):
+        # Galaxy appends additional text to imported workflow names
+        self.assertTrue(wf.name.startswith('paste_columns'))
+        wf_ids = set(_.id for _ in self.gi.workflows.list())
+        self.assertTrue(wf.id in wf_ids)
+        wf.delete()
 
     # not very accurate:
     #   * we can't publish a wf from the API
@@ -297,25 +303,6 @@ class TestGalaxyInstance(unittest.TestCase):
             imported.delete()
         else:
             print "skipped 'manually publish a workflow to run this test'"
-
-    def test_workflow_info(self):
-        imported = self.gi.workflows.import_new(WF_DICT)
-        wi = imported.info
-        inv_dag = {}
-        for h, tails in wi.dag.iteritems():
-            for t in tails:
-                inv_dag.setdefault(str(t), set()).add(h)
-        self.assertEqual(wi.inv_dag, inv_dag)
-        heads = set(wi.dag)
-        self.assertEqual(heads, set.union(*wi.inv_dag.itervalues()))
-        tails = set(wi.inv_dag)
-        self.assertEqual(tails, set.union(*wi.dag.itervalues()))
-        ids = wi.sorted_step_ids()
-        self.assertEqual(set(ids), heads | tails)
-        for h, tails in wi.dag.iteritems():
-            for t in tails:
-                self.assertTrue(ids.index(h) < ids.index(t))
-        imported.delete()
 
     def test_get_libraries(self):
         self.__test_multi_get('library')
@@ -339,9 +326,10 @@ class TestGalaxyInstance(unittest.TestCase):
             del_kwargs = {'purge': True}
         elif obj_type == 'workflow':
             def create(name):
-                wf = wrappers.Workflow(WF_DICT)
-                wf.name = name
-                return self.gi.workflows.import_new(wf)
+                with open(SAMPLE_FN) as f:
+                    d = json.load(f)
+                d['name'] = name
+                return self.gi.workflows.import_new(d)
             get_objs = self.gi.workflows.list
             get_prevs = self.gi.workflows.get_previews
             del_kwargs = {}
