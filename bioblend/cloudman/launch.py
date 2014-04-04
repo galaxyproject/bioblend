@@ -16,7 +16,7 @@ from bioblend.util import Bunch
 
 
 # Comment the following line if no logging at the prompt is desired
-#bioblend.set_stream_logger(__name__)
+# bioblend.set_stream_logger(__name__)
 
 
 class CloudManLauncher(object):
@@ -172,7 +172,7 @@ class CloudManLauncher(object):
         # Add ICMP (i.e., ping) rule required by HTCondor
         try:
             if not self.rule_exists(cmsg.rules, from_port='-1', to_port='-1', ip_protocol='icmp'):
-                cmsg.authorize(ip_protocol='icmp', from_port=-1, to_port=-1, cidr_ip='0.0.0.0/0')
+                cmsg.authorize(ip_protocol='icmp', from_port= -1, to_port= -1, cidr_ip='0.0.0.0/0')
             else:
                 bioblend.log.debug("ICMP rule already exists in {0} SG".format(sg_name))
         except EC2ResponseError, e:
@@ -467,7 +467,7 @@ class CloudManLauncher(object):
                     if vol:
                         placement = vol[0].zone
                 except:
-                    #If anything goes wrong with zone detection, default to None
+                    # If anything goes wrong with zone detection, default to None
                     placement = None
             elif 'filesystems' in pd:
                 for fs in pd['filesystems']:
@@ -479,7 +479,7 @@ class CloudManLauncher(object):
                                 if vol:
                                     placement = vol[0].zone
                             except:
-                                #If anything goes wrong with zone detection, default to None
+                                # If anything goes wrong with zone detection, default to None
                                 placement = None
         return placement
 
