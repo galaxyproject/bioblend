@@ -215,7 +215,12 @@ class Workflow(Wrapper):
         input_labels_to_ids = {}
         for id_, d in self.inputs.iteritems():
             input_labels_to_ids.setdefault(d['label'], set()).add(id_)
+        tool_labels_to_ids = {}
+        for s in self.steps.itervalues():
+            if isinstance(s, Tool):
+                tool_labels_to_ids.setdefault(s.tool_id, set()).add(s.id)
         object.__setattr__(self, 'input_labels_to_ids', input_labels_to_ids)
+        object.__setattr__(self, 'tool_labels_to_ids', tool_labels_to_ids)
         dag, inv_dag = self._get_dag()
         heads, tails = set(dag), set(inv_dag)
         object.__setattr__(self, '_dag', dag)

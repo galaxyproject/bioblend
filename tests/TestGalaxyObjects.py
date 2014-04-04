@@ -182,6 +182,9 @@ class TestWorkflow(unittest.TestCase):
         self.assertEqual(
             self.wf.input_labels_to_ids, {'Input Dataset': {'571', '572'}}
             )
+        self.assertEqual(
+            self.wf.tool_labels_to_ids, {'Paste1': {'573'}}
+            )
         self.assertEqual(self.wf.input_ids, {'571', '572'})
         self.assertEqual(self.wf.output_ids, {'573'})
 
@@ -553,7 +556,8 @@ class TestRunWorkflow(unittest.TestCase):
     def setUp(self):
         self.gi = galaxy_instance.GalaxyInstance(URL, API_KEY)
         self.lib = self.gi.libraries.create('test_%s' % uuid.uuid4().hex)
-        self.wf = self.gi.workflows.import_new(WF_DICT)
+        with open(SAMPLE_FN) as f:
+            self.wf = self.gi.workflows.import_new(f.read())
         self.contents = ['one\ntwo\n', '1\n2\n']
         self.inputs = [self.lib.upload_data(_) for _ in self.contents]
         self.hist_name = 'test_%s' % uuid.uuid4().hex
@@ -573,7 +577,7 @@ class TestRunWorkflow(unittest.TestCase):
         else:
             hist = self.hist_name
         if params:
-            params = {self.wf.tools[0].tool_id: {'delimiter': 'U'}}
+            params = {'Paste1': {'delimiter': 'U'}}
             sep = '_'  # 'U' maps to '_' in the paste tool
         else:
             params = None
