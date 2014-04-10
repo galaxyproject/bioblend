@@ -163,7 +163,7 @@ class CloudManLauncher(object):
                  ('30000', '30100'),  # FTP transfer
                  ('42284', '42284'))  # CloudMan UI
         # TODO: Hack to support ipython_notebook. Remove once the nginx configuration in cloudman is redone
-        if self.cloud.name == "NeCTAR":
+        if self.cloud.name.lower() == "nectar":
             ports += (('9510', '9510'),)
         for port in ports:
             try:
