@@ -757,3 +757,11 @@ class ObjWorkflowClient(ObjClient):
         res = self.gi.workflows.delete_workflow(id_)
         if not isinstance(res, basestring):
             self._error('delete_workflow: unexpected reply: %r' % (res,))
+
+
+class ObjToolClient(ObjClient):
+    """
+    Interacts with Galaxy tools.
+    """
+    def __init__(self, obj_gi):
+        super(ObjToolClient, self).__init__(obj_gi)
