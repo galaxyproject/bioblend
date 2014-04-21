@@ -17,12 +17,19 @@ class DatasetClient(Client):
         self.module = 'datasets'
         super(DatasetClient, self).__init__(galaxy_instance)
 
-    def show_dataset(self, dataset_id, deleted=False):
+    def show_dataset(self, dataset_id, deleted=False, hda_ldda='hda'):
         """
         Display information about and/or content of a dataset. This can be a
         history or a library dataset.
+        
+        :type hda_ldda: string
+        :param hda_ldda: Whether to show a history dataset ('hda' - the default) or library
+                         dataset ('ldda').
         """
-        return Client._get(self, id=dataset_id, deleted=deleted)
+        params = dict(
+            hda_ldda=hda_ldda,
+        )
+        return Client._get(self, id=dataset_id, deleted=deleted, params=params)
 
     def download_dataset(self, dataset_id, file_path=None, use_default_filename=True,
          wait_for_completion=False, maxwait=12000):
