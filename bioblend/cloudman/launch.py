@@ -174,7 +174,7 @@ class CloudManLauncher(object):
         # Add ICMP (i.e., ping) rule required by HTCondor
         try:
             if not self.rule_exists(cmsg.rules, from_port='-1', to_port='-1', ip_protocol='icmp'):
-                cmsg.authorize(ip_protocol='icmp', from_port= -1, to_port= -1, cidr_ip='0.0.0.0/0')
+                cmsg.authorize(ip_protocol='icmp', from_port=-1, to_port=-1, cidr_ip='0.0.0.0/0')
             else:
                 bioblend.log.debug("ICMP rule already exists in {0} SG".format(sg_name))
         except EC2ResponseError, e:
@@ -300,33 +300,34 @@ class CloudManLauncher(object):
         buckets = s3_conn.get_all_buckets()
         clusters = []
         for bucket in buckets:
-            try:
-                # TODO: first lookup if persistent_data.yaml key exists
-                pd = bucket.get_key('persistent_data.yaml')
-            except S3ResponseError, e:
-                # This can fail for a number of reasons for non-us and/or CNAME'd buckets.
-                err = ("Problem fetching persistent_data.yaml from bucket %s \n%s"
-                       % (bucket, e.body))
-                bioblend.log.error(err)
-                continue
-            if pd:
-                # We are dealing with a CloudMan bucket
-                pd_contents = pd.get_contents_as_string()
-                pd = yaml.load(pd_contents)
-                if 'cluster_name' in pd:
-                    cluster_name = pd['cluster_name']
-                else:
-                    for key in bucket.list():
-                        if key.name.endswith('.clusterName'):
-                            cluster_name = key.name.split('.clusterName')[0]
-                cluster = {'cluster_name': cluster_name,
-                           'persistent_data': pd,
-                           'bucket_name': bucket.name}
-                # Look for cluster's placement too
-                if include_placement:
-                    placement = self._find_placement(cluster_name, cluster)
-                    cluster['placement'] = placement
-                clusters.append(cluster)
+            if 'cm-' in bucket.name:  # Inspect CloudMan buckets only
+                try:
+                    # TODO: first lookup if persistent_data.yaml key exists
+                    pd = bucket.get_key('persistent_data.yaml')
+                except S3ResponseError, e:
+                    # This can fail for a number of reasons for non-us and/or CNAME'd buckets.
+                    err = ("Problem fetching persistent_data.yaml from bucket %s \n%s"
+                           % (bucket, e.body))
+                    bioblend.log.error(err)
+                    continue
+                if pd:
+                    # We are dealing with a CloudMan bucket
+                    pd_contents = pd.get_contents_as_string()
+                    pd = yaml.load(pd_contents)
+                    if 'cluster_name' in pd:
+                        cluster_name = pd['cluster_name']
+                    else:
+                        for key in bucket.list():
+                            if key.name.endswith('.clusterName'):
+                                cluster_name = key.name.split('.clusterName')[0]
+                    cluster = {'cluster_name': cluster_name,
+                               'persistent_data': pd,
+                               'bucket_name': bucket.name}
+                    # Look for cluster's placement too
+                    if include_placement:
+                        placement = self._find_placement(cluster_name, cluster)
+                        cluster['placement'] = placement
+                    clusters.append(cluster)
         return clusters
 
     def get_cluster_pd(self, cluster_name):
