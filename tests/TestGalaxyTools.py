@@ -11,7 +11,7 @@ class TestGalaxyTools(GalaxyTestBase.GalaxyTestBase):
         super(TestGalaxyTools, self).setUp()
 
     def test_paste_data(self):
-        history = self.gi.histories.create_history(name="tool test history")
+        history = self.gi.histories.create_history(name="test_paste_data history")
 
         tool_input = {}
         tool_input["file_type"] = "txt"
@@ -29,7 +29,7 @@ class TestGalaxyTools(GalaxyTestBase.GalaxyTestBase):
         assert len(tool_output) == 1
 
     def test_upload_file(self):
-        history = self.gi.histories.create_history(name="tool test history")
+        history = self.gi.histories.create_history(name="test_upload_file history")
 
         tool_output = self.gi.tools.upload_file(
             "setup.py",
