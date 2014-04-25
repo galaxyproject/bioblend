@@ -4,7 +4,7 @@ API for interacting with a CloudMan instance.
 import time
 import requests
 import functools
-import simplejson
+import json
 from urlparse import urlparse
 import bioblend
 from bioblend.cloudman.launch import CloudManLauncher
@@ -42,7 +42,7 @@ def block_till_vm_ready(func):
         interval = kwargs.pop('vm_ready_check_interval', 10)
         try:
             obj.wait_till_instance_ready(timeout, interval)
-        except AttributeError, e:
+        except AttributeError:
             raise VMLaunchException("Decorated object does not define a wait_till_instance_ready method."
                                     "Make sure that the object is of type GenericVMInstance.")
         return func(*args, **kwargs)
@@ -192,12 +192,12 @@ class CloudManConfig(object):
     def set_extra_parameters(self, **kwargs):
         self.kwargs = kwargs
 
-    class CustomTypeEncoder(simplejson.JSONEncoder):
+    class CustomTypeEncoder(json.JSONEncoder):
         def default(self, obj):
             if isinstance(obj, (CloudManConfig, Bunch)):
                 key = '__%s__' % obj.__class__.__name__
                 return {key: obj.__dict__}
-            return simplejson.JSONEncoder.default(self, obj)
+            return json.JSONEncoder.default(self, obj)
 
     @staticmethod
     def CustomTypeDecoder(dct):
@@ -210,10 +210,10 @@ class CloudManConfig(object):
 
     @staticmethod
     def load_config(fp):
-        return simplejson.load(fp, object_hook=CloudManConfig.CustomTypeDecoder)
+        return json.load(fp, object_hook=CloudManConfig.CustomTypeDecoder)
 
     def save_config(self, fp):
-        simplejson.dump(self, fp, cls=self.CustomTypeEncoder)
+        json.dump(self, fp, cls=self.CustomTypeEncoder)
 
     def validate(self):
         if self.access_key is None:
