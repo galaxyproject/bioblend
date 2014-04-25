@@ -10,6 +10,7 @@ import time
 
 import bioblend as bb
 
+
 class ConnectionError(Exception):
     """
     An exception class that is raised when unexpected HTTP responses come back.
@@ -102,7 +103,7 @@ class Client(object):
         Make a GET request to the given `url`.  Retry as configured by
         `Client.max_get_retries` and `Client.get_retry_delay`.
 
-        
+
         Sometimes request failures are temporary.  We may want our client to
         insist and keep retrying issueing a request periodically for a some
         time, rather than throwing an error.  Also, Galaxy sometimes gets into a
@@ -130,7 +131,7 @@ class Client(object):
         attempts_left = self.max_get_retries()
         retry_delay = self.get_retry_delay()
         bb.log.debug("Client._get_retry - attempts left: %s; retry delay: %s",
-                attempts_left, retry_delay)
+                     attempts_left, retry_delay)
         r = None
         while attempts_left > 0:
             attempts_left -= 1
@@ -140,11 +141,11 @@ class Client(object):
                     return r.json()
                 else:
                     bb.log.info("GET request failed (response code: %s). %s attempts left",
-                            r.status_code, attempts_left)
+                                r.status_code, attempts_left)
                     bb.log.debug("Response content: %s", r.content)
             except requests.exceptions.ConnectionError as e:
                 if attempts_left <= 0:
-                    raise ConnectionError(e.message) # raise client.ConnectionError
+                    raise ConnectionError(e.message)  # raise client.ConnectionError
                 else:
                     bb.log.warn("Error connecting to Galaxy: %s. Going to retry %s more times.", e, attempts_left)
             except simplejson.JSONDecodeError as e:

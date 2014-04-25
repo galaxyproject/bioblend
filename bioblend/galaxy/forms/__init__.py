@@ -1,16 +1,14 @@
 """
-Contains possible interactions with the Galaxy Forms 
+Contains possible interactions with the Galaxy Forms
 """
 from bioblend.galaxy.client import Client
 
-import shutil
-import urllib2
 
 class FormsClient(Client):
+
     def __init__(self, galaxy_instance):
         self.module = 'forms'
         super(FormsClient, self).__init__(galaxy_instance)
-
 
     def get_forms(self):
         """
@@ -28,11 +26,10 @@ class FormsClient(Client):
                    u'model_class': u'FormDefinition',
                    u'name': u'second form',
                    u'url': u'/api/forms/ebfb8f50c6abde6d'}]
-                                                                                                            
-        
+
+
         """
         return Client._get(self)
-
 
     def show_form(self, form_id):
         """
@@ -53,28 +50,24 @@ class FormsClient(Client):
                    u'model_class': u'FormDefinition',
                    u'name': u'First form',
                    u'url': u'/api/forms/f2db41e1fa331b3e'}
-                            
-                   
+
+
         """
 
         return Client._get(self, id=form_id)
 
-
-
     def create_form(self, form_xml_text):
         """
         Create a new form
-        
+
         :type   form_xml_text: string
         :param  form_xml_text: Form xml to create a form on galaxy instance
-        
+
         :rtype:     string
         :returns:   Unique url of newly created form with encoded id
-                                
+
         """
 
         payload = form_xml_text
-        
-        return Client._post(self,payload=payload)
 
-    
+        return Client._post(self, payload=payload)

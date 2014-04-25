@@ -1,16 +1,14 @@
 """
-Contains possible interactions with the Galaxy Jobs 
+Contains possible interactions with the Galaxy Jobs
 """
 from bioblend.galaxy.client import Client
 
-import shutil
-import urllib2
 
 class JobsClient(Client):
+
     def __init__(self, galaxy_instance):
         self.module = 'jobs'
         super(JobsClient, self).__init__(galaxy_instance)
-
 
     def get_jobs(self):
         """
@@ -20,13 +18,13 @@ class JobsClient(Client):
         :param  state: limit listing of jobs to those that match one of the included states. If none, all are returned.
         Valid Galaxy job states include:
         'new', 'upload', 'waiting', 'queued', 'running', 'ok', 'error', 'paused', 'deleted', 'deleted_new'
-        
+
         :type   tool_id: string or list
         :param  tool_id: limit listing of jobs to those that match one of the included tool_ids. If none, all are returned.
-        
+
         :type   history_id: string
         :param  history_id: limit listing of jobs to those that match the history_id. If none, all are returned.
-        
+
         :rtype:     list
         :returns:   list of dictionaries containing summary job information
                  For example::
@@ -45,13 +43,8 @@ class JobsClient(Client):
                  u'state': u'ok',
                  u'tool_id': u'upload1',
                  u'update_time': u'2014-03-01T16:05:39.558458'}]
-                 
-]
-                                                    
-        
         """
         return Client._get(self)
-
 
     def show_job(self, job_id):
         """
@@ -77,37 +70,33 @@ class JobsClient(Client):
                  u'state': u'ok',
                  u'tool_id': u'tab2fasta',
                  u'update_time': u'2014-03-01T16:17:31.930728'}
-                                                                                             
-                                    
-                                
+
+
+
         """
 
         return Client._get(self, id=job_id)
 
-
-
     def search_jobs(self, job_info):
         """
         Return jobs for current user based payload content
-        
+
         :type   payload: dict
         :param  payload: Dictionary containing description of requested job. This is in the same format as
         a request to POST /api/tools would take to initiate a job
-        
+
         :rtype:     list
         :returns:   list of dictionaries containing summary job information of the jobs that match the requested job run
-        
+
         This method is designed to scan the list of previously run jobs and find records of jobs that had
         the exact some input parameters and datasets. This can be used to minimize the amount of repeated work, and simply
         recycle the old results.
-                                
+
         """
 
         payload = job_info
-        
+
         url = self.gi._make_url(self)
         url = '/'.join([url, "search"])
-        
-        return Client._post(self,url=url,payload=payload)
 
-    
+        return Client._post(self, url=url, payload=payload)

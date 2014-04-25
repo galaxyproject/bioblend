@@ -56,9 +56,12 @@ class ToolShedClient(Client):
         """
         return Client._get(self, id=toolShed_id)
 
-    def install_repository_revision(self, tool_shed_url, name, owner, changeset_revision,
-          install_tool_dependencies=False, install_repository_dependencies=False,
-          tool_panel_section_id=None, new_tool_panel_section_label=None):
+    def install_repository_revision(self, tool_shed_url, name, owner,
+                                    changeset_revision,
+                                    install_tool_dependencies=False,
+                                    install_repository_dependencies=False,
+                                    tool_panel_section_id=None,
+                                    new_tool_panel_section_label=None):
         """
         Install a specified repository revision from a specified Tool Shed into
         this Galaxy instance. This example demonstrates installation of a repository

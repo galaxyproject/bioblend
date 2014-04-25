@@ -10,6 +10,7 @@ import urllib2
 
 
 class HistoryClient(Client):
+
     def __init__(self, galaxy_instance):
         self.module = 'histories'
         super(HistoryClient, self).__init__(galaxy_instance)
@@ -131,10 +132,10 @@ class HistoryClient(Client):
 
         """
 
-        #empty payload since we are adding the new tag using the url
+        # empty payload since we are adding the new tag using the url
         payload = {}
 
-        #creating the url
+        # creating the url
         url = self.url
         url = '/'.join([url, history_id, 'tags', tag])
 
@@ -154,7 +155,7 @@ class HistoryClient(Client):
         return Client._post(self, payload, id=history_id, contents=True)
 
     def download_dataset(self, history_id, dataset_id, file_path,
-         use_default_filename=True, to_ext=None):
+                         use_default_filename=True, to_ext=None):
         """
         Download a ``dataset_id`` from history with ``history_id`` to a
         file on the local file system, saving it to ``file_path``.

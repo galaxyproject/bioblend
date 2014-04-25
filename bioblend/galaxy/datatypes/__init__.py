@@ -3,20 +3,18 @@ Contains possible interactions with the Galaxy Datatype
 """
 from bioblend.galaxy.client import Client
 
-import shutil
-import urllib2
 
 class DatatypesClient(Client):
+
     def __init__(self, galaxy_instance):
         self.module = 'datatypes'
         super(DatatypesClient, self).__init__(galaxy_instance)
 
-
-    def get_datatypes(self,extension_only=False,upload_only=False):
+    def get_datatypes(self, extension_only=False, upload_only=False):
         """
         Displays a collection (list) of datatypes.
 
-        
+
         :rtype: list
         :return: A list of dicts with details on individual datatypes.
                  For example::
@@ -31,22 +29,21 @@ class DatatypesClient(Client):
                  u'wig',
                  u'xgmml',
                  u'xml']
-        
+
         """
 
         params = {}
         if extension_only:
-            params['extension_only']=True
-            
-        if upload_only:
-            params['upload_only']=True
-        
-        return Client._get(self,params=params)
+            params['extension_only'] = True
 
+        if upload_only:
+            params['upload_only'] = True
+
+        return Client._get(self, params=params)
 
     def get_sniffers(self):
         """
-        Displays a collection (list) of sniffers.        
+        Displays a collection (list) of sniffers.
 
         :rtype: list
         :return: A list of  individual sniffers.
@@ -61,13 +58,12 @@ class DatatypesClient(Client):
                  u'galaxy.datatypes.sequence:Maf',
                  u'galaxy.datatypes.sequence:Lav',
                  u'galaxy.datatypes.sequence:csFasta']
-                 
 
-                                
+
+
         """
 
         url = self.gi._make_url(self)
         url = '/'.join([url, "sniffers"])
 
-        
-        return Client._get(self,url=url)
+        return Client._get(self, url=url)
