@@ -1,6 +1,6 @@
 """
 Tests the functionality of the Blend CloudMan API. These tests require working
-credentials to supported cloud infrastructure. 
+credentials to supported cloud infrastructure.
 
 Use ``nose`` to run these unit tests.
 """
@@ -57,7 +57,7 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
 
     def test_delete_history(self):
         result = self.gi.histories.delete_history(self.history['id'])
-        self.assertEqual(result, 'OK')
+        self.assertTrue(result['deleted'])
 
         full_history = self.gi.histories.get_histories()
         self.assertTrue(not any(d['id'] == self.history['id'] for d in full_history))
