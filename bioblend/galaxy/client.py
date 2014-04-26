@@ -5,7 +5,7 @@ This class is primarily a helper for the library and user code
 should not use it directly.
 """
 import requests
-import simplejson
+import json
 import time
 
 import bioblend as bb
@@ -102,7 +102,7 @@ class Client(object):
         Make a GET request to the given `url`.  Retry as configured by
         `Client.max_get_retries` and `Client.get_retry_delay`.
 
-        
+
         Sometimes request failures are temporary.  We may want our client to
         insist and keep retrying issueing a request periodically for a some
         time, rather than throwing an error.  Also, Galaxy sometimes gets into a
@@ -115,7 +115,7 @@ class Client(object):
 
         Raises:
             ConnectionError
-            simplejson.JSONDecodeError
+            json.JSONDecodeError
         """
         # Why is this method in Client instead of GalaxyInstance?
         # When some API calls go bad Galaxy returns HTTP 200 with an empty body
@@ -147,7 +147,7 @@ class Client(object):
                     raise ConnectionError(e.message) # raise client.ConnectionError
                 else:
                     bb.log.warn("Error connecting to Galaxy: %s. Going to retry %s more times.", e, attempts_left)
-            except simplejson.JSONDecodeError as e:
+            except json.JSONDecodeError as e:
                 if attempts_left <= 0:
                     raise
                 else:
@@ -207,7 +207,7 @@ class Client(object):
         """
         if not url:
             url = self.gi._make_url(self, module_id=id, deleted=deleted, contents=contents)
-        payload = simplejson.dumps(payload)
+        payload = json.dumps(payload)
         r = self.gi.make_delete_request(url, payload=payload)
         if r.status_code == 200:
             return r.json()

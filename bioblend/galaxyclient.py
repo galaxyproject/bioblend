@@ -8,7 +8,7 @@ A base representation of an instance
 import urllib2
 import poster
 import requests
-import simplejson
+import json
 from galaxy.client import ConnectionError
 
 
@@ -83,9 +83,9 @@ class GalaxyClient(object):
             datagen, headers = poster.encode.multipart_encode(payload)
             request = urllib2.Request(url, datagen, headers)
             fp = urllib2.urlopen(request)
-            return simplejson.load(fp)
+            return json.loads(fp.read())
         else:
-            payload = simplejson.dumps(payload)
+            payload = json.dumps(payload)
             r = requests.post(url, data=payload, headers=self.json_headers,
                     verify=self.verify, params=params)
             if r.status_code == 200:
@@ -98,7 +98,7 @@ class GalaxyClient(object):
         Make a DELETE request using the provided ``url`` and the optional
         arguments.
         The ``payload`` must be a dict that can be converted into a JSON
-        object (via ``simplejson.dumps``)
+        object (via ``json.dumps``)
 
         If the ``params`` are not provided, use ``default_params`` class field.
         If params are provided and the provided dict does not have ``key`` key,
@@ -116,13 +116,13 @@ class GalaxyClient(object):
         """
         Make a PUT request using the provided ``url`` with required playload
         The ``payload`` must be a dict that can be converted into a JSON
-        object (via ``simplejson.dumps``)
+        object (via ``json.dumps``)
         """
         if params is not None and params.get('key', False) is False:
             params['key'] = self.key
         else:
             params = self.default_params
 
-        payload = simplejson.dumps(payload)
+        payload = json.dumps(payload)
         r = requests.put(url, data=payload, params=params)
         return r
