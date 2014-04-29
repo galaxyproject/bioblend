@@ -300,7 +300,10 @@ class ObjLibraryClient(ObjDatasetClient):
         :type paths: str or :class:`~collections.Iterable` of str
         :param paths: server-side file paths from which data should be read
 
-        See :meth:`.upload_data` for info on other params.
+        See :meth:`.upload_data` for info on other params; in
+        addition, this method accepts a ``link_data_only`` keyword
+        argument that, if set, instructs Galaxy to link files instead
+        of copying them.
         """
         fid = self.__pre_upload(library, folder)
         if isinstance(paths, basestring):
