@@ -40,6 +40,32 @@ class ObjClient(object):
         self.gi = self.obj_gi.gi
         self.log = bioblend.log
 
+    @abc.abstractmethod
+    def get_previews(self, name=None, **kwargs):
+        """
+        Get object previews (listings).
+
+        Previews model entity summaries provided by REST collection
+        URIs, e.g., ``http://host:port/api/libraries``.  Being the
+        most lightweight objects associated to the various entities,
+        these are the ones that should be used to retrieve basic info
+        such as id and name.
+
+        :type name: str
+        :param name: return only objects with this name
+
+        Optional boolean kwargs for specific object types:
+
+        ``deleted`` (libraries and histories)
+          if :obj:`True`, return only deleted objects
+
+        ``published`` (workflows)
+          if :obj:`True`, return published workflows
+
+        :rtype: list of :class:`~.wrappers.Preview`
+        """
+        pass
+
     #-- helpers --
     def _error(self, msg, err_type=RuntimeError):
         self.log.error(msg)
@@ -180,18 +206,6 @@ class ObjLibraryClient(ObjDatasetClient):
         return self._get_container(id_, wrappers.Library)
 
     def get_previews(self, name=None, deleted=False):
-        """
-        Get library previews for the user of this Galaxy instance.
-
-        :type name: str
-        :param name: return only libraries with this name
-
-        :type deleted: bool
-        :param deleted: if :obj:`True`, return only deleted libraries
-
-        :rtype: list of
-          :class:`~.wrappers.LibraryPreview`
-        """
         dicts = self.gi.libraries.get_libraries(name=name, deleted=deleted)
         return [wrappers.LibraryPreview(_, gi=self.obj_gi) for _ in dicts]
 
@@ -409,18 +423,6 @@ class ObjHistoryClient(ObjDatasetClient):
         return self._get_container(id_, wrappers.History)
 
     def get_previews(self, name=None, deleted=False):
-        """
-        Get history previews for the user of this Galaxy instance.
-
-        :type name: str
-        :param name: return only histories with this name
-
-        :type deleted: bool
-        :param deleted: if :obj:`True`, return only deleted histories
-
-        :rtype: list of
-          :class:`~.wrappers.HistoryPreview`
-        """
         dicts = self.gi.histories.get_histories(name=name, deleted=deleted)
         return [wrappers.HistoryPreview(_, gi=self.obj_gi) for _ in dicts]
 
@@ -609,17 +611,6 @@ class ObjWorkflowClient(ObjClient):
 
     # the 'deleted' option is not available for workflows
     def get_previews(self, name=None, published=False):
-        """
-        Get workflow previews for the user of this Galaxy instance.
-
-        :type name: str
-        :param name: return only workflows with this name
-        :type published: bool
-        :param published: return published workflows
-
-        :rtype: list of
-          :class:`~.wrappers.WorkflowPreview`
-        """
         dicts = self.gi.workflows.get_workflows(
             name=name, published=published
             )
