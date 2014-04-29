@@ -299,16 +299,13 @@ class CloudManLauncher(object):
         s3_conn = self.connect_s3(self.access_key, self.secret_key, self.cloud)
         buckets = s3_conn.get_all_buckets()
         clusters = []
-        for bucket in buckets:
-            if 'cm-' in bucket.name:  # Inspect CloudMan buckets only
+        for bucket in [b for b in buckets if b.name.startswith('cm-')]:
                 try:
                     # TODO: first lookup if persistent_data.yaml key exists
                     pd = bucket.get_key('persistent_data.yaml')
-                except S3ResponseError, e:
+                except S3ResponseError:
                     # This can fail for a number of reasons for non-us and/or CNAME'd buckets.
-                    err = ("Problem fetching persistent_data.yaml from bucket %s \n%s"
-                           % (bucket, e.body))
-                    bioblend.log.error(err)
+                    bioblend.log.exception("Problem fetching persistent_data.yaml from bucket %s" % bucket)
                     continue
                 if pd:
                     # We are dealing with a CloudMan bucket
@@ -445,6 +442,17 @@ class CloudManLauncher(object):
             ci = yaml.dump(ci, default_flow_style=False, allow_unicode=False)
         return ci
 
+    def _get_volume_placement(self, vol_id):
+        """
+        Returns the placement of a volume (or None, if it cannot be determined)
+        """
+        vol = self.ec2_conn.get_all_volumes(volume_ids=[vol_id])
+        if vol:
+            return vol[0].zone
+        else:
+            bioblend.log.error("Requested placement of a volume '%s' that does not exist." % vol_id)
+            return None
+
     def _find_placement(self, cluster_name, cluster=None):
         """
         Find a placement zone for a cluster with the name ``cluster_name`` and
@@ -456,35 +464,28 @@ class CloudManLauncher(object):
         return ``None``.
         """
         placement = None
-        if not cluster:
-            cluster = self.get_cluster_pd(cluster_name)
+        cluster = cluster or self.get_cluster_pd(cluster_name)
         if cluster and 'persistent_data' in cluster:
             pd = cluster['persistent_data']
-            if 'placement' in pd:
-                placement = pd['placement']
-            elif 'data_filesystems' in pd:
-                try:
+            try:
+                if 'placement' in pd:
+                    placement = pd['placement']
+                elif 'data_filesystems' in pd:
                     # We have v1 format persistent data so get the volume first and
                     # then the placement zone
                     vol_id = pd['data_filesystems']['galaxyData'][0]['vol_id']
-                    vol = self.ec2_conn.get_all_volumes(volume_ids=[vol_id])
-                    if vol:
-                        placement = vol[0].zone
-                except:
-                    # If anything goes wrong with zone detection, default to None
-                    placement = None
-            elif 'filesystems' in pd:
-                for fs in pd['filesystems']:
-                    if 'kind' in fs and fs['kind'] == 'volume':
-                        if 'ids' in fs:
-                            try:
-                                vol_id = fs['ids'][0]  # All volumes must be in the same zone
-                                vol = self.ec2_conn.get_all_volumes(volume_ids=[vol_id])
-                                if vol:
-                                    placement = vol[0].zone
-                            except:
-                                # If anything goes wrong with zone detection, default to None
-                                placement = None
+                    placement = self._get_volume_placement(vol_id)
+                elif 'filesystems' in pd:
+                    # V2 format.
+                    for fs in [fs for fs in pd['filesystems'] if fs.get('kind', None) == 'volume' and 'ids' in fs]:
+                        vol_id = fs['ids'][0]  # All volumes must be in the same zone
+                        placement = self._get_volume_placement(vol_id)
+                        # No need to continue to iterate through
+                        # filesystems, if we found one with a volume.
+                        break
+            except Exception, ex:
+                bioblend.log.exception("Exception while finding placement.  This can indicate malformed instance data.  Or that this method is broken.")
+                placement = None
         return placement
 
     def find_placements(self, ec2_conn, instance_type, cloud_type, cluster_name=None):
@@ -510,21 +511,18 @@ class CloudManLauncher(object):
         # First look for a specific zone a given cluster is bound to
         zones = []
         if cluster_name:
-            zones = self._find_placement(cluster_name)
+            zones = self._find_placement(cluster_name) or []
         # If placement is not found, look for a list of available zones
         if not zones:
-            zones = []  # _find_placement can return None so ensure we have a list
             in_the_past = datetime.datetime.now() - datetime.timedelta(hours=1)
             back_compatible_zone = "us-east-1e"
-            for zone in ec2_conn.get_all_zones():
-                if zone.state in ["available"]:
-                    # Non EC2 clouds may not support get_spot_price_history
-                    if instance_type is not None and cloud_type == 'ec2':
-                        if (len(ec2_conn.get_spot_price_history(instance_type=instance_type,
-                                                                end_time=in_the_past.isoformat(),
-                                                                availability_zone=zone.name)) > 0):
-                            zones.append(zone.name)
-                    else:
+            for zone in [z for z in ec2_conn.get_all_zones() if z.state == 'available']:
+                # Non EC2 clouds may not support get_spot_price_history
+                if instance_type is None or cloud_type != 'ec2':
+                    zones.append(zone.name)
+                elif ec2_conn.get_spot_price_history(instance_type=instance_type,
+                                                     end_time=in_the_past.isoformat(),
+                                                     availability_zone=zone.name):
                         zones.append(zone.name)
             zones.sort(reverse=True)  # Higher-lettered zones seem to have more availability currently
             if back_compatible_zone in zones:
@@ -532,10 +530,6 @@ class CloudManLauncher(object):
             if len(zones) == 0:
                 bioblend.log.error("Did not find availabilty zone for {1}".format(instance_type))
                 zones.append(back_compatible_zone)
-        else:
-            # Make sure we're returning a list
-            if not isinstance(zones, list):
-                zones = [zones]
         return zones
 
     def _checkURL(self, url):
