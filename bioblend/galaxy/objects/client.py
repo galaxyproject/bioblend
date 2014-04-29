@@ -66,6 +66,19 @@ class ObjClient(object):
         """
         pass
 
+    def _select_ids(self, id_=None, name=None):
+        """
+        Return the id list that corresponds to the given id or name info.
+        """
+        if id_ is None and name is None:
+            self._error('neither id nor name provided', err_type=TypeError)
+        if id_ is not None and name is not None:
+            self._error('both id and name provided', err_type=TypeError)
+        if id_ is None:
+            return [_.id for _ in self.get_previews(name=name)]
+        else:
+            return [id_]
+
     #-- helpers --
     def _error(self, msg, err_type=RuntimeError):
         self.log.error(msg)
@@ -221,17 +234,20 @@ class ObjLibraryClient(ObjDatasetClient):
         dicts = self.gi.libraries.get_libraries(name=name)
         return [self.get(_['id']) for _ in dicts]
 
-    def delete(self, id_):
+    def delete(self, id_=None, name=None):
         """
-        Delete the library with the given id.
+        Delete the library with the given id or name.
+
+        Note that the same name can map to multiple libraries.
 
         .. warning::
           Deleting a data library is irreversible - all of the data from
           the library will be permanently deleted.
         """
-        res = self.gi.libraries.delete_library(id_)
-        if not isinstance(res, collections.Mapping):
-            self._error('delete_library: unexpected reply: %r' % (res,))
+        for id_ in self._select_ids(id_=id_, name=name):
+            res = self.gi.libraries.delete_library(id_)
+            if not isinstance(res, collections.Mapping):
+                self._error('delete_library: unexpected reply: %r' % (res,))
 
     #-- library contents --
 
@@ -449,18 +465,21 @@ class ObjHistoryClient(ObjDatasetClient):
             self._error('update_history: failed to update %r' % (history.id,))
         return self.get(history.id)
 
-    def delete(self, id_, purge=False):
+    def delete(self, id_=None, name=None, purge=False):
         """
-        Delete the history with the given id.
+        Delete the history with the given id or name.
+
+        Note that the same name can map to multiple histories.
 
         :type purge: bool
         :param purge: if :obj:`True`, also purge the history (requires
           ``allow_user_dataset_purge = True`` to be set in Galaxy's
           configuration file ``universe_wsgi.ini``)
         """
-        res = self.gi.histories.delete_history(id_, purge=purge)
-        if not isinstance(res, collections.Mapping):
-            self._error('delete_history: unexpected reply: %r' % (res,))
+        for id_ in self._select_ids(id_=id_, name=name):
+            res = self.gi.histories.delete_history(id_, purge=purge)
+            if not isinstance(res, collections.Mapping):
+                self._error('delete_history: unexpected reply: %r' % (res,))
 
     #-- history contents --
 
@@ -740,17 +759,20 @@ class ObjWorkflowClient(ObjClient):
         out_dss = [out_hist.get_dataset(_) for _ in res['outputs']]
         return out_dss, out_hist
 
-    def delete(self, id_):
+    def delete(self, id_=None, name=None):
         """
-        Delete the workflow with the given id.
+        Delete the workflow with the given id or name.
+
+        Note that the same name can map to multiple workflows.
 
         .. warning::
           Deleting a workflow is irreversible - all of the data from
           the workflow will be permanently deleted.
         """
-        res = self.gi.workflows.delete_workflow(id_)
-        if not isinstance(res, basestring):
-            self._error('delete_workflow: unexpected reply: %r' % (res,))
+        for id_ in self._select_ids(id_=id_, name=name):
+            res = self.gi.workflows.delete_workflow(id_)
+            if not isinstance(res, basestring):
+                self._error('delete_workflow: unexpected reply: %r' % (res,))
 
 
 class ObjToolClient(ObjClient):

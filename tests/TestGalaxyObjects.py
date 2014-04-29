@@ -325,7 +325,7 @@ class TestGalaxyInstance(unittest.TestCase):
     def test_get_workflows(self):
         self.__test_multi_get('workflow')
 
-    def __test_multi_get(self, obj_type):
+    def __normalized_functions(self, obj_type):
         if obj_type == 'library':
             create = self.gi.libraries.create
             get_objs = self.gi.libraries.list
@@ -345,7 +345,12 @@ class TestGalaxyInstance(unittest.TestCase):
             get_objs = self.gi.workflows.list
             get_prevs = self.gi.workflows.get_previews
             del_kwargs = {}
-        #--
+        return create, get_objs, get_prevs, del_kwargs
+
+    def __test_multi_get(self, obj_type):
+        create, get_objs, get_prevs, del_kwargs = self.__normalized_functions(
+            obj_type
+            )
         ids = lambda seq: set(_.id for _ in seq)
         names = ['test_%s' % uuid.uuid4().hex for _ in xrange(2)]
         objs = []
@@ -368,6 +373,27 @@ class TestGalaxyInstance(unittest.TestCase):
         finally:
             for o in objs:
                 o.delete(**del_kwargs)
+
+    def test_delete_libraries_by_name(self):
+        self.__test_delete_by_name('library')
+
+    def test_delete_histories_by_name(self):
+        self.__test_delete_by_name('history')
+
+    def test_delete_workflows_by_name(self):
+        self.__test_delete_by_name('workflow')
+
+    def __test_delete_by_name(self, obj_type):
+        create, _, get_prevs, del_kwargs = self.__normalized_functions(
+            obj_type
+            )
+        name = 'test_%s' % uuid.uuid4().hex
+        objs = [create(name) for _ in xrange(2)]
+        final_name = objs[0].name
+        self.assertEqual(len(get_prevs(name=final_name)), len(objs))
+        del_kwargs['name'] = final_name
+        objs[0].gi_module.delete(**del_kwargs)
+        self.assertEqual(len(get_prevs(name=final_name)), 0)
 
 
 class TestLibraryContents(unittest.TestCase):
