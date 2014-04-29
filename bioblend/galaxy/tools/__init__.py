@@ -4,7 +4,7 @@ Contains possible interaction dealing with Galaxy tools.
 """
 from bioblend.galaxy.client import Client
 from os.path import basename
-from simplejson import dumps
+from json import dumps
 
 
 class ToolClient(Client):

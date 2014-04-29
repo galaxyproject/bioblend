@@ -1,11 +1,11 @@
 """
 Tests the functionality of the Blend CloudMan API. These tests require working
-credentials to supported cloud infrastructure. 
+credentials to supported cloud infrastructure.
 
 Use ``nose`` to run these unit tests.
 """
 import os
-import simplejson
+import json
 import GalaxyTestBase
 import test_util
 
@@ -29,7 +29,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         file_local_path = os.path.join(file_local_path, filename)
 
         with open(file_local_path, 'rb') as fp:
-            workflow_json = simplejson.load(fp)
+            workflow_json = json.load(fp)
 
     def test_get_workflows(self):
         wk = self.gi.workflows.get_workflows()[0]
