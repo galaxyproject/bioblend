@@ -54,7 +54,7 @@ class DatasetClient(Client):
                                  contain the full file path including filename.
 
         :type wait_for_completion: boolean
-        :param wait_for_completion: If wait_for_completion is True, this call will block till the dataset is ready.
+        :param wait_for_completion: If wait_for_completion is True, this call will block until the dataset is ready.
                                     If the dataset state becomes invalid, a DatasetStateException will be thrown.
 
         :type maxwait: float

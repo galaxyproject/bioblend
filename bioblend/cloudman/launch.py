@@ -118,9 +118,8 @@ class CloudManLauncher(object):
                                              placement=placement)
             ret['rs'] = rs
         except EC2ResponseError, e:
-            err = "Problem launching an instance: %s" % e
-            bioblend.log.error(err)
-            ret['error'] = err
+            bioblend.log.exception("Problem launching an instance.")
+            ret['error'] = "Problem launching an instance."
             return ret
         else:
             try:
@@ -128,9 +127,8 @@ class CloudManLauncher(object):
                 ret['instance_id'] = rs.instances[0].id
                 ret['instance_ip'] = rs.instances[0].ip_address
             except Exception, e:
-                err = "Problem with the launched instance object: %s" % e
-                bioblend.log.error(err)
-                ret['error'] = err
+                bioblend.log.exception("Problem with the launched instance object.")
+                ret['error'] = "Problem with the launched instance object: %s" % e
         return ret
 
     def create_cm_security_group(self, sg_name='CloudMan'):
@@ -169,16 +167,16 @@ class CloudManLauncher(object):
                     cmsg.authorize(ip_protocol='tcp', from_port=port[0], to_port=port[1], cidr_ip='0.0.0.0/0')
                 else:
                     bioblend.log.debug("Rule (%s:%s) already exists in the SG" % (port[0], port[1]))
-            except EC2ResponseError, e:
-                bioblend.log.error("A problem with security group authorizations: %s" % e)
+            except EC2ResponseError:
+                bioblend.log.exception("A problem with security group authorizations.")
         # Add ICMP (i.e., ping) rule required by HTCondor
         try:
             if not self.rule_exists(cmsg.rules, from_port='-1', to_port='-1', ip_protocol='icmp'):
                 cmsg.authorize(ip_protocol='icmp', from_port=-1, to_port=-1, cidr_ip='0.0.0.0/0')
             else:
                 bioblend.log.debug("ICMP rule already exists in {0} SG".format(sg_name))
-        except EC2ResponseError, e:
-            bioblend.log.error("A problem with security group authorizations: %s" % e)
+        except EC2ResponseError:
+            bioblend.log.exception("A problem with security group authorizations.")
         # Add rule that allows communication between instances in the same SG
         g_rule_exists = False  # A flag to indicate if group rule already exists
         for rule in cmsg.rules:
@@ -191,8 +189,8 @@ class CloudManLauncher(object):
         if not g_rule_exists:
             try:
                 cmsg.authorize(src_group=cmsg)
-            except EC2ResponseError, e:
-                bioblend.log.error("A problem w/ security group authorization: %s" % e)
+            except EC2ResponseError:
+                bioblend.log.exception("A problem with security group authorization.")
         bioblend.log.info("Done configuring '%s' security group" % cmsg.name)
         return cmsg.name
 
@@ -222,8 +220,8 @@ class CloudManLauncher(object):
                 return akp.name, None
         try:
             kp = self.ec2_conn.create_key_pair(key_name)
-        except EC2ResponseError, e:
-            bioblend.log.error("Problem creating key pair '%s': %s" % (key_name, e))
+        except EC2ResponseError:
+            bioblend.log.exception("Problem creating key pair '%s'." % key_name)
             return None, None
         bioblend.log.info("Created key pair '%s'" % kp.name)
         return kp.name, kp.material
@@ -483,7 +481,7 @@ class CloudManLauncher(object):
                         # No need to continue to iterate through
                         # filesystems, if we found one with a volume.
                         break
-            except Exception, ex:
+            except Exception:
                 bioblend.log.exception("Exception while finding placement.  This can indicate malformed instance data.  Or that this method is broken.")
                 placement = None
         return placement
