@@ -13,6 +13,30 @@ class ToolClient(Client):
         self.module = 'tools'
         super(ToolClient, self).__init__(galaxy_instance)
 
+    def get_tools(self):
+        """
+        Get a list of available tool elements in Galaxy's configured toolbox.
+
+        :rtype: list
+        :return: List of tool descriptions.
+        """
+        return self._raw_get_tool(in_panel=False)
+
+    def get_tool_panel(self):
+        """
+        Get a list of available tool elements in Galaxy's configured toolbox.
+
+        :rtype: list
+        :return: List containing tools (if not in sections) or tool sections
+                 with nested tool descriptions.
+        """
+        return self._raw_get_tool(in_panel=True)
+
+    def _raw_get_tool(self, in_panel=None):
+        params = {}
+        params['in_panel'] = in_panel
+        return Client._get(self, params=params)
+
     def run_tool(self, history_id, tool_id, tool_inputs):
         """
         Runs tool specified by ``tool_id`` in history indicated
