@@ -17,6 +17,29 @@ class TestGalaxyTools(GalaxyTestBase.GalaxyTestBase):
     def setUp(self):
         super(TestGalaxyTools, self).setUp()
 
+    def test_get_tools(self):
+        # Test requires target Galaxy is configured with at least one tool.
+        tools = self.gi.tools.get_tools()
+        assert len(tools) > 0
+        assert all(map(self._assert_is_tool_rep, tools))
+
+    def test_get_tool_panel(self):
+        # Test requires target Galaxy is configured with at least one tool
+        # section.
+        tool_panel = self.gi.tools.get_tool_panel()
+        sections = [ s for s in tool_panel if "elems" in s ]
+        assert len(sections) > 0
+        assert all(map(self._assert_is_tool_rep, sections[0]["elems"]))
+
+    def _assert_is_tool_rep(self, data):
+        assert data["model_class"].endswith("Tool")
+        # Special tools like SetMetadataTool may have different model_class
+        # than Tool - but they all seem to end in tool.
+
+        for key in ["name", "id", "version"]:
+            assert key in data, "key %s not in %s" % (key, data)
+        return True
+
     def test_paste_data(self):
         history = self.gi.histories.create_history(name="test_paste_data history")
 
