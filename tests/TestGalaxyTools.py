@@ -59,6 +59,7 @@ class TestGalaxyTools(GalaxyTestBase.GalaxyTestBase):
         )
         assert len(tool_output["outputs"]) == 1
 
+    @test_util.skip_unless_tool("random_lines1")
     def test_run_random_lines(self):
         # Run second test case from randomlines.xml
         history_id = self.gi.histories.create_history(name="test_run_random_lines history")["id"]
@@ -83,6 +84,7 @@ class TestGalaxyTools(GalaxyTestBase.GalaxyTestBase):
         # TODO: Wait for results and verify has 1 line and is
         # chr5  131424298   131424460   CCDS4149.1_cds_0_0_chr5_131424299_f 0   +
 
+    @test_util.skip_unless_tool("cat1")
     def test_run_cat1(self):
         history_id = self.gi.histories.create_history(name="test_run_cat1 history")["id"]
         dataset1_id = self._test_dataset(history_id, contents="1 2 3")
