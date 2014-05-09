@@ -116,7 +116,7 @@ class Client(object):
 
         Raises:
             ConnectionError
-            json.JSONDecodeError
+            ValueError
         """
         # Why is this method in Client instead of GalaxyInstance?
         # When some API calls go bad Galaxy returns HTTP 200 with an empty body
@@ -148,7 +148,7 @@ class Client(object):
                     raise ConnectionError(e.message)  # raise client.ConnectionError
                 else:
                     bb.log.warn("Error connecting to Galaxy: %s. Going to retry %s more times.", e, attempts_left)
-            except json.JSONDecodeError as e:
+            except ValueError as e:
                 if attempts_left <= 0:
                     raise
                 else:
