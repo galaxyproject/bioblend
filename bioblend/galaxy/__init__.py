@@ -1,6 +1,8 @@
 """
 A base representation of an instance of Galaxy
 """
+import base64
+import requests
 import urlparse
 from bioblend.galaxy.client import Client
 from bioblend.galaxy import (libraries, histories, workflows, datasets, users,
@@ -10,7 +12,7 @@ from bioblend.galaxyclient import GalaxyClient
 
 
 class GalaxyInstance(GalaxyClient):
-    def __init__(self, url, key):
+    def __init__(self, url, key=None, email=None, password=None):
         """
         A base representation of an instance of Galaxy, identified by a
         URL and a user's API key.
@@ -35,7 +37,18 @@ class GalaxyInstance(GalaxyClient):
 
         :type key: string
         :param key: User's API key for the given instance of Galaxy, obtained
-                    from the user preferences.
+                    from the user preferences. If a key is not supplied, an
+                    email address and password must be and key will
+                    automatically be created for the user.
+
+        :type email: string
+        :param email: Galaxy e-mail address corresponding to the user.
+                      Ignored if key is supplied directly.
+
+        :type password: string
+        :param password: Password of Galaxy account corresponding to the above
+                         e-mail address. Ignored if key is supplied directly.
+
         """
         # Make sure the url scheme is defined (otherwise requests will not work)
         if not urlparse.urlparse(url).scheme:
@@ -43,8 +56,14 @@ class GalaxyInstance(GalaxyClient):
         # All of Galaxy's API's are rooted at <url>/api so make that the base url
         self.base_url = url
         self.url = urlparse.urljoin(url, 'api')
-        self.key = key
-        self.default_params = {'key': key}
+        # If key supplied use it, otherwise just set email and password and
+        # grab users key before first request.
+        if key:
+            self.__key = key
+        else:
+            self.__key = None
+            self.email = email
+            self.password = password
         self.json_headers = {'Content-Type': 'application/json'}
         self.verify = False  # Should SSL verification be done
         self.libraries = libraries.LibraryClient(self)
@@ -63,6 +82,26 @@ class GalaxyInstance(GalaxyClient):
         self.jobs = jobs.JobsClient(self)
         self.forms = forms.FormsClient(self)
         self.ftpfiles = ftpfiles.FTPFilesClient(self)
+
+    @property
+    def key(self):
+        if self.__key is None:
+            unencoded_credentials = "%s:%s" % (self.email, self.password)
+            authorization = base64.b64encode(unencoded_credentials)
+            headers = self.json_headers.copy()
+            headers["Authorization"] = authorization
+            auth_url = "%s/authenticate/baseauth" % self.url
+            # make_post_request uses default_params, which uses this and
+            # sets wrong headers - so using lower level method.
+            r = requests.get(auth_url, verify=self.verify, headers=headers)
+            if r.status_code != 200:
+                raise Exception("Failed to authenticate user.")
+            self.__key = r.json()["api_key"]
+        return self.__key
+
+    @property
+    def default_params(self):
+        return {'key': self.key}
 
     @property
     def max_get_attempts(self):
