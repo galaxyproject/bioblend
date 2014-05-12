@@ -124,6 +124,29 @@ class HistoryClient(Client):
 
         return Client._put(self, payload, id=history_id)
 
+    def update_dataset(self, history_id, dataset_id, **kwds):
+        """
+        Update history dataset metadata. Only a subset of the available
+        metadata parameters for modification are documented below currently.
+
+        :type history_id: string
+        :param history_id: Encoded history ID
+        :type name: string
+        :param name: Replace history dataset name with the given string
+        :type annotation: string
+        :param annotation: Replace history dataset annotation with given string
+        :type deleted: boolean
+        :param deleted: Mark or unmark history dataset as deleted.
+        :type visible: boolean
+        :param visible: Mark or unmark history dataset as visible.
+
+        :rtype: status_code (int)
+        """
+        url = self.gi._make_url(self, history_id, contents=True)
+        # Append the dataset_id to the base history contents URL
+        url = '/'.join([url, dataset_id])
+        return Client._put(self, payload=kwds, url=url)
+
     def create_history_tag(self, history_id, tag):
         """
         Create history tag

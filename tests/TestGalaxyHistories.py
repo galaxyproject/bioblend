@@ -61,6 +61,13 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
         dataset = self.gi.histories.show_dataset(history_id, dataset1_id)
         self.assertEqual(dataset["deleted"], True)
 
+    def test_update_dataset(self):
+        history_id = self.history["id"]
+        dataset1_id = self._test_dataset(history_id)
+        self.gi.histories.update_dataset(history_id, dataset1_id, visible=False)
+        dataset = self.gi.histories.show_dataset(history_id, dataset1_id)
+        self.assertEqual(dataset["visible"], False)
+
     def test_upload_dataset_from_library(self):
         pass
 
