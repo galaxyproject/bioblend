@@ -67,6 +67,15 @@ class HistoryClient(Client):
                 params['visible'] = visible
         return Client._get(self, id=history_id, contents=contents, params=params)
 
+    def delete_dataset(self, history_id, dataset_id):
+        """
+        Mark corresponding datset as deleted.
+        """
+        url = self.gi._make_url(self, history_id, contents=True)
+        # Append the dataset_id to the base history contents URL
+        url = '/'.join([url, dataset_id])
+        Client._delete(self, payload={}, url=url)
+
     def show_dataset(self, history_id, dataset_id):
         """
         Get details about a given history dataset. The required ``history_id``
