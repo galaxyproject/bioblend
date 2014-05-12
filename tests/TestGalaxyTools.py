@@ -108,10 +108,6 @@ class TestGalaxyTools(GalaxyTestBase.GalaxyTestBase):
         # TODO: Wait for results and verify it has 3 lines - 1 2 3, 4 5 6,
         # and 7 8 9.
 
-    def _test_dataset(self, history_id, contents="1\t2\t3"):
-        tool_output = self.gi.tools.paste_content(contents, history_id)
-        return tool_output["outputs"][0]["id"]
-
 
 def load_data(name):
     return open(os.path.join(os.path.dirname(__file__), "data", name), "r").read()
