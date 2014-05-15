@@ -49,16 +49,16 @@ class TestGalaxyDatasetCollections(GalaxyTestBase.GalaxyTestBase):
                         name="sample1",
                         type="paired",
                         elements=[
-                            collections.HistoryDatasetElement(name="left", id=dataset1_id),
-                            collections.HistoryDatasetElement(name="right", id=dataset2_id),
+                            collections.HistoryDatasetElement(name="forward", id=dataset1_id),
+                            collections.HistoryDatasetElement(name="reverse", id=dataset2_id),
                         ]
                     ),
                     collections.CollectionElement(
                         name="sample2",
                         type="paired",
                         elements=[
-                            collections.HistoryDatasetElement(name="left", id=dataset3_id),
-                            collections.HistoryDatasetElement(name="right", id=dataset4_id),
+                            collections.HistoryDatasetElement(name="forward", id=dataset3_id),
+                            collections.HistoryDatasetElement(name="reverse", id=dataset4_id),
                         ]
                     ),
                 ]
@@ -72,22 +72,22 @@ class TestGalaxyDatasetCollections(GalaxyTestBase.GalaxyTestBase):
         created_pair1 = elements[0]["object"]
         assert created_pair1["collection_type"] == "paired"
         assert len(created_pair1["elements"]) == 2
-        left_element1 = created_pair1["elements"][0]
-        assert left_element1["element_identifier"] == "left"
-        assert left_element1["element_index"] == 0
-        left_dataset1 = left_element1["object"]
-        assert left_dataset1["id"] == dataset1_id
+        forward_element1 = created_pair1["elements"][0]
+        assert forward_element1["element_identifier"] == "forward"
+        assert forward_element1["element_index"] == 0
+        forward_dataset1 = forward_element1["object"]
+        assert forward_dataset1["id"] == dataset1_id
 
         assert elements[1]["element_index"] == 1
         created_pair2 = elements[1]["object"]
         assert created_pair2["collection_type"] == "paired"
         assert len(created_pair2["elements"]) == 2
-        right_element2 = created_pair2["elements"][1]
-        right_dataset2 = right_element2["object"]
+        reverse_element2 = created_pair2["elements"][1]
+        reverse_dataset2 = reverse_element2["object"]
 
-        assert right_element2["element_identifier"] == "right"
-        assert right_element2["element_index"] == 1
-        assert right_dataset2["id"] == dataset4_id
+        assert reverse_element2["element_identifier"] == "reverse"
+        assert reverse_element2["element_index"] == 1
+        assert reverse_dataset2["id"] == dataset4_id
 
     def test_collections_in_history_index(self):
         history_id = self.gi.histories.create_history(name="TestHistoryDSIndex")["id"]
@@ -130,8 +130,8 @@ class TestGalaxyDatasetCollections(GalaxyTestBase.GalaxyTestBase):
                 name="MyTestPair",
                 type="paired",
                 elements=[
-                    collections.HistoryDatasetElement(name="left", id=dataset1_id),
-                    collections.HistoryDatasetElement(name="right", id=dataset2_id),
+                    collections.HistoryDatasetElement(name="forward", id=dataset1_id),
+                    collections.HistoryDatasetElement(name="reverse", id=dataset2_id),
                 ]
             )
         )
