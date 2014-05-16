@@ -437,7 +437,7 @@ class HistoryDatasetAssociation(Dataset):
     """
     Maps to a Galaxy ``HistoryDatasetAssociation``.
     """
-    BASE_ATTRS = Dataset.BASE_ATTRS + ('state',)
+    BASE_ATTRS = Dataset.BASE_ATTRS + ('state', 'deleted')
     SRC = 'hda'
     POLLING_INTERVAL = 1  # for state monitoring
 
