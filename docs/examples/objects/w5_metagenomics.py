@@ -18,6 +18,11 @@ p = get_one(_ for _ in previews if _.published)
 
 iw = gi.workflows.import_shared(p.id)
 
+# Create a new history
+
+history_name = '%s output' % workflow_name
+h = gi.histories.create(history_name)
+
 # Select the "Orione SupMat" library
 
 library_name = 'Orione SupMat'
@@ -26,8 +31,7 @@ l = get_one(gi.libraries.list(name=library_name))
 # Select the "/Metagenomics/MetagenomicsDataset.fq" dataset
 
 ds_name = '/Metagenomics/MetagenomicsDataset.fq'
-ld = get_one(l.get_datasets(name=ds_name))
-input_map = {'Input Dataset': ld}
+input_map = {'Input Dataset': h.import_dataset(get_one(l.get_datasets(name=ds_name)))}
 
 # Select the blastn step
 
@@ -42,10 +46,9 @@ ws_parameters = ws.tool_inputs.copy()
 # Run the workflow on a new history with the selected dataset
 # as input, setting the BLAST db to "16SMicrobial-20131106"
 
-history_name = '%s output' % workflow_name
 params = {tool_id: {'db_opts': ws_parameters['db_opts']}}
 params[tool_id]['db_opts']['database'] = '16SMicrobial-20131106'
-outputs, out_hist = iw.run(input_map, history_name, params=params)
+outputs, out_hist = iw.run(input_map, h, params=params)
 assert out_hist.name == history_name
 
 print 'Running workflow: %s [%s]' % (iw.name, iw.id)

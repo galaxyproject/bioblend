@@ -18,6 +18,11 @@ p = get_one(_ for _ in previews if _.published)
 
 iw = gi.workflows.import_shared(p.id)
 
+# Create a new history
+
+history_name = '%s output' % workflow_name
+h = gi.histories.create(history_name)
+
 # Select the "Orione SupMat" library
 
 library_name = 'Orione SupMat'
@@ -35,7 +40,7 @@ input_labels = [
     'Reverse Reads',
     'Reference Genome',
     ]
-input_map = dict((label, get_one(l.get_datasets(name=name)))
+input_map = dict((label, h.import_dataset(get_one(l.get_datasets(name=name))))
                   for name, label in zip(ds_names, input_labels))
 
 # Set custom parameters for the "check_contigs" and "sspace" tools
@@ -47,8 +52,7 @@ params = {
 
 # Run the workflow on a new history with the selected datasets as inputs
 
-history_name = '%s output' % workflow_name
-outputs, out_hist = iw.run(input_map, history_name, params=params)
+outputs, out_hist = iw.run(input_map, h, params=params)
 assert out_hist.name == history_name
 
 print 'Running workflow: %s [%s]' % (iw.name, iw.id)
