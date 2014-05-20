@@ -54,6 +54,13 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
         self.assertEqual(dataset["deleted"], False)
         self.assertEqual(dataset["visible"], True)
 
+    def test_show_dataset_provenance(self):
+        history_id = self.history["id"]
+        dataset1_id = self._test_dataset(history_id)
+        prov = self.gi.histories.show_dataset_provenance(history_id, dataset1_id)
+        for key in ["job_id", "id", "stdout", "stderr", "parameters", "tool_id"]:
+            assert key in prov
+
     def test_delete_dataset(self):
         history_id = self.history["id"]
         dataset1_id = self._test_dataset(history_id)

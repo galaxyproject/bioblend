@@ -119,6 +119,19 @@ class HistoryClient(Client):
                 for h in self.show_history(history_id, contents=True)
                 if name_filter is None or name_filter.match(h['name'])]
 
+    def show_dataset_provenance(self, history_id, dataset_id, follow=False):
+        """
+        Get details related to how dataset was created (``id``, ``job_id``,
+        ``tool_id``, ``stdout``, ``stderr``, ``parameters``, ``inputs``,
+        etc...).
+
+        If ``follow`` is ``True``, recursively fetch dataset provenance
+        information for all inputs and their inputs, etc....
+        """
+        url = self.gi._make_url(self, history_id, contents=True)
+        url = '/'.join([url, dataset_id, "provenance"])
+        return Client._get(self, url=url)
+
     def update_history(self, history_id, name=None, annotation=None):
         """
         Update history metadata information. Current attributes that can be modified
