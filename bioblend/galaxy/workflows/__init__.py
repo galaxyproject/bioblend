@@ -2,7 +2,7 @@
 Contains possible interactions with the Galaxy Workflows
 """
 from bioblend.galaxy.client import Client
-import simplejson
+import json
 import os
 
 class WorkflowClient(Client):
@@ -71,8 +71,8 @@ class WorkflowClient(Client):
 
     def get_workflow_inputs(self, workflow_id, label):
         """
-        Get a list of workflow input IDs that match the given label. 
-        If no input matches the given label, an empty list is returned. 
+        Get a list of workflow input IDs that match the given label.
+        If no input matches the given label, an empty list is returned.
         """
         wf = Client._get(self, id=workflow_id)
         inputs = wf['inputs']
@@ -96,13 +96,13 @@ class WorkflowClient(Client):
         exported workflow.
         """
         with open(file_local_path, 'rb') as fp:
-            workflow_json = simplejson.load(fp)
+            workflow_json = json.load(fp)
 
         return self.import_workflow_json(workflow_json)
 
     def import_shared_workflow(self, workflow_id):
         """
-        Imports a new workflow from the shared published workflows 
+        Imports a new workflow from the shared published workflows
 
         :type workflow_id: string
         :param workflow_id: Encoded workflow ID
@@ -117,8 +117,8 @@ class WorkflowClient(Client):
                  u'published': False,
                  u'tags': [],
                  u'url': u'/api/workflows/ee0e2b4b696d9092'}
-     
-        """        
+
+        """
         payload = {}
         payload['workflow_id'] = workflow_id
         url = self.gi._make_url(self)
@@ -162,7 +162,7 @@ class WorkflowClient(Client):
             file_local_path = os.path.join(file_local_path, filename)
 
         with open(file_local_path, 'wb') as fp:
-            workflow_json = simplejson.dump(workflow_json, fp)
+            workflow_json = json.dump(workflow_json, fp)
 
         return workflow_json
 
@@ -202,7 +202,7 @@ class WorkflowClient(Client):
 
         :type replacement_params: dict
         :param params: A mapping from workflow replacement params to values. The map must be in the following
-                       format: 
+                       format:
                        ``{'output_name': 'my_output_name', 'threshold': '10'}``
 
         :rtype: dict
@@ -217,13 +217,13 @@ class WorkflowClient(Client):
         payload = {}
         payload['workflow_id'] = workflow_id
         payload['ds_map'] = dataset_map
-        
+
         if params:
             payload['parameters'] = params
 
         if replacement_params:
             payload['replacement_params'] = replacement_params
-            
+
         if history_id:
             payload['history'] = 'hist_id={0}'.format(history_id)
         elif history_name:

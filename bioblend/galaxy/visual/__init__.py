@@ -3,14 +3,12 @@ Contains possible interactions with the Galaxy visualization
 """
 from bioblend.galaxy.client import Client
 
-import shutil
-import urllib2
 
 class VisualClient(Client):
+
     def __init__(self, galaxy_instance):
         self.module = 'visualizations'
         super(VisualClient, self).__init__(galaxy_instance)
-
 
     def get_visualizations(self):
         """
@@ -30,8 +28,8 @@ class VisualClient(Client):
                    u'title': u'Bam to Bigwig',
                    u'type': u'trackster',
                    u'url': u'/api/visualizations/a669f50f8bf55b02'}]
-                                                                    
-        
+
+
         """
         results = Client._get(self)
         return results

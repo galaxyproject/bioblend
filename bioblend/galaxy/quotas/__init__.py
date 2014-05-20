@@ -1,25 +1,23 @@
 """
-Contains possible interactions with the Galaxy Quota 
+Contains possible interactions with the Galaxy Quota
 """
 from bioblend.galaxy.client import Client
 
-import shutil
-import urllib2
 
 class QuotaClient(Client):
+
     def __init__(self, galaxy_instance):
         self.module = 'quotas'
         super(QuotaClient, self).__init__(galaxy_instance)
 
-
-    def get_quotas(self,deleted=False):
+    def get_quotas(self, deleted=False):
         """
         Get a list of quotas
 
         :type deleted: Boolean
         :param deleted: Only return quota(s) that have been deleted
 
-        
+
         :rtype: list
         :return: A list of dicts with details on individual quotas.
                  For example::
@@ -32,11 +30,10 @@ class QuotaClient(Client):
                    u'model_class': u'Quota',
                    u'name': u'workshop',
                    u'url': u'/api/quotas/1ee267091d0190af'}]
-                                                    
-        
-        """
-        return Client._get(self,deleted=deleted)
 
+
+        """
+        return Client._get(self, deleted=deleted)
 
     def show_quota(self, quota_id, deleted=False):
         """
@@ -47,8 +44,8 @@ class QuotaClient(Client):
 
         :type deleted: Boolean
         :param deleted: Search for quota in list of ones already marked as deleted
-        
-        
+
+
         :rtype: dict
         :return: A description of quota
                  For example::
@@ -63,9 +60,7 @@ class QuotaClient(Client):
                    u'name': u'test ',
                    u'operation': u'=',
                    u'users': []}
-                                    
-                                
+
+
         """
-
-        return Client._get(self, id=quota_id,deleted=deleted)
-
+        return Client._get(self, id=quota_id, deleted=deleted)

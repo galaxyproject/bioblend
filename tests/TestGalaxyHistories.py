@@ -1,8 +1,4 @@
 """
-Tests the functionality of the Blend CloudMan API. These tests require working
-credentials to supported cloud infrastructure. 
-
-Use ``nose`` to run these unit tests.
 """
 import GalaxyTestBase
 import test_util
@@ -47,7 +43,30 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
         self.assertEqual('new', history_data['state'])
 
     def test_show_dataset(self):
-        pass
+        history_id = self.history["id"]
+        dataset1_id = self._test_dataset(history_id)
+        dataset = self.gi.histories.show_dataset(history_id, dataset1_id)
+        for key in ["name", "hid", "id", "deleted", "history_id", "visible"]:
+            assert key in dataset
+        self.assertEqual(dataset["history_id"], history_id)
+        self.assertEqual(dataset["hid"], 1)
+        self.assertEqual(dataset["id"], dataset1_id)
+        self.assertEqual(dataset["deleted"], False)
+        self.assertEqual(dataset["visible"], True)
+
+    def test_delete_dataset(self):
+        history_id = self.history["id"]
+        dataset1_id = self._test_dataset(history_id)
+        self.gi.histories.delete_dataset(history_id, dataset1_id)
+        dataset = self.gi.histories.show_dataset(history_id, dataset1_id)
+        self.assertEqual(dataset["deleted"], True)
+
+    def test_update_dataset(self):
+        history_id = self.history["id"]
+        dataset1_id = self._test_dataset(history_id)
+        self.gi.histories.update_dataset(history_id, dataset1_id, visible=False)
+        dataset = self.gi.histories.show_dataset(history_id, dataset1_id)
+        self.assertEqual(dataset["visible"], False)
 
     def test_upload_dataset_from_library(self):
         pass
@@ -57,7 +76,7 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
 
     def test_delete_history(self):
         result = self.gi.histories.delete_history(self.history['id'])
-        self.assertEqual(result, 'OK')
+        self.assertTrue(result['deleted'])
 
         full_history = self.gi.histories.get_histories()
         self.assertTrue(not any(d['id'] == self.history['id'] for d in full_history))
