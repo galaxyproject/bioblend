@@ -689,6 +689,7 @@ class Preview(Wrapper):
     Classes derived from this one model the short summaries returned
     by global getters such as ``/api/libraries``.
     """
+    BASE_ATTRS = Wrapper.BASE_ATTRS + ('deleted',)
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
@@ -733,7 +734,7 @@ class WorkflowPreview(Preview):
     Instances of this class wrap dictionaries obtained by getting
     ``/api/workflows`` from Galaxy.
     """
-    BASE_ATTRS = Wrapper.BASE_ATTRS + ('published', 'tags')
+    BASE_ATTRS = Preview.BASE_ATTRS + ('published', 'tags')
 
     def __init__(self, pw_dict, gi=None):
         super(WorkflowPreview, self).__init__(pw_dict, gi=gi)

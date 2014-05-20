@@ -390,10 +390,12 @@ class TestGalaxyInstance(unittest.TestCase):
         name = 'test_%s' % uuid.uuid4().hex
         objs = [create(name) for _ in xrange(2)]
         final_name = objs[0].name
-        self.assertEqual(len(get_prevs(name=final_name)), len(objs))
+        prevs = [_ for _ in get_prevs(name=final_name) if not _.deleted]
+        self.assertEqual(len(prevs), len(objs))
         del_kwargs['name'] = final_name
         objs[0].gi_module.delete(**del_kwargs)
-        self.assertEqual(len(get_prevs(name=final_name)), 0)
+        prevs = [_ for _ in get_prevs(name=final_name) if not _.deleted]
+        self.assertEqual(len(prevs), 0)
 
 
 class TestLibraryContents(unittest.TestCase):

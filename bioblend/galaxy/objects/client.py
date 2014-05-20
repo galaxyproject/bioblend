@@ -232,7 +232,7 @@ class ObjLibraryClient(ObjDatasetClient):
         :rtype: list of :class:`~.wrappers.Library`
         """
         dicts = self.gi.libraries.get_libraries(name=name)
-        return [self.get(_['id']) for _ in dicts]
+        return [self.get(_['id']) for _ in dicts if not _['deleted']]
 
     def delete(self, id_=None, name=None):
         """
