@@ -74,6 +74,8 @@ Visual
 
 -----
 
+.. _workflows-api:
+
 Workflows
 ---------
 
