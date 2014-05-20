@@ -1,18 +1,11 @@
 import sys, os, json, urlparse
 
-# This example uses a workflow and datasets publicly available on
-# CRS4's Orione Galaxy server.
+# This example, provided for comparison with w5_metagenomics.py,
+# contains the code required to run the metagenomics workflow
+# *without* BioBlend.
 
 URL = os.getenv('GALAXY_URL', 'http://orione.crs4.it')
 API_URL = urlparse.urljoin(URL, 'api')
-
-# To use the Galaxy API you need an API key. To get one, proceed as follows:
-#   1) go to http://orione.crs4.it and register, or log in if you are
-#      already registered, through the "User" menu at the top of the page;
-#   2) open "User" -> "API Keys";
-#   3) generate your API key if you don't have one;
-# In the following line, replace YOUR_API_KEY with your API key.
-
 API_KEY = os.getenv('GALAXY_API_KEY', 'YOUR_API_KEY')
 if API_KEY == 'YOUR_API_KEY':
     sys.exit('API_KEY not set, see the README.txt file')
