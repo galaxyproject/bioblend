@@ -24,6 +24,6 @@ libraries = gi.libraries.get_libraries()
 if len(libraries)==0:
     print "There are no Data Libraries available."
 else:
-    print "\Data Libraries:"
+    print "\nData Libraries:"
     for lib_dict in libraries:
         print "{0} : {1}".format(lib_dict['name'], lib_dict['id'])
