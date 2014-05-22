@@ -64,6 +64,14 @@ Effort has been made to keep the structure and naming of those API's consistent
 across the library but because they do bridge different services, some discrepancies
 may exist. Feel free to point those out and/or provide fixes.
 
+For Galaxy, an alternative :ref:`object-oriented API <objects-api>` is
+also available.  This API provides an explicit modeling of server-side
+Galaxy instances and their relationships, providing higher-level
+methods to perform operations such as retrieving all datasets for a
+given history, etc.  Note that, at the moment, the oo API is still
+incomplete, providing access to a more restricted set of Galaxy
+modules with respect to the standard one.
+
 CloudMan API
 ~~~~~~~~~~~~
 

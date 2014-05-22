@@ -81,19 +81,21 @@ Workflows
 
 .. automodule:: bioblend.galaxy.workflows
 
------
 
-Objects
--------
+.. _objects-api:
+
+==========================
+Object-oriented Galaxy API
+==========================
 
 .. autoclass:: bioblend.galaxy.objects.galaxy_instance.GalaxyInstance
 
-Wrappers
-........
-
-.. automodule:: bioblend.galaxy.objects.wrappers
-
 Client
-......
+------
 
 .. automodule:: bioblend.galaxy.objects.client
+
+Wrappers
+--------
+
+.. automodule:: bioblend.galaxy.objects.wrappers
