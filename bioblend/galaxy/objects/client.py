@@ -733,6 +733,11 @@ class ObjWorkflowClient(ObjClient):
         """
         if not workflow.is_mapped:
             self._error('workflow is not mapped to a Galaxy object')
+        if not workflow.is_runnable:
+            self._error('workflow has missing tools: %s' % ', '.join(
+                '%s[%s]' % (workflow.steps[_].tool_id, _)
+                for _ in workflow.missing_ids
+                ))
         ds_map = workflow.convert_input_map(input_map)
         kwargs = {
             'params': params,

@@ -282,6 +282,21 @@ class TestGalaxyInstance(unittest.TestCase):
             wf = self.gi.workflows.import_new(json.load(f))
         self.__check_and_del_workflow(wf)
 
+    def test_workflow_missing_tools(self):
+        sys.stderr.write('\nNOTE: error logging msg EXPECTED here\n')
+        with open(SAMPLE_FN) as f:
+            wf_dump = json.load(f)
+            wf_info = self.gi.gi.workflows.import_workflow_json(wf_dump)
+            wf_dict = self.gi.gi.workflows.show_workflow(wf_info['id'])
+            for id_, step in wf_dict['steps'].iteritems():
+                if step['type'] == 'tool':
+                    for k in 'tool_inputs', 'tool_version':
+                        wf_dict['steps'][id_][k] = None
+            wf = wrappers.Workflow(wf_dict, gi=self.gi)
+            self.assertFalse(wf.is_runnable)
+            self.assertRaises(StandardError, wf.run, 'foo', 'bar')
+            wf.delete()
+
     def test_export(self):
         with open(SAMPLE_FN) as f:
             wf1 = self.gi.workflows.import_new(f.read())

@@ -188,8 +188,9 @@ class Tool(Step):
         if step_dict['type'] != 'tool':
             raise ValueError('not a tool')
         super(Tool, self).__init__(step_dict, parent)
-        for k, v in self.tool_inputs.iteritems():
-            self.tool_inputs[k] = json.loads(v)
+        if self.tool_inputs:
+            for k, v in self.tool_inputs.iteritems():
+                self.tool_inputs[k] = json.loads(v)
 
 
 class Workflow(Wrapper):
@@ -206,12 +207,16 @@ class Workflow(Wrapper):
 
     def __init__(self, wf_dict, gi=None):
         super(Workflow, self).__init__(wf_dict, gi=gi)
+        missing_ids = []
         for k, v in self.steps.iteritems():
             # convert step ids to str for consistency with outer keys
             v['id'] = str(v['id'])
             for i in v['input_steps'].itervalues():
                 i['source_step'] = str(i['source_step'])
-            self.steps[k] = self._build_step(v, self)
+            step = self._build_step(v, self)
+            self.steps[k] = step
+            if isinstance(step, Tool) and not step.tool_inputs:
+                missing_ids.append(k)
         input_labels_to_ids = {}
         for id_, d in self.inputs.iteritems():
             input_labels_to_ids.setdefault(d['label'], set()).add(id_)
@@ -228,6 +233,7 @@ class Workflow(Wrapper):
         object.__setattr__(self, 'input_ids', heads - tails)
         assert self.input_ids == set(self.inputs)
         object.__setattr__(self, 'output_ids', tails - heads)
+        object.__setattr__(self, 'missing_ids', missing_ids)
 
     @property
     def gi_module(self):
@@ -318,6 +324,16 @@ class Workflow(Wrapper):
         Return the labels of this workflow's input steps.
         """
         return set(self.input_labels_to_ids)
+
+    @property
+    def is_runnable(self):
+        """
+        Return True if the workflow can be run on Galaxy.
+
+        A workflow is considered runnable on a Galaxy instance if all
+        of the tools it uses are installed in that instance.
+        """
+        return not self.missing_ids
 
     def convert_input_map(self, input_map):
         """
