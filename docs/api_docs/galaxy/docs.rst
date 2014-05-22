@@ -220,7 +220,7 @@ This call returns a dictionary containing basic metadata on the new Workflow obj
       u'name': u'CuffDiff',
       u'url': u'/api/workflows/b0631c44aa74526d'}]
 
-Instead of using JSON strings directly, Workflows can be exported to or imported from files on the local disk using the ``export_workflow_to_local_path`` and ``import_workflow_from_local_path`` methods. See the :ref:`workflows-api` API reference for details.
+Instead of using JSON strings directly, Workflows can be exported to or imported from files on the local disk using the ``export_workflow_to_local_path`` and ``import_workflow_from_local_path`` methods. See the :ref:`API reference <workflows-api>` for details.
 
 .. Note:: If we export a Workflow from one Galaxy instance and import it into another, Galaxy will only run it without modification if it has the same versions of the tool wrappers installed. This is to ensure reproducibility. Otherwise, we will need to manually update the Workflow to use the new tool versions.
 
@@ -260,7 +260,7 @@ To specify the inputs, we build a data map and pass this to the ``run_workflow``
                   ]
     }
 
-In this case the only input id is '252' and the corresponding dataset id is '10a4b652da44e82a'. We have specified the dataset source to be 'hda' (HistoryDatasetAssociation) since the dataset is stored in a History. See the :ref:`workflows-api` API reference for allowed dataset specifications. We have also requested that a new History be created and used to store the results of the run, by setting ``history_name='New output history'``. 
+In this case the only input id is '252' and the corresponding dataset id is '10a4b652da44e82a'. We have specified the dataset source to be 'hda' (HistoryDatasetAssociation) since the dataset is stored in a History. See the :ref:`API reference <workflows-api>` for allowed dataset specifications. We have also requested that a new History be created and used to store the results of the run, by setting ``history_name='New output history'``.
 
 The ``run_workflow`` call submits all the jobs which need to be run to the Galaxy workflow engine, with the appropriate dependencies so that they will run in order. The call returns immediately, so we can continue to submit new jobs while waiting for this workflow to execute. ``run_workflow`` returns the id of the output History and of the datasets that will be created as a result of this run. Note that these dataset ids are valid immediately, so we can specify these datasets as inputs to new jobs even before the files have been created, and the new jobs will be added to the queue with the appropriate dependencies.
 

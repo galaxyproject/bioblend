@@ -29,6 +29,17 @@ via Galaxy. In reality, it makes it possible to do things like this:
     gi.workflows.show_workflow('workflow ID')
     gi.workflows.run_workflow('workflow ID', input_dataset_map)
 
+- Interact with Galaxy via an object-oriented API::
+
+    from bioblend.galaxy.objects import GalaxyInstance
+    gi = GalaxyInstance("URL", "API_KEY")
+    wf = gi.workflows.list()[0]
+    hist = gi.histories.list()[0]
+    inputs = hist.get_datasets()[:2]
+    input_map = dict(zip(wf.input_labels, inputs))
+    params = {"Paste1": {"delimiter": "U"}}
+    wf.run(input_map, "wf_output", params=params)
+
 .. note::
     Although this library allows you to blend these two services into a cohesive unit,
     the library itself can be used with either service irrespective of the other. For

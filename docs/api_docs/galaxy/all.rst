@@ -74,9 +74,28 @@ Visual
 
 -----
 
+.. _workflows-api:
+
 Workflows
 ---------
 
 .. automodule:: bioblend.galaxy.workflows
 
------
+
+.. _objects-api:
+
+==========================
+Object-oriented Galaxy API
+==========================
+
+.. autoclass:: bioblend.galaxy.objects.galaxy_instance.GalaxyInstance
+
+Client
+------
+
+.. automodule:: bioblend.galaxy.objects.client
+
+Wrappers
+--------
+
+.. automodule:: bioblend.galaxy.objects.wrappers

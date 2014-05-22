@@ -111,12 +111,12 @@ class WorkflowClient(Client):
         :return: A description of the workflow.
                  For example::
 
-                 {u'id': u'ee0e2b4b696d9092',
-                 u'model_class': u'StoredWorkflow',
-                 u'name': u'Super workflow that solves everything!',
-                 u'published': False,
-                 u'tags': [],
-                 u'url': u'/api/workflows/ee0e2b4b696d9092'}
+                   {u'id': u'ee0e2b4b696d9092',
+                    u'model_class': u'StoredWorkflow',
+                    u'name': u'Super workflow that solves everything!',
+                    u'published': False,
+                    u'tags': [],
+                    u'url': u'/api/workflows/ee0e2b4b696d9092'}
 
         """
         payload = {}
