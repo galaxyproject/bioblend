@@ -15,7 +15,6 @@ class TestGalaxyUsers(GalaxyTestBase.GalaxyTestBase):
         users = self.gi.users.get_users()
         for user in users:
             self.assertIsNotNone(user['id'])
-            self.assertIsNotNone(user['url'])
             self.assertIsNotNone(user['email'])
 
     def test_show_user(self):

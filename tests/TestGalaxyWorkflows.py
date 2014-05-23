@@ -1,13 +1,16 @@
 """
-Tests the functionality of the Blend CloudMan API. These tests require working
-credentials to supported cloud infrastructure.
-
 Use ``nose`` to run these unit tests.
 """
 import os
 import json
+import tempfile
+import shutil
 import GalaxyTestBase
 import test_util
+
+
+def get_abspath(path):
+    return os.path.join(os.path.dirname(__file__), path)
 
 
 @test_util.skip_unless_galaxy()
@@ -16,20 +19,24 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
     def test_import_workflow_from_local_path(self):
         with self.assertRaises(Exception):
             self.gi.workflows.import_workflow_from_local_path(None)
-        wk = self.gi.workflows.import_workflow_from_local_path('tests/data/SampleWorkflow.ga')
+        path = get_abspath(os.path.join('data', 'paste_columns.ga'))
+        wk = self.gi.workflows.import_workflow_from_local_path(path)
         self.assertNotEqual(wk['id'], None)
 
     def test_export_workflow_to_local_path(self):
+        export_dir = tempfile.mkdtemp(prefix='bioblend_test_')
         with self.assertRaises(Exception):
             self.gi.workflows.export_workflow_to_local_path(None, None, None)
-        wk = self.gi.workflows.get_workflows()[0]
-        file_local_path = "."
-        filename = 'Galaxy-Workflow-%s.ga' % wk['name']
-        self.gi.workflows.export_workflow_to_local_path(wk['id'], file_local_path)
-        file_local_path = os.path.join(file_local_path, filename)
-
-        with open(file_local_path, 'rb') as fp:
-            workflow_json = json.load(fp)
+        path = get_abspath(os.path.join('data', 'paste_columns.ga'))
+        wk = self.gi.workflows.import_workflow_from_local_path(path)
+        self.gi.workflows.export_workflow_to_local_path(wk['id'], export_dir)
+        dir_contents = os.listdir(export_dir)
+        self.assertEqual(len(dir_contents), 1)
+        export_path = os.path.join(export_dir, dir_contents[0])
+        with open(export_path, 'rb') as f:
+            workflow_json = json.load(f)
+        assert isinstance(workflow_json, dict)
+        shutil.rmtree(export_dir)
 
     def test_get_workflows(self):
         wk = self.gi.workflows.get_workflows()[0]

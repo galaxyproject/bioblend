@@ -11,6 +11,10 @@ from bioblend.galaxy.tools.inputs import (
 )
 
 
+def get_abspath(path):
+    return os.path.join(os.path.dirname(__file__), path)
+
+
 @test_util.skip_unless_galaxy()
 class TestGalaxyTools(GalaxyTestBase.GalaxyTestBase):
 
@@ -49,8 +53,9 @@ class TestGalaxyTools(GalaxyTestBase.GalaxyTestBase):
     def test_upload_file(self):
         history = self.gi.histories.create_history(name="test_upload_file history")
 
+        fn = get_abspath(os.path.join(os.pardir, "setup.py"))
         tool_output = self.gi.tools.upload_file(
-            "setup.py",
+            fn,
             # First param could be a regular path also of course...
             history_id=history["id"],
             file_name="test1",
@@ -63,7 +68,9 @@ class TestGalaxyTools(GalaxyTestBase.GalaxyTestBase):
     def test_run_random_lines(self):
         # Run second test case from randomlines.xml
         history_id = self.gi.histories.create_history(name="test_run_random_lines history")["id"]
-        dataset_id = self._test_dataset(history_id, contents=load_data("1.bed"))
+        with open(get_abspath(os.path.join("data", "1.bed"))) as f:
+            contents = f.read()
+        dataset_id = self._test_dataset(history_id, contents=contents)
         tool_inputs = inputs().set(
             "num_lines", "1"
         ).set(
@@ -107,7 +114,3 @@ class TestGalaxyTools(GalaxyTestBase.GalaxyTestBase):
         assert len(tool_output["outputs"]) == 1
         # TODO: Wait for results and verify it has 3 lines - 1 2 3, 4 5 6,
         # and 7 8 9.
-
-
-def load_data(name):
-    return open(os.path.join(os.path.dirname(__file__), "data", name), "r").read()
