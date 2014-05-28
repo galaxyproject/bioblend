@@ -1,0 +1,95 @@
+{
+    "a_galaxy_workflow": "true",
+    "annotation": "",
+    "format-version": "0.1",
+    "name": "get_col",
+    "steps": {
+        "0": {
+            "annotation": "",
+            "id": 0,
+            "input_connections": {},
+            "inputs": [
+                {
+                    "description": "",
+                    "name": "input_tsv"
+                }
+            ],
+            "name": "Input dataset",
+            "outputs": [],
+            "position": {
+                "left": 200,
+                "top": 200
+            },
+            "tool_errors": null,
+            "tool_id": null,
+            "tool_state": "{\"name\": \"input_tsv\"}",
+            "tool_version": null,
+            "type": "data_input",
+            "user_outputs": []
+        },
+        "1": {
+            "annotation": "",
+            "id": 1,
+            "input_connections": {
+                "input": {
+                    "id": 0,
+                    "output_name": "output"
+                }
+            },
+            "inputs": [],
+            "name": "Remove beginning",
+            "outputs": [
+                {
+                    "name": "out_file1",
+                    "type": "input"
+                }
+            ],
+            "position": {
+                "left": 420,
+                "top": 200
+            },
+            "post_job_actions": {
+                "HideDatasetActionout_file1": {
+                    "action_arguments": {},
+                    "action_type": "HideDatasetAction",
+                    "output_name": "out_file1"
+                }
+            },
+            "tool_errors": null,
+            "tool_id": "Remove beginning1",
+            "tool_state": "{\"input\": \"null\", \"__rerun_remap_job_id__\": null, \"chromInfo\": \"\\\"/SHARE/USERFS/els7/users/biobank/galaxy/tool-data/shared/ucsc/chrom/?.len\\\"\", \"num_lines\": \"\\\"2\\\"\", \"__page__\": 0}",
+            "tool_version": "1.0.0",
+            "type": "tool",
+            "user_outputs": []
+        },
+        "2": {
+            "annotation": "",
+            "id": 2,
+            "input_connections": {
+                "input": {
+                    "id": 1,
+                    "output_name": "out_file1"
+                }
+            },
+            "inputs": [],
+            "name": "Cut",
+            "outputs": [
+                {
+                    "name": "out_file1",
+                    "type": "tabular"
+                }
+            ],
+            "position": {
+                "left": 640,
+                "top": 200
+            },
+            "post_job_actions": {},
+            "tool_errors": null,
+            "tool_id": "Cut1",
+            "tool_state": "{\"__page__\": 0, \"__rerun_remap_job_id__\": null, \"delimiter\": \"\\\"T\\\"\", \"columnList\": \"\\\"c1\\\"\", \"input\": \"null\", \"chromInfo\": \"\\\"/SHARE/USERFS/els7/users/biobank/galaxy/tool-data/shared/ucsc/chrom/?.len\\\"\"}",
+            "tool_version": "1.0.2",
+            "type": "tool",
+            "user_outputs": []
+        }
+    }
+}

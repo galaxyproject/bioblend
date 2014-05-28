@@ -5,6 +5,7 @@ from bioblend.galaxy.client import Client
 
 
 class LibraryClient(Client):
+
     def __init__(self, galaxy_instance):
         self.module = 'libraries'
         super(LibraryClient, self).__init__(galaxy_instance)

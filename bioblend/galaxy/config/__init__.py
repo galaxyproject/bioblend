@@ -3,8 +3,6 @@ Contains possible interaction dealing with Galaxy configuration.
 
 """
 from bioblend.galaxy.client import Client
-from os.path import basename
-from simplejson import dumps
 
 
 class ConfigClient(Client):
@@ -16,7 +14,7 @@ class ConfigClient(Client):
     def get_config(self):
         """
         Get a list of attributes about galaxy instance. More attributes will be present if user is an admin
-        
+
 
         :rtype: list
         :return: A list of attributes.
@@ -28,8 +26,7 @@ class ConfigClient(Client):
                      ,u'ftp_upload_site': u'galaxy.com',u'library_import_dir': u'None',
                      u'logo_url': None,u'support_url': u'http://wiki.g2.bx.psu.edu/Support'
                      ,u'terms_url': None,u'user_library_import_dir': None,u'wiki_url': u'http://g2.trac.bx.psu.edu/'}
-                                                
+
 
         """
         return Client._get(self)
-        

@@ -9,10 +9,13 @@ import os
 from bioblend.cloudman.launch import Bunch
 from bioblend.cloudman import CloudManConfig
 from bioblend.cloudman import CloudManInstance
+import test_util
+
 
 class CloudmanTestBase(unittest.TestCase):
 
     @classmethod
+    @test_util.skip_unless_cloudman()
     def setUpClass(cls):
         if os.environ.get('BIOBLEND_CLOUD_TYPE') == 'EC2':
             cls.access_key = os.environ['BIOBLEND_ACCESS_KEY']
@@ -59,10 +62,10 @@ class CloudmanTestBase(unittest.TestCase):
             cls.password = 'password'
 
     @classmethod
+    @test_util.skip_unless_cloudman()
     def tearDownClass(cls):
         try:
             # TODO: cloudman's terminate method has a bug. Needs fix
             cls.cmi.terminate(delete_cluster=True)
         except:
             pass
-

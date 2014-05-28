@@ -5,14 +5,16 @@ credentials to supported cloud infrastructure.
 Use ``nose`` to run these unit tests.
 """
 import GalaxyTestBase
+import test_util
 
+
+@test_util.skip_unless_galaxy()
 class TestGalaxyUsers(GalaxyTestBase.GalaxyTestBase):
 
     def test_get_users(self):
         users = self.gi.users.get_users()
         for user in users:
             self.assertIsNotNone(user['id'])
-            self.assertIsNotNone(user['url'])
             self.assertIsNotNone(user['email'])
 
     def test_show_user(self):

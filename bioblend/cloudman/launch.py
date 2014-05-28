@@ -37,21 +37,19 @@ class CloudManLauncher(object):
         self.secret_key = secret_key
         if cloud is None:
             # Default to an EC2-compatible object
-            self.cloud = Bunch(
-                    id='1',  # for compatibility w/ DB representation
-                    name="Amazon",
-                    cloud_type="ec2",
-                    bucket_default="cloudman",
-                    region_name="us-east-1",
-                    region_endpoint="ec2.amazonaws.com",
-                    ec2_port="",
-                    ec2_conn_path="/",
-                    cidr_range="",
-                    is_secure=True,
-                    s3_host="s3.amazonaws.com",
-                    s3_port="",
-                    s3_conn_path='/',
-            )
+            self.cloud = Bunch(id='1',  # for compatibility w/ DB representation
+                               name="Amazon",
+                               cloud_type="ec2",
+                               bucket_default="cloudman",
+                               region_name="us-east-1",
+                               region_endpoint="ec2.amazonaws.com",
+                               ec2_port="",
+                               ec2_conn_path="/",
+                               cidr_range="",
+                               is_secure=True,
+                               s3_host="s3.amazonaws.com",
+                               s3_port="",
+                               s3_conn_path='/')
         else:
             self.cloud = cloud
         self.ec2_conn = self.connect_ec2(self.access_key, self.secret_key, self.cloud)
@@ -111,18 +109,17 @@ class CloudManLauncher(object):
         try:
             rs = None
             rs = self.ec2_conn.run_instances(image_id=image_id,
-                                        instance_type=instance_type,
-                                        key_name=key_name,
-                                        security_groups=security_groups,
-                                        user_data=ud,
-                                        kernel_id=kernel_id,
-                                        ramdisk_id=ramdisk_id,
-                                        placement=placement)
+                                             instance_type=instance_type,
+                                             key_name=key_name,
+                                             security_groups=security_groups,
+                                             user_data=ud,
+                                             kernel_id=kernel_id,
+                                             ramdisk_id=ramdisk_id,
+                                             placement=placement)
             ret['rs'] = rs
         except EC2ResponseError, e:
-            err = "Problem launching an instance: %s" % e
-            bioblend.log.error(err)
-            ret['error'] = err
+            bioblend.log.exception("Problem launching an instance.")
+            ret['error'] = "Problem launching an instance."
             return ret
         else:
             try:
@@ -130,9 +127,8 @@ class CloudManLauncher(object):
                 ret['instance_id'] = rs.instances[0].id
                 ret['instance_ip'] = rs.instances[0].ip_address
             except Exception, e:
-                err = "Problem with the launched instance object: %s" % e
-                bioblend.log.error(err)
-                ret['error'] = err
+                bioblend.log.exception("Problem with the launched instance object.")
+                ret['error'] = "Problem with the launched instance object: %s" % e
         return ret
 
     def create_cm_security_group(self, sg_name='CloudMan'):
@@ -168,16 +164,16 @@ class CloudManLauncher(object):
                     cmsg.authorize(ip_protocol='tcp', from_port=port[0], to_port=port[1], cidr_ip='0.0.0.0/0')
                 else:
                     bioblend.log.debug("Rule (%s:%s) already exists in the SG" % (port[0], port[1]))
-            except EC2ResponseError, e:
-                bioblend.log.error("A problem with security group authorizations: %s" % e)
+            except EC2ResponseError:
+                bioblend.log.exception("A problem with security group authorizations.")
         # Add ICMP (i.e., ping) rule required by HTCondor
         try:
             if not self.rule_exists(cmsg.rules, from_port='-1', to_port='-1', ip_protocol='icmp'):
-                cmsg.authorize(ip_protocol='icmp', from_port= -1, to_port= -1, cidr_ip='0.0.0.0/0')
+                cmsg.authorize(ip_protocol='icmp', from_port=-1, to_port=-1, cidr_ip='0.0.0.0/0')
             else:
                 bioblend.log.debug("ICMP rule already exists in {0} SG".format(sg_name))
-        except EC2ResponseError, e:
-            bioblend.log.error("A problem with security group authorizations: %s" % e)
+        except EC2ResponseError:
+            bioblend.log.exception("A problem with security group authorizations.")
         # Add rule that allows communication between instances in the same SG
         g_rule_exists = False  # A flag to indicate if group rule already exists
         for rule in cmsg.rules:
@@ -190,8 +186,8 @@ class CloudManLauncher(object):
         if not g_rule_exists:
             try:
                 cmsg.authorize(src_group=cmsg)
-            except EC2ResponseError, e:
-                bioblend.log.error("A problem w/ security group authorization: %s" % e)
+            except EC2ResponseError:
+                bioblend.log.exception("A problem with security group authorization.")
         bioblend.log.info("Done configuring '%s' security group" % cmsg.name)
         return cmsg.name
 
@@ -221,30 +217,33 @@ class CloudManLauncher(object):
                 return akp.name, None
         try:
             kp = self.ec2_conn.create_key_pair(key_name)
-        except EC2ResponseError, e:
-            bioblend.log.error("Problem creating key pair '%s': %s" % (key_name, e))
+        except EC2ResponseError:
+            bioblend.log.exception("Problem creating key pair '%s'." % key_name)
             return None, None
         bioblend.log.info("Created key pair '%s'" % kp.name)
         return kp.name, kp.material
 
     def get_status(self, instance_id):
         """
-        Check on the status of an instance. If ``instance_id`` is not provided,
-        the ID obtained when launching *the most recent* instance is used. Note
-        that this assumes the instance being checked on was launched using this
-        class. Also note that the same class may be used to launch multiple instances
-        but only the most recent ``instance_id`` is kept while any others will
-        need to be explicitly specified.
+        Check on the status of an instance. ``instance_id`` needs to be a
+        ``boto``-library copatible instance ID (e.g., ``i-8fehrdss``).If
+        ``instance_id`` is not provided, the ID obtained when launching
+        *the most recent* instance is used. Note that this assumes the instance
+        being checked on was launched using this  class. Also note that the same
+        class may be used to launch multiple instances but only the most recent
+        ``instance_id`` is kept while any others will  to be explicitly specified.
 
         This method also allows the required ``ec2_conn`` connection object to be
         provided at invocation time. If the object is not provided, credentials
         defined for the class are used (ability to specify a custom ``ec2_conn``
         helps in case of stateless method invocations).
 
-        Return a ``state`` dict with the current ``instance_state``, ``public_ip``,
-        ``placement``, and ``error`` keys, which capture the current state (the
-        values for those keys default to empty string if no data is available from
-        the cloud).
+        Return a ``state`` dict containing the following keys: ``instance_state``,
+        ``public_ip``, ``placement``, and ``error``, which capture CloudMan's
+        current state. For ``instance_state``, expected values are: ``pending``,
+        ``booting``, ``running``, or ``error`` and represent the state of the
+        underlying instance. Other keys will return an empty  value until the
+        ``instance_state`` enters ``running`` state.
         """
         ec2_conn = self.ec2_conn
         rs = None
@@ -295,34 +294,32 @@ class CloudManLauncher(object):
         s3_conn = self.connect_s3(self.access_key, self.secret_key, self.cloud)
         buckets = s3_conn.get_all_buckets()
         clusters = []
-        for bucket in buckets:
-            try:
-                # TODO: first lookup if persistent_data.yaml key exists
-                pd = bucket.get_key('persistent_data.yaml')
-            except S3ResponseError, e:
-                # This can fail for a number of reasons for non-us and/or CNAME'd buckets.
-                err = ("Problem fetching persistent_data.yaml from bucket %s \n%s"
-                    % (bucket, e.body))
-                bioblend.log.error(err)
-                continue
-            if pd:
-                # We are dealign with a CloudMan bucket
-                pd_contents = pd.get_contents_as_string()
-                pd = yaml.load(pd_contents)
-                if 'cluster_name' in pd:
-                    cluster_name = pd['cluster_name']
-                else:
-                    for key in bucket.list():
-                        if key.name.endswith('.clusterName'):
-                            cluster_name = key.name.split('.clusterName')[0]
-                cluster = {'cluster_name': cluster_name,
-                           'persistent_data': pd,
-                           'bucket_name': bucket.name}
-                # Look for cluster's placement too
-                if include_placement:
-                    placement = self._find_placement(cluster_name, cluster)
-                    cluster['placement'] = placement
-                clusters.append(cluster)
+        for bucket in [b for b in buckets if b.name.startswith('cm-')]:
+                try:
+                    # TODO: first lookup if persistent_data.yaml key exists
+                    pd = bucket.get_key('persistent_data.yaml')
+                except S3ResponseError:
+                    # This can fail for a number of reasons for non-us and/or CNAME'd buckets.
+                    bioblend.log.exception("Problem fetching persistent_data.yaml from bucket %s" % bucket)
+                    continue
+                if pd:
+                    # We are dealing with a CloudMan bucket
+                    pd_contents = pd.get_contents_as_string()
+                    pd = yaml.load(pd_contents)
+                    if 'cluster_name' in pd:
+                        cluster_name = pd['cluster_name']
+                    else:
+                        for key in bucket.list():
+                            if key.name.endswith('.clusterName'):
+                                cluster_name = key.name.split('.clusterName')[0]
+                    cluster = {'cluster_name': cluster_name,
+                               'persistent_data': pd,
+                               'bucket_name': bucket.name}
+                    # Look for cluster's placement too
+                    if include_placement:
+                        placement = self._find_placement(cluster_name, cluster)
+                        cluster['placement'] = placement
+                    clusters.append(cluster)
         return clusters
 
     def get_cluster_pd(self, cluster_name):
@@ -353,14 +350,14 @@ class CloudManLauncher(object):
         ci = self._get_cloud_info(cloud)
         r = RegionInfo(name=ci['region_name'], endpoint=ci['region_endpoint'])
         ec2_conn = boto.connect_ec2(aws_access_key_id=a_key,
-                              aws_secret_access_key=s_key,
-                              # api_version is needed for availability zone support for EC2
-                              api_version='2012-06-01' if ci['cloud_type'] == 'ec2' else None,
-                              is_secure=ci['is_secure'],
-                              region=r,
-                              port=ci['ec2_port'],
-                              path=ci['ec2_conn_path'],
-                              validate_certs=False)
+                                    aws_secret_access_key=s_key,
+                                    # api_version is needed for availability zone support for EC2
+                                    api_version='2012-06-01' if ci['cloud_type'] == 'ec2' else None,
+                                    is_secure=ci['is_secure'],
+                                    region=r,
+                                    port=ci['ec2_port'],
+                                    path=ci['ec2_conn_path'],
+                                    validate_certs=False)
         return ec2_conn
 
     def connect_s3(self, a_key, s_key, cloud=None):
@@ -394,8 +391,9 @@ class CloudManLauncher(object):
         form_data = {}
         # Do not include the following fields in the user data but do include
         # any 'advanced startup fields' that might be added in the future
-        excluded_fields = ['sg_name', 'image_id', 'instance_id', 'kp_name', 'cloud', 'cloud_type',
-            'public_dns', 'cidr_range', 'kp_material', 'placement']
+        excluded_fields = ['sg_name', 'image_id', 'instance_id', 'kp_name',
+                           'cloud', 'cloud_type', 'public_dns', 'cidr_range',
+                           'kp_material', 'placement']
         for key, value in user_provided_data.iteritems():
             if key not in excluded_fields:
                 form_data[key] = value
@@ -439,6 +437,17 @@ class CloudManLauncher(object):
             ci = yaml.dump(ci, default_flow_style=False, allow_unicode=False)
         return ci
 
+    def _get_volume_placement(self, vol_id):
+        """
+        Returns the placement of a volume (or None, if it cannot be determined)
+        """
+        vol = self.ec2_conn.get_all_volumes(volume_ids=[vol_id])
+        if vol:
+            return vol[0].zone
+        else:
+            bioblend.log.error("Requested placement of a volume '%s' that does not exist." % vol_id)
+            return None
+
     def _find_placement(self, cluster_name, cluster=None):
         """
         Find a placement zone for a cluster with the name ``cluster_name`` and
@@ -450,35 +459,28 @@ class CloudManLauncher(object):
         return ``None``.
         """
         placement = None
-        if not cluster:
-            cluster = self.get_cluster_pd(cluster_name)
+        cluster = cluster or self.get_cluster_pd(cluster_name)
         if cluster and 'persistent_data' in cluster:
             pd = cluster['persistent_data']
-            if 'placement' in pd:
-                placement = pd['placement']
-            elif 'data_filesystems' in pd:
-                try:
+            try:
+                if 'placement' in pd:
+                    placement = pd['placement']
+                elif 'data_filesystems' in pd:
                     # We have v1 format persistent data so get the volume first and
                     # then the placement zone
                     vol_id = pd['data_filesystems']['galaxyData'][0]['vol_id']
-                    vol = self.ec2_conn.get_all_volumes(volume_ids=[vol_id])
-                    if vol:
-                        placement = vol[0].zone
-                except:
-                    # If anything goes wrong with zone detection, default to None
-                    placement = None
-            elif 'filesystems' in pd:
-                for fs in pd['filesystems']:
-                    if 'kind' in fs and fs['kind'] == 'volume':
-                        if 'ids' in fs:
-                            try:
-                                vol_id = fs['ids'][0]  # All volumes must be in the same zone
-                                vol = self.ec2_conn.get_all_volumes(volume_ids=[vol_id])
-                                if vol:
-                                    placement = vol[0].zone
-                            except:
-                                # If anything goes wrong with zone detection, default to None
-                                placement = None
+                    placement = self._get_volume_placement(vol_id)
+                elif 'filesystems' in pd:
+                    # V2 format.
+                    for fs in [fs for fs in pd['filesystems'] if fs.get('kind', None) == 'volume' and 'ids' in fs]:
+                        vol_id = fs['ids'][0]  # All volumes must be in the same zone
+                        placement = self._get_volume_placement(vol_id)
+                        # No need to continue to iterate through
+                        # filesystems, if we found one with a volume.
+                        break
+            except Exception:
+                bioblend.log.exception("Exception while finding placement.  This can indicate malformed instance data.  Or that this method is broken.")
+                placement = None
         return placement
 
     def find_placements(self, ec2_conn, instance_type, cloud_type, cluster_name=None):
@@ -504,21 +506,18 @@ class CloudManLauncher(object):
         # First look for a specific zone a given cluster is bound to
         zones = []
         if cluster_name:
-            zones = self._find_placement(cluster_name)
+            zones = self._find_placement(cluster_name) or []
         # If placement is not found, look for a list of available zones
         if not zones:
-            zones = []  # _find_placement can return None so ensure we have a list
             in_the_past = datetime.datetime.now() - datetime.timedelta(hours=1)
             back_compatible_zone = "us-east-1e"
-            for zone in ec2_conn.get_all_zones():
-                if zone.state in ["available"]:
-                    # Non EC2 clouds may not support get_spot_price_history
-                    if instance_type is not None and cloud_type == 'ec2':
-                        if (len(ec2_conn.get_spot_price_history(instance_type=instance_type,
-                                                                end_time=in_the_past.isoformat(),
-                                                                availability_zone=zone.name)) > 0):
-                            zones.append(zone.name)
-                    else:
+            for zone in [z for z in ec2_conn.get_all_zones() if z.state == 'available']:
+                # Non EC2 clouds may not support get_spot_price_history
+                if instance_type is None or cloud_type != 'ec2':
+                    zones.append(zone.name)
+                elif ec2_conn.get_spot_price_history(instance_type=instance_type,
+                                                     end_time=in_the_past.isoformat(),
+                                                     availability_zone=zone.name):
                         zones.append(zone.name)
             zones.sort(reverse=True)  # Higher-lettered zones seem to have more availability currently
             if back_compatible_zone in zones:
@@ -526,10 +525,6 @@ class CloudManLauncher(object):
             if len(zones) == 0:
                 bioblend.log.error("Did not find availabilty zone for {1}".format(instance_type))
                 zones.append(back_compatible_zone)
-        else:
-            # Make sure we're returning a list
-            if not isinstance(zones, list):
-                zones = [zones]
         return zones
 
     def _checkURL(self, url):

@@ -9,7 +9,10 @@ from bioblend.cloudman.launch import Bunch
 from bioblend.cloudman import CloudManConfig
 from bioblend.cloudman import CloudManInstance
 import GalaxyTestBase
+import test_util
 
+
+@test_util.skip_unless_galaxy()
 class TestGalaxyLibraries(GalaxyTestBase.GalaxyTestBase):
 
     def setUp(self):
@@ -21,7 +24,6 @@ class TestGalaxyLibraries(GalaxyTestBase.GalaxyTestBase):
         test_library = self.gi.libraries.create_library(lib_name, description='automated test', synopsis='automated test synopsis')
         self.assertEqual(test_library['name'], lib_name)
         self.assertNotEqual(test_library['id'], None)
-        self.assertNotEqual(test_library['url'], None)
 
     def test_create_folder(self):
         pass
@@ -29,22 +31,7 @@ class TestGalaxyLibraries(GalaxyTestBase.GalaxyTestBase):
     def test_get_libraries(self):
         # Make sure there's at least one value - the one we created
         all_libraries = self.gi.libraries.get_libraries()
-        self.assertIsNotNone(all_libraries)
-
-#        # Check whether name is correct, when searched by id
-#        new_library = self.gi.libraries.get_libraries(library_id=self.library['id'])
-#        self.assertTrue(any(d['name'] == self.default_library_name for d in new_library))
-#
-#        # Check whether id is present, when searched by name
-#        new_library = self.gi.histories.get_libraries(name=self.default_library_name)
-#        self.assertTrue(any(d['id'] == self.library['id'] for d in new_library))
-
-        # check whether deleted history is returned correctly
-        deleted_libraries = self.gi.libraries.get_libraries(deleted=True)
-        deleted_ids = [lib['id'] for lib in deleted_libraries]
-        all_ids = [lib['id'] for lib in all_libraries]
-        intersection = list(set(all_ids) & set(deleted_ids))
-        self.assertEqual(intersection, [], 'Deleted libraries and current libraries should not overlap')
+        self.assertTrue(len(all_libraries) >= 1)
 
     def test_show_library(self):
 #        library_data = self.gi.libraries.show_library(self.library['id'])

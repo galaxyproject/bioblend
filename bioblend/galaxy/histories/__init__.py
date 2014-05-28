@@ -10,6 +10,7 @@ import urllib2
 
 
 class HistoryClient(Client):
+
     def __init__(self, galaxy_instance):
         self.module = 'histories'
         super(HistoryClient, self).__init__(galaxy_instance)
@@ -47,7 +48,7 @@ class HistoryClient(Client):
             histories = filtered_hists
         return histories
 
-    def show_history(self, history_id, contents=False, deleted=None, visible=None, details=None):
+    def show_history(self, history_id, contents=False, deleted=None, visible=None, details=None, types=None):
         """
         Get details of a given history. By default, just get the history meta
         information. If ``contents`` is set to ``True``, get the complete list of
@@ -64,7 +65,27 @@ class HistoryClient(Client):
                 params['deleted'] = deleted
             if visible is not None:
                 params['visible'] = visible
+            if types is not None:
+                params['types'] = types.join(",")
         return Client._get(self, id=history_id, contents=contents, params=params)
+
+    def delete_dataset(self, history_id, dataset_id):
+        """
+        Mark corresponding datset as deleted.
+        """
+        url = self.gi._make_url(self, history_id, contents=True)
+        # Append the dataset_id to the base history contents URL
+        url = '/'.join([url, dataset_id])
+        Client._delete(self, payload={}, url=url)
+
+    def delete_dataset_collection(self, history_id, dataset_collection_id):
+        """
+        Mark corresponding datset as deleted.
+        """
+        url = self.gi._make_url(self, history_id, contents=True)
+        # Append the dataset_id to the base history contents URL
+        url = '/'.join([url, "dataset_collections", dataset_collection_id])
+        Client._delete(self, payload={}, url=url)
 
     def show_dataset(self, history_id, dataset_id):
         """
@@ -74,6 +95,14 @@ class HistoryClient(Client):
         url = self.gi._make_url(self, history_id, contents=True)
         # Append the dataset_id to the base history contents URL
         url = '/'.join([url, dataset_id])
+        return Client._get(self, url=url)
+
+    def show_dataset_collection(self, history_id, dataset_collection_id):
+        """
+        Get details about a given history dataset collection.
+        """
+        url = self.gi._make_url(self, history_id, contents=True)
+        url = '/'.join([url, "dataset_collections", dataset_collection_id])
         return Client._get(self, url=url)
 
     def show_matching_datasets(self, history_id, name_filter=None):
@@ -89,6 +118,19 @@ class HistoryClient(Client):
         return [self.show_dataset(history_id, h['id'])
                 for h in self.show_history(history_id, contents=True)
                 if name_filter is None or name_filter.match(h['name'])]
+
+    def show_dataset_provenance(self, history_id, dataset_id, follow=False):
+        """
+        Get details related to how dataset was created (``id``, ``job_id``,
+        ``tool_id``, ``stdout``, ``stderr``, ``parameters``, ``inputs``,
+        etc...).
+
+        If ``follow`` is ``True``, recursively fetch dataset provenance
+        information for all inputs and their inputs, etc....
+        """
+        url = self.gi._make_url(self, history_id, contents=True)
+        url = '/'.join([url, dataset_id, "provenance"])
+        return Client._get(self, url=url)
 
     def update_history(self, history_id, name=None, annotation=None):
         """
@@ -114,6 +156,49 @@ class HistoryClient(Client):
 
         return Client._put(self, payload, id=history_id)
 
+    def update_dataset(self, history_id, dataset_id, **kwds):
+        """
+        Update history dataset metadata. Only a subset of the available
+        metadata parameters for modification are documented below currently.
+
+        :type history_id: string
+        :param history_id: Encoded history ID
+        :type name: string
+        :param name: Replace history dataset name with the given string
+        :type annotation: string
+        :param annotation: Replace history dataset annotation with given string
+        :type deleted: boolean
+        :param deleted: Mark or unmark history dataset as deleted.
+        :type visible: boolean
+        :param visible: Mark or unmark history dataset as visible.
+
+        :rtype: status_code (int)
+        """
+        url = self.gi._make_url(self, history_id, contents=True)
+        # Append the dataset_id to the base history contents URL
+        url = '/'.join([url, dataset_id])
+        return Client._put(self, payload=kwds, url=url)
+
+    def update_dataset_collection(self, history_id, dataset_collection_id, **kwds):
+        """
+        Update history dataset metadata. Only a subset of the available
+        metadata parameters for modification are documented below currently.
+
+        :type history_id: string
+        :param history_id: Encoded history ID
+        :type name: string
+        :param name: Replace history dataset collection name with the given string
+        :type deleted: boolean
+        :param deleted: Mark or unmark history dataset collection as deleted.
+        :type visible: boolean
+        :param visible: Mark or unmark history dataset collection as visible.
+
+        :rtype: status_code (int)
+        """
+        url = self.gi._make_url(self, history_id, contents=True)
+        url = '/'.join([url, "dataset_collections", dataset_collection_id])
+        return Client._put(self, payload=kwds, url=url)
+
     def create_history_tag(self, history_id, tag):
         """
         Create history tag
@@ -131,10 +216,10 @@ class HistoryClient(Client):
 
         """
 
-        #empty payload since we are adding the new tag using the url
+        # empty payload since we are adding the new tag using the url
         payload = {}
 
-        #creating the url
+        # creating the url
         url = self.url
         url = '/'.join([url, history_id, 'tags', tag])
 
@@ -153,8 +238,21 @@ class HistoryClient(Client):
         }
         return Client._post(self, payload, id=history_id, contents=True)
 
+    def create_dataset_collection(self, history_id, collection_description):
+        try:
+            collection_description = collection_description.to_dict()
+        except AttributeError:
+            pass
+        payload = dict(
+            name=collection_description["name"],
+            type="dataset_collection",
+            collection_type=collection_description["collection_type"],
+            element_identifiers=collection_description["element_identifiers"],
+        )
+        return Client._post(self, payload, id=history_id, contents=True)
+
     def download_dataset(self, history_id, dataset_id, file_path,
-         use_default_filename=True, to_ext=None):
+                         use_default_filename=True, to_ext=None):
         """
         Download a ``dataset_id`` from history with ``history_id`` to a
         file on the local file system, saving it to ``file_path``.

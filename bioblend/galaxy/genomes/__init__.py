@@ -5,6 +5,7 @@ from bioblend.galaxy.client import Client
 
 
 class GenomeClient(Client):
+
     def __init__(self, galaxy_instance):
         self.module = 'genomes'
         super(GenomeClient, self).__init__(galaxy_instance)
