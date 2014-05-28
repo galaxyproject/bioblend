@@ -162,9 +162,6 @@ class CloudManLauncher(object):
                  ('9600', '9700'),  # HTCondor
                  ('30000', '30100'),  # FTP transfer
                  ('42284', '42284'))  # CloudMan UI
-        # TODO: Hack to support ipython_notebook. Remove once the nginx configuration in cloudman is redone
-        if self.cloud.name == "NeCTAR":
-            ports += (('9510', '9510'),)
         for port in ports:
             try:
                 if not self.rule_exists(cmsg.rules, from_port=port[0], to_port=port[1]):
