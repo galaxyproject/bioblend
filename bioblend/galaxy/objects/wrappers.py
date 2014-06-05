@@ -596,6 +596,19 @@ class History(DatasetContainer):
     def get_datasets(self, name=None):
         return self.gi.histories.get_datasets(self, name=name)
 
+    def upload_dataset(self, path, **kwargs):
+        """
+        Upload the file specified by path to this history.
+
+        :type path: str
+        :param path: path of the file to upload
+
+        :rtype: :class:`~.wrappers.HistoryDatasetAssociation`
+        :return: the uploaded dataset
+        """
+        out_dict = self.gi.gi.tools.upload_file(path, self.id, **kwargs)
+        return self.get_dataset(out_dict['outputs'][0]['id'])
+
 
 class Library(DatasetContainer):
     """
