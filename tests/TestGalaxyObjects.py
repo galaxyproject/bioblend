@@ -258,7 +258,6 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
         self.__check_and_del_workflow(wf)
 
     def test_workflow_missing_tools(self):
-        sys.stderr.write('\nNOTE: error logging msg EXPECTED here\n')
         with open(SAMPLE_FN) as f:
             wf_dump = json.load(f)
             wf_info = self.gi.gi.workflows.import_workflow_json(wf_dump)
@@ -269,7 +268,7 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
                         wf_dict['steps'][id_][k] = None
             wf = wrappers.Workflow(wf_dict, gi=self.gi)
             self.assertFalse(wf.is_runnable)
-            self.assertRaises(StandardError, wf.run, 'foo', 'bar')
+            self.assertRaises(RuntimeError, wf.run, 'foo', 'bar')
             wf.delete()
 
     def test_export(self):
