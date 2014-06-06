@@ -10,8 +10,6 @@ import abc, collections, json
 __all__ = [
     'Wrapper',
     'Step',
-    'DataInput',
-    'Tool',
     'Workflow',
     'ContentInfo',
     'LibraryContentInfo',
@@ -153,44 +151,20 @@ class Step(Wrapper):
     Abstract base class for workflow steps.
 
     Steps are the main building blocks of a Galaxy workflow.  A step
-    can refer to either an input dataset (:class:`DataInput`) or a
-    computational tool (:class:`Tool`).
+    can refer to either an input dataset (type 'data_input`) or a
+    computational tool (type 'tool`).
     """
-    __metaclass__ = abc.ABCMeta
-    BASE_ATTRS = Wrapper.BASE_ATTRS + ('input_steps',)
+    BASE_ATTRS = Wrapper.BASE_ATTRS + ('input_steps', 'tool_id', 'tool_inputs', 'tool_version', 'type')
 
-    @abc.abstractmethod
     def __init__(self, step_dict, parent):
         super(Step, self).__init__(step_dict, parent=parent, gi=parent.gi)
+        if self.type == 'tool' and self.tool_inputs:
+            for k, v in self.tool_inputs.iteritems():
+                self.tool_inputs[k] = json.loads(v)
 
     @property
     def gi_module(self):
         return self.gi.workflows
-
-
-class DataInput(Step):
-    """
-    DataInputs model input datasets for Galaxy tools.
-    """
-    def __init__(self, step_dict, parent):
-        if step_dict['type'] != 'data_input':
-            raise ValueError('not a data input')
-        super(DataInput, self).__init__(step_dict, parent)
-
-
-class Tool(Step):
-    """
-    Tools model Galaxy tools.
-    """
-    BASE_ATTRS = Step.BASE_ATTRS + ('tool_id', 'tool_inputs', 'tool_version')
-
-    def __init__(self, step_dict, parent):
-        if step_dict['type'] != 'tool':
-            raise ValueError('not a tool')
-        super(Tool, self).__init__(step_dict, parent)
-        if self.tool_inputs:
-            for k, v in self.tool_inputs.iteritems():
-                self.tool_inputs[k] = json.loads(v)
 
 
 class Workflow(Wrapper):
@@ -215,14 +189,14 @@ class Workflow(Wrapper):
                 i['source_step'] = str(i['source_step'])
             step = self._build_step(v, self)
             self.steps[k] = step
-            if isinstance(step, Tool) and not step.tool_inputs:
+            if step.type == 'tool' and not step.tool_inputs:
                 missing_ids.append(k)
         input_labels_to_ids = {}
         for id_, d in self.inputs.iteritems():
             input_labels_to_ids.setdefault(d['label'], set()).add(id_)
         tool_labels_to_ids = {}
         for s in self.steps.itervalues():
-            if isinstance(s, Tool):
+            if s.type == 'tool':
                 tool_labels_to_ids.setdefault(s.tool_id, set()).add(s.id)
         object.__setattr__(self, 'input_labels_to_ids', input_labels_to_ids)
         object.__setattr__(self, 'tool_labels_to_ids', tool_labels_to_ids)
@@ -295,28 +269,25 @@ class Workflow(Wrapper):
             stype = step_dict['type']
         except KeyError:
             raise ValueError('not a step dict')
-        if stype == 'data_input':
-            return DataInput(step_dict, parent)
-        elif stype == 'tool':
-            return Tool(step_dict, parent)
-        else:
+        if stype not in {'data_input', 'tool'}:
             raise ValueError('unknown step type: %r' % (stype,))
+        return Step(step_dict, parent)
 
     @property
     def data_input_ids(self):
         """
-        Return the list of :class:`DataInput` steps for this workflow.
+        Return the list of data input steps for this workflow.
         """
         return set(id_ for id_, s in self.steps.iteritems()
-                   if isinstance(s, DataInput))
+                   if s.type == 'data_input')
 
     @property
     def tool_ids(self):
         """
-        Return the list of :class:`Tool` steps for this workflow.
+        Return the list of tool steps for this workflow.
         """
         return set(id_ for id_, s in self.steps.iteritems()
-                   if isinstance(s, Tool))
+                   if s.type == 'tool')
 
     @property
     def input_labels(self):
@@ -624,6 +595,19 @@ class History(DatasetContainer):
 
     def get_datasets(self, name=None):
         return self.gi.histories.get_datasets(self, name=name)
+
+    def upload_dataset(self, path, **kwargs):
+        """
+        Upload the file specified by path to this history.
+
+        :type path: str
+        :param path: path of the file to upload
+
+        :rtype: :class:`~.wrappers.HistoryDatasetAssociation`
+        :return: the uploaded dataset
+        """
+        out_dict = self.gi.gi.tools.upload_file(path, self.id, **kwargs)
+        return self.get_dataset(out_dict['outputs'][0]['id'])
 
 
 class Library(DatasetContainer):

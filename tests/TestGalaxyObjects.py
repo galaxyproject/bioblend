@@ -210,10 +210,6 @@ class TestWorkflow(unittest.TestCase):
             self.assertTrue(isinstance(s, wrappers.Step))
             self.assertEqual(s.id, sid)
             d = steps[sid]
-            if d['type'] == 'data_input':
-                self.assertTrue(isinstance(s, wrappers.DataInput))
-            if d['type'] == 'tool':
-                self.assertTrue(isinstance(s, wrappers.Tool))
             self.assertTrue(s.parent is self.wf)
         self.assertEqual(self.wf.data_input_ids, {'571', '572'})
         self.assertEqual(self.wf.tool_ids, {'573'})
