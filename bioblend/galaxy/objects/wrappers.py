@@ -709,7 +709,7 @@ class Tool(Wrapper):
           dataset can also be a Dataset object, it will be automatically
           converted to the needed format
 
-        :type history: :class:`~.wrappers.History`
+        :type history: :class:`History`
         :param history: the history where to execute the tool
 
         :type wait: boolean
@@ -718,7 +718,7 @@ class Tool(Wrapper):
         :type polling_interval: float
         :param polling_interval: polling interval in seconds
 
-        :rtype: list of :class:`~.wrappers.HistoryDatasetAssociation`
+        :rtype: list of :class:`HistoryDatasetAssociation`
         :return: list of output datasets
         """
         # Convert a Dataset object to a dict suitable to be passed as an element of the 'tool_inputs' dict expected by bioblend tools.ToolClient.run_tool()
