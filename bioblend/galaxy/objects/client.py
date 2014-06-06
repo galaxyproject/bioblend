@@ -94,6 +94,13 @@ class ObjClient(object):
         except (TypeError, IndexError):
             self._error('%s: unexpected reply: %r' % (meth_name, reply))
 
+
+class ObjDatasetClient(ObjClient):
+
+    @abc.abstractmethod
+    def _dataset_stream_url(self, dataset):
+        pass
+
     def _get_container(self, id_, ctype):
         show_fname = 'show_%s' % ctype.__name__.lower()
         gi_client = getattr(self.gi, ctype.API_MODULE)
@@ -120,13 +127,6 @@ class ObjClient(object):
         gi_client = getattr(self.gi, ctype.API_MODULE)
         ds_dict = gi_client.show_dataset(container_id, ds_id)
         return ctype.DS_TYPE(ds_dict, container_id, gi=self.obj_gi)
-
-
-class ObjDatasetClient(ObjClient):
-
-    @abc.abstractmethod
-    def _dataset_stream_url(self, dataset):
-        pass
 
     def get_datasets(self, src, name=None):
         """
