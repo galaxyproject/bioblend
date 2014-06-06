@@ -22,6 +22,7 @@ __all__ = [
     'HistoryDatasetAssociation',
     'LibraryDatasetDatasetAssociation',
     'LibraryDataset',
+    'Tool',
     'Preview',
     'LibraryPreview',
     'HistoryPreview',
@@ -680,6 +681,58 @@ class Folder(Wrapper):
     @property
     def gi_module(self):
         return self.gi.libraries
+
+
+class Tool(Wrapper):
+    """
+    Maps to a Galaxy tool.
+    """
+    BASE_ATTRS = Wrapper.BASE_ATTRS + ('version',)
+    POLLING_INTERVAL = 10  # for output state monitoring
+
+    def __init__(self, t_dict, gi=None):
+        super(Tool, self).__init__(t_dict, gi=gi)
+
+    @property
+    def gi_module(self):
+        return self.gi.tools
+
+    def run(self, inputs, history, wait=False,
+            polling_interval=POLLING_INTERVAL):
+        """
+        Execute this tool in the given history with inputs from dict
+        ``inputs``.
+
+        :type inputs: dict
+        :param inputs: dictionary of input datasets and parameters in
+          the format used by the Galaxy API. The value of an input
+          dataset can also be a Dataset object, it will be automatically
+          converted to the needed format
+
+        :type history: :class:`~.wrappers.History`
+        :param history: the history where to execute the tool
+
+        :type wait: boolean
+        :param wait: whether to wait while the returned datasets are in a pending state
+
+        :type polling_interval: float
+        :param polling_interval: polling interval in seconds
+
+        :rtype: list of :class:`~.wrappers.HistoryDatasetAssociation`
+        :return: list of output datasets
+        """
+        # Convert a Dataset object to a dict suitable to be passed as an element of the 'tool_inputs' dict expected by bioblend tools.ToolClient.run_tool()
+        for k, v in inputs.iteritems():
+            if isinstance(v, Dataset):
+                inputs[k] = dict(
+                    src=v.SRC,
+                    id=v.id,
+                )
+        out_dict = self.gi.gi.tools.run_tool(history.id, self.id, inputs)
+        outputs = [history.get_dataset(_['id']) for _ in out_dict['outputs']]
+        if wait:
+            self.gi.histories.wait(outputs, polling_interval=polling_interval)
+        return outputs
 
 
 class Preview(Wrapper):

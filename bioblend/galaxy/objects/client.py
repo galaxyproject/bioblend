@@ -786,3 +786,37 @@ class ObjToolClient(ObjClient):
     """
     def __init__(self, obj_gi):
         super(ObjToolClient, self).__init__(obj_gi)
+
+    def get(self, id_):
+        """
+        Retrieve the tool corresponding to the given id.
+
+        :rtype: :class:`~.wrappers.Tool`
+        :return: the tool corresponding to ``id_``
+        """
+        res = self.gi.tools.show_tool(id_)
+        tool_dict = self._get_dict('show_tool', res)
+        return wrappers.Tool(tool_dict, gi=self.obj_gi)
+
+    def get_previews(self, name=None, in_panel=False, trackster=None):
+        """
+        Get the list of tools installed on the Galaxy instance.
+
+        :rtype: list of :class:`~.wrappers.Tool`
+        """
+        dicts = self.gi.tools.get_tools(
+            name=name, in_panel=in_panel, trackster=trackster
+            )
+        return [wrappers.Tool(_, gi=self.obj_gi) for _ in dicts]
+
+    # the 'deleted' option is not available for tools
+    def list(self, name=None, in_panel=False, trackster=None):
+        """
+        Get the list of tools installed on the Galaxy instance.
+
+        :rtype: list of :class:`~.wrappers.Tool`
+        """
+        dicts = self.gi.tools.get_tools(
+            name=name, in_panel=in_panel, trackster=trackster
+            )
+        return [self.get(_['id']) for _ in dicts]
