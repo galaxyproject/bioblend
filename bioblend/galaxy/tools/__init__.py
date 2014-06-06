@@ -13,14 +13,21 @@ class ToolClient(Client):
         self.module = 'tools'
         super(ToolClient, self).__init__(galaxy_instance)
 
-    def get_tools(self):
+    def get_tools(self, name=None, in_panel=False, trackster=None):
         """
         Get a list of available tool elements in Galaxy's configured toolbox.
 
         :rtype: list
         :return: List of tool descriptions.
         """
-        return self._raw_get_tool(in_panel=False)
+        tools = self._raw_get_tool(in_panel=in_panel, trackster=trackster)
+        if name is not None:
+            filtered_tools = []
+            for tool in tools:
+                if name == tool['name']:
+                    filtered_tools.append(tool)
+            tools = filtered_tools
+        return tools
 
     def get_tool_panel(self):
         """
@@ -32,10 +39,17 @@ class ToolClient(Client):
         """
         return self._raw_get_tool(in_panel=True)
 
-    def _raw_get_tool(self, in_panel=None):
+    def _raw_get_tool(self, in_panel=None, trackster=None):
         params = {}
         params['in_panel'] = in_panel
+        params['trackster'] = trackster
         return Client._get(self, params=params)
+
+    def show_tool(self, tool_id, io_details=False, link_details=False):
+        params = {}
+        params['io_details'] = io_details
+        params['link_details'] = link_details
+        return Client._get(self, id=tool_id, params=params)
 
     def run_tool(self, history_id, tool_id, tool_inputs):
         """
