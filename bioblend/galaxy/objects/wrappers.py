@@ -704,10 +704,8 @@ class Tool(Wrapper):
         ``inputs``.
 
         :type inputs: dict
-        :param inputs: dictionary of input datasets and parameters in
-          the format used by the Galaxy API. The value of an input
-          dataset can also be a Dataset object, it will be automatically
-          converted to the needed format
+        :param inputs: dictionary of input datasets and parameters for
+          the tool (see below)
 
         :type history: :class:`History`
         :param history: the history where to execute the tool
@@ -720,6 +718,12 @@ class Tool(Wrapper):
 
         :rtype: list of :class:`HistoryDatasetAssociation`
         :return: list of output datasets
+
+        The ``inputs`` dict should contain input datasets and parameters
+        in the (largely undocumented) format used by the Galaxy API.
+        Some examples can be found in https://bitbucket.org/galaxy/galaxy-central/src/tip/test/api/test_tools.py .
+        The value of an input dataset can also be a Dataset object,
+        which will be automatically converted to the needed format.
         """
         # Convert a Dataset object to a dict suitable to be passed as an element of the 'tool_inputs' dict expected by bioblend tools.ToolClient.run_tool()
         for k, v in inputs.iteritems():

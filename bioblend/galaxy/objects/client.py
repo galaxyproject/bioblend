@@ -798,25 +798,35 @@ class ObjToolClient(ObjClient):
         tool_dict = self._get_dict('show_tool', res)
         return wrappers.Tool(tool_dict, gi=self.obj_gi)
 
-    def get_previews(self, name=None, in_panel=False, trackster=None):
+    def get_previews(self, name=None, trackster=None):
         """
         Get the list of tools installed on the Galaxy instance.
 
+        :type name: str
+        :param name: return only tools with this name
+
+        :type trackster: boolean
+        :param trackster: if True, only tools that are compatible with
+          Trackster are returned
+
         :rtype: list of :class:`~.wrappers.Tool`
         """
-        dicts = self.gi.tools.get_tools(
-            name=name, in_panel=in_panel, trackster=trackster
-            )
+        dicts = self.gi.tools.get_tools(name=name, trackster=trackster)
         return [wrappers.Tool(_, gi=self.obj_gi) for _ in dicts]
 
     # the 'deleted' option is not available for tools
-    def list(self, name=None, in_panel=False, trackster=None):
+    def list(self, name=None, trackster=None):
         """
         Get the list of tools installed on the Galaxy instance.
 
+        :type name: str
+        :param name: return only tools with this name
+
+        :type trackster: boolean
+        :param trackster: if True, only tools that are compatible with
+          Trackster are returned
+
         :rtype: list of :class:`~.wrappers.Tool`
         """
-        dicts = self.gi.tools.get_tools(
-            name=name, in_panel=in_panel, trackster=trackster
-            )
+        dicts = self.gi.tools.get_tools(name=name, trackster=trackster)
         return [self.get(_['id']) for _ in dicts]
