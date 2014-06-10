@@ -154,7 +154,7 @@ class HistoryClient(Client):
         if annotation:
             payload['annotation'] = annotation
 
-        return Client._put(self, payload, id=history_id)
+        return Client._put(self, payload, id=history_id).status_code
 
     def update_dataset(self, history_id, dataset_id, **kwds):
         """
@@ -177,7 +177,7 @@ class HistoryClient(Client):
         url = self.gi._make_url(self, history_id, contents=True)
         # Append the dataset_id to the base history contents URL
         url = '/'.join([url, dataset_id])
-        return Client._put(self, payload=kwds, url=url)
+        return Client._put(self, payload=kwds, url=url).status_code
 
     def update_dataset_collection(self, history_id, dataset_collection_id, **kwds):
         """
@@ -197,7 +197,7 @@ class HistoryClient(Client):
         """
         url = self.gi._make_url(self, history_id, contents=True)
         url = '/'.join([url, "dataset_collections", dataset_collection_id])
-        return Client._put(self, payload=kwds, url=url)
+        return Client._put(self, payload=kwds, url=url).status_code
 
     def create_history_tag(self, history_id, tag):
         """

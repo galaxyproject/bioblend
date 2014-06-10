@@ -197,7 +197,7 @@ class Client(object):
 
         r = self.gi.make_put_request(url, payload=payload, params=params)
 
-        return r.status_code
+        return r
 
     def _delete(self, payload, id=None, deleted=False, contents=None, url=None):
         """
