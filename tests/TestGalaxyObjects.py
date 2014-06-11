@@ -76,30 +76,6 @@ def is_reachable(url):
     return True
 
 
-def keep_trying(f):
-    """
-    Don't give up immediately if decorated test fails.
-
-    This is useful for testing LibraryDataset contents, since LDs are
-    not immediately ready after upload.
-    """
-    delay = 1
-    max_retries = 5
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        r = 1
-        while True:
-            try:
-                f(*args, **kwargs)
-                break
-            except AssertionError:
-                if r >= max_retries:
-                    raise RuntimeError('max n. of retries (%d) reached' % r)
-            r += 1
-            time.sleep(delay)
-    return decorated
-
-
 def upload_from_fs(lib, bnames, **kwargs):
     tempdir = tempfile.mkdtemp(prefix='bioblend_test_')
     try:
@@ -497,28 +473,25 @@ class TestLDContents(GalaxyObjectsTestBase):
         super(TestLDContents, self).setUp()
         self.lib = self.gi.libraries.create('test_%s' % uuid.uuid4().hex)
         self.ds = self.lib.upload_data(FOO_DATA)
+        self.ds.wait()
 
     def tearDown(self):
         self.lib.delete()
 
-    @keep_trying
     def test_dataset_get_stream(self):
         for idx, c in enumerate(self.ds.get_stream(chunk_size=1)):
             self.assertEqual(str(FOO_DATA[idx]), c)
 
-    @keep_trying
     def test_dataset_peek(self):
         fetched_data = self.ds.peek(chunk_size=4)
         self.assertEqual(FOO_DATA[0:4], fetched_data)
 
-    @keep_trying
     def test_dataset_download(self):
         with tempfile.TemporaryFile() as f:
             self.ds.download(f)
             f.seek(0)
             self.assertEqual(FOO_DATA, f.read())
 
-    @keep_trying
     def test_dataset_get_contents(self):
         self.assertEqual(FOO_DATA, self.ds.get_contents())
 

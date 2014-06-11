@@ -2,10 +2,28 @@
 A representation of a Galaxy instance based on oo wrappers.
 """
 
+import time
+
 import bioblend
 import bioblend.galaxy
 
 import client
+
+
+# dataset states corresponding to a 'pending' condition
+_PENDING_DS_STATES = set(
+    ["new", "upload", "queued", "running", "setting_metadata"]
+    )
+
+
+def _get_error_info(hda):
+    msg = hda.id
+    try:
+        msg += ' (%s): ' % hda.name
+        msg += hda.wrapped['misc_info']
+    except StandardError:  # avoid 'error while generating an error report'
+        msg += ': error'
+    return msg
 
 
 class GalaxyInstance(object):
@@ -65,3 +83,39 @@ class GalaxyInstance(object):
         Client module for Galaxy tools.
         """
         return self.__tools
+
+    def _wait_datasets(self, datasets, polling_interval,
+             break_on_error=True):
+        """
+        Wait for datasets to come out of the pending states.
+
+        :type datasets: :class:`~collections.Iterable` of
+          :class:`~.wrappers.Dataset`
+        :param datasets: datasets
+
+        :type polling_interval: float
+        :param polling_interval: polling interval in seconds
+
+        :type break_on_error: bool
+        :param break_on_error: if :obj:`True`, break as soon as at least
+          one of the datasets is in the 'error' state.
+
+        .. warning::
+
+          This is a blocking operation that can take a very long time.
+          Also, note that this method does not return anything;
+          however, each input dataset is refreshed (possibly multiple
+          times) during the execution.
+        """
+        self.log.info('waiting for datasets')
+        datasets = [_ for _ in datasets if _.state in _PENDING_DS_STATES]
+        while datasets:
+            time.sleep(polling_interval)
+            for i in xrange(len(datasets)-1, -1, -1):
+                ds = datasets[i]
+                ds.refresh()
+                self.log.info('{0.id}: {0.state}'.format(ds))
+                if break_on_error and ds.state == 'error':
+                    raise RuntimeError(_get_error_info(ds))
+                if ds.state not in _PENDING_DS_STATES:
+                    del datasets[i]

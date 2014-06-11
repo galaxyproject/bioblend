@@ -346,7 +346,7 @@ class Workflow(Wrapper):
             replacement_params=replacement_params
             )
         if wait:
-            self.gi.histories.wait(outputs, polling_interval=polling_interval,
+            self.gi._wait_datasets(outputs, polling_interval=polling_interval,
                                    break_on_error=break_on_error)
         return outputs, history
 
@@ -362,8 +362,9 @@ class Dataset(Wrapper):
     """
     Abstract base class for Galaxy datasets.
     """
-    BASE_ATTRS = Wrapper.BASE_ATTRS + ('data_type', 'file_name', 'file_size')
+    BASE_ATTRS = Wrapper.BASE_ATTRS + ('data_type', 'file_name', 'file_size', 'state', 'deleted')
     __metaclass__ = abc.ABCMeta
+    POLLING_INTERVAL = 1  # for state monitoring
 
     @abc.abstractmethod
     def __init__(self, ds_dict, container_id, gi=None):
@@ -421,14 +422,16 @@ class Dataset(Wrapper):
         self.__init__(fresh.wrapped, self.container_id, self.gi)
         return self
 
+    def wait(self, polling_interval=POLLING_INTERVAL, break_on_error=True):
+        self.gi._wait_datasets([self], polling_interval=polling_interval,
+                               break_on_error=break_on_error)
+
 
 class HistoryDatasetAssociation(Dataset):
     """
     Maps to a Galaxy ``HistoryDatasetAssociation``.
     """
-    BASE_ATTRS = Dataset.BASE_ATTRS + ('state', 'deleted')
     SRC = 'hda'
-    POLLING_INTERVAL = 1  # for state monitoring
 
     def __init__(self, ds_dict, container_id, gi=None):
         super(HistoryDatasetAssociation, self).__init__(
@@ -441,10 +444,6 @@ class HistoryDatasetAssociation(Dataset):
 
     def get_stream(self, chunk_size=None):
         return self.gi.histories.get_stream(self, chunk_size=chunk_size)
-
-    def wait(self, polling_interval=POLLING_INTERVAL, break_on_error=True):
-        self.gi.histories.wait([self], polling_interval=polling_interval,
-                               break_on_error=break_on_error)
 
 
 class LibRelatedDataset(Dataset):
@@ -762,7 +761,7 @@ class Tool(Wrapper):
         out_dict = self.gi.gi.tools.run_tool(history.id, self.id, inputs)
         outputs = [history.get_dataset(_['id']) for _ in out_dict['outputs']]
         if wait:
-            self.gi.histories.wait(outputs, polling_interval=polling_interval)
+            self.gi._wait_datasets(outputs, polling_interval=polling_interval)
         return outputs
 
 

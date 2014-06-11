@@ -4,26 +4,10 @@ Clients for interacting with specific Galaxy entity types.
 Classes in this module should not be instantiated directly, but used
 via their handles in :class:`~.galaxy_instance.GalaxyInstance`.
 """
-import collections, httplib, json, time, abc
+import collections, httplib, json, abc
 
 import bioblend
 import wrappers
-
-
-# dataset states corresponding to a 'pending' condition
-_PENDING_DS_STATES = set(
-    ["new", "upload", "queued", "running", "setting_metadata"]
-    )
-
-
-def _get_error_info(hda):
-    msg = hda.id
-    try:
-        msg += ' (%s): ' % hda.name
-        msg += hda.wrapped['misc_info']
-    except StandardError:  # avoid 'error while generating an error report'
-        msg += ': error'
-    return msg
 
 
 class ObjClient(object):
@@ -396,8 +380,6 @@ class ObjHistoryClient(ObjDatasetClient):
     Interacts with Galaxy histories.
     """
 
-    POLLING_INTERVAL = wrappers.HistoryDatasetAssociation.POLLING_INTERVAL
-
     def __init__(self, obj_gi):
         super(ObjHistoryClient, self).__init__(obj_gi)
 
@@ -513,42 +495,6 @@ class ObjHistoryClient(ObjDatasetClient):
         :return: the history dataset corresponding to ``id_``
         """
         return self._get_container_dataset(src, ds_id, wrappers.History)
-
-    def wait(self, datasets, polling_interval=POLLING_INTERVAL,
-             break_on_error=True):
-        """
-        Wait for datasets to come out of the pending states.
-
-        :type datasets: :class:`~collections.Iterable` of
-          :class:`~.wrappers.HistoryDatasetAssociation`
-        :param datasets: history datasets
-
-        :type polling_interval: float
-        :param polling_interval: polling interval in seconds
-
-        :type break_on_error: bool
-        :param break_on_error: if :obj:`True`, break as soon as at least
-          one of the datasets is in the 'error' state.
-
-        .. warning::
-
-          This is a blocking operation that can take a very long time.
-          Also, note that this method does not return anything;
-          however, each input dataset is refreshed (possibly multiple
-          times) during the execution.
-        """
-        self.log.info('waiting for datasets')
-        datasets = [_ for _ in datasets if _.state in _PENDING_DS_STATES]
-        while datasets:
-            time.sleep(polling_interval)
-            for i in xrange(len(datasets)-1, -1, -1):
-                ds = datasets[i]
-                ds.refresh()
-                self.log.info('{0.id}: {0.state}'.format(ds))
-                if break_on_error and ds.state == 'error':
-                    self._error(_get_error_info(ds))
-                if ds.state not in _PENDING_DS_STATES:
-                    del datasets[i]
 
 
 class ObjWorkflowClient(ObjClient):
