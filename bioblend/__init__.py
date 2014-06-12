@@ -5,6 +5,14 @@ from bioblend.config import Config, BioBlendConfigLocations
 # Current version of the library
 __version__ = '0.5.0'
 
+# default chunk size (in bytes) for reading remote data
+try:
+    import resource
+    CHUNK_SIZE = resource.getpagesize()
+except StandardError:
+    CHUNK_SIZE = 4096
+
+
 config = Config()
 
 

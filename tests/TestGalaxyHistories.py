@@ -1,5 +1,7 @@
 """
 """
+import os, tempfile, shutil, tarfile
+
 import GalaxyTestBase
 import test_util
 
@@ -103,6 +105,22 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
         self.assertIsNotNone(current_history['id'])
         self.assertIsNotNone(current_history['name'])
         self.assertIsNotNone(current_history['state'])
+
+    def test_download_history(self):
+        jeha_id = self.gi.histories.export_history(
+            self.history['id'], wait=True
+            )
+        self.assertTrue(jeha_id)
+        tempdir = tempfile.mkdtemp(prefix='bioblend_test_')
+        temp_fn = os.path.join(tempdir, 'export.tar.gz')
+        try:
+            with open(temp_fn, 'w') as fo:
+                self.gi.histories.download_history(
+                    self.history['id'], jeha_id, fo
+                    )
+            self.assertTrue(tarfile.is_tarfile(temp_fn))
+        finally:
+            shutil.rmtree(tempdir)
 
     def tearDown(self):
         self.history = self.gi.histories.delete_history(self.history['id'], purge=True)

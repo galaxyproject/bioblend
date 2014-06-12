@@ -14,12 +14,6 @@ import wrappers
 _PENDING_DS_STATES = set(
     ["new", "upload", "queued", "running", "setting_metadata"]
     )
-# default chunk size for reading remote data
-try:
-    import resource
-    _CHUNK_SIZE = resource.getpagesize()
-except StandardError:
-    _CHUNK_SIZE = 4096
 
 
 def _get_error_info(hda):
@@ -159,7 +153,7 @@ class ObjDatasetClient(ObjClient):
         return [self._get_container_dataset(src, _, ctype=type(src))
                 for _ in ds_ids]
 
-    def get_stream(self, dataset, chunk_size=_CHUNK_SIZE):
+    def get_stream(self, dataset, chunk_size=bioblend.CHUNK_SIZE):
         """
         Open ``dataset`` for reading and return an iterator over its contents.
 

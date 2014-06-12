@@ -1,12 +1,14 @@
 """
 Contains possible interactions with the Galaxy Histories
 """
+import bioblend
 from bioblend.galaxy.client import Client
 
 import os
 import re
 import shutil
 import urllib2
+import time
 
 
 class HistoryClient(Client):
@@ -319,3 +321,74 @@ class HistoryClient(Client):
         url = self.gi._make_url(self, None)
         url = '/'.join([url, 'most_recently_used'])
         return Client._get(self, url=url)
+
+    def export_history(self, history_id, gzip=True, include_hidden=False,
+                       include_deleted=False, wait=False):
+        """
+        Start a job to create an export archive for the given history.
+
+        :type history_id: str
+        :param history_id: history ID
+
+        :type gzip: bool
+        :param gzip: create .tar.gz archive if :obj:`True`, else .tar
+
+        :type include_hidden: bool
+        :param include_hidden: whether to include hidden datasets
+          in the export
+
+        :type include_deleted: bool
+        :param include_deleted: whether to include deleted datasets
+          in the export
+
+        :type wait: bool
+        :param wait: if :obj:`True`, block until the export is ready;
+          else, return immediately
+
+        :rtype: str
+        :return: ``jeha_id`` of the export, or empty if ``wait`` is
+          :obj:`False` and the export is not ready.
+        """
+        params = {
+            'gzip': gzip,
+            'include_hidden': include_hidden,
+            'include_deleted': include_deleted,
+            }
+        url = '%s/exports' % self.gi._make_url(self, history_id)
+        while True:
+            r = Client._put(self, {}, url=url, params=params)
+            if not wait or r.status_code == 200:
+                break
+            time.sleep(1)
+        contents = r.json()
+        if contents:
+            jeha_id = contents['download_url'].rsplit('/', 1)[-1]
+        else:
+            jeha_id = ''  # export is not ready
+        return jeha_id
+
+    def download_history(self, history_id, jeha_id, outf,
+                         chunk_size=bioblend.CHUNK_SIZE):
+        """
+        Export and download the given history.
+
+        :type history_id: str
+        :param history_id: history ID
+
+        :type jeha_id: str
+        :param jeha_id: jeha ID (this should be obtained via
+          :meth:`export_history`)
+
+        :type outf: file
+        :param jeha_id: output file object, open for writing
+
+        :type chunk_size: int
+        :param chunk_size: how many bytes at a time should be read into memory
+        """
+        url = '%s/exports/%s' % (
+            self.gi._make_url(self, module_id=history_id), jeha_id
+            )
+        r = self.gi.make_get_request(url, stream=True)
+        r.raise_for_status()
+        for chunk in r.iter_content(chunk_size):
+            outf.write(chunk)
