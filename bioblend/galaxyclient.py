@@ -42,20 +42,27 @@ class GalaxyClient(object):
                 c_url = '/'.join([c_url, 'contents'])
         return c_url
 
-    def make_get_request(self, url, params=None):
+    def make_get_request(self, url, **kwargs):
         """
         Make a GET request using the provided ``url``.
+
+        Keyword arguments are the same as in requests.request.
+
+        If ``verify`` is not provided, ``self.verify`` will be used.
 
         If the ``params`` are not provided, use ``default_params`` class field.
         If params are provided and the provided dict does not have ``key`` key,
         the default ``self.key`` value will be included in what's passed to
         the server via the request.
         """
+        params = kwargs.get('params')
         if params is not None and params.get('key', False) is False:
             params['key'] = self.key
         else:
             params = self.default_params
-        r = requests.get(url, verify=self.verify, params=params)
+        kwargs['params'] = params
+        kwargs.setdefault('verify', self.verify)
+        r = requests.get(url, **kwargs)
         return r
 
     def make_post_request(self, url, payload, params=None, files_attached=False):

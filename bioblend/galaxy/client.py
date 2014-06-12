@@ -136,7 +136,7 @@ class Client(object):
         while attempts_left > 0:
             attempts_left -= 1
             try:
-                r = self.gi.make_get_request(url, params)
+                r = self.gi.make_get_request(url, params=params)
                 if r.status_code == 200 and r.content:
                     return r.json()
                 else:

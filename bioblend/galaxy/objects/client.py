@@ -4,7 +4,7 @@ Clients for interacting with specific Galaxy entity types.
 Classes in this module should not be instantiated directly, but used
 via their handles in :class:`~.galaxy_instance.GalaxyInstance`.
 """
-import collections, httplib, json, requests, time, abc
+import collections, httplib, json, time, abc
 
 import bioblend
 import wrappers
@@ -171,15 +171,10 @@ class ObjDatasetClient(ObjClient):
         :param chunk_size: read this amount of bytes at a time
         """
         url = self._dataset_stream_url(dataset)
-        params = {'key': self.gi.key}
+        kwargs = {'stream': True}
         if isinstance(dataset, wrappers.LibraryDataset):
-            params['ldda_ids%5B%5D'] = dataset.id
-        get_options = {
-            'verify': self.gi.verify,
-            'params': params,
-            'stream': True,
-            }
-        r = requests.get(url, **get_options)
+            kwargs['params'] = {'ldda_ids%5B%5D': dataset.id}
+        r = self.gi.make_get_request(url, **kwargs)
         r.raise_for_status()
         return r.iter_content(chunk_size)  # FIXME: client can't close r
 
