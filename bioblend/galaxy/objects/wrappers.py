@@ -4,6 +4,7 @@
 A basic object-oriented interface for Galaxy entities.
 """
 
+import bioblend
 import abc, collections, json
 
 
@@ -608,6 +609,32 @@ class History(DatasetContainer):
         """
         out_dict = self.gi.gi.tools.upload_file(path, self.id, **kwargs)
         return self.get_dataset(out_dict['outputs'][0]['id'])
+
+    def export(self, gzip=True, include_hidden=False, include_deleted=False,
+               wait=False):
+        """
+        Start a job to create an export archive for this history.  See
+        :meth:`~bioblend.galaxy.histories.HistoryClient.export_history`
+        for parameter and return value info.
+        """
+        return self.gi.gi.histories.export_history(
+            self.id,
+            gzip=gzip,
+            include_hidden=include_hidden,
+            include_deleted=include_deleted,
+            wait=wait
+            )
+
+    def download(self, jeha_id, outf, chunk_size=bioblend.CHUNK_SIZE):
+        """
+        Download an export archive for this history.  Use :meth:`export`
+        to create an export and get the required ``jeha_id``.  See
+        :meth:`~bioblend.galaxy.histories.HistoryClient.download_history`
+        for parameter and return value info.
+        """
+        return self.gi.gi.histories.download_history(
+            self.id, jeha_id, outf, chunk_size=chunk_size
+            )
 
 
 class Library(DatasetContainer):

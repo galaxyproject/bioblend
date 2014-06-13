@@ -1,6 +1,6 @@
 # pylint: disable=C0103,E1101
 
-import sys, os, unittest, json, uuid, tempfile, urllib2, shutil, time
+import sys, os, unittest, json, uuid, tempfile, tarfile, urllib2, shutil, time
 from functools import wraps
 import socket
 socket.setdefaulttimeout(10.0)
@@ -409,7 +409,7 @@ class TestGalaxyInstance(unittest.TestCase):
         self.assertEqual(len(prevs), 0)
 
 
-class TestLibraryContents(unittest.TestCase):
+class TestLibrary(unittest.TestCase):
 
     # just something that can be expected to be always up
     DS_URL = 'http://tools.ietf.org/rfc/rfc1866.txt'
@@ -518,7 +518,7 @@ class TestLDContents(unittest.TestCase):
         self.assertEqual(FOO_DATA, self.ds.get_contents())
 
 
-class TestHistoryContents(unittest.TestCase):
+class TestHistory(unittest.TestCase):
 
     def setUp(self):
         self.gi = galaxy_instance.GalaxyInstance(URL, API_KEY)
@@ -565,6 +565,18 @@ class TestHistoryContents(unittest.TestCase):
         selected = self.hist.get_datasets(name=bnames[0])
         self.assertEqual(len(selected), 1)
         self.assertEqual(selected[0].name, bnames[0])
+
+    def test_export_and_download(self):
+        jeha_id = self.hist.export(wait=True)
+        self.assertTrue(jeha_id)
+        tempdir = tempfile.mkdtemp(prefix='bioblend_test_')
+        temp_fn = os.path.join(tempdir, 'export.tar.gz')
+        try:
+            with open(temp_fn, 'w') as fo:
+                self.hist.download(jeha_id, fo)
+            self.assertTrue(tarfile.is_tarfile(temp_fn))
+        finally:
+            shutil.rmtree(tempdir)
 
 
 class TestHDAContents(unittest.TestCase):
@@ -662,9 +674,9 @@ def suite():
         TestWrapper,
         TestWorkflow,
         TestGalaxyInstance,
-        TestLibraryContents,
+        TestLibrary,
         TestLDContents,
-        TestHistoryContents,
+        TestHistory,
         TestHDAContents,
         TestRunWorkflow,
         )])
