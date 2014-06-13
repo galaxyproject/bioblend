@@ -370,7 +370,8 @@ class HistoryClient(Client):
     def download_history(self, history_id, jeha_id, outf,
                          chunk_size=bioblend.CHUNK_SIZE):
         """
-        Export and download the given history.
+        Download a history export archive.  Use :meth:`export_history`
+        to create an export.
 
         :type history_id: str
         :param history_id: history ID
@@ -380,7 +381,7 @@ class HistoryClient(Client):
           :meth:`export_history`)
 
         :type outf: file
-        :param jeha_id: output file object, open for writing
+        :param outf: output file object, open for writing
 
         :type chunk_size: int
         :param chunk_size: how many bytes at a time should be read into memory
