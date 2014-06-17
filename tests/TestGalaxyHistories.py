@@ -34,9 +34,15 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
         new_history = self.gi.histories.get_histories(name=self.default_history_name)
         self.assertTrue(any(d['id'] == self.history['id'] for d in new_history))
 
-        # check whether deleted history is returned correctly
-        deleted_history = self.gi.histories.get_histories(deleted=True)
-        self.assertGreaterEqual(len(deleted_history), len(full_history))
+        # TODO: check whether deleted history is returned correctly
+        # At the moment, get_histories() returns only not-deleted histories
+        # and get_histories(deleted=True) returns only deleted histories,
+        # so they are not comparable.
+        # In the future, according to https://trello.com/c/MoilsmVv/1673-api-incoherent-and-buggy-indexing-of-deleted-entities ,
+        # get_histories() will return both not-deleted and deleted histories
+        # and we can uncomment the following test.
+        # deleted_history = self.gi.histories.get_histories(deleted=True)
+        # self.assertGreaterEqual(len(full_history), len(deleted_history))
 
     def test_show_history(self):
         history_data = self.gi.histories.show_history(self.history['id'])
