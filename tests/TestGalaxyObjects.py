@@ -10,10 +10,8 @@ bioblend.set_stream_logger('test', level='INFO')
 import bioblend.galaxy.objects.wrappers as wrappers
 import bioblend.galaxy.objects.galaxy_instance as galaxy_instance
 from bioblend.galaxy.client import ConnectionError
+import test_util
 
-
-URL = os.environ.get('BIOBLEND_GALAXY_URL', 'http://localhost:8080')
-API_KEY = os.environ['BIOBLEND_GALAXY_API_KEY']
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 SAMPLE_FN = os.path.join(THIS_DIR, 'data', 'paste_columns.ga')
@@ -239,10 +237,15 @@ class TestWorkflow(unittest.TestCase):
             self.assertTrue(d['id'] in 'ab')
 
 
-class TestGalaxyInstance(unittest.TestCase):
+class GalaxyObjectsTestBase(unittest.TestCase):
 
     def setUp(self):
-        self.gi = galaxy_instance.GalaxyInstance(URL, API_KEY)
+        galaxy_key = os.environ['BIOBLEND_GALAXY_API_KEY']
+        galaxy_url = os.environ['BIOBLEND_GALAXY_URL']
+        self.gi = galaxy_instance.GalaxyInstance(galaxy_url, galaxy_key)
+
+@test_util.skip_unless_galaxy()
+class TestGalaxyInstance(GalaxyObjectsTestBase):
 
     def test_library(self):
         name = 'test_%s' % uuid.uuid4().hex
@@ -409,13 +412,14 @@ class TestGalaxyInstance(unittest.TestCase):
         self.assertEqual(len(prevs), 0)
 
 
-class TestLibrary(unittest.TestCase):
+@test_util.skip_unless_galaxy()
+class TestLibrary(GalaxyObjectsTestBase):
 
     # just something that can be expected to be always up
     DS_URL = 'http://tools.ietf.org/rfc/rfc1866.txt'
 
     def setUp(self):
-        self.gi = galaxy_instance.GalaxyInstance(URL, API_KEY)
+        super(TestLibrary, self).setUp()
         self.lib = self.gi.libraries.create('test_%s' % uuid.uuid4().hex)
 
     def tearDown(self):
@@ -486,10 +490,11 @@ class TestLibrary(unittest.TestCase):
         self.assertEqual(selected[0].name, bnames[0])
 
 
-class TestLDContents(unittest.TestCase):
+@test_util.skip_unless_galaxy()
+class TestLDContents(GalaxyObjectsTestBase):
 
     def setUp(self):
-        self.gi = galaxy_instance.GalaxyInstance(URL, API_KEY)
+        super(TestLDContents, self).setUp()
         self.lib = self.gi.libraries.create('test_%s' % uuid.uuid4().hex)
         self.ds = self.lib.upload_data(FOO_DATA)
 
@@ -518,10 +523,11 @@ class TestLDContents(unittest.TestCase):
         self.assertEqual(FOO_DATA, self.ds.get_contents())
 
 
-class TestHistory(unittest.TestCase):
+@test_util.skip_unless_galaxy()
+class TestHistory(GalaxyObjectsTestBase):
 
     def setUp(self):
-        self.gi = galaxy_instance.GalaxyInstance(URL, API_KEY)
+        super(TestHistory, self).setUp()
         self.hist = self.gi.histories.create('test_%s' % uuid.uuid4().hex)
         self.lib = self.gi.libraries.create('test_%s' % uuid.uuid4().hex)
 
@@ -579,10 +585,11 @@ class TestHistory(unittest.TestCase):
             shutil.rmtree(tempdir)
 
 
-class TestHDAContents(unittest.TestCase):
+@test_util.skip_unless_galaxy()
+class TestHDAContents(GalaxyObjectsTestBase):
 
     def setUp(self):
-        self.gi = galaxy_instance.GalaxyInstance(URL, API_KEY)
+        super(TestHDAContents, self).setUp()
         self.hist = self.gi.histories.create('test_%s' % uuid.uuid4().hex)
         self.lib = self.gi.libraries.create('test_%s' % uuid.uuid4().hex)
         ld = self.lib.upload_data(FOO_DATA)
@@ -612,10 +619,11 @@ class TestHDAContents(unittest.TestCase):
         self.assertEqual(FOO_DATA, self.ds.get_contents())
 
 
-class TestRunWorkflow(unittest.TestCase):
+@test_util.skip_unless_galaxy()
+class TestRunWorkflow(GalaxyObjectsTestBase):
 
     def setUp(self):
-        self.gi = galaxy_instance.GalaxyInstance(URL, API_KEY)
+        super(TestRunWorkflow, self).setUp()
         self.lib = self.gi.libraries.create('test_%s' % uuid.uuid4().hex)
         with open(SAMPLE_FN) as f:
             self.wf = self.gi.workflows.import_new(f.read())
