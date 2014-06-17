@@ -108,9 +108,12 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
 
     def test_get_current_history(self):
         current_history = self.gi.histories.get_current_history()
-        self.assertIsNotNone(current_history['id'])
-        self.assertIsNotNone(current_history['name'])
-        self.assertIsNotNone(current_history['state'])
+        # if the user has been created via the API, it does not have
+        # a session, therefore no current history
+        if current_history is not None:
+            self.assertIsNotNone(current_history['id'])
+            self.assertIsNotNone(current_history['name'])
+            self.assertIsNotNone(current_history['state'])
 
     def test_download_history(self):
         jeha_id = self.gi.histories.export_history(
