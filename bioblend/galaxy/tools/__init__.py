@@ -83,6 +83,14 @@ class ToolClient(Client):
         """
         Runs tool specified by ``tool_id`` in history indicated
         by ``history_id`` with inputs from ``dict`` ``tool_inputs``.
+
+        :type tool_inputs: dict
+        :param tool_inputs: dictionary of input datasets and parameters
+          for the tool (see below)
+
+        The ``tool_inputs`` dict should contain input datasets and parameters
+        in the (largely undocumented) format used by the Galaxy API.
+        Some examples can be found in https://bitbucket.org/galaxy/galaxy-central/src/tip/test/api/test_tools.py .
         """
         payload = {}
         payload["history_id"] = history_id
