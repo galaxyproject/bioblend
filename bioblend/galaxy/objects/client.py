@@ -88,6 +88,13 @@ class ObjClient(object):
         except (TypeError, IndexError):
             self._error('%s: unexpected reply: %r' % (meth_name, reply))
 
+
+class ObjDatasetClient(ObjClient):
+
+    @abc.abstractmethod
+    def _dataset_stream_url(self, dataset):
+        pass
+
     def _get_container(self, id_, ctype):
         show_fname = 'show_%s' % ctype.__name__.lower()
         gi_client = getattr(self.gi, ctype.API_MODULE)
@@ -114,13 +121,6 @@ class ObjClient(object):
         gi_client = getattr(self.gi, ctype.API_MODULE)
         ds_dict = gi_client.show_dataset(container_id, ds_id)
         return ctype.DS_TYPE(ds_dict, container_id, gi=self.obj_gi)
-
-
-class ObjDatasetClient(ObjClient):
-
-    @abc.abstractmethod
-    def _dataset_stream_url(self, dataset):
-        pass
 
     def get_datasets(self, src, name=None):
         """
@@ -775,3 +775,47 @@ class ObjToolClient(ObjClient):
     """
     def __init__(self, obj_gi):
         super(ObjToolClient, self).__init__(obj_gi)
+
+    def get(self, id_):
+        """
+        Retrieve the tool corresponding to the given id.
+
+        :rtype: :class:`~.wrappers.Tool`
+        :return: the tool corresponding to ``id_``
+        """
+        res = self.gi.tools.show_tool(id_)
+        tool_dict = self._get_dict('show_tool', res)
+        return wrappers.Tool(tool_dict, gi=self.obj_gi)
+
+    def get_previews(self, name=None, trackster=None):
+        """
+        Get the list of tools installed on the Galaxy instance.
+
+        :type name: str
+        :param name: return only tools with this name
+
+        :type trackster: boolean
+        :param trackster: if True, only tools that are compatible with
+          Trackster are returned
+
+        :rtype: list of :class:`~.wrappers.Tool`
+        """
+        dicts = self.gi.tools.get_tools(name=name, trackster=trackster)
+        return [wrappers.Tool(_, gi=self.obj_gi) for _ in dicts]
+
+    # the 'deleted' option is not available for tools
+    def list(self, name=None, trackster=None):
+        """
+        Get the list of tools installed on the Galaxy instance.
+
+        :type name: str
+        :param name: return only tools with this name
+
+        :type trackster: boolean
+        :param trackster: if True, only tools that are compatible with
+          Trackster are returned
+
+        :rtype: list of :class:`~.wrappers.Tool`
+        """
+        dicts = self.gi.tools.get_tools(name=name, trackster=trackster)
+        return [self.get(_['id']) for _ in dicts]

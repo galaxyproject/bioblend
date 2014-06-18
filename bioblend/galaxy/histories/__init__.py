@@ -38,16 +38,14 @@ class HistoryClient(Client):
         matches the given ``name``, return the list of all the histories with the
         given name.
         """
+        if history_id is not None and name is not None:
+            raise ValueError('Provide only one argument between name or history_id, but not both')
         histories = Client._get(self, deleted=deleted)
-        if name is not None or history_id is not None:
-            filtered_hists = []
-            for history in histories:
-                if name == history['name'] or history_id == history['id']:
-                    filtered_hists.append(history)
-                    # History ID's are unique so break now that the hist was found
-                    if history_id is not None:
-                        break
-            histories = filtered_hists
+        if history_id is not None:
+            history = next((_ for _ in histories if _['id'] == history_id), None)
+            histories = [history] if history is not None else []
+        elif name is not None:
+            histories = [_ for _ in histories if _['name'] == name]
         return histories
 
     def show_history(self, history_id, contents=False, deleted=None, visible=None, details=None, types=None):

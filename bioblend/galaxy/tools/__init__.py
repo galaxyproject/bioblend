@@ -13,14 +13,37 @@ class ToolClient(Client):
         self.module = 'tools'
         super(ToolClient, self).__init__(galaxy_instance)
 
-    def get_tools(self):
+    def get_tools(self, tool_id=None, name=None, trackster=None):
         """
-        Get a list of available tool elements in Galaxy's configured toolbox.
+        Get all tools or filter the specific one(s) via the provided ``name``
+        or ``tool_id``. Provide only one argument, ``name`` or ``tool_id``,
+        but not both.
+
+        If ``name`` is set and multiple names match the given name, all the
+        tools matching the argument will be returned.
+
+        :type tool_id: str
+        :param tool_id: id of the requested tool
+
+        :type name: str
+        :param name: name of the requested tool(s)
+
+        :type trackster: boolean
+        :param trackster: if True, only tools that are compatible with
+          Trackster are returned
 
         :rtype: list
         :return: List of tool descriptions.
         """
-        return self._raw_get_tool(in_panel=False)
+        if tool_id is not None and name is not None:
+            raise ValueError('Provide only one argument between name or tool_id, but not both')
+        tools = self._raw_get_tool(in_panel=False, trackster=trackster)
+        if tool_id is not None:
+            tool = next((_ for _ in tools if _['id'] == tool_id), None)
+            tools = [tool] if tool is not None else []
+        elif name is not None:
+            tools = [_ for _ in tools if _['name'] == name]
+        return tools
 
     def get_tool_panel(self):
         """
@@ -32,15 +55,42 @@ class ToolClient(Client):
         """
         return self._raw_get_tool(in_panel=True)
 
-    def _raw_get_tool(self, in_panel=None):
+    def _raw_get_tool(self, in_panel=None, trackster=None):
         params = {}
         params['in_panel'] = in_panel
+        params['trackster'] = trackster
         return Client._get(self, params=params)
+
+    def show_tool(self, tool_id, io_details=False, link_details=False):
+        """
+        Get details of a given tool.
+
+        :type tool_id: str
+        :param tool_id: id of the requested tool
+
+        :type io_details: boolean
+        :param io_details: if True, get also input and output details
+
+        :type link_details: boolean
+        :param link_details: if True, get also link details
+        """
+        params = {}
+        params['io_details'] = io_details
+        params['link_details'] = link_details
+        return Client._get(self, id=tool_id, params=params)
 
     def run_tool(self, history_id, tool_id, tool_inputs):
         """
         Runs tool specified by ``tool_id`` in history indicated
         by ``history_id`` with inputs from ``dict`` ``tool_inputs``.
+
+        :type tool_inputs: dict
+        :param tool_inputs: dictionary of input datasets and parameters
+          for the tool (see below)
+
+        The ``tool_inputs`` dict should contain input datasets and parameters
+        in the (largely undocumented) format used by the Galaxy API.
+        Some examples can be found in https://bitbucket.org/galaxy/galaxy-central/src/tip/test/api/test_tools.py .
         """
         payload = {}
         payload["history_id"] = history_id

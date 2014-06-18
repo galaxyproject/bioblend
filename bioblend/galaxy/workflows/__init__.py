@@ -35,19 +35,17 @@ class WorkflowClient(Client):
                      u'url': u'/api/workflows/92c56938c2f9b315'}]
 
         """
+        if workflow_id is not None and name is not None:
+            raise ValueError('Provide only one argument between name or workflow_id, but not both')
         kwargs = {'deleted': deleted}
         if published:
             kwargs['params'] = {'show_published': 'True'}
         workflows = Client._get(self, **kwargs)
-        if name is not None or workflow_id is not None:
-            filtered_wfs = []
-            for workflow in workflows:
-                if name == workflow['name'] or workflow_id == workflow['id']:
-                    filtered_wfs.append(workflow)
-                    # Workflows ID's are unique so break now that the wf was found
-                    if workflow_id is not None:
-                        break
-            workflows = filtered_wfs
+        if workflow_id is not None:
+            workflow = next((_ for _ in workflows if _['id'] == workflow_id), None)
+            workflows = [workflow] if workflow is not None else []
+        elif name is not None:
+            workflows = [_ for _ in workflows if _['name'] == name]
         return workflows
 
     def show_workflow(self, workflow_id):

@@ -590,7 +590,8 @@ class TestHDAContents(unittest.TestCase):
         self.ds.wait()
 
     def tearDown(self):
-        super(TestHDAContents, self).tearDown()
+        self.hist.delete(purge=True)
+        self.lib.delete()
 
     def test_dataset_get_stream(self):
         for idx, c in enumerate(self.ds.get_stream(chunk_size=1)):

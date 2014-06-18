@@ -120,24 +120,22 @@ class LibraryClient(Client):
         Return a list of JSON formatted dicts each containing basic information
         about a folder.
         """
+        if folder_id is not None and name is not None:
+            raise ValueError('Provide only one argument between name or folder_id, but not both')
         library_contents = Client._get(self, id=library_id, contents=True)
-        folders = []
-        filtered_folders = []
-        for content in library_contents:
-            if content['type'] == 'folder':
-                folders.append(content)
-                if name == content['name'] or folder_id == content['id']:
-                    filtered_folders.append(content)
-                if folder_id is not None and filtered_folders:
-                    break
-        if name is not None or folder_id is not None:
-            folders = filtered_folders
+        if folder_id is not None:
+            folder = next((_ for _ in library_contents if _['type'] == 'folder' and _['id'] == folder_id), None)
+            folders = [folder] if folder is not None else []
+        elif name is not None:
+            folders = [_ for _ in library_contents if _['type'] == 'folder' and _['name'] == name]
+        else:
+            folders = [_ for _ in library_contents if _['type'] == 'folder']
         return folders
 
     def get_libraries(self, library_id=None, name=None, deleted=False):
         """
         Get all the libraries or filter for specific one(s) via the provided name or ID.
-        Provide only one argument: ``name`` or ``library_id``.
+        Provide only one argument: ``name`` or ``library_id``, but not both.
 
         If ``name`` is set and multiple names match the given name, all the
         libraries matching the argument will be returned.
@@ -145,16 +143,14 @@ class LibraryClient(Client):
         Return a list of JSON formatted dicts each containing basic information
         about a library.
         """
+        if library_id is not None and name is not None:
+            raise ValueError('Provide only one argument between name or library_id, but not both')
         libraries = Client._get(self, deleted=deleted)
-        if name is not None or library_id is not None:
-            filtered_libs = []
-            for lib in libraries:
-                if name == lib['name'] or library_id == lib['id']:
-                    filtered_libs.append(lib)
-                # Library ID's are unique so break now that the lib was found
-                if library_id is not None and filtered_libs:
-                    break
-            libraries = filtered_libs
+        if library_id is not None:
+            library = next((_ for _ in libraries if _['id'] == library_id), None)
+            libraries = [library] if library is not None else []
+        if name is not None:
+            libraries = [_ for _ in libraries if _['name'] == name]
         return libraries
 
     def show_library(self, library_id, contents=False):

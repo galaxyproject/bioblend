@@ -17,8 +17,8 @@ class GalaxyInstance(object):
     :param url: a FQDN or IP for a given instance of Galaxy. For example:
       ``http://127.0.0.1:8080``
 
-    :type key: str
-    :param key: user's API key for the given instance of Galaxy, obtained
+    :type api_key: str
+    :param api_key: user's API key for the given instance of Galaxy, obtained
       from the Galaxy web UI.
 
     This is actually a factory class which instantiates the entity-specific
