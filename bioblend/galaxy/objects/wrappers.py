@@ -338,7 +338,7 @@ class Workflow(Wrapper):
             raise ValueError('no object for id %s' % self.id)
         return p
 
-    def run(self, input_map, history, params=None, import_inputs=False,
+    def run(self, input_map={}, history='', params=None, import_inputs=False,
             replacement_params=None, wait=False,
             polling_interval=POLLING_INTERVAL, break_on_error=True):
         """
@@ -427,8 +427,8 @@ class Workflow(Wrapper):
                 '%s[%s]' % (self.steps[_].tool_id, _)
                 for _ in self.missing_ids
                 ))
-        ds_map = self.convert_input_map(input_map)
         kwargs = {
+            'dataset_map': self.convert_input_map(input_map),
             'params': params,
             'import_inputs_to_history': import_inputs,
             'replacement_params': replacement_params,
@@ -442,7 +442,7 @@ class Workflow(Wrapper):
             kwargs['history_name'] = history
         else:
             raise TypeError('history must be either a history wrapper or a string')
-        res = self.gi.gi.workflows.run_workflow(self.id, ds_map, **kwargs)
+        res = self.gi.gi.workflows.run_workflow(self.id, **kwargs)
         # res structure: {'history': HIST_ID, 'outputs': [DS_ID, DS_ID, ...]}
         out_hist = self.gi.histories.get(res['history'])
         assert set(res['outputs']).issubset(out_hist.dataset_ids)

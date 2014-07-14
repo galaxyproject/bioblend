@@ -268,7 +268,7 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
                         wf_dict['steps'][id_][k] = None
             wf = wrappers.Workflow(wf_dict, gi=self.gi)
             self.assertFalse(wf.is_runnable)
-            self.assertRaises(RuntimeError, wf.run, 'foo', 'bar')
+            self.assertRaises(RuntimeError, wf.run)
             wf.delete()
 
     def test_export(self):

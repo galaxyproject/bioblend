@@ -164,7 +164,7 @@ class WorkflowClient(Client):
 
         return workflow_json
 
-    def run_workflow(self, workflow_id, dataset_map,params=None, history_id=None, history_name=None,
+    def run_workflow(self, workflow_id, dataset_map=None, params=None, history_id=None, history_name=None,
             import_inputs_to_history=False, replacement_params=None):
         """
         Run the workflow identified by ``workflow_id``
@@ -178,7 +178,8 @@ class WorkflowClient(Client):
                             LibraryDataset (``ld``), or HistoryDatasetAssociation (``hda``).
                             The map must be in the following format:
                             ``{'<input>': {'id': <encoded dataset ID>, 'src': '[ldda, ld, hda]'}}``
-                            (eg, ``{'23': {'id': '29beef4fadeed09f', 'src': 'ld'}}``)
+                            (e.g. ``{'23': {'id': '29beef4fadeed09f', 'src': 'ld'}}``)
+
         :type params: string or dict
         :param params: A mapping of tool parameters that are non-datasets parameters. The map must be in the
                          following format:
@@ -214,7 +215,8 @@ class WorkflowClient(Client):
         """
         payload = {}
         payload['workflow_id'] = workflow_id
-        payload['ds_map'] = dataset_map
+        if dataset_map:
+            payload['ds_map'] = dataset_map
 
         if params:
             payload['parameters'] = params
