@@ -4,26 +4,10 @@ Clients for interacting with specific Galaxy entity types.
 Classes in this module should not be instantiated directly, but used
 via their handles in :class:`~.galaxy_instance.GalaxyInstance`.
 """
-import collections, httplib, json, time, abc
+import collections, httplib, json, abc
 
 import bioblend
 import wrappers
-
-
-# dataset states corresponding to a 'pending' condition
-_PENDING_DS_STATES = set(
-    ["new", "upload", "queued", "running", "setting_metadata"]
-    )
-
-
-def _get_error_info(hda):
-    msg = hda.id
-    try:
-        msg += ' (%s): ' % hda.name
-        msg += hda.wrapped['misc_info']
-    except StandardError:  # avoid 'error while generating an error report'
-        msg += ': error'
-    return msg
 
 
 class ObjClient(object):
@@ -396,8 +380,6 @@ class ObjHistoryClient(ObjDatasetClient):
     Interacts with Galaxy histories.
     """
 
-    POLLING_INTERVAL = wrappers.HistoryDatasetAssociation.POLLING_INTERVAL
-
     def __init__(self, obj_gi):
         super(ObjHistoryClient, self).__init__(obj_gi)
 
@@ -514,42 +496,6 @@ class ObjHistoryClient(ObjDatasetClient):
         """
         return self._get_container_dataset(src, ds_id, wrappers.History)
 
-    def wait(self, datasets, polling_interval=POLLING_INTERVAL,
-             break_on_error=True):
-        """
-        Wait for datasets to come out of the pending states.
-
-        :type datasets: :class:`~collections.Iterable` of
-          :class:`~.wrappers.HistoryDatasetAssociation`
-        :param datasets: history datasets
-
-        :type polling_interval: float
-        :param polling_interval: polling interval in seconds
-
-        :type break_on_error: bool
-        :param break_on_error: if :obj:`True`, break as soon as at least
-          one of the datasets is in the 'error' state.
-
-        .. warning::
-
-          This is a blocking operation that can take a very long time.
-          Also, note that this method does not return anything;
-          however, each input dataset is refreshed (possibly multiple
-          times) during the execution.
-        """
-        self.log.info('waiting for datasets')
-        datasets = [_ for _ in datasets if _.state in _PENDING_DS_STATES]
-        while datasets:
-            time.sleep(polling_interval)
-            for i in xrange(len(datasets)-1, -1, -1):
-                ds = datasets[i]
-                ds.refresh()
-                self.log.info('{0.id}: {0.state}'.format(ds))
-                if break_on_error and ds.state == 'error':
-                    self._error(_get_error_info(ds))
-                if ds.state not in _PENDING_DS_STATES:
-                    del datasets[i]
-
 
 class ObjWorkflowClient(ObjClient):
     """
@@ -594,18 +540,6 @@ class ObjWorkflowClient(ObjClient):
         wf_info = self.gi.workflows.import_shared_workflow(id_)
         return self.get(wf_info['id'])
 
-    def export(self, id_):
-        """
-        Export a re-importable representation of a workflow.
-
-        :type id_: str
-        :param id_: workflow id
-
-        :rtype: dict
-        :return: a JSON-serializable dump of the workflow identified by ``id_``
-        """
-        return self.gi.workflows.export_workflow_json(id_)
-
     def get(self, id_):
         """
         Retrieve the workflow corresponding to the given id.
@@ -639,119 +573,6 @@ class ObjWorkflowClient(ObjClient):
             name=name, deleted=deleted, published=published
             )
         return [self.get(_['id']) for _ in dicts]
-
-    def run(self, workflow, input_map, history, params=None,
-            import_inputs=False, replacement_params=None):
-        """
-        Run ``workflow`` in the current Galaxy instance.
-
-        :type workflow: :class:`~.wrappers.Workflow`
-        :param workflow: the workflow that should be run
-
-        :type input_map: dict
-        :param input_map: a mapping from workflow input labels to
-          datasets, e.g.: ``dict(zip(workflow.input_labels,
-          library.get_datasets()))``
-
-        :type history: :class:`~.wrappers.History` or str
-        :param history: either a valid history object (results will be
-          stored there) or a string (a new history will be created with
-          the given name).
-
-        :type params: :class:`~collections.Mapping`
-        :param params: parameter settings for workflow steps (see below)
-
-        :type import_inputs: bool
-        :param import_inputs: If :obj:`True`, workflow inputs will be
-          imported into the history; if :obj:`False`, only workflow
-          outputs will be visible in the history.
-
-        :type replacement_params: :class:`~collections.Mapping`
-        :param replacement_params: pattern-based replacements for
-          post-job actions (see below)
-
-        :rtype: tuple
-        :return: list of output datasets, output history
-
-        The ``params`` dict should be structured as follows::
-
-          PARAMS = {STEP_ID: PARAM_DICT, ...}
-          PARAM_DICT = {NAME: VALUE, ...}
-
-        For backwards compatibility, the following (deprecated) format is
-        also supported::
-
-          PARAMS = {TOOL_ID: PARAM_DICT, ...}
-
-        in which case PARAM_DICT affects all steps with the given tool id.
-        If both by-tool-id and by-step-id specifications are used, the
-        latter takes precedence.
-
-        Finally (again, for backwards compatibility), PARAM_DICT can also
-        be specified as::
-
-          PARAM_DICT = {'param': NAME, 'value': VALUE}
-
-        Note that this format allows only one parameter to be set per step.
-
-        Example: set 'a' to 1 for the third workflow step::
-
-          params = {workflow.steps[2].id: {'a': 1}}
-
-        The ``replacement_params`` dict should map parameter names in
-        post-job actions (PJAs) to their runtime values.  For
-        instance, if the final step has a PJA like the following::
-
-          {u'RenameDatasetActionout_file1': {
-             u'action_arguments': {u'newname': u'${output}'},
-             u'action_type': u'RenameDatasetAction',
-             u'output_name': u'out_file1'}}
-
-        then the following renames the output dataset to 'foo'::
-
-          replacement_params = {'output': 'foo'}
-
-        see also `this thread
-        <http://lists.bx.psu.edu/pipermail/galaxy-dev/2011-September/006875.html>`_
-
-        .. warning::
-          This is an asynchronous operation: when the method returns,
-          the output datasets and history will most likely **not** be
-          in their final state.  Use :meth:`ObjHistoryClient.wait` if
-          you want to block until they're ready.
-        """
-        if not workflow.is_mapped:
-            self._error('workflow is not mapped to a Galaxy object')
-        if not workflow.is_runnable:
-            self._error('workflow has missing tools: %s' % ', '.join(
-                '%s[%s]' % (workflow.steps[_].tool_id, _)
-                for _ in workflow.missing_ids
-                ))
-        ds_map = workflow.convert_input_map(input_map)
-        kwargs = {
-            'params': params,
-            'import_inputs_to_history': import_inputs,
-            'replacement_params': replacement_params,
-            }
-        if isinstance(history, wrappers.History):
-            try:
-                kwargs['history_id'] = history.id
-            except AttributeError:
-                self._error('history does not have an id')
-        elif not isinstance(history, basestring):
-            self._error(
-                'history must be either a history wrapper or a string',
-                err_type=TypeError,
-                )
-        else:
-            kwargs['history_name'] = history
-        res = self.gi.workflows.run_workflow(workflow.id, ds_map, **kwargs)
-        res = self._get_dict('run_workflow', res)
-        # res structure: {'history': HIST_ID, 'outputs': [DS_ID, DS_ID, ...]}
-        out_hist = self.obj_gi.histories.get(res['history'])
-        assert set(res['outputs']).issubset(out_hist.dataset_ids)
-        out_dss = [out_hist.get_dataset(_) for _ in res['outputs']]
-        return out_dss, out_hist
 
     def delete(self, id_=None, name=None):
         """

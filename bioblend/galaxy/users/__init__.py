@@ -37,7 +37,15 @@ class UserClient(Client):
 
     def create_user(self, user_email):
         """
-        Create a new Galaxy user.
+        Deprecated method.
+
+        Just an alias for create_remote_user().
+        """
+        return self.create_remote_user(user_email)
+
+    def create_remote_user(self, user_email):
+        """
+        Create a new Galaxy remote user.
 
         .. note::
             For this method to work, the Galaxy instance must have
@@ -49,6 +57,22 @@ class UserClient(Client):
         """
         payload = {}
         payload['remote_user_email'] = user_email
+        return Client._post(self, payload)
+
+    def create_local_user(self, username, user_email, password):
+        """
+        Create a new Galaxy user.
+
+        .. note::
+            For this method to work, the Galaxy instance must have
+            ``allow_user_creation`` option set to ``True`` and
+            ``use_remote_user`` option set to ``False`` in the
+            ``universe_wsgi.ini`` configuration file.
+        """
+        payload = {}
+        payload['username'] = username
+        payload['email'] = user_email
+        payload['password'] = password
         return Client._post(self, payload)
 
     def get_current_user(self):

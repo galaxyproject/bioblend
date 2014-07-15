@@ -338,20 +338,129 @@ class Workflow(Wrapper):
             raise ValueError('no object for id %s' % self.id)
         return p
 
-    def run(self, inputs, history, params=None, import_inputs=False,
+    def run(self, input_map={}, history='', params=None, import_inputs=False,
             replacement_params=None, wait=False,
             polling_interval=POLLING_INTERVAL, break_on_error=True):
-        outputs, history = self.gi.workflows.run(
-            self, inputs, history, params=params, import_inputs=import_inputs,
-            replacement_params=replacement_params
-            )
+        """
+        Run the workflow in the current Galaxy instance.
+
+        :type input_map: dict
+        :param input_map: a mapping from workflow input labels to
+          datasets, e.g.: ``dict(zip(workflow.input_labels,
+          library.get_datasets()))``
+
+        :type history: :class:`History` or str
+        :param history: either a valid history object (results will be
+          stored there) or a string (a new history will be created with
+          the given name).
+
+        :type params: :class:`~collections.Mapping`
+        :param params: parameter settings for workflow steps (see below)
+
+        :type import_inputs: bool
+        :param import_inputs: If :obj:`True`, workflow inputs will be
+          imported into the history; if :obj:`False`, only workflow
+          outputs will be visible in the history.
+
+        :type replacement_params: :class:`~collections.Mapping`
+        :param replacement_params: pattern-based replacements for
+          post-job actions (see below)
+
+        :type wait: boolean
+        :param wait: whether to wait while the returned datasets are in a pending state
+
+        :type polling_interval: float
+        :param polling_interval: polling interval in seconds
+
+        :type break_on_error: boolean
+        :param break_on_error: whether to break as soon as at least one
+          of the returned datasets is in the 'error' state
+
+        :rtype: tuple
+        :return: list of output datasets, output history
+
+        The ``params`` dict should be structured as follows::
+
+          PARAMS = {STEP_ID: PARAM_DICT, ...}
+          PARAM_DICT = {NAME: VALUE, ...}
+
+        For backwards compatibility, the following (deprecated) format is
+        also supported::
+
+          PARAMS = {TOOL_ID: PARAM_DICT, ...}
+
+        in which case PARAM_DICT affects all steps with the given tool id.
+        If both by-tool-id and by-step-id specifications are used, the
+        latter takes precedence.
+
+        Finally (again, for backwards compatibility), PARAM_DICT can also
+        be specified as::
+
+          PARAM_DICT = {'param': NAME, 'value': VALUE}
+
+        Note that this format allows only one parameter to be set per step.
+
+        Example: set 'a' to 1 for the third workflow step::
+
+          params = {workflow.steps[2].id: {'a': 1}}
+
+        The ``replacement_params`` dict should map parameter names in
+        post-job actions (PJAs) to their runtime values.  For
+        instance, if the final step has a PJA like the following::
+
+          {u'RenameDatasetActionout_file1': {
+             u'action_arguments': {u'newname': u'${output}'},
+             u'action_type': u'RenameDatasetAction',
+             u'output_name': u'out_file1'}}
+
+        then the following renames the output dataset to 'foo'::
+
+          replacement_params = {'output': 'foo'}
+
+        see also `this thread
+        <http://lists.bx.psu.edu/pipermail/galaxy-dev/2011-September/006875.html>`_
+        """
+        if not self.is_mapped:
+            raise RuntimeError('workflow is not mapped to a Galaxy object')
+        if not self.is_runnable:
+            raise RuntimeError('workflow has missing tools: %s' % ', '.join(
+                '%s[%s]' % (self.steps[_].tool_id, _)
+                for _ in self.missing_ids
+                ))
+        kwargs = {
+            'dataset_map': self.convert_input_map(input_map),
+            'params': params,
+            'import_inputs_to_history': import_inputs,
+            'replacement_params': replacement_params,
+            }
+        if isinstance(history, History):
+            try:
+                kwargs['history_id'] = history.id
+            except AttributeError:
+                raise RuntimeError('history does not have an id')
+        elif isinstance(history, basestring):
+            kwargs['history_name'] = history
+        else:
+            raise TypeError('history must be either a history wrapper or a string')
+        res = self.gi.gi.workflows.run_workflow(self.id, **kwargs)
+        # res structure: {'history': HIST_ID, 'outputs': [DS_ID, DS_ID, ...]}
+        out_hist = self.gi.histories.get(res['history'])
+        assert set(res['outputs']).issubset(out_hist.dataset_ids)
+        outputs = [out_hist.get_dataset(_) for _ in res['outputs']]
+
         if wait:
-            self.gi.histories.wait(outputs, polling_interval=polling_interval,
+            self.gi._wait_datasets(outputs, polling_interval=polling_interval,
                                    break_on_error=break_on_error)
-        return outputs, history
+        return outputs, out_hist
 
     def export(self):
-        return self.gi.workflows.export(self.id)
+        """
+        Export a re-importable representation of the workflow.
+
+        :rtype: dict
+        :return: a JSON-serializable dump of the workflow
+        """
+        return self.gi.gi.workflows.export_workflow_json(self.id)
 
     def delete(self):
         self.gi.workflows.delete(id_=self.id)
@@ -362,8 +471,9 @@ class Dataset(Wrapper):
     """
     Abstract base class for Galaxy datasets.
     """
-    BASE_ATTRS = Wrapper.BASE_ATTRS + ('data_type', 'file_name', 'file_size')
+    BASE_ATTRS = Wrapper.BASE_ATTRS + ('data_type', 'file_name', 'file_size', 'state', 'deleted')
     __metaclass__ = abc.ABCMeta
+    POLLING_INTERVAL = 1  # for state monitoring
 
     @abc.abstractmethod
     def __init__(self, ds_dict, container_id, gi=None):
@@ -421,14 +531,16 @@ class Dataset(Wrapper):
         self.__init__(fresh.wrapped, self.container_id, self.gi)
         return self
 
+    def wait(self, polling_interval=POLLING_INTERVAL, break_on_error=True):
+        self.gi._wait_datasets([self], polling_interval=polling_interval,
+                               break_on_error=break_on_error)
+
 
 class HistoryDatasetAssociation(Dataset):
     """
     Maps to a Galaxy ``HistoryDatasetAssociation``.
     """
-    BASE_ATTRS = Dataset.BASE_ATTRS + ('state', 'deleted')
     SRC = 'hda'
-    POLLING_INTERVAL = 1  # for state monitoring
 
     def __init__(self, ds_dict, container_id, gi=None):
         super(HistoryDatasetAssociation, self).__init__(
@@ -441,10 +553,6 @@ class HistoryDatasetAssociation(Dataset):
 
     def get_stream(self, chunk_size=None):
         return self.gi.histories.get_stream(self, chunk_size=chunk_size)
-
-    def wait(self, polling_interval=POLLING_INTERVAL, break_on_error=True):
-        self.gi.histories.wait([self], polling_interval=polling_interval,
-                               break_on_error=break_on_error)
 
 
 class LibRelatedDataset(Dataset):
@@ -762,7 +870,7 @@ class Tool(Wrapper):
         out_dict = self.gi.gi.tools.run_tool(history.id, self.id, inputs)
         outputs = [history.get_dataset(_['id']) for _ in out_dict['outputs']]
         if wait:
-            self.gi.histories.wait(outputs, polling_interval=polling_interval)
+            self.gi._wait_datasets(outputs, polling_interval=polling_interval)
         return outputs
 
 
