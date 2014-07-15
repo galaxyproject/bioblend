@@ -156,7 +156,9 @@ class Step(Wrapper):
     can refer to either an input dataset (type 'data_input`) or a
     computational tool (type 'tool`).
     """
-    BASE_ATTRS = Wrapper.BASE_ATTRS + ('input_steps', 'tool_id', 'tool_inputs', 'tool_version', 'type')
+    BASE_ATTRS = Wrapper.BASE_ATTRS + (
+        'input_steps', 'tool_id', 'tool_inputs', 'tool_version', 'type'
+        )
 
     def __init__(self, step_dict, parent):
         super(Step, self).__init__(step_dict, parent=parent, gi=parent.gi)
@@ -338,7 +340,7 @@ class Workflow(Wrapper):
             raise ValueError('no object for id %s' % self.id)
         return p
 
-    def run(self, input_map={}, history='', params=None, import_inputs=False,
+    def run(self, input_map=None, history='', params=None, import_inputs=False,
             replacement_params=None, wait=False,
             polling_interval=POLLING_INTERVAL, break_on_error=True):
         """
@@ -367,7 +369,8 @@ class Workflow(Wrapper):
           post-job actions (see below)
 
         :type wait: boolean
-        :param wait: whether to wait while the returned datasets are in a pending state
+        :param wait: whether to wait while the returned datasets are
+          in a pending state
 
         :type polling_interval: float
         :param polling_interval: polling interval in seconds
@@ -428,7 +431,7 @@ class Workflow(Wrapper):
                 for _ in self.missing_ids
                 ))
         kwargs = {
-            'dataset_map': self.convert_input_map(input_map),
+            'dataset_map': self.convert_input_map(input_map or {}),
             'params': params,
             'import_inputs_to_history': import_inputs,
             'replacement_params': replacement_params,
@@ -441,7 +444,9 @@ class Workflow(Wrapper):
         elif isinstance(history, basestring):
             kwargs['history_name'] = history
         else:
-            raise TypeError('history must be either a history wrapper or a string')
+            raise TypeError(
+                'history must be either a history wrapper or a string'
+                )
         res = self.gi.gi.workflows.run_workflow(self.id, **kwargs)
         # res structure: {'history': HIST_ID, 'outputs': [DS_ID, DS_ID, ...]}
         out_hist = self.gi.histories.get(res['history'])
@@ -471,7 +476,9 @@ class Dataset(Wrapper):
     """
     Abstract base class for Galaxy datasets.
     """
-    BASE_ATTRS = Wrapper.BASE_ATTRS + ('data_type', 'file_name', 'file_size', 'state', 'deleted')
+    BASE_ATTRS = Wrapper.BASE_ATTRS + (
+        'data_type', 'file_name', 'file_size', 'state', 'deleted'
+        )
     __metaclass__ = abc.ABCMeta
     POLLING_INTERVAL = 1  # for state monitoring
 
@@ -846,7 +853,8 @@ class Tool(Wrapper):
         :param history: the history where to execute the tool
 
         :type wait: boolean
-        :param wait: whether to wait while the returned datasets are in a pending state
+        :param wait: whether to wait while the returned datasets are
+          in a pending state
 
         :type polling_interval: float
         :param polling_interval: polling interval in seconds
@@ -856,17 +864,15 @@ class Tool(Wrapper):
 
         The ``inputs`` dict should contain input datasets and parameters
         in the (largely undocumented) format used by the Galaxy API.
-        Some examples can be found in https://bitbucket.org/galaxy/galaxy-central/src/tip/test/api/test_tools.py .
-        The value of an input dataset can also be a Dataset object,
-        which will be automatically converted to the needed format.
+        Some examples can be found in `Galaxy's API test suite
+        <https://bitbucket.org/galaxy/galaxy-central/src/tip/test/api/test_tools.py>`_.
+        The value of an input dataset can also be a :class:`Dataset`
+        object, which will be automatically converted to the needed
+        format.
         """
-        # Convert a Dataset object to a dict suitable to be passed as an element of the 'tool_inputs' dict expected by bioblend tools.ToolClient.run_tool()
         for k, v in inputs.iteritems():
             if isinstance(v, Dataset):
-                inputs[k] = dict(
-                    src=v.SRC,
-                    id=v.id,
-                )
+                inputs[k] = {'src': v.SRC, 'id': v.id}
         out_dict = self.gi.gi.tools.run_tool(history.id, self.id, inputs)
         outputs = [history.get_dataset(_['id']) for _ in out_dict['outputs']]
         if wait:
