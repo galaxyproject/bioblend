@@ -101,14 +101,14 @@ class CloudManMockTests(unittest.TestCase):
         return_json_string = {"autoscaling": {"use_autoscaling": False, "as_max": "N/A", "as_min": "N/A"}}
         self.cm._make_get_request = MagicMock(return_value=return_json_string)
         self.assertFalse(self.cm.autoscaling_enabled())
-        self.cm.enable_autoscaling(minimum_nodes=0,maximum_nodes=19)
+        self.cm.enable_autoscaling(minimum_nodes=0, maximum_nodes=19)
 
         # Check that the correct URL was called
         params = {'as_min': 0, 'as_max': 19}
         self.cm._make_get_request.assert_called_with("toggle_autoscaling", parameters=params)
 
         return_json_string = {"autoscaling": {"use_autoscaling": True, "as_max": "19", "as_min": "0"}}
-        self.cm.enable_autoscaling(minimum_nodes=0,maximum_nodes=19)
+        self.cm.enable_autoscaling(minimum_nodes=0, maximum_nodes=19)
 
         # Check that the correct URL was called
         params = {'as_min': 0, 'as_max': 19}
@@ -124,7 +124,7 @@ class CloudManMockTests(unittest.TestCase):
     def test_adjust_autoscaling(self):
         return_json_string = {"autoscaling": {"use_autoscaling": True, "as_max": "3", "as_min": "1"}}
         self.cm._make_get_request = MagicMock(return_value=return_json_string)
-        self.cm.adjust_autoscaling(minimum_nodes=3,maximum_nodes=4)
+        self.cm.adjust_autoscaling(minimum_nodes=3, maximum_nodes=4)
         params = {'as_min_adj': 3, 'as_max_adj': 4}
         self.cm._make_get_request.assert_called_with("adjust_autoscaling", parameters=params)
 

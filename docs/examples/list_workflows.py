@@ -21,7 +21,7 @@ print "Retrieving Workflows list"
 
 workflows = gi.workflows.get_workflows()
 
-if len(workflows)==0:
+if len(workflows) == 0:
     print "There are no Workflows in your account."
 else:
     print "\nWorkflows:"

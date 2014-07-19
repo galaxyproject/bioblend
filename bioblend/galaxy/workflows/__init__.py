@@ -160,9 +160,7 @@ class WorkflowClient(Client):
             file_local_path = os.path.join(file_local_path, filename)
 
         with open(file_local_path, 'wb') as fp:
-            workflow_json = json.dump(workflow_json, fp)
-
-        return workflow_json
+            json.dump(workflow_json, fp)
 
     def run_workflow(self, workflow_id, dataset_map=None, params=None, history_id=None, history_name=None,
             import_inputs_to_history=False, replacement_params=None):

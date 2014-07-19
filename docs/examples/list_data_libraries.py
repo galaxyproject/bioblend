@@ -21,7 +21,7 @@ print "Retrieving Data Library list"
 
 libraries = gi.libraries.get_libraries()
 
-if len(libraries)==0:
+if len(libraries) == 0:
     print "There are no Data Libraries available."
 else:
     print "\nData Libraries:"

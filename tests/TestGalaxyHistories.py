@@ -97,8 +97,8 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
         self.assertTrue(not any(d['id'] == self.history['id'] for d in full_history))
 
     def test_undelete_history(self):
-        result = self.gi.histories.delete_history(self.history['id'])
-        result = self.gi.histories.undelete_history(self.history['id'])
+        self.gi.histories.delete_history(self.history['id'])
+        self.gi.histories.undelete_history(self.history['id'])
         full_history = self.gi.histories.get_histories()
         self.assertTrue(any(d['id'] == self.history['id'] for d in full_history))
 

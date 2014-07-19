@@ -4,7 +4,6 @@ initialize a Galaxy server in Continuous Integration testing of BioBlend.
 
 Usage: python create_user_get_api_key.py <Galaxy_URL> <Galaxy_API_key> <new_username> <new_user_email> <new_password>
 """
-import os
 import sys
 import bioblend.galaxy
 

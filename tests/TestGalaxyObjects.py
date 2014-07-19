@@ -1,7 +1,6 @@
 # pylint: disable=C0103,E1101
 
-import sys, os, unittest, json, uuid, tempfile, tarfile, urllib2, shutil, time
-from functools import wraps
+import sys, os, unittest, json, uuid, tempfile, tarfile, urllib2, shutil
 import socket
 socket.setdefaulttimeout(10.0)
 
@@ -104,7 +103,7 @@ class MockWrapper(wrappers.Wrapper):
 class TestWrapper(unittest.TestCase):
 
     def setUp(self):
-        self.d = {'a' : 1, 'b' : [2, 3],  'c': {'x': 4}}
+        self.d = {'a' : 1, 'b' : [2, 3], 'c': {'x': 4}}
         self.assertRaises(TypeError, wrappers.Wrapper, self.d)
         self.w = MockWrapper(self.d)
 

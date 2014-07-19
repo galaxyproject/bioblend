@@ -1,13 +1,9 @@
 """
 Tests the functionality of the Blend CloudMan API. These tests require working
-credentials to supported cloud infrastructure. 
+credentials to supported cloud infrastructure.
 
 Use ``nose`` to run these unit tests.
 """
-import unittest
-from bioblend.cloudman.launch import Bunch
-from bioblend.cloudman import CloudManConfig
-from bioblend.cloudman import CloudManInstance
 import GalaxyTestBase
 import test_util
 
