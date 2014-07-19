@@ -228,11 +228,11 @@ class Workflow(Wrapper):
         For instance, a workflow with a single tool *c*, two inputs
         *a, b* and three outputs *d, e, f* is represented by (direct)::
 
-          {'a': {'c'}, 'b': {'c'}, 'c': {'d', 'e', 'f'}}
+          {'a': {'c'}, 'b': {'c'}, 'c': set(['d', 'e', 'f'])}
 
         and by (inverse)::
 
-          {'c': {'a', 'b'}, 'd': {'c'}, 'e': {'c'}, 'f': {'c'}}
+          {'c': set(['a', 'b']), 'd': {'c'}, 'e': {'c'}, 'f': {'c'}}
         """
         dag, inv_dag = {}, {}
         for s in self.steps.itervalues():
@@ -273,7 +273,7 @@ class Workflow(Wrapper):
             stype = step_dict['type']
         except KeyError:
             raise ValueError('not a step dict')
-        if stype not in {'data_input', 'tool'}:
+        if stype not in set(['data_input', 'tool']):
             raise ValueError('unknown step type: %r' % (stype,))
         return Step(step_dict, parent)
 

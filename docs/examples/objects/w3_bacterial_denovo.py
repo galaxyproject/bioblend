@@ -43,7 +43,7 @@ input_map = dict((label, h.import_dataset(get_one(l.get_datasets(name=name))))
 
 # Set the "hash_length" parameter to different values for the 3 "velveth" steps
 
-lengths = {'19', '23', '29'}
+lengths = set(['19', '23', '29'])
 ws_ids = iw.tool_labels_to_ids['velveth']
 assert len(ws_ids) == len(lengths)
 params = dict((id_, {'hash_length': v}) for id_, v in zip(ws_ids, lengths))
