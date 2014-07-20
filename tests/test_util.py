@@ -1,9 +1,11 @@
 """ General support infrastructure not tied to any particular test.
 """
 import os
-from operator import itemgetter
 
 import unittest
+if not hasattr(unittest, 'skip'):
+    # Python < 2.7
+    import unittest2 as unittest
 
 NO_CLOUDMAN_MESSAGE = "CloudMan required and no CloudMan AMI configured."
 NO_GALAXY_MESSAGE = "Externally configured Galaxy required, but not found. Set BIOBLEND_GALAXY_URL and BIOBLEND_GALAXY_API_KEY to run this test."
@@ -34,20 +36,17 @@ def skip_unless_galaxy():
 
 
 def skip_unless_tool(tool_id):
-    """ Decorate an Galaxy test method as requiring a specific tool,
-    have skip the test case is the tool is unavailable.
+    """ Decorate a Galaxy test method as requiring a specific tool,
+    skip the test case if the tool is unavailable.
     """
 
     def method_wrapper(method):
 
-        def get_tool_ids(has_gi):
+        def wrapped_method(has_gi, *args, **kwargs):
             tools = has_gi.gi.tools.get_tools()
             # In panels by default, so flatten out sections...
-            tool_ids = map(itemgetter("id"), tools)
-            return tool_ids
-
-        def wrapped_method(has_gi, *args, **kwargs):
-            if tool_id not in get_tool_ids(has_gi):
+            tool_ids = [_['id'] for _ in tools]
+            if tool_id not in tool_ids:
                 raise unittest.SkipTest(MISSING_TOOL_MESSAGE % tool_id)
 
             return method(has_gi, *args, **kwargs)

@@ -1,6 +1,7 @@
 # pylint: disable=C0103,E1101
 
-import sys, os, unittest, json, uuid, tempfile, tarfile, urllib2, shutil
+import sys, os, json, uuid, tempfile, tarfile, urllib2, shutil
+from test_util import unittest
 import socket
 socket.setdefaulttimeout(10.0)
 

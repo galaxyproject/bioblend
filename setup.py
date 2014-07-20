@@ -1,6 +1,16 @@
+import sys
+
 from setuptools import setup, find_packages
 
 from bioblend import get_version
+
+tests_require = ['mock', 'nose']
+if sys.version_info < (2, 7):
+    tests_require.append('unittest2>=0.5.1')
+    # cannot use nose collector because on Python 2.6 setUpClass class methods of classes decorated with unittest2.skip() are executed anyway, causing those tests to fail instead of being skipped
+    test_suite='my_unittest2.collector'
+else:
+    test_suite='nose.collector'
 
 setup(name="bioblend",
       version=get_version(),
@@ -9,7 +19,7 @@ setup(name="bioblend",
       author_email="afgane@gmail.com",
       url="http://bioblend.readthedocs.org/",
       install_requires=['requests>=1.1.0', 'poster', 'boto>=2.9.7', 'pyyaml'],
-      tests_require=['mock', 'nose'],
+      tests_require=tests_require,
       packages=find_packages(),
       license='MIT',
       platforms="Posix; MacOS X; Windows",
@@ -21,4 +31,5 @@ setup(name="bioblend",
                    "Programming Language :: Python :: 2",
                    "Programming Language :: Python :: 2.6",
                    "Programming Language :: Python :: 2.7"],
+      test_suite=test_suite,
       )

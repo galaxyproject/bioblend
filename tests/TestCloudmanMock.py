@@ -7,7 +7,7 @@ current behaviour.
 
 Use ``nose`` to run these unit tests.
 """
-import unittest
+from test_util import unittest
 from mock import MagicMock
 from bioblend import cloudman
 

@@ -3,7 +3,7 @@ Tests on the GalaxyInstance object itself.
 
 Use ``nose`` to run these unit tests.
 """
-import unittest
+from test_util import unittest
 
 from bioblend.galaxy import GalaxyInstance
 from bioblend.galaxy.client import Client, ConnectionError
