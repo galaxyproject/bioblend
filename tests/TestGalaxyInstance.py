@@ -7,10 +7,8 @@ import unittest
 
 from bioblend.galaxy import GalaxyInstance
 from bioblend.galaxy.client import Client, ConnectionError
-import test_util
 
 
-@test_util.skip_unless_cloudman()
 class TestGalaxyInstance(unittest.TestCase):
 
     def setUp(self):
