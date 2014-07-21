@@ -1,8 +1,8 @@
 """
-Tests the functionality of the Blend CloudMan API, without actually making
+Tests the functionality of the BioBlend CloudMan API, without actually making
 calls to a remote CloudMan instance/server. These don't actually ensure
-that Blend is integrated with CloudMan correctly. They only ensure that
-if you refactor the Blend CloudMan API code, that it will maintain its
+that BioBlend is integrated with CloudMan correctly. They only ensure that
+if you refactor the BioBlend CloudMan API code, that it will maintain its
 current behaviour.
 
 Use ``nose`` to run these unit tests.
@@ -11,7 +11,7 @@ import unittest
 from mock import MagicMock
 from bioblend import cloudman
 
-class CloudManMockTests(unittest.TestCase):
+class TestCloudmanMock(unittest.TestCase):
 
     def setUp(self):
         url = "http://127.0.0.1:42284"
@@ -132,6 +132,6 @@ class CloudManMockTests(unittest.TestCase):
         return_json = {"status": "'Galaxy' is not running", "srvc": "Galaxy"}
         self.cm._make_get_request = MagicMock(return_value=return_json)
 
-        self.assertEquals(self.cm.get_galaxy_state(), "'Galaxy' is not running")
+        self.assertEquals(self.cm.get_galaxy_state()['status'], "'Galaxy' is not running")
         params = {'srvc': "Galaxy"}
         self.cm._make_get_request.assert_called_with("get_srvc_status", parameters=params)
