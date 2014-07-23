@@ -31,7 +31,7 @@ class TestGalaxyTools(GalaxyTestBase.GalaxyTestBase):
         # Test requires target Galaxy is configured with at least one tool
         # section.
         tool_panel = self.gi.tools.get_tool_panel()
-        sections = [ s for s in tool_panel if "elems" in s ]
+        sections = [s for s in tool_panel if "elems" in s]
         assert len(sections) > 0
         assert all(map(self._assert_is_tool_rep, sections[0]["elems"]))
 

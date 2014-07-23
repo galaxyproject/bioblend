@@ -1,6 +1,12 @@
+import sys
+
 from setuptools import setup, find_packages
 
 from bioblend import get_version
+
+tests_require = ['mock>=0.7.0', 'nose>=1.3.1']
+if sys.version_info < (2, 7):
+    tests_require.append('unittest2>=0.5.1')
 
 setup(name="bioblend",
       version=get_version(),
@@ -9,7 +15,7 @@ setup(name="bioblend",
       author_email="afgane@gmail.com",
       url="http://bioblend.readthedocs.org/",
       install_requires=['requests>=1.1.0', 'poster', 'boto>=2.9.7', 'pyyaml'],
-      tests_require=['mock', 'nose'],
+      tests_require=tests_require,
       packages=find_packages(),
       license='MIT',
       platforms="Posix; MacOS X; Windows",
@@ -21,4 +27,5 @@ setup(name="bioblend",
                    "Programming Language :: Python :: 2",
                    "Programming Language :: Python :: 2.6",
                    "Programming Language :: Python :: 2.7"],
+      test_suite='nose.collector',
       )

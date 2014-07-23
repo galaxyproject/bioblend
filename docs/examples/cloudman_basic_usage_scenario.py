@@ -31,7 +31,7 @@ cm.reboot_node(instance_id)
 ## Autoscaling
 # enable
 cm.disable_autoscaling()
-cm.enable_autoscaling(minimum_nodes=0,maximum_nodes=19)
+cm.enable_autoscaling(minimum_nodes=0, maximum_nodes=19)
 
 # autoscaling should be enabled now
 is_enabled = cm.autoscaling_enabled()

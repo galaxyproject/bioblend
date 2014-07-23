@@ -1,6 +1,6 @@
-import unittest
 import os
 from bioblend import galaxy
+from test_util import unittest
 
 
 class GalaxyTestBase(unittest.TestCase):

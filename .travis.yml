@@ -1,0 +1,39 @@
+language: python
+python:
+  - "2.7"
+  - "2.6"
+
+install:
+  - python setup.py install
+
+before_script:
+  # Install Galaxy
+  - cd $HOME
+  - wget https://bitbucket.org/galaxy/galaxy-central/get/tip.tar.bz2
+  - tar xvjf tip.tar.bz2 | tail
+  - ln -s galaxy-galaxy-central-* galaxy-central
+  - cd galaxy-central/
+  # Copy sample files and fetch eggs
+  - ./scripts/common_startup.sh
+  # Create a PostgreSQL database for Galaxy. The default SQLite3 database makes test fail randomly because of "database locked" error.
+  - createdb -U postgres galaxy-travis
+  # Change Galaxy configuration to use the newly created PostgreSQL database
+  - sed -i -e 's|^#database_connection.*|database_connection = postgresql://postgres:@localhost/galaxy-travis|' universe_wsgi.ini
+  # Add a master API key and an admin user to Galaxy universe_wsgi.ini
+  - GALAXY_MASTER_API_KEY=`date --rfc-3339=ns | md5sum | cut -f 1 -d ' '`
+  - GALAXY_USER=$USER
+  - GALAXY_USER_EMAIL=${USER}@localhost.localdomain
+  - GALAXY_USER_PASSWD=`date --rfc-3339=ns | md5sum | cut -f 1 -d ' '`
+  - sed -i -e "s/^#master_api_key.*/master_api_key = $GALAXY_MASTER_API_KEY/" -e "s/^#admin_users.*/admin_users = $GALAXY_USER_EMAIL/" universe_wsgi.ini
+  # Change Galaxy configuration needed by TestGalaxyObjects.TestLibraryContents test
+  - sed -i -e 's/^#allow_library_path_paste.*/allow_library_path_paste = True/' universe_wsgi.ini
+  # Start Galaxy
+  - ./rolling_restart.sh
+  # Use the master API key to create the admin user and get its API key
+  - export BIOBLEND_GALAXY_URL=http://localhost:8080
+  - export BIOBLEND_GALAXY_API_KEY=`python $TRAVIS_BUILD_DIR/docs/examples/create_user_get_api_key.py $BIOBLEND_GALAXY_URL $GALAXY_MASTER_API_KEY $GALAXY_USER $GALAXY_USER_EMAIL $GALAXY_USER_PASSWD`
+  - echo "Created new Galaxy user $GALAXY_USER with email $GALAXY_USER_EMAIL , password $GALAXY_USER_PASSWD and API key $BIOBLEND_GALAXY_API_KEY"
+
+script:
+  # Run nosetests through setuptools, so it will install test depedencies
+  - cd $TRAVIS_BUILD_DIR && python setup.py test

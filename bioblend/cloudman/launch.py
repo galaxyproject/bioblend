@@ -295,31 +295,31 @@ class CloudManLauncher(object):
         buckets = s3_conn.get_all_buckets()
         clusters = []
         for bucket in [b for b in buckets if b.name.startswith('cm-')]:
-                try:
-                    # TODO: first lookup if persistent_data.yaml key exists
-                    pd = bucket.get_key('persistent_data.yaml')
-                except S3ResponseError:
-                    # This can fail for a number of reasons for non-us and/or CNAME'd buckets.
-                    bioblend.log.exception("Problem fetching persistent_data.yaml from bucket %s" % bucket)
-                    continue
-                if pd:
-                    # We are dealing with a CloudMan bucket
-                    pd_contents = pd.get_contents_as_string()
-                    pd = yaml.load(pd_contents)
-                    if 'cluster_name' in pd:
-                        cluster_name = pd['cluster_name']
-                    else:
-                        for key in bucket.list():
-                            if key.name.endswith('.clusterName'):
-                                cluster_name = key.name.split('.clusterName')[0]
-                    cluster = {'cluster_name': cluster_name,
-                               'persistent_data': pd,
-                               'bucket_name': bucket.name}
-                    # Look for cluster's placement too
-                    if include_placement:
-                        placement = self._find_placement(cluster_name, cluster)
-                        cluster['placement'] = placement
-                    clusters.append(cluster)
+            try:
+                # TODO: first lookup if persistent_data.yaml key exists
+                pd = bucket.get_key('persistent_data.yaml')
+            except S3ResponseError:
+                # This can fail for a number of reasons for non-us and/or CNAME'd buckets.
+                bioblend.log.exception("Problem fetching persistent_data.yaml from bucket %s" % bucket)
+                continue
+            if pd:
+                # We are dealing with a CloudMan bucket
+                pd_contents = pd.get_contents_as_string()
+                pd = yaml.load(pd_contents)
+                if 'cluster_name' in pd:
+                    cluster_name = pd['cluster_name']
+                else:
+                    for key in bucket.list():
+                        if key.name.endswith('.clusterName'):
+                            cluster_name = key.name.split('.clusterName')[0]
+                cluster = {'cluster_name': cluster_name,
+                           'persistent_data': pd,
+                           'bucket_name': bucket.name}
+                # Look for cluster's placement too
+                if include_placement:
+                    placement = self._find_placement(cluster_name, cluster)
+                    cluster['placement'] = placement
+                clusters.append(cluster)
         return clusters
 
     def get_cluster_pd(self, cluster_name):
@@ -518,7 +518,7 @@ class CloudManLauncher(object):
                 elif ec2_conn.get_spot_price_history(instance_type=instance_type,
                                                      end_time=in_the_past.isoformat(),
                                                      availability_zone=zone.name):
-                        zones.append(zone.name)
+                    zones.append(zone.name)
             zones.sort(reverse=True)  # Higher-lettered zones seem to have more availability currently
             if back_compatible_zone in zones:
                 zones = [back_compatible_zone] + [z for z in zones if z != back_compatible_zone]

@@ -1,7 +1,7 @@
 # pylint: disable=C0103,E1101
 
-import sys, os, unittest, json, uuid, tempfile, tarfile, urllib2, shutil, time
-from functools import wraps
+import sys, os, json, uuid, tempfile, tarfile, urllib2, shutil
+from test_util import unittest
 import socket
 socket.setdefaulttimeout(10.0)
 
@@ -104,7 +104,7 @@ class MockWrapper(wrappers.Wrapper):
 class TestWrapper(unittest.TestCase):
 
     def setUp(self):
-        self.d = {'a' : 1, 'b' : [2, 3],  'c': {'x': 4}}
+        self.d = {'a' : 1, 'b' : [2, 3], 'c': {'x': 4}}
         self.assertRaises(TypeError, wrappers.Wrapper, self.d)
         self.w = MockWrapper(self.d)
 
@@ -154,13 +154,13 @@ class TestWorkflow(unittest.TestCase):
         self.assertEqual(self.wf.published, False)
         self.assertEqual(self.wf.tags, [])
         self.assertEqual(
-            self.wf.input_labels_to_ids, {'Input Dataset': {'571', '572'}}
+            self.wf.input_labels_to_ids, {'Input Dataset': set(['571', '572'])}
             )
         self.assertEqual(
-            self.wf.tool_labels_to_ids, {'Paste1': {'573'}}
+            self.wf.tool_labels_to_ids, {'Paste1': set(['573'])}
             )
-        self.assertEqual(self.wf.input_ids, {'571', '572'})
-        self.assertEqual(self.wf.output_ids, {'573'})
+        self.assertEqual(self.wf.input_ids, set(['571', '572']))
+        self.assertEqual(self.wf.output_ids, set(['573']))
 
     def test_dag(self):
         inv_dag = {}
@@ -185,8 +185,8 @@ class TestWorkflow(unittest.TestCase):
             self.assertEqual(s.id, sid)
             d = steps[sid]
             self.assertTrue(s.parent is self.wf)
-        self.assertEqual(self.wf.data_input_ids, {'571', '572'})
-        self.assertEqual(self.wf.tool_ids, {'573'})
+        self.assertEqual(self.wf.data_input_ids, set(['571', '572']))
+        self.assertEqual(self.wf.tool_ids, set(['573']))
 
     def test_taint(self):
         self.assertFalse(self.wf.is_modified)
@@ -199,16 +199,16 @@ class TestWorkflow(unittest.TestCase):
             def __init__(self, id_):
                 self.id = id_
         label = 'Input Dataset'
-        self.assertEqual(self.wf.input_labels, {label})
+        self.assertEqual(self.wf.input_labels, set([label]))
         input_map = self.wf.convert_input_map(
             {label: [DummyLD('a'), DummyLD('b')]}
             )
         # {'571': {'id': 'a', 'src': 'ld'}, '572': {'id': 'b', 'src': 'ld'}}
         # OR
         # {'571': {'id': 'b', 'src': 'ld'}, '572': {'id': 'a', 'src': 'ld'}}
-        self.assertEqual(set(input_map), {'571', '572'})
+        self.assertEqual(set(input_map), set(['571', '572']))
         for d in input_map.itervalues():
-            self.assertEqual(set(d), {'id', 'src'})
+            self.assertEqual(set(d), set(['id', 'src']))
             self.assertEqual(d['src'], 'ld')
             self.assertTrue(d['id'] in 'ab')
 

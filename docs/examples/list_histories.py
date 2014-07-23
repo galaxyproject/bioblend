@@ -21,7 +21,7 @@ print "Retrieving History list"
 
 histories = gi.histories.get_histories()
 
-if len(histories)==0:
+if len(histories) == 0:
     print "There are no Histories in your account."
 else:
     print "\nHistories:"
