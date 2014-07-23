@@ -1,3 +1,9 @@
+.. image:: https://travis-ci.org/afgane/bioblend.png
+        :target: https://travis-ci.org/afgane/bioblend
+
+.. image:: https://pypip.in/d/bioblend/badge.png
+        :target: https://pypi.python.org/pypi/bioblend/
+
 `BioBlend <http://bioblend.readthedocs.org/>`_ is a Python (2.6 or 2.7)
 library for interacting with `CloudMan`_ and `Galaxy`_'s API.
 
