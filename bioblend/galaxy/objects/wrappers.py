@@ -5,7 +5,7 @@ A basic object-oriented interface for Galaxy entities.
 """
 
 import bioblend
-import abc, collections, json
+import abc, collections, httplib, json
 
 
 __all__ = [
@@ -680,10 +680,19 @@ class History(DatasetContainer):
         return self.gi.histories
 
     def update(self, name=None, annotation=None):
+        """
+        Update history metadata with the given name and annotation.
+        """
         # TODO: wouldn't it be better if name and annotation were attributes?
         # TODO: do we need to ensure the attributes of `self` are the same as
-        # the ones returned by the call to `update` below?
-        return self.gi.histories.update(self, name, annotation)
+        # the ones returned by the call to `update_history` below?
+        res = self.gi.gi.histories.update_history(
+            self.id, name=name, annotation=annotation
+            )
+        if res != httplib.OK:
+            raise RuntimeError('failed to update history')
+        self.refresh()
+        return self
 
     def delete(self, purge=False):
         self.gi.histories.delete(id_=self.id, purge=purge)

@@ -556,6 +556,14 @@ class TestHistory(GalaxyObjectsTestBase):
         finally:
             shutil.rmtree(tempdir)
 
+    def test_update(self):
+        new_name = 'test_%s' % uuid.uuid4().hex
+        new_annotation = 'Annotation for %s' % new_name
+        updated_hist = self.hist.update(name=new_name, annotation=new_annotation)
+        self.assertEqual(self.hist.id, updated_hist.id)
+        self.assertEqual(self.hist.name, new_name)
+        self.assertEqual(self.hist.annotation, new_annotation)
+
 
 @test_util.skip_unless_galaxy()
 class TestHDAContents(GalaxyObjectsTestBase):

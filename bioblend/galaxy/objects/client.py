@@ -4,7 +4,7 @@ Clients for interacting with specific Galaxy entity types.
 Classes in this module should not be instantiated directly, but used
 via their handles in :class:`~.galaxy_instance.GalaxyInstance`.
 """
-import collections, httplib, json, abc
+import collections, json, abc
 
 import bioblend
 import wrappers
@@ -424,17 +424,6 @@ class ObjHistoryClient(ObjDatasetClient):
         """
         dicts = self.gi.histories.get_histories(name=name)
         return [self.get(_['id']) for _ in dicts]
-
-    def update(self, history, name=None, annotation=None):
-        """
-        Update history metadata with the given name and annotation.
-        """
-        res = self.gi.histories.update_history(
-            history.id, name=name, annotation=annotation
-            )
-        if res != httplib.OK:
-            self._error('update_history: failed to update %r' % (history.id,))
-        return self.get(history.id)
 
     def delete(self, id_=None, name=None, purge=False):
         """
