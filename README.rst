@@ -4,6 +4,12 @@
 .. image:: https://pypip.in/d/bioblend/badge.png
         :target: https://pypi.python.org/pypi/bioblend/
 
-Also see `ABOUT.rst <./ABOUT.rst>`_.
+BioBlend is a Python (2.6 or 2.7) library for interacting with `CloudMan`_
+and `Galaxy`_'s API.
 
-Full docs available at http://bioblend.readthedocs.org.
+Full docs are available at http://bioblend.readthedocs.org with a quick library
+overview also available in `ABOUT.rst <./ABOUT.rst>`_.
+
+.. References/hyperlinks used above
+.. _CloudMan: http://usecloudman.org/
+.. _Galaxy: http://usegalaxy.org/
