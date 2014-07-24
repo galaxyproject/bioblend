@@ -198,9 +198,10 @@ class WorkflowClient(Client):
                                          will be visible in the given history.
 
         :type replacement_params: dict
-        :param params: A mapping from workflow replacement params to values. The map must be in the following
-                       format:
-                       ``{'output_name': 'my_output_name', 'threshold': '10'}``
+        :param replacement_params: A mapping from workflow replacement params to values used by
+                                   post job actions for dataset renaming. The `dict` must be in
+                                   the following format:
+                       ``{'sample_name': 'sample1'}``
 
         :rtype: dict
         :return: A dict containing the history ID where the outputs are placed as well as
