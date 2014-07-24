@@ -5,7 +5,7 @@ BioBlend
 About
 =====
 
-.. include:: ../README.rst
+.. include:: ../ABOUT.rst
 
 Installation
 ============
