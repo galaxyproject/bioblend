@@ -198,10 +198,7 @@ class WorkflowClient(Client):
                                          will be visible in the given history.
 
         :type replacement_params: dict
-        :param replacement_params: A mapping from workflow replacement params to values used by
-                                   post job actions for dataset renaming. The `dict` must be in
-                                   the following format:
-                       ``{'sample_name': 'sample1'}``
+        :param replacement_params: pattern-based replacements for post-job actions (see below)
 
         :rtype: dict
         :return: A dict containing the history ID where the outputs are placed as well as
@@ -211,6 +208,21 @@ class WorkflowClient(Client):
                   {u'history': u'64177123325c9cfd',
                    u'outputs': [u'aa4d3084af404259']}
 
+        The ``replacement_params`` dict should map parameter names in
+        post-job actions (PJAs) to their runtime values.  For
+        instance, if the final step has a PJA like the following::
+
+          {u'RenameDatasetActionout_file1': {
+             u'action_arguments': {u'newname': u'${output}'},
+             u'action_type': u'RenameDatasetAction',
+             u'output_name': u'out_file1'}}
+
+        then the following renames the output dataset to 'foo'::
+
+          replacement_params = {'output': 'foo'}
+
+        see also `this thread
+        <http://lists.bx.psu.edu/pipermail/galaxy-dev/2011-September/006875.html>`_
         """
         payload = {}
         payload['workflow_id'] = workflow_id

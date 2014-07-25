@@ -366,7 +366,8 @@ class Workflow(Wrapper):
 
         :type replacement_params: :class:`~collections.Mapping`
         :param replacement_params: pattern-based replacements for
-          post-job actions (see below)
+          post-job actions (see the docs for
+          :meth:`~bioblend.galaxy.workflows.WorkflowClient.run_workflow`)
 
         :type wait: boolean
         :param wait: whether to wait while the returned datasets are
@@ -406,22 +407,6 @@ class Workflow(Wrapper):
         Example: set 'a' to 1 for the third workflow step::
 
           params = {workflow.steps[2].id: {'a': 1}}
-
-        The ``replacement_params`` dict should map parameter names in
-        post-job actions (PJAs) to their runtime values.  For
-        instance, if the final step has a PJA like the following::
-
-          {u'RenameDatasetActionout_file1': {
-             u'action_arguments': {u'newname': u'${output}'},
-             u'action_type': u'RenameDatasetAction',
-             u'output_name': u'out_file1'}}
-
-        then the following renames the output dataset to 'foo'::
-
-          replacement_params = {'output': 'foo'}
-
-        see also `this thread
-        <http://lists.bx.psu.edu/pipermail/galaxy-dev/2011-September/006875.html>`_
         """
         if not self.is_mapped:
             raise RuntimeError('workflow is not mapped to a Galaxy object')
