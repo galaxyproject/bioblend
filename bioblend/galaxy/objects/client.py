@@ -472,19 +472,13 @@ class ObjHistoryClient(ObjDatasetClient):
             self._error('history is not mapped to a Galaxy object')
         if not isinstance(lds, wrappers.LibraryDataset):
             self._error('lds is not a LibraryDataset', err_type=TypeError)
-        # upload_dataset_from_library returns a dict with the unencoded id
-        # to get the encoded id, we have to detect the new entry by diff
-        old_ids = set(history.dataset_ids)
         res = self.gi.histories.upload_dataset_from_library(history.id, lds.id)
         if not isinstance(res, collections.Mapping):
             self._error(
                 'upload_dataset_from_library: unexpected reply: %r' % (res,)
                 )
         history.refresh()
-        diff = set(history.dataset_ids) - old_ids
-        if len(diff) != 1:
-            self._error('cannot retrieve hda id')
-        return self.get_dataset(history, diff.pop())
+        return self.get_dataset(history, res['id'])
 
     def get_dataset(self, src, ds_id):
         """
