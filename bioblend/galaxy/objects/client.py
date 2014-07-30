@@ -92,51 +92,6 @@ class ObjDatasetClient(ObjClient):
         c_infos = [ctype.CONTENT_INFO_TYPE(_) for _ in c_infos]
         return ctype(cdict, content_infos=c_infos, gi=self.obj_gi)
 
-    def _get_container_dataset(self, src, ds_id, ctype=None):
-        if isinstance(src, wrappers.DatasetContainer):
-            ctype = type(src)
-            container_id = src.id
-        else:
-            assert ctype is not None
-            if isinstance(src, collections.Mapping):
-                container_id = src['id']
-            else:
-                container_id = src
-        gi_client = getattr(self.gi, ctype.API_MODULE)
-        ds_dict = gi_client.show_dataset(container_id, ds_id)
-        return ctype.DS_TYPE(ds_dict, container_id, gi=self.obj_gi)
-
-    def get_datasets(self, src, name=None):
-        """
-        Get all datasets contained by the given dataset container.
-
-        :type src: :class:`~.wrappers.History` or :class:`~.wrappers.Library`
-        :param src: the dataset container
-
-        :type name: str
-        :param name: return only datasets with this name
-
-        :rtype: list of :class:`~.wrappers.LibraryDataset` or list of
-          :class:`~.wrappers.HistoryDatasetAssociation`
-        :return: datasets associated with the given container
-
-        .. note::
-
-          when filtering library datasets by name, specify their full
-          paths starting from the library's root folder, e.g.,
-          ``/seqdata/reads.fastq``.  Full paths are available through
-          the ``content_infos`` attribute of
-          :class:`~.wrappers.Library` objects.
-        """
-        if not isinstance(src, wrappers.DatasetContainer):
-            self._error('not a history or library object', err_type=TypeError)
-        if name is None:
-            ds_ids = src.dataset_ids
-        else:
-            ds_ids = [_.id for _ in src.content_infos if _.name == name]
-        return [self._get_container_dataset(src, _, ctype=type(src))
-                for _ in ds_ids]
-
     def get_stream(self, dataset, chunk_size=bioblend.CHUNK_SIZE):
         """
         Open ``dataset`` for reading and return an iterator over its contents.
@@ -231,7 +186,7 @@ class ObjLibraryClient(ObjDatasetClient):
 
     def __post_upload(self, library, meth_name, reply):
         ds_info = self._get_dict(meth_name, reply)
-        return self.get_dataset(library, ds_info['id'])
+        return library.get_dataset(ds_info['id'])
 
     def upload_data(self, library, data, folder=None, **kwargs):
         """
@@ -322,19 +277,10 @@ class ObjLibraryClient(ObjDatasetClient):
                 'upload_from_galaxy_filesystem: unexpected reply: %r' % (res,)
                 )
         new_datasets = [
-            self.get_dataset(library, ds_info['id']) for ds_info in res
+            library.get_dataset(ds_info['id']) for ds_info in res
             ]
         library.refresh()
         return new_datasets
-
-    def get_dataset(self, src, ds_id):
-        """
-        Retrieve the library dataset corresponding to the given id.
-
-        :rtype: :class:`~.wrappers.LibraryDataset`
-        :return: the library dataset corresponding to ``id_``
-        """
-        return self._get_container_dataset(src, ds_id, wrappers.Library)
 
     def create_folder(self, library, name, description=None, base_folder=None):
         """
@@ -467,17 +413,7 @@ class ObjHistoryClient(ObjDatasetClient):
                 'upload_dataset_from_library: unexpected reply: %r' % (res,)
                 )
         history.refresh()
-        return self.get_dataset(history, res['id'])
-
-    def get_dataset(self, src, ds_id):
-        """
-        Retrieve the history dataset corresponding to the given id.
-
-        :rtype:
-          :class:`~.wrappers.HistoryDatasetAssociation`
-        :return: the history dataset corresponding to ``id_``
-        """
-        return self._get_container_dataset(src, ds_id, wrappers.History)
+        return history.get_dataset(res['id'])
 
 
 class ObjWorkflowClient(ObjClient):

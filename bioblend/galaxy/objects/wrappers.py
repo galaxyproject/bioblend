@@ -468,9 +468,18 @@ class Dataset(Wrapper):
     POLLING_INTERVAL = 1  # for state monitoring
 
     @abc.abstractmethod
-    def __init__(self, ds_dict, container_id, gi=None):
+    def __init__(self, ds_dict, container, gi=None):
         super(Dataset, self).__init__(ds_dict, gi=gi)
-        object.__setattr__(self, 'container_id', container_id)
+        object.__setattr__(self, 'container', container)
+
+    @property
+    def container_id(self):
+        """
+        Deprecated property.
+
+        Id of the dataset container. Use :attr:`.container.id` instead.
+        """
+        return self.container.id
 
     @abc.abstractmethod
     def get_stream(self, chunk_size=None):
@@ -519,8 +528,9 @@ class Dataset(Wrapper):
 
         Returns: self
         """
-        fresh = self.gi_module.get_dataset(self.container_id, self.id)
-        self.__init__(fresh.wrapped, self.container_id, self.gi)
+        gi_client = getattr(self.gi.gi, self.container.API_MODULE)
+        ds_dict = gi_client.show_dataset(self.container.id, self.id)
+        self.__init__(ds_dict, self.container, self.gi)
         return self
 
     def wait(self, polling_interval=POLLING_INTERVAL, break_on_error=True):
@@ -534,9 +544,9 @@ class HistoryDatasetAssociation(Dataset):
     """
     SRC = 'hda'
 
-    def __init__(self, ds_dict, container_id, gi=None):
+    def __init__(self, ds_dict, container, gi=None):
         super(HistoryDatasetAssociation, self).__init__(
-            ds_dict, container_id, gi=gi
+            ds_dict, container, gi=gi
             )
 
     @property
@@ -548,9 +558,11 @@ class HistoryDatasetAssociation(Dataset):
 
 
 class LibRelatedDataset(Dataset):
+    """
+    """
 
-    def __init__(self, ds_dict, container_id, gi=None):
-        super(LibRelatedDataset, self).__init__(ds_dict, container_id, gi=gi)
+    def __init__(self, ds_dict, container, gi=None):
+        super(LibRelatedDataset, self).__init__(ds_dict, container, gi=gi)
 
     @property
     def gi_module(self):
@@ -660,6 +672,47 @@ class DatasetContainer(Wrapper):
             )
         return self
 
+    def get_dataset(self, ds_id):
+        """
+        Retrieve the dataset corresponding to the given id.
+
+        :type ds_id: str
+        :param ds_id: dataset id
+
+        :rtype: :class:`~.HistoryDatasetAssociation` or
+          :class:`~.LibraryDataset`
+        :return: the dataset corresponding to ``ds_id``
+        """
+        gi_client = getattr(self.gi.gi, self.API_MODULE)
+        ds_dict = gi_client.show_dataset(self.id, ds_id)
+        return self.DS_TYPE(ds_dict, self, gi=self.gi)
+
+    def get_datasets(self, name=None):
+        """
+        Get all datasets contained inside this dataset container.
+
+        :type name: str
+        :param name: return only datasets with this name
+
+        :rtype: list of :class:`~.HistoryDatasetAssociation` or list of
+          :class:`~.LibraryDataset`
+        :return: datasets with the given name contained inside this
+          container
+
+        .. note::
+
+          when filtering library datasets by name, specify their full
+          paths starting from the library's root folder, e.g.,
+          ``/seqdata/reads.fastq``.  Full paths are available through
+          the ``content_infos`` attribute of
+          :class:`~.Library` objects.
+        """
+        if name is None:
+            ds_ids = self.dataset_ids
+        else:
+            ds_ids = [_.id for _ in self.content_infos if _.name == name]
+        return [self.get_dataset(_) for _ in ds_ids]
+
 
 class History(DatasetContainer):
     """
@@ -701,12 +754,6 @@ class History(DatasetContainer):
     def import_dataset(self, lds):
         return self.gi.histories.import_dataset(self, lds)
 
-    def get_dataset(self, ds_id):
-        return self.gi.histories.get_dataset(self, ds_id)
-
-    def get_datasets(self, name=None):
-        return self.gi.histories.get_datasets(self, name=name)
-
     def upload_dataset(self, path, **kwargs):
         """
         Upload the file specified by path to this history.
@@ -714,7 +761,7 @@ class History(DatasetContainer):
         :type path: str
         :param path: path of the file to upload
 
-        :rtype: :class:`~.wrappers.HistoryDatasetAssociation`
+        :rtype: :class:`~.HistoryDatasetAssociation`
         :return: the uploaded dataset
         """
         out_dict = self.gi.gi.tools.upload_file(path, self.id, **kwargs)
@@ -786,12 +833,6 @@ class Library(DatasetContainer):
         return self.gi.libraries.upload_from_galaxy_fs(
             self, paths, folder, **kwargs
             )
-
-    def get_dataset(self, ds_id):
-        return self.gi.libraries.get_dataset(self, ds_id)
-
-    def get_datasets(self, name=None):
-        return self.gi.libraries.get_datasets(self, name=name)
 
     def create_folder(self, name, description=None, base_folder=None):
         return self.gi.libraries.create_folder(
