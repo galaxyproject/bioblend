@@ -752,7 +752,26 @@ class History(DatasetContainer):
         self.unmap()
 
     def import_dataset(self, lds):
-        return self.gi.histories.import_dataset(self, lds)
+        """
+        Import a dataset into the history from a library.
+
+        :type lds: :class:`~.LibraryDataset`
+        :param lds: the library dataset to import
+
+        :rtype: :class:`~.HistoryDatasetAssociation`
+        :return: the imported history dataset
+        """
+        if not self.is_mapped:
+            raise RuntimeError('history is not mapped to a Galaxy object')
+        if not isinstance(lds, LibraryDataset):
+            raise TypeError('lds is not a LibraryDataset')
+        res = self.gi.gi.histories.upload_dataset_from_library(self.id, lds.id)
+        if not isinstance(res, collections.Mapping):
+            raise RuntimeError(
+                'upload_dataset_from_library: unexpected reply: %r' % res
+                )
+        self.refresh()
+        return self.get_dataset(res['id'])
 
     def upload_dataset(self, path, **kwargs):
         """

@@ -387,34 +387,6 @@ class ObjHistoryClient(ObjDatasetClient):
             if not isinstance(res, collections.Mapping):
                 self._error('delete_history: unexpected reply: %r' % (res,))
 
-    #-- history contents --
-
-    def import_dataset(self, history, lds):
-        """
-        Import a dataset into the history from a library.
-
-        :type history: :class:`~.wrappers.History`
-        :param history: target history
-
-        :type lds: :class:`~.wrappers.LibraryDataset`
-        :param lds: the library dataset to import
-
-        :rtype:
-          :class:`~.wrappers.HistoryDatasetAssociation`
-        :return: the imported history dataset
-        """
-        if not history.is_mapped:
-            self._error('history is not mapped to a Galaxy object')
-        if not isinstance(lds, wrappers.LibraryDataset):
-            self._error('lds is not a LibraryDataset', err_type=TypeError)
-        res = self.gi.histories.upload_dataset_from_library(history.id, lds.id)
-        if not isinstance(res, collections.Mapping):
-            self._error(
-                'upload_dataset_from_library: unexpected reply: %r' % (res,)
-                )
-        history.refresh()
-        return history.get_dataset(res['id'])
-
 
 class ObjWorkflowClient(ObjClient):
     """
