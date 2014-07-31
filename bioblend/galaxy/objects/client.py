@@ -75,10 +75,6 @@ class ObjClient(object):
 
 class ObjDatasetClient(ObjClient):
 
-    @abc.abstractmethod
-    def _dataset_stream_url(self, dataset):
-        pass
-
     def _get_container(self, id_, ctype):
         show_fname = 'show_%s' % ctype.__name__.lower()
         gi_client = getattr(self.gi, ctype.API_MODULE)
@@ -92,25 +88,6 @@ class ObjDatasetClient(ObjClient):
         c_infos = [ctype.CONTENT_INFO_TYPE(_) for _ in c_infos]
         return ctype(cdict, content_infos=c_infos, gi=self.obj_gi)
 
-    def get_stream(self, dataset, chunk_size=bioblend.CHUNK_SIZE):
-        """
-        Open ``dataset`` for reading and return an iterator over its contents.
-
-        :type dataset:
-          :class:`~.wrappers.HistoryDatasetAssociation`
-        :param dataset: the dataset to read from
-
-        :type chunk_size: int
-        :param chunk_size: read this amount of bytes at a time
-        """
-        url = self._dataset_stream_url(dataset)
-        kwargs = {'stream': True}
-        if isinstance(dataset, wrappers.LibraryDataset):
-            kwargs['params'] = {'ldda_ids%5B%5D': dataset.id}
-        r = self.gi.make_get_request(url, **kwargs)
-        r.raise_for_status()
-        return r.iter_content(chunk_size)  # FIXME: client can't close r
-
 
 class ObjLibraryClient(ObjDatasetClient):
     """
@@ -118,10 +95,6 @@ class ObjLibraryClient(ObjDatasetClient):
     """
     def __init__(self, obj_gi):
         super(ObjLibraryClient, self).__init__(obj_gi)
-
-    def _dataset_stream_url(self, dataset):
-        base_url = self.gi._make_url(self.gi.libraries)
-        return "%s/datasets/download/uncompressed" % base_url
 
     def create(self, name, description=None, synopsis=None):
         """
@@ -328,12 +301,6 @@ class ObjHistoryClient(ObjDatasetClient):
 
     def __init__(self, obj_gi):
         super(ObjHistoryClient, self).__init__(obj_gi)
-
-    def _dataset_stream_url(self, dataset):
-        base_url = self.gi._make_url(
-            self.gi.histories, module_id=dataset.container_id, contents=True
-            )
-        return "%s/%s/display" % (base_url, dataset.id)
 
     def create(self, name=None):
         """

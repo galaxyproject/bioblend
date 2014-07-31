@@ -481,7 +481,10 @@ class Dataset(Wrapper):
         """
         return self.container.id
 
-    @abc.abstractmethod
+    @abc.abstractproperty
+    def _stream_url(self):
+        pass
+
     def get_stream(self, chunk_size=None):
         """
         Open dataset for reading and return an iterator over its contents.
@@ -489,7 +492,12 @@ class Dataset(Wrapper):
         :type chunk_size: int
         :param chunk_size: read this amount of bytes at a time
         """
-        pass
+        kwargs = {'stream': True}
+        if isinstance(self, LibraryDataset):
+            kwargs['params'] = {'ldda_ids%5B%5D': self.id}
+        r = self.gi.gi.make_get_request(self._stream_url, **kwargs)
+        r.raise_for_status()
+        return r.iter_content(chunk_size)  # FIXME: client can't close r
 
     def peek(self, chunk_size=None):
         """
@@ -553,8 +561,12 @@ class HistoryDatasetAssociation(Dataset):
     def gi_module(self):
         return self.gi.histories
 
-    def get_stream(self, chunk_size=None):
-        return self.gi.histories.get_stream(self, chunk_size=chunk_size)
+    @property
+    def _stream_url(self):
+        base_url = self.gi.gi._make_url(
+            self.gi.gi.histories, module_id=self.container.id, contents=True
+            )
+        return "%s/%s/display" % (base_url, self.id)
 
 
 class LibRelatedDataset(Dataset):
@@ -568,8 +580,10 @@ class LibRelatedDataset(Dataset):
     def gi_module(self):
         return self.gi.libraries
 
-    def get_stream(self, chunk_size=None):
-        return self.gi.libraries.get_stream(self, chunk_size=chunk_size)
+    @property
+    def _stream_url(self):
+        base_url = self.gi.gi._make_url(self.gi.gi.libraries)
+        return "%s/datasets/download/uncompressed" % base_url
 
 
 class LibraryDatasetDatasetAssociation(LibRelatedDataset):
