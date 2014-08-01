@@ -4,7 +4,7 @@ Clients for interacting with specific Galaxy entity types.
 Classes in this module should not be instantiated directly, but used
 via their handles in :class:`~.galaxy_instance.GalaxyInstance`.
 """
-import collections, httplib, json, abc
+import collections, json, abc
 
 import bioblend
 import wrappers
@@ -75,10 +75,6 @@ class ObjClient(object):
 
 class ObjDatasetClient(ObjClient):
 
-    @abc.abstractmethod
-    def _dataset_stream_url(self, dataset):
-        pass
-
     def _get_container(self, id_, ctype):
         show_fname = 'show_%s' % ctype.__name__.lower()
         gi_client = getattr(self.gi, ctype.API_MODULE)
@@ -92,70 +88,6 @@ class ObjDatasetClient(ObjClient):
         c_infos = [ctype.CONTENT_INFO_TYPE(_) for _ in c_infos]
         return ctype(cdict, content_infos=c_infos, gi=self.obj_gi)
 
-    def _get_container_dataset(self, src, ds_id, ctype=None):
-        if isinstance(src, wrappers.DatasetContainer):
-            ctype = type(src)
-            container_id = src.id
-        else:
-            assert ctype is not None
-            if isinstance(src, collections.Mapping):
-                container_id = src['id']
-            else:
-                container_id = src
-        gi_client = getattr(self.gi, ctype.API_MODULE)
-        ds_dict = gi_client.show_dataset(container_id, ds_id)
-        return ctype.DS_TYPE(ds_dict, container_id, gi=self.obj_gi)
-
-    def get_datasets(self, src, name=None):
-        """
-        Get all datasets contained by the given dataset container.
-
-        :type src: :class:`~.wrappers.History` or :class:`~.wrappers.Library`
-        :param src: the dataset container
-
-        :type name: str
-        :param name: return only datasets with this name
-
-        :rtype: list of :class:`~.wrappers.LibraryDataset` or list of
-          :class:`~.wrappers.HistoryDatasetAssociation`
-        :return: datasets associated with the given container
-
-        .. note::
-
-          when filtering library datasets by name, specify their full
-          paths starting from the library's root folder, e.g.,
-          ``/seqdata/reads.fastq``.  Full paths are available through
-          the ``content_infos`` attribute of
-          :class:`~.wrappers.Library` objects.
-        """
-        if not isinstance(src, wrappers.DatasetContainer):
-            self._error('not a history or library object', err_type=TypeError)
-        if name is None:
-            ds_ids = src.dataset_ids
-        else:
-            ds_ids = [_.id for _ in src.content_infos if _.name == name]
-        return [self._get_container_dataset(src, _, ctype=type(src))
-                for _ in ds_ids]
-
-    def get_stream(self, dataset, chunk_size=bioblend.CHUNK_SIZE):
-        """
-        Open ``dataset`` for reading and return an iterator over its contents.
-
-        :type dataset:
-          :class:`~.wrappers.HistoryDatasetAssociation`
-        :param dataset: the dataset to read from
-
-        :type chunk_size: int
-        :param chunk_size: read this amount of bytes at a time
-        """
-        url = self._dataset_stream_url(dataset)
-        kwargs = {'stream': True}
-        if isinstance(dataset, wrappers.LibraryDataset):
-            kwargs['params'] = {'ldda_ids%5B%5D': dataset.id}
-        r = self.gi.make_get_request(url, **kwargs)
-        r.raise_for_status()
-        return r.iter_content(chunk_size)  # FIXME: client can't close r
-
 
 class ObjLibraryClient(ObjDatasetClient):
     """
@@ -163,10 +95,6 @@ class ObjLibraryClient(ObjDatasetClient):
     """
     def __init__(self, obj_gi):
         super(ObjLibraryClient, self).__init__(obj_gi)
-
-    def _dataset_stream_url(self, dataset):
-        base_url = self.gi._make_url(self.gi.libraries)
-        return "%s/datasets/download/uncompressed" % base_url
 
     def create(self, name, description=None, synopsis=None):
         """
@@ -231,7 +159,7 @@ class ObjLibraryClient(ObjDatasetClient):
 
     def __post_upload(self, library, meth_name, reply):
         ds_info = self._get_dict(meth_name, reply)
-        return self.get_dataset(library, ds_info['id'])
+        return library.get_dataset(ds_info['id'])
 
     def upload_data(self, library, data, folder=None, **kwargs):
         """
@@ -322,19 +250,10 @@ class ObjLibraryClient(ObjDatasetClient):
                 'upload_from_galaxy_filesystem: unexpected reply: %r' % (res,)
                 )
         new_datasets = [
-            self.get_dataset(library, ds_info['id']) for ds_info in res
+            library.get_dataset(ds_info['id']) for ds_info in res
             ]
         library.refresh()
         return new_datasets
-
-    def get_dataset(self, src, ds_id):
-        """
-        Retrieve the library dataset corresponding to the given id.
-
-        :rtype: :class:`~.wrappers.LibraryDataset`
-        :return: the library dataset corresponding to ``id_``
-        """
-        return self._get_container_dataset(src, ds_id, wrappers.Library)
 
     def create_folder(self, library, name, description=None, base_folder=None):
         """
@@ -383,12 +302,6 @@ class ObjHistoryClient(ObjDatasetClient):
     def __init__(self, obj_gi):
         super(ObjHistoryClient, self).__init__(obj_gi)
 
-    def _dataset_stream_url(self, dataset):
-        base_url = self.gi._make_url(
-            self.gi.histories, module_id=dataset.container_id, contents=True
-            )
-        return "%s/%s/display" % (base_url, dataset.id)
-
     def create(self, name=None):
         """
         Create a new Galaxy history, optionally setting its name.
@@ -425,17 +338,6 @@ class ObjHistoryClient(ObjDatasetClient):
         dicts = self.gi.histories.get_histories(name=name)
         return [self.get(_['id']) for _ in dicts]
 
-    def update(self, history, name=None, annotation=None):
-        """
-        Update history metadata with the given name and annotation.
-        """
-        res = self.gi.histories.update_history(
-            history.id, name=name, annotation=annotation
-            )
-        if res != httplib.OK:
-            self._error('update_history: failed to update %r' % (history.id,))
-        return self.get(history.id)
-
     def delete(self, id_=None, name=None, purge=False):
         """
         Delete the history with the given id or name.
@@ -451,50 +353,6 @@ class ObjHistoryClient(ObjDatasetClient):
             res = self.gi.histories.delete_history(id_, purge=purge)
             if not isinstance(res, collections.Mapping):
                 self._error('delete_history: unexpected reply: %r' % (res,))
-
-    #-- history contents --
-
-    def import_dataset(self, history, lds):
-        """
-        Import a dataset into the history from a library.
-
-        :type history: :class:`~.wrappers.History`
-        :param history: target history
-
-        :type lds: :class:`~.wrappers.LibraryDataset`
-        :param lds: the library dataset to import
-
-        :rtype:
-          :class:`~.wrappers.HistoryDatasetAssociation`
-        :return: the imported history dataset
-        """
-        if not history.is_mapped:
-            self._error('history is not mapped to a Galaxy object')
-        if not isinstance(lds, wrappers.LibraryDataset):
-            self._error('lds is not a LibraryDataset', err_type=TypeError)
-        # upload_dataset_from_library returns a dict with the unencoded id
-        # to get the encoded id, we have to detect the new entry by diff
-        old_ids = set(history.dataset_ids)
-        res = self.gi.histories.upload_dataset_from_library(history.id, lds.id)
-        if not isinstance(res, collections.Mapping):
-            self._error(
-                'upload_dataset_from_library: unexpected reply: %r' % (res,)
-                )
-        history.refresh()
-        diff = set(history.dataset_ids) - old_ids
-        if len(diff) != 1:
-            self._error('cannot retrieve hda id')
-        return self.get_dataset(history, diff.pop())
-
-    def get_dataset(self, src, ds_id):
-        """
-        Retrieve the history dataset corresponding to the given id.
-
-        :rtype:
-          :class:`~.wrappers.HistoryDatasetAssociation`
-        :return: the history dataset corresponding to ``id_``
-        """
-        return self._get_container_dataset(src, ds_id, wrappers.History)
 
 
 class ObjWorkflowClient(ObjClient):

@@ -415,7 +415,7 @@ class TestLibrary(GalaxyObjectsTestBase):
         self.assertEqual(len(dss), len(self.lib.dataset_ids))
         self.assertEqual(set(_.id for _ in dss), set(self.lib.dataset_ids))
         for ds in dss:
-            self.assertEqual(ds.container_id, self.lib.id)
+            self.assertTrue(ds.container is self.lib)
 
     def test_dataset(self):
         folder = self.lib.create_folder('test_%s' % uuid.uuid4().hex)
@@ -523,7 +523,7 @@ class TestHistory(GalaxyObjectsTestBase):
         self.assertEqual(len(self.hist.dataset_ids), 0)
         hda = self.hist.import_dataset(lds)
         self.assertTrue(isinstance(hda, wrappers.HistoryDatasetAssociation))
-        self.assertEqual(hda.container_id, self.hist.id)
+        self.assertTrue(hda.container is self.hist)
         self.assertEqual(len(self.hist.dataset_ids), 1)
         self.assertEqual(self.hist.dataset_ids[0], hda.id)
 
@@ -555,6 +555,14 @@ class TestHistory(GalaxyObjectsTestBase):
             self.assertTrue(tarfile.is_tarfile(temp_fn))
         finally:
             shutil.rmtree(tempdir)
+
+    def test_update(self):
+        new_name = 'test_%s' % uuid.uuid4().hex
+        new_annotation = 'Annotation for %s' % new_name
+        updated_hist = self.hist.update(name=new_name, annotation=new_annotation)
+        self.assertEqual(self.hist.id, updated_hist.id)
+        self.assertEqual(self.hist.name, new_name)
+        self.assertEqual(self.hist.annotation, new_annotation)
 
 
 @test_util.skip_unless_galaxy()

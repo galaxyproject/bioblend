@@ -75,7 +75,7 @@ class Client(object):
         """
         A generic Client interface defining the common fields.
 
-        All clinets *must* define the following field (which will be used as part
+        All clients *must* define the following field (which will be used as part
         of the URL composition (eg, http://<galaxy_instance>/api/libraries):
         ``self.module = 'workflows' | 'libraries' | 'histories' | ...``
         """
