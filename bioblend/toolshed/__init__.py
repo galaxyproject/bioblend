@@ -20,7 +20,7 @@ class ToolShedInstance(GalaxyClient):
 
             from bioblend import toolshed
 
-            ts = toolshed.ToolshedInstance(url='http://testtoolshed.g2.bx.psu.edu')
+            ts = toolshed.ToolShedInstance(url='http://testtoolshed.g2.bx.psu.edu')
 
             rl = ts.repositories.get_repositories()
             print "List of repositories:", rl
