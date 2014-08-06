@@ -803,6 +803,9 @@ class History(DatasetContainer):
         :type path: str
         :param path: path of the file to upload
 
+        See :meth:`~bioblend.galaxy.tools.ToolClient.upload_file` for
+        the optional parameters.
+
         :rtype: :class:`~.HistoryDatasetAssociation`
         :return: the uploaded dataset
         """
