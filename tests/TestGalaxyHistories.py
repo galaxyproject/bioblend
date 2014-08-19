@@ -1,6 +1,7 @@
 """
 """
 import os, tempfile, shutil, tarfile
+import time
 
 import GalaxyTestBase
 import test_util
@@ -87,7 +88,13 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
         pass
 
     def test_download_dataset(self):
-        pass
+        history_id = self.history["id"]
+        dataset1_id = self._test_dataset(history_id)
+        self._wait_for_history()
+        with tempfile.NamedTemporaryFile(prefix='bioblend_test_') as f:
+            self.gi.histories.download_dataset(history_id, dataset1_id, file_path=f.name, use_default_filename=False)
+            f.flush()
+            assert open(f.name, "r").read() == "1\t2\t3\n"
 
     def test_delete_history(self):
         result = self.gi.histories.delete_history(self.history['id'])
@@ -133,3 +140,24 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
 
     def tearDown(self):
         self.history = self.gi.histories.delete_history(self.history['id'], purge=True)
+
+    def _wait_for_history(self, timeout_seconds=15):
+        for _ in range(timeout_seconds):
+            state = self._history_data()['state']
+            if self._state_ready(state):
+                return
+            time.sleep(1)
+        return self._state_ready( state, error_msg="History in error state." )
+
+    def _history_data(self, history_id=None):
+        if history_id is None:
+            history_id = self.history['id']
+        history_data = self.gi.histories.show_history(history_id)
+        return history_data
+
+    def _state_ready(self, state_str):
+        if state_str == 'ok':
+            return True
+        elif state_str == 'error':
+            raise Exception("History in error state")
+        return False
