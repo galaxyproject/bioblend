@@ -402,10 +402,9 @@ class CloudManLauncher(object):
         for udkey in udkeys:
             if udkey in form_data and form_data[udkey] == '':
                 del form_data[udkey]
-        # Check if bucket_default is defined for the given cloud and, if it was not
-        # provided by the user, add it to the user data. However, do so only if the
-        # the value is not blank - blank conflicts with CloudMan's ec2autorun.py
-        if 'bucket_default' not in form_data and self.cloud.bucket_default != '':
+        # If bucket_default was not provided, add a default value to the user data
+        # (missing value does not play nicely with CloudMan's ec2autorun.py)
+        if not form_data.get('bucket_default', None) and self.cloud.bucket_default:
             form_data['bucket_default'] = self.cloud.bucket_default
         # Reuse the ``password`` for the ``freenxpass`` user data option
         if 'freenxpass' not in form_data and 'password' in form_data:
