@@ -7,6 +7,7 @@ from bioblend.galaxy.client import Client
 import os
 import re
 import shutil
+import urlparse
 import urllib2
 import time
 
@@ -257,11 +258,16 @@ class HistoryClient(Client):
         Download a ``dataset_id`` from history with ``history_id`` to a
         file on the local file system, saving it to ``file_path``.
         """
+        # TODO: Outsource to DatasetClient.download_dataset() to replace most of this.
         meta = self.show_dataset(history_id, dataset_id)
         d_type = to_ext
         if d_type is None and 'data_type' in meta:
             d_type = meta['data_type']
-        url = '/'.join([self.gi.base_url, 'datasets', meta['id'], "display"]) + "?to_ext=" + d_type
+
+        # Currently the Datasets REST API does not provide the download URL, so we construct it
+        download_url = 'datasets/' + meta['id'] + '/display?to_ext=' + d_type
+        url = urlparse.urljoin(self.gi.base_url, download_url)
+
         req = urllib2.urlopen(url)
         if use_default_filename:
             file_local_path = os.path.join(file_path, meta['name'])
