@@ -407,6 +407,15 @@ class Workflow(Wrapper):
         Example: set 'a' to 1 for the third workflow step::
 
           params = {workflow.steps[2].id: {'a': 1}}
+
+        .. warning::
+
+          This is a blocking operation that can take a very long time.
+          If ``wait`` is set to :obj:`False`, the method will return
+          as soon as the workflow has been *scheduled*, otherwise it
+          will wait until the workflow has been *run*.  With a large
+          number of steps, however, the delay may not be negligible
+          even in the former case (e.g., minutes for 100 steps).
         """
         if not self.is_mapped:
             raise RuntimeError('workflow is not mapped to a Galaxy object')
