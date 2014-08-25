@@ -84,8 +84,7 @@ class GalaxyInstance(object):
         """
         return self.__tools
 
-    def _wait_datasets(self, datasets, polling_interval,
-             break_on_error=True):
+    def _wait_datasets(self, datasets, polling_interval, break_on_error=True):
         """
         Wait for datasets to come out of the pending states.
 
@@ -107,15 +106,18 @@ class GalaxyInstance(object):
           however, each input dataset is refreshed (possibly multiple
           times) during the execution.
         """
-        self.log.info('waiting for datasets')
-        datasets = [_ for _ in datasets if _.state in _PENDING_DS_STATES]
-        while datasets:
-            time.sleep(polling_interval)
-            for i in xrange(len(datasets)-1, -1, -1):
-                ds = datasets[i]
+        def poll(ds_list):
+            pending = []
+            for ds in ds_list:
                 ds.refresh()
                 self.log.info('{0.id}: {0.state}'.format(ds))
                 if break_on_error and ds.state == 'error':
                     raise RuntimeError(_get_error_info(ds))
-                if ds.state not in _PENDING_DS_STATES:
-                    del datasets[i]
+                if ds.state in _PENDING_DS_STATES:
+                    pending.append(ds)
+            return pending
+        #--
+        self.log.info('waiting for datasets')
+        while datasets:
+            datasets = poll(datasets)
+            time.sleep(polling_interval)
