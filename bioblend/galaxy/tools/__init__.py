@@ -103,24 +103,52 @@ class ToolClient(Client):
 
     def upload_file(self, path, history_id, **keywords):
         """
-        Upload specified file specified by ``path`` to history specified by
+        Upload file specified by ``path`` to the history specified by
         ``history_id``.
+
+        :type path: str
+        :param path: path of the file to upload
+
+        :type history_id: str
+        :param history_id: id of the history where to upload the file
+
+        :type file_name: str
+        :param file_name: (optional) name of the new history dataset
+
+        :type file_type: str
+        :param file_type: (optional) Galaxy datatype for the new dataset,
+          default is auto
+
+        :type dbkey: str
+        :param dbkey: (optional) genome dbkey
         """
         default_file_name = basename(path)
         if "file_name" not in keywords:
             keywords["file_name"] = default_file_name
-        payload = self.upload_payload(history_id, **keywords)
+        payload = self._upload_payload(history_id, **keywords)
         payload["files_0|file_data"] = open(path, "rb")
         return self._tool_post(payload, files_attached=True)
 
     def paste_content(self, content, history_id, **kwds):
-        payload = self.upload_payload(history_id, **kwds)
+        """
+        Upload a string to a new dataset in the history specified by
+        ``history_id``.
+
+        :type content: str
+        :param content: content of the new dataset to upload
+
+        :type history_id: str
+        :param history_id: id of the history where to upload the content
+
+        See :meth:`upload_file` for the optional parameters.
+        """
+        payload = self._upload_payload(history_id, **kwds)
         payload["files_0|url_paste"] = content
         return self._tool_post(payload, files_attached=False)
 
     put_url = paste_content
 
-    def upload_payload(self, history_id, **keywords):
+    def _upload_payload(self, history_id, **keywords):
         payload = {}
         payload["history_id"] = history_id
         payload["tool_id"] = keywords.get("tool_id", "upload1")

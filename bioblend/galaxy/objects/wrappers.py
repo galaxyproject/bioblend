@@ -803,6 +803,9 @@ class History(DatasetContainer):
         :type path: str
         :param path: path of the file to upload
 
+        See :meth:`~bioblend.galaxy.tools.ToolClient.upload_file` for
+        the optional parameters.
+
         :rtype: :class:`~.HistoryDatasetAssociation`
         :return: the uploaded dataset
         """
@@ -862,27 +865,130 @@ class Library(DatasetContainer):
         self.gi.libraries.delete(id_=self.id)
         self.unmap()
 
+    def __pre_upload(self, folder):
+        if not self.is_mapped:
+            raise RuntimeError('library is not mapped to a Galaxy object')
+        return None if folder is None else folder.id
+
     def upload_data(self, data, folder=None, **kwargs):
-        return self.gi.libraries.upload_data(self, data, folder, **kwargs)
+        """
+        Upload data to this library.
+
+        :type data: str
+        :param data: dataset contents
+
+        :type folder: :class:`~.Folder`
+        :param folder: a folder object, or :obj:`None` to upload to
+          the root folder
+
+        :rtype: :class:`~.LibraryDataset`
+        :return: the dataset object that represents the uploaded content
+
+        Optional keyword arguments: ``file_type``, ``dbkey``.
+        """
+        fid = self.__pre_upload(folder)
+        res = self.gi.gi.libraries.upload_file_contents(
+            self.id, data, folder_id=fid, **kwargs
+            )
+        self.refresh()
+        return self.get_dataset(res[0]['id'])
 
     def upload_from_url(self, url, folder=None, **kwargs):
-        return self.gi.libraries.upload_from_url(self, url, folder, **kwargs)
+        """
+        Upload data to this library from the given URL.
+
+        :type url: str
+        :param url: URL from which data should be read
+
+        See :meth:`.upload_data` for info on other params.
+        """
+        fid = self.__pre_upload(folder)
+        res = self.gi.gi.libraries.upload_file_from_url(
+            self.id, url, fid, **kwargs
+            )
+        self.refresh()
+        return self.get_dataset(res[0]['id'])
 
     def upload_from_local(self, path, folder=None, **kwargs):
-        return self.gi.libraries.upload_from_local(self, path, folder, **kwargs)
+        """
+        Upload data to this library from a local file.
+
+        :type path: str
+        :param path: local file path from which data should be read
+
+        See :meth:`.upload_data` for info on other params.
+        """
+        fid = self.__pre_upload(folder)
+        res = self.gi.gi.libraries.upload_file_from_local_path(
+            self.id, path, fid, **kwargs
+            )
+        self.refresh()
+        return self.get_dataset(res[0]['id'])
 
     def upload_from_galaxy_fs(self, paths, folder=None, **kwargs):
-        return self.gi.libraries.upload_from_galaxy_fs(
-            self, paths, folder, **kwargs
+        """
+        Upload data to this library from filesystem paths on the server.
+
+        :type paths: str or :class:`~collections.Iterable` of str
+        :param paths: server-side file paths from which data should be read
+
+        See :meth:`.upload_data` for info on other params; in
+        addition, this method accepts a ``link_data_only`` keyword
+        argument that, if set, instructs Galaxy to link files instead
+        of copying them.
+        """
+        fid = self.__pre_upload(folder)
+        if isinstance(paths, basestring):
+            paths = (paths,)
+        paths = '\n'.join(paths)
+        res = self.gi.gi.libraries.upload_from_galaxy_filesystem(
+            self.id, paths, folder_id=fid, **kwargs
             )
+        if res is None:
+            raise RuntimeError('upload_from_galaxy_filesystem: no reply')
+        if not isinstance(res, collections.Sequence):
+            raise RuntimeError(
+                'upload_from_galaxy_filesystem: unexpected reply: %r' % res
+                )
+        new_datasets = [
+            self.get_dataset(ds_info['id']) for ds_info in res
+            ]
+        self.refresh()
+        return new_datasets
 
     def create_folder(self, name, description=None, base_folder=None):
-        return self.gi.libraries.create_folder(
-            self, name, description, base_folder
+        """
+        Create a folder in this library.
+
+        :type name: str
+        :param name: folder name
+
+        :type description: str
+        :param description: optional folder description
+
+        :type base_folder: :class:`~.Folder`
+        :param base_folder: parent folder, or :obj:`None` to create in
+          the root folder
+
+        :rtype: :class:`~.Folder`
+        :return: the folder just created
+        """
+        bfid = None if base_folder is None else base_folder.id
+        res = self.gi.gi.libraries.create_folder(
+            self.id, name, description=description, base_folder_id=bfid,
             )
+        self.refresh()
+        return self.get_folder(res[0]['id'])
 
     def get_folder(self, f_id):
-        return self.gi.libraries.get_folder(self, f_id)
+        """
+        Retrieve the folder corresponding to the given id.
+
+        :rtype: :class:`~.Folder`
+        :return: the folder corresponding to ``f_id``
+        """
+        f_dict = self.gi.gi.libraries.show_folder(self.id, f_id)
+        return Folder(f_dict, self.id, gi=self.gi)
 
 
 class Folder(Wrapper):
