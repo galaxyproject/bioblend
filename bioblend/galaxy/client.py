@@ -5,6 +5,13 @@ This class is primarily a helper for the library and user code
 should not use it directly.
 """
 import requests
+try:
+    # The following import will work only for Requests >= 2.4.0 and is
+    # needed to workaround its "urllib3.exceptions.ProtocolError not
+    # wrapped" bug: https://github.com/kennethreitz/requests/issues/2192
+    from requests.packages.urllib3.exceptions import ProtocolError
+except ImportError:
+    ProtocolError = None
 import json
 import time
 
@@ -143,7 +150,7 @@ class Client(object):
                     bb.log.info("GET request failed (response code: %s). %s attempts left",
                                 r.status_code, attempts_left)
                     bb.log.debug("Response content: %s", r.content)
-            except requests.exceptions.ConnectionError as e:
+            except (requests.exceptions.ConnectionError, ProtocolError) as e:
                 if attempts_left <= 0:
                     raise ConnectionError(e.message)  # raise client.ConnectionError
                 else:
