@@ -320,7 +320,15 @@ class HistoryClient(Client):
 
     def get_current_history(self):
         """
-        Returns the current user's most recently used history object (not deleted)
+        Deprecated method.
+
+        Just an alias for get_most_recently_used_history().
+        """
+        return self.get_most_recently_used_history()
+
+    def get_most_recently_used_history(self):
+        """
+        Returns the current user's most recently used history (not deleted).
         """
         url = self.gi._make_url(self, None)
         url = '/'.join([url, 'most_recently_used'])
