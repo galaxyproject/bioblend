@@ -559,6 +559,7 @@ class HistoryDatasetAssociation(Dataset):
     """
     Maps to a Galaxy ``HistoryDatasetAssociation``.
     """
+    BASE_ATTRS = Dataset.BASE_ATTRS + ('tags',)
     SRC = 'hda'
 
     def __init__(self, ds_dict, container, gi=None):
@@ -741,7 +742,7 @@ class History(DatasetContainer):
     """
     Maps to a Galaxy history.
     """
-    BASE_ATTRS = DatasetContainer.BASE_ATTRS + ('annotation', 'state_ids')
+    BASE_ATTRS = DatasetContainer.BASE_ATTRS + ('annotation', 'state_ids', 'tags')
     DS_TYPE = HistoryDatasetAssociation
     CONTENT_INFO_TYPE = HistoryContentInfo
     API_MODULE = 'histories'
@@ -1100,6 +1101,8 @@ class HistoryPreview(Preview):
     Instances of this class wrap dictionaries obtained by getting
     ``/api/histories`` from Galaxy.
     """
+    BASE_ATTRS = Preview.BASE_ATTRS + ('tags',)
+
     def __init__(self, pw_dict, gi=None):
         super(HistoryPreview, self).__init__(pw_dict, gi=gi)
 
