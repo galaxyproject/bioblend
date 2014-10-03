@@ -503,7 +503,7 @@ class Dataset(Wrapper):
         """
         kwargs = {'stream': True}
         if isinstance(self, LibraryDataset):
-            kwargs['params'] = {'ldda_ids%5B%5D': self.id}
+            kwargs['params'] = {'ld_ids%5B%5D': self.id}
         r = self.gi.gi.make_get_request(self._stream_url, **kwargs)
         r.raise_for_status()
         return r.iter_content(chunk_size)  # FIXME: client can't close r
