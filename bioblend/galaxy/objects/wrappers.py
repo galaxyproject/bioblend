@@ -471,7 +471,7 @@ class Dataset(Wrapper):
     Abstract base class for Galaxy datasets.
     """
     BASE_ATTRS = Wrapper.BASE_ATTRS + (
-        'data_type', 'file_name', 'file_size', 'state', 'deleted'
+        'data_type', 'file_name', 'file_size', 'state', 'deleted', 'file_ext'
         )
     __metaclass__ = abc.ABCMeta
     POLLING_INTERVAL = 1  # for state monitoring

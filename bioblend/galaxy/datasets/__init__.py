@@ -73,7 +73,8 @@ class DatasetClient(Client):
             raise DatasetStateException("Dataset not ready. Dataset id: %s, current state: %s" % (dataset_id, dataset['state']))
 
         # Currently the Datasets REST API does not provide the download URL, so we construct it
-        download_url = 'datasets/' + dataset_id + '/display?to_ext=' + dataset['data_type']
+        file_ext = dataset.get('file_ext', dataset['data_type'])
+        download_url = 'datasets/' + dataset_id + '/display?to_ext=' + file_ext
         url = urlparse.urljoin(self.gi.base_url, download_url)
 
         # Don't use self.gi.make_get_request as currently the download API does not require a key
@@ -91,7 +92,7 @@ class DatasetClient(Client):
                     filename = os.path.basename(header_filepath)
                 except (ValueError, IndexError):
                     # If the filename was not in the header, build a useable filename ourselves.
-                    filename = dataset['name'] + '.' + dataset['data_type']
+                    filename = dataset['name'] + '.' + file_ext
 
                 file_local_path = os.path.join(file_path, filename)
             else:
