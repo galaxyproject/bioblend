@@ -18,15 +18,15 @@ before_script:
   # Create a PostgreSQL database for Galaxy. The default SQLite3 database makes test fail randomly because of "database locked" error.
   - createdb -U postgres galaxy-travis
   # Change Galaxy configuration to use the newly created PostgreSQL database
-  - sed -i -e 's|^#database_connection.*|database_connection = postgresql://postgres:@localhost/galaxy-travis|' universe_wsgi.ini
-  # Add a master API key and an admin user to Galaxy universe_wsgi.ini
+  - sed -e 's|^#database_connection.*|database_connection = postgresql://postgres:@localhost/galaxy-travis|' config/galaxy.ini.sample > config/galaxy.ini
+  # Add a master API key and an admin user to Galaxy's galaxy.ini
   - GALAXY_MASTER_API_KEY=`date --rfc-3339=ns | md5sum | cut -f 1 -d ' '`
   - GALAXY_USER=$USER
   - GALAXY_USER_EMAIL=${USER}@localhost.localdomain
   - GALAXY_USER_PASSWD=`date --rfc-3339=ns | md5sum | cut -f 1 -d ' '`
-  - sed -i -e "s/^#master_api_key.*/master_api_key = $GALAXY_MASTER_API_KEY/" -e "s/^#admin_users.*/admin_users = $GALAXY_USER_EMAIL/" universe_wsgi.ini
+  - sed -i -e "s/^#master_api_key.*/master_api_key = $GALAXY_MASTER_API_KEY/" -e "s/^#admin_users.*/admin_users = $GALAXY_USER_EMAIL/" config/galaxy.ini
   # Change Galaxy configuration needed by TestGalaxyObjects.TestLibraryContents test
-  - sed -i -e 's/^#allow_library_path_paste.*/allow_library_path_paste = True/' universe_wsgi.ini
+  - sed -i -e 's/^#allow_library_path_paste.*/allow_library_path_paste = True/' config/galaxy.ini
   # Start Galaxy
   - ./rolling_restart.sh
   # Use the master API key to create the admin user and get its API key
