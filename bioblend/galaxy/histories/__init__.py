@@ -261,10 +261,12 @@ class HistoryClient(Client):
         # TODO: Outsource to DatasetClient.download_dataset() to replace most of this.
         meta = self.show_dataset(history_id, dataset_id)
         d_type = to_ext
-        if d_type is None and 'data_type' in meta:
+        if d_type is None and 'file_ext' in meta:
+            d_type = meta['file_ext']
+        elif d_type is None and 'data_type' in meta:
             d_type = meta['data_type']
 
-        # Currently the Datasets REST API does not provide the download URL, so we construct it
+        # TODO: Download this via the RET API. api/datasets/<dataset_id>/display
         download_url = 'datasets/' + meta['id'] + '/display?to_ext=' + d_type
         url = urlparse.urljoin(self.gi.base_url, download_url)
 
