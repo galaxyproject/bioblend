@@ -1,6 +1,7 @@
 """
 Interaction with a Tool Shed instance
 """
+import urlparse
 from bioblend.galaxy.client import Client
 
 
@@ -218,4 +219,26 @@ class ToolShedClient(Client):
         # since metadata_id has to be defined, easy to create the url here
         url = self.gi.url + '/repository_revisions/' + metadata_id
 
+        return Client._get(self, url=url)
+
+    def get_categories(self):
+        """
+        Returns a list of dictionaries that contain descriptions of the
+        repository categories found on the given Tool Shed instance.
+
+        :rtype: list
+        :return: A list of dictionaries containing information about
+                 repository categories present in the Tool Shed.
+                 For example::
+
+                    [{u'deleted': False,
+                      u'description': u'Tools for manipulating data',
+                      u'id': u'175812cd7caaf439',
+                      u'model_class': u'Category',
+                      u'name': u'Text Manipulation',
+                      u'url': u'/api/categories/175812cd7caaf439'},]
+
+        .. versionadded:: 0.5.2
+        """
+        url = urlparse.urljoin(self.url, 'categories')
         return Client._get(self, url=url)
