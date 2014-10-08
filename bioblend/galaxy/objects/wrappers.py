@@ -655,6 +655,7 @@ class DatasetContainer(Wrapper):
     """
     Abstract base class for dataset containers (histories and libraries).
     """
+    BASE_ATTRS = Wrapper.BASE_ATTRS + ('deleted',)
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
