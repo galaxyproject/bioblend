@@ -559,10 +559,12 @@ class TestHistory(GalaxyObjectsTestBase):
     def test_update(self):
         new_name = 'test_%s' % uuid.uuid4().hex
         new_annotation = 'Annotation for %s' % new_name
-        updated_hist = self.hist.update(name=new_name, annotation=new_annotation)
+        new_tags = ['tag1', 'tag2']
+        updated_hist = self.hist.update(name=new_name, annotation=new_annotation, tags=new_tags)
         self.assertEqual(self.hist.id, updated_hist.id)
         self.assertEqual(self.hist.name, new_name)
         self.assertEqual(self.hist.annotation, new_annotation)
+        self.assertEqual(self.hist.tags, new_tags)
 
 
 @test_util.skip_unless_galaxy()
