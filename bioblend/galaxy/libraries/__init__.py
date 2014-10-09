@@ -112,8 +112,8 @@ class LibraryClient(Client):
         or ``folder_id`` in data library with id ``library_id``. Provide only one
         argument: ``name`` or ``folder_id``, but not both.
 
-        If ``name`` is set and multiple names match the given name, all the
-        folders matching the argument will be returned.
+        For ``name`` specify the full path of the folder starting from the
+        library's root folder, e.g. ``/subfolder/subsubfolder``.
 
         If ``deleted`` is set to ``True``, return folders that have been deleted.
 

@@ -22,6 +22,17 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
         self.assertEqual(new_history['name'], history_name)
         self.assertIsNotNone(new_history['url'])
 
+    def test_update_history(self):
+        new_name = 'buildbot - automated test renamed'
+        new_annotation = 'Annotation for %s' % new_name
+        new_tags = ['tag1', 'tag2']
+        self.gi.histories.update_history(self.history['id'], name=new_name, annotation=new_annotation, tags=new_tags)
+        updated_hist = self.gi.histories.show_history(self.history['id'])
+        self.assertEqual(self.history['id'], updated_hist['id'])
+        self.assertEqual(updated_hist['name'], new_name)
+        self.assertEqual(updated_hist['annotation'], new_annotation)
+        self.assertEqual(updated_hist['tags'], new_tags)
+
     def test_get_histories(self):
         # Make sure there's at least one value - the one we created
         full_history = self.gi.histories.get_histories()
