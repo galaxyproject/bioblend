@@ -81,7 +81,7 @@ class HistoryClient(Client):
 
     def delete_dataset_collection(self, history_id, dataset_collection_id):
         """
-        Mark corresponding datset as deleted.
+        Mark corresponding dataset as deleted.
         """
         url = self.gi._make_url(self, history_id, contents=True)
         # Append the dataset_id to the base history contents URL
@@ -133,34 +133,37 @@ class HistoryClient(Client):
         url = '/'.join([url, dataset_id, "provenance"])
         return Client._get(self, url=url)
 
-    def update_history(self, history_id, name=None, annotation=None):
+    def update_history(self, history_id, name=None, annotation=None, **kwds):
         """
-        Update history metadata information. Current attributes that can be modified
-        for a history 'name' and 'annotation'.
+        Update history metadata information. Some of the attributes that can be
+        modified are documented below.
 
         :type history_id: string
         :param history_id: Encoded history ID
         :type name: string
-        :param name: Replace history with the given string
+        :param name: Replace history name with the given string
         :type annotation: string
         :param annotation: Replace history annotation with given string
+        :type deleted: boolean
+        :param deleted: Mark or unmark history as deleted
+        :type published: boolean
+        :param published: Mark or unmark history as published
+        :type importable: boolean
+        :param importable: Mark or unmark history as importable
+        :type tags: list
+        :param tags: Replace history tags with the given list
 
         :rtype: status_code (int)
 
         """
-
-        payload = {}
-        if name:
-            payload['name'] = name
-        if annotation:
-            payload['annotation'] = annotation
-
-        return Client._put(self, payload, id=history_id).status_code
+        kwds['name'] = name
+        kwds['annotation'] = annotation
+        return Client._put(self, kwds, id=history_id).status_code
 
     def update_dataset(self, history_id, dataset_id, **kwds):
         """
-        Update history dataset metadata. Only a subset of the available
-        metadata parameters for modification are documented below currently.
+        Update history dataset metadata. Some of the attributes that can be
+        modified are documented below.
 
         :type history_id: string
         :param history_id: Encoded history ID
@@ -169,9 +172,9 @@ class HistoryClient(Client):
         :type annotation: string
         :param annotation: Replace history dataset annotation with given string
         :type deleted: boolean
-        :param deleted: Mark or unmark history dataset as deleted.
+        :param deleted: Mark or unmark history dataset as deleted
         :type visible: boolean
-        :param visible: Mark or unmark history dataset as visible.
+        :param visible: Mark or unmark history dataset as visible
 
         :rtype: status_code (int)
         """
@@ -182,8 +185,8 @@ class HistoryClient(Client):
 
     def update_dataset_collection(self, history_id, dataset_collection_id, **kwds):
         """
-        Update history dataset metadata. Only a subset of the available
-        metadata parameters for modification are documented below currently.
+        Update history dataset collection metadata. Some of the attributes that
+        can be modified are documented below.
 
         :type history_id: string
         :param history_id: Encoded history ID
@@ -261,10 +264,12 @@ class HistoryClient(Client):
         # TODO: Outsource to DatasetClient.download_dataset() to replace most of this.
         meta = self.show_dataset(history_id, dataset_id)
         d_type = to_ext
-        if d_type is None and 'data_type' in meta:
+        if d_type is None and 'file_ext' in meta:
+            d_type = meta['file_ext']
+        elif d_type is None and 'data_type' in meta:
             d_type = meta['data_type']
 
-        # Currently the Datasets REST API does not provide the download URL, so we construct it
+        # TODO: Download this via the REST API. api/datasets/<dataset_id>/display
         download_url = 'datasets/' + meta['id'] + '/display?to_ext=' + d_type
         url = urlparse.urljoin(self.gi.base_url, download_url)
 

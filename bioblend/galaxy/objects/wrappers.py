@@ -471,7 +471,7 @@ class Dataset(Wrapper):
     Abstract base class for Galaxy datasets.
     """
     BASE_ATTRS = Wrapper.BASE_ATTRS + (
-        'data_type', 'file_name', 'file_size', 'state', 'deleted'
+        'data_type', 'file_name', 'file_size', 'state', 'deleted', 'file_ext'
         )
     __metaclass__ = abc.ABCMeta
     POLLING_INTERVAL = 1  # for state monitoring
@@ -655,6 +655,7 @@ class DatasetContainer(Wrapper):
     """
     Abstract base class for dataset containers (histories and libraries).
     """
+    BASE_ATTRS = Wrapper.BASE_ATTRS + ('deleted',)
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
@@ -756,15 +757,29 @@ class History(DatasetContainer):
     def gi_module(self):
         return self.gi.histories
 
-    def update(self, name=None, annotation=None):
+    def update(self, name=None, annotation=None, **kwds):
         """
-        Update history metadata with the given name and annotation.
+        Update history metadata information. Some of the attributes that can be
+        modified are documented below.
+
+        :type name: string
+        :param name: Replace history name with the given string
+        :type annotation: string
+        :param annotation: Replace history annotation with given string
+        :type deleted: boolean
+        :param deleted: Mark or unmark history as deleted
+        :type published: boolean
+        :param published: Mark or unmark history as published
+        :type importable: boolean
+        :param importable: Mark or unmark history as importable
+        :type tags: list
+        :param tags: Replace history tags with the given list
         """
         # TODO: wouldn't it be better if name and annotation were attributes?
         # TODO: do we need to ensure the attributes of `self` are the same as
         # the ones returned by the call to `update_history` below?
         res = self.gi.gi.histories.update_history(
-            self.id, name=name, annotation=annotation
+            self.id, name=name, annotation=annotation, **kwds
             )
         if res != httplib.OK:
             raise RuntimeError('failed to update history')
