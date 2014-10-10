@@ -72,7 +72,7 @@ class HistoryClient(Client):
 
     def delete_dataset(self, history_id, dataset_id):
         """
-        Mark corresponding datset as deleted.
+        Mark corresponding dataset as deleted.
         """
         url = self.gi._make_url(self, history_id, contents=True)
         # Append the dataset_id to the base history contents URL
@@ -81,7 +81,7 @@ class HistoryClient(Client):
 
     def delete_dataset_collection(self, history_id, dataset_collection_id):
         """
-        Mark corresponding dataset as deleted.
+        Mark corresponding dataset collection as deleted.
         """
         url = self.gi._make_url(self, history_id, contents=True)
         # Append the dataset_id to the base history contents URL
