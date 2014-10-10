@@ -578,6 +578,11 @@ class HistoryDatasetAssociation(Dataset):
             )
         return "%s/%s/display" % (base_url, self.id)
 
+    def delete(self):
+        self.gi.gi.histories.delete_dataset(self.container.id, self.id)
+        self.container.refresh()
+        self.refresh()
+
 
 class LibRelatedDataset(Dataset):
     """
@@ -608,6 +613,11 @@ class LibraryDataset(LibRelatedDataset):
     Maps to a Galaxy ``LibraryDataset``.
     """
     SRC = 'ld'
+
+    def delete(self, purged=False):
+        self.gi.gi.libraries.delete_library_dataset(self.container.id, self.id, purged=purged)
+        self.container.refresh()
+        self.refresh()
 
 
 class ContentInfo(Wrapper):
