@@ -123,11 +123,7 @@ class ToolShedClient(Client):
         payload['install_tool_dependencies'] = install_tool_dependencies
         payload['install_repository_dependencies'] = install_repository_dependencies
         if tool_panel_section_id:
-            # Galaxy requires 'section_' to be prepended to the section ID so ensure it's there
-            if 'section_' not in tool_panel_section_id:
-                payload['tool_panel_section_id'] = 'section_%s' % tool_panel_section_id
-            else:
-                payload['tool_panel_section_id'] = tool_panel_section_id
+            payload['tool_panel_section_id'] = tool_panel_section_id
         elif new_tool_panel_section_label:
             payload['new_tool_panel_section_label'] = new_tool_panel_section_label
 
