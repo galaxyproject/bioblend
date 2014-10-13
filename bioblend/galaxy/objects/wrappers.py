@@ -500,11 +500,23 @@ class Dataset(Wrapper):
 
         :type chunk_size: int
         :param chunk_size: read this amount of bytes at a time
+
+        .. warning::
+
+          Due to a change in the Galaxy API endpoint, this method does
+          not work on :class:`LibraryDataset` instances with Galaxy
+          ``release_2014.06.02`` and ``release_2014.08.11``.  Methods
+          that delegate work to this one are also affected:
+          :meth:`peek`, :meth:`download`, :meth:`get_contents`.
         """
         kwargs = {'stream': True}
         if isinstance(self, LibraryDataset):
             kwargs['params'] = {'ld_ids%5B%5D': self.id}
         r = self.gi.gi.make_get_request(self._stream_url, **kwargs)
+        if isinstance(self, LibraryDataset) and r.status_code != 200:
+            # compatibility with older Galaxy releases
+            kwargs['params'] = {'ldda_ids%5B%5D': self.id}
+            r = self.gi.gi.make_get_request(self._stream_url, **kwargs)
         r.raise_for_status()
         return r.iter_content(chunk_size)  # FIXME: client can't close r
 
