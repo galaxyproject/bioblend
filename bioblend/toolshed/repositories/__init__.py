@@ -242,3 +242,11 @@ class ToolShedClient(Client):
         """
         url = urlparse.urljoin(self.url, 'categories')
         return Client._get(self, url=url)
+
+    def update_repository(self, id, tar_ball_path, commit_message=None):
+        url = self.gi._make_url(self, id) + '/changeset_revision'
+        payload = {}
+        if commit_message is not None:
+            payload[commit_message] = commit_message
+        payload["file"] = open(tar_ball_path, "rb")
+        return Client._post(self, id=id, payload=payload, files_attached=True, url=url)
