@@ -571,7 +571,7 @@ class HistoryDatasetAssociation(Dataset):
     """
     Maps to a Galaxy ``HistoryDatasetAssociation``.
     """
-    BASE_ATTRS = Dataset.BASE_ATTRS + ('tags',)
+    BASE_ATTRS = Dataset.BASE_ATTRS + ('tags', 'visible')
     SRC = 'hda'
 
     def __init__(self, ds_dict, container, gi=None):
@@ -589,6 +589,11 @@ class HistoryDatasetAssociation(Dataset):
             self.gi.gi.histories, module_id=self.container.id, contents=True
             )
         return "%s/%s/display" % (base_url, self.id)
+
+    def delete(self):
+        self.gi.gi.histories.delete_dataset(self.container.id, self.id)
+        self.container.refresh()
+        self.refresh()
 
 
 class LibRelatedDataset(Dataset):
@@ -620,6 +625,11 @@ class LibraryDataset(LibRelatedDataset):
     Maps to a Galaxy ``LibraryDataset``.
     """
     SRC = 'ld'
+
+    def delete(self, purged=False):
+        self.gi.gi.libraries.delete_library_dataset(self.container.id, self.id, purged=purged)
+        self.container.refresh()
+        self.refresh()
 
 
 class ContentInfo(Wrapper):
@@ -655,6 +665,8 @@ class HistoryContentInfo(ContentInfo):
     Instances of this class wrap dictionaries obtained by getting
     ``/api/histories/<ID>/contents`` from Galaxy.
     """
+    BASE_ATTRS = ContentInfo.BASE_ATTRS + ('deleted', 'state', 'visible')
+
     def __init__(self, info_dict, gi=None):
         super(HistoryContentInfo, self).__init__(info_dict, gi=gi)
 

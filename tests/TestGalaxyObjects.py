@@ -494,6 +494,12 @@ class TestLDContents(GalaxyObjectsTestBase):
     def test_dataset_get_contents(self):
         self.assertEqual(FOO_DATA, self.ds.get_contents())
 
+    def test_dataset_delete(self):
+        self.ds.delete()
+        # cannot test this yet because the 'deleted' attribute is not
+        # exported by the API at the moment
+        #self.assertTrue(self.ds.deleted)
+
 
 @test_util.skip_unless_galaxy()
 class TestHistory(GalaxyObjectsTestBase):
@@ -599,6 +605,10 @@ class TestHDAContents(GalaxyObjectsTestBase):
 
     def test_dataset_get_contents(self):
         self.assertEqual(FOO_DATA, self.ds.get_contents())
+
+    def test_dataset_delete(self):
+        self.ds.delete()
+        self.assertTrue(self.ds.deleted)
 
 
 @test_util.skip_unless_galaxy()
