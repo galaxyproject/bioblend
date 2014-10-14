@@ -7,7 +7,7 @@ import urlparse
 
 
 class ToolShedInstance(GalaxyClient):
-    def __init__(self, url, key=''):
+    def __init__(self, url, key='', email=None, password=None):
         """
         A base representation of an instance of ToolShed, identified by a
         URL and a user's API key.
@@ -39,8 +39,7 @@ class ToolShedInstance(GalaxyClient):
         self.base_url = url
         # All of ToolShed's API's are rooted at <url>/api so make that the url
         self.url = urlparse.urljoin(url, 'api')
-        self.key = key
-        self.default_params = {'key': key}
+        self._init_auth(key, email, password)
         self.json_headers = {'Content-Type': 'application/json'}
         self.verify = False  # Should SSL verification be done
         self.repositories = repositories.ToolShedClient(self)

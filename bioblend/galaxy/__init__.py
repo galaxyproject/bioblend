@@ -1,8 +1,6 @@
 """
 A base representation of an instance of Galaxy
 """
-import base64
-import requests
 import urlparse
 from bioblend.galaxy.client import Client
 from bioblend.galaxy import (libraries, histories, workflows, datasets, users,
@@ -56,14 +54,7 @@ class GalaxyInstance(GalaxyClient):
         # All of Galaxy's API's are rooted at <url>/api so make that the base url
         self.base_url = url
         self.url = urlparse.urljoin(url, 'api')
-        # If key supplied use it, otherwise just set email and password and
-        # grab users key before first request.
-        if key:
-            self.__key = key
-        else:
-            self.__key = None
-            self.email = email
-            self.password = password
+        self._init_auth(key, email, password)
         self.json_headers = {'Content-Type': 'application/json'}
         self.verify = False  # Should SSL verification be done
         self.libraries = libraries.LibraryClient(self)
@@ -82,26 +73,6 @@ class GalaxyInstance(GalaxyClient):
         self.jobs = jobs.JobsClient(self)
         self.forms = forms.FormsClient(self)
         self.ftpfiles = ftpfiles.FTPFilesClient(self)
-
-    @property
-    def key(self):
-        if self.__key is None:
-            unencoded_credentials = "%s:%s" % (self.email, self.password)
-            authorization = base64.b64encode(unencoded_credentials)
-            headers = self.json_headers.copy()
-            headers["Authorization"] = authorization
-            auth_url = "%s/authenticate/baseauth" % self.url
-            # make_post_request uses default_params, which uses this and
-            # sets wrong headers - so using lower level method.
-            r = requests.get(auth_url, verify=self.verify, headers=headers)
-            if r.status_code != 200:
-                raise Exception("Failed to authenticate user.")
-            self.__key = r.json()["api_key"]
-        return self.__key
-
-    @property
-    def default_params(self):
-        return {'key': self.key}
 
     @property
     def max_get_attempts(self):

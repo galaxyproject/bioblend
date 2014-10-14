@@ -5,6 +5,7 @@ This class is primarily a helper for the library and user code
 should not use it directly.
 A base representation of an instance
 """
+import base64
 import urllib2
 import poster
 import requests
@@ -135,3 +136,37 @@ class GalaxyClient(object):
         payload = json.dumps(payload)
         r = requests.put(url, data=payload, params=params)
         return r
+
+    @property
+    def key(self):
+        if not self._key and self.email is not None and self.password is not None:
+            unencoded_credentials = "%s:%s" % (self.email, self.password)
+            authorization = base64.b64encode(unencoded_credentials)
+            headers = self.json_headers.copy()
+            headers["Authorization"] = authorization
+            auth_url = "%s/authenticate/baseauth" % self.url
+            # make_post_request uses default_params, which uses this and
+            # sets wrong headers - so using lower level method.
+            r = requests.get(auth_url, verify=self.verify, headers=headers)
+            if r.status_code != 200:
+                raise Exception("Failed to authenticate user.")
+            response = r.json()
+            if isinstance(response, basestring) or isinstance(response, unicode):
+                # bug in tool shed
+                response = json.loads(response)
+            self._key = response["api_key"]
+        return self._key
+
+    def _init_auth(self, key, email, password):
+        # If key supplied use it, otherwise just set email and password and
+        # grab users key before first request.
+        if key:
+            self._key = key
+        else:
+            self._key = None
+            self.email = email
+            self.password = password
+
+    @property
+    def default_params(self):
+        return {'key': self.key}
