@@ -3,7 +3,7 @@ import logging
 from bioblend.config import Config, BioBlendConfigLocations
 
 # Current version of the library
-__version__ = '0.5.2'
+__version__ = '0.5.3-dev'
 
 # default chunk size (in bytes) for reading remote data
 try:
