@@ -1,3 +1,24 @@
+### BioBlend v0.5.2 - October 17, 2014
+
+* BioBlend.objects: enable email&password auth
+
+* Enable Tool Shed tar ball uploads
+
+* BioBlend.objects: allow deletion of history and library datasets
+
+* BioBlend.objects: fixed library dataset downloads
+
+* Fixed the Tool Shed tool installation method
+
+* Add 'deleted' attribute to DatasetContainer
+
+* Handle `data_type` changes in the Oct 2014 Galaxy release
+
+* Renamed `get_current_history()` to `get_most_recently_used_history()`
+
+* A number of documentation improvements and other small fixes (see
+  the commit messages for more details)
+
 ### BioBlend v0.5.1 - August 19, 2014
 
 * Fixed url joining problem described in issue #82
