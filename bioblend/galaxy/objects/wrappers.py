@@ -513,7 +513,7 @@ class Dataset(Wrapper):
         if isinstance(self, LibraryDataset):
             kwargs['params'] = {'ld_ids%5B%5D': self.id}
         r = self.gi.gi.make_get_request(self._stream_url, **kwargs)
-        if isinstance(self, LibraryDataset) and r.status_code != 200:
+        if isinstance(self, LibraryDataset) and r.status_code == 500:
             # compatibility with older Galaxy releases
             kwargs['params'] = {'ldda_ids%5B%5D': self.id}
             r = self.gi.gi.make_get_request(self._stream_url, **kwargs)
