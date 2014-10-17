@@ -48,8 +48,8 @@ class GalaxyInstance(object):
       gi = GalaxyInstance('http://127.0.0.1:8080', 'foo')
       histories = gi.histories.list()
     """
-    def __init__(self, url, api_key):
-        self.gi = bioblend.galaxy.GalaxyInstance(url, api_key)
+    def __init__(self, url, api_key=None, email=None, password=None):
+        self.gi = bioblend.galaxy.GalaxyInstance(url, api_key, email, password)
         self.log = bioblend.log
         self.__histories = client.ObjHistoryClient(self)
         self.__libraries = client.ObjLibraryClient(self)
