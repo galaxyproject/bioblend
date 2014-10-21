@@ -29,7 +29,7 @@ class FormsClient(Client):
 
 
         """
-        return Client._get(self)
+        return Client._get(self).json()
 
     def show_form(self, form_id):
         """
@@ -54,7 +54,7 @@ class FormsClient(Client):
 
         """
 
-        return Client._get(self, id=form_id)
+        return Client._get(self, id=form_id).json()
 
     def create_form(self, form_xml_text):
         """

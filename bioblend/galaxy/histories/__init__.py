@@ -41,7 +41,7 @@ class HistoryClient(Client):
         """
         if history_id is not None and name is not None:
             raise ValueError('Provide only one argument between name or history_id, but not both')
-        histories = Client._get(self, deleted=deleted)
+        histories = Client._get(self, deleted=deleted).json()
         if history_id is not None:
             history = next((_ for _ in histories if _['id'] == history_id), None)
             histories = [history] if history is not None else []
@@ -68,7 +68,7 @@ class HistoryClient(Client):
                 params['visible'] = visible
             if types is not None:
                 params['types'] = types.join(",")
-        return Client._get(self, id=history_id, contents=contents, params=params)
+        return Client._get(self, id=history_id, contents=contents, params=params).json()
 
     def delete_dataset(self, history_id, dataset_id):
         """
@@ -96,7 +96,7 @@ class HistoryClient(Client):
         url = self.gi._make_url(self, history_id, contents=True)
         # Append the dataset_id to the base history contents URL
         url = '/'.join([url, dataset_id])
-        return Client._get(self, url=url)
+        return Client._get(self, url=url).json()
 
     def show_dataset_collection(self, history_id, dataset_collection_id):
         """
@@ -104,7 +104,7 @@ class HistoryClient(Client):
         """
         url = self.gi._make_url(self, history_id, contents=True)
         url = '/'.join([url, "dataset_collections", dataset_collection_id])
-        return Client._get(self, url=url)
+        return Client._get(self, url=url).json()
 
     def show_matching_datasets(self, history_id, name_filter=None):
         """
@@ -131,7 +131,7 @@ class HistoryClient(Client):
         """
         url = self.gi._make_url(self, history_id, contents=True)
         url = '/'.join([url, dataset_id, "provenance"])
-        return Client._get(self, url=url)
+        return Client._get(self, url=url).json()
 
     def update_history(self, history_id, name=None, annotation=None, **kwds):
         """
@@ -337,7 +337,7 @@ class HistoryClient(Client):
         """
         url = self.gi._make_url(self, None)
         url = '/'.join([url, 'most_recently_used'])
-        return Client._get(self, url=url)
+        return Client._get(self, url=url).json()
 
     def export_history(self, history_id, gzip=True, include_hidden=False,
                        include_deleted=False, wait=False):

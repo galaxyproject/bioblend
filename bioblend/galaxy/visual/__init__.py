@@ -31,7 +31,7 @@ class VisualClient(Client):
 
 
         """
-        results = Client._get(self)
+        results = Client._get(self).json()
         return results
 
     def show_visualization(self, visual_id):
@@ -58,4 +58,4 @@ class VisualClient(Client):
                    u'user_id': u'21e4aed91386ca8b'}
 
         """
-        return Client._get(self, id=visual_id)
+        return Client._get(self, id=visual_id).json()

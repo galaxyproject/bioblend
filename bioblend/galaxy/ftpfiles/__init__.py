@@ -20,4 +20,4 @@ class FTPFilesClient(Client):
 
 
         """
-        return Client._get(self)
+        return Client._get(self).json()

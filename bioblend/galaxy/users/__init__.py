@@ -26,14 +26,14 @@ class UserClient(Client):
                      u'url': u'/api/users/dda47097d9189f15'}]
 
         """
-        return Client._get(self, deleted=deleted)
+        return Client._get(self, deleted=deleted).json()
 
     def show_user(self, user_id, deleted=False):
         """
         Display information about a user. If ``deleted`` is set to ``True``,
         display information about a deleted user.
         """
-        return Client._get(self, id=user_id, deleted=deleted)
+        return Client._get(self, id=user_id, deleted=deleted).json()
 
     def create_user(self, user_email):
         """
@@ -81,7 +81,7 @@ class UserClient(Client):
         """
         url = self.gi._make_url(self, None)
         url = '/'.join([url, 'current'])
-        return Client._get(self, url=url)
+        return Client._get(self, url=url).json()
 
     def create_user_apikey(self, user_id):
         """
