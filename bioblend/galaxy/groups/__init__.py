@@ -31,7 +31,7 @@ class GroupsClient(Client):
 
 
         """
-        return Client._get(self)
+        return Client._get(self).json()
 
     def show_group(self, group_id):
         """
@@ -52,7 +52,7 @@ class GroupsClient(Client):
 
         """
 
-        return Client._get(self, id=group_id)
+        return Client._get(self, id=group_id).json()
 
     def create_group(self, group_name, user_ids=[], role_ids=[]):
         """

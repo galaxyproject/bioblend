@@ -14,7 +14,7 @@ class GenomeClient(Client):
         """
         Returns a list of installed genomes
         """
-        genomes = Client._get(self)
+        genomes = Client._get(self).json()
         return genomes
 
     def show_genome(self, id, num=None, chrom=None, low=None, high=None):
@@ -30,7 +30,7 @@ class GenomeClient(Client):
             params['low'] = low
         if high:
             params['high'] = high
-        return Client._get(self, id, params)
+        return Client._get(self, id, params).json()
 
     def install_genome(self, func='download', source=None, dbkey=None, ncbi_name=None, ensembl_dbkey=None, url_dbkey=None, indexers=None):
         """

@@ -31,7 +31,7 @@ class ToolShedClient(Client):
             Changed method name from ``get_tools`` to ``get_repositories`` to
             better align with the Tool Shed concepts
         """
-        return Client._get(self)
+        return Client._get(self).json()
 
     def show_repository(self, toolShed_id):
         """
@@ -55,7 +55,7 @@ class ToolShedClient(Client):
             Changed method name from ``show_tool`` to ``show_repository`` to
             better align with the Tool Shed concepts
         """
-        return Client._get(self, id=toolShed_id)
+        return Client._get(self, id=toolShed_id).json()
 
     def get_ordered_installable_revisions(self, name, owner):
         """
@@ -76,7 +76,7 @@ class ToolShedClient(Client):
         params = {}
         params['name'] = name
         params['owner'] = owner
-        r = Client._get(self, url=url, params=params)
+        r = Client._get(self, url=url, params=params).json()
 
         return r
 
@@ -116,7 +116,7 @@ class ToolShedClient(Client):
         params['owner'] = owner
         params['changeset_revision'] = changeset_revision
 
-        return Client._get(self, url=url, params=params)
+        return Client._get(self, url=url, params=params).json()
 
     def repository_revisions(self, downloadable=None, malicious=None,
             tools_functionally_correct=None, missing_test_components=None,
@@ -184,7 +184,7 @@ class ToolShedClient(Client):
         if skip_tool_test:
             params['skip_tool_test'] = 'True'
 
-        return Client._get(self, url=url, params=params)
+        return Client._get(self, url=url, params=params).json()
 
     def show_repository_revision(self, metadata_id):
         '''
@@ -219,7 +219,7 @@ class ToolShedClient(Client):
         # since metadata_id has to be defined, easy to create the url here
         url = self.gi.url + '/repository_revisions/' + metadata_id
 
-        return Client._get(self, url=url)
+        return Client._get(self, url=url).json()
 
     def get_categories(self):
         """
@@ -241,7 +241,7 @@ class ToolShedClient(Client):
         .. versionadded:: 0.5.2
         """
         url = urlparse.urljoin(self.url, 'categories')
-        return Client._get(self, url=url)
+        return Client._get(self, url=url).json()
 
     def update_repository(self, id, tar_ball_path, commit_message=None):
         url = self.gi._make_url(self, id) + '/changeset_revision'

@@ -31,7 +31,7 @@ class ToolShedClient(Client):
             Changed method name from ``get_tools`` to ``get_repositories`` to
             better align with the Tool Shed concepts
         """
-        return Client._get(self)
+        return Client._get(self).json()
 
     def show_repository(self, toolShed_id):
         """
@@ -54,7 +54,7 @@ class ToolShedClient(Client):
             Changed method name from ``show_tool`` to ``show_repository`` to
             better align with the Tool Shed concepts
         """
-        return Client._get(self, id=toolShed_id)
+        return Client._get(self, id=toolShed_id).json()
 
     def install_repository_revision(self, tool_shed_url, name, owner,
                                     changeset_revision,
