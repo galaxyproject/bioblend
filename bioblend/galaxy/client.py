@@ -89,7 +89,8 @@ class Client(object):
         self.gi = galaxy_instance
         self.url = '/'.join([self.gi.url, self.module])
 
-    def _get(self, id=None, deleted=False, contents=None, url=None, params=None):
+    def _raw_get(self, id=None, deleted=False, contents=None, url=None,
+                 params=None):
         """
         Do a generic GET request, composing the url from the contents of the
         arguments. Alternatively, an explicit ``url`` can be provided
@@ -103,9 +104,9 @@ class Client(object):
         """
         if not url:
             url = self.gi._make_url(self, module_id=id, deleted=deleted, contents=contents)
-        return self._get_retry(url, params)
+        return self._raw_get_retry(url, params)
 
-    def _get_retry(self, url, params):
+    def _raw_get_retry(self, url, params):
         """
         Make a GET request to the given `url`.  Retry as configured by
         `Client.max_get_retries` and `Client.get_retry_delay`.
@@ -145,7 +146,7 @@ class Client(object):
             try:
                 r = self.gi.make_get_request(url, params=params)
                 if r.status_code == 200 and r.content:
-                    return r.json()
+                    return r
                 else:
                     bb.log.info("GET request failed (response code: %s). %s attempts left",
                                 r.status_code, attempts_left)
@@ -169,6 +170,20 @@ class Client(object):
         else:
             msg = "Empty reply from GET API call"
         raise ConnectionError(msg, r.content if r else None)
+
+    def _get(self, id=None, deleted=False, contents=None, url=None,
+             params=None):
+        """
+        Perform a :meth:`_raw_get` and return the decoded JSON.
+        """
+        return self._raw_get(id=id, deleted=deleted, contents=contents,
+                             url=url, params=params).json()
+
+    def _get_retry(self, url, params):
+        """
+        Perform a :meth:`_raw_get_retry` and return the decoded JSON.
+        """
+        return self._raw_get_retry(url, params).json()
 
     def _post(self, payload, id=None, deleted=False, contents=None, url=None, files_attached=False):
         """
