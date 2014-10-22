@@ -59,7 +59,7 @@ class ToolClient(Client):
         params = {}
         params['in_panel'] = in_panel
         params['trackster'] = trackster
-        return Client._get(self, params=params)
+        return Client._get(self, params=params).json()
 
     def show_tool(self, tool_id, io_details=False, link_details=False):
         """
@@ -77,7 +77,7 @@ class ToolClient(Client):
         params = {}
         params['io_details'] = io_details
         params['link_details'] = link_details
-        return Client._get(self, id=tool_id, params=params)
+        return Client._get(self, id=tool_id, params=params).json()
 
     def run_tool(self, history_id, tool_id, tool_inputs):
         """

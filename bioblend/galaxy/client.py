@@ -145,7 +145,7 @@ class Client(object):
             try:
                 r = self.gi.make_get_request(url, params=params)
                 if r.status_code == 200 and r.content:
-                    return r.json()
+                    return r
                 else:
                     bb.log.info("GET request failed (response code: %s). %s attempts left",
                                 r.status_code, attempts_left)

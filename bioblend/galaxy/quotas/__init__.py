@@ -33,7 +33,7 @@ class QuotaClient(Client):
 
 
         """
-        return Client._get(self, deleted=deleted)
+        return Client._get(self, deleted=deleted).json()
 
     def show_quota(self, quota_id, deleted=False):
         """
@@ -63,4 +63,4 @@ class QuotaClient(Client):
 
 
         """
-        return Client._get(self, id=quota_id, deleted=deleted)
+        return Client._get(self, id=quota_id, deleted=deleted).json()

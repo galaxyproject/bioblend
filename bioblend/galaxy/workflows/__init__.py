@@ -40,7 +40,7 @@ class WorkflowClient(Client):
         kwargs = {'deleted': deleted}
         if published:
             kwargs['params'] = {'show_published': 'True'}
-        workflows = Client._get(self, **kwargs)
+        workflows = Client._get(self, **kwargs).json()
         if workflow_id is not None:
             workflow = next((_ for _ in workflows if _['id'] == workflow_id), None)
             workflows = [workflow] if workflow is not None else []
@@ -65,14 +65,14 @@ class WorkflowClient(Client):
                    u'url': u'/api/workflows/92c56938c2f9b315'}
 
         """
-        return Client._get(self, id=workflow_id)
+        return Client._get(self, id=workflow_id).json()
 
     def get_workflow_inputs(self, workflow_id, label):
         """
         Get a list of workflow input IDs that match the given label.
         If no input matches the given label, an empty list is returned.
         """
-        wf = Client._get(self, id=workflow_id)
+        wf = Client._get(self, id=workflow_id).json()
         inputs = wf['inputs']
         return [id for id in inputs if inputs[id]['label'] == label]
 
@@ -133,7 +133,7 @@ class WorkflowClient(Client):
         url = self.gi._make_url(self)
         url = '/'.join([url, "download"])
         url = '/'.join([url, workflow_id])
-        return Client._get(self, url=url)
+        return Client._get(self, url=url).json()
 
     def export_workflow_to_local_path(self, workflow_id, file_local_path, use_default_filename=True):
         """

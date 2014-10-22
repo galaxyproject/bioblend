@@ -44,7 +44,7 @@ class JobsClient(Client):
                  u'tool_id': u'upload1',
                  u'update_time': u'2014-03-01T16:05:39.558458'}]
         """
-        return Client._get(self)
+        return Client._get(self).json()
 
     def show_job(self, job_id):
         """
@@ -75,7 +75,7 @@ class JobsClient(Client):
 
         """
 
-        return Client._get(self, id=job_id)
+        return Client._get(self, id=job_id).json()
 
     def search_jobs(self, job_info):
         """

@@ -41,7 +41,7 @@ class LibraryClient(Client):
     def __show_item(self, library_id, item_id):
         url = self.gi._make_url(self, library_id, contents=True)
         url = '/'.join([url, item_id])
-        return Client._get(self, url=url)
+        return Client._get(self, url=url).json()
 
     def delete_library_dataset(self, library_id, dataset_id, purged=False):
         """
@@ -122,7 +122,7 @@ class LibraryClient(Client):
         """
         if folder_id is not None and name is not None:
             raise ValueError('Provide only one argument between name or folder_id, but not both')
-        library_contents = Client._get(self, id=library_id, contents=True)
+        library_contents = Client._get(self, id=library_id, contents=True).json()
         if folder_id is not None:
             folder = next((_ for _ in library_contents if _['type'] == 'folder' and _['id'] == folder_id), None)
             folders = [folder] if folder is not None else []
@@ -145,7 +145,7 @@ class LibraryClient(Client):
         """
         if library_id is not None and name is not None:
             raise ValueError('Provide only one argument between name or library_id, but not both')
-        libraries = Client._get(self, deleted=deleted)
+        libraries = Client._get(self, deleted=deleted).json()
         if library_id is not None:
             library = next((_ for _ in libraries if _['id'] == library_id), None)
             libraries = [library] if library is not None else []
@@ -162,7 +162,7 @@ class LibraryClient(Client):
 
         Return a list of JSON formatted dicts containing library details.
         """
-        return Client._get(self, id=library_id, contents=contents)
+        return Client._get(self, id=library_id, contents=contents).json()
 
     def _do_upload(self, **keywords):
         """
