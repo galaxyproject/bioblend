@@ -92,50 +92,21 @@ class Client(object):
     def _raw_get(self, id=None, deleted=False, contents=None, url=None,
                  params=None):
         """
-        Do a generic GET request, composing the url from the contents of the
-        arguments. Alternatively, an explicit ``url`` can be provided
-        to use for the request.
+        Do a GET request, composing the URL from ``id``, ``deleted`` and
+        ``contents``.  Alternatively, an explicit ``url`` can be provided.
 
-        This action often repeats itself in this library, so use this as a
-        generic method that can easily be replaced if it does not do what's
-        needed.
+        The request will optionally be retried as configured by
+        ``max_get_retries`` and ``get_retry_delay``: this offers some
+        resilience in the presence of temporary failures.
 
-        raises: ConnectionError (the one in this module)
+        **NOTE:** Galaxy sometimes temporarily returns an empty body
+        with HTTP 200 even when an API call went bad. For this reason,
+        this method keeps trying until the response can be decoded as
+        a valid JSON object, raising a ``ConnectionError``
+        otherwise. This has to be taken into account when an empty
+        response is acceptable (e.g., if this method is used to
+        download an empty dataset).
         """
-        if not url:
-            url = self.gi._make_url(self, module_id=id, deleted=deleted, contents=contents)
-        return self._raw_get_retry(url, params)
-
-    def _raw_get_retry(self, url, params):
-        """
-        Make a GET request to the given `url`.  Retry as configured by
-        `Client.max_get_retries` and `Client.get_retry_delay`.
-
-
-        Sometimes request failures are temporary.  We may want our client to
-        insist and keep retrying issueing a request periodically for a some
-        time, rather than throwing an error.  Also, Galaxy sometimes gets into a
-        bad state where it temporarily returns an empty body with HTTP 200 even
-        when an API call went bad.
-
-        This method lets bioblend retry a GET request as configured through
-        the class methods `max_get_retries` and `get_retry_delay`. The idea is
-        to let the client easily acquire some resistance to transient failures.
-
-        Raises:
-            ConnectionError
-            ValueError
-        """
-        # Why is this method in Client instead of GalaxyInstance?
-        # When some API calls go bad Galaxy returns HTTP 200 with an empty body
-        # or a text error message in the reply. To know whether there was a
-        # problem we need to parse the body -- which implies that we assume it's
-        # JSON and that we returned the parsed contents rather than a Request
-        # object. GalaxyInstance doesn't make any assumptions regarding the
-        # contents of the  the reply.  Instead, the body is parsed here in the
-        # Client class (`GalaxyInstance.make_get_request` returns a `Request`
-        # object). This kind of forces to put the logic here.
-
         attempts_left = self.max_get_retries()
         retry_delay = self.get_retry_delay()
         bb.log.debug("GET - attempts left: %s; retry delay: %s",
@@ -178,12 +149,6 @@ class Client(object):
         """
         return self._raw_get(id=id, deleted=deleted, contents=contents,
                              url=url, params=params).json()
-
-    def _get_retry(self, url, params):
-        """
-        Perform a :meth:`_raw_get_retry` and return the decoded JSON.
-        """
-        return self._raw_get_retry(url, params).json()
 
     def _post(self, payload, id=None, deleted=False, contents=None, url=None, files_attached=False):
         """
