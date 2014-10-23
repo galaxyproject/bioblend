@@ -138,7 +138,7 @@ class Client(object):
 
         attempts_left = self.max_get_retries()
         retry_delay = self.get_retry_delay()
-        bb.log.debug("Client._get_retry - attempts left: %s; retry delay: %s",
+        bb.log.debug("GET - attempts left: %s; retry delay: %s",
                      attempts_left, retry_delay)
         r = None
         while attempts_left > 0:
