@@ -107,6 +107,9 @@ class Client(object):
         response is acceptable (e.g., if this method is used to
         download an empty dataset).
         """
+        if not url:
+            url = self.gi._make_url(self, module_id=id, deleted=deleted,
+                                    contents=contents)
         attempts_left = self.max_get_retries()
         retry_delay = self.get_retry_delay()
         bb.log.debug("GET - attempts left: %s; retry delay: %s",
