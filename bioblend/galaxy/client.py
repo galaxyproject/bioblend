@@ -131,10 +131,11 @@ class Client(object):
                 else:
                     msg = "GET: error %s: %r" % (r.status_code, r.content)
             msg = "%s, %d attempts left" % (msg, attempts_left)
-            bb.log.info(msg)
             if attempts_left <= 0:
+                bb.log.error(msg)
                 raise ConnectionError(msg)
             else:
+                bb.log.warn(msg)
                 time.sleep(retry_delay)
 
     def _post(self, payload, id=None, deleted=False, contents=None, url=None, files_attached=False):
