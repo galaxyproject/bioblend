@@ -89,23 +89,17 @@ class Client(object):
         self.gi = galaxy_instance
         self.url = '/'.join([self.gi.url, self.module])
 
-    def _raw_get(self, id=None, deleted=False, contents=None, url=None,
-                 params=None):
+    def _get(self, id=None, deleted=False, contents=None, url=None,
+             params=None, json=True):
         """
         Do a GET request, composing the URL from ``id``, ``deleted`` and
         ``contents``.  Alternatively, an explicit ``url`` can be provided.
+        If ``json`` is set to ``True``, return a decoded JSON object
+        (and treat an empty or undecodable response as an error).
 
         The request will optionally be retried as configured by
         ``max_get_retries`` and ``get_retry_delay``: this offers some
         resilience in the presence of temporary failures.
-
-        **NOTE:** Galaxy sometimes temporarily returns an empty body
-        with HTTP 200 even when an API call went bad. For this reason,
-        this method keeps trying until the response can be decoded as
-        a valid JSON object, raising a ``ConnectionError``
-        otherwise. This has to be taken into account when an empty
-        response is acceptable (e.g., if this method is used to
-        download an empty dataset).
         """
         if not url:
             url = self.gi._make_url(self, module_id=id, deleted=deleted,
@@ -114,44 +108,35 @@ class Client(object):
         retry_delay = self.get_retry_delay()
         bb.log.debug("GET - attempts left: %s; retry delay: %s",
                      attempts_left, retry_delay)
-        r = None
+        msg = ''
         while attempts_left > 0:
             attempts_left -= 1
             try:
                 r = self.gi.make_get_request(url, params=params)
-                if r.status_code == 200 and r.content:
-                    return r
-                else:
-                    bb.log.info("GET request failed (response code: %s). %s attempts left",
-                                r.status_code, attempts_left)
-                    bb.log.debug("Response content: %s", r.content)
             except (requests.exceptions.ConnectionError, ProtocolError) as e:
-                if attempts_left <= 0:
-                    raise ConnectionError(e.message)  # raise client.ConnectionError
+                msg = e.message
+            else:
+                if r is None:
+                    msg = "GET: no response"
+                if r.status_code == 200:
+                    if not json:
+                        return r
+                    elif not r.content:
+                        msg = "GET: empty response"
+                    else:
+                        try:
+                            return r.json()
+                        except ValueError:
+                            msg = "GET: invalid JSON : %r" % (r.content,)
                 else:
-                    bb.log.warn("Error connecting to Galaxy: %s. Going to retry %s more times.", e, attempts_left)
-            except ValueError as e:
-                if attempts_left <= 0:
-                    raise
-                else:
-                    bb.log.warn("Received invalid JSON reply from Galaxy: %s. Going to retry %s more times.", e, attempts_left)
-            if attempts_left > 0:
+                    msg = "GET: error %s: %r" % (r.status_code, r.content)
+            msg = "%s, %d attempts left" % (msg, attempts_left)
+            if attempts_left <= 0:
+                bb.log.error(msg)
+                raise ConnectionError(msg)
+            else:
+                bb.log.warn(msg)
                 time.sleep(retry_delay)
-        if r is None:
-            msg = "Unable to issue request. gi.make_get_request returned None!"
-        elif r.status_code != 200:
-            msg = "Unexpected HTTP status code: %s" % r.status_code
-        else:
-            msg = "Empty reply from GET API call"
-        raise ConnectionError(msg, r.content if r else None)
-
-    def _get(self, id=None, deleted=False, contents=None, url=None,
-             params=None):
-        """
-        Perform a :meth:`_raw_get` and return the decoded JSON.
-        """
-        return self._raw_get(id=id, deleted=deleted, contents=contents,
-                             url=url, params=params).json()
 
     def _post(self, payload, id=None, deleted=False, contents=None, url=None, files_attached=False):
         """
