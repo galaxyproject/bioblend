@@ -4,16 +4,20 @@ An interface the clients should implement.
 This class is primarily a helper for the library and user code
 should not use it directly.
 """
+
+import json
+import time
+
 import requests
 try:
     # The following import will work only for Requests >= 2.4.0 and is
     # needed to workaround its "urllib3.exceptions.ProtocolError not
     # wrapped" bug: https://github.com/kennethreitz/requests/issues/2192
+    # pylint: disable=E0611,F0401
     from requests.packages.urllib3.exceptions import ProtocolError
+    # pylint: enable=E0611,F0401
 except ImportError:
-    ProtocolError = None
-import json
-import time
+    ProtocolError = None  # pylint: disable=C0103
 
 import bioblend as bb
 
@@ -27,7 +31,7 @@ class ConnectionError(Exception):
     @see: body attribute to see the content of the http response
     """
     def __init__(self, message, body=None):
-        self.message = message
+        super(ConnectionError, self).__init__(message)
         self.body = body
 
     def __str__(self):
@@ -67,12 +71,18 @@ class Client(object):
 
     @classmethod
     def get_retry_delay(cls):
-        """The delay (in seconds) to wait before retrying a failed GET request."""
+        """
+        The delay (in seconds) to wait before retrying a failed GET
+        request.
+        """
         return cls._get_retry_delay
 
     @classmethod
     def set_get_retry_delay(cls, value):
-        """Set the delay (in seconds) to wait before retrying a failed GET request. Default: 1"""
+        """
+        Set the delay (in seconds) to wait before retrying a failed GET
+        request. Default: 1
+        """
         if value < 0:
             raise ValueError("Retry delay must be >= 0 (got: %s)" % value)
         cls._get_retry_delay = value
@@ -82,9 +92,10 @@ class Client(object):
         """
         A generic Client interface defining the common fields.
 
-        All clients *must* define the following field (which will be used as part
-        of the URL composition (eg, http://<galaxy_instance>/api/libraries):
-        ``self.module = 'workflows' | 'libraries' | 'histories' | ...``
+        All clients *must* define the following field (which will be
+        used as part of the URL composition (e.g.,
+        ``http://<galaxy_instance>/api/libraries``): ``self.module =
+        'workflows' | 'libraries' | 'histories' | ...``
         """
         self.gi = galaxy_instance
         self.url = '/'.join([self.gi.url, self.module])
@@ -138,25 +149,26 @@ class Client(object):
                 bb.log.warn(msg)
                 time.sleep(retry_delay)
 
-    def _post(self, payload, id=None, deleted=False, contents=None, url=None, files_attached=False):
+    def _post(self, payload, id=None, deleted=False, contents=None, url=None,
+              files_attached=False):
         """
         Do a generic POST request, composing the url from the contents of the
         arguments. Alternatively, an explicit ``url`` can be provided to use
         for the request. ``payload`` must be a dict that contains additional
         request arguments which will be sent along with the request body.
-        The payload dict may contain file handles (in which case the files_attached
-        flag must be set to true).
+        The payload dict may contain file handles (in which case the
+        ``files_attached`` flag must be set to true).
 
-        The request body will be encoded in a JSON format if files_attached=False
-        or will be encoded in a multipart/form-data format if files_attached=True.
+        If ``files_attached`` is set to ``False``, the request body will be
+        JSON-encoded; otherwise, it will be encoded as multipart/form-data.
+
         The return value will contain the response body as a JSON object.
         """
         if not url:
-            url = self.gi._make_url(self, module_id=id, deleted=deleted, contents=contents)
-
-        r = self.gi.make_post_request(url, payload=payload, files_attached=files_attached)
-
-        return r
+            url = self.gi._make_url(self, module_id=id, deleted=deleted,
+                                    contents=contents)
+        return self.gi.make_post_request(url, payload=payload,
+                                         files_attached=files_attached)
 
     def _put(self, payload, id=None, url=None, params=None):
         """
@@ -165,27 +177,27 @@ class Client(object):
         for the request. ``payload`` must be a dict that contains additional
         request arguments which will be sent along with the request body.
 
-        The return value will html status code
+        This method returns the HTTP request object.
         """
         if not url:
             url = self.gi._make_url(self, module_id=id)
-
-        r = self.gi.make_put_request(url, payload=payload, params=params)
-
-        return r
+        return self.gi.make_put_request(url, payload=payload, params=params)
 
     def _delete(self, payload, id=None, deleted=False, contents=None, url=None):
         """
         Do a generic DELETE request, composing the url from the contents of the
         arguments. Alternatively, an explicit ``url`` can be provided to use
         for the request. ``payload`` must be a dict that can be converted
-        into a JSON object (which will be done whthin this method)
+        into a JSON object (which will be done within this method)
         """
         if not url:
-            url = self.gi._make_url(self, module_id=id, deleted=deleted, contents=contents)
+            url = self.gi._make_url(self, module_id=id, deleted=deleted,
+                                    contents=contents)
         payload = json.dumps(payload)
         r = self.gi.make_delete_request(url, payload=payload)
         if r.status_code == 200:
             return r.json()
         # @see self.body for HTTP response body
-        raise ConnectionError("Unexpected HTTP status code: %s" % r.status_code, body=r.text)
+        raise ConnectionError(
+            "Unexpected HTTP status code: %s" % r.status_code, body=r.text
+        )
