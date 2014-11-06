@@ -13,3 +13,9 @@ overview also available in `ABOUT.rst <./ABOUT.rst>`_.
 .. References/hyperlinks used above
 .. _CloudMan: http://usecloudman.org/
 .. _Galaxy: http://usegalaxy.org/
+
+
+.. image:: https://d2weczhvl823v0.cloudfront.net/afgane/bioblend/trend.png
+   :alt: Bitdeli badge
+   :target: https://bitdeli.com/free
+
