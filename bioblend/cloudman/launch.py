@@ -18,6 +18,49 @@ from bioblend.util import Bunch
 # Comment the following line if no logging at the prompt is desired
 # bioblend.set_stream_logger(__name__)
 
+def instance_types(cloud_name='generic'):
+    """
+    Return a list of dictionaries containing details about the available
+    instance types for the given `cloud_name`.
+
+    :type cloud_name: string
+    :param cloud_name: A name of the cloud for which the list of instance
+                       types will be returned. Valid values are: `aws`,
+                       `nectar`, `generic`.
+
+    :rtype: list
+    :return: A list of dictionaries describing instance types. Each dict will
+             contain the following keys: `name`, `model`, and `description`.
+    """
+    instance_list = []
+    if cloud_name.lower() == 'aws':
+        instance_list.append({"model": "c3.large",
+                              "name": "Compute optimized Large",
+                              "description": "2 vCPU/4GB RAM"})
+        instance_list.append({"model": "c3.2xlarge",
+                              "name": "Compute optimized 2xLarge",
+                              "description": "8 vCPU/15GB RAM"})
+        instance_list.append({"model": "c3.8xlarge",
+                              "name": "Compute optimized 8xLarge",
+                              "description": "32 vCPU/60GB RAM"})
+    elif cloud_name.lower() in ['nectar', 'generic']:
+        instance_list.append({"model": "m1.small",
+                              "name": "Small",
+                              "description": "1 vCPU / 4GB RAM"})
+        instance_list.append({"model": "m1.medium",
+                              "name": "Medium",
+                              "description": "2 vCPU / 8GB RAM"})
+        instance_list.append({"model": "m1.large",
+                              "name": "Large",
+                              "description": "4 vCPU / 16GB RAM"})
+        instance_list.append({"model": "m1.xlarge",
+                              "name": "Extra Large",
+                              "description": "8 vCPU / 32GB RAM"})
+        instance_list.append({"model": "m1.xxlarge",
+                              "name": "Extra-extra Large",
+                              "description": "16 vCPU / 64GB RAM"})
+    return instance_list
+
 
 class CloudManLauncher(object):
     def __init__(self, access_key, secret_key, cloud=None):
