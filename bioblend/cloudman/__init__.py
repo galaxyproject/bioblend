@@ -131,7 +131,7 @@ class CloudManConfig(object):
 
         :type cluster_type: string
         :param cluster_type: The ``type``, either 'Galaxy', 'Data', or
-                             'SGE', defines the type of cluster platform to initialize.
+                             'Test', defines the type of cluster platform to initialize.
 
         :type galaxy_data_option: string
         :param galaxy_data_option: The storage type to use for this instance.
@@ -228,7 +228,7 @@ class CloudManConfig(object):
             return "Instance type must not be null"
         elif self.password is None:
             return "Password must not be null"
-        elif self.cluster_type not in [None, 'SGE', 'Data', 'Galaxy']:
+        elif self.cluster_type not in [None, 'Test', 'Data', 'Galaxy', 'Shared_cluster']:
             return "Unrecognized cluster type ({0})".format(self.cluster_type)
         elif self.galaxy_data_option not in [None, '', 'custom-size', 'transient']:
             return "Unrecognized galaxy data option ({0})".format(self.galaxy_data_option)
@@ -479,7 +479,7 @@ class CloudManInstance(GenericVMInstance):
         Initialize CloudMan platform. This needs to be done before the cluster
         can be used.
 
-        The ``cluster_type``, either 'Galaxy', 'Data', or 'SGE', defines the type
+        The ``cluster_type``, either 'Galaxy', 'Data', or 'Test', defines the type
         of cluster platform to initialize.
         """
         if not self.initialized:
@@ -500,7 +500,7 @@ class CloudManInstance(GenericVMInstance):
         """
         Get the ``cluster type`` for this CloudMan instance. See the
         CloudMan docs about the available types. Returns a dictionary,
-        for example: ``{u'cluster_type': u'SGE'}``.
+        for example: ``{u'cluster_type': u'Test'}``.
         """
         cluster_type = self._make_get_request("cluster_type")
         if cluster_type['cluster_type']:
