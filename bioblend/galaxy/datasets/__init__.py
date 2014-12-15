@@ -48,9 +48,9 @@ class DatasetClient(Client):
 
         :type use_default_name: boolean
         :param use_default_name: If the use_default_name parameter is True, the exported
-                                 file will be saved as file_local_path/%s,
+                                 file will be saved as file_path/%s,
                                  where %s is the dataset name.
-                                 If use_default_name is False, file_local_path is assumed to
+                                 If use_default_name is False, file_path is assumed to
                                  contain the full file path including filename.
 
         :type wait_for_completion: boolean
