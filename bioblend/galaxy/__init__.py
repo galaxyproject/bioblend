@@ -73,6 +73,7 @@ class GalaxyInstance(GalaxyClient):
         self.jobs = jobs.JobsClient(self)
         self.forms = forms.FormsClient(self)
         self.ftpfiles = ftpfiles.FTPFilesClient(self)
+        self.tool_data = tool_data.ToolDataClient(self)
 
     @property
     def max_get_attempts(self):
