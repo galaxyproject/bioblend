@@ -5,7 +5,7 @@ import urlparse
 from bioblend.galaxy.client import Client
 from bioblend.galaxy import (libraries, histories, workflows, datasets, users,
                              genomes, tools, toolshed, config, visual, quotas,
-                             groups, datatypes, jobs, forms, ftpfiles)
+                             groups, datatypes, jobs, forms, ftpfiles, folders, tool_data)
 from bioblend.galaxyclient import GalaxyClient
 
 
