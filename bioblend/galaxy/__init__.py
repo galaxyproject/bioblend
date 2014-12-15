@@ -5,7 +5,7 @@ import urlparse
 from bioblend.galaxy.client import Client
 from bioblend.galaxy import (libraries, histories, workflows, datasets, users,
                              genomes, tools, toolshed, config, visual, quotas,
-                             groups, datatypes, jobs, forms, ftpfiles, folders, tool_data)
+                             groups, datatypes, jobs, forms, ftpfiles, folders, roles, tool_data)
 from bioblend.galaxyclient import GalaxyClient
 
 
@@ -69,6 +69,7 @@ class GalaxyInstance(GalaxyClient):
         self.visual = visual.VisualClient(self)
         self.quotas = quotas.QuotaClient(self)
         self.groups = groups.GroupsClient(self)
+        self.roles = roles.RolesClient(self)
         self.datatypes = datatypes.DatatypesClient(self)
         self.jobs = jobs.JobsClient(self)
         self.forms = forms.FormsClient(self)
