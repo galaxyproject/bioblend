@@ -125,14 +125,14 @@ class DatasetClient(Client):
             # noinspection PyUnboundLocalVariable
             raise DatasetTimeoutException("Waited too long for dataset to complete: %s" % dataset_id)
 
-    def show_stderr(self, dataset_id, deleted=False):
+    def show_stderr(self, dataset_id):
         """
         Display stderr output of a dataset.
         """
         res = urllib2.urlopen(self.url[:-len("/api/datasets/")+1]+"/datasets/"+dataset_id+"/stderr")
         return res.read()
 
-    def show_stdout(self, dataset_id, deleted=False):
+    def show_stdout(self, dataset_id):
         """
         Display stderr output of a dataset.
         """
