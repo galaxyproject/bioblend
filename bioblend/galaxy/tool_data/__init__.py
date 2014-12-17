@@ -14,23 +14,20 @@ class ToolDataClient(Client):
         """
         Displays a collection (list) of data tables.
 
-
         :rtype: list
         :return: A list of dicts with details on individual data tables.
                  For example::
 
                 [
                     {
-                        "model_class": "TabularToolDataTable", 
+                        "model_class": "TabularToolDataTable",
                         "name": "fasta_indexes"
-                    }, 
+                    },
                     {
-                        "model_class": "TabularToolDataTable", 
+                        "model_class": "TabularToolDataTable",
                         "name": "bwa_indexes"
                     }
-                } 
-
-
+                }
         """
         return Client._get(self)
 
@@ -41,22 +38,21 @@ class ToolDataClient(Client):
         :type data_table_id: string
         :param data_table_id: ID of the data table
 
-
         :rtype: dict
         :return: A description of data_table and its content
                  For example::
 
             {
-                "columns": ["value", "dbkey", "name", "path"], 
+                "columns": ["value", "dbkey", "name", "path"],
                 "fields": [
                     [
-                        "test id", "test", "test name", "/opt/galaxy-dist/tool-data/test/seq/test id.fa"
+                        "test id", "test", "test name",
+                        "/opt/galaxy-dist/tool-data/test/seq/test id.fa"
                     ]
-                ], 
-                "model_class": "TabularToolDataTable", 
+                ],
+                "model_class": "TabularToolDataTable",
                 "name": "all_fasta"
             }
-
         """
 
         return Client._get(self, id=data_table_id)
@@ -65,9 +61,10 @@ class ToolDataClient(Client):
         """
         Delete an item from a data table.
 
-        The ``values`` is a "|" separated list of column contents, there must be a value for all the columns of the data table
+        The ``values`` is a "|" separated list of column contents,
+        there must be a value for all the columns of the data table
         """
         payload = {}
         payload['values'] = values
-        
+
         return Client._delete(self, payload, id=data_table_id)
