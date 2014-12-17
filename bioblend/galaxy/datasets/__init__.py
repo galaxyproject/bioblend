@@ -134,7 +134,7 @@ class DatasetClient(Client):
 
     def show_stdout(self, dataset_id):
         """
-        Display stderr output of a dataset.
+        Display stdout output of a dataset.
         """
         res = urllib2.urlopen(self.url[:-len("/api/datasets/")+1]+"/datasets/"+dataset_id+"/stdout")
         return res.read()
