@@ -572,6 +572,20 @@ class TestHistory(GalaxyObjectsTestBase):
         self.assertEqual(self.hist.annotation, new_annotation)
         self.assertEqual(self.hist.tags, new_tags)
 
+    def test_show_dataset_stdout(self):
+        lds = self.lib.upload_data(FOO_DATA)
+        hda = self.hist.import_dataset(lds)
+        retrieved = self.hist.get_dataset(hda.id)
+        stdout = self.gi.datasets.show_stdout()
+        self.assertIsNotNone(stdout)
+
+    def test_show_dataset_stderr(self):
+        lds = self.lib.upload_data(FOO_DATA)
+        hda = self.hist.import_dataset(lds)
+        retrieved = self.hist.get_dataset(hda.id)
+        stderr = self.gi.datasets.show_stderr()
+        self.assertIsNotNone(stderr)
+
 
 @test_util.skip_unless_galaxy()
 class TestHDAContents(GalaxyObjectsTestBase):

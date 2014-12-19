@@ -8,6 +8,7 @@ import shlex
 import time
 import logging
 import urlparse
+import urllib2
 
 log = logging.getLogger(__name__)
 
@@ -123,6 +124,21 @@ class DatasetClient(Client):
         if raise_on_timeout:
             # noinspection PyUnboundLocalVariable
             raise DatasetTimeoutException("Waited too long for dataset to complete: %s" % dataset_id)
+
+    def show_stderr(self, dataset_id):
+        """
+        Display stderr output of a dataset.
+        """
+        res = urllib2.urlopen(self.url[:-len("/api/datasets/")+1]+"/datasets/"+dataset_id+"/stderr")
+        return res.read()
+
+    def show_stdout(self, dataset_id):
+        """
+        Display stdout output of a dataset.
+        """
+        res = urllib2.urlopen(self.url[:-len("/api/datasets/")+1]+"/datasets/"+dataset_id+"/stdout")
+        return res.read()
+
 
 
 class DatasetStateException(Exception):
