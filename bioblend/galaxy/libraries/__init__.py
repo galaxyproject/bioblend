@@ -95,9 +95,11 @@ class LibraryClient(Client):
 
     def create_folder(self, library_id, folder_name, description=None, base_folder_id=None):
         """
-        Create a folder in the given library and the base folder. If
-        ``base_folder_id`` is not provided, the new folder will be created
-        in the root folder.
+        Create a folder in a library.
+
+        :type base_folder_id: str
+        :param base_folder_id: id of the folder where to create the new folder.
+          If not provided, the root folder will be used
         """
         # Get root folder ID if no ID was provided
         if base_folder_id is None:
@@ -219,7 +221,10 @@ class LibraryClient(Client):
     def upload_file_from_url(self, library_id, file_url, folder_id=None, file_type='auto', dbkey='?'):
         """
         Upload a file to a library from a URL.
-        If ``folder_id`` is not specified, the file will be uploaded to the root folder.
+
+        :type folder_id: str
+        :param folder_id: id of the folder where to place the uploaded file.
+          If not provided, the root folder will be used
         """
         # TODO: Is there a better way of removing self from locals?
         vars = locals().copy()
@@ -229,7 +234,10 @@ class LibraryClient(Client):
     def upload_file_contents(self, library_id, pasted_content, folder_id=None, file_type='auto', dbkey='?'):
         """
         Upload pasted_contents to a data library as a new file.
-        If ``folder_id`` is not specified, the file will be placed in the root folder.
+
+        :type folder_id: str
+        :param folder_id: id of the folder where to place the uploaded file.
+          If not provided, the root folder will be used
         """
         vars = locals().copy()
         del vars['self']
@@ -239,7 +247,10 @@ class LibraryClient(Client):
                                     folder_id=None, file_type='auto', dbkey='?'):
         """
         Read local file contents from file_local_path and upload data to a library.
-        If ``folder_id`` is not specified, the file will be placed in the root folder.
+
+        :type folder_id: str
+        :param folder_id: id of the folder where to place the uploaded file.
+          If not provided, the root folder will be used
         """
         vars = locals().copy()
         del vars['self']
@@ -249,15 +260,20 @@ class LibraryClient(Client):
                                 file_type='auto', dbkey='?', link_data_only=None,
                                 roles=""):
         """
-        Upload a file to a library from a path on the server where Galaxy is running.
-        If ``folder_id`` is not provided, the file will be placed in the root folder.
+        Upload all files in the specified subdirectory of the Galaxy library
+        import directory to a library.
 
-        Note that for this method to work, the Galaxy instance you're connecting to
-        must have the configuration option ``library_import_dir`` set in ``universe_wsgi.ini``.
-        The value of that configuration option should be a base directory from where
-        more specific directories can be specified as part of the ``server_dir`` argument.
-        All and only the files (ie, no folders) specified by the ``server_dir`` argument
-        will be uploaded to the data library.
+        Note that for this method to work, the Galaxy instance you're
+        connecting to must have the configuration option ``library_import_dir``
+        set in ``config/galaxy.ini``. The value of that configuration option
+        should be a base directory from where more specific directories can be
+        specified as part of the ``server_dir`` argument.
+        All and only the files (i.e. no folders) specified by the
+        ``server_dir`` argument will be uploaded to the data library.
+
+        :type folder_id: str
+        :param folder_id: id of the folder where to place the uploaded files.
+          If not provided, the root folder will be used
         """
         vars = locals().copy()
         del vars['self']
@@ -267,16 +283,46 @@ class LibraryClient(Client):
                                       file_type="auto", dbkey="?", link_data_only=None,
                                       roles=""):
         """
-        Upload a file from filesystem paths already present on the Galaxy server.
+        Upload a set of files already present on the filesystem of the Galaxy
+        server to a library.
 
-        Provides API access for the 'Upload files from filesystem paths' approach.
+        Note that for this method to work, the Galaxy instance you're
+        connecting to must have the configuration option
+        ``allow_library_path_paste`` set to True in ``config/galaxy.ini``.
 
-        ``link_data_only`` -- whether to copy data into Galaxy. Setting to 'link_to_files'
-          symlinks data instead of copying
+        :type filesystem_paths: str
+        :param filesystem_paths: file paths on the Galaxy server to upload to
+          the library, one file per line
+
+        :type folder_id: str
+        :param folder_id: id of the folder where to place the uploaded files.
+          If not provided, the root folder will be used
+
+        :type link_data_only: str
+        :param link_data_only: either 'copy_files' (default) or
+          'link_to_files'. Setting to 'link_to_files' symlinks instead of
+          copying the files
         """
         vars = locals().copy()
         del vars['self']
         return self._do_upload(**vars)
+
+    def copy_from_dataset(self, library_id, dataset_id, folder_id=None, message=''):
+        """
+        Copy a Galaxy dataset into a library.
+
+        :type folder_id: str
+        :param folder_id: id of the folder where to place the uploaded files.
+          If not provided, the root folder will be used
+        """
+        if folder_id is None:
+            folder_id = self._get_root_folder_id(library_id)
+        payload = {}
+        payload['folder_id'] = folder_id
+        payload['create_type'] = 'file'
+        payload['from_hda_id'] = dataset_id
+        payload['ldda_message'] = message
+        return Client._post(self, payload, id=library_id, contents=True)
 
     def set_library_permissions(self, library_id, access_in=None, modify_in=None,
                                 add_in=None, manage_in=None):

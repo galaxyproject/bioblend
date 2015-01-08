@@ -25,7 +25,7 @@ before_script:
   - GALAXY_USER_EMAIL=${USER}@localhost.localdomain
   - GALAXY_USER_PASSWD=`date --rfc-3339=ns | md5sum | cut -f 1 -d ' '`
   - sed -i -e "s/^#master_api_key.*/master_api_key = $GALAXY_MASTER_API_KEY/" -e "s/^#admin_users.*/admin_users = $GALAXY_USER_EMAIL/" config/galaxy.ini
-  # Change Galaxy configuration needed by TestGalaxyObjects.TestLibraryContents test
+  # Change Galaxy configuration needed by some library tests
   - sed -i -e 's/^#allow_library_path_paste.*/allow_library_path_paste = True/' config/galaxy.ini
   # Start Galaxy
   - ./rolling_restart.sh
