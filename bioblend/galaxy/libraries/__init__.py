@@ -84,6 +84,15 @@ class LibraryClient(Client):
         """
         return self.__show_item(library_id, folder_id)
 
+    def _get_root_folder_id(self, library_id):
+        """
+        Find the root folder (i.e. '/') of a library.
+        """
+        folders = self.show_library(library_id=library_id, contents=True)
+        for f in folders:
+            if f['name'] == '/':
+                return f['id']
+
     def create_folder(self, library_id, folder_name, description=None, base_folder_id=None):
         """
         Create a folder in the given library and the base folder. If
@@ -92,11 +101,7 @@ class LibraryClient(Client):
         """
         # Get root folder ID if no ID was provided
         if base_folder_id is None:
-            folders = self.show_library(library_id=library_id, contents=True)
-            for f in folders:
-                if f['name'] == '/':
-                    base_folder_id = f['id']
-                    break
+            base_folder_id = self._get_root_folder_id(library_id)
         # Compose the payload
         payload = {}
         payload['name'] = folder_name
@@ -170,16 +175,10 @@ class LibraryClient(Client):
         This method should not be called directly but instead refer to the methods
         specific for the desired type of data upload.
         """
-        # If folder_id was not provided in the arguments, find the root folder ID
-        if keywords.get('folder_id', None) is None:
-            folders = self.show_library(library_id=keywords['library_id'], contents=True)
-            for f in folders:
-                if f['name'] == '/':
-                    folder_id = f['id']
-                    break
-        else:
-            folder_id = keywords['folder_id']
-
+        library_id = keywords['library_id']
+        folder_id = keywords.get('folder_id', None)
+        if folder_id is None:
+            folder_id = self._get_root_folder_id(library_id)
         files_attached = False
         # Compose the payload dict
         payload = {}
@@ -209,7 +208,7 @@ class LibraryClient(Client):
             payload["upload_option"] = "upload_paths"
             payload["filesystem_paths"] = keywords["filesystem_paths"]
 
-        r = Client._post(self, payload, id=keywords['library_id'], contents=True,
+        r = Client._post(self, payload, id=library_id, contents=True,
                          files_attached=files_attached)
 
         if payload.get('files_0|file_data', None) is not None:
@@ -267,7 +266,8 @@ class LibraryClient(Client):
     def upload_from_galaxy_filesystem(self, library_id, filesystem_paths, folder_id=None,
                                       file_type="auto", dbkey="?", link_data_only=None,
                                       roles=""):
-        """Upload a file from filesystem paths already present on the Galaxy server.
+        """
+        Upload a file from filesystem paths already present on the Galaxy server.
 
         Provides API access for the 'Upload files from filesystem paths' approach.
 
