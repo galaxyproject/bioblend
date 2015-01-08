@@ -35,7 +35,7 @@ class ConnectionError(Exception):
         self.body = body
 
     def __str__(self):
-        return "{0}: {1}".format(self.message, self.body)
+        return "{0}: {1}".format(self.args[0], self.body)
 
 
 class Client(object):
@@ -125,7 +125,7 @@ class Client(object):
             try:
                 r = self.gi.make_get_request(url, params=params)
             except (requests.exceptions.ConnectionError, ProtocolError) as e:
-                msg = e.message
+                msg = str(e)
             else:
                 if r is None:
                     msg = "GET: no response"
