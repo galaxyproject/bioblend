@@ -965,24 +965,30 @@ class Library(DatasetContainer):
         self.refresh()
         return self.get_dataset(res[0]['id'])
 
-    def upload_from_galaxy_fs(self, paths, folder=None, **kwargs):
+    def upload_from_galaxy_fs(self, paths, folder=None, link_data_only=None, **kwargs):
         """
         Upload data to this library from filesystem paths on the server.
 
         :type paths: str or :class:`~collections.Iterable` of str
         :param paths: server-side file paths from which data should be read
 
-        See :meth:`.upload_data` for info on other params; in
-        addition, this method accepts a ``link_data_only`` keyword
-        argument that, if set, instructs Galaxy to link files instead
-        of copying them.
+        :type link_data_only: str
+        :param link_data_only: either 'copy_files' (default) or
+          'link_to_files'. Setting to 'link_to_files' symlinks instead of
+          copying the files
+
+        :rtype: list of :class:`~.LibraryDataset`
+        :return: the dataset objects that represent the uploaded content
+
+        See :meth:`.upload_data` for info on other params.
         """
         fid = self.__pre_upload(folder)
         if isinstance(paths, basestring):
             paths = (paths,)
         paths = '\n'.join(paths)
         res = self.gi.gi.libraries.upload_from_galaxy_filesystem(
-            self.id, paths, folder_id=fid, **kwargs
+            self.id, paths, folder_id=fid, link_data_only=link_data_only,
+            **kwargs
             )
         if res is None:
             raise RuntimeError('upload_from_galaxy_filesystem: no reply')
