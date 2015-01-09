@@ -286,9 +286,12 @@ class HistoryClient(Client):
         """
         Delete a history.
 
-        If ``purge`` is set to ``True``, also purge the history. Note that for
-        the purge option to work, ``allow_user_dataset_purge`` option must be
-        set in the Galaxy's configuration file ``universe_wsgi.ini``
+        If ``purge`` is set to ``True``, also purge the history.
+
+        .. note::
+          For the purge option to work, the Galaxy instance must have the
+          ``allow_user_dataset_purge`` option set to ``True`` in the
+          ``config/galaxy.ini`` configuration file.
         """
         payload = {}
         if purge is True:

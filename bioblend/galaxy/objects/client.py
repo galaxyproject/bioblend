@@ -100,9 +100,6 @@ class ObjLibraryClient(ObjDatasetClient):
         """
         Create a data library with the properties defined in the arguments.
 
-        Requires ``allow_library_path_paste = True`` to be set in
-        Galaxy's configuration file ``universe_wsgi.ini``.
-
         :rtype: :class:`~.wrappers.Library`
         :return: the library just created
         """
@@ -202,9 +199,12 @@ class ObjHistoryClient(ObjDatasetClient):
         Note that the same name can map to multiple histories.
 
         :type purge: bool
-        :param purge: if :obj:`True`, also purge the history (requires
-          ``allow_user_dataset_purge = True`` to be set in Galaxy's
-          configuration file ``universe_wsgi.ini``)
+        :param purge: if ``True``, also purge the history
+
+        .. note::
+          For the purge option to work, the Galaxy instance must have the
+          ``allow_user_dataset_purge`` option set to ``True`` in the
+          ``config/galaxy.ini`` configuration file.
         """
         for id_ in self._select_ids(id_=id_, name=name):
             res = self.gi.histories.delete_history(id_, purge=purge)

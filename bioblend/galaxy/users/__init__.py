@@ -48,12 +48,12 @@ class UserClient(Client):
         Create a new Galaxy remote user.
 
         .. note::
-            For this method to work, the Galaxy instance must have
-            ``allow_user_creation`` and ``use_remote_user`` options set to ``True``
-            in the ``universe_wsgi.ini`` configuration file. Also note that setting
-            ``use_remote_user`` will require an upstream authentication proxy
-            server; however, if you do not have one, access to Galaxy via a browser
-            will not be possible.
+          For this method to work, the Galaxy instance must have the
+          ``allow_user_creation`` and ``use_remote_user`` options set to
+          ``True`` in the ``config/galaxy.ini`` configuration file. Also
+          note that setting ``use_remote_user`` will require an upstream
+          authentication proxy server; however, if you do not have one, access
+          to Galaxy via a browser will not be possible.
         """
         payload = {}
         payload['remote_user_email'] = user_email
@@ -64,10 +64,10 @@ class UserClient(Client):
         Create a new Galaxy user.
 
         .. note::
-            For this method to work, the Galaxy instance must have
-            ``allow_user_creation`` option set to ``True`` and
-            ``use_remote_user`` option set to ``False`` in the
-            ``universe_wsgi.ini`` configuration file.
+          For this method to work, the Galaxy instance must have the
+          ``allow_user_creation`` option set to ``True`` and
+          ``use_remote_user`` option set to ``False`` in the
+          ``config/galaxy.ini`` configuration file.
         """
         payload = {}
         payload['username'] = username
@@ -90,10 +90,8 @@ class UserClient(Client):
         :type user_id: string
         :param user_id: Encoded user ID
 
-
         :rtype: string
         :return: The api key for the user
-
         """
 
         url = self.gi._make_url(self, None)

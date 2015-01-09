@@ -263,13 +263,16 @@ class LibraryClient(Client):
         Upload all files in the specified subdirectory of the Galaxy library
         import directory to a library.
 
-        Note that for this method to work, the Galaxy instance you're
-        connecting to must have the configuration option ``library_import_dir``
-        set in ``config/galaxy.ini``. The value of that configuration option
-        should be a base directory from where more specific directories can be
-        specified as part of the ``server_dir`` argument.
-        All and only the files (i.e. no folders) specified by the
-        ``server_dir`` argument will be uploaded to the data library.
+        .. note::
+          For this method to work, the Galaxy instance must have the
+          ``library_import_dir`` option configured in the ``config/galaxy.ini``
+          configuration file.
+
+        :type server_dir: str
+        :param server_dir: relative path of the subdirectory of
+          ``library_import_dir`` to upload. All and only the files (i.e. no
+          subdirectories) contained in the specified directory will be
+          uploaded.
 
         :type folder_id: str
         :param folder_id: id of the folder where to place the uploaded files.
@@ -286,9 +289,10 @@ class LibraryClient(Client):
         Upload a set of files already present on the filesystem of the Galaxy
         server to a library.
 
-        Note that for this method to work, the Galaxy instance you're
-        connecting to must have the configuration option
-        ``allow_library_path_paste`` set to True in ``config/galaxy.ini``.
+        .. note::
+          For this method to work, the Galaxy instance must have the
+          ``allow_library_path_paste`` option set to ``True`` in the
+          ``config/galaxy.ini`` configuration file.
 
         :type filesystem_paths: str
         :param filesystem_paths: file paths on the Galaxy server to upload to

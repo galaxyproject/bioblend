@@ -969,6 +969,11 @@ class Library(DatasetContainer):
         """
         Upload data to this library from filesystem paths on the server.
 
+        .. note::
+          For this method to work, the Galaxy instance must have the
+          ``allow_library_path_paste`` option set to ``True`` in the
+          ``config/galaxy.ini`` configuration file.
+
         :type paths: str or :class:`~collections.Iterable` of str
         :param paths: server-side file paths from which data should be read
 
