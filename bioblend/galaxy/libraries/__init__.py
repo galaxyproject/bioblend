@@ -45,24 +45,22 @@ class LibraryClient(Client):
 
     def delete_library_dataset(self, library_id, dataset_id, purged=False):
         """
-        Deleta a library dataset in a data library
+        Delete a library dataset in a data library.
 
-        :type library_id: string
-        :param library_id: Encoded Library id where dataset is found in
+        :type library_id: str
+        :param library_id: library id where dataset is found in
 
-        :type dataset_id: string
-        :param dataset_id: Encoded dataset id to be deleted
+        :type dataset_id: str
+        :param dataset_id: if of the dataset to be deleted
 
-        :type purged: Boolean
+        :type purged: bool
         :param purged: Indicate that the dataset should be purged (permanently deleted)
 
         :rtype: dict
-        :return: A dictionary containing the datset id and whether the dataset has been deleted
+        :return: A dictionary containing the dataset id and whether the dataset has been deleted
                  For example::
 
                  {u'deleted': True, u'id': u'60e680a037f41974'}
-
-
         """
 
         url = self.gi._make_url(self, library_id, contents=True)

@@ -138,17 +138,17 @@ class HistoryClient(Client):
         Update history metadata information. Some of the attributes that can be
         modified are documented below.
 
-        :type history_id: string
+        :type history_id: str
         :param history_id: Encoded history ID
-        :type name: string
+        :type name: str
         :param name: Replace history name with the given string
-        :type annotation: string
+        :type annotation: str
         :param annotation: Replace history annotation with given string
-        :type deleted: boolean
+        :type deleted: bool
         :param deleted: Mark or unmark history as deleted
-        :type published: boolean
+        :type published: bool
         :param published: Mark or unmark history as published
-        :type importable: boolean
+        :type importable: bool
         :param importable: Mark or unmark history as importable
         :type tags: list
         :param tags: Replace history tags with the given list
@@ -165,15 +165,15 @@ class HistoryClient(Client):
         Update history dataset metadata. Some of the attributes that can be
         modified are documented below.
 
-        :type history_id: string
+        :type history_id: str
         :param history_id: Encoded history ID
-        :type name: string
+        :type name: str
         :param name: Replace history dataset name with the given string
-        :type annotation: string
+        :type annotation: str
         :param annotation: Replace history dataset annotation with given string
-        :type deleted: boolean
+        :type deleted: bool
         :param deleted: Mark or unmark history dataset as deleted
-        :type visible: boolean
+        :type visible: bool
         :param visible: Mark or unmark history dataset as visible
 
         :rtype: status_code (int)
@@ -188,13 +188,13 @@ class HistoryClient(Client):
         Update history dataset collection metadata. Some of the attributes that
         can be modified are documented below.
 
-        :type history_id: string
+        :type history_id: str
         :param history_id: Encoded history ID
-        :type name: string
+        :type name: str
         :param name: Replace history dataset collection name with the given string
-        :type deleted: boolean
+        :type deleted: bool
         :param deleted: Mark or unmark history dataset collection as deleted.
-        :type visible: boolean
+        :type visible: bool
         :param visible: Mark or unmark history dataset collection as visible.
 
         :rtype: status_code (int)
@@ -207,9 +207,9 @@ class HistoryClient(Client):
         """
         Create history tag
 
-        :type history_id: string
+        :type history_id: str
         :param history_id: Encoded history ID
-        :type tag: string
+        :type tag: str
         :param tag: Add tag to history
 
         :rtype: json object
