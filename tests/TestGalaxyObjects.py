@@ -524,14 +524,24 @@ class TestHistory(GalaxyObjectsTestBase):
         except ConnectionError:
             pass
 
-    def test_import_dataset(self):
-        lds = self.lib.upload_data(FOO_DATA)
-        self.assertEqual(len(self.hist.dataset_ids), 0)
-        hda = self.hist.import_dataset(lds)
+    def __check_dataset(self, hda):
         self.assertTrue(isinstance(hda, wrappers.HistoryDatasetAssociation))
         self.assertTrue(hda.container is self.hist)
         self.assertEqual(len(self.hist.dataset_ids), 1)
         self.assertEqual(self.hist.dataset_ids[0], hda.id)
+
+    def test_import_dataset(self):
+        lds = self.lib.upload_data(FOO_DATA)
+        self.assertEqual(len(self.hist.dataset_ids), 0)
+        hda = self.hist.import_dataset(lds)
+        self.__check_dataset(hda)
+
+    def test_upload_file(self):
+        with tempfile.NamedTemporaryFile(prefix='bioblend_test_') as f:
+            f.write(FOO_DATA)
+            f.flush()
+            hda = self.hist.upload_file(f.name)
+        self.__check_dataset(hda)
 
     def test_get_dataset(self):
         lds = self.lib.upload_data(FOO_DATA)

@@ -836,7 +836,7 @@ class History(DatasetContainer):
         self.refresh()
         return self.get_dataset(res['id'])
 
-    def upload_dataset(self, path, **kwargs):
+    def upload_file(self, path, **kwargs):
         """
         Upload the file specified by path to this history.
 
@@ -850,7 +850,10 @@ class History(DatasetContainer):
         :return: the uploaded dataset
         """
         out_dict = self.gi.gi.tools.upload_file(path, self.id, **kwargs)
+        self.refresh()
         return self.get_dataset(out_dict['outputs'][0]['id'])
+
+    upload_dataset = upload_file
 
     def export(self, gzip=True, include_hidden=False, include_deleted=False,
                wait=False):
