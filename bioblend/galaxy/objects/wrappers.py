@@ -855,6 +855,23 @@ class History(DatasetContainer):
 
     upload_dataset = upload_file
 
+    def paste_content(self, content, **kwargs):
+        """
+        Upload a string to a new dataset in this history.
+
+        :type content: str
+        :param content: content of the new dataset to upload
+
+        See :meth:`~bioblend.galaxy.tools.ToolClient.upload_file` for
+        the optional parameters.
+
+        :rtype: :class:`~.HistoryDatasetAssociation`
+        :return: the uploaded dataset
+        """
+        out_dict = self.gi.gi.tools.paste_content(content, self.id, **kwargs)
+        self.refresh()
+        return self.get_dataset(out_dict['outputs'][0]['id'])
+
     def export(self, gzip=True, include_hidden=False, include_deleted=False,
                wait=False):
         """
@@ -947,7 +964,7 @@ class Library(DatasetContainer):
         """
         fid = self.__pre_upload(folder)
         res = self.gi.gi.libraries.upload_file_from_url(
-            self.id, url, fid, **kwargs
+            self.id, url, folder_id=fid, **kwargs
             )
         self.refresh()
         return self.get_dataset(res[0]['id'])
@@ -963,7 +980,7 @@ class Library(DatasetContainer):
         """
         fid = self.__pre_upload(folder)
         res = self.gi.gi.libraries.upload_file_from_local_path(
-            self.id, path, fid, **kwargs
+            self.id, path, folder_id=fid, **kwargs
             )
         self.refresh()
         return self.get_dataset(res[0]['id'])
@@ -1009,6 +1026,22 @@ class Library(DatasetContainer):
             ]
         self.refresh()
         return new_datasets
+
+    def copy_from_dataset(self, hda, folder=None, message=''):
+        """
+        Copy a history dataset into this library.
+
+        :type hda: :class:`~.HistoryDatasetAssociation`
+        :param hda: history dataset to copy into the library
+
+        See :meth:`.upload_data` for info on other params.
+        """
+        fid = self.__pre_upload(folder)
+        res = self.gi.gi.libraries.copy_from_dataset(
+            self.id, hda.id, folder_id=fid, message=message
+            )
+        self.refresh()
+        return self.get_dataset(res['library_dataset_id'])
 
     def create_folder(self, name, description=None, base_folder=None):
         """

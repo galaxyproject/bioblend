@@ -122,7 +122,7 @@ class TestWrapper(unittest.TestCase):
 
     def test_taint(self):
         self.assertFalse(self.w.is_modified)
-        self.w.a = 111
+        self.w.a = 111  # pylint: disable=W0201
         self.assertTrue(self.w.is_modified)
 
     def test_serialize(self):
@@ -448,6 +448,15 @@ class TestLibrary(GalaxyObjectsTestBase):
         for ds, fn in zip(dss, fnames):
             self.assertEqual(ds.file_name, fn)
 
+    def test_copy_from_dataset(self):
+        hist = self.gi.histories.create('test_%s' % uuid.uuid4().hex)
+        try:
+            hda = hist.paste_content(FOO_DATA)
+            ds = self.lib.copy_from_dataset(hda)
+        finally:
+            hist.delete(purge=True)
+        self.__check_datasets([ds])
+
     def test_get_dataset(self):
         ds = self.lib.upload_data(FOO_DATA)
         retrieved = self.lib.get_dataset(ds.id)
@@ -541,6 +550,10 @@ class TestHistory(GalaxyObjectsTestBase):
             f.write(FOO_DATA)
             f.flush()
             hda = self.hist.upload_file(f.name)
+        self.__check_dataset(hda)
+
+    def test_paste_content(self):
+        hda = self.hist.paste_content(FOO_DATA)
         self.__check_dataset(hda)
 
     def test_get_dataset(self):
