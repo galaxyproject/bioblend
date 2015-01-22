@@ -30,13 +30,13 @@ see the `API documentation`_.
 
 BioBlend requires a number of Python libraries. These libraries are installed
 automatically when BioBlend itself is installed, regardless whether it is installed
-via `PyPi`_ or by running ``python setup.py install`` command. The current list of
+via PyPi_ or by running ``python setup.py install`` command. The current list of
 required libraries is always available from `setup.py`_ in the source code
 repository and it is also replicated here: ``requests>=1.1.0, poster,
 boto, pyyaml``.
 
 If you will also run tests locally, the following
-libraries are also required: ``nose, mock``. To install those, run
+libraries are also required: ``nose, mock``. To install those, run::
 
     $ python setup.py test
 
@@ -117,7 +117,7 @@ Testing
 =======
 If you'd like to do more than just a mock test, you'll want to point
 BioBlend to an instance of Galaxy. Do so by exporting the following
-two variables:
+two variables::
 
     $ export BIOBLEND_GALAXY_URL=http://127.0.0.1:8080
     $ export BIOBLEND_GALAXY_API_KEY=<API key>
@@ -152,6 +152,6 @@ Indices and tables
 * :ref:`search`
 
 .. References/hyperlinks used above
-.. _Git repository: https://github.com/galaxyproject/bioblend
-.. _PyPi: https://pypi.python.org/pypi
+.. _`Git repository`: https://github.com/galaxyproject/bioblend
+.. _PyPi: https://pypi.python.org/pypi/bioblend/
 .. _setup.py: https://github.com/galaxyproject/bioblend/blob/master/setup.py
