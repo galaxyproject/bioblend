@@ -19,7 +19,7 @@ Alternatively, you may install the most current source code from our `Git reposi
 or fork the project on Github. To install from source, do the following::
 
     # Clone the repository to a local directory
-    $ git clone https://github.com/afgane/bioblend.git
+    $ git clone https://github.com/galaxyproject/bioblend.git
     # Install the library
     $ cd bioblend
     $ python setup.py install
@@ -32,8 +32,13 @@ BioBlend requires a number of Python libraries. These libraries are installed
 automatically when BioBlend itself is installed, regardless whether it is installed
 via `PyPi`_ or by running ``python setup.py install`` command. The current list of
 required libraries is always available from `setup.py`_ in the source code
-repository and it is also replicated here: ``requests>=1.1.0, poster, simplejson,
-boto, nose, mock, pyyaml``.
+repository and it is also replicated here: ``requests>=1.1.0, poster,
+boto, pyyaml``.
+
+If you will also run tests locally, the following
+libraries are also required: ``nose, mock``. To install those, run
+
+    $ python setup.py test
 
 Usage
 =====
@@ -110,7 +115,14 @@ These configuration files can be used to specify access keys, for example.
 
 Testing
 =======
-The unit tests, in the ``tests`` folder, can be run using
+If you'd like to do more than just a mock test, you'll want to point
+BioBlend to an instance of Galaxy. Do so by exporting the following
+two variables:
+
+    $ export BIOBLEND_GALAXY_URL=http://127.0.0.1:8080
+    $ export BIOBLEND_GALAXY_API_KEY=<API key>
+
+The unit tests, stored in the ``tests`` folder, can be run using
 `nose <https://github.com/nose-devs/nose>`_. From the project root::
 
     $ nosetests
@@ -120,7 +132,7 @@ Getting help
 
 If you've run into issues, found a bug, or can't seem to find an answer to
 your question regarding the use and functionality of BioBlend, please use
-`Github Issues <https://github.com/afgane/bioblend/issues>`_ page to ask your
+`Github Issues <https://github.com/galaxyproject/bioblend/issues>`_ page to ask your
 question.
 
 Related documentation
@@ -140,6 +152,6 @@ Indices and tables
 * :ref:`search`
 
 .. References/hyperlinks used above
-.. _Git repository: https://github.com/afgane/bioblend
+.. _Git repository: https://github.com/galaxyproject/bioblend
 .. _PyPi: https://pypi.python.org/pypi
-.. _setup.py: https://github.com/afgane/bioblend/blob/master/setup.py
+.. _setup.py: https://github.com/galaxyproject/bioblend/blob/master/setup.py
