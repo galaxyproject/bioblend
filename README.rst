@@ -1,5 +1,5 @@
-.. image:: https://travis-ci.org/afgane/bioblend.png
-        :target: https://travis-ci.org/afgane/bioblend
+.. image:: https://travis-ci.org/galaxyproject/bioblend.png
+        :target: https://travis-ci.org/galaxyproject/bioblend
 
 .. image:: https://pypip.in/d/bioblend/badge.png
         :target: https://pypi.python.org/pypi/bioblend/
