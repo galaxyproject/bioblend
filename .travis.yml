@@ -19,12 +19,14 @@ before_script:
   - createdb -U postgres galaxy-travis
   # Change Galaxy configuration to use the newly created PostgreSQL database
   - sed -e 's|^#database_connection.*|database_connection = postgresql://postgres:@localhost/galaxy-travis|' config/galaxy.ini.sample > config/galaxy.ini
-  # Add a master API key and an admin user to Galaxy's galaxy.ini
+  # Setup Galaxy master API key and admin user
   - GALAXY_MASTER_API_KEY=`date --rfc-3339=ns | md5sum | cut -f 1 -d ' '`
   - GALAXY_USER=$USER
   - GALAXY_USER_EMAIL=${USER}@localhost.localdomain
   - GALAXY_USER_PASSWD=`date --rfc-3339=ns | md5sum | cut -f 1 -d ' '`
   - sed -i -e "s/^#master_api_key.*/master_api_key = $GALAXY_MASTER_API_KEY/" -e "s/^#admin_users.*/admin_users = $GALAXY_USER_EMAIL/" config/galaxy.ini
+  # Change configuration needed by many tests
+  - sed -i -e 's/^#allow_user_dataset_purge.*/allow_user_dataset_purge = True/' config/galaxy.ini
   # Change Galaxy configuration needed by some library tests
   - sed -i -e 's/^#allow_library_path_paste.*/allow_library_path_paste = True/' config/galaxy.ini
   # Start Galaxy

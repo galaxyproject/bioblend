@@ -49,12 +49,6 @@ if [ -z "$g_val" ]; then
   exit 1
 fi
 
-export BIOBLEND_GALAXY_URL=http://localhost:${p_val}
-GALAXY_MASTER_API_KEY=`date --rfc-3339=ns | md5sum | cut -f 1 -d ' '`
-GALAXY_USER=$USER
-GALAXY_USER_EMAIL=${USER}@localhost.localdomain
-GALAXY_USER_PASSWD=`date --rfc-3339=ns | md5sum | cut -f 1 -d ' '`
-
 # Install BioBlend
 cd ${b_val}
 python setup.py install --user || exit 1
@@ -71,8 +65,14 @@ hg status -X eggs -in0 | xargs -0 rm -f
 # Copy sample files and fetch new eggs
 ./scripts/common_startup.sh
 # Setup Galaxy master API key and admin user
+GALAXY_MASTER_API_KEY=`date --rfc-3339=ns | md5sum | cut -f 1 -d ' '`
+GALAXY_USER=$USER
+GALAXY_USER_EMAIL=${USER}@localhost.localdomain
+GALAXY_USER_PASSWD=`date --rfc-3339=ns | md5sum | cut -f 1 -d ' '`
 sed -e "s/^#master_api_key.*/master_api_key = $GALAXY_MASTER_API_KEY/" -e "s/^#admin_users.*/admin_users = $GALAXY_USER_EMAIL/" config/galaxy.ini.sample > config/galaxy.ini
-# Change configuration needed by TestGalaxyObjects.TestLibraryContents test
+# Change configuration needed by many tests
+sed -i -e 's/^#allow_user_dataset_purge.*/allow_user_dataset_purge = True/' config/galaxy.ini
+# Change configuration needed by some library tests
 sed -i -e 's/^#allow_library_path_paste.*/allow_library_path_paste = True/' config/galaxy.ini
 if [ -n "${p_val}" ]; then
   # Change only the first occurence of port number
@@ -86,6 +86,7 @@ cp -f universe.sqlite.empty_at_latest_migration database/universe.sqlite
 cp -f database/universe.sqlite universe.sqlite.empty_at_latest_migration
 
 # Use the master API key to create the admin user and get its API key
+export BIOBLEND_GALAXY_URL=http://localhost:${p_val}
 export BIOBLEND_GALAXY_API_KEY=`python ${b_val}/docs/examples/create_user_get_api_key.py $BIOBLEND_GALAXY_URL $GALAXY_MASTER_API_KEY $GALAXY_USER $GALAXY_USER_EMAIL $GALAXY_USER_PASSWD`
 echo "Created new Galaxy user $GALAXY_USER with email $GALAXY_USER_EMAIL , password $GALAXY_USER_PASSWD and API key $BIOBLEND_GALAXY_API_KEY"
 # Run the tests
