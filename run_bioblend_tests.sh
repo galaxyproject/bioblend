@@ -4,10 +4,13 @@ show_help () {
   echo "Usage:  $0 -g GALAXY_DIR [-b BIOBLEND_DIR] [-p PORT] [-t BIOBLEND_TESTS] [-r GALAXY_REV]
 
   Run tests for BioBlend. Useful for Continuous Integration testing.
+  *Please note* that this script modifies the configuration of the galaxy
+  instance target (-g), so only use it on 'test' or otherwise disposable
+  instances.
 
 Options:
   -g GALAXY_DIR
-      Path of the local Galaxy Mercurial repository.
+      Path of the local Galaxy Mercurial repository.  The configuration of this instance will be modified to facilitate testing.
   -b BIOBLEND_DIR
       Path of the local BioBlend sources. Defaults to the current directory.
   -p PORT
