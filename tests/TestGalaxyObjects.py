@@ -529,8 +529,9 @@ class TestHistory(GalaxyObjectsTestBase):
         self.assertFalse(hist.is_mapped)
         try:
             h = self.gi.histories.get(hist_id)
-            self.fail("Expected ConnectionError but GET returned %s" % str(h))
+            self.assertTrue(h.deleted)
         except ConnectionError:
+            # Galaxy up to release_2015.01.13 gives a ConnectionError
             pass
 
     def __check_dataset(self, hda):
