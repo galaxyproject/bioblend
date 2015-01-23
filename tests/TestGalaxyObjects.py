@@ -516,11 +516,9 @@ class TestHistory(GalaxyObjectsTestBase):
     def setUp(self):
         super(TestHistory, self).setUp()
         self.hist = self.gi.histories.create('test_%s' % uuid.uuid4().hex)
-        self.lib = self.gi.libraries.create('test_%s' % uuid.uuid4().hex)
 
     def tearDown(self):
         self.hist.delete(purge=True)
-        self.lib.delete()
 
     def test_delete(self):
         hist = self.gi.histories.create('test_%s' % uuid.uuid4().hex)
@@ -541,9 +539,11 @@ class TestHistory(GalaxyObjectsTestBase):
         self.assertEqual(self.hist.dataset_ids[0], hda.id)
 
     def test_import_dataset(self):
-        lds = self.lib.upload_data(FOO_DATA)
+        lib = self.gi.libraries.create('test_%s' % uuid.uuid4().hex)
+        lds = lib.upload_data(FOO_DATA)
         self.assertEqual(len(self.hist.dataset_ids), 0)
         hda = self.hist.import_dataset(lds)
+        lib.delete()
         self.__check_dataset(hda)
 
     def test_upload_file(self):
@@ -558,15 +558,16 @@ class TestHistory(GalaxyObjectsTestBase):
         self.__check_dataset(hda)
 
     def test_get_dataset(self):
-        lds = self.lib.upload_data(FOO_DATA)
-        hda = self.hist.import_dataset(lds)
+        hda = self.hist.paste_content(FOO_DATA)
         retrieved = self.hist.get_dataset(hda.id)
         self.assertEqual(hda.id, retrieved.id)
 
     def test_get_datasets(self):
         bnames = ['f%d.txt' % _ for _ in xrange(2)]
-        lds, _ = upload_from_fs(self.lib, bnames)
+        lib = self.gi.libraries.create('test_%s' % uuid.uuid4().hex)
+        lds, _ = upload_from_fs(lib, bnames)
         hdas = [self.hist.import_dataset(_) for _ in lds]
+        lib.delete()
         retrieved = self.hist.get_datasets()
         self.assertEqual(len(hdas), len(retrieved))
         self.assertEqual(set(_.id for _ in hdas), set(_.id for _ in retrieved))
@@ -603,14 +604,11 @@ class TestHDAContents(GalaxyObjectsTestBase):
     def setUp(self):
         super(TestHDAContents, self).setUp()
         self.hist = self.gi.histories.create('test_%s' % uuid.uuid4().hex)
-        self.lib = self.gi.libraries.create('test_%s' % uuid.uuid4().hex)
-        ld = self.lib.upload_data(FOO_DATA)
-        self.ds = self.hist.import_dataset(ld)
+        self.ds = self.hist.paste_content(FOO_DATA)
         self.ds.wait()
 
     def tearDown(self):
         self.hist.delete(purge=True)
-        self.lib.delete()
 
     def test_dataset_get_stream(self):
         for idx, c in enumerate(self.ds.get_stream(chunk_size=1)):
