@@ -54,15 +54,17 @@ class TestGalaxyTools(GalaxyTestBase.GalaxyTestBase):
         history = self.gi.histories.create_history(name="test_upload_file history")
 
         fn = get_abspath(os.path.join(os.pardir, "setup.py"))
+        file_name = "test1"
         tool_output = self.gi.tools.upload_file(
             fn,
             # First param could be a regular path also of course...
             history_id=history["id"],
-            file_name="test1",
+            file_name=file_name,
             dbkey="?",
             file_type="txt",
         )
         assert len(tool_output["outputs"]) == 1
+        assert tool_output['outputs'][0]['name'] == file_name
 
     @test_util.skip_unless_tool("random_lines1")
     def test_run_random_lines(self):
