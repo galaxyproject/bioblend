@@ -1,7 +1,7 @@
 #!/bin/sh
 
 show_help () {
-  echo "Usage:  $0 -g GALAXY_DIR [-b BIOBLEND_DIR] [-p PORT] [-t BIOBLEND_TESTS] [-r GALAXY_REV]
+  echo "Usage:  $0 -g GALAXY_DIR [-p PORT] [-t BIOBLEND_TESTS] [-r GALAXY_REV]
 
   Run tests for BioBlend. Useful for Continuous Integration testing.
   *Please note* that this script overwrites the sqlite database of the Galaxy
@@ -12,8 +12,6 @@ Options:
   -g GALAXY_DIR
       Path of the local Galaxy Mercurial repository. The sqlite database of
       this instance will be overwritten.
-  -b BIOBLEND_DIR
-      Path of the local BioBlend sources. Defaults to the current directory.
   -p PORT
       Port to use for the Galaxy server. Defaults to 8080.
   -t BIOBLEND_TESTS
@@ -29,14 +27,12 @@ get_abs_dirname () {
   echo $(cd "$1" && pwd)
 }
 
-b_val=$(get_abs_dirname .)
 p_val=8080
 while getopts 'hb:g:p:t:r:' option
 do
   case $option in
     h) show_help
        exit;;
-    b) b_val=$(get_abs_dirname $OPTARG);;
     g) g_val=$(get_abs_dirname $OPTARG);;
     p) p_val=$OPTARG;;
     t) t_val=$OPTARG;;
@@ -44,11 +40,6 @@ do
   esac
 done
 
-if [ -z "$b_val" ]; then
-  echo "Error: missing -b value."
-  show_help
-  exit 1
-fi
 if [ -z "$g_val" ]; then
   echo "Error: missing -g value."
   show_help
@@ -56,7 +47,8 @@ if [ -z "$g_val" ]; then
 fi
 
 # Install BioBlend
-cd ${b_val}
+BIOBLEND_DIR=$(get_abs_dirname $(dirname $0))
+cd ${BIOBLEND_DIR}
 python setup.py install --user || exit 1
 
 # Setup Galaxy
@@ -91,10 +83,10 @@ cp -f database/universe.sqlite universe.sqlite.empty_at_latest_migration
 export BIOBLEND_GALAXY_URL=http://localhost:${p_val}
 GALAXY_USER=$USER
 GALAXY_USER_PASSWD=`date --rfc-3339=ns | md5sum | cut -f 1 -d ' '`
-export BIOBLEND_GALAXY_API_KEY=`python ${b_val}/docs/examples/create_user_get_api_key.py $BIOBLEND_GALAXY_URL $GALAXY_MASTER_API_KEY $GALAXY_USER $GALAXY_USER_EMAIL $GALAXY_USER_PASSWD`
+export BIOBLEND_GALAXY_API_KEY=`python ${BIOBLEND_DIR}/docs/examples/create_user_get_api_key.py $BIOBLEND_GALAXY_URL $GALAXY_MASTER_API_KEY $GALAXY_USER $GALAXY_USER_EMAIL $GALAXY_USER_PASSWD`
 echo "Created new Galaxy user $GALAXY_USER with email $GALAXY_USER_EMAIL , password $GALAXY_USER_PASSWD and API key $BIOBLEND_GALAXY_API_KEY"
 # Run the tests
-cd ${b_val}
+cd ${BIOBLEND_DIR}
 if [ -n "${t_val}" ]; then
   python setup.py nosetests --tests ${t_val}
 else
