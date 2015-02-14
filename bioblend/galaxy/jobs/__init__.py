@@ -71,11 +71,25 @@ class JobsClient(Client):
                  u'tool_id': u'tab2fasta',
                  u'update_time': u'2014-03-01T16:17:31.930728'}
 
-
-
         """
 
         return Client._get(self, id=job_id)
+
+    def get_state(self, job_id):
+        """
+        Display the current state for a single job from current user.
+
+        :type job_id: string
+        :param job_id: Specific job ID
+
+        :rtype: string
+        :return: State of single job with the following being valid values:
+                 `new`, `queued`, `running`, `waiting`, `ok`. In case the
+                 state cannot be retrived, an empty string is returned.
+
+        .. versionadded:: 0.5.3
+        """
+        return self.show_job(job_id).get('state', '')
 
     def search_jobs(self, job_info):
         """
