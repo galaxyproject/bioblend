@@ -10,16 +10,16 @@ show_help () {
 
 Options:
   -g GALAXY_DIR
-      Path of the local Galaxy Mercurial repository. The sqlite database of
-      this instance will be overwritten.
+      Path of the local Galaxy git repository. The SQLite database of this
+      instance will be overwritten.
   -p PORT
       Port to use for the Galaxy server. Defaults to 8080.
   -t BIOBLEND_TESTS
       Subset of tests to run, e.g. 'tests/TestGalaxyObjects.py:TestHistory'.
       See 'man nosetests' for more information. Defaults to all tests.
   -r GALAXY_REV
-      Revision of the local Galaxy Mercurial repository to checkout. Defaults
-      to tip. Minimum is 4f3f92ca8e7488f4f5a90b8d57eddaeb3e1645d6 ."
+      Branch or commit of the local Galaxy git repository to checkout. Defaults
+      to the dev branch."
 }
 
 get_abs_dirname () {
@@ -28,6 +28,7 @@ get_abs_dirname () {
 }
 
 p_val=8080
+r_val=dev
 while getopts 'hb:g:p:t:r:' option
 do
   case $option in
@@ -56,8 +57,12 @@ cd ${g_val}
 # Stop Galaxy if it was running
 GALAXY_RUN_ALL=1 ./run.sh --daemon stop
 # Update repository (may change the sample files or the list of eggs)
-hg pull
-hg update ${r_val}
+git fetch
+git checkout ${r_val}
+if git show-ref -q --verify "refs/heads/${r_val}" 2>/dev/null; then
+  # ${r_val} is a branch
+  git pull
+fi
 # Setup Galaxy master API key and admin user
 TEMP_DIR=`mktemp -d 2>/dev/null || mktemp -d -t 'mytmpdir'`
 export GALAXY_CONFIG_FILE=$TEMP_DIR/galaxy.ini

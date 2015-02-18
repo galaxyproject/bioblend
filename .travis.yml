@@ -9,10 +9,9 @@ install:
 before_script:
   # Install Galaxy
   - cd $HOME
-  - wget https://bitbucket.org/galaxy/galaxy-central/get/tip.tar.bz2
-  - tar xvjf tip.tar.bz2 | tail
-  - ln -s galaxy-galaxy-central-* galaxy-central
-  - cd galaxy-central/
+  - wget https://github.com/galaxyproject/galaxy/archive/dev.tar.gz
+  - tar xvzf dev.tar.gz | tail
+  - cd galaxy-dev/
   # Copy sample files and fetch eggs
   - ./scripts/common_startup.sh
   # Create a PostgreSQL database for Galaxy. The default SQLite3 database makes test fail randomly because of "database locked" error.
