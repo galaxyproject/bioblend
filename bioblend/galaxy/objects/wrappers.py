@@ -206,8 +206,8 @@ class Workflow(Wrapper):
         object.__setattr__(self, 'tool_labels_to_ids', tool_labels_to_ids)
         dag, inv_dag = self._get_dag()
         heads, tails = set(dag), set(inv_dag)
-        object.__setattr__(self, '_dag', dag)
-        object.__setattr__(self, '_inv_dag', inv_dag)
+        object.__setattr__(self, 'dag', dag)
+        object.__setattr__(self, 'inv_dag', inv_dag)
         object.__setattr__(self, 'input_ids', heads - tails)
         assert self.input_ids == set(self.inputs)
         object.__setattr__(self, 'output_ids', tails - heads)
@@ -241,14 +241,6 @@ class Workflow(Wrapper):
                 dag.setdefault(head, set()).add(tail)
                 inv_dag.setdefault(tail, set()).add(head)
         return dag, inv_dag
-
-    @property
-    def dag(self):
-        return self._dag
-
-    @property
-    def inv_dag(self):
-        return self._inv_dag
 
     def sorted_step_ids(self):
         """
