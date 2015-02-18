@@ -159,8 +159,9 @@ class TestWorkflow(unittest.TestCase):
         self.assertEqual(
             self.wf.tool_labels_to_ids, {'Paste1': set(['573'])}
             )
-        self.assertEqual(self.wf.input_ids, set(['571', '572']))
-        self.assertEqual(self.wf.output_ids, set(['573']))
+        self.assertEqual(self.wf.data_input_ids, set(['571', '572']))
+        self.assertEqual(self.wf.source_ids, set(['571', '572']))
+        self.assertEqual(self.wf.sink_ids, set(['573']))
 
     def test_dag(self):
         inv_dag = {}

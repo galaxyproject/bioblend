@@ -208,9 +208,9 @@ class Workflow(Wrapper):
         heads, tails = set(dag), set(inv_dag)
         object.__setattr__(self, 'dag', dag)
         object.__setattr__(self, 'inv_dag', inv_dag)
-        object.__setattr__(self, 'input_ids', heads - tails)
-        assert self.input_ids == set(self.inputs)
-        object.__setattr__(self, 'output_ids', tails - heads)
+        object.__setattr__(self, 'source_ids', heads - tails)
+        assert self.data_input_ids == set(self.inputs)
+        object.__setattr__(self, 'sink_ids', tails - heads)
         object.__setattr__(self, 'missing_ids', missing_ids)
 
     @property
@@ -247,16 +247,16 @@ class Workflow(Wrapper):
         Return a topological sort of the workflow's DAG.
         """
         ids = []
-        input_ids = self.input_ids.copy()
+        source_ids = self.source_ids.copy()
         inv_dag = dict((k, v.copy()) for k, v in self.inv_dag.iteritems())
-        while input_ids:
-            head = input_ids.pop()
+        while source_ids:
+            head = source_ids.pop()
             ids.append(head)
             for tail in self.dag.get(head, []):
                 incoming = inv_dag[tail]
                 incoming.remove(head)
                 if not incoming:
-                    input_ids.add(tail)
+                    source_ids.add(tail)
         return ids
 
     @staticmethod
