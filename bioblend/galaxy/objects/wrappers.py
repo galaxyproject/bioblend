@@ -644,8 +644,6 @@ class LibraryContentInfo(ContentInfo):
     """
     def __init__(self, info_dict, gi=None):
         super(LibraryContentInfo, self).__init__(info_dict, gi=gi)
-        if self.id.startswith('F'):
-            object.__setattr__(self, 'id', self.id[1:])
 
     @property
     def gi_module(self):
@@ -1078,8 +1076,6 @@ class Folder(Wrapper):
 
     def __init__(self, f_dict, container_id, gi=None):
         super(Folder, self).__init__(f_dict, gi=gi)
-        if self.id.startswith('F'):  # folder id from library contents
-            object.__setattr__(self, 'id', self.id[1:])
         object.__setattr__(self, 'container_id', container_id)
 
     @property
