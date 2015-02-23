@@ -409,8 +409,9 @@ class TestLibrary(GalaxyObjectsTestBase):
         self.assertEqual(folder.container_id, self.lib.id)
         self.assertEqual(len(self.lib.content_infos), 2)
         self.assertEqual(len(self.lib.folder_ids), 2)
-        self.assertEqual(len(self.lib.dataset_ids), 0)
         self.assertTrue(folder.id in self.lib.folder_ids)
+        retrieved = self.lib.get_folder(folder.id)
+        self.assertEqual(folder.id, retrieved.id)
 
     def __check_datasets(self, dss):
         self.assertEqual(len(dss), len(self.lib.dataset_ids))
