@@ -757,7 +757,7 @@ class History(DatasetContainer):
     """
     Maps to a Galaxy history.
     """
-    BASE_ATTRS = DatasetContainer.BASE_ATTRS + ('annotation', 'state_ids', 'tags')
+    BASE_ATTRS = DatasetContainer.BASE_ATTRS + ('annotation', 'state', 'state_ids', 'tags')
     DS_TYPE = HistoryDatasetAssociation
     CONTENT_INFO_TYPE = HistoryContentInfo
     API_MODULE = 'histories'
