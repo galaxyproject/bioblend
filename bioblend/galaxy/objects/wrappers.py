@@ -757,7 +757,7 @@ class History(DatasetContainer):
     """
     Maps to a Galaxy history.
     """
-    BASE_ATTRS = DatasetContainer.BASE_ATTRS + ('annotation', 'state_ids', 'tags')
+    BASE_ATTRS = DatasetContainer.BASE_ATTRS + ('annotation', 'state', 'state_ids', 'state_details', 'tags')
     DS_TYPE = HistoryDatasetAssociation
     CONTENT_INFO_TYPE = HistoryContentInfo
     API_MODULE = 'histories'
@@ -887,6 +887,14 @@ class History(DatasetContainer):
         return self.gi.gi.histories.download_history(
             self.id, jeha_id, outf, chunk_size=chunk_size
             )
+
+    def get_status(self):
+        """
+        Returns the state of this history as a dictionary.
+        See :meth:`~bioblend.galaxy.histories.HistoryClient.get_status`
+        for return value info
+        """
+        return self.gi.gi.histories.get_status(self.id)
 
 
 class Library(DatasetContainer):
