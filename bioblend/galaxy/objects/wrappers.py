@@ -890,6 +890,14 @@ class History(DatasetContainer):
             self.id, jeha_id, outf, chunk_size=chunk_size
             )
 
+    def get_status(self):
+        """
+        Returns the state of this history as a dictionary.
+        See :meth:`~bioblend.galaxy.histories.HistoryClient.get_status`
+        for return value info
+        """
+        return self.gi.gi.histories.get_status(self.id)
+
 
 class Library(DatasetContainer):
     """
