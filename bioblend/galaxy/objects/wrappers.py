@@ -1065,7 +1065,7 @@ class Library(DatasetContainer):
         :return: the folder corresponding to ``f_id``
         """
         f_dict = self.gi.gi.libraries.show_folder(self.id, f_id)
-        return Folder(f_dict, self.id, gi=self.gi)
+        return Folder(f_dict, self, gi=self.gi)
 
 
 class Folder(Wrapper):
@@ -1074,13 +1074,22 @@ class Folder(Wrapper):
     """
     BASE_ATTRS = Wrapper.BASE_ATTRS + ('description', 'item_count')
 
-    def __init__(self, f_dict, container_id, gi=None):
+    def __init__(self, f_dict, container, gi=None):
         super(Folder, self).__init__(f_dict, gi=gi)
-        object.__setattr__(self, 'container_id', container_id)
+        object.__setattr__(self, 'container', container)
 
     @property
     def gi_module(self):
         return self.gi.libraries
+
+    @property
+    def container_id(self):
+        """
+        Deprecated property.
+
+        Id of the folder container. Use :attr:`.container.id` instead.
+        """
+        return self.container.id
 
 
 class Tool(Wrapper):

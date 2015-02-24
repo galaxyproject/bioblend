@@ -406,7 +406,7 @@ class TestLibrary(GalaxyObjectsTestBase):
         folder = self.lib.create_folder(name, description=desc)
         self.assertEqual(folder.name, name)
         self.assertEqual(folder.description, desc)
-        self.assertEqual(folder.container_id, self.lib.id)
+        self.assertTrue(folder.container is self.lib)
         self.assertEqual(len(self.lib.content_infos), 2)
         self.assertEqual(len(self.lib.folder_ids), 2)
         self.assertTrue(folder.id in self.lib.folder_ids)
