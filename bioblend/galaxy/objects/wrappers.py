@@ -1077,6 +1077,28 @@ class Folder(Wrapper):
     def __init__(self, f_dict, container, gi=None):
         super(Folder, self).__init__(f_dict, gi=gi)
         object.__setattr__(self, 'container', container)
+        self._set_parent_folder()
+
+    def _set_parent_folder(self):
+        """
+        Set the parent attribute to the folder indicated by 'parent_id'
+
+        Root folder will have no parent.
+        """
+        parent = None
+        parent_id = self.wrapped.get('parent_id',None)
+        if parent_id is not None:
+            if parent_id[0]!='F':
+                # older Galaxy versions strip the F
+                parent_id = u'F%s' % (parent_id)
+
+            try:
+                parent = self.container.get_folder(parent_id)
+            except bioblend.galaxy.client.ConnectionError:
+                # the get method will log this kind of error
+                #  but it's not critical
+                pass
+        object.__setattr__(self, 'parent', parent)
 
     @property
     def gi_module(self):
