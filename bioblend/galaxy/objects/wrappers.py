@@ -1102,8 +1102,7 @@ class Folder(Wrapper):
         Return folder indicated by 'parent_id'
         """
         parent_id = self.wrapped.get('parent_id',None)
-        # 'F21000...' seems to be a dummy ID (encoding of 0 or None?)
-        if parent_id is not None and parent_id != 'F2100007bb1a6035d':
+        if parent_id is not None:
             if parent_id[0]!='F':
                 # older Galaxy versions strip the F
                 parent_id = u'F%s' % (parent_id)
@@ -1111,10 +1110,10 @@ class Folder(Wrapper):
                 parent = self.container.get_folder(parent_id)
                 return parent
             except bioblend.galaxy.client.ConnectionError:
-                # Sometimes galaxy is returning a dummy parent_id 
-                # If it's not caught above, we deal with it here
-                # Clear the parent_id, so we don't spew errors
-                self.wrapped['broken_parent_id']=self.wrapped['parent_id']
+                # Depending on version, galaxy is returning a dummy parent_id 
+                #  for the root Folder
+                # Clear the parent_id, so we don't try to load it each time
+                self.wrapped['dummy_parent_id']=self.wrapped['parent_id']
                 self.wrapped['parent_id']=None
 
         # folder is root, return library
