@@ -1153,6 +1153,16 @@ class Folder(Wrapper):
         """
         return self.container.id
 
+    def refresh(self):
+        """
+        Re-fetch the attributes pertaining to this object.
+
+        Returns: self
+        """
+        f_dict = self.gi.gi.libraries.show_folder(self.container.id, self.id)
+        self.__init__(f_dict, self.container, gi=self.gi)
+        return self
+
 
 class Tool(Wrapper):
     """
