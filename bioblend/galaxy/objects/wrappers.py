@@ -1107,8 +1107,7 @@ class Folder(Wrapper):
                 # older Galaxy versions strip the F
                 parent_id = u'F%s' % (parent_id)
             try:
-                parent = self.container.get_folder(parent_id)
-                return parent
+                return self.container.get_folder(parent_id)
             except bioblend.galaxy.client.ConnectionError:
                 # Depending on version, galaxy is returning a dummy parent_id 
                 #  for the root Folder
@@ -1116,8 +1115,7 @@ class Folder(Wrapper):
                 self.wrapped['dummy_parent_id']=self.wrapped['parent_id']
                 self.wrapped['parent_id']=None
 
-        # folder is root, return library
-        return self.container
+        return None
 
     @property
     def gi_module(self):
