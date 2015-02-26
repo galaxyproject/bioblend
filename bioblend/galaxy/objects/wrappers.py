@@ -94,7 +94,7 @@ class Wrapper(object):
         The GalaxyInstance module that deals with objects of this type.
         """
         pass
-    
+
     @property
     def parent(self):
         """
@@ -626,7 +626,9 @@ class LibraryDataset(LibRelatedDataset):
     SRC = 'ld'
 
     def delete(self, purged=False):
-        self.gi.gi.libraries.delete_library_dataset(self.container.id, self.id, purged=purged)
+        self.gi.gi.libraries.delete_library_dataset(
+                self.container.id, self.id, purged=purged
+                )
         self.container.refresh()
         self.refresh()
 
@@ -1092,8 +1094,8 @@ class Folder(Wrapper):
         The root folder will have the library as a parent.
         """
         if self._cached_parent is None:
-            object.__setattr__(self, 
-                               '_cached_parent', 
+            object.__setattr__(self,
+                               '_cached_parent',
                                self._get_parent())
         return self._cached_parent
 
@@ -1101,19 +1103,19 @@ class Folder(Wrapper):
         """
         Return folder indicated by 'parent_id'
         """
-        parent_id = self.wrapped.get('parent_id',None)
+        parent_id = self.wrapped.get('parent_id', None)
         if parent_id is not None:
-            if parent_id[0]!='F':
+            if parent_id[0] != 'F':
                 # older Galaxy versions strip the F
                 parent_id = u'F%s' % (parent_id)
             try:
                 return self.container.get_folder(parent_id)
             except bioblend.galaxy.client.ConnectionError:
-                # Depending on version, galaxy is returning a dummy parent_id 
+                # Depending on version, galaxy is returning a dummy parent_id
                 #  for the root Folder
                 # Clear the parent_id, so we don't try to load it each time
-                self.wrapped['dummy_parent_id']=self.wrapped['parent_id']
-                self.wrapped['parent_id']=None
+                self.wrapped['dummy_parent_id'] = self.wrapped['parent_id']
+                self.wrapped['parent_id'] = None
 
         return None
 
