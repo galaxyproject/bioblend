@@ -261,6 +261,9 @@ class Workflow(Wrapper):
 
     @staticmethod
     def _build_step(step_dict, parent):
+        """
+        Return a Step object for the given parameters.
+        """
         try:
             stype = step_dict['type']
         except KeyError:
@@ -454,6 +457,13 @@ class Workflow(Wrapper):
         return self.gi.gi.workflows.export_workflow_json(self.id)
 
     def delete(self):
+        """
+        Delete this workflow.
+
+        .. warning::
+          Deleting a workflow is irreversible - all of the data from
+          the workflow will be permanently deleted.
+        """
         self.gi.workflows.delete(id_=self.id)
         self.unmap()
 
@@ -484,6 +494,9 @@ class Dataset(Wrapper):
 
     @abc.abstractproperty
     def _stream_url(self):
+        """
+        Return the URL to stream this dataset.
+        """
         pass
 
     def get_stream(self, chunk_size=None):
@@ -555,6 +568,22 @@ class Dataset(Wrapper):
         return self
 
     def wait(self, polling_interval=POLLING_INTERVAL, break_on_error=True):
+        """
+        Wait for this dataset to come out of the pending states.
+
+        :type polling_interval: float
+        :param polling_interval: polling interval in seconds
+
+        :type break_on_error: bool
+        :param break_on_error: if :obj:`True`, raise a RuntimeError exception if
+          the dataset ends in the 'error' state.
+
+        .. warning::
+
+          This is a blocking operation that can take a very long time. Also,
+          note that this method does not return anything; however, this dataset
+          is refreshed (possibly multiple times) during the execution.
+        """
         self.gi._wait_datasets([self], polling_interval=polling_interval,
                                break_on_error=break_on_error)
 
@@ -583,6 +612,9 @@ class HistoryDatasetAssociation(Dataset):
         return "%s/%s/display" % (base_url, self.id)
 
     def delete(self):
+        """
+        Delete this dataset.
+        """
         self.gi.gi.histories.delete_dataset(self.container.id, self.id)
         self.container.refresh()
         self.refresh()
@@ -590,6 +622,7 @@ class HistoryDatasetAssociation(Dataset):
 
 class LibRelatedDataset(Dataset):
     """
+    Base class for LibraryDatasetDatasetAssociation and LibraryDataset classes.
     """
 
     def __init__(self, ds_dict, container, gi=None):
@@ -619,6 +652,12 @@ class LibraryDataset(LibRelatedDataset):
     SRC = 'ld'
 
     def delete(self, purged=False):
+        """
+        Delete this library dataset.
+
+        :type purged: bool
+        :param purged: if ``True``, also purge (permanently delete) the dataset
+        """
         self.gi.gi.libraries.delete_library_dataset(self.container.id, self.id, purged=purged)
         self.container.refresh()
         self.refresh()
@@ -685,6 +724,9 @@ class DatasetContainer(Wrapper):
 
     @property
     def dataset_ids(self):
+        """
+        Return the ids of the contained datasets.
+        """
         return [_.id for _ in self.content_infos if _.type == 'file']
 
     def preview(self):
@@ -801,6 +843,17 @@ class History(DatasetContainer):
         return self
 
     def delete(self, purge=False):
+        """
+        Delete this history.
+
+        :type purge: bool
+        :param purge: if ``True``, also purge (permanently delete) the history
+
+        .. note::
+          For the purge option to work, the Galaxy instance must have the
+          ``allow_user_dataset_purge`` option set to ``True`` in the
+          ``config/galaxy.ini`` configuration file.
+        """
         self.gi.histories.delete(id_=self.id, purge=purge)
         self.unmap()
 
@@ -909,13 +962,22 @@ class Library(DatasetContainer):
 
     @property
     def folder_ids(self):
+        """
+        Return the ids of the contained folders.
+        """
         return [_.id for _ in self.content_infos if _.type == 'folder']
 
     def delete(self):
+        """
+        Delete this library.
+        """
         self.gi.libraries.delete(id_=self.id)
         self.unmap()
 
     def __pre_upload(self, folder):
+        """
+        Return the id of the given folder, after sanity checking.
+        """
         if not self.is_mapped:
             raise RuntimeError('library is not mapped to a Galaxy object')
         return None if folder is None else folder.id

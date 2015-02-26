@@ -135,12 +135,13 @@ class ToolClient(Client):
         ``history_id``.
 
         :type content: str
-        :param content: content of the new dataset to upload
+        :param content: content of the new dataset to upload or a list of URLs
+          (one per line) to upload
 
         :type history_id: str
         :param history_id: id of the history where to upload the content
 
-        See :meth:`upload_file` for the optional parameters.
+        See :meth:`upload_file` for the optional parameters (except file_name).
         """
         payload = self._upload_payload(history_id, **kwds)
         payload["files_0|url_paste"] = content

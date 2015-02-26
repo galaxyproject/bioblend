@@ -199,7 +199,7 @@ class ObjHistoryClient(ObjDatasetClient):
         Note that the same name can map to multiple histories.
 
         :type purge: bool
-        :param purge: if ``True``, also purge the history
+        :param purge: if ``True``, also purge (permanently delete) the history
 
         .. note::
           For the purge option to work, the Galaxy instance must have the

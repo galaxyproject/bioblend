@@ -96,8 +96,8 @@ class GalaxyInstance(object):
         :param polling_interval: polling interval in seconds
 
         :type break_on_error: bool
-        :param break_on_error: if :obj:`True`, break as soon as at least
-          one of the datasets is in the 'error' state.
+        :param break_on_error: if :obj:`True`, raise a RuntimeError exception as
+          soon as at least one of the datasets is in the 'error' state.
 
         .. warning::
 
