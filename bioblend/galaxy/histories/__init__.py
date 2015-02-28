@@ -13,7 +13,6 @@ class HistoryClient(Client):
 
     def __init__(self, galaxy_instance):
         self.module = 'histories'
-        self.galaxy_instance = galaxy_instance
         super(HistoryClient, self).__init__(galaxy_instance)
 
     def create_history(self, name=None):
@@ -259,7 +258,7 @@ class HistoryClient(Client):
         Download a ``dataset_id`` from history with ``history_id`` to a
         file on the local file system, saving it to ``file_path``.
         """
-        dc = DatasetClient(self.galaxy_instance)
+        dc = DatasetClient(self.gi)
         return dc.download_dataset(dataset_id, file_path=file_path,
                                    use_default_filename=use_default_filename,
                                    file_ext=to_ext)
