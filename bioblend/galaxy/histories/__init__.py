@@ -3,12 +3,9 @@ Contains possible interactions with the Galaxy Histories
 """
 import bioblend
 from bioblend.galaxy.client import Client
+from bioblend.galaxy.datasets import DatasetClient
 
-import os
 import re
-import shutil
-import urlparse
-import urllib2
 import time
 
 
@@ -16,6 +13,7 @@ class HistoryClient(Client):
 
     def __init__(self, galaxy_instance):
         self.module = 'histories'
+        self.galaxy_instance = galaxy_instance
         super(HistoryClient, self).__init__(galaxy_instance)
 
     def create_history(self, name=None):
@@ -261,26 +259,10 @@ class HistoryClient(Client):
         Download a ``dataset_id`` from history with ``history_id`` to a
         file on the local file system, saving it to ``file_path``.
         """
-        # TODO: Outsource to DatasetClient.download_dataset() to replace most of this.
-        meta = self.show_dataset(history_id, dataset_id)
-        d_type = to_ext
-        if d_type is None and 'file_ext' in meta:
-            d_type = meta['file_ext']
-        elif d_type is None and 'data_type' in meta:
-            d_type = meta['data_type']
-
-        # TODO: Download this via the REST API. api/datasets/<dataset_id>/display
-        download_url = 'datasets/' + meta['id'] + '/display?to_ext=' + d_type
-        url = urlparse.urljoin(self.gi.base_url, download_url)
-
-        req = urllib2.urlopen(url)
-        if use_default_filename:
-            file_local_path = os.path.join(file_path, meta['name'])
-        else:
-            file_local_path = file_path
-
-        with open(file_local_path, 'wb') as fp:
-            shutil.copyfileobj(req, fp)
+        dc = DatasetClient(self.galaxy_instance)
+        return dc.download_dataset(dataset_id, file_path=file_path,
+                                   use_default_filename=use_default_filename,
+                                   file_ext=to_ext)
 
     def delete_history(self, history_id, purge=False):
         """

@@ -33,7 +33,7 @@ class DatasetClient(Client):
         return Client._get(self, id=dataset_id, deleted=deleted, params=params)
 
     def download_dataset(self, dataset_id, file_path=None, use_default_filename=True,
-                         wait_for_completion=False, maxwait=12000):
+                         wait_for_completion=False, maxwait=12000, file_ext=None):
         """
         Downloads the dataset identified by 'id'.
 
@@ -62,6 +62,11 @@ class DatasetClient(Client):
         :param maxwait: Time (in seconds) to wait for dataset to complete.
                         If the dataset state is not complete within this time, a DatasetTimeoutException will be thrown.
 
+        :type file_ext: str
+        :param file_ext: Extension to request from Galaxy. Will default to
+                         dataset file_ext value. Provided for backwards
+                         compatability with HistoryClient.download_dataset()
+
         :rtype: dict
         :return: If a file_path argument is not provided, returns a dict containing the file_content.
                  Otherwise returns nothing.
@@ -74,8 +79,9 @@ class DatasetClient(Client):
             raise DatasetStateException("Dataset not ready. Dataset id: %s, current state: %s" % (dataset_id, dataset['state']))
 
         # Currently the Datasets REST API does not provide the download URL, so we construct it
-        file_ext = dataset.get('file_ext', dataset['data_type'])
-        download_url = 'datasets/' + dataset_id + '/display?to_ext=' + file_ext
+        if file_ext is None:
+            file_ext = dataset.get('file_ext', dataset['data_type'])
+        download_url = dataset['url'] + '/display?to_ext=' + file_ext
         url = urlparse.urljoin(self.gi.base_url, download_url)
 
         # Don't use self.gi.make_get_request as currently the download API does not require a key
@@ -101,6 +107,9 @@ class DatasetClient(Client):
 
             with open(file_local_path, 'wb') as fp:
                 fp.write(r.content)
+
+            # Return location file was saved to
+            return file_local_path
 
     def _is_dataset_complete(self, dataset_id):
         dataset = self.show_dataset(dataset_id)
