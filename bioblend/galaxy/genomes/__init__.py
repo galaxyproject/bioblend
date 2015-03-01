@@ -20,6 +20,21 @@ class GenomeClient(Client):
     def show_genome(self, id, num=None, chrom=None, low=None, high=None):
         """
         Returns information about build <id>
+
+        :type id: str
+        :param id: Genome build ID to use
+
+        :type num: str
+        :param num: num
+
+        :type chrom: str
+        :param chrom: chrom
+
+        :type low: str
+        :param low: low
+
+        :type high: str
+        :param high: high
         """
         params = {}
         if num:
@@ -32,29 +47,38 @@ class GenomeClient(Client):
             params['high'] = high
         return Client._get(self, id, params)
 
-    def install_genome(self, func='download', source=None, dbkey=None, ncbi_name=None, ensembl_dbkey=None, url_dbkey=None, indexers=None):
+    def install_genome(self, func='download', source=None, dbkey=None,
+                       ncbi_name=None, ensembl_dbkey=None, url_dbkey=None,
+                       indexers=None):
         """
         Download and/or index a genome.
 
-        Parameters::
 
-            dbkey           DB key of the build to download, ignored unless 'UCSC' is specified as the source
-            ncbi_name       NCBI's genome identifier, ignored unless NCBI is specified as the source
-            ensembl_dbkey   Ensembl's genome identifier, ignored unless Ensembl is specified as the source
-            url_dbkey       DB key to use for this build, ignored unless URL is specified as the source
-            source          Data source for this build. Can be: UCSC, Ensembl, NCBI, URL
-            indexers        POST array of indexers to run after downloading (indexers[] = first, indexers[] = second, ...)
-            func            Allowed values:
-                            'download'  Download and index
-                            'index'     Index only
+        :type dbkey: str
+        :param dbkey: DB key of the build to download, ignored unless 'UCSC' is specified as the source
 
-        Returns::
+        :type ncbi_name: str
+        :param ncbi_name: NCBI's genome identifier, ignored unless NCBI is specified as the source
 
-            If no error:
-            dict( status: 'ok', job: <job ID> )
+        :type ensembl_dbkey: str
+        :param ensembl_dbkey: Ensembl's genome identifier, ignored unless Ensembl is specified as the source
 
-            If error:
-            dict( status: 'error', error: <error message> )
+        :type url_dbkey: str
+        :param url_dbkey: DB key to use for this build, ignored unless URL is specified as the source
+
+        :type source: str
+        :param source: Data source for this build. Can be: UCSC, Ensembl, NCBI, URL
+
+        :type indexers: list
+        :param indexers: POST array of indexers to run after downloading (indexers[] = first, indexers[] = second, ...)
+
+        :type func: str
+        :param func: Allowed values: 'download', Download and index; 'index', Index only
+
+        :rtype: dict
+        :return: dict( status: 'ok', job: <job ID> )
+                 If error:
+                 dict( status: 'error', error: <error message> )
         """
         payload = {}
         if source:

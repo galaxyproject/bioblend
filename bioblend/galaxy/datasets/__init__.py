@@ -23,7 +23,13 @@ class DatasetClient(Client):
         Display information about and/or content of a dataset. This can be a
         history or a library dataset.
 
-        :type hda_ldda: string
+        :type dataset_id: str
+        :param dataset_id: Encoded Dataset ID
+
+        :type deleted: bool
+        :param deleted: Whether to return results for a deleted dataset
+
+        :type hda_ldda: str
         :param hda_ldda: Whether to show a history dataset ('hda' - the default) or library
                          dataset ('ldda').
         """
@@ -37,18 +43,18 @@ class DatasetClient(Client):
         """
         Downloads the dataset identified by 'id'.
 
-        :type dataset_id: string
+        :type dataset_id: str
         :param dataset_id: Encoded Dataset ID
 
-        :type file_path: string
+        :type file_path: str
         :param file_path: If the file_path argument is provided, the dataset will be streamed to disk
                           at that path (Should not contain filename if use_default_name=True).
                           If the file_path argument is not provided, the dataset content is loaded into memory
                           and returned by the method (Memory consumption may be heavy as the entire file
                           will be in memory).
 
-        :type use_default_name: boolean
-        :param use_default_name: If the use_default_name parameter is True, the exported
+        :type use_default_filename: boolean
+        :param use_default_filename: If the use_default_name parameter is True, the exported
                                  file will be saved as file_path/%s,
                                  where %s is the dataset name.
                                  If use_default_name is False, file_path is assumed to
@@ -137,6 +143,9 @@ class DatasetClient(Client):
     def show_stderr(self, dataset_id):
         """
         Display stderr output of a dataset.
+
+        :type dataset_id: str
+        :param dataset_id: Encoded Dataset ID
         """
         res = urllib2.urlopen(self.url[:-len("/api/datasets/")+1]+"/datasets/"+dataset_id+"/stderr")
         return res.read()
@@ -144,6 +153,9 @@ class DatasetClient(Client):
     def show_stdout(self, dataset_id):
         """
         Display stdout output of a dataset.
+
+        :type dataset_id: str
+        :param dataset_id: Encoded Dataset ID
         """
         res = urllib2.urlopen(self.url[:-len("/api/datasets/")+1]+"/datasets/"+dataset_id+"/stdout")
         return res.read()
