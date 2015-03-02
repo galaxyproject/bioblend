@@ -64,11 +64,16 @@ if git show-ref -q --verify "refs/heads/${r_val}" 2>/dev/null; then
   git pull
 fi
 # Setup Galaxy master API key and admin user
+if [ -f universe_wsgi.ini.sample ]; then
+  GALAXY_SAMPLE_CONFIG_FILE=universe_wsgi.ini.sample
+else
+  GALAXY_SAMPLE_CONFIG_FILE=config/galaxy.ini.sample
+fi
 TEMP_DIR=`mktemp -d 2>/dev/null || mktemp -d -t 'mytmpdir'`
 export GALAXY_CONFIG_FILE=$TEMP_DIR/galaxy.ini
 GALAXY_MASTER_API_KEY=`date --rfc-3339=ns | md5sum | cut -f 1 -d ' '`
 GALAXY_USER_EMAIL=${USER}@localhost.localdomain
-sed -e "s/^#master_api_key.*/master_api_key = $GALAXY_MASTER_API_KEY/" -e "s/^#admin_users.*/admin_users = $GALAXY_USER_EMAIL/" config/galaxy.ini.sample > $GALAXY_CONFIG_FILE
+sed -e "s/^#master_api_key.*/master_api_key = $GALAXY_MASTER_API_KEY/" -e "s/^#admin_users.*/admin_users = $GALAXY_USER_EMAIL/" $GALAXY_SAMPLE_CONFIG_FILE > $GALAXY_CONFIG_FILE
 # Change configuration needed by many tests
 sed -i -e 's/^#allow_user_dataset_purge.*/allow_user_dataset_purge = True/' $GALAXY_CONFIG_FILE
 # Change configuration needed by some library tests
