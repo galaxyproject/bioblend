@@ -68,10 +68,10 @@ class ToolClient(Client):
         :type tool_id: str
         :param tool_id: id of the requested tool
 
-        :type io_details: boolean
+        :type io_details: bool
         :param io_details: if True, get also input and output details
 
-        :type link_details: boolean
+        :type link_details: bool
         :param link_details: if True, get also link details
         """
         params = {}
@@ -83,6 +83,12 @@ class ToolClient(Client):
         """
         Runs tool specified by ``tool_id`` in history indicated
         by ``history_id`` with inputs from ``dict`` ``tool_inputs``.
+
+        :type history_id: str
+        :param history_id: encoded ID of the history in which to run the tool
+
+        :type tool_id: str
+        :param tool_id: ID of the tool to be run
 
         :type tool_inputs: dict
         :param tool_inputs: dictionary of input datasets and parameters
@@ -113,11 +119,10 @@ class ToolClient(Client):
         :param history_id: id of the history where to upload the file
 
         :type file_name: str
-        :param file_name: (optional) name of the new history dataset
+        :param file_name: name of the new history dataset
 
         :type file_type: str
-        :param file_type: (optional) Galaxy datatype for the new dataset,
-          default is auto
+        :param file_type: Galaxy datatype for the new dataset, default is auto
 
         :type dbkey: str
         :param dbkey: (optional) genome dbkey

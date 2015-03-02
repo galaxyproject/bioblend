@@ -53,14 +53,14 @@ class DatasetClient(Client):
                           and returned by the method (Memory consumption may be heavy as the entire file
                           will be in memory).
 
-        :type use_default_filename: boolean
+        :type use_default_filename: bool
         :param use_default_filename: If the use_default_name parameter is True, the exported
                                  file will be saved as file_path/%s,
                                  where %s is the dataset name.
                                  If use_default_name is False, file_path is assumed to
                                  contain the full file path including filename.
 
-        :type wait_for_completion: boolean
+        :type wait_for_completion: bool
         :param wait_for_completion: If wait_for_completion is True, this call will block until the dataset is ready.
                                     If the dataset state becomes invalid, a DatasetStateException will be thrown.
 

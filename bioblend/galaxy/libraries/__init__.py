@@ -15,6 +15,18 @@ class LibraryClient(Client):
         Create a data library with the properties defined in the arguments.
         Return a list of JSON dicts, looking like so::
 
+        :type name: str
+        :param name: Name of the new data library
+
+        :type description: str
+        :param description: Optional data library description
+
+        :type synopsis: str
+        :param synopsis: Optional data library synopsis
+
+        :rtype: list
+        :return: List of dicts describing created library
+
             [{"id": "f740ab636b360a70",
               "name": "Library from bioblend",
               "url": "/api/libraries/f740ab636b360a70"}]
@@ -29,7 +41,10 @@ class LibraryClient(Client):
 
     def delete_library(self, library_id):
         """
-        Delete a data library identified by `library_id`.
+        Delete a data library
+
+        :type library_id: str
+        :param library_id: Encoded data library ID identifying the library to be deleted
 
         .. warning::
             Deleting a data library is irreversible - all of the data from
@@ -51,7 +66,7 @@ class LibraryClient(Client):
         :param library_id: library id where dataset is found in
 
         :type dataset_id: str
-        :param dataset_id: if of the dataset to be deleted
+        :param dataset_id: id of the dataset to be deleted
 
         :type purged: bool
         :param purged: Indicate that the dataset should be purged (permanently deleted)
@@ -72,6 +87,15 @@ class LibraryClient(Client):
         """
         Get details about a given library dataset. The required ``library_id``
         can be obtained from the datasets's library content details.
+
+        :type library_id: str
+        :param library_id: library id where dataset is found in
+
+        :type dataset_id: str
+        :param dataset_id: id of the dataset to be inspected
+
+        :rtype: dict
+        :return: A dictionary containing information about the dataset in the library
         """
         return self.__show_item(library_id, dataset_id)
 
@@ -79,12 +103,21 @@ class LibraryClient(Client):
         """
         Get details about a given folder. The required ``folder_id``
         can be obtained from the folder's library content details.
+
+        :type library_id: str
+        :param library_id: library id to inspect folders in
+
+        :type folder_id: str
+        :param folder_id: id of the folder to be inspected
         """
         return self.__show_item(library_id, folder_id)
 
     def _get_root_folder_id(self, library_id):
         """
         Find the root folder (i.e. '/') of a library.
+
+        :type library_id: str
+        :param library_id: library id to find root of
         """
         folders = self.show_library(library_id=library_id, contents=True)
         for f in folders:
@@ -94,6 +127,15 @@ class LibraryClient(Client):
     def create_folder(self, library_id, folder_name, description=None, base_folder_id=None):
         """
         Create a folder in a library.
+
+        :type library_id: str
+        :param library_id: library id to use
+
+        :type folder_name: str
+        :param folder_name: name of the new folder in the data library
+
+        :type description: str
+        :param description: description of the new folder in the data library
 
         :type base_folder_id: str
         :param base_folder_id: id of the folder where to create the new folder.
@@ -117,13 +159,20 @@ class LibraryClient(Client):
         or ``folder_id`` in data library with id ``library_id``. Provide only one
         argument: ``name`` or ``folder_id``, but not both.
 
-        For ``name`` specify the full path of the folder starting from the
-        library's root folder, e.g. ``/subfolder/subsubfolder``.
+        :type folder_id: str
+        :param folder_id: filter for folder by folder id
 
-        If ``deleted`` is set to ``True``, return folders that have been deleted.
+        :type name: str
+        :param name: filter for folder by name. For ``name`` specify the full
+                     path of the folder starting from the library's root
+                     folder, e.g. ``/subfolder/subsubfolder``.
 
-        Return a list of JSON formatted dicts each containing basic information
-        about a folder.
+        :type deleted: bool
+        :param deleted: If set to ``True``, return folders that have been
+                        deleted.
+
+        :rtype: dict
+        :return: list of dicts each containing basic information about a folder.
         """
         if folder_id is not None and name is not None:
             raise ValueError('Provide only one argument between name or folder_id, but not both')
@@ -142,11 +191,20 @@ class LibraryClient(Client):
         Get all the libraries or filter for specific one(s) via the provided name or ID.
         Provide only one argument: ``name`` or ``library_id``, but not both.
 
-        If ``name`` is set and multiple names match the given name, all the
-        libraries matching the argument will be returned.
+        :type library_id: str
+        :param library_id: filter for library by library id
 
-        Return a list of JSON formatted dicts each containing basic information
-        about a library.
+        :type name: str
+        :param name: If ``name`` is set and multiple names match the given
+                     name, all the libraries matching the argument will be
+                     returned.
+
+        :type deleted: bool
+        :param deleted: If set to ``True``, return libraries that have been
+                        deleted.
+
+        :rtype: dict
+        :return: list of dicts each containing basic information about a library.
         """
         if library_id is not None and name is not None:
             raise ValueError('Provide only one argument between name or library_id, but not both')
@@ -162,10 +220,14 @@ class LibraryClient(Client):
         """
         Get information about a library.
 
-        If want to get contents of the library (rather than just the library details),
-        set ``contents`` to ``True``.
+        :type library_id: str
+        :param library_id: filter for library by library id
 
-        Return a list of JSON formatted dicts containing library details.
+        :type contents: bool
+        :param contents: True if want to get contents of the library (rather than just the library details).
+
+        :rtype: list
+        :return: a list of dicts containing library details.
         """
         return Client._get(self, id=library_id, contents=contents)
 
@@ -220,9 +282,21 @@ class LibraryClient(Client):
         """
         Upload a file to a library from a URL.
 
+        :type library_id: str
+        :param library_id: id of the library where to place the uploaded file.
+          If not provided, the root library will be used
+
+        :type file_url: str
+        :param file_url: file to download to the library specified by ``library_id``
+
         :type folder_id: str
-        :param folder_id: id of the folder where to place the uploaded file.
-          If not provided, the root folder will be used
+        :param folder_id: id of the folder to download into
+
+        :type file_type: str
+        :param file_type: Galaxy file format name
+
+        :type dbkey: str
+        :param dbkey: Dbkey
         """
         # TODO: Is there a better way of removing self from locals?
         vars = locals().copy()
@@ -233,9 +307,21 @@ class LibraryClient(Client):
         """
         Upload pasted_contents to a data library as a new file.
 
+        :type library_id: str
+        :param library_id: id of the library where to place the uploaded file.
+          If not provided, the root library will be used
+
+        :type pasted_content: str
+        :param pasted_content: Content to upload into a file
+
         :type folder_id: str
-        :param folder_id: id of the folder where to place the uploaded file.
-          If not provided, the root folder will be used
+        :param folder_id: id of the folder to download into
+
+        :type file_type: str
+        :param file_type: Galaxy file format name
+
+        :type dbkey: str
+        :param dbkey: Dbkey
         """
         vars = locals().copy()
         del vars['self']
@@ -246,9 +332,21 @@ class LibraryClient(Client):
         """
         Read local file contents from file_local_path and upload data to a library.
 
+        :type library_id: str
+        :param library_id: id of the library where to place the uploaded file.
+          If not provided, the root library will be used
+
+        :type file_local_path: str
+        :param file_local_path: Serverside path to file to add to library
+
         :type folder_id: str
-        :param folder_id: id of the folder where to place the uploaded file.
-          If not provided, the root folder will be used
+        :param folder_id: id of the folder to download into
+
+        :type file_type: str
+        :param file_type: Galaxy file format name
+
+        :type dbkey: str
+        :param dbkey: Dbkey
         """
         vars = locals().copy()
         del vars['self']
@@ -266,6 +364,10 @@ class LibraryClient(Client):
           ``library_import_dir`` option configured in the ``config/galaxy.ini``
           configuration file.
 
+        :type library_id: str
+        :param library_id: id of the library where to place the uploaded file.
+          If not provided, the root library will be used
+
         :type server_dir: str
         :param server_dir: relative path of the subdirectory of
           ``library_import_dir`` to upload. All and only the files (i.e. no
@@ -275,6 +377,17 @@ class LibraryClient(Client):
         :type folder_id: str
         :param folder_id: id of the folder where to place the uploaded files.
           If not provided, the root folder will be used
+
+        :type file_type: str
+        :param file_type: Galaxy file format name
+
+        :type dbkey: str
+        :param dbkey: Dbkey
+
+        :type link_data_only: str
+        :param link_data_only: either 'copy_files' (default) or
+          'link_to_files'. Setting to 'link_to_files' symlinks instead of
+          copying the files
         """
         vars = locals().copy()
         del vars['self']
@@ -292,6 +405,10 @@ class LibraryClient(Client):
           ``allow_library_path_paste`` option set to ``True`` in the
           ``config/galaxy.ini`` configuration file.
 
+        :type library_id: str
+        :param library_id: id of the library where to place the uploaded file.
+          If not provided, the root library will be used
+
         :type filesystem_paths: str
         :param filesystem_paths: file paths on the Galaxy server to upload to
           the library, one file per line
@@ -300,10 +417,19 @@ class LibraryClient(Client):
         :param folder_id: id of the folder where to place the uploaded files.
           If not provided, the root folder will be used
 
+        :type file_type: str
+        :param file_type: Galaxy file format name
+
+        :type dbkey: str
+        :param dbkey: Dbkey
+
         :type link_data_only: str
         :param link_data_only: either 'copy_files' (default) or
           'link_to_files'. Setting to 'link_to_files' symlinks instead of
           copying the files
+
+        :type roles: str
+        :param roles: ???
         """
         vars = locals().copy()
         del vars['self']
@@ -313,9 +439,19 @@ class LibraryClient(Client):
         """
         Copy a Galaxy dataset into a library.
 
+        :type library_id: str
+        :param library_id: id of the library where to place the uploaded file.
+          If not provided, the root library will be used
+
+        :type dataset_id: str
+        :param dataset_id: id of the dataset to copy from
+
         :type folder_id: str
         :param folder_id: id of the folder where to place the uploaded files.
           If not provided, the root folder will be used
+
+        :type message: str
+        :param message: message for copying action
         """
         if folder_id is None:
             folder_id = self._get_root_folder_id(library_id)
@@ -332,7 +468,20 @@ class LibraryClient(Client):
         Sets the permissions for a library.  Note: it will override all
         security for this library even if you leave out a permission type.
 
-        access_in, modify_in, add_in, manage_in expect a list of user id's OR None
+        :type library_id: str
+        :param library_id: id of the library
+
+        :type access_in: list
+        :param access_in: list of user ids
+
+        :type modify_in: list
+        :param modify_in: list of user ids
+
+        :type add_in: list
+        :param add_in: list of user ids
+
+        :type manage_in: list
+        :param manage_in: list of user ids
         """
 
         payload = {}

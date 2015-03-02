@@ -18,6 +18,12 @@ class HistoryClient(Client):
     def create_history(self, name=None):
         """
         Create a new history, optionally setting the ``name``.
+
+        :type name: str
+        :param name: Optional name for new history
+
+        :rtype: dict
+        :return: Dictionary containing information about newly created history
         """
         payload = {}
         if name is not None:
@@ -32,9 +38,16 @@ class HistoryClient(Client):
 
         If ``deleted`` is set to ``True``, return histories that have been deleted.
 
-        Return a list of history element dicts. If more than one history
-        matches the given ``name``, return the list of all the histories with the
-        given name.
+        :type history_id: str
+        :param history_id: Encoded history ID to filter on
+
+        :type name: str
+        :param name: Name of history to filter on
+
+        :rtype: dict
+        :return: Return a list of history element dicts. If more than one
+                 history matches the given ``name``, return the list of all the
+                 histories with the given name.
         """
         if history_id is not None and name is not None:
             raise ValueError('Provide only one argument between name or history_id, but not both')
@@ -49,11 +62,25 @@ class HistoryClient(Client):
     def show_history(self, history_id, contents=False, deleted=None, visible=None, details=None, types=None):
         """
         Get details of a given history. By default, just get the history meta
-        information. If ``contents`` is set to ``True``, get the complete list of
-        datasets in the given history. ``deleted``, ``visible``, and ``details`` are
-        used only if ``contents`` is ``True`` and are used to modify the datasets returned
-        and their contents. Set ``details`` to 'all' to get more information
-        about each dataset.
+        information.
+
+        :type history_id: str
+        :param history_id: Encoded history ID to filter on
+
+        :type contents: str
+        :param contents: When true, the complete list of datasets in the given history.
+
+        :type deleted: str
+        :param deleted: Used when contents=True, includes deleted datasets is history dataset list
+
+        :type visible: str
+        :param visible: Used when contents=True, includes only visible datasets is history dataset list
+
+        :type details: str
+        :param details: Used when contents=True, includes dataset details. Set to 'all' for the most information
+
+        :type types: str
+        :param types: ???
         """
         params = {}
         if contents:
@@ -70,6 +97,12 @@ class HistoryClient(Client):
     def delete_dataset(self, history_id, dataset_id):
         """
         Mark corresponding dataset as deleted.
+
+        :type history_id: str
+        :param history_id: Encoded history ID
+
+        :type dataset_id: str
+        :param dataset_id: Encoded dataset ID
         """
         url = self.gi._make_url(self, history_id, contents=True)
         # Append the dataset_id to the base history contents URL
@@ -79,6 +112,12 @@ class HistoryClient(Client):
     def delete_dataset_collection(self, history_id, dataset_collection_id):
         """
         Mark corresponding dataset collection as deleted.
+
+        :type history_id: str
+        :param history_id: Encoded history ID
+
+        :type dataset_collection_id: str
+        :param dataset_collection_id: Encoded dataset collection ID
         """
         url = self.gi._make_url(self, history_id, contents=True)
         # Append the dataset_id to the base history contents URL
@@ -87,8 +126,13 @@ class HistoryClient(Client):
 
     def show_dataset(self, history_id, dataset_id):
         """
-        Get details about a given history dataset. The required ``history_id``
-        can be obtained from the datasets's history content details.
+        Get details about a given history dataset.
+
+        :type history_id: str
+        :param history_id: Encoded history ID
+
+        :type dataset_id: str
+        :param dataset_id: Encoded dataset ID
         """
         url = self.gi._make_url(self, history_id, contents=True)
         # Append the dataset_id to the base history contents URL
@@ -98,6 +142,12 @@ class HistoryClient(Client):
     def show_dataset_collection(self, history_id, dataset_collection_id):
         """
         Get details about a given history dataset collection.
+
+        :type history_id: str
+        :param history_id: Encoded history ID
+
+        :type dataset_collection_id: str
+        :param dataset_collection_id: Encoded dataset collection ID
         """
         url = self.gi._make_url(self, history_id, contents=True)
         url = '/'.join([url, "dataset_collections", dataset_collection_id])
@@ -107,9 +157,14 @@ class HistoryClient(Client):
         """
         Get dataset details for matching datasets within a history.
 
-        Only datasets whose name matches the ``name_filter`` regular
-        expression will be returned; use plain strings for exact
-        matches and None to match all datasets in the history.
+        :type history_id: str
+        :param history_id: Encoded history ID
+
+        :type name_filter: str
+        :param name_filter: Only datasets whose name matches the
+                            ``name_filter`` regular expression will be
+                            returned; use plain strings for exact matches and
+                            None to match all datasets in the history.
         """
         if isinstance(name_filter, basestring):
             name_filter = re.compile(name_filter + '$')
@@ -123,8 +178,16 @@ class HistoryClient(Client):
         ``tool_id``, ``stdout``, ``stderr``, ``parameters``, ``inputs``,
         etc...).
 
-        If ``follow`` is ``True``, recursively fetch dataset provenance
-        information for all inputs and their inputs, etc....
+        :type history_id: str
+        :param history_id: Encoded history ID
+
+        :type dataset_id: str
+        :param dataset_id: Encoded dataset ID
+
+        :type follow: bool
+        :param follow: If ``follow`` is ``True``, recursively fetch dataset
+                       provenance information for all inputs and their inputs,
+                       etc....
         """
         url = self.gi._make_url(self, history_id, contents=True)
         url = '/'.join([url, dataset_id, "provenance"])
@@ -137,20 +200,27 @@ class HistoryClient(Client):
 
         :type history_id: str
         :param history_id: Encoded history ID
+
         :type name: str
         :param name: Replace history name with the given string
+
         :type annotation: str
         :param annotation: Replace history annotation with given string
+
         :type deleted: bool
         :param deleted: Mark or unmark history as deleted
+
         :type published: bool
         :param published: Mark or unmark history as published
+
         :type importable: bool
         :param importable: Mark or unmark history as importable
+
         :type tags: list
         :param tags: Replace history tags with the given list
 
-        :rtype: status_code (int)
+        :rtype: int
+        :return: status code
 
         """
         kwds['name'] = name
@@ -164,16 +234,12 @@ class HistoryClient(Client):
 
         :type history_id: str
         :param history_id: Encoded history ID
-        :type name: str
-        :param name: Replace history dataset name with the given string
-        :type annotation: str
-        :param annotation: Replace history dataset annotation with given string
-        :type deleted: bool
-        :param deleted: Mark or unmark history dataset as deleted
-        :type visible: bool
-        :param visible: Mark or unmark history dataset as visible
 
-        :rtype: status_code (int)
+        :type dataset_id: str
+        :param dataset_id: Id of the dataset
+
+        :rtype: int
+        :return: status code
         """
         url = self.gi._make_url(self, history_id, contents=True)
         # Append the dataset_id to the base history contents URL
@@ -187,14 +253,12 @@ class HistoryClient(Client):
 
         :type history_id: str
         :param history_id: Encoded history ID
-        :type name: str
-        :param name: Replace history dataset collection name with the given string
-        :type deleted: bool
-        :param deleted: Mark or unmark history dataset collection as deleted.
-        :type visible: bool
-        :param visible: Mark or unmark history dataset collection as visible.
 
-        :rtype: status_code (int)
+        :type dataset_collection_id: str
+        :param dataset_collection_id: Encoded dataset_collection ID
+
+        :rtype: int
+        :return: status code
         """
         url = self.gi._make_url(self, history_id, contents=True)
         url = '/'.join([url, "dataset_collections", dataset_collection_id])
@@ -206,11 +270,12 @@ class HistoryClient(Client):
 
         :type history_id: str
         :param history_id: Encoded history ID
+
         :type tag: str
         :param tag: Add tag to history
 
-        :rtype: json object
-        :return: Return json object
+        :rtype: dict
+        :return: A dictionary with information regarding the tag.
                  For example::
 
                  {'model_class':'HistoryTagAssociation', 'user_tname': 'NGS_PE_RUN', 'id': 'f792763bee8d277a', 'user_value': None}
@@ -231,6 +296,12 @@ class HistoryClient(Client):
         Upload a dataset into the history from a library. Requires the
         library dataset ID, which can be obtained from the library
         contents.
+
+        :type history_id: str
+        :param history_id: Encoded history ID
+
+        :type lib_dataset_id: str
+        :param lib_dataset_id: Encoded library dataset ID
         """
         payload = {
             'content': lib_dataset_id,
@@ -240,6 +311,15 @@ class HistoryClient(Client):
         return Client._post(self, payload, id=history_id, contents=True)
 
     def create_dataset_collection(self, history_id, collection_description):
+        """
+        Create a new dataset collection
+
+        :type history_id: str
+        :param history_id: Encoded history ID
+
+        :type collection_description: str
+        :param collection_description: a description of the dataset collection
+        """
         try:
             collection_description = collection_description.to_dict()
         except AttributeError:
@@ -257,6 +337,10 @@ class HistoryClient(Client):
         """
         Download a ``dataset_id`` from history with ``history_id`` to a
         file on the local file system, saving it to ``file_path``.
+
+        Legacy use only, refer to
+        ``bioblend.galaxy.dataset.DatasetClient.download_dataset()`` for
+        available parameters
         """
         dc = DatasetClient(self.gi)
         return dc.download_dataset(dataset_id, file_path=file_path,
@@ -267,7 +351,11 @@ class HistoryClient(Client):
         """
         Delete a history.
 
-        If ``purge`` is set to ``True``, also purge the history.
+        :type history_id: str
+        :param history_id: Encoded history ID
+
+        :type purge: bool
+        :param purge: Purge the history
 
         .. note::
           For the purge option to work, the Galaxy instance must have the
@@ -282,6 +370,9 @@ class HistoryClient(Client):
     def undelete_history(self, history_id):
         """
         Undelete a history
+
+        :type history_id: str
+        :param history_id: Encoded history ID
         """
         url = self.gi._make_url(self, history_id, deleted=True)
         # Append the 'undelete' action to the history URL
@@ -290,10 +381,16 @@ class HistoryClient(Client):
 
     def get_status(self, history_id):
         """
-        Returns the state of this history as a dictionary, with the following keys.
-        'state' = This is the current state of the history, such as ok, error, new etc.
-        'state_details' = Contains individual statistics for various dataset states.
-        'percent_complete' = The overall number of datasets processed to completion.
+        Returns the state of this history
+
+        :type history_id: str
+        :param history_id: Encoded history ID
+
+        :rtype: dict
+        :return: A dict documenting the current state of the history. Has the following keys:
+            'state' = This is the current state of the history, such as ok, error, new etc.
+            'state_details' = Contains individual statistics for various dataset states.
+            'percent_complete' = The overall number of datasets processed to completion.
         """
         state = {}
         history = self.show_history(history_id)
