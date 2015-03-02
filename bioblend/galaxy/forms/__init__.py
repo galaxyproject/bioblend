@@ -35,7 +35,7 @@ class FormsClient(Client):
         """
         Display information on a single form
 
-        :type form_id: string
+        :type form_id: str
         :param form_id: Encoded form ID
 
         :rtype: dict
@@ -60,10 +60,10 @@ class FormsClient(Client):
         """
         Create a new form
 
-        :type   form_xml_text: string
+        :type   form_xml_text: str
         :param  form_xml_text: Form xml to create a form on galaxy instance
 
-        :rtype:     string
+        :rtype:     str
         :returns:   Unique url of newly created form with encoded id
 
         """

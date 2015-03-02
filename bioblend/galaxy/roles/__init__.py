@@ -34,7 +34,7 @@ class RolesClient(Client):
         """
         Display information on a single role
 
-        :type role_id: string
+        :type role_id: str
         :param role_id: Encoded role ID
 
         :rtype: dict

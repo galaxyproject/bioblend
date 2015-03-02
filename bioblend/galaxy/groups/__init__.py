@@ -37,7 +37,7 @@ class GroupsClient(Client):
         """
         Display information on a single group
 
-        :type group_id: string
+        :type group_id: str
         :param group_id: Encoded group ID
 
 
@@ -58,8 +58,14 @@ class GroupsClient(Client):
         """
         Create a new Galaxy group
 
-        :param group_name: string
-        :type group_name: A name for new group
+        :type group_name: str
+        :param group_name: A name for new group
+
+        :type user_ids: list
+        :param user_ids: A list of encoded user IDs to add to the new group
+
+        :type role_ids: list
+        :param role_ids: A list of encoded role IDs to add to the new group
 
         :rtype: list
         :return: A (size 1) list with newly created group

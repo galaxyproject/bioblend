@@ -35,7 +35,7 @@ class ToolDataClient(Client):
         """
         Display information on a single data_table
 
-        :type data_table_id: string
+        :type data_table_id: str
         :param data_table_id: ID of the data table
 
         :rtype: dict
@@ -61,8 +61,12 @@ class ToolDataClient(Client):
         """
         Delete an item from a data table.
 
-        The ``values`` is a "|" separated list of column contents,
-        there must be a value for all the columns of the data table
+        :type data_table_id: str
+        :param data_table_id: ID of the data table
+
+        :type values: str
+        :param values: a "|" separated list of column contents, there must be a
+          value for all the columns of the data table
         """
         payload = {}
         payload['values'] = values

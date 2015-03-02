@@ -388,6 +388,9 @@ class LibraryClient(Client):
         :param link_data_only: either 'copy_files' (default) or
           'link_to_files'. Setting to 'link_to_files' symlinks instead of
           copying the files
+
+        :type roles: str
+        :param roles: ???
         """
         vars = locals().copy()
         del vars['self']

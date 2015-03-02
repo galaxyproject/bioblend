@@ -15,8 +15,8 @@ class FoldersClient(Client):
         """
         Display information about a folder.
 
-        :type folder_id: an encoded id string (has to be prefixed by 'F')
-        :param folder_id: the folder's encoded id (required)
+        :type folder_id: str
+        :param folder_id: the folder's encoded id, prefixed by 'F'
 
         :rtype: dict
         :return: dictionary including details of the folder
@@ -29,8 +29,8 @@ class FoldersClient(Client):
         Marks the folder with the given ``id`` as `deleted` (or removes the
         `deleted` mark if the `undelete` param is True).
 
-        :type folder_id: an encoded id string (has to be prefixed by 'F')
-        :param folder_id: the folder's encoded id (required)
+        :type folder_id: str
+        :param folder_id: the folder's encoded id, prefixed by 'F'
 
         :type undelete: bool
         :param undelete: If set to True, the folder will be undeleted

@@ -37,7 +37,7 @@ class ToolShedClient(Client):
         """
         Display information of a repository from the Tool Shed
 
-        :type toolShed_id: string
+        :type toolShed_id: str
         :param toolShed_id: Encoded toolShed ID
 
         :rtype: dictionary
@@ -77,32 +77,32 @@ class ToolShedClient(Client):
             <section id="from_test_tool_shed" name="From Test Tool Shed" version="">
             </section>
 
-        :type tool_shed_url: string
+        :type tool_shed_url: str
         :param tool_shed_url: URL of the Tool Shed from which the repository should
                               be installed from (e.g., ``http://testtoolshed.g2.bx.psu.edu``)
 
-        :type name: string
+        :type name: str
         :param name: The name of the repository that should be installed
 
-        :type owner: string
+        :type owner: str
         :param owner: The name of the repository owner
 
-        :type changeset_revision: string
+        :type changeset_revision: str
         :param changeset_revision: The revision of the repository to be installed
 
-        :type install_tool_dependencies: Boolean
+        :type install_tool_dependencies: bool
         :param install_tool_dependencies: Whether or not to automatically handle
                                           tool dependencies (see
                                           http://wiki.galaxyproject.org/AToolOrASuitePerRepository
                                           for more details)
 
-        :type install_repository_dependencies: Boolean
+        :type install_repository_dependencies: bool
         :param install_repository_dependencies: Whether or not to automatically
                                                 handle repository dependencies
                                                 (see http://wiki.galaxyproject.org/DefiningRepositoryDependencies
                                                 for more details)
 
-        :type tool_panel_section_id: string
+        :type tool_panel_section_id: str
         :param tool_panel_section_id: The ID of the Galaxy tool panel section
                                       where the tool should be insterted under.
                                       Note that you should specify either this
@@ -110,7 +110,7 @@ class ToolShedClient(Client):
                                       If both are specified, this one will take
                                       precedence.
 
-        :type new_tool_panel_section_label: string
+        :type new_tool_panel_section_label: str
         :param new_tool_panel_section_label: The name of a Galaxy tool panel section
                                              that should be created and the repository
                                              installed into.
