@@ -86,8 +86,13 @@ class LibraryClient(Client):
         """
         Find the root folder (i.e. '/') of a library.
         """
-        folders = self.show_library(library_id=library_id, contents=True)
-        for f in folders:
+        l = self.show_library(library_id=library_id)
+        if 'root_folder_id' in l:
+            return l['root_folder_id']
+        # Galaxy previous to release_13.04 does not have root_folder_id in
+        # library dictionary, so resort to find the folder with name '/'
+        library_contents = self.show_library(library_id=library_id, contents=True)
+        for f in library_contents:
             if f['name'] == '/':
                 return f['id']
 
@@ -127,7 +132,7 @@ class LibraryClient(Client):
         """
         if folder_id is not None and name is not None:
             raise ValueError('Provide only one argument between name or folder_id, but not both')
-        library_contents = Client._get(self, id=library_id, contents=True)
+        library_contents = self.show_library(library_id=library_id, contents=True)
         if folder_id is not None:
             folder = next((_ for _ in library_contents if _['type'] == 'folder' and _['id'] == folder_id), None)
             folders = [folder] if folder is not None else []
