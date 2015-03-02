@@ -1134,7 +1134,7 @@ class Folder(Wrapper):
     """
     Maps to a folder in a Galaxy library.
     """
-    BASE_ATTRS = Wrapper.BASE_ATTRS + ('description', 'item_count')
+    BASE_ATTRS = Wrapper.BASE_ATTRS + ('description', 'deleted', 'item_count')
 
     def __init__(self, f_dict, container, gi=None):
         super(Folder, self).__init__(f_dict, gi=gi)
