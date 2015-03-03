@@ -84,7 +84,7 @@ class Wrapper(object):
         object.__setattr__(self, 'wrapped', json.loads(dumped))
         for k in self.BASE_ATTRS:
             object.__setattr__(self, k, self.wrapped.get(k))
-        object.__setattr__(self, 'parent', parent)
+        object.__setattr__(self, '_cached_parent', parent)
         object.__setattr__(self, 'is_modified', False)
         object.__setattr__(self, 'gi', gi)
 
@@ -94,6 +94,13 @@ class Wrapper(object):
         The GalaxyInstance module that deals with objects of this type.
         """
         pass
+
+    @property
+    def parent(self):
+        """
+        Setup as a property so it can be dynamic in some subclasses
+        """
+        return self._cached_parent
 
     @property
     def is_mapped(self):
@@ -658,7 +665,9 @@ class LibraryDataset(LibRelatedDataset):
         :type purged: bool
         :param purged: if ``True``, also purge (permanently delete) the dataset
         """
-        self.gi.gi.libraries.delete_library_dataset(self.container.id, self.id, purged=purged)
+        self.gi.gi.libraries.delete_library_dataset(
+                self.container.id, self.id, purged=purged
+                )
         self.container.refresh()
         self.refresh()
 
@@ -1139,6 +1148,38 @@ class Folder(Wrapper):
     def __init__(self, f_dict, container, gi=None):
         super(Folder, self).__init__(f_dict, gi=gi)
         object.__setattr__(self, 'container', container)
+
+    @property
+    def parent(self):
+        """
+        Get folder indicated by 'parent_id'
+        The root folder will have the library as a parent.
+        """
+        if self._cached_parent is None:
+            object.__setattr__(self,
+                               '_cached_parent',
+                               self._get_parent())
+        return self._cached_parent
+
+    def _get_parent(self):
+        """
+        Return folder indicated by 'parent_id'
+        """
+        parent_id = self.wrapped.get('parent_id', None)
+        if parent_id is not None:
+            if parent_id[0] != 'F':
+                # older Galaxy versions strip the F
+                parent_id = u'F%s' % (parent_id)
+            try:
+                return self.container.get_folder(parent_id)
+            except bioblend.galaxy.client.ConnectionError:
+                # Depending on version, galaxy is returning a dummy parent_id
+                #  for the root Folder
+                # Clear the parent_id, so we don't try to load it each time
+                self.wrapped['dummy_parent_id'] = self.wrapped['parent_id']
+                self.wrapped['parent_id'] = None
+
+        return None
 
     @property
     def gi_module(self):
