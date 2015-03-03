@@ -98,7 +98,7 @@ class Wrapper(object):
     @property
     def parent(self):
         """
-        Setup as a property so it can be dynamic in some subclasses
+        The parent of this wrapper.
         """
         return self._cached_parent
 
@@ -666,8 +666,8 @@ class LibraryDataset(LibRelatedDataset):
         :param purged: if ``True``, also purge (permanently delete) the dataset
         """
         self.gi.gi.libraries.delete_library_dataset(
-                self.container.id, self.id, purged=purged
-                )
+            self.container.id, self.id, purged=purged
+            )
         self.container.refresh()
         self.refresh()
 
@@ -1138,6 +1138,16 @@ class Library(DatasetContainer):
         f_dict = self.gi.gi.libraries.show_folder(self.id, f_id)
         return Folder(f_dict, self, gi=self.gi)
 
+    @property
+    def root_folder(self):
+        """
+        The root folder of this library.
+
+        :rtype: :class:`~.Folder`
+        :return: the root folder of this library
+        """
+        return self.get_folder(self.gi.gi.libraries._get_root_folder_id(self.id))
+
 
 class Folder(Wrapper):
     """
@@ -1152,8 +1162,11 @@ class Folder(Wrapper):
     @property
     def parent(self):
         """
-        Get folder indicated by 'parent_id'
-        The root folder will have the library as a parent.
+        The parent folder of this folder. The parent of the root folder is
+        ``None``.
+
+        :rtype: :class:`~.Folder`
+        :return: the parent of this folder
         """
         if self._cached_parent is None:
             object.__setattr__(self,
@@ -1163,23 +1176,25 @@ class Folder(Wrapper):
 
     def _get_parent(self):
         """
-        Return folder indicated by 'parent_id'
+        Return the parent folder of this folder.
         """
-        parent_id = self.wrapped.get('parent_id', None)
-        if parent_id is not None:
-            if parent_id[0] != 'F':
-                # older Galaxy versions strip the F
-                parent_id = u'F%s' % (parent_id)
-            try:
-                return self.container.get_folder(parent_id)
-            except bioblend.galaxy.client.ConnectionError:
-                # Depending on version, galaxy is returning a dummy parent_id
-                #  for the root Folder
-                # Clear the parent_id, so we don't try to load it each time
-                self.wrapped['dummy_parent_id'] = self.wrapped['parent_id']
-                self.wrapped['parent_id'] = None
-
-        return None
+        # Galaxy release_13.04 and earlier does not have parent_id in the folder
+        # dictionary, may be implemented by searching for the folder with the
+        # correct name
+        if 'parent_id' not in self.wrapped:
+            raise NotImplementedError('This method has not been implemented for Galaxy release_13.04 and earlier')
+        parent_id = self.wrapped['parent_id']
+        if parent_id is None:
+            return None
+        # Galaxy from release_14.02 to release_15.01 returns a dummy parent_id
+        # for the root folder instead of None, so check if this is the root
+        if self.id == self.gi.gi.libraries._get_root_folder_id(self.container.id):
+            return None
+        # Galaxy release_13.11 and earlier returns a parent_id without the
+        # initial 'F'
+        if not parent_id.startswith('F'):
+            parent_id = 'F' + parent_id
+        return self.container.get_folder(parent_id)
 
     @property
     def gi_module(self):

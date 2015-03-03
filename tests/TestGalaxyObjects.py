@@ -401,12 +401,17 @@ class TestLibrary(GalaxyObjectsTestBase):
     def tearDown(self):
         self.lib.delete()
 
+    def test_root_folder(self):
+        r = self.lib.root_folder
+        self.assertIsNone(r.parent)
+
     def test_folder(self):
         name, desc = 'test_%s' % uuid.uuid4().hex, 'D'
         folder = self.lib.create_folder(name, description=desc)
         self.assertEqual(folder.name, name)
         self.assertEqual(folder.description, desc)
         self.assertIs(folder.container, self.lib)
+        self.assertEqual(folder.parent.id, self.lib.root_folder.id)
         self.assertEqual(len(self.lib.content_infos), 2)
         self.assertEqual(len(self.lib.folder_ids), 2)
         self.assertIn(folder.id, self.lib.folder_ids)
