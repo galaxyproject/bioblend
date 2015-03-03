@@ -19,12 +19,14 @@ class WorkflowClient(Client):
         If ``name`` is set and multiple names match the given name, all the
         workflows matching the argument will be returned.
 
-        If ``deleted`` is set to ``True``, return workflows that have been deleted.
-
-        If ``published`` is set to ``True``, return published workflows.
-
         Return a list of JSON formatted dicts each containing basic information
         about a workflow.
+
+        :type deleted: bool
+        :param deleted: this parameter is deprecated and ignored, it will be
+          removed in BioBlend 0.6
+        :type published: bool
+        :param published: if ``True``, return also published workflows
 
         :rtype: list
         :return: A list of workflow dicts.
@@ -37,7 +39,7 @@ class WorkflowClient(Client):
         """
         if workflow_id is not None and name is not None:
             raise ValueError('Provide only one argument between name or workflow_id, but not both')
-        kwargs = {'deleted': deleted}
+        kwargs = {}
         if published:
             kwargs['params'] = {'show_published': 'True'}
         workflows = Client._get(self, **kwargs)
