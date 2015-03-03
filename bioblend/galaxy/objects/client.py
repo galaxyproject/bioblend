@@ -120,17 +120,19 @@ class ObjLibraryClient(ObjDatasetClient):
         dicts = self.gi.libraries.get_libraries(name=name, deleted=deleted)
         return [wrappers.LibraryPreview(_, gi=self.obj_gi) for _ in dicts]
 
-    def list(self, name=None):
+    def list(self, name=None, deleted=False):
         """
         Get libraries owned by the user of this Galaxy instance.
 
         :type name: str
         :param name: return only libraries with this name
+        :type deleted: bool
+        :param deleted: if ``True``, return libraries that have been deleted
 
         :rtype: list of :class:`~.wrappers.Library`
         """
-        dicts = self.gi.libraries.get_libraries(name=name)
-        return [self.get(_['id']) for _ in dicts if not _['deleted']]
+        dicts = self.gi.libraries.get_libraries(name=name, deleted=deleted)
+        return [self.get(_['id']) for _ in dicts]
 
     def delete(self, id_=None, name=None):
         """
@@ -180,16 +182,18 @@ class ObjHistoryClient(ObjDatasetClient):
         dicts = self.gi.histories.get_histories(name=name, deleted=deleted)
         return [wrappers.HistoryPreview(_, gi=self.obj_gi) for _ in dicts]
 
-    def list(self, name=None):
+    def list(self, name=None, deleted=False):
         """
         Get histories owned by the user of this Galaxy instance.
 
         :type name: str
         :param name: return only histories with this name
+        :type deleted: bool
+        :param deleted: if ``True``, return histories that have been deleted
 
         :rtype: list of :class:`~.wrappers.History`
         """
-        dicts = self.gi.histories.get_histories(name=name)
+        dicts = self.gi.histories.get_histories(name=name, deleted=deleted)
         return [self.get(_['id']) for _ in dicts]
 
     def delete(self, id_=None, name=None, purge=False):
@@ -273,20 +277,22 @@ class ObjWorkflowClient(ObjClient):
             )
         return [wrappers.WorkflowPreview(_, gi=self.obj_gi) for _ in dicts]
 
+    # the 'deleted' option is not available for workflows
     def list(self, name=None, deleted=False, published=False):
         """
         Get workflows owned by the user of this Galaxy instance.
 
         :type name: str
         :param name: return only workflows with this name
+        :type deleted: bool
+        :param deleted: this parameter is deprecated and ignored, it will be
+          removed in BioBlend 0.6
         :type published: bool
-        :param published: return published workflows
+        :param published: if ``True``, return also published workflows
 
         :rtype: list of :class:`~.wrappers.Workflow`
         """
-        dicts = self.gi.workflows.get_workflows(
-            name=name, deleted=deleted, published=published
-            )
+        dicts = self.gi.workflows.get_workflows(name=name, published=published)
         return [self.get(_['id']) for _ in dicts]
 
     def delete(self, id_=None, name=None):

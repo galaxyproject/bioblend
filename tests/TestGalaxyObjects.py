@@ -138,7 +138,7 @@ class TestWrapper(unittest.TestCase):
     def test_kwargs(self):
         parent = MockWrapper({'a': 10})
         w = MockWrapper(self.d, parent=parent)
-        self.assertEqual(w.parent, parent)
+        self.assertIs(w.parent, parent)
         self.assertRaises(AttributeError, setattr, w, 'parent', 0)
 
 
@@ -177,15 +177,15 @@ class TestWorkflow(unittest.TestCase):
         self.assertEqual(set(ids), heads | tails)
         for h, tails in self.wf.dag.iteritems():
             for t in tails:
-                self.assertTrue(ids.index(h) < ids.index(t))
+                self.assertLess(ids.index(h), ids.index(t))
 
     def test_steps(self):
         steps = SAMPLE_WF_DICT['steps']
         for sid, s in self.wf.steps.iteritems():
-            self.assertTrue(isinstance(s, wrappers.Step))
+            self.assertIsInstance(s, wrappers.Step)
             self.assertEqual(s.id, sid)
             d = steps[sid]
-            self.assertTrue(s.parent is self.wf)
+            self.assertIs(s.parent, self.wf)
         self.assertEqual(self.wf.data_input_ids, set(['571', '572']))
         self.assertEqual(self.wf.tool_ids, set(['573']))
 
@@ -211,7 +211,7 @@ class TestWorkflow(unittest.TestCase):
         for d in input_map.itervalues():
             self.assertEqual(set(d), set(['id', 'src']))
             self.assertEqual(d['src'], 'ld')
-            self.assertTrue(d['id'] in 'ab')
+            self.assertIn(d['id'], 'ab')
 
 
 class GalaxyObjectsTestBase(unittest.TestCase):
@@ -236,7 +236,7 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
         self.assertEqual(len(lib.content_infos), 1)  # root folder
         self.assertEqual(len(lib.folder_ids), 1)
         self.assertEqual(len(lib.dataset_ids), 0)
-        self.assertTrue(lib.id in [_.id for _ in self.gi.libraries.list()])
+        self.assertIn(lib.id, [_.id for _ in self.gi.libraries.list()])
         lib.delete()
         self.assertFalse(lib.is_mapped)
 
@@ -244,7 +244,7 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
         name = 'test_%s' % uuid.uuid4().hex
         hist = self.gi.histories.create(name)
         self.assertEqual(hist.name, name)
-        self.assertTrue(hist.id in [_.id for _ in self.gi.histories.list()])
+        self.assertIn(hist.id, [_.id for _ in self.gi.histories.list()])
         hist.delete(purge=True)
         self.assertFalse(hist.is_mapped)
 
@@ -285,7 +285,7 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
         self.assertTrue(wf.name.startswith('paste_columns'))
         self.assertEqual(len(wf.steps), 3)
         wf_ids = set(_.id for _ in self.gi.workflows.list())
-        self.assertTrue(wf.id in wf_ids)
+        self.assertIn(wf.id, wf_ids)
         wf.delete()
 
     # not very accurate:
@@ -301,7 +301,7 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
         if pub_only_ids:
             wf_id = pub_only_ids.pop()
             imported = self.gi.workflows.import_shared(wf_id)
-            self.assertTrue(isinstance(imported, wrappers.Workflow))
+            self.assertIsInstance(imported, wrappers.Workflow)
             imported.delete()
         else:
             print "skipped 'manually publish a workflow to run this test'"
@@ -346,14 +346,14 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
         objs = []
         try:
             objs = [create(_) for _ in names]
-            self.assertTrue(ids(objs) <= ids(get_objs()))
+            self.assertLessEqual(ids(objs), ids(get_objs()))
             if obj_type != 'workflow':
                 filtered = get_objs(name=names[0])
                 self.assertEqual(len(filtered), 1)
                 self.assertEqual(filtered[0].id, objs[0].id)
                 del_id = objs[-1].id
                 objs.pop().delete(**del_kwargs)
-                self.assertTrue(del_id in ids(get_prevs(deleted=True)))
+                self.assertIn(del_id, ids(get_prevs(deleted=True)))
             else:
                 # Galaxy appends info strings to imported workflow names
                 prev = get_prevs()[0]
@@ -401,15 +401,20 @@ class TestLibrary(GalaxyObjectsTestBase):
     def tearDown(self):
         self.lib.delete()
 
+    def test_root_folder(self):
+        r = self.lib.root_folder
+        self.assertIsNone(r.parent)
+
     def test_folder(self):
         name, desc = 'test_%s' % uuid.uuid4().hex, 'D'
         folder = self.lib.create_folder(name, description=desc)
         self.assertEqual(folder.name, name)
         self.assertEqual(folder.description, desc)
-        self.assertTrue(folder.container is self.lib)
+        self.assertIs(folder.container, self.lib)
+        self.assertEqual(folder.parent.id, self.lib.root_folder.id)
         self.assertEqual(len(self.lib.content_infos), 2)
         self.assertEqual(len(self.lib.folder_ids), 2)
-        self.assertTrue(folder.id in self.lib.folder_ids)
+        self.assertIn(folder.id, self.lib.folder_ids)
         retrieved = self.lib.get_folder(folder.id)
         self.assertEqual(folder.id, retrieved.id)
 
@@ -417,7 +422,7 @@ class TestLibrary(GalaxyObjectsTestBase):
         self.assertEqual(len(dss), len(self.lib.dataset_ids))
         self.assertEqual(set(_.id for _ in dss), set(self.lib.dataset_ids))
         for ds in dss:
-            self.assertTrue(ds.container is self.lib)
+            self.assertIs(ds.container, self.lib)
 
     def test_dataset(self):
         folder = self.lib.create_folder('test_%s' % uuid.uuid4().hex)
@@ -535,8 +540,8 @@ class TestHistory(GalaxyObjectsTestBase):
             pass
 
     def __check_dataset(self, hda):
-        self.assertTrue(isinstance(hda, wrappers.HistoryDatasetAssociation))
-        self.assertTrue(hda.container is self.hist)
+        self.assertIsInstance(hda, wrappers.HistoryDatasetAssociation)
+        self.assertIs(hda.container, self.hist)
         self.assertEqual(len(self.hist.dataset_ids), 1)
         self.assertEqual(self.hist.dataset_ids[0], hda.id)
 
@@ -674,7 +679,7 @@ class TestRunWorkflow(GalaxyObjectsTestBase):
             )
         self.assertEqual(len(outputs), 1)
         out_ds = outputs[0]
-        self.assertTrue(out_ds.id in out_hist.dataset_ids)
+        self.assertIn(out_ds.id, out_hist.dataset_ids)
         res = out_ds.get_contents()
         self.__check_res(res, sep)
         if existing_hist:

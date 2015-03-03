@@ -4,14 +4,10 @@ show_help () {
   echo "Usage:  $0 -g GALAXY_DIR [-p PORT] [-t BIOBLEND_TESTS] [-r GALAXY_REV]
 
   Run tests for BioBlend. Useful for Continuous Integration testing.
-  *Please note* that this script overwrites the sqlite database of the Galaxy
-  instance target (-g), so only use it on 'test' or otherwise disposable
-  instances.
 
 Options:
   -g GALAXY_DIR
-      Path of the local Galaxy git repository. The SQLite database of this
-      instance will be overwritten.
+      Path of the local Galaxy git repository.
   -p PORT
       Port to use for the Galaxy server. Defaults to 8080.
   -t BIOBLEND_TESTS
@@ -54,8 +50,6 @@ python setup.py install --user || exit 1
 
 # Setup Galaxy
 cd ${g_val}
-# Stop Galaxy if it was running
-GALAXY_RUN_ALL=1 ./run.sh --daemon stop
 # Update repository (may change the sample files or the list of eggs)
 git fetch
 git checkout ${r_val}
@@ -64,11 +58,17 @@ if git show-ref -q --verify "refs/heads/${r_val}" 2>/dev/null; then
   git pull
 fi
 # Setup Galaxy master API key and admin user
+if [ -f universe_wsgi.ini.sample ]; then
+  GALAXY_SAMPLE_CONFIG_FILE=universe_wsgi.ini.sample
+else
+  GALAXY_SAMPLE_CONFIG_FILE=config/galaxy.ini.sample
+fi
 TEMP_DIR=`mktemp -d 2>/dev/null || mktemp -d -t 'mytmpdir'`
 export GALAXY_CONFIG_FILE=$TEMP_DIR/galaxy.ini
 GALAXY_MASTER_API_KEY=`date --rfc-3339=ns | md5sum | cut -f 1 -d ' '`
 GALAXY_USER_EMAIL=${USER}@localhost.localdomain
-sed -e "s/^#master_api_key.*/master_api_key = $GALAXY_MASTER_API_KEY/" -e "s/^#admin_users.*/admin_users = $GALAXY_USER_EMAIL/" config/galaxy.ini.sample > $GALAXY_CONFIG_FILE
+sed -e "s/^#master_api_key.*/master_api_key = $GALAXY_MASTER_API_KEY/" -e "s/^#admin_users.*/admin_users = $GALAXY_USER_EMAIL/" $GALAXY_SAMPLE_CONFIG_FILE > $GALAXY_CONFIG_FILE
+sed -i -e "s|^#database_connection.*|database_connection = sqlite:///$TEMP_DIR/universe.sqlite?isolation_level=IMMEDIATE|" -e "s|^#file_path.*|file_path = $TEMP_DIR/files|" -e "s|^#new_file_path.*|new_file_path = $TEMP_DIR/tmp|" -e "s|#job_working_directory.*|job_working_directory = $TEMP_DIR/job_working_directory|" $GALAXY_CONFIG_FILE
 # Change configuration needed by many tests
 sed -i -e 's/^#allow_user_dataset_purge.*/allow_user_dataset_purge = True/' $GALAXY_CONFIG_FILE
 # Change configuration needed by some library tests
@@ -77,12 +77,8 @@ if [ -n "${p_val}" ]; then
   # Change only the first occurence of port number
   sed -i -e "0,/^#port/ s/^#port.*/port = $p_val/" $GALAXY_CONFIG_FILE
 fi
-# Restore empty database at latest migration stage, if available
-cp -f universe.sqlite.empty_at_latest_migration database/universe.sqlite
 # Start Galaxy and wait for successful server start
 ./rolling_restart.sh || exit 1
-# Save empty database at latest migration stage
-cp -f database/universe.sqlite universe.sqlite.empty_at_latest_migration
 
 # Use the master API key to create the admin user and get its API key
 export BIOBLEND_GALAXY_URL=http://localhost:${p_val}

@@ -31,21 +31,6 @@ __all__ = [
     ]
 
 
-# sometimes the Galaxy API returns JSONs that contain other JSONs
-def _recursive_loads(jdef):
-    try:
-        r = json.loads(jdef)
-    except (TypeError, ValueError):
-        r = jdef
-    if isinstance(r, collections.Sequence) and not isinstance(r, basestring):
-        for i, v in enumerate(r):
-            r[i] = _recursive_loads(v)
-    elif isinstance(r, collections.Mapping):
-        for k, v in r.iteritems():
-            r[k] = _recursive_loads(v)
-    return r
-
-
 class Wrapper(object):
     """
     Abstract base class for Galaxy entity wrappers.
@@ -84,7 +69,7 @@ class Wrapper(object):
         object.__setattr__(self, 'wrapped', json.loads(dumped))
         for k in self.BASE_ATTRS:
             object.__setattr__(self, k, self.wrapped.get(k))
-        object.__setattr__(self, 'parent', parent)
+        object.__setattr__(self, '_cached_parent', parent)
         object.__setattr__(self, 'is_modified', False)
         object.__setattr__(self, 'gi', gi)
 
@@ -94,6 +79,13 @@ class Wrapper(object):
         The GalaxyInstance module that deals with objects of this type.
         """
         pass
+
+    @property
+    def parent(self):
+        """
+        The parent of this wrapper.
+        """
+        return self._cached_parent
 
     @property
     def is_mapped(self):
@@ -658,7 +650,9 @@ class LibraryDataset(LibRelatedDataset):
         :type purged: bool
         :param purged: if ``True``, also purge (permanently delete) the dataset
         """
-        self.gi.gi.libraries.delete_library_dataset(self.container.id, self.id, purged=purged)
+        self.gi.gi.libraries.delete_library_dataset(
+            self.container.id, self.id, purged=purged
+            )
         self.container.refresh()
         self.refresh()
 
@@ -1129,16 +1123,63 @@ class Library(DatasetContainer):
         f_dict = self.gi.gi.libraries.show_folder(self.id, f_id)
         return Folder(f_dict, self, gi=self.gi)
 
+    @property
+    def root_folder(self):
+        """
+        The root folder of this library.
+
+        :rtype: :class:`~.Folder`
+        :return: the root folder of this library
+        """
+        return self.get_folder(self.gi.gi.libraries._get_root_folder_id(self.id))
+
 
 class Folder(Wrapper):
     """
     Maps to a folder in a Galaxy library.
     """
-    BASE_ATTRS = Wrapper.BASE_ATTRS + ('description', 'item_count')
+    BASE_ATTRS = Wrapper.BASE_ATTRS + ('description', 'deleted', 'item_count')
 
     def __init__(self, f_dict, container, gi=None):
         super(Folder, self).__init__(f_dict, gi=gi)
         object.__setattr__(self, 'container', container)
+
+    @property
+    def parent(self):
+        """
+        The parent folder of this folder. The parent of the root folder is
+        ``None``.
+
+        :rtype: :class:`~.Folder`
+        :return: the parent of this folder
+        """
+        if self._cached_parent is None:
+            object.__setattr__(self,
+                               '_cached_parent',
+                               self._get_parent())
+        return self._cached_parent
+
+    def _get_parent(self):
+        """
+        Return the parent folder of this folder.
+        """
+        # Galaxy release_13.04 and earlier does not have parent_id in the folder
+        # dictionary, may be implemented by searching for the folder with the
+        # correct name
+        if 'parent_id' not in self.wrapped:
+            raise NotImplementedError('This method has not been implemented for Galaxy release_13.04 and earlier')
+        parent_id = self.wrapped['parent_id']
+        if parent_id is None:
+            return None
+        # Galaxy from release_14.02 to release_15.01 returns a dummy parent_id
+        # for the root folder instead of None, so check if this is the root
+        if self.id == self.gi.gi.libraries._get_root_folder_id(self.container.id):
+            return None
+        # Galaxy release_13.11 and earlier returns a parent_id without the
+        # initial 'F'
+        if not parent_id.startswith('F'):
+            parent_id = 'F' + parent_id
+        return self.container.get_folder(parent_id)
 
     @property
     def gi_module(self):
