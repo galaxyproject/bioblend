@@ -277,7 +277,8 @@ class ObjWorkflowClient(ObjClient):
             )
         return [wrappers.WorkflowPreview(_, gi=self.obj_gi) for _ in dicts]
 
-    def list(self, name=None, deleted=False, published=False):
+    # the 'deleted' option is not available for workflows
+    def list(self, name=None, published=False):
         """
         Get workflows owned by the user of this Galaxy instance.
 
@@ -289,7 +290,7 @@ class ObjWorkflowClient(ObjClient):
         :rtype: list of :class:`~.wrappers.Workflow`
         """
         dicts = self.gi.workflows.get_workflows(
-            name=name, deleted=deleted, published=published
+            name=name, published=published
             )
         return [self.get(_['id']) for _ in dicts]
 
