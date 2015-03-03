@@ -25,13 +25,6 @@ class WorkflowClient(Client):
           workflows matching the argument will be returned.
 
         :type deleted: bool
-        :param deleted: If set to ``True``, return workflows that have been
-          deleted.
-
-        :type published: bool
-        :param published: If set to ``True``, return published workflows.
-
-        :type deleted: bool
         :param deleted: this parameter is deprecated and ignored, it will be
           removed in BioBlend 0.6
 
