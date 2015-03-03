@@ -10,7 +10,7 @@ class WorkflowClient(Client):
         self.module = 'workflows'
         super(WorkflowClient, self).__init__(galaxy_instance)
 
-    def get_workflows(self, workflow_id=None, name=None, deleted=False, published=False):
+    def get_workflows(self, workflow_id=None, name=None, published=False):
         """
         Get all workflows or filter the specific one(s) via the provided ``name``
         or ``workflow_id``. Provide only one argument, ``name`` or ``workflow_id``,
@@ -18,8 +18,6 @@ class WorkflowClient(Client):
 
         If ``name`` is set and multiple names match the given name, all the
         workflows matching the argument will be returned.
-
-        If ``deleted`` is set to ``True``, return workflows that have been deleted.
 
         If ``published`` is set to ``True``, return published workflows.
 
@@ -37,7 +35,7 @@ class WorkflowClient(Client):
         """
         if workflow_id is not None and name is not None:
             raise ValueError('Provide only one argument between name or workflow_id, but not both')
-        kwargs = {'deleted': deleted}
+        kwargs = {}
         if published:
             kwargs['params'] = {'show_published': 'True'}
         workflows = Client._get(self, **kwargs)
