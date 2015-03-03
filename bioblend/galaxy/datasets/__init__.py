@@ -71,7 +71,7 @@ class DatasetClient(Client):
         :type file_ext: str
         :param file_ext: Extension to request from Galaxy. Will default to
                          dataset file_ext value. Provided for backwards
-                         compatability with HistoryClient.download_dataset()
+                         compatibility with HistoryClient.download_dataset()
 
         :rtype: dict
         :return: If a file_path argument is not provided, returns a dict containing the file_content.

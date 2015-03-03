@@ -167,7 +167,7 @@ class WorkflowClient(Client):
 
     def export_workflow_to_local_path(self, workflow_id, file_local_path, use_default_filename=True):
         """
-        Exports a workflow to a given local path.
+        Exports a workflow in json format to a given local path.
 
         :type workflow_id: str
         :param workflow_id: Encoded workflow ID
