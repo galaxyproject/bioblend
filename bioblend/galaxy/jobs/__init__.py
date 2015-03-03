@@ -14,15 +14,15 @@ class JobsClient(Client):
         """
         Get a list of jobs for current user
 
-        :type   state: string or list
+        :type   state: str or list
         :param  state: limit listing of jobs to those that match one of the included states. If none, all are returned.
         Valid Galaxy job states include:
         'new', 'upload', 'waiting', 'queued', 'running', 'ok', 'error', 'paused', 'deleted', 'deleted_new'
 
-        :type   tool_id: string or list
+        :type   tool_id: str or list
         :param  tool_id: limit listing of jobs to those that match one of the included tool_ids. If none, all are returned.
 
-        :type   history_id: string
+        :type   history_id: str
         :param  history_id: limit listing of jobs to those that match the history_id. If none, all are returned.
 
         :rtype:     list
@@ -50,7 +50,7 @@ class JobsClient(Client):
         """
         Display information on a single job from current user
 
-        :type job_id: string
+        :type job_id: str
         :param job_id: Specific job ID
 
         :rtype: dict
@@ -79,10 +79,10 @@ class JobsClient(Client):
         """
         Display the current state for a single job from current user.
 
-        :type job_id: string
+        :type job_id: str
         :param job_id: Specific job ID
 
-        :rtype: string
+        :rtype: str
         :return: State of single job with the following being valid values:
                  `new`, `queued`, `running`, `waiting`, `ok`. In case the
                  state cannot be retrived, an empty string is returned.
@@ -95,9 +95,10 @@ class JobsClient(Client):
         """
         Return jobs for current user based payload content
 
-        :type   payload: dict
-        :param  payload: Dictionary containing description of requested job. This is in the same format as
-        a request to POST /api/tools would take to initiate a job
+        :type   job_info: dict
+        :param  job_info: Dictionary containing description of requested job.
+          This is in the same format as a request to POST /api/tools would take
+          to initiate a job
 
         :rtype:     list
         :returns:   list of dictionaries containing summary job information of the jobs that match the requested job run

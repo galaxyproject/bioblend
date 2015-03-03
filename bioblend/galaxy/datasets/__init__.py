@@ -23,7 +23,13 @@ class DatasetClient(Client):
         Display information about and/or content of a dataset. This can be a
         history or a library dataset.
 
-        :type hda_ldda: string
+        :type dataset_id: str
+        :param dataset_id: Encoded Dataset ID
+
+        :type deleted: bool
+        :param deleted: Whether to return results for a deleted dataset
+
+        :type hda_ldda: str
         :param hda_ldda: Whether to show a history dataset ('hda' - the default) or library
                          dataset ('ldda').
         """
@@ -33,34 +39,39 @@ class DatasetClient(Client):
         return Client._get(self, id=dataset_id, deleted=deleted, params=params)
 
     def download_dataset(self, dataset_id, file_path=None, use_default_filename=True,
-                         wait_for_completion=False, maxwait=12000):
+                         wait_for_completion=False, maxwait=12000, file_ext=None):
         """
         Downloads the dataset identified by 'id'.
 
-        :type dataset_id: string
+        :type dataset_id: str
         :param dataset_id: Encoded Dataset ID
 
-        :type file_path: string
+        :type file_path: str
         :param file_path: If the file_path argument is provided, the dataset will be streamed to disk
                           at that path (Should not contain filename if use_default_name=True).
                           If the file_path argument is not provided, the dataset content is loaded into memory
                           and returned by the method (Memory consumption may be heavy as the entire file
                           will be in memory).
 
-        :type use_default_name: boolean
-        :param use_default_name: If the use_default_name parameter is True, the exported
+        :type use_default_filename: bool
+        :param use_default_filename: If the use_default_name parameter is True, the exported
                                  file will be saved as file_path/%s,
                                  where %s is the dataset name.
                                  If use_default_name is False, file_path is assumed to
                                  contain the full file path including filename.
 
-        :type wait_for_completion: boolean
+        :type wait_for_completion: bool
         :param wait_for_completion: If wait_for_completion is True, this call will block until the dataset is ready.
                                     If the dataset state becomes invalid, a DatasetStateException will be thrown.
 
         :type maxwait: float
         :param maxwait: Time (in seconds) to wait for dataset to complete.
                         If the dataset state is not complete within this time, a DatasetTimeoutException will be thrown.
+
+        :type file_ext: str
+        :param file_ext: Extension to request from Galaxy. Will default to
+                         dataset file_ext value. Provided for backwards
+                         compatability with HistoryClient.download_dataset()
 
         :rtype: dict
         :return: If a file_path argument is not provided, returns a dict containing the file_content.
@@ -74,8 +85,9 @@ class DatasetClient(Client):
             raise DatasetStateException("Dataset not ready. Dataset id: %s, current state: %s" % (dataset_id, dataset['state']))
 
         # Currently the Datasets REST API does not provide the download URL, so we construct it
-        file_ext = dataset.get('file_ext', dataset['data_type'])
-        download_url = 'datasets/' + dataset_id + '/display?to_ext=' + file_ext
+        if file_ext is None:
+            file_ext = dataset.get('file_ext', dataset['data_type'])
+        download_url = dataset['url'] + '/display?to_ext=' + file_ext
         url = urlparse.urljoin(self.gi.base_url, download_url)
 
         # Don't use self.gi.make_get_request as currently the download API does not require a key
@@ -101,6 +113,9 @@ class DatasetClient(Client):
 
             with open(file_local_path, 'wb') as fp:
                 fp.write(r.content)
+
+            # Return location file was saved to
+            return file_local_path
 
     def _is_dataset_complete(self, dataset_id):
         dataset = self.show_dataset(dataset_id)
@@ -128,6 +143,9 @@ class DatasetClient(Client):
     def show_stderr(self, dataset_id):
         """
         Display stderr output of a dataset.
+
+        :type dataset_id: str
+        :param dataset_id: Encoded Dataset ID
         """
         res = urllib2.urlopen(self.url[:-len("/api/datasets/")+1]+"/datasets/"+dataset_id+"/stderr")
         return res.read()
@@ -135,6 +153,9 @@ class DatasetClient(Client):
     def show_stdout(self, dataset_id):
         """
         Display stdout output of a dataset.
+
+        :type dataset_id: str
+        :param dataset_id: Encoded Dataset ID
         """
         res = urllib2.urlopen(self.url[:-len("/api/datasets/")+1]+"/datasets/"+dataset_id+"/stdout")
         return res.read()

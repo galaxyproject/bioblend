@@ -14,9 +14,8 @@ class QuotaClient(Client):
         """
         Get a list of quotas
 
-        :type deleted: Boolean
+        :type deleted: bool
         :param deleted: Only return quota(s) that have been deleted
-
 
         :rtype: list
         :return: A list of dicts with details on individual quotas.
@@ -39,12 +38,11 @@ class QuotaClient(Client):
         """
         Display information on a quota
 
-        :type quota_id: string
+        :type quota_id: str
         :param quota_id: Encoded quota ID
 
-        :type deleted: Boolean
+        :type deleted: bool
         :param deleted: Search for quota in list of ones already marked as deleted
-
 
         :rtype: dict
         :return: A description of quota

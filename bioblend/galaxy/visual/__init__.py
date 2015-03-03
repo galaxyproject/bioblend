@@ -38,7 +38,7 @@ class VisualClient(Client):
         """
         Display information on a visualization
 
-        :type visual_id: string
+        :type visual_id: str
         :param visual_id: Encoded visualization ID
 
         :rtype: dict
