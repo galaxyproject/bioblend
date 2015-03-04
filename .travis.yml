@@ -14,7 +14,7 @@ before_script:
   # Install Galaxy
   - cd $HOME
   - wget https://github.com/galaxyproject/galaxy/archive/${GALAXY_VERSION}.tar.gz
-  - tar xvzf dev.tar.gz | tail
+  - tar xvzf ${GALAXY_VERSION}.tar.gz | tail
   # Releases/dev branch are named differently
   - cd galaxy-${GALAXY_VERSION}/
   # Copy sample files and fetch eggs
