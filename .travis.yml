@@ -4,6 +4,7 @@ python:
   - "2.6"
 env:
   - GALAXY_VERSION=dev
+  - GALAXY_VERSION=release_15.03
   - GALAXY_VERSION=release_15.01
   - GALAXY_VERSION=release_14.10
   
