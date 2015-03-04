@@ -37,7 +37,7 @@ class UserClient(Client):
         :param user_id: User ID to inspect
 
         :type deleted: bool
-        :param deleted: Include deleted users in listing
+        :param deleted: Whether to return results for a deleted user
 
         :rtype: dict
         :return: dictionary containing information about the user
@@ -49,12 +49,6 @@ class UserClient(Client):
         Deprecated method.
 
         Just an alias for create_remote_user().
-
-        :type user_email: str
-        :param user_email: Email of user to be created
-
-        :rtype: dict
-        :return: dictionary containing information about the user
         """
         return self.create_remote_user(user_email)
 
@@ -74,7 +68,7 @@ class UserClient(Client):
         :param user_email: Email of user to be created
 
         :rtype: dict
-        :return: dictionary containing information about the user
+        :return: dictionary containing information about the created user
         """
         payload = {}
         payload['remote_user_email'] = user_email
@@ -100,7 +94,7 @@ class UserClient(Client):
         :param password: password of user to be created
 
         :rtype: dict
-        :return: dictionary containing information about the user
+        :return: dictionary containing information about the created user
         """
         payload = {}
         payload['username'] = username

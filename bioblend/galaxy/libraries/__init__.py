@@ -41,7 +41,7 @@ class LibraryClient(Client):
 
     def delete_library(self, library_id):
         """
-        Delete a data library
+        Delete a data library.
 
         :type library_id: str
         :param library_id: Encoded data library ID identifying the library to be deleted
@@ -288,14 +288,14 @@ class LibraryClient(Client):
         Upload a file to a library from a URL.
 
         :type library_id: str
-        :param library_id: id of the library where to place the uploaded file.
-          If not provided, the root library will be used
+        :param library_id: id of the library where to place the uploaded file
 
         :type file_url: str
-        :param file_url: file to download to the library specified by ``library_id``
+        :param file_url: URL of the file to upload
 
         :type folder_id: str
-        :param folder_id: id of the folder to download into
+        :param folder_id: id of the folder where to place the uploaded file.
+          If not provided, the root folder will be used
 
         :type file_type: str
         :param file_type: Galaxy file format name
@@ -310,17 +310,17 @@ class LibraryClient(Client):
 
     def upload_file_contents(self, library_id, pasted_content, folder_id=None, file_type='auto', dbkey='?'):
         """
-        Upload pasted_contents to a data library as a new file.
+        Upload pasted_content to a data library as a new file.
 
         :type library_id: str
-        :param library_id: id of the library where to place the uploaded file.
-          If not provided, the root library will be used
+        :param library_id: id of the library where to place the uploaded file
 
         :type pasted_content: str
-        :param pasted_content: Content to upload into a file
+        :param pasted_content: Content to upload into the library
 
         :type folder_id: str
-        :param folder_id: id of the folder to download into
+        :param folder_id: id of the folder where to place the uploaded file.
+          If not provided, the root folder will be used
 
         :type file_type: str
         :param file_type: Galaxy file format name
@@ -335,17 +335,18 @@ class LibraryClient(Client):
     def upload_file_from_local_path(self, library_id, file_local_path,
                                     folder_id=None, file_type='auto', dbkey='?'):
         """
-        Read local file contents from file_local_path and upload data to a library.
+        Read local file contents from file_local_path and upload data to a
+        library.
 
         :type library_id: str
-        :param library_id: id of the library where to place the uploaded file.
-          If not provided, the root library will be used
+        :param library_id: id of the library where to place the uploaded file
 
         :type file_local_path: str
-        :param file_local_path: Serverside path to file to add to library
+        :param file_local_path: path of local file to upload
 
         :type folder_id: str
-        :param folder_id: id of the folder to download into
+        :param folder_id: id of the folder where to place the uploaded file.
+          If not provided, the root folder will be used
 
         :type file_type: str
         :param file_type: Galaxy file format name
@@ -370,8 +371,7 @@ class LibraryClient(Client):
           configuration file.
 
         :type library_id: str
-        :param library_id: id of the library where to place the uploaded file.
-          If not provided, the root library will be used
+        :param library_id: id of the library where to place the uploaded file
 
         :type server_dir: str
         :param server_dir: relative path of the subdirectory of
@@ -414,8 +414,7 @@ class LibraryClient(Client):
           ``config/galaxy.ini`` configuration file.
 
         :type library_id: str
-        :param library_id: id of the library where to place the uploaded file.
-          If not provided, the root library will be used
+        :param library_id: id of the library where to place the uploaded file
 
         :type filesystem_paths: str
         :param filesystem_paths: file paths on the Galaxy server to upload to
@@ -448,8 +447,7 @@ class LibraryClient(Client):
         Copy a Galaxy dataset into a library.
 
         :type library_id: str
-        :param library_id: id of the library where to place the uploaded file.
-          If not provided, the root library will be used
+        :param library_id: id of the library where to place the uploaded file
 
         :type dataset_id: str
         :param dataset_id: id of the dataset to copy from

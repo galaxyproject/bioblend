@@ -238,6 +238,18 @@ class HistoryClient(Client):
         :type dataset_id: str
         :param dataset_id: Id of the dataset
 
+        :type name: str
+        :param name: Replace history dataset name with the given string
+
+        :type annotation: str
+        :param annotation: Replace history dataset annotation with given string
+
+        :type deleted: bool
+        :param deleted: Mark or unmark history dataset as deleted
+
+        :type visible: bool
+        :param visible: Mark or unmark history dataset as visible
+
         :rtype: int
         :return: status code
         """
@@ -256,6 +268,15 @@ class HistoryClient(Client):
 
         :type dataset_collection_id: str
         :param dataset_collection_id: Encoded dataset_collection ID
+
+        :type name: str
+        :param name: Replace history dataset collection name with the given string
+
+        :type deleted: bool
+        :param deleted: Mark or unmark history dataset collection as deleted.
+
+        :type visible: bool
+        :param visible: Mark or unmark history dataset collection as visible.
 
         :rtype: int
         :return: status code
@@ -338,14 +359,21 @@ class HistoryClient(Client):
         Download a ``dataset_id`` from history with ``history_id`` to a
         file on the local file system, saving it to ``file_path``.
 
-        Legacy use only, refer to
-        ``bioblend.galaxy.dataset.DatasetClient.download_dataset()`` for
-        available parameters
+        :type to_ext: str
+        :param to_ext: this parameter is deprecated and ignored, it will be
+          removed in BioBlend 0.6
+
+        Refer to ``bioblend.galaxy.dataset.DatasetClient.download_dataset()``
+        for the other available parameters.
         """
+        meta = self.show_dataset(history_id, dataset_id)
+        if use_default_filename:
+            file_local_path = os.path.join(file_path, meta['name'])
+        else:
+            file_local_path = file_path
         dc = DatasetClient(self.gi)
-        return dc.download_dataset(dataset_id, file_path=file_path,
-                                   use_default_filename=use_default_filename,
-                                   file_ext=to_ext)
+        return dc.download_dataset(dataset_id, file_path=file_local_path,
+                                   use_default_filename=False)
 
     def delete_history(self, history_id, purge=False):
         """
@@ -355,7 +383,7 @@ class HistoryClient(Client):
         :param history_id: Encoded history ID
 
         :type purge: bool
-        :param purge: Purge the history
+        :param purge: if ``True``, also purge (permanently delete) the history
 
         .. note::
           For the purge option to work, the Galaxy instance must have the

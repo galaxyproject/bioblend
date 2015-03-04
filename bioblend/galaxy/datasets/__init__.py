@@ -24,7 +24,7 @@ class DatasetClient(Client):
         history or a library dataset.
 
         :type dataset_id: str
-        :param dataset_id: Encoded Dataset ID
+        :param dataset_id: Encoded dataset ID
 
         :type deleted: bool
         :param deleted: Whether to return results for a deleted dataset
@@ -39,12 +39,12 @@ class DatasetClient(Client):
         return Client._get(self, id=dataset_id, deleted=deleted, params=params)
 
     def download_dataset(self, dataset_id, file_path=None, use_default_filename=True,
-                         wait_for_completion=False, maxwait=12000, file_ext=None):
+                         wait_for_completion=False, maxwait=12000):
         """
         Downloads the dataset identified by 'id'.
 
         :type dataset_id: str
-        :param dataset_id: Encoded Dataset ID
+        :param dataset_id: Encoded dataset ID
 
         :type file_path: str
         :param file_path: If the file_path argument is provided, the dataset will be streamed to disk
@@ -68,11 +68,6 @@ class DatasetClient(Client):
         :param maxwait: Time (in seconds) to wait for dataset to complete.
                         If the dataset state is not complete within this time, a DatasetTimeoutException will be thrown.
 
-        :type file_ext: str
-        :param file_ext: Extension to request from Galaxy. Will default to
-                         dataset file_ext value. Provided for backwards
-                         compatibility with HistoryClient.download_dataset()
-
         :rtype: dict
         :return: If a file_path argument is not provided, returns a dict containing the file_content.
                  Otherwise returns nothing.
@@ -84,10 +79,28 @@ class DatasetClient(Client):
         if not dataset['state'] == 'ok':
             raise DatasetStateException("Dataset not ready. Dataset id: %s, current state: %s" % (dataset_id, dataset['state']))
 
-        # Currently the Datasets REST API does not provide the download URL, so we construct it
-        if file_ext is None:
-            file_ext = dataset.get('file_ext', dataset['data_type'])
-        download_url = dataset['url'] + '/display?to_ext=' + file_ext
+        # Galaxy release_13.01 and earlier does not have file_ext in the dataset
+        # dict, so resort to data_type.
+        # N.B.: data_type cannot be used for Galaxy release_14.10 and later
+        # because it was changed to the Galaxy datatype class
+        file_ext = dataset.get('file_ext', dataset['data_type'])
+        # Galaxy release_13.01 and earlier does not have download_url in the
+        # dataset dict
+        download_url = dataset.get('download_url', '')
+        # The preferred download URL is
+        # '/api/histories/<history_id>/contents/<dataset_id>/display?to_ext=<dataset_ext>'
+        # since the old URL:
+        # '/dataset/<dataset_id>/display/to_ext=<dataset_ext>'
+        # does not work when using REMOTE_USER with access disabled to
+        # everything but /api without auth
+        if download_url.startswith('/api/'):
+            download_url += '?to_ext=' + file_ext
+        else:
+            # This is Galaxy release_13.02 (download_url
+            # '/dataset/<dataset_id>/display/to_ext=<dataset_ext>') or
+            # release_13.01 or earlier (download_url ''). For these releases the
+            # preferred URL does not work, so resort to the old URL
+            download_url = 'datasets/' + dataset_id + '/display?to_ext=' + file_ext
         url = urlparse.urljoin(self.gi.base_url, download_url)
 
         # Don't use self.gi.make_get_request as currently the download API does not require a key
@@ -145,7 +158,7 @@ class DatasetClient(Client):
         Display stderr output of a dataset.
 
         :type dataset_id: str
-        :param dataset_id: Encoded Dataset ID
+        :param dataset_id: Encoded dataset ID
         """
         res = urllib2.urlopen(self.url[:-len("/api/datasets/")+1]+"/datasets/"+dataset_id+"/stderr")
         return res.read()
@@ -155,7 +168,7 @@ class DatasetClient(Client):
         Display stdout output of a dataset.
 
         :type dataset_id: str
-        :param dataset_id: Encoded Dataset ID
+        :param dataset_id: Encoded dataset ID
         """
         res = urllib2.urlopen(self.url[:-len("/api/datasets/")+1]+"/datasets/"+dataset_id+"/stdout")
         return res.read()

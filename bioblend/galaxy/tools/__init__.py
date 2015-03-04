@@ -119,7 +119,7 @@ class ToolClient(Client):
         :param history_id: id of the history where to upload the file
 
         :type file_name: str
-        :param file_name: name of the new history dataset
+        :param file_name: (optional) name of the new history dataset
 
         :type file_type: str
         :param file_type: Galaxy datatype for the new dataset, default is auto
