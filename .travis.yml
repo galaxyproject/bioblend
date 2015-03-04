@@ -15,7 +15,8 @@ before_script:
   - cd $HOME
   - wget https://github.com/galaxyproject/galaxy/archive/${GALAXY_VERSION}.tar.gz
   - tar xvzf dev.tar.gz | tail
-  - cd galaxy-dev/
+  # Releases/dev branch are named differently
+  - cd galaxy-*/
   # Copy sample files and fetch eggs
   - ./scripts/common_startup.sh
   # Create a PostgreSQL database for Galaxy. The default SQLite3 database makes test fail randomly because of "database locked" error.
