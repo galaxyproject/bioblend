@@ -2,14 +2,18 @@ language: python
 python:
   - "2.7"
   - "2.6"
-
+env:
+  - GALAXY_VERSION=dev
+  - GALAXY_VERSION=release_15.01
+  - GALAXY_VERSION=release_14.10
+  
 install:
   - python setup.py install
 
 before_script:
   # Install Galaxy
   - cd $HOME
-  - wget https://github.com/galaxyproject/galaxy/archive/dev.tar.gz
+  - wget https://github.com/galaxyproject/galaxy/archive/${GALAXY_VERSION}.tar.gz
   - tar xvzf dev.tar.gz | tail
   - cd galaxy-dev/
   # Copy sample files and fetch eggs
