@@ -7,7 +7,15 @@ env:
   - GALAXY_VERSION=release_15.03
   - GALAXY_VERSION=release_15.01
   - GALAXY_VERSION=release_14.10
-  
+matrix:
+  exclude:
+    - python: "2.6"
+      env: GALAXY_VERSION=release_15.03
+    - python: "2.6"
+      env: GALAXY_VERSION=release_15.01
+    - python: "2.6"
+      env: GALAXY_VERSION=release_14.10
+
 install:
   - python setup.py install
 
