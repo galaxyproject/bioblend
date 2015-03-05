@@ -2,16 +2,22 @@ language: python
 python:
   - "2.7"
   - "2.6"
-
+env:
+  - GALAXY_VERSION=dev
+  - GALAXY_VERSION=release_15.03
+  - GALAXY_VERSION=release_15.01
+  - GALAXY_VERSION=release_14.10
+  
 install:
   - python setup.py install
 
 before_script:
   # Install Galaxy
   - cd $HOME
-  - wget https://github.com/galaxyproject/galaxy/archive/dev.tar.gz
-  - tar xvzf dev.tar.gz | tail
-  - cd galaxy-dev/
+  - wget https://github.com/galaxyproject/galaxy/archive/${GALAXY_VERSION}.tar.gz
+  - tar xvzf ${GALAXY_VERSION}.tar.gz | tail
+  # Releases/dev branch are named differently
+  - cd galaxy-${GALAXY_VERSION}/
   # Copy sample files and fetch eggs
   - ./scripts/common_startup.sh
   # Create a PostgreSQL database for Galaxy. The default SQLite3 database makes test fail randomly because of "database locked" error.
