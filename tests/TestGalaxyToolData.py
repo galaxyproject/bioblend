@@ -8,7 +8,7 @@ import GalaxyTestBase
 import test_util
 
 
-@test_util.skip_unless_galaxy()
+@test_util.skip_unless_galaxy('release_15.01')
 class TestGalaxyToolData(GalaxyTestBase.GalaxyTestBase):
 
     def test_get_data_tables(self):

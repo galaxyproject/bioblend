@@ -9,6 +9,7 @@ if not hasattr(unittest, 'skip'):
 
 NO_CLOUDMAN_MESSAGE = "CloudMan required and no CloudMan AMI configured."
 NO_GALAXY_MESSAGE = "Externally configured Galaxy required, but not found. Set BIOBLEND_GALAXY_URL and BIOBLEND_GALAXY_API_KEY to run this test."
+OLD_GALAXY_RELEASE = "Testing on Galaxy %s, but need %s to run this test."
 MISSING_TOOL_MESSAGE = "Externally configured Galaxy instance requires tool %s to run test."
 
 
@@ -22,7 +23,7 @@ def skip_unless_cloudman():
     return test
 
 
-def skip_unless_galaxy():
+def skip_unless_galaxy(min_release=None):
     """ Decorate tests with this to skip the test if Galaxy is not
     configured.
     """
@@ -31,7 +32,10 @@ def skip_unless_galaxy():
         if prop not in os.environ:
             test = unittest.skip(NO_GALAXY_MESSAGE)
             break
-
+    if min_release is not None:
+        galaxy_release = os.environ.get('GALAXY_VERSION', None)
+        if galaxy_release is not None and galaxy_release.startswith('release_') and galaxy_release < min_release:
+            test = unittest.skip(OLD_GALAXY_RELEASE % (galaxy_release, min_release))
     return test
 
 
