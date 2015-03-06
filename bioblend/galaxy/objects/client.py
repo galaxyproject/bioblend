@@ -132,7 +132,13 @@ class ObjLibraryClient(ObjDatasetClient):
         :rtype: list of :class:`~.wrappers.Library`
         """
         dicts = self.gi.libraries.get_libraries(name=name, deleted=deleted)
-        return [self.get(_['id']) for _ in dicts]
+        if not deleted:
+            # return Library objects only for not-deleted libraries since Galaxy
+            # does not filter them out and Galaxy release_14.08 and earlier
+            # crashes when trying to get a deleted library
+            return [self.get(_['id']) for _ in dicts if not _['deleted']]
+        else:
+            return [self.get(_['id']) for _ in dicts]
 
     def delete(self, id_=None, name=None):
         """
