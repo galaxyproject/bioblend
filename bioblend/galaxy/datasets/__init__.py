@@ -84,26 +84,23 @@ class DatasetClient(Client):
         # N.B.: data_type cannot be used for Galaxy release_14.10 and later
         # because it was changed to the Galaxy datatype class
         file_ext = dataset.get('file_ext', dataset['data_type'])
-        # Galaxy release_13.01 and earlier does not have download_url in the
-        # dataset dict
-        download_url = dataset.get('download_url', '')
         # The preferred download URL is
         # '/api/histories/<history_id>/contents/<dataset_id>/display?to_ext=<dataset_ext>'
         # since the old URL:
         # '/dataset/<dataset_id>/display/to_ext=<dataset_ext>'
         # does not work when using REMOTE_USER with access disabled to
         # everything but /api without auth
-        if download_url.startswith('/api/'):
-            download_url += '?to_ext=' + file_ext
+        if 'url' in dataset:
+            # This is Galaxy release_15.03 or later
+            download_url = dataset['download_url'] + '?to_ext=' + file_ext
         else:
-            # This is Galaxy release_13.02 (download_url
-            # '/dataset/<dataset_id>/display/to_ext=<dataset_ext>') or
-            # release_13.01 or earlier (download_url ''). For these releases the
-            # preferred URL does not work, so resort to the old URL
+            # This is Galaxy release_15.01 or earlier, for which the preferred
+            # URL does not work without a key, so resort to the old URL
             download_url = 'datasets/' + dataset_id + '/display?to_ext=' + file_ext
         url = urlparse.urljoin(self.gi.base_url, download_url)
 
-        # Don't use self.gi.make_get_request as currently the download API does not require a key
+        # Don't use self.gi.make_get_request as currently the download API does
+        # not require a key
         r = requests.get(url)
 
         if file_path is None:

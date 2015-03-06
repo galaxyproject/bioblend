@@ -5,6 +5,7 @@ import bioblend
 from bioblend.galaxy.client import Client
 from bioblend.galaxy.datasets import DatasetClient
 
+import os
 import re
 import time
 
@@ -371,9 +372,9 @@ class HistoryClient(Client):
             file_local_path = os.path.join(file_path, meta['name'])
         else:
             file_local_path = file_path
-        dc = DatasetClient(self.gi)
-        return dc.download_dataset(dataset_id, file_path=file_local_path,
-                                   use_default_filename=False)
+        return self.gi.datasets.download_dataset(dataset_id,
+                                                 file_path=file_local_path,
+                                                 use_default_filename=False)
 
     def delete_history(self, history_id, purge=False):
         """
