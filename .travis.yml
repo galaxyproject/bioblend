@@ -7,6 +7,7 @@ env:
   - GALAXY_VERSION=release_15.03
   - GALAXY_VERSION=release_15.01
   - GALAXY_VERSION=release_14.10
+  - GALAXY_VERSION=release_14.08
 matrix:
   exclude:
     - python: "2.6"
@@ -15,6 +16,8 @@ matrix:
       env: GALAXY_VERSION=release_15.01
     - python: "2.6"
       env: GALAXY_VERSION=release_14.10
+    - python: "2.6"
+      env: GALAXY_VERSION=release_14.08
 
 install:
   - python setup.py install
@@ -30,16 +33,17 @@ before_script:
   - ./scripts/common_startup.sh
   # Create a PostgreSQL database for Galaxy. The default SQLite3 database makes test fail randomly because of "database locked" error.
   - createdb -U postgres galaxy-travis
+  - if [ -f universe_wsgi.ini.sample ]; then GALAXY_CONFIG_FILE=universe_wsgi.ini; else GALAXY_CONFIG_FILE=config/galaxy.ini; fi
   # Change Galaxy configuration to use the newly created PostgreSQL database
-  - sed -e 's|^#database_connection.*|database_connection = postgresql://postgres:@localhost/galaxy-travis|' config/galaxy.ini.sample > config/galaxy.ini
+  - sed -e 's|^#database_connection.*|database_connection = postgresql://postgres:@localhost/galaxy-travis|' $GALAXY_CONFIG_FILE.sample > $GALAXY_CONFIG_FILE
   # Setup Galaxy master API key and admin user
   - GALAXY_MASTER_API_KEY=`date --rfc-3339=ns | md5sum | cut -f 1 -d ' '`
   - GALAXY_USER_EMAIL=${USER}@localhost.localdomain
-  - sed -i -e "s/^#master_api_key.*/master_api_key = $GALAXY_MASTER_API_KEY/" -e "s/^#admin_users.*/admin_users = $GALAXY_USER_EMAIL/" config/galaxy.ini
+  - sed -i -e "s/^#master_api_key.*/master_api_key = $GALAXY_MASTER_API_KEY/" -e "s/^#admin_users.*/admin_users = $GALAXY_USER_EMAIL/" $GALAXY_CONFIG_FILE
   # Change configuration needed by many tests
-  - sed -i -e 's/^#allow_user_dataset_purge.*/allow_user_dataset_purge = True/' config/galaxy.ini
+  - sed -i -e 's/^#allow_user_dataset_purge.*/allow_user_dataset_purge = True/' $GALAXY_CONFIG_FILE
   # Change Galaxy configuration needed by some library tests
-  - sed -i -e 's/^#allow_library_path_paste.*/allow_library_path_paste = True/' config/galaxy.ini
+  - sed -i -e 's/^#allow_library_path_paste.*/allow_library_path_paste = True/' $GALAXY_CONFIG_FILE
   # Start Galaxy and wait for successful server start
   - ./rolling_restart.sh
   # Use the master API key to create the admin user and get its API key
