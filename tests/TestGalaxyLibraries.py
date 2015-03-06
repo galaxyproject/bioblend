@@ -20,7 +20,7 @@ class TestGalaxyLibraries(GalaxyTestBase.GalaxyTestBase):
 
     def test_create_library(self):
         self.assertEqual(self.library['name'], self.name)
-        self.assertNotEqual(self.library['id'], None)
+        self.assertIsNotNone(self.library['id'])
 
     def test_create_folder(self):
         pass
@@ -28,7 +28,7 @@ class TestGalaxyLibraries(GalaxyTestBase.GalaxyTestBase):
     def test_get_libraries(self):
         # Make sure there's at least one value - the one we created
         all_libraries = self.gi.libraries.get_libraries()
-        self.assertTrue(len(all_libraries) >= 1)
+        self.assertGreaterEqual(len(all_libraries), 1)
 
     def test_show_library(self):
         library_data = self.gi.libraries.show_library(self.library['id'])

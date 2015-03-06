@@ -1,6 +1,8 @@
 """
 Use ``nose`` to run these unit tests.
 """
+import tempfile
+
 import GalaxyTestBase
 import test_util
 
@@ -13,6 +15,9 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
         self.history_id = self.gi.histories.create_history(name='TestShowDataset')['id']
         self.dataset_id = self._test_dataset(self.history_id)
 
+    def tearDown(self):
+        self.gi.histories.delete_history(self.history_id, purge=True)
+
     def test_show_dataset(self):
         with self.assertRaises(Exception):
             self.gi.datasets.show_dataset(None)
@@ -22,7 +27,10 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
         with self.assertRaises(Exception):
             self.gi.datasets.download_dataset(None)
         self._wait_for_history(self.history_id)
-        self.gi.datasets.download_dataset(self.dataset_id)
+        with tempfile.NamedTemporaryFile(prefix='bioblend_test_') as f:
+            self.gi.datasets.download_dataset(self.dataset_id, file_path=f.name, use_default_filename=False)
+            f.flush()
+            self.assertEqual(f.read(), "1\t2\t3\n")
 
     def test_show_stderr(self):
         stderr = self.gi.datasets.show_stderr(self.dataset_id)

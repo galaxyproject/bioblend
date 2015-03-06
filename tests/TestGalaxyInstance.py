@@ -37,4 +37,4 @@ class TestGalaxyInstance(unittest.TestCase):
         except ConnectionError:
             end = time.time()
         duration = end - start
-        self.assertTrue(duration > self.gi.get_retry_delay, "Didn't seem to retry long enough")
+        self.assertGreater(duration, self.gi.get_retry_delay, "Didn't seem to retry long enough")

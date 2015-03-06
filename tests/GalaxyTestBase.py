@@ -27,4 +27,4 @@ class GalaxyTestBase(unittest.TestCase):
             if _state_ready(state):
                 return
             time.sleep(1)
-        return _state_ready(state)
+        raise Exception('Timeout expired while waiting for history')

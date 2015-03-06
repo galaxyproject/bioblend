@@ -21,7 +21,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
             self.gi.workflows.import_workflow_from_local_path(None)
         path = get_abspath(os.path.join('data', 'paste_columns.ga'))
         wk = self.gi.workflows.import_workflow_from_local_path(path)
-        self.assertNotEqual(wk['id'], None)
+        self.assertIsNotNone(wk['id'])
 
     def test_export_workflow_to_local_path(self):
         export_dir = tempfile.mkdtemp(prefix='bioblend_test_')
@@ -35,24 +35,24 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         export_path = os.path.join(export_dir, dir_contents[0])
         with open(export_path, 'rb') as f:
             workflow_json = json.load(f)
-        assert isinstance(workflow_json, dict)
+        self.assertIsInstance(workflow_json, dict)
         shutil.rmtree(export_dir)
 
     def test_get_workflows(self):
         wk = self.gi.workflows.get_workflows()[0]
-        self.assertNotEqual(wk['id'], None)
-        self.assertNotEqual(wk['name'], None)
-        self.assertNotEqual(wk['url'], None)
+        self.assertIsNotNone(wk['id'])
+        self.assertIsNotNone(wk['name'])
+        self.assertIsNotNone(wk['url'])
 
     def test_show_workflow(self):
         wk = self.gi.workflows.get_workflows()[0]
         # TODO: This test is problematic, because it relies on the get_workflow method!
         # This test is not self-contained.
         wk = self.gi.workflows.show_workflow(wk['id'])
-        self.assertNotEqual(wk['id'], None)
-        self.assertNotEqual(wk['name'], None)
-        self.assertNotEqual(wk['inputs'], None)
-        self.assertNotEqual(wk['url'], None)
+        self.assertIsNotNone(wk['id'])
+        self.assertIsNotNone(wk['name'])
+        self.assertIsNotNone(wk['inputs'])
+        self.assertIsNotNone(wk['url'])
 
     def test_run_workflow(self):
         wk = self.gi.workflows.get_workflows()[0]

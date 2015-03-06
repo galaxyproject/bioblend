@@ -66,7 +66,7 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
         dataset1_id = self._test_dataset(history_id)
         dataset = self.gi.histories.show_dataset(history_id, dataset1_id)
         for key in ["name", "hid", "id", "deleted", "history_id", "visible"]:
-            assert key in dataset
+            self.assertIn(key, dataset)
         self.assertEqual(dataset["history_id"], history_id)
         self.assertEqual(dataset["hid"], 1)
         self.assertEqual(dataset["id"], dataset1_id)
@@ -78,21 +78,21 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
         dataset1_id = self._test_dataset(history_id)
         prov = self.gi.histories.show_dataset_provenance(history_id, dataset1_id)
         for key in ["job_id", "id", "stdout", "stderr", "parameters", "tool_id"]:
-            assert key in prov
+            self.assertIn(key, prov)
 
     def test_delete_dataset(self):
         history_id = self.history["id"]
         dataset1_id = self._test_dataset(history_id)
         self.gi.histories.delete_dataset(history_id, dataset1_id)
         dataset = self.gi.histories.show_dataset(history_id, dataset1_id)
-        self.assertEqual(dataset["deleted"], True)
+        self.assertTrue(dataset["deleted"])
 
     def test_update_dataset(self):
         history_id = self.history["id"]
         dataset1_id = self._test_dataset(history_id)
         self.gi.histories.update_dataset(history_id, dataset1_id, visible=False)
         dataset = self.gi.histories.show_dataset(history_id, dataset1_id)
-        self.assertEqual(dataset["visible"], False)
+        self.assertFalse(dataset["visible"])
 
     def test_upload_dataset_from_library(self):
         pass
@@ -104,7 +104,7 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
         with tempfile.NamedTemporaryFile(prefix='bioblend_test_') as f:
             self.gi.histories.download_dataset(history_id, dataset1_id, file_path=f.name, use_default_filename=False)
             f.flush()
-            assert open(f.name, "r").read() == "1\t2\t3\n"
+            self.assertEqual(f.read(), "1\t2\t3\n")
 
     def test_delete_history(self):
         result = self.gi.histories.delete_history(self.history['id'])
@@ -149,4 +149,4 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
             shutil.rmtree(tempdir)
 
     def tearDown(self):
-        self.history = self.gi.histories.delete_history(self.history['id'], purge=True)
+        self.gi.histories.delete_history(self.history['id'], purge=True)

@@ -24,16 +24,16 @@ class TestCloudmanServices(CloudmanTestBase.CloudmanTestBase):
 
     def test_get_status(self):
         status = self.cmi.get_status()
-        self.assertNotEqual(status, None)
+        self.assertIsNotNone(status)
 
     def test_get_nodes(self):
         nodes = self.cmi.get_nodes()
-        self.assertNotEqual(nodes, None)
+        self.assertIsNotNone(nodes)
 
     def test_add_nodes(self):
         num_nodes = 1
         status = self.cmi.add_nodes(num_nodes)
-        self.assertNotEqual(status, None)
+        self.assertIsNotNone(status)
 
     def test_reboot_node(self):
         instance_id = self.cmi.instance_id
