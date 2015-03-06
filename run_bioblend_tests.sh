@@ -1,7 +1,7 @@
 #!/bin/sh
 
 show_help () {
-  echo "Usage:  $0 -g GALAXY_DIR [-p PORT] [-t BIOBLEND_TESTS] [-r GALAXY_REV]
+  echo "Usage:  $0 -g GALAXY_DIR [-p PORT] [-t BIOBLEND_TESTS] [-r GALAXY_REV] [-c]
 
   Run tests for BioBlend. Useful for Continuous Integration testing.
 
@@ -16,6 +16,9 @@ Options:
   -r GALAXY_REV
       Branch or commit of the local Galaxy git repository to checkout. Defaults
       to the dev branch."
+  -c
+      Force removal of the temporary directory created for Galaxy, even if some
+      test failed.
 }
 
 get_abs_dirname () {
@@ -25,11 +28,12 @@ get_abs_dirname () {
 
 p_val=8080
 r_val=dev
-while getopts 'hb:g:p:t:r:' option
+while getopts 'hcg:p:t:r:' option
 do
   case $option in
     h) show_help
        exit;;
+    c) c_val=1;;
     g) g_val=$(get_abs_dirname $OPTARG);;
     p) p_val=$OPTARG;;
     t) t_val=$OPTARG;;
@@ -67,6 +71,7 @@ else
   GALAXY_SAMPLE_CONFIG_FILE=config/galaxy.ini.sample
 fi
 TEMP_DIR=`mktemp -d 2>/dev/null || mktemp -d -t 'mytmpdir'`
+echo "Created temporary directory $TEMP_DIR"
 export GALAXY_CONFIG_FILE=$TEMP_DIR/galaxy.ini
 GALAXY_MASTER_API_KEY=`date --rfc-3339=ns | md5sum | cut -f 1 -d ' '`
 GALAXY_USER_EMAIL=${USER}@localhost.localdomain
@@ -96,8 +101,12 @@ if [ -n "${t_val}" ]; then
 else
   python setup.py test
 fi
+exit_code=$?
 
 # Stop Galaxy
 cd ${g_val}
 GALAXY_RUN_ALL=1 ./run.sh --daemon stop
-rm -rf $TEMP_DIR
+# Remove temporary directory if -c is specified or if all tests passed
+if [ -n "${c_val}" ] || [ $exit_code -eq 0 ]; then
+  rm -rf $TEMP_DIR
+fi
