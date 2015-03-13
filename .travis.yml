@@ -8,6 +8,7 @@ env:
   - GALAXY_VERSION=release_15.01
   - GALAXY_VERSION=release_14.10
   - GALAXY_VERSION=release_14.08
+  - GALAXY_VERSION=release_14.06
 matrix:
   exclude:
     - python: "2.6"
@@ -18,9 +19,12 @@ matrix:
       env: GALAXY_VERSION=release_14.10
     - python: "2.6"
       env: GALAXY_VERSION=release_14.08
+    - python: "2.6"
+      env: GALAXY_VERSION=release_14.06
 
 install:
   - python setup.py install
+  - cp run_galaxy.sh $HOME
 
 before_script:
   # Install Galaxy
@@ -29,8 +33,6 @@ before_script:
   - tar xvzf ${GALAXY_VERSION}.tar.gz | tail
   # Releases/dev branch are named differently
   - cd galaxy-${GALAXY_VERSION}/
-  # Copy sample files and fetch eggs
-  - ./scripts/common_startup.sh
   # Create a PostgreSQL database for Galaxy. The default SQLite3 database makes test fail randomly because of "database locked" error.
   - createdb -U postgres galaxy-travis
   - if [ -f universe_wsgi.ini.sample ]; then GALAXY_CONFIG_FILE=universe_wsgi.ini; else GALAXY_CONFIG_FILE=config/galaxy.ini; fi
@@ -45,7 +47,7 @@ before_script:
   # Change Galaxy configuration needed by some library tests
   - sed -i -e 's/^#allow_library_path_paste.*/allow_library_path_paste = True/' $GALAXY_CONFIG_FILE
   # Start Galaxy and wait for successful server start
-  - ./rolling_restart.sh
+  - GALAXY_RUN_ALL=1 ../run_galaxy.sh --daemon --wait
   # Use the master API key to create the admin user and get its API key
   - export BIOBLEND_GALAXY_URL=http://localhost:8080
   - GALAXY_USER=$USER

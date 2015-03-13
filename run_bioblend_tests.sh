@@ -62,8 +62,6 @@ if git show-ref -q --verify "refs/heads/${r_val}" 2>/dev/null; then
   export GALAXY_VERSION=${r_val}
   git pull
 fi
-# Use latest run.sh to have support for GALAXY_CONFIG_FILE and --wait
-git checkout dev -- run.sh
 # Setup Galaxy master API key and admin user
 if [ -f universe_wsgi.ini.sample ]; then
   GALAXY_SAMPLE_CONFIG_FILE=universe_wsgi.ini.sample
@@ -86,7 +84,7 @@ if [ -n "${p_val}" ]; then
   sed -i -e "0,/^#port/ s/^#port.*/port = $p_val/" $GALAXY_CONFIG_FILE
 fi
 # Start Galaxy and wait for successful server start
-GALAXY_RUN_ALL=1 ./run.sh --daemon --wait || exit 1
+GALAXY_RUN_ALL=1 ${BIOBLEND_DIR}/run_galaxy.sh --daemon --wait || exit 1
 
 # Use the master API key to create the admin user and get its API key
 export BIOBLEND_GALAXY_URL=http://localhost:${p_val}
