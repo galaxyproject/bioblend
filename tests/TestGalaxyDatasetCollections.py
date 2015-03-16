@@ -4,7 +4,7 @@ import GalaxyTestBase
 import test_util
 
 
-@test_util.skip_unless_galaxy()
+@test_util.skip_unless_galaxy('release_14.06')
 class TestGalaxyDatasetCollections(GalaxyTestBase.GalaxyTestBase):
 
     def test_create_list_in_history(self):

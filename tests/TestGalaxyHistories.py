@@ -77,7 +77,8 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
         history_id = self.history["id"]
         dataset1_id = self._test_dataset(history_id)
         prov = self.gi.histories.show_dataset_provenance(history_id, dataset1_id)
-        for key in ["job_id", "id", "stdout", "stderr", "parameters", "tool_id"]:
+        # 'job_id' key was added in Galaxy release_14.06
+        for key in ["id", "stdout", "stderr", "parameters", "tool_id"]:
             self.assertIn(key, prov)
 
     def test_delete_dataset(self):
