@@ -502,9 +502,9 @@ class Dataset(Wrapper):
 
           Due to a change in the Galaxy API endpoint, this method does
           not work on :class:`LibraryDataset` instances with Galaxy
-          ``release_2014.06.02`` and ``release_2014.08.11``.  Methods
-          that delegate work to this one are also affected:
-          :meth:`peek`, :meth:`download`, :meth:`get_contents`.
+          ``release_2014.06.02``. Methods that delegate work to this one
+          are also affected: :meth:`peek`, :meth:`download` and
+          :meth:`get_contents`.
         """
         kwargs = {'stream': True}
         if isinstance(self, LibraryDataset):

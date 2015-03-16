@@ -493,20 +493,24 @@ class TestLDContents(GalaxyObjectsTestBase):
     def tearDown(self):
         self.lib.delete()
 
+    @test_util.skip_unless_galaxy('release_14.08')
     def test_dataset_get_stream(self):
         for idx, c in enumerate(self.ds.get_stream(chunk_size=1)):
             self.assertEqual(str(FOO_DATA[idx]), c)
 
+    @test_util.skip_unless_galaxy('release_14.08')
     def test_dataset_peek(self):
         fetched_data = self.ds.peek(chunk_size=4)
         self.assertEqual(FOO_DATA[0:4], fetched_data)
 
+    @test_util.skip_unless_galaxy('release_14.08')
     def test_dataset_download(self):
         with tempfile.TemporaryFile() as f:
             self.ds.download(f)
             f.seek(0)
             self.assertEqual(FOO_DATA, f.read())
 
+    @test_util.skip_unless_galaxy('release_14.08')
     def test_dataset_get_contents(self):
         self.assertEqual(FOO_DATA, self.ds.get_contents())
 
