@@ -4,10 +4,6 @@
 .. image:: https://pypip.in/d/bioblend/badge.png
         :target: https://pypi.python.org/pypi/bioblend/
 
-.. image:: https://d2weczhvl823v0.cloudfront.net/afgane/bioblend/trend.png
-   :alt: Bitdeli badge
-   :target: https://bitdeli.com/free
-
 .. image:: https://landscape.io/github/galaxyproject/bioblend/master/landscape.svg?style=flat
         :target: https://landscape.io/github/galaxyproject/bioblend/master
         :alt: Code Health
