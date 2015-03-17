@@ -267,8 +267,8 @@ class ToolShedClient(Client):
         :param description: Optional description of the repository
 
         :type type: str
-        :param type: type of the repository. One of unrestricted,
-                     repository_suite_definition, or tool_dependency_definition
+        :param type: type of the repository. One of "unrestricted",
+                     "repository_suite_definition", or "tool_dependency_definition"
 
         :type remote_repository_url: str
         :param remote_repository_url: Remote URL (e.g. github/bitbucket repository)
