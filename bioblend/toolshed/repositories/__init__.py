@@ -244,6 +244,32 @@ class ToolShedClient(Client):
         return Client._get(self, url=url)
 
     def update_repository(self, id, tar_ball_path, commit_message=None):
+        """
+        Update the contents of a tool shed repository with specified tar
+        ball.
+
+        :type id: string
+        :param id: Encoded repository ID
+
+        :type tar_ball_path: string
+        :param tar_ball_path: Path to file containing tar ball to upload.
+
+        :type commit_message: string
+        :param commit_message: Commit message used for underlying mercurial
+                               repository backing tool shed repository.
+
+        :rtype: dict
+        :return: Returns a dictionary that includes repository content
+                 warnings. Most valid uploads will result in no such
+                 warning and an exception will be raised generally if
+                 there are problems.
+
+                 For example a successful upload will look like::
+
+                     {u'content_alert': u'', u'message': u''}
+
+        .. versionadded:: 0.5.2
+        """
         url = self.gi._make_url(self, id) + '/changeset_revision'
         payload = {}
         if commit_message is not None:
