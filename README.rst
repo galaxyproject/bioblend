@@ -8,6 +8,11 @@
    :alt: Bitdeli badge
    :target: https://bitdeli.com/free
 
+.. image:: https://landscape.io/github/galaxyproject/bioblend/master/landscape.svg?style=flat
+        :target: https://landscape.io/github/galaxyproject/bioblend/master
+        :alt: Code Health
+
+
 BioBlend is a Python (2.6 or 2.7) library for interacting with `CloudMan`_
 and `Galaxy`_'s API.
 
