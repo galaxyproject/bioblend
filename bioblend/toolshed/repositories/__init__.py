@@ -247,6 +247,6 @@ class ToolShedClient(Client):
         url = self.gi._make_url(self, id) + '/changeset_revision'
         payload = {}
         if commit_message is not None:
-            payload[commit_message] = commit_message
+            payload['commit_message'] = commit_message
         payload["file"] = open(tar_ball_path, "rb")
         return Client._post(self, id=id, payload=payload, files_attached=True, url=url)
