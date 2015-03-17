@@ -323,6 +323,6 @@ class ToolShedClient(Client):
             payload['homepage_url'] = homepage_url
 
         if category_ids is not None:
-            payload['category_ids'] = category_ids
+            payload['category_ids[]'] = category_ids
 
         return Client._post(self, payload)
