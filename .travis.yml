@@ -10,6 +10,7 @@ env:
   - GALAXY_VERSION=release_14.08
   - GALAXY_VERSION=release_14.06
   - GALAXY_VERSION=release_14.04
+  - GALAXY_VERSION=release_14.02
 matrix:
   exclude:
     - python: "2.6"
@@ -24,6 +25,8 @@ matrix:
       env: GALAXY_VERSION=release_14.06
     - python: "2.6"
       env: GALAXY_VERSION=release_14.04
+    - python: "2.6"
+      env: GALAXY_VERSION=release_14.02
 
 install:
   - python setup.py install
