@@ -1,6 +1,6 @@
-### BioBlend v0.5.3 - March 1X, 2014
+### BioBlend v0.5.3 - March 18, 2014
 
-* Project source moved to new URL - https://github.com/galaxyproject/bioblend .
+* Project source moved to new URL - https://github.com/galaxyproject/bioblend
 
 * Huge improvements to automated testing, tests now run against Galaxy
   release_14.02 and all later versions to ensure backward compatibility
