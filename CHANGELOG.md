@@ -1,22 +1,34 @@
 ### BioBlend v0.5.3 - March 1X, 2014
 
-* Project source moved to new URL - https://github.com/galaxyproject/bioblend.
+* Project source moved to new URL - https://github.com/galaxyproject/bioblend .
 
-* Huge improvements to automated testing, tests now run against
-  many older versions of Galaxy to ensure backward compatiblity
+* Huge improvements to automated testing, tests now run against Galaxy
+  release_14.02 and all later versions to ensure backward compatibility
   (see `.travis.yml` for details).
 
-* Many documentation improvements.
+* Many documentation improvements (thanks to Eric Rasche).
 
 * Add Galaxy clients for the tool data tables, the roles, and library
-  folders.
+  folders (thanks to Anthony Bretaudeau).
 
 * Add method to get the standard error and standard output for the
-  job corresponding to a Galaxy dataset.
+  job corresponding to a Galaxy dataset (thanks to Anthony Bretaudeau).
 
-* Add ``get_state`` method to ``JobsClient``.
+* Add ``get_state()`` method to ``JobsClient``.
 
-* Fix ``download_dataset`` for certain proxied Galaxy deployments.
+* Add ``copy_from_dataset()`` method to ``LibraryClient``.
+
+* Add ``create_repository()`` method to ``ToolShedClient`` (thanks to Eric
+  Rasche).
+
+* Fix ``DatasetClient.download_dataset()`` for certain proxied Galaxy
+  deployments.
+
+* Make ``LibraryClient._get_root_folder_id()`` method safer and faster for
+  Galaxy release_13.06 and later.
+
+* Deprecate and ignore invalid ``deleted`` parameter to
+  ``WorkflowClient.get_workflows()``.
 
 * CloudMan: Add method to fetch instance types.
 
@@ -25,28 +37,31 @@
 * BioBlend.objects: Deprecate and ignore invalid ``deleted`` parameter
   to ``ObjWorkflowClient.list()``.
 
-* BioBlend.objects: Add ``History.paste_content()`` method
+* BioBlend.objects: Add ``paste_content()`` method to ``History`` objects.
 
-* BioBlend.objects: Add ``Library.copy_from_dataset()`` methods.
+* BioBlend.objects: Add ``copy_from_dataset()`` method and ``root_folder``
+  property to ``Library`` objects.
 
-* BioBlend.objects: Add methods to get raw response objects.
+* BioBlend.objects: Add ``container`` and ``deleted`` attributes to ``Folder``
+  objects.
 
-* BioBlend.objects: Add ``deleted`` parameter to Folder objects.
+* BioBlend.objects: Set the ``parent`` attribute of a ``Folder`` object to its
+  parent folder object (thanks to John M. Eppley).
 
-* BioBlend.objects: Add ``deleted`` parameter to ``list`` method
+* BioBlend.objects: Add ``deleted`` parameter to ``list()`` method
   of libraries and histories.
 
-* BioBlend.objects: Add ``state`` and ``state_details`` to ``History
-  object.
+* BioBlend.objects: Add ``state`` and ``state_details`` attributes to
+ ``History`` objects (thanks to Gianmauro Cuccuru).
 
 * BioBlend.objects: Rename ``upload_dataset()`` method to ``upload_file()``
-  for History objects.
+  for ``History`` objects.
 
-* BioBlend.objects: Fixes ``ObjLibraryClient.list()`` for Galaxy
-  release_14.08 and earlier.
+* BioBlend.objects: Rename ``input_ids`` and ``output_ids`` attributes of
+  ``Workflow`` objects to ``source_ids`` and ``sink_ids`` respectively.
 
-* BioBlend.objects: Improvements to library handling and root folder
-  determination.
+* Add ``run_bioblend_tests.sh`` script (useful for Continuous Integration
+  testing).
 
 ### BioBlend v0.5.2 - October 17, 2014
 
