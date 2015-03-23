@@ -160,7 +160,7 @@ class CloudManLauncher(object):
                                              ramdisk_id=ramdisk_id,
                                              placement=placement)
             ret['rs'] = rs
-        except EC2ResponseError, e:
+        except EC2ResponseError as e:
             bioblend.log.exception("Problem launching an instance.")
             ret['error'] = "Problem launching an instance."
             return ret
@@ -169,7 +169,7 @@ class CloudManLauncher(object):
                 bioblend.log.info("Launched an instance with ID %s" % rs.instances[0].id)
                 ret['instance_id'] = rs.instances[0].id
                 ret['instance_ip'] = rs.instances[0].ip_address
-            except Exception, e:
+            except Exception as e:
                 bioblend.log.exception("Problem with the launched instance object.")
                 ret['error'] = "Problem with the launched instance object: %s" % e
         return ret
@@ -317,7 +317,7 @@ class CloudManLauncher(object):
                         state['instance_state'] = 'booting'
                 else:
                     state['instance_state'] = inst_state
-        except Exception, e:
+        except Exception as e:
             err = "Problem updating instance '%s' state: %s" % (instance_id, e)
             bioblend.log.error(err)
             state['error'] = err

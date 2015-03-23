@@ -51,7 +51,7 @@ class TestGalaxyLibraries(GalaxyTestBase.GalaxyTestBase):
         pass
 
     def test_upload_from_galaxy_filesystem(self):
-        bnames = ['f%d.txt' % i for i in xrange(2)]
+        bnames = ['f%d.txt' % i for i in range(2)]
         tempdir = tempfile.mkdtemp(prefix='bioblend_test_')
         try:
             fnames = [os.path.join(tempdir, _) for _ in bnames]

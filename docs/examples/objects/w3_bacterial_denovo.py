@@ -53,7 +53,7 @@ params = dict((id_, {'hash_length': v}) for id_, v in zip(ws_ids, lengths))
 
 tool_id = 'velvetg'
 ws_ids = iw.tool_labels_to_ids[tool_id]
-step = iw.steps[iter(ws_ids).next()]  # arbitrarily pick one
+step = iw.steps[next(iter(ws_ids))]  # arbitrarily pick one
 params[tool_id] = {'reads': step.tool_inputs['reads'].copy()}
 params[tool_id]['reads']['ins_length'] = -1
 

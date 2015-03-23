@@ -342,7 +342,7 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
             obj_type
             )
         ids = lambda seq: set(_.id for _ in seq)
-        names = ['test_%s' % uuid.uuid4().hex for _ in xrange(2)]
+        names = ['test_%s' % uuid.uuid4().hex for _ in range(2)]
         objs = []
         try:
             objs = [create(_) for _ in names]
@@ -378,7 +378,7 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
             obj_type
             )
         name = 'test_%s' % uuid.uuid4().hex
-        objs = [create(name) for _ in xrange(2)]
+        objs = [create(name) for _ in range(2)]
         final_name = objs[0].name
         prevs = [_ for _ in get_prevs(name=final_name) if not _.deleted]
         self.assertEqual(len(prevs), len(objs))
@@ -446,7 +446,7 @@ class TestLibrary(GalaxyObjectsTestBase):
         self.__check_datasets([ds])
 
     def test_datasets_from_fs(self):
-        bnames = ['f%d.txt' % i for i in xrange(2)]
+        bnames = ['f%d.txt' % i for i in range(2)]
         dss, fnames = upload_from_fs(self.lib, bnames)
         self.__check_datasets(dss)
         dss, fnames = upload_from_fs(
@@ -470,7 +470,7 @@ class TestLibrary(GalaxyObjectsTestBase):
         self.assertEqual(ds.id, retrieved.id)
 
     def test_get_datasets(self):
-        bnames = ['f%d.txt' % _ for _ in xrange(2)]
+        bnames = ['f%d.txt' % _ for _ in range(2)]
         dss, _ = upload_from_fs(self.lib, bnames)
         retrieved = self.lib.get_datasets()
         self.assertEqual(len(dss), len(retrieved))
@@ -574,7 +574,7 @@ class TestHistory(GalaxyObjectsTestBase):
         self.assertEqual(hda.id, retrieved.id)
 
     def test_get_datasets(self):
-        bnames = ['f%d.txt' % _ for _ in xrange(2)]
+        bnames = ['f%d.txt' % _ for _ in range(2)]
         lib = self.gi.libraries.create('test_%s' % uuid.uuid4().hex)
         lds, _ = upload_from_fs(lib, bnames)
         hdas = [self.hist.import_dataset(_) for _ in lds]
