@@ -206,13 +206,15 @@ class WorkflowClient(Client):
                          ``{'blastn': {'param': 'evalue', 'value': '1e-06'}}``
 
         :type history_id: str
-        :param history_id: The encoded history ID where to store the workflow output.
-                           ``history_id`` OR ``history_name`` should be provided but not both!
+        :param history_id: The encoded history ID where to store the workflow
+          output. Alternatively, ``history_name`` may be specified to create a
+          new history.
 
         :type history_name: str
-        :param history_name: Create a new history with the given name to store the
-                             workflow output. ``history_id`` OR ``history_name``
-                             should be provided but not both!
+        :param history_name: Create a new history with the given name to store
+          the workflow output. If both ``history_id`` and ``history_name`` are
+          provided, ``history_name`` is ignored. If neither is specified, a new
+          'Unnamed history' is created.
 
         :type import_inputs_to_history: bool
         :param import_inputs_to_history: If ``True``, used workflow inputs will be imported
@@ -261,8 +263,6 @@ class WorkflowClient(Client):
             payload['history'] = 'hist_id={0}'.format(history_id)
         elif history_name:
             payload['history'] = history_name
-        else:
-            print "Must provide history_id or history_name argument"
         if import_inputs_to_history is False:
             payload['no_add_to_history'] = True
         return Client._post(self, payload)
