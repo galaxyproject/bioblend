@@ -1,2 +1,2 @@
-from wrappers import *
-from galaxy_instance import GalaxyInstance
+from .wrappers import *
+from .galaxy_instance import GalaxyInstance

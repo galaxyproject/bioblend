@@ -1,11 +1,13 @@
 """
 API for interacting with a CloudMan instance.
 """
-import time
-import requests
 import functools
 import json
+import time
 from urlparse import urlparse
+
+import requests
+
 import bioblend
 from bioblend.cloudman.launch import CloudManLauncher
 from bioblend.util import Bunch

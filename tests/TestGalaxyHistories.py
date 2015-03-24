@@ -1,6 +1,9 @@
 """
 """
-import os, tempfile, shutil, tarfile
+import os
+import shutil
+import tarfile
+import tempfile
 
 import GalaxyTestBase
 import test_util

@@ -1,7 +1,10 @@
 """
 Use ``nose`` to run these unit tests.
 """
-import os, shutil, tempfile
+import os
+import shutil
+import tempfile
+
 import GalaxyTestBase
 import test_util
 

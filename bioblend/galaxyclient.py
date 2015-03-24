@@ -6,11 +6,13 @@ should not use it directly.
 A base representation of an instance
 """
 import base64
+import json
 import urllib2
+
 import poster
 import requests
-import json
-from galaxy.client import ConnectionError
+
+from .galaxy.client import ConnectionError
 
 
 class GalaxyClient(object):

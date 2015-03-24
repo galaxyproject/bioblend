@@ -1,4 +1,6 @@
-import os, time
+import os
+import time
+
 from bioblend import galaxy
 from test_util import unittest
 

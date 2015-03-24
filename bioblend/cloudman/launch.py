@@ -1,10 +1,10 @@
 """
 Setup and launch a CloudMan instance.
 """
-import yaml
 import datetime
 from httplib import HTTP
 from urlparse import urlparse
+import yaml
 
 import boto
 from boto.ec2.regioninfo import RegionInfo

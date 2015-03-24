@@ -1,14 +1,12 @@
 """
 Contains possible interactions with the Galaxy Histories
 """
-import bioblend
-from bioblend.galaxy.client import Client
-from bioblend.galaxy.datasets import DatasetClient
-
 import os
 import re
 import time
 
+import bioblend
+from bioblend.galaxy.client import Client
 
 class HistoryClient(Client):
 

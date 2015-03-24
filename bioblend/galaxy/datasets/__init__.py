@@ -1,14 +1,16 @@
 """
 Contains possible interactions with the Galaxy Datasets
 """
-from bioblend.galaxy.client import Client
-import requests
+import logging
 import os
 import shlex
 import time
-import logging
 import urlparse
 import urllib2
+
+import requests
+
+from bioblend.galaxy.client import Client
 
 log = logging.getLogger(__name__)
 

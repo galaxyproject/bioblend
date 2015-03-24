@@ -7,7 +7,7 @@ import time
 import bioblend
 import bioblend.galaxy
 
-import client
+from . import client
 
 
 # dataset states corresponding to a 'pending' condition
