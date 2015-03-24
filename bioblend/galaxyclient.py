@@ -7,10 +7,11 @@ A base representation of an instance
 """
 import base64
 import json
-import urllib2
 
 import poster
 import requests
+from six.moves.urllib.request import Request, urlopen
+import six
 
 from .galaxy.client import ConnectionError
 
@@ -92,8 +93,8 @@ class GalaxyClient(object):
             payload.update(params)  # merge query string values into request body instead
             poster.streaminghttp.register_openers()
             datagen, headers = poster.encode.multipart_encode(payload)
-            request = urllib2.Request(url, datagen, headers)
-            fp = urllib2.urlopen(request)
+            request = Request(url, datagen, headers)
+            fp = urlopen(request)
             return json.loads(fp.read())
         else:
             payload = json.dumps(payload)
@@ -153,8 +154,8 @@ class GalaxyClient(object):
             if r.status_code != 200:
                 raise Exception("Failed to authenticate user.")
             response = r.json()
-            if isinstance(response, basestring) or isinstance(response, unicode):
-                # bug in tool shed
+            if isinstance(response, (six.string_types, six.text_type)):
+                # bug in Tool Shed
                 response = json.loads(response)
             self._key = response["api_key"]
         return self._key

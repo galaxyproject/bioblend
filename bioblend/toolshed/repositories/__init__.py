@@ -1,7 +1,8 @@
 """
 Interaction with a Tool Shed instance
 """
-import urlparse
+from six.moves.urllib.parse import urljoin
+
 from bioblend.galaxy.client import Client
 
 
@@ -240,7 +241,7 @@ class ToolShedClient(Client):
 
         .. versionadded:: 0.5.2
         """
-        url = urlparse.urljoin(self.url, 'categories')
+        url = urljoin(self.url, 'categories')
         return Client._get(self, url=url)
 
     def update_repository(self, id, tar_ball_path, commit_message=None):

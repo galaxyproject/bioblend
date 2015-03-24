@@ -2,14 +2,14 @@
 Setup and launch a CloudMan instance.
 """
 import datetime
-from httplib import HTTP
-from urlparse import urlparse
 import yaml
 
 import boto
 from boto.ec2.regioninfo import RegionInfo
 from boto.exception import EC2ResponseError, S3ResponseError
 from boto.s3.connection import OrdinaryCallingFormat, S3Connection, SubdomainCallingFormat
+from six.moves.http_client import HTTPConnection
+from six.moves.urllib.parse import urlparse
 
 import bioblend
 from bioblend.util import Bunch
@@ -576,11 +576,11 @@ class CloudManLauncher(object):
         """
         try:
             p = urlparse(url)
-            h = HTTP(p[1])
+            h = HTTPConnection(p[1])
             h.putrequest('HEAD', p[2])
             h.endheaders()
-            r = h.getreply()
-            if r[0] == 200 or r[0] == 401:  # CloudMan UI is pwd protected so include 401
+            r = h.getresponse()
+            if r.status in (200, 401):  # CloudMan UI is pwd protected so include 401
                 return True
         except Exception:
             # No response or no good response

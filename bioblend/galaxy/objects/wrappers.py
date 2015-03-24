@@ -6,9 +6,10 @@ A basic object-oriented interface for Galaxy entities.
 
 import abc
 import collections
-import httplib
 import json
 
+from six.moves import http_client
+import six
 
 import bioblend
 
@@ -35,6 +36,7 @@ __all__ = [
     ]
 
 
+@six.add_metaclass(abc.ABCMeta)
 class Wrapper(object):
     """
     Abstract base class for Galaxy entity wrappers.
@@ -49,7 +51,6 @@ class Wrapper(object):
     attribute.
     """
     BASE_ATTRS = ('id', 'name')
-    __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
     def __init__(self, wrapped, parent=None, gi=None):
@@ -426,7 +427,7 @@ class Workflow(Wrapper):
                 kwargs['history_id'] = history.id
             except AttributeError:
                 raise RuntimeError('history does not have an id')
-        elif isinstance(history, basestring):
+        elif isinstance(history, six.string_types):
             kwargs['history_name'] = history
         else:
             raise TypeError(
@@ -464,6 +465,7 @@ class Workflow(Wrapper):
         self.unmap()
 
 
+@six.add_metaclass(abc.ABCMeta)
 class Dataset(Wrapper):
     """
     Abstract base class for Galaxy datasets.
@@ -471,7 +473,6 @@ class Dataset(Wrapper):
     BASE_ATTRS = Wrapper.BASE_ATTRS + (
         'data_type', 'file_name', 'file_size', 'state', 'deleted', 'file_ext'
         )
-    __metaclass__ = abc.ABCMeta
     POLLING_INTERVAL = 1  # for state monitoring
 
     @abc.abstractmethod
@@ -661,13 +662,13 @@ class LibraryDataset(LibRelatedDataset):
         self.refresh()
 
 
+@six.add_metaclass(abc.ABCMeta)
 class ContentInfo(Wrapper):
     """
     Instances of this class wrap dictionaries obtained by getting
     ``/api/{histories,libraries}/<ID>/contents`` from Galaxy.
     """
     BASE_ATTRS = Wrapper.BASE_ATTRS + ('type',)
-    __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
     def __init__(self, info_dict, gi=None):
@@ -702,12 +703,12 @@ class HistoryContentInfo(ContentInfo):
         return self.gi.histories
 
 
+@six.add_metaclass(abc.ABCMeta)
 class DatasetContainer(Wrapper):
     """
     Abstract base class for dataset containers (histories and libraries).
     """
     BASE_ATTRS = Wrapper.BASE_ATTRS + ('deleted',)
-    __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
     def __init__(self, c_dict, content_infos=None, gi=None):
@@ -835,7 +836,7 @@ class History(DatasetContainer):
         res = self.gi.gi.histories.update_history(
             self.id, name=name, annotation=annotation, **kwds
             )
-        if res != httplib.OK:
+        if res != http_client.OK:
             raise RuntimeError('failed to update history')
         self.refresh()
         return self
@@ -1058,7 +1059,7 @@ class Library(DatasetContainer):
         See :meth:`.upload_data` for info on other params.
         """
         fid = self.__pre_upload(folder)
-        if isinstance(paths, basestring):
+        if isinstance(paths, six.string_types):
             paths = (paths,)
         paths = '\n'.join(paths)
         res = self.gi.gi.libraries.upload_from_galaxy_filesystem(
@@ -1264,6 +1265,7 @@ class Tool(Wrapper):
         return outputs
 
 
+@six.add_metaclass(abc.ABCMeta)
 class Preview(Wrapper):
     """
     Abstract base class for Galaxy entity 'previews'.
@@ -1272,7 +1274,6 @@ class Preview(Wrapper):
     by global getters such as ``/api/libraries``.
     """
     BASE_ATTRS = Wrapper.BASE_ATTRS + ('deleted',)
-    __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
     def __init__(self, pw_dict, gi=None):

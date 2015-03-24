@@ -1,6 +1,8 @@
 import os
 import time
 
+from six.moves import range
+
 from bioblend import galaxy
 from test_util import unittest
 

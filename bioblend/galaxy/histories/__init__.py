@@ -5,6 +5,8 @@ import os
 import re
 import time
 
+import six
+
 import bioblend
 from bioblend.galaxy.client import Client
 
@@ -165,7 +167,7 @@ class HistoryClient(Client):
                             returned; use plain strings for exact matches and
                             None to match all datasets in the history.
         """
-        if isinstance(name_filter, basestring):
+        if isinstance(name_filter, six.string_types):
             name_filter = re.compile(name_filter + '$')
         return [self.show_dataset(history_id, h['id'])
                 for h in self.show_history(history_id, contents=True)

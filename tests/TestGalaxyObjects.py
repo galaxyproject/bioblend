@@ -7,8 +7,10 @@ import socket
 import sys
 import tarfile
 import tempfile
-import urllib2
 import uuid
+
+from six.moves.urllib.request import urlopen
+from six.moves.urllib.error import URLError
 
 import bioblend
 bioblend.set_stream_logger('test', level='INFO')
@@ -74,8 +76,8 @@ SAMPLE_WF_DICT = {
 def is_reachable(url):
     res = None
     try:
-        res = urllib2.urlopen(url, timeout=1)
-    except urllib2.URLError:
+        res = urlopen(url, timeout=1)
+    except URLError:
         return False
     if res is not None:
         res.close()

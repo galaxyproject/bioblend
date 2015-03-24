@@ -4,9 +4,10 @@ API for interacting with a CloudMan instance.
 import functools
 import json
 import time
-from urlparse import urlparse
 
 import requests
+from six.moves import range
+from six.moves.urllib.parse import urlparse
 
 import bioblend
 from bioblend.cloudman.launch import CloudManLauncher
@@ -324,7 +325,7 @@ class GenericVMInstance(object):
         if self.host_name:  # Host name available. Therefore, instance is ready
             return
 
-        for time_left in xrange(vm_ready_timeout, 0, -vm_ready_check_interval):
+        for time_left in range(vm_ready_timeout, 0, -vm_ready_check_interval):
             status = self.get_machine_status()
             if (status['public_ip'] != '' and status['error'] == ''):
                 self._init_instance(status['public_ip'])
