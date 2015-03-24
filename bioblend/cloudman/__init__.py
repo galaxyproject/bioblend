@@ -705,7 +705,6 @@ class CloudManInstance(GenericVMInstance):
         before sending a response.
         """
         req_url = '/'.join([self.cloudman_url, 'root', url])
-        # print "GET request url: %s params: %s timeout: %s" % (req_url, parameters, timeout)
         r = requests.get(req_url, params=parameters, auth=("", self.password), timeout=timeout)
         try:
             json = r.json()

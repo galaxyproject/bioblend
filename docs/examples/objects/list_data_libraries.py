@@ -3,27 +3,28 @@ This example retrieves details of all the Data Libraries available to us and lis
 
 Usage: python list_data_libraries.py <Galaxy_URL> <Galaxy_API_key>
 """
-
+from __future__ import print_function
 import sys
+
 from bioblend.galaxy.objects import GalaxyInstance
 
 if len(sys.argv) != 3:
-    print "Usage: python list_data_libraries.py <Galaxy_URL> <Galaxy_API_key>"
+    print("Usage: python list_data_libraries.py <Galaxy_URL> <Galaxy_API_key>")
     sys.exit(1)
 galaxy_url = sys.argv[1]
 galaxy_key = sys.argv[2]
 
-print "Initiating Galaxy connection"
+print("Initiating Galaxy connection")
 
 gi = GalaxyInstance(galaxy_url, galaxy_key)
 
-print "Retrieving Data Library list"
+print("Retrieving Data Library list")
 
 libraries = gi.libraries.get_previews()
 
 if len(libraries) == 0:
-    print "There are no Data Libraries available."
+    print("There are no Data Libraries available.")
 else:
-    print "\nData Libraries:"
+    print("\nData Libraries:")
     for lib in libraries:
-        print "{0} : {1}".format(lib.name, lib.id)
+        print("{0} : {1}".format(lib.name, lib.id))

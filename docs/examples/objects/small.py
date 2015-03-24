@@ -1,4 +1,8 @@
-import sys, os, tempfile
+from __future__ import print_function
+import os
+import sys
+import tempfile
+
 from bioblend.galaxy.objects import GalaxyInstance
 from common import get_one
 
@@ -37,14 +41,14 @@ input_map = {'input_tsv': ld}
 
 history_name = 'get_col output'
 params = {'Cut1': {'columnList': 'c2'}}
-print 'Running workflow: %s [%s]' % (wf.name, wf.id)
+print('Running workflow: %s [%s]' % (wf.name, wf.id))
 outputs, out_hist = wf.run(input_map, history_name, params=params, wait=True)
-print 'Job has finished'
+print('Job has finished')
 assert out_hist.name == history_name
-print 'Output history: %s [%s]' % (out_hist.name, out_hist.id)
+print('Output history: %s [%s]' % (out_hist.name, out_hist.id))
 
 # Save results to local disk
 out_ds = get_one([_ for _ in outputs if _.name == 'Cut on data 1'])
 with tempfile.NamedTemporaryFile(prefix='bioblend_', delete=False) as f:
     out_ds.download(f)
-print 'Output downloaded to "%s"' % f.name
+print('Output downloaded to "%s"' % f.name)

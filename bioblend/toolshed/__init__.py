@@ -23,7 +23,6 @@ class ToolShedInstance(GalaxyClient):
             ts = toolshed.ToolShedInstance(url='http://testtoolshed.g2.bx.psu.edu')
 
             rl = ts.repositories.get_repositories()
-            print "List of repositories:", rl
 
         :type url: string
         :param url: A FQDN or IP for a given instance of ToolShed. For example:

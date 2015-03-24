@@ -11,8 +11,9 @@ In this case we expect Tophat wrapper 1.5.0 and Cufflinks wrapper 0.0.5.
 
 Usage: python run_imported_workflow.py <galaxy-url> <galaxy-API-key>
 """
-
+from __future__ import print_function
 import sys
+
 from bioblend import galaxy
 
 ## -----------------------------------
@@ -37,26 +38,26 @@ output_history_name = 'Output from API demo'
 ## -----------------------------------
 
 if len(sys.argv) != 3:
-    print "Usage: python run_imported_workflow.py <galaxy-url> <galaxy-API-key>"
+    print("Usage: python run_imported_workflow.py <galaxy-url> <galaxy-API-key>")
     sys.exit(1)
 galaxy_url = sys.argv[1]
 galaxy_key = sys.argv[2]
 
-print "Initiating Galaxy connection"
+print("Initiating Galaxy connection")
 
 gi = galaxy.GalaxyInstance(url=galaxy_url, key=galaxy_key)
 
-print "Importing workflow"
+print("Importing workflow")
 
 wf_import_dict = gi.workflows.import_workflow_from_local_path(workflow_file)
 workflow = wf_import_dict['id']
 
-print "Creating data library '%s'" % library_name
+print("Creating data library '%s'" % library_name)
 
 library_dict = gi.libraries.create_library(library_name)
 library = library_dict['id']
 
-print "Importing data"
+print("Importing data")
 
 # Import each pair of files, and track the resulting identifiers.
 
@@ -70,12 +71,12 @@ for (file1, file2) in import_file_pairs:
     filenames[id2] = file2
     dataset_ids.append((id1, id2))
 
-print "Creating output history '%s'" % output_history_name
+print("Creating output history '%s'" % output_history_name)
 
 outputhist_dict = gi.histories.create_history(output_history_name)
 outputhist = outputhist_dict['id']
 
-print "Will run workflow on %d pairs of files" % len(dataset_ids)
+print("Will run workflow on %d pairs of files" % len(dataset_ids))
 
 # Get the input step IDs from the workflow.
 # We use the BioBlend convenience function get_workflow_inputs to retrieve inputs by label.
@@ -87,7 +88,7 @@ input2 = gi.workflows.get_workflow_inputs(workflow, label='Input fastq readpair-
 # For each input we need to build a datamap dict with 'src' set to 'ld', as we stored our data in a Galaxy Library
 
 for (data1, data2) in dataset_ids:
-    print "Initiating workflow run on files %s, %s" % (filenames[data1], filenames[data2])
+    print("Initiating workflow run on files %s, %s" % (filenames[data1], filenames[data2]))
     datamap = dict()
     datamap[input1] = {'src':'ld', 'id':data1}
     datamap[input2] = {'src':'ld', 'id':data2}

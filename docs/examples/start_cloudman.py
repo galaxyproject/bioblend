@@ -12,6 +12,7 @@ Usage::
 Example:
 python start_cloudman.py "cluster bioblend" pwd SGE m1.small ami-00000032 <access_key> <secret_key>
 """
+from __future__ import print_function
 import sys
 
 from bioblend.util import Bunch
@@ -45,16 +46,16 @@ def start_cloudman(name, pwd, cm_type, inst_type, ami, ak, sk):
     # Create an instance of the CloudManConfig class and launch a CloudMan instance
     cmc = CloudManConfig(ak, sk, name, ami, inst_type, pwd, cloud_metadata=cloud,
       cloudman_type=cm_type, initial_storage_size=2, placement='melbourne-np')
-    print "Configured an instance; waiting to launch and boot..."
+    print("Configured an instance; waiting to launch and boot...")
     cmi = CloudManInstance.launch_instance(cmc)
-    print "Done! CloudMan IP is {0}".format(cmi.cloudman_url)
+    print("Done! CloudMan IP is {0}".format(cmi.cloudman_url))
     return cmc, cmi
 
 if __name__ == "__main__":
     if len(sys.argv) != 8:
-        print "\nUsage:\n"\
+        print("\nUsage:\n"\
             "python start_cloudman.py <cluster_name> <password> <cm_type> "\
-            "<instance_type> <AMI> <access_key> <secret_key>"
+            "<instance_type> <AMI> <access_key> <secret_key>")
         sys.exit(1)
     cml, cm = start_cloudman(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4],
             sys.argv[5], sys.argv[6], sys.argv[7])

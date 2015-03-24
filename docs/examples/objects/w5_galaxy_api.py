@@ -1,4 +1,8 @@
-import sys, os, json, urlparse
+from __future__ import print_function
+import json
+import os
+import sys
+import urlparse
 
 # This example, provided for comparison with w5_metagenomics.py,
 # contains the code required to run the metagenomics workflow
@@ -79,5 +83,5 @@ data['ds_map'] = {input_step_id: {'src': 'ld', 'id' : ld['id']}}
 data['history'] = history_name
 r_dict = common.post(API_KEY, '%s/workflows' % API_URL, data)
 
-print 'Running workflow: %s [%s]' % (iw['name'], iw['id'])
-print 'Output history: %s [%s]' % (history_name, r_dict['history'])
+print('Running workflow: %s [%s]' % (iw['name'], iw['id']))
+print('Output history: %s [%s]' % (history_name, r_dict['history']))

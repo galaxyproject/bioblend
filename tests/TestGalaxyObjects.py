@@ -1,18 +1,24 @@
 # pylint: disable=C0103,E1101
-
-import sys, os, json, uuid, tempfile, tarfile, urllib2, shutil
-from test_util import unittest
+from __future__ import print_function
+import json
+import os
+import shutil
 import socket
-socket.setdefaulttimeout(10.0)
+import sys
+import tarfile
+import tempfile
+import urllib2
+import uuid
 
 import bioblend
 bioblend.set_stream_logger('test', level='INFO')
 import bioblend.galaxy.objects.wrappers as wrappers
 import bioblend.galaxy.objects.galaxy_instance as galaxy_instance
 from bioblend.galaxy.client import ConnectionError
+from test_util import unittest
 import test_util
 
-
+socket.setdefaulttimeout(10.0)
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 SAMPLE_FN = os.path.join(THIS_DIR, 'data', 'paste_columns.ga')
 FOO_DATA = 'foo\nbar\n'
@@ -304,7 +310,7 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
             self.assertIsInstance(imported, wrappers.Workflow)
             imported.delete()
         else:
-            print "skipped 'manually publish a workflow to run this test'"
+            print("skipped 'manually publish a workflow to run this test'")
 
     def test_get_libraries(self):
         self.__test_multi_get('library')
@@ -436,7 +442,7 @@ class TestLibrary(GalaxyObjectsTestBase):
             ds = self.lib.upload_from_url(self.DS_URL)
             self.__check_datasets([ds])
         else:
-            print "skipped 'url not reachable'"
+            print("skipped 'url not reachable'")
 
     def test_dataset_from_local(self):
         with tempfile.NamedTemporaryFile(prefix='bioblend_test_') as f:
