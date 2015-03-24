@@ -4,9 +4,13 @@
 A basic object-oriented interface for Galaxy entities.
 """
 
-import bioblend
-import abc, collections, httplib, json
+import abc
+import collections
+import httplib
+import json
 
+
+import bioblend
 
 __all__ = [
     'Wrapper',
@@ -524,7 +528,7 @@ class Dataset(Wrapper):
         See :meth:`.get_stream` for param info.
         """
         try:
-            return self.get_stream(chunk_size=chunk_size).next()
+            return next(self.get_stream(chunk_size=chunk_size))
         except StopIteration:
             return ''
 

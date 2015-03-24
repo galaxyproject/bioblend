@@ -9,7 +9,7 @@ __version__ = '0.5.4-dev'
 try:
     import resource
     CHUNK_SIZE = resource.getpagesize()
-except StandardError:
+except Exception:
     CHUNK_SIZE = 4096
 
 

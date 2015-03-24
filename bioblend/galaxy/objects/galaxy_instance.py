@@ -21,7 +21,7 @@ def _get_error_info(hda):
     try:
         msg += ' (%s): ' % hda.name
         msg += hda.wrapped['misc_info']
-    except StandardError:  # avoid 'error while generating an error report'
+    except Exception:  # avoid 'error while generating an error report'
         msg += ': error'
     return msg
 

@@ -21,7 +21,7 @@ class CollectionDescription(HasElements):
         return dict(
             name=self.name,
             collection_type=self.type,
-            element_identifiers=map(lambda e: e.to_dict(), self.elements)
+            element_identifiers=[e.to_dict() for e in self.elements]
         )
 
 
@@ -32,7 +32,7 @@ class CollectionElement(HasElements):
             src="new_collection",
             name=self.name,
             collection_type=self.type,
-            element_identifiers=map(lambda e: e.to_dict(), self.elements)
+            element_identifiers=[e.to_dict() for e in self.elements]
         )
 
 

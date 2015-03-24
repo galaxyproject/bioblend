@@ -28,7 +28,12 @@ sys.path.append('../')
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.todo', 'sphinx.ext.coverage', 'sphinx.ext.viewcode']
+extensions = [
+    'sphinx.ext.autodoc',
+    'sphinx.ext.todo',
+    'sphinx.ext.coverage',
+    'sphinx.ext.viewcode'
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -43,8 +48,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'BioBlend'
-copyright = u'2012, Enis Afgan'
+project = 'BioBlend'
+copyright = '2012-2015, Enis Afgan'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -198,8 +203,8 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'BioBlend.tex', u'BioBlend Documentation',
-   u'Enis Afgan', 'manual'),
+  ('index', 'BioBlend.tex', 'BioBlend Documentation',
+   'Enis Afgan', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -228,8 +233,8 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'bioblend', u'BioBlend Documentation',
-     [u'Enis Afgan'], 1)
+    ('index', 'bioblend', 'BioBlend Documentation',
+     ['Enis Afgan'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -242,8 +247,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'BioBlend', u'BioBlend Documentation',
-   u'Enis Afgan', 'BioBlend', 'One line description of project.',
+  ('index', 'BioBlend', 'BioBlend Documentation',
+   'Enis Afgan', 'BioBlend', 'One line description of project.',
    'Miscellaneous'),
 ]
 

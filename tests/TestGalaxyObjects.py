@@ -24,50 +24,50 @@ SAMPLE_FN = os.path.join(THIS_DIR, 'data', 'paste_columns.ga')
 FOO_DATA = 'foo\nbar\n'
 FOO_DATA_2 = 'foo2\nbar2\n'
 SAMPLE_WF_DICT = {
-    u'deleted': False,
-    u'id': u'9005c5112febe774',
-    u'inputs': {
-        u'571': {u'label': u'Input Dataset', u'value': u''},
-        u'572': {u'label': u'Input Dataset', u'value': u''},
+    'deleted': False,
+    'id': '9005c5112febe774',
+    'inputs': {
+        '571': {'label': 'Input Dataset', 'value': ''},
+        '572': {'label': 'Input Dataset', 'value': ''},
         },
-    u'model_class': u'StoredWorkflow',
-    u'name': u'paste_columns',
-    u'published': False,
-    u'steps': {
-        u'571': {
-            u'id': 571,
-            u'input_steps': {},
-            u'tool_id': None,
-            u'tool_inputs': {u'name': u'Input Dataset'},
-            u'tool_version': None,
-            u'type': u'data_input',
+    'model_class': 'StoredWorkflow',
+    'name': 'paste_columns',
+    'published': False,
+    'steps': {
+        '571': {
+            'id': 571,
+            'input_steps': {},
+            'tool_id': None,
+            'tool_inputs': {'name': 'Input Dataset'},
+            'tool_version': None,
+            'type': 'data_input',
             },
-        u'572': {
-            u'id': 572,
-            u'input_steps': {},
-            u'tool_id': None,
-            u'tool_inputs': {u'name': u'Input Dataset'},
-            u'tool_version': None,
-            u'type': u'data_input',
+        '572': {
+            'id': 572,
+            'input_steps': {},
+            'tool_id': None,
+            'tool_inputs': {'name': 'Input Dataset'},
+            'tool_version': None,
+            'type': 'data_input',
             },
-        u'573': {
-            u'id': 573,
-            u'input_steps': {
-                u'input1': {u'source_step': 571, u'step_output': u'output'},
-                u'input2': {u'source_step': 572, u'step_output': u'output'},
+        '573': {
+            'id': 573,
+            'input_steps': {
+                'input1': {'source_step': 571, 'step_output': 'output'},
+                'input2': {'source_step': 572, 'step_output': 'output'},
                 },
-            u'tool_id': u'Paste1',
-            u'tool_inputs': {
-                u'delimiter': u'"T"',
-                u'input1': u'null',
-                u'input2': u'null',
+            'tool_id': 'Paste1',
+            'tool_inputs': {
+                'delimiter': '"T"',
+                'input1': 'null',
+                'input2': 'null',
                 },
-            u'tool_version': u'1.0.0',
-            u'type': u'tool',
+            'tool_version': '1.0.0',
+            'type': 'tool',
             }
         },
-    u'tags': [],
-    u'url': u'/api/workflows/9005c5112febe774',
+    'tags': [],
+    'url': '/api/workflows/9005c5112febe774',
     }
 
 
