@@ -169,6 +169,8 @@ class CloudManLauncher(object):
                 bioblend.log.info("Launched an instance with ID %s" % rs.instances[0].id)
                 ret['instance_id'] = rs.instances[0].id
                 ret['instance_ip'] = rs.instances[0].ip_address
+            except (KeyboardInterrupt, SystemExit):  # for Python 2
+                raise
             except Exception as e:
                 bioblend.log.exception("Problem with the launched instance object.")
                 ret['error'] = "Problem with the launched instance object: %s" % e
@@ -317,6 +319,8 @@ class CloudManLauncher(object):
                         state['instance_state'] = 'booting'
                 else:
                     state['instance_state'] = inst_state
+        except (KeyboardInterrupt, SystemExit):  # for Python 2
+            raise
         except Exception as e:
             err = "Problem updating instance '%s' state: %s" % (instance_id, e)
             bioblend.log.error(err)
@@ -520,6 +524,8 @@ class CloudManLauncher(object):
                         # No need to continue to iterate through
                         # filesystems, if we found one with a volume.
                         break
+            except (KeyboardInterrupt, SystemExit):  # for Python 2
+                raise
             except Exception:
                 bioblend.log.exception("Exception while finding placement.  This can indicate malformed instance data.  Or that this method is broken.")
                 placement = None
@@ -582,6 +588,8 @@ class CloudManLauncher(object):
             r = h.getresponse()
             if r.status in (200, 401):  # CloudMan UI is pwd protected so include 401
                 return True
+        except (KeyboardInterrupt, SystemExit):  # for Python 2
+            raise
         except Exception:
             # No response or no good response
             pass
