@@ -8,6 +8,8 @@ import abc
 import collections
 import json
 
+import six
+
 import bioblend
 from . import wrappers
 
@@ -315,7 +317,7 @@ class ObjWorkflowClient(ObjClient):
         """
         for id_ in self._select_ids(id_=id_, name=name):
             res = self.gi.workflows.delete_workflow(id_)
-            if not isinstance(res, basestring):
+            if not isinstance(res, six.string_types):
                 self._error('delete_workflow: unexpected reply: %r' % (res,))
 
 

@@ -5,10 +5,11 @@ import logging
 import os
 import shlex
 import time
-import urlparse
-import urllib2
 
 import requests
+from six.moves import range
+from six.moves.urllib.parse import urljoin
+from six.moves.urllib.request import urlopen
 
 from bioblend.galaxy.client import Client
 
@@ -99,7 +100,7 @@ class DatasetClient(Client):
             # This is Galaxy release_15.01 or earlier, for which the preferred
             # URL does not work without a key, so resort to the old URL
             download_url = 'datasets/' + dataset_id + '/display?to_ext=' + file_ext
-        url = urlparse.urljoin(self.gi.base_url, download_url)
+        url = urljoin(self.gi.base_url, download_url)
 
         # Don't use self.gi.make_get_request as currently the download API does
         # not require a key
@@ -143,7 +144,7 @@ class DatasetClient(Client):
         assert maxwait > interval
         assert interval > 0
 
-        for time_left in xrange(maxwait, 0, -interval):
+        for time_left in range(maxwait, 0, -interval):
             if self._is_dataset_complete(dataset_id):
                 return
             log.warn("Waiting for dataset %s to complete. Will wait another %is" % (dataset_id, time_left))
@@ -159,7 +160,7 @@ class DatasetClient(Client):
         :type dataset_id: str
         :param dataset_id: Encoded dataset ID
         """
-        res = urllib2.urlopen(self.url[:-len("/api/datasets/")+1]+"/datasets/"+dataset_id+"/stderr")
+        res = urlopen(self.url[:-len("/api/datasets/")+1]+"/datasets/"+dataset_id+"/stderr")
         return res.read()
 
     def show_stdout(self, dataset_id):
@@ -169,7 +170,7 @@ class DatasetClient(Client):
         :type dataset_id: str
         :param dataset_id: Encoded dataset ID
         """
-        res = urllib2.urlopen(self.url[:-len("/api/datasets/")+1]+"/datasets/"+dataset_id+"/stdout")
+        res = urlopen(self.url[:-len("/api/datasets/")+1]+"/datasets/"+dataset_id+"/stdout")
         return res.read()
 
 

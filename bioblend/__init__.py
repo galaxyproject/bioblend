@@ -1,5 +1,6 @@
-import os
 import logging
+import os
+
 from bioblend.config import Config, BioBlendConfigLocations
 
 # Current version of the library
@@ -27,9 +28,9 @@ def init_logging():
     """
     Initialize BioBlend's logging from a configuration file.
     """
-    for file in BioBlendConfigLocations:
+    for config_file in BioBlendConfigLocations:
         try:
-            logging.config.fileConfig(os.path.expanduser(file))
+            logging.config.fileConfig(os.path.expanduser(config_file))
         except:
             pass
 

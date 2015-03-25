@@ -1,7 +1,8 @@
 """
 A base representation of an instance of Galaxy
 """
-import urlparse
+from six.moves.urllib.parse import urljoin, urlparse
+
 from bioblend.galaxy.client import Client
 from bioblend.galaxy import (libraries, histories, workflows, datasets, users,
                              genomes, tools, toolshed, config, visual, quotas,
@@ -49,11 +50,11 @@ class GalaxyInstance(GalaxyClient):
 
         """
         # Make sure the url scheme is defined (otherwise requests will not work)
-        if not urlparse.urlparse(url).scheme:
+        if not urlparse(url).scheme:
             url = "http://" + url
         # All of Galaxy's API's are rooted at <url>/api so make that the base url
         self.base_url = url
-        self.url = urlparse.urljoin(url, 'api')
+        self.url = urljoin(url, 'api')
         self._init_auth(key, email, password)
         self.json_headers = {'Content-Type': 'application/json'}
         self.verify = False  # Should SSL verification be done
