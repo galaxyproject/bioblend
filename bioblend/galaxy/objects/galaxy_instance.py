@@ -21,6 +21,8 @@ def _get_error_info(hda):
     try:
         msg += ' (%s): ' % hda.name
         msg += hda.wrapped['misc_info']
+    except (KeyboardInterrupt, SystemExit):  # for Python 2
+        raise
     except Exception:  # avoid 'error while generating an error report'
         msg += ': error'
     return msg
