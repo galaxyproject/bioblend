@@ -131,7 +131,7 @@ class ToolClient(Client):
         if "file_name" not in keywords:
             keywords["file_name"] = default_file_name
         payload = self._upload_payload(history_id, **keywords)
-        payload["files_0|file_data"] = open(path, "rb")
+        payload["files_0|file_data"] = self.gi.attach_file(path, name=keywords["file_name"])
         return self._tool_post(payload, files_attached=True)
 
     def paste_content(self, content, history_id, **kwds):

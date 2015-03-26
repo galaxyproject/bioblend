@@ -7,16 +7,32 @@ A base representation of an instance
 """
 import base64
 import json
+import os
 
-import poster
 import requests
-from six.moves.urllib.request import Request, urlopen
+from requests_toolbelt import MultipartEncoder
 import six
 
 from .galaxy.client import ConnectionError
 
 
 class GalaxyClient(object):
+
+    def attach_file(self, path, name=None):
+        """
+        Attach a path to a request payload object.
+
+        :type path: string
+        :param path: Path to file to attach to payload.
+
+        :type name: string
+        :param name: Name to give file, if different than actual pathname.
+        """
+        if name is None:
+            name = os.path.basename(path)
+        attachment = (name, open(path, "rb"))
+        return attachment
+
     def _make_url(self, module, module_id=None, deleted=False, contents=False):
         """
         Compose a URL based on the provided arguments.
@@ -90,21 +106,23 @@ class GalaxyClient(object):
             params = self.default_params
 
         if files_attached:
-            payload.update(params)  # merge query string values into request body instead
-            poster.streaminghttp.register_openers()
-            datagen, headers = poster.encode.multipart_encode(payload)
-            request = Request(url, datagen, headers)
-            fp = urlopen(request)
-            return json.loads(fp.read())
+            payload.update(params)
+            payload = MultipartEncoder(fields=payload)
+            headers = self.json_headers.copy()
+            headers['Content-Type'] = payload.content_type
+            params = {}
         else:
             payload = json.dumps(payload)
-            r = requests.post(url, data=payload, headers=self.json_headers,
-                              verify=self.verify, params=params)
-            if r.status_code == 200:
-                return r.json()
-            # @see self.body for HTTP response body
-            raise ConnectionError("Unexpected response from galaxy: %s" %
-                                  r.status_code, body=r.text)
+            headers = self.json_headers
+            params = params
+
+        r = requests.post(url, data=payload, headers=headers,
+                          verify=self.verify, params=params)
+        if r.status_code == 200:
+            return r.json()
+        # @see self.body for HTTP response body
+        raise ConnectionError("Unexpected response from galaxy: %s" %
+                              r.status_code, body=r.text)
 
     def make_delete_request(self, url, payload=None, params=None):
         """

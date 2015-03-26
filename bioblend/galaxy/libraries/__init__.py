@@ -269,7 +269,7 @@ class LibraryClient(Client):
             payload['server_dir'] = keywords['server_dir']
         elif keywords.get('file_local_path', None) is not None:
             payload['upload_option'] = 'upload_file'
-            payload['files_0|file_data'] = open(keywords['file_local_path'], 'rb')
+            payload['files_0|file_data'] = self.gi.attach_file(keywords['file_local_path'])
             files_attached = True
         elif keywords.get("filesystem_paths", None) is not None:
             payload["upload_option"] = "upload_paths"

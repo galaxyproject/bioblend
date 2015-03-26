@@ -275,7 +275,7 @@ class ToolShedClient(Client):
         payload = {}
         if commit_message is not None:
             payload['commit_message'] = commit_message
-        payload["file"] = open(tar_ball_path, "rb")
+        payload["file"] = self.gi.attach_file(tar_ball_path)
         return Client._post(self, id=id, payload=payload, files_attached=True, url=url)
 
     def create_repository(self, name, synopsis, description=None, type="unrestricted",
