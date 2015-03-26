@@ -132,7 +132,10 @@ class ToolClient(Client):
             keywords["file_name"] = default_file_name
         payload = self._upload_payload(history_id, **keywords)
         payload["files_0|file_data"] = self.gi.attach_file(path, name=keywords["file_name"])
-        return self._tool_post(payload, files_attached=True)
+        try:
+            return self._tool_post(payload, files_attached=True)
+        finally:
+            payload["files_0|file_data"][1].close()
 
     def paste_content(self, content, history_id, **kwds):
         """

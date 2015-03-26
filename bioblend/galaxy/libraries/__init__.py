@@ -275,13 +275,12 @@ class LibraryClient(Client):
             payload["upload_option"] = "upload_paths"
             payload["filesystem_paths"] = keywords["filesystem_paths"]
 
-        r = Client._post(self, payload, id=library_id, contents=True,
-                         files_attached=files_attached)
-
-        if payload.get('files_0|file_data', None) is not None:
-            payload['files_0|file_data'].close()
-
-        return r
+        try:
+            return Client._post(self, payload, id=library_id, contents=True,
+                                files_attached=files_attached)
+        finally:
+            if payload.get('files_0|file_data', None) is not None:
+                payload['files_0|file_data'][1].close()
 
     def upload_file_from_url(self, library_id, file_url, folder_id=None, file_type='auto', dbkey='?'):
         """
