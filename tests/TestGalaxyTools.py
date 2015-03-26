@@ -64,7 +64,10 @@ class TestGalaxyTools(GalaxyTestBase.GalaxyTestBase):
             file_type="txt",
         )
         self.assertEqual(len(tool_output["outputs"]), 1)
-        self.assertEqual(tool_output['outputs'][0]['name'], file_name)
+        output = tool_output['outputs'][0]
+        self.assertEqual(output['name'], file_name)
+        expected_contents = open(fn, "rb").read()
+        self._wait_and_verify_dataset(history["id"], output["id"], expected_contents)
 
     @test_util.skip_unless_tool("random_lines1")
     def test_run_random_lines(self):
