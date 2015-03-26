@@ -101,6 +101,16 @@ and workflow execution.
 
     api_docs/galaxy/*
 
+Toolshed API
+~~~~~~~~~~
+
+API used to interact with the Galaxy Toolshed, including repository management.
+
+.. toctree::
+    :maxdepth: 3
+    :glob:
+
+    api_docs/toolshed/*
 
 Configuration
 =============
