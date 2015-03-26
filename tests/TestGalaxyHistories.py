@@ -104,11 +104,7 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
     def test_download_dataset(self):
         history_id = self.history["id"]
         dataset1_id = self._test_dataset(history_id)
-        self._wait_for_history(history_id)
-        with tempfile.NamedTemporaryFile(prefix='bioblend_test_') as f:
-            self.gi.histories.download_dataset(history_id, dataset1_id, file_path=f.name, use_default_filename=False)
-            f.flush()
-            self.assertEqual(f.read(), "1\t2\t3\n")
+        self._wait_and_verify_dataset(history_id, dataset1_id, "1\t2\t3\n")
 
     def test_delete_history(self):
         result = self.gi.histories.delete_history(self.history['id'])

@@ -4,6 +4,7 @@ Interaction with a Tool Shed instance
 from six.moves.urllib.parse import urljoin
 
 from bioblend.galaxy.client import Client
+from bioblend.util import attach_file
 
 
 class ToolShedClient(Client):
@@ -275,8 +276,11 @@ class ToolShedClient(Client):
         payload = {}
         if commit_message is not None:
             payload['commit_message'] = commit_message
-        payload["file"] = open(tar_ball_path, "rb")
-        return Client._post(self, id=id, payload=payload, files_attached=True, url=url)
+        payload["file"] = attach_file(tar_ball_path)
+        try:
+            return Client._post(self, id=id, payload=payload, files_attached=True, url=url)
+        finally:
+            payload["file"].close()
 
     def create_repository(self, name, synopsis, description=None, type="unrestricted",
                           remote_repository_url=None, homepage_url=None,

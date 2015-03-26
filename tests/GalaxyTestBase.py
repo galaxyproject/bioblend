@@ -1,5 +1,6 @@
 import os
 import time
+import tempfile
 
 from six.moves import range
 
@@ -32,3 +33,10 @@ class GalaxyTestBase(unittest.TestCase):
                 return
             time.sleep(1)
         raise Exception('Timeout expired while waiting for history')
+
+    def _wait_and_verify_dataset(self, history_id, dataset_id, expected_contents):
+        self._wait_for_history(history_id)
+        with tempfile.NamedTemporaryFile(prefix='bioblend_test_') as f:
+            self.gi.histories.download_dataset(history_id, dataset_id, file_path=f.name, use_default_filename=False)
+            f.flush()
+            self.assertEqual(f.read(), expected_contents)
