@@ -89,19 +89,22 @@ class GalaxyClient(object):
         else:
             params = self.default_params
 
+        # Compute data, headers, params arguments for request.post,
+        # leveraging the requests-toolbelt library if any files have
+        # been attached.
         if files_attached:
             payload.update(params)
             payload = MultipartEncoder(fields=payload)
             headers = self.json_headers.copy()
             headers['Content-Type'] = payload.content_type
-            params = {}
+            post_params = {}
         else:
             payload = json.dumps(payload)
             headers = self.json_headers
-            params = params
+            post_params = params
 
         r = requests.post(url, data=payload, headers=headers,
-                          verify=self.verify, params=params)
+                          verify=self.verify, params=post_params)
         if r.status_code == 200:
             return r.json()
         # @see self.body for HTTP response body
