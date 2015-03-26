@@ -7,7 +7,6 @@ A base representation of an instance
 """
 import base64
 import json
-import os
 
 import requests
 from requests_toolbelt import MultipartEncoder
@@ -17,21 +16,6 @@ from .galaxy.client import ConnectionError
 
 
 class GalaxyClient(object):
-
-    def attach_file(self, path, name=None):
-        """
-        Attach a path to a request payload object.
-
-        :type path: string
-        :param path: Path to file to attach to payload.
-
-        :type name: string
-        :param name: Name to give file, if different than actual pathname.
-        """
-        if name is None:
-            name = os.path.basename(path)
-        attachment = (name, open(path, "rb"))
-        return attachment
 
     def _make_url(self, module, module_id=None, deleted=False, contents=False):
         """

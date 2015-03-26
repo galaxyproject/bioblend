@@ -2,6 +2,7 @@
 Contains possible interactions with the Galaxy Data Libraries
 """
 from bioblend.galaxy.client import Client
+from bioblend.util import attach_file
 
 
 class LibraryClient(Client):
@@ -269,7 +270,7 @@ class LibraryClient(Client):
             payload['server_dir'] = keywords['server_dir']
         elif keywords.get('file_local_path', None) is not None:
             payload['upload_option'] = 'upload_file'
-            payload['files_0|file_data'] = self.gi.attach_file(keywords['file_local_path'])
+            payload['files_0|file_data'] = attach_file(keywords['file_local_path'])
             files_attached = True
         elif keywords.get("filesystem_paths", None) is not None:
             payload["upload_option"] = "upload_paths"
@@ -280,7 +281,7 @@ class LibraryClient(Client):
                                 files_attached=files_attached)
         finally:
             if payload.get('files_0|file_data', None) is not None:
-                payload['files_0|file_data'][1].close()
+                payload['files_0|file_data'].close()
 
     def upload_file_from_url(self, library_id, file_url, folder_id=None, file_type='auto', dbkey='?'):
         """

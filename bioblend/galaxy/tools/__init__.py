@@ -3,6 +3,7 @@ Contains possible interaction dealing with Galaxy tools.
 
 """
 from bioblend.galaxy.client import Client
+from bioblend.util import attach_file
 from os.path import basename
 from json import dumps
 
@@ -131,11 +132,11 @@ class ToolClient(Client):
         if "file_name" not in keywords:
             keywords["file_name"] = default_file_name
         payload = self._upload_payload(history_id, **keywords)
-        payload["files_0|file_data"] = self.gi.attach_file(path, name=keywords["file_name"])
+        payload["files_0|file_data"] = attach_file(path, name=keywords["file_name"])
         try:
             return self._tool_post(payload, files_attached=True)
         finally:
-            payload["files_0|file_data"][1].close()
+            payload["files_0|file_data"].close()
 
     def paste_content(self, content, history_id, **kwds):
         """
