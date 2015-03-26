@@ -100,9 +100,10 @@ class ToolShedClient(Client):
 
         :rtype: List of dictionaries
         :return: Returns a list of the following dictionaries:
-        a dictionary defining the repository
-        a dictionary defining the repository revision (RepositoryMetadata)
-        a dictionary including the additional information required to install the repository
+                  - a dictionary defining the repository
+                  - a dictionary defining the repository revision (RepositoryMetadata)
+                  - a dictionary including the additional information required to
+                    install the repository
 
                  For example::
 
@@ -168,7 +169,7 @@ class ToolShedClient(Client):
         url = self.gi.url + '/repository_revisions'
         params = {}
 
-        #nice and long... my god!
+        # nice and long... my god!
         if downloadable:
             params['downloadable'] = 'True'
         if malicious:
