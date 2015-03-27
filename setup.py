@@ -1,8 +1,5 @@
 # http://bugs.python.org/issue15881#msg170215
-try:
-    import multiprocessing
-except ImportError:
-    pass
+import multiprocessing  # noqa
 
 import ast
 import os.path
@@ -44,5 +41,4 @@ setup(name="bioblend",
                    "Programming Language :: Python :: 2",
                    "Programming Language :: Python :: 2.6",
                    "Programming Language :: Python :: 2.7"],
-      test_suite='nose.collector',
-      )
+      test_suite='nose.collector')

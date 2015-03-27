@@ -10,7 +10,6 @@ class FoldersClient(Client):
         self.module = 'folders'
         super(FoldersClient, self).__init__(galaxy_instance)
 
-
     def show_folder(self, folder_id):
         """
         Display information about a folder.

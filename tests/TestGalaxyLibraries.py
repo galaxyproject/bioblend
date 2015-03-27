@@ -10,6 +10,7 @@ import test_util
 
 FOO_DATA = 'foo\nbar\n'
 
+
 @test_util.skip_unless_galaxy()
 class TestGalaxyLibraries(GalaxyTestBase.GalaxyTestBase):
 

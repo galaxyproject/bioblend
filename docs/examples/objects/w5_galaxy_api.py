@@ -77,10 +77,10 @@ ws_parameters['db_opts']['database'] = '16SMicrobial-20131106'
 data = {
     'workflow_id': iw['id'],
     'parameters': {tool_id: {'db_opts': ws_parameters['db_opts']}},
-    }
+}
 assert len(iw_details['inputs']) == 1
 input_step_id = iw_details['inputs'].keys()[0]
-data['ds_map'] = {input_step_id: {'src': 'ld', 'id' : ld['id']}}
+data['ds_map'] = {input_step_id: {'src': 'ld', 'id': ld['id']}}
 data['history'] = history_name
 r_dict = common.post(API_KEY, '%s/workflows' % API_URL, data)
 

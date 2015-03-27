@@ -37,21 +37,21 @@ ds_names = [
     '/Whole genome - Escherichia coli/E coli DH10B MiSeq R1.fastq',
     '/Whole genome - Escherichia coli/E coli DH10B MiSeq R2.fastq',
     '/Whole genome - Escherichia coli/E coli DH10B - Reference',
-    ]
+]
 input_labels = [
     'Forward Reads',
     'Reverse Reads',
     'Reference Genome',
-    ]
+]
 input_map = dict((label, h.import_dataset(get_one(l.get_datasets(name=name))))
-                  for name, label in zip(ds_names, input_labels))
+                 for name, label in zip(ds_names, input_labels))
 
 # Set custom parameters for the "check_contigs" and "sspace" tools
 
 params = {
     'check_contigs': {'genomesize': 5.0},  # affects both occurrences
     'sspace': {'insert': 300, 'error': 0.5, 'minoverlap': 35},
-    }
+}
 
 # Run the workflow on a new history with the selected datasets as inputs
 

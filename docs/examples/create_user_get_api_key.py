@@ -15,7 +15,7 @@ if len(sys.argv) != 6:
 galaxy_url = sys.argv[1]
 galaxy_api_key = sys.argv[2]
 
-#Initiating Galaxy connection
+# Initiating Galaxy connection
 gi = bioblend.galaxy.GalaxyInstance(galaxy_url, galaxy_api_key)
 
 # Create a new user and get a new API key for her

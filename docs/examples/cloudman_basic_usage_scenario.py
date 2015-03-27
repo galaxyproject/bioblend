@@ -5,30 +5,30 @@ password = "password"
 cm = cloudman.CloudManInstance(url, password)
 
 # Expects CloudMan to be running locally
-## Set cluster type and storage size
+# Set cluster type and storage size
 cm.initialize(type="SGE")
 
-## Get cluster status
+# Get cluster status
 status = cm.get_status()
 
-## Get nodes
+# Get nodes
 nodes = cm.get_nodes()
 # There should be a master node
 
-## Add node
+# Add node
 num_nodes = 1
 status = cm.add_nodes(num_nodes)
 
-## Remove nodes
+# Remove nodes
 status = cm.remove_nodes(num_nodes, force=True)
 
 instance_id = "abcdef"
 cm.remove_node(instance_id, force=True)
 
-## Reboot instance
+# Reboot instance
 cm.reboot_node(instance_id)
 
-## Autoscaling
+# Autoscaling:
 # enable
 cm.disable_autoscaling()
 cm.enable_autoscaling(minimum_nodes=0, maximum_nodes=19)
@@ -48,6 +48,5 @@ cm.disable_autoscaling()
 # autoscaling should be disabled
 cm.autoscaling_enabled()
 
-## Get Galaxy DNS/Host
-galaxy_state = cm.get_galaxy_state() #RUNNING, STARTING.....
-
+# Get Galaxy DNS/Host
+galaxy_state = cm.get_galaxy_state()  # RUNNING, STARTING.....

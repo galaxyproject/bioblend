@@ -18,6 +18,7 @@ matrix:
 install:
   - python setup.py install
   - cp run_galaxy.sh $HOME
+  - pip install flake8
 
 before_script:
   # Install Galaxy
@@ -50,4 +51,4 @@ before_script:
 
 script:
   # Run nosetests through setuptools, so it will install test depedencies
-  - cd $TRAVIS_BUILD_DIR && python setup.py test
+  - cd $TRAVIS_BUILD_DIR && find . -name '*.py' -exec flake8 {} + && python setup.py test

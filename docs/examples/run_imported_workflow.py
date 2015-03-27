@@ -16,9 +16,6 @@ import sys
 
 from bioblend import galaxy
 
-## -----------------------------------
-## Config information for this example
-
 # Specify workflow and data to import into Galaxy
 
 workflow_file = 'tophat_cufflinks_pairedend_workflow.ga'
@@ -34,8 +31,6 @@ import_file_pairs = [
 
 library_name = 'Imported data for API demo'
 output_history_name = 'Output from API demo'
-
-## -----------------------------------
 
 if len(sys.argv) != 3:
     print("Usage: python run_imported_workflow.py <galaxy-url> <galaxy-API-key>")
@@ -90,6 +85,6 @@ input2 = gi.workflows.get_workflow_inputs(workflow, label='Input fastq readpair-
 for (data1, data2) in dataset_ids:
     print("Initiating workflow run on files %s, %s" % (filenames[data1], filenames[data2]))
     datamap = dict()
-    datamap[input1] = {'src':'ld', 'id':data1}
-    datamap[input2] = {'src':'ld', 'id':data2}
+    datamap[input1] = {'src': 'ld', 'id': data1}
+    datamap[input2] = {'src': 'ld', 'id': data2}
     result = gi.workflows.run_workflow(workflow, datamap, history_id=outputhist, import_inputs_to_history=True)

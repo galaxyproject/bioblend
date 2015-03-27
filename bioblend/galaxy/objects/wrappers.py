@@ -33,7 +33,7 @@ __all__ = [
     'LibraryPreview',
     'HistoryPreview',
     'WorkflowPreview',
-    ]
+]
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -155,7 +155,7 @@ class Step(Wrapper):
     """
     BASE_ATTRS = Wrapper.BASE_ATTRS + (
         'input_steps', 'tool_id', 'tool_inputs', 'tool_version', 'type'
-        )
+    )
 
     def __init__(self, step_dict, parent):
         super(Step, self).__init__(step_dict, parent=parent, gi=parent.gi)
@@ -177,7 +177,7 @@ class Workflow(Wrapper):
     """
     BASE_ATTRS = Wrapper.BASE_ATTRS + (
         'deleted', 'inputs', 'published', 'steps', 'tags'
-        )
+    )
     POLLING_INTERVAL = 10  # for output state monitoring
 
     def __init__(self, wf_dict, gi=None):
@@ -414,14 +414,13 @@ class Workflow(Wrapper):
         if not self.is_runnable:
             raise RuntimeError('workflow has missing tools: %s' % ', '.join(
                 '%s[%s]' % (self.steps[_].tool_id, _)
-                for _ in self.missing_ids
-                ))
+                for _ in self.missing_ids))
         kwargs = {
             'dataset_map': self.convert_input_map(input_map or {}),
             'params': params,
             'import_inputs_to_history': import_inputs,
             'replacement_params': replacement_params,
-            }
+        }
         if isinstance(history, History):
             try:
                 kwargs['history_id'] = history.id
@@ -431,8 +430,7 @@ class Workflow(Wrapper):
             kwargs['history_name'] = history
         else:
             raise TypeError(
-                'history must be either a history wrapper or a string'
-                )
+                'history must be either a history wrapper or a string')
         res = self.gi.gi.workflows.run_workflow(self.id, **kwargs)
         # res structure: {'history': HIST_ID, 'outputs': [DS_ID, DS_ID, ...]}
         out_hist = self.gi.histories.get(res['history'])
@@ -472,7 +470,7 @@ class Dataset(Wrapper):
     """
     BASE_ATTRS = Wrapper.BASE_ATTRS + (
         'data_type', 'file_name', 'file_size', 'state', 'deleted', 'file_ext'
-        )
+    )
     POLLING_INTERVAL = 1  # for state monitoring
 
     @abc.abstractmethod
@@ -594,8 +592,7 @@ class HistoryDatasetAssociation(Dataset):
 
     def __init__(self, ds_dict, container, gi=None):
         super(HistoryDatasetAssociation, self).__init__(
-            ds_dict, container, gi=gi
-            )
+            ds_dict, container, gi=gi)
 
     @property
     def gi_module(self):
@@ -604,8 +601,7 @@ class HistoryDatasetAssociation(Dataset):
     @property
     def _stream_url(self):
         base_url = self.gi.gi._make_url(
-            self.gi.gi.histories, module_id=self.container.id, contents=True
-            )
+            self.gi.gi.histories, module_id=self.container.id, contents=True)
         return "%s/%s/display" % (base_url, self.id)
 
     def delete(self):
@@ -656,8 +652,7 @@ class LibraryDataset(LibRelatedDataset):
         :param purged: if ``True``, also purge (permanently delete) the dataset
         """
         self.gi.gi.libraries.delete_library_dataset(
-            self.container.id, self.id, purged=purged
-            )
+            self.container.id, self.id, purged=purged)
         self.container.refresh()
         self.refresh()
 
@@ -748,8 +743,7 @@ class DatasetContainer(Wrapper):
         """
         fresh = self.gi_module.get(self.id)
         self.__init__(
-            fresh.wrapped, content_infos=fresh.content_infos, gi=self.gi
-            )
+            fresh.wrapped, content_infos=fresh.content_infos, gi=self.gi)
         return self
 
     def get_dataset(self, ds_id):
@@ -805,8 +799,7 @@ class History(DatasetContainer):
 
     def __init__(self, hist_dict, content_infos=None, gi=None):
         super(History, self).__init__(
-            hist_dict, content_infos=content_infos, gi=gi
-            )
+            hist_dict, content_infos=content_infos, gi=gi)
 
     @property
     def gi_module(self):
@@ -834,8 +827,7 @@ class History(DatasetContainer):
         # TODO: do we need to ensure the attributes of `self` are the same as
         # the ones returned by the call to `update_history` below?
         res = self.gi.gi.histories.update_history(
-            self.id, name=name, annotation=annotation, **kwds
-            )
+            self.id, name=name, annotation=annotation, **kwds)
         if res != http_client.OK:
             raise RuntimeError('failed to update history')
         self.refresh()
@@ -873,8 +865,7 @@ class History(DatasetContainer):
         res = self.gi.gi.histories.upload_dataset_from_library(self.id, lds.id)
         if not isinstance(res, collections.Mapping):
             raise RuntimeError(
-                'upload_dataset_from_library: unexpected reply: %r' % res
-                )
+                'upload_dataset_from_library: unexpected reply: %r' % res)
         self.refresh()
         return self.get_dataset(res['id'])
 
@@ -926,8 +917,7 @@ class History(DatasetContainer):
             gzip=gzip,
             include_hidden=include_hidden,
             include_deleted=include_deleted,
-            wait=wait
-            )
+            wait=wait)
 
     def download(self, jeha_id, outf, chunk_size=bioblend.CHUNK_SIZE):
         """
@@ -937,8 +927,7 @@ class History(DatasetContainer):
         for parameter and return value info.
         """
         return self.gi.gi.histories.download_history(
-            self.id, jeha_id, outf, chunk_size=chunk_size
-            )
+            self.id, jeha_id, outf, chunk_size=chunk_size)
 
 
 class Library(DatasetContainer):
@@ -952,8 +941,7 @@ class Library(DatasetContainer):
 
     def __init__(self, lib_dict, content_infos=None, gi=None):
         super(Library, self).__init__(
-            lib_dict, content_infos=content_infos, gi=gi
-            )
+            lib_dict, content_infos=content_infos, gi=gi)
 
     @property
     def gi_module(self):
@@ -999,8 +987,7 @@ class Library(DatasetContainer):
         """
         fid = self.__pre_upload(folder)
         res = self.gi.gi.libraries.upload_file_contents(
-            self.id, data, folder_id=fid, **kwargs
-            )
+            self.id, data, folder_id=fid, **kwargs)
         self.refresh()
         return self.get_dataset(res[0]['id'])
 
@@ -1015,8 +1002,7 @@ class Library(DatasetContainer):
         """
         fid = self.__pre_upload(folder)
         res = self.gi.gi.libraries.upload_file_from_url(
-            self.id, url, folder_id=fid, **kwargs
-            )
+            self.id, url, folder_id=fid, **kwargs)
         self.refresh()
         return self.get_dataset(res[0]['id'])
 
@@ -1031,8 +1017,7 @@ class Library(DatasetContainer):
         """
         fid = self.__pre_upload(folder)
         res = self.gi.gi.libraries.upload_file_from_local_path(
-            self.id, path, folder_id=fid, **kwargs
-            )
+            self.id, path, folder_id=fid, **kwargs)
         self.refresh()
         return self.get_dataset(res[0]['id'])
 
@@ -1064,17 +1049,15 @@ class Library(DatasetContainer):
         paths = '\n'.join(paths)
         res = self.gi.gi.libraries.upload_from_galaxy_filesystem(
             self.id, paths, folder_id=fid, link_data_only=link_data_only,
-            **kwargs
-            )
+            **kwargs)
         if res is None:
             raise RuntimeError('upload_from_galaxy_filesystem: no reply')
         if not isinstance(res, collections.Sequence):
             raise RuntimeError(
-                'upload_from_galaxy_filesystem: unexpected reply: %r' % res
-                )
+                'upload_from_galaxy_filesystem: unexpected reply: %r' % res)
         new_datasets = [
             self.get_dataset(ds_info['id']) for ds_info in res
-            ]
+        ]
         self.refresh()
         return new_datasets
 
@@ -1089,8 +1072,7 @@ class Library(DatasetContainer):
         """
         fid = self.__pre_upload(folder)
         res = self.gi.gi.libraries.copy_from_dataset(
-            self.id, hda.id, folder_id=fid, message=message
-            )
+            self.id, hda.id, folder_id=fid, message=message)
         self.refresh()
         return self.get_dataset(res['library_dataset_id'])
 
@@ -1113,8 +1095,7 @@ class Library(DatasetContainer):
         """
         bfid = None if base_folder is None else base_folder.id
         res = self.gi.gi.libraries.create_folder(
-            self.id, name, description=description, base_folder_id=bfid,
-            )
+            self.id, name, description=description, base_folder_id=bfid)
         self.refresh()
         return self.get_folder(res[0]['id'])
 

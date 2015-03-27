@@ -5,6 +5,7 @@ from bioblend.galaxy.client import Client
 import json
 import os
 
+
 class WorkflowClient(Client):
     def __init__(self, galaxy_instance):
         self.module = 'workflows'
@@ -184,8 +185,9 @@ class WorkflowClient(Client):
         with open(file_local_path, 'wb') as fp:
             json.dump(workflow_json, fp)
 
-    def run_workflow(self, workflow_id, dataset_map=None, params=None, history_id=None, history_name=None,
-            import_inputs_to_history=False, replacement_params=None):
+    def run_workflow(self, workflow_id, dataset_map=None, params=None,
+                     history_id=None, history_name=None,
+                     import_inputs_to_history=False, replacement_params=None):
         """
         Run the workflow identified by ``workflow_id``
 

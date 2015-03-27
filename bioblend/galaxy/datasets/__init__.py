@@ -160,7 +160,7 @@ class DatasetClient(Client):
         :type dataset_id: str
         :param dataset_id: Encoded dataset ID
         """
-        res = urlopen(self.url[:-len("/api/datasets/")+1]+"/datasets/"+dataset_id+"/stderr")
+        res = urlopen(self.url[:-len("/api/datasets/") + 1] + "/datasets/" + dataset_id + "/stderr")
         return res.read()
 
     def show_stdout(self, dataset_id):
@@ -170,9 +170,8 @@ class DatasetClient(Client):
         :type dataset_id: str
         :param dataset_id: Encoded dataset ID
         """
-        res = urlopen(self.url[:-len("/api/datasets/")+1]+"/datasets/"+dataset_id+"/stdout")
+        res = urlopen(self.url[:-len("/api/datasets/") + 1] + "/datasets/" + dataset_id + "/stdout")
         return res.read()
-
 
 
 class DatasetStateException(Exception):

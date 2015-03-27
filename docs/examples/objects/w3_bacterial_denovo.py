@@ -36,13 +36,13 @@ l = get_one(gi.libraries.list(name=library_name))
 ds_names = [
     '/Whole genome - Escherichia coli/E coli DH10B MiSeq R1.fastq',
     '/Whole genome - Escherichia coli/E coli DH10B MiSeq R2.fastq',
-    ]
+]
 input_labels = [
     'Left/Forward FASTQ Reads',
     'Right/Reverse FASTQ Reads',
-    ]
+]
 input_map = dict((label, h.import_dataset(get_one(l.get_datasets(name=name))))
-                  for name, label in zip(ds_names, input_labels))
+                 for name, label in zip(ds_names, input_labels))
 
 # Set the "hash_length" parameter to different values for the 3 "velveth" steps
 
@@ -66,7 +66,7 @@ params['cisarunner'] = {'genomesize': 5000000}
 params['check_contigs'] = {'genomesize': 5.0}
 params[
     'toolshed.g2.bx.psu.edu/repos/edward-kirton/abyss_toolsuite/abyss/1.0.0'
-    ] = {'k': 41}
+] = {'k': 41}
 
 # Run the workflow on a new history with the selected datasets as inputs
 

@@ -44,8 +44,9 @@ def start_cloudman(name, pwd, cm_type, inst_type, ami, ak, sk):
                   s3_port=8888,
                   s3_conn_path='/')
     # Create an instance of the CloudManConfig class and launch a CloudMan instance
-    cmc = CloudManConfig(ak, sk, name, ami, inst_type, pwd, cloud_metadata=cloud,
-      cloudman_type=cm_type, initial_storage_size=2, placement='melbourne-np')
+    cmc = CloudManConfig(
+        ak, sk, name, ami, inst_type, pwd, cloud_metadata=cloud,
+        cloudman_type=cm_type, initial_storage_size=2, placement='melbourne-np')
     print("Configured an instance; waiting to launch and boot...")
     cmi = CloudManInstance.launch_instance(cmc)
     print("Done! CloudMan IP is {0}".format(cmi.cloudman_url))
@@ -53,9 +54,9 @@ def start_cloudman(name, pwd, cm_type, inst_type, ami, ak, sk):
 
 if __name__ == "__main__":
     if len(sys.argv) != 8:
-        print("\nUsage:\n"\
-            "python start_cloudman.py <cluster_name> <password> <cm_type> "\
-            "<instance_type> <AMI> <access_key> <secret_key>")
+        print("\nUsage:\n"
+              "python start_cloudman.py <cluster_name> <password> <cm_type> "
+              "<instance_type> <AMI> <access_key> <secret_key>")
         sys.exit(1)
     cml, cm = start_cloudman(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4],
-            sys.argv[5], sys.argv[6], sys.argv[7])
+                             sys.argv[5], sys.argv[6], sys.argv[7])

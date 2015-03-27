@@ -10,6 +10,7 @@ import six
 import bioblend
 from bioblend.galaxy.client import Client
 
+
 class HistoryClient(Client):
 
     def __init__(self, galaxy_instance):
@@ -480,7 +481,7 @@ class HistoryClient(Client):
             'gzip': gzip,
             'include_hidden': include_hidden,
             'include_deleted': include_deleted,
-            }
+        }
         url = '%s/exports' % self.gi._make_url(self, history_id)
         while True:
             r = Client._put(self, {}, url=url, params=params)
@@ -514,8 +515,7 @@ class HistoryClient(Client):
         :param chunk_size: how many bytes at a time should be read into memory
         """
         url = '%s/exports/%s' % (
-            self.gi._make_url(self, module_id=history_id), jeha_id
-            )
+            self.gi._make_url(self, module_id=history_id), jeha_id)
         r = self.gi.make_get_request(url, stream=True)
         r.raise_for_status()
         for chunk in r.iter_content(chunk_size):

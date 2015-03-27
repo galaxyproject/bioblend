@@ -31,7 +31,7 @@ SAMPLE_WF_DICT = {
     'inputs': {
         '571': {'label': 'Input Dataset', 'value': ''},
         '572': {'label': 'Input Dataset', 'value': ''},
-        },
+    },
     'model_class': 'StoredWorkflow',
     'name': 'paste_columns',
     'published': False,
@@ -43,7 +43,7 @@ SAMPLE_WF_DICT = {
             'tool_inputs': {'name': 'Input Dataset'},
             'tool_version': None,
             'type': 'data_input',
-            },
+        },
         '572': {
             'id': 572,
             'input_steps': {},
@@ -51,26 +51,26 @@ SAMPLE_WF_DICT = {
             'tool_inputs': {'name': 'Input Dataset'},
             'tool_version': None,
             'type': 'data_input',
-            },
+        },
         '573': {
             'id': 573,
             'input_steps': {
                 'input1': {'source_step': 571, 'step_output': 'output'},
                 'input2': {'source_step': 572, 'step_output': 'output'},
-                },
+            },
             'tool_id': 'Paste1',
             'tool_inputs': {
                 'delimiter': '"T"',
                 'input1': 'null',
                 'input2': 'null',
-                },
+            },
             'tool_version': '1.0.0',
             'type': 'tool',
-            }
-        },
+        }
+    },
     'tags': [],
     'url': '/api/workflows/9005c5112febe774',
-    }
+}
 
 
 def is_reachable(url):
@@ -112,7 +112,7 @@ class MockWrapper(wrappers.Wrapper):
 class TestWrapper(unittest.TestCase):
 
     def setUp(self):
-        self.d = {'a' : 1, 'b' : [2, 3], 'c': {'x': 4}}
+        self.d = {'a': 1, 'b': [2, 3], 'c': {'x': 4}}
         self.assertRaises(TypeError, wrappers.Wrapper, self.d)
         self.w = MockWrapper(self.d)
 
@@ -162,11 +162,8 @@ class TestWorkflow(unittest.TestCase):
         self.assertEqual(self.wf.published, False)
         self.assertEqual(self.wf.tags, [])
         self.assertEqual(
-            self.wf.input_labels_to_ids, {'Input Dataset': set(['571', '572'])}
-            )
-        self.assertEqual(
-            self.wf.tool_labels_to_ids, {'Paste1': set(['573'])}
-            )
+            self.wf.input_labels_to_ids, {'Input Dataset': set(['571', '572'])})
+        self.assertEqual(self.wf.tool_labels_to_ids, {'Paste1': set(['573'])})
         self.assertEqual(self.wf.data_input_ids, set(['571', '572']))
         self.assertEqual(self.wf.source_ids, set(['571', '572']))
         self.assertEqual(self.wf.sink_ids, set(['573']))
@@ -192,7 +189,7 @@ class TestWorkflow(unittest.TestCase):
         for sid, s in self.wf.steps.iteritems():
             self.assertIsInstance(s, wrappers.Step)
             self.assertEqual(s.id, sid)
-            d = steps[sid]
+            self.assertIn(sid, steps)
             self.assertIs(s.parent, self.wf)
         self.assertEqual(self.wf.data_input_ids, set(['571', '572']))
         self.assertEqual(self.wf.tool_ids, set(['573']))
@@ -205,13 +202,13 @@ class TestWorkflow(unittest.TestCase):
     def test_input_map(self):
         class DummyLD(object):
             SRC = 'ld'
+
             def __init__(self, id_):
                 self.id = id_
         label = 'Input Dataset'
         self.assertEqual(self.wf.input_labels, set([label]))
         input_map = self.wf.convert_input_map(
-            {label: [DummyLD('a'), DummyLD('b')]}
-            )
+            {label: [DummyLD('a'), DummyLD('b')]})
         # {'571': {'id': 'a', 'src': 'ld'}, '572': {'id': 'b', 'src': 'ld'}}
         # OR
         # {'571': {'id': 'b', 'src': 'ld'}, '572': {'id': 'a', 'src': 'ld'}}
@@ -229,6 +226,7 @@ class GalaxyObjectsTestBase(unittest.TestCase):
         galaxy_url = os.environ['BIOBLEND_GALAXY_URL']
         self.gi = galaxy_instance.GalaxyInstance(galaxy_url, galaxy_key)
 
+
 @test_util.skip_unless_galaxy()
 class TestGalaxyInstance(GalaxyObjectsTestBase):
 
@@ -236,8 +234,7 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
         name = 'test_%s' % uuid.uuid4().hex
         description, synopsis = 'D', 'S'
         lib = self.gi.libraries.create(
-            name, description=description, synopsis=synopsis
-            )
+            name, description=description, synopsis=synopsis)
         self.assertEqual(lib.name, name)
         self.assertEqual(lib.description, description)
         self.assertEqual(lib.synopsis, synopsis)
@@ -302,10 +299,9 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
     def test_workflow_from_shared(self):
         all_prevs = dict(
             (_.id, _) for _ in self.gi.workflows.get_previews(published=True)
-            )
+        )
         pub_only_ids = set(all_prevs).difference(
-            _.id for _ in self.gi.workflows.get_previews()
-            )
+            _.id for _ in self.gi.workflows.get_previews())
         if pub_only_ids:
             wf_id = pub_only_ids.pop()
             imported = self.gi.workflows.import_shared(wf_id)
@@ -347,8 +343,7 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
 
     def __test_multi_get(self, obj_type):
         create, get_objs, get_prevs, del_kwargs = self.__normalized_functions(
-            obj_type
-            )
+            obj_type)
         ids = lambda seq: set(_.id for _ in seq)
         names = ['test_%s' % uuid.uuid4().hex for _ in range(2)]
         objs = []
@@ -383,10 +378,9 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
 
     def __test_delete_by_name(self, obj_type):
         create, _, get_prevs, del_kwargs = self.__normalized_functions(
-            obj_type
-            )
+            obj_type)
         name = 'test_%s' % uuid.uuid4().hex
-        objs = [create(name) for _ in range(2)]
+        objs = [create(name) for _ in range(2)]  # noqa
         final_name = objs[0].name
         prevs = [_ for _ in get_prevs(name=final_name) if not _.deleted]
         self.assertEqual(len(prevs), len(objs))
@@ -458,8 +452,7 @@ class TestLibrary(GalaxyObjectsTestBase):
         dss, fnames = upload_from_fs(self.lib, bnames)
         self.__check_datasets(dss)
         dss, fnames = upload_from_fs(
-            self.lib, bnames, link_data_only='link_to_files'
-            )
+            self.lib, bnames, link_data_only='link_to_files')
         for ds, fn in zip(dss, fnames):
             self.assertEqual(ds.file_name, fn)
 
@@ -524,9 +517,9 @@ class TestLDContents(GalaxyObjectsTestBase):
 
     def test_dataset_delete(self):
         self.ds.delete()
-        # cannot test this yet because the 'deleted' attribute is not
-        # exported by the API at the moment
-        #self.assertTrue(self.ds.deleted)
+        # Cannot test this yet because the 'deleted' attribute is not exported
+        # by the API at the moment
+        # self.assertTrue(self.ds.deleted)
 
 
 @test_util.skip_unless_galaxy()
@@ -584,7 +577,7 @@ class TestHistory(GalaxyObjectsTestBase):
     def test_get_datasets(self):
         bnames = ['f%d.txt' % _ for _ in range(2)]
         lib = self.gi.libraries.create('test_%s' % uuid.uuid4().hex)
-        lds, _ = upload_from_fs(lib, bnames)
+        lds = upload_from_fs(lib, bnames)[0]
         hdas = [self.hist.import_dataset(_) for _ in lds]
         lib.delete()
         retrieved = self.hist.get_datasets()
@@ -687,8 +680,7 @@ class TestRunWorkflow(GalaxyObjectsTestBase):
         input_map = {'Input 1': self.inputs[0], 'Input 2': self.inputs[1]}
         sys.stderr.write(os.linesep)
         outputs, out_hist = self.wf.run(
-            input_map, hist, params=params, wait=True, polling_interval=1
-            )
+            input_map, hist, params=params, wait=True, polling_interval=1)
         self.assertEqual(len(outputs), 1)
         out_ds = outputs[0]
         self.assertIn(out_ds.id, out_hist.dataset_ids)
@@ -721,7 +713,7 @@ def suite():
         TestHistory,
         TestHDAContents,
         TestRunWorkflow,
-        )])
+    )])
     return s
 
 

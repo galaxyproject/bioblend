@@ -13,7 +13,7 @@ from . import client
 # dataset states corresponding to a 'pending' condition
 _PENDING_DS_STATES = set(
     ["new", "upload", "queued", "running", "setting_metadata"]
-    )
+)
 
 
 def _get_error_info(hda):
@@ -116,7 +116,7 @@ class GalaxyInstance(object):
                 if ds.state in _PENDING_DS_STATES:
                     pending.append(ds)
             return pending
-        #--
+
         self.log.info('waiting for datasets')
         while datasets:
             datasets = poll(datasets)

@@ -51,6 +51,7 @@ fi
 BIOBLEND_DIR=$(get_abs_dirname $(dirname $0))
 cd ${BIOBLEND_DIR}
 python setup.py install --user || exit 1
+pip install --user flake8
 
 # Setup Galaxy
 cd ${g_val}
@@ -94,11 +95,13 @@ export BIOBLEND_GALAXY_API_KEY=`python ${BIOBLEND_DIR}/docs/examples/create_user
 echo "Created new Galaxy user $GALAXY_USER with email $GALAXY_USER_EMAIL , password $GALAXY_USER_PASSWD and API key $BIOBLEND_GALAXY_API_KEY"
 # Run the tests
 cd ${BIOBLEND_DIR}
-if [ -n "${t_val}" ]; then
-  python setup.py nosetests --tests ${t_val}
-else
-  python setup.py test
-fi
+find . -name '*.py' -exec flake8 {} + && (
+  if [ -n "${t_val}" ]; then
+    python setup.py nosetests --tests ${t_val}
+  else
+    python setup.py test
+  fi
+)
 exit_code=$?
 
 # Stop Galaxy

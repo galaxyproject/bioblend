@@ -11,6 +11,7 @@ from test_util import unittest
 from mock import MagicMock
 from bioblend import cloudman
 
+
 class TestCloudmanMock(unittest.TestCase):
 
     def setUp(self):

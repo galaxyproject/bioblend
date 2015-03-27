@@ -61,7 +61,6 @@ class ObjClient(object):
         else:
             return [id_]
 
-    #-- helpers --
     def _error(self, msg, err_type=RuntimeError):
         self.log.error(msg)
         raise err_type(msg)
@@ -282,9 +281,7 @@ class ObjWorkflowClient(ObjClient):
 
     # the 'deleted' option is not available for workflows
     def get_previews(self, name=None, published=False):
-        dicts = self.gi.workflows.get_workflows(
-            name=name, published=published
-            )
+        dicts = self.gi.workflows.get_workflows(name=name, published=published)
         return [wrappers.WorkflowPreview(_, gi=self.obj_gi) for _ in dicts]
 
     # the 'deleted' option is not available for workflows

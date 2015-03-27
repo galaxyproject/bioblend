@@ -121,7 +121,8 @@ class ToolShedClient(Client):
 
         return Client._get(self, url=url, params=params)
 
-    def repository_revisions(self, downloadable=None, malicious=None,
+    def repository_revisions(
+            self, downloadable=None, malicious=None,
             tools_functionally_correct=None, missing_test_components=None,
             do_not_test=None, includes_tools=None, test_install_error=None,
             skip_tool_test=None):
