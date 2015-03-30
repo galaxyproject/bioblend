@@ -494,7 +494,7 @@ class Dataset(Wrapper):
         """
         pass
 
-    def get_stream(self, chunk_size=None):
+    def get_stream(self, chunk_size=bioblend.CHUNK_SIZE):
         """
         Open dataset for reading and return an iterator over its contents.
 
@@ -520,7 +520,7 @@ class Dataset(Wrapper):
         r.raise_for_status()
         return r.iter_content(chunk_size)  # FIXME: client can't close r
 
-    def peek(self, chunk_size=None):
+    def peek(self, chunk_size=bioblend.CHUNK_SIZE):
         """
         Open dataset for reading and return the first chunk.
 
@@ -531,7 +531,7 @@ class Dataset(Wrapper):
         except StopIteration:
             return ''
 
-    def download(self, file_object, chunk_size=None):
+    def download(self, file_object, chunk_size=bioblend.CHUNK_SIZE):
         """
         Open dataset for reading and save its contents to ``file_object``.
 
@@ -543,7 +543,7 @@ class Dataset(Wrapper):
         for chunk in self.get_stream(chunk_size=chunk_size):
             file_object.write(chunk)
 
-    def get_contents(self, chunk_size=None):
+    def get_contents(self, chunk_size=bioblend.CHUNK_SIZE):
         """
         Open dataset for reading and return its **full** contents.
 
