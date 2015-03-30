@@ -1,7 +1,7 @@
 #!/bin/sh
 
 show_help () {
-  echo "Usage:  $0 -g GALAXY_DIR [-p PORT] [-t BIOBLEND_TESTS] [-r GALAXY_REV] [-c]
+  echo "Usage:  $0 -g GALAXY_DIR [-p PORT] [-e TOX_ENV] [-t BIOBLEND_TESTS] [-r GALAXY_REV] [-c]
 
   Run tests for BioBlend. Useful for Continuous Integration testing.
 
@@ -10,6 +10,8 @@ Options:
       Path of the local Galaxy git repository.
   -p PORT
       Port to use for the Galaxy server. Defaults to 8080.
+  -e TOX_ENV
+      Work against specified tox environments. Defaults to py27.
   -t BIOBLEND_TESTS
       Subset of tests to run, e.g. 'tests/TestGalaxyObjects.py:TestHistory'.
       See 'man nosetests' for more information. Defaults to all tests.
@@ -26,15 +28,17 @@ get_abs_dirname () {
   echo $(cd "$1" && pwd)
 }
 
+e_val=py27
 p_val=8080
 r_val=dev
-while getopts 'hcg:p:t:r:' option
+while getopts 'hcg:e:p:t:r:' option
 do
   case $option in
     h) show_help
        exit;;
     c) c_val=1;;
     g) g_val=$(get_abs_dirname $OPTARG);;
+    e) e_val=$OPTARG;;
     p) p_val=$OPTARG;;
     t) t_val=$OPTARG;;
     r) r_val=$OPTARG;;
@@ -51,7 +55,7 @@ fi
 BIOBLEND_DIR=$(get_abs_dirname $(dirname $0))
 cd ${BIOBLEND_DIR}
 python setup.py install --user || exit 1
-pip install --user flake8
+pip install --user "tox>=1.8.0"
 
 # Setup Galaxy
 cd ${g_val}
@@ -95,13 +99,11 @@ export BIOBLEND_GALAXY_API_KEY=`python ${BIOBLEND_DIR}/docs/examples/create_user
 echo "Created new Galaxy user $GALAXY_USER with email $GALAXY_USER_EMAIL , password $GALAXY_USER_PASSWD and API key $BIOBLEND_GALAXY_API_KEY"
 # Run the tests
 cd ${BIOBLEND_DIR}
-find . -name '*.py' -exec flake8 {} + && (
-  if [ -n "${t_val}" ]; then
-    python setup.py nosetests --tests ${t_val}
-  else
-    python setup.py test
-  fi
-)
+if [ -n "${t_val}" ]; then
+  tox -e ${e_val} -- --tests ${t_val}
+else
+  tox -e ${e_val}
+fi
 exit_code=$?
 
 # Stop Galaxy
