@@ -114,7 +114,7 @@ class WorkflowClient(Client):
         :type file_local_path: str
         :param file_local_path: File to upload to the server for new workflow
         """
-        with open(file_local_path, 'rb') as fp:
+        with open(file_local_path, 'r') as fp:
             workflow_json = json.load(fp)
 
         return self.import_workflow_json(workflow_json)
@@ -182,7 +182,7 @@ class WorkflowClient(Client):
             filename = 'Galaxy-Workflow-%s.ga' % workflow_json['name']
             file_local_path = os.path.join(file_local_path, filename)
 
-        with open(file_local_path, 'wb') as fp:
+        with open(file_local_path, 'w') as fp:
             json.dump(workflow_json, fp)
 
     def run_workflow(self, workflow_id, dataset_map=None, params=None,

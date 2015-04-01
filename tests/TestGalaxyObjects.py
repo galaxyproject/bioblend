@@ -11,6 +11,7 @@ import uuid
 
 from six.moves.urllib.request import urlopen
 from six.moves.urllib.error import URLError
+import six
 
 import bioblend
 bioblend.set_stream_logger('test', level='INFO')
@@ -441,7 +442,7 @@ class TestLibrary(GalaxyObjectsTestBase):
             print("skipped 'url not reachable'")
 
     def test_dataset_from_local(self):
-        with tempfile.NamedTemporaryFile(prefix='bioblend_test_') as f:
+        with tempfile.NamedTemporaryFile(mode='w', prefix='bioblend_test_') as f:
             f.write(FOO_DATA)
             f.flush()
             ds = self.lib.upload_from_local(f.name)
@@ -497,23 +498,23 @@ class TestLDContents(GalaxyObjectsTestBase):
     @test_util.skip_unless_galaxy('release_14.08')
     def test_dataset_get_stream(self):
         for idx, c in enumerate(self.ds.get_stream(chunk_size=1)):
-            self.assertEqual(str(FOO_DATA[idx]), c)
+            self.assertEqual(six.b(FOO_DATA[idx]), c)
 
     @test_util.skip_unless_galaxy('release_14.08')
     def test_dataset_peek(self):
         fetched_data = self.ds.peek(chunk_size=4)
-        self.assertEqual(FOO_DATA[0:4], fetched_data)
+        self.assertEqual(six.b(FOO_DATA[0:4]), fetched_data)
 
     @test_util.skip_unless_galaxy('release_14.08')
     def test_dataset_download(self):
         with tempfile.TemporaryFile() as f:
             self.ds.download(f)
             f.seek(0)
-            self.assertEqual(FOO_DATA, f.read())
+            self.assertEqual(six.b(FOO_DATA), f.read())
 
     @test_util.skip_unless_galaxy('release_14.08')
     def test_dataset_get_contents(self):
-        self.assertEqual(FOO_DATA, self.ds.get_contents())
+        self.assertEqual(six.b(FOO_DATA), self.ds.get_contents())
 
     def test_dataset_delete(self):
         self.ds.delete()
@@ -559,7 +560,7 @@ class TestHistory(GalaxyObjectsTestBase):
         self.__check_dataset(hda)
 
     def test_upload_file(self):
-        with tempfile.NamedTemporaryFile(prefix='bioblend_test_') as f:
+        with tempfile.NamedTemporaryFile(mode='w', prefix='bioblend_test_') as f:
             f.write(FOO_DATA)
             f.flush()
             hda = self.hist.upload_file(f.name)
@@ -593,7 +594,7 @@ class TestHistory(GalaxyObjectsTestBase):
         tempdir = tempfile.mkdtemp(prefix='bioblend_test_')
         temp_fn = os.path.join(tempdir, 'export.tar.gz')
         try:
-            with open(temp_fn, 'w') as fo:
+            with open(temp_fn, 'wb') as fo:
                 self.hist.download(jeha_id, fo)
             self.assertTrue(tarfile.is_tarfile(temp_fn))
         finally:
@@ -624,21 +625,21 @@ class TestHDAContents(GalaxyObjectsTestBase):
 
     def test_dataset_get_stream(self):
         for idx, c in enumerate(self.ds.get_stream(chunk_size=1)):
-            self.assertEqual(str(FOO_DATA[idx]), c)
+            self.assertEqual(six.b(FOO_DATA[idx]), c)
 
     def test_dataset_peek(self):
         fetched_data = self.ds.peek(chunk_size=4)
-        self.assertEqual(FOO_DATA[0:4], fetched_data)
+        self.assertEqual(six.b(FOO_DATA[0:4]), fetched_data)
 
     def test_dataset_download(self):
         with tempfile.TemporaryFile() as f:
             self.ds.download(f)
             f.seek(0)
             data = f.read()
-            self.assertEqual(FOO_DATA, data)
+            self.assertEqual(six.b(FOO_DATA), data)
 
     def test_dataset_get_contents(self):
-        self.assertEqual(FOO_DATA, self.ds.get_contents())
+        self.assertEqual(six.b(FOO_DATA), self.ds.get_contents())
 
     def test_dataset_delete(self):
         self.ds.delete()
