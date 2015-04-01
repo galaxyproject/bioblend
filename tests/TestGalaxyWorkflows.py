@@ -33,7 +33,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         dir_contents = os.listdir(export_dir)
         self.assertEqual(len(dir_contents), 1)
         export_path = os.path.join(export_dir, dir_contents[0])
-        with open(export_path, 'rb') as f:
+        with open(export_path, 'r') as f:
             workflow_json = json.load(f)
         self.assertIsInstance(workflow_json, dict)
         shutil.rmtree(export_dir)

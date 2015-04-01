@@ -509,7 +509,7 @@ class HistoryClient(Client):
           :meth:`export_history`)
 
         :type outf: file
-        :param outf: output file object, open for writing
+        :param outf: output file object, open for writing in binary mode
 
         :type chunk_size: int
         :param chunk_size: how many bytes at a time should be read into memory

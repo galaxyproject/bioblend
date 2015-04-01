@@ -529,7 +529,7 @@ class Dataset(Wrapper):
         try:
             return next(self.get_stream(chunk_size=chunk_size))
         except StopIteration:
-            return ''
+            return b''
 
     def download(self, file_object, chunk_size=bioblend.CHUNK_SIZE):
         """
@@ -549,7 +549,7 @@ class Dataset(Wrapper):
 
         See :meth:`.get_stream` for param info.
         """
-        return ''.join(self.get_stream(chunk_size=chunk_size))
+        return b''.join(self.get_stream(chunk_size=chunk_size))
 
     def refresh(self):
         """

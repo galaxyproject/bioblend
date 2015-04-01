@@ -46,7 +46,7 @@ class TestGalaxyLibraries(GalaxyTestBase.GalaxyTestBase):
         self.gi.libraries.upload_file_contents(self.library['id'], FOO_DATA)
 
     def test_upload_file_from_local_path(self):
-        with tempfile.NamedTemporaryFile(prefix='bioblend_test_') as f:
+        with tempfile.NamedTemporaryFile(mode='w', prefix='bioblend_test_') as f:
             f.write(FOO_DATA)
             f.flush()
             self.gi.libraries.upload_file_from_local_path(self.library['id'], f.name)
