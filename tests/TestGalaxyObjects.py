@@ -171,23 +171,23 @@ class TestWorkflow(unittest.TestCase):
 
     def test_dag(self):
         inv_dag = {}
-        for h, tails in self.wf.dag.iteritems():
+        for h, tails in six.iteritems(self.wf.dag):
             for t in tails:
                 inv_dag.setdefault(str(t), set()).add(h)
         self.assertEqual(self.wf.inv_dag, inv_dag)
         heads = set(self.wf.dag)
-        self.assertEqual(heads, set.union(*self.wf.inv_dag.itervalues()))
+        self.assertEqual(heads, set.union(*self.wf.inv_dag.values()))
         tails = set(self.wf.inv_dag)
-        self.assertEqual(tails, set.union(*self.wf.dag.itervalues()))
+        self.assertEqual(tails, set.union(*self.wf.dag.values()))
         ids = self.wf.sorted_step_ids()
         self.assertEqual(set(ids), heads | tails)
-        for h, tails in self.wf.dag.iteritems():
+        for h, tails in six.iteritems(self.wf.dag):
             for t in tails:
                 self.assertLess(ids.index(h), ids.index(t))
 
     def test_steps(self):
         steps = SAMPLE_WF_DICT['steps']
-        for sid, s in self.wf.steps.iteritems():
+        for sid, s in six.iteritems(self.wf.steps):
             self.assertIsInstance(s, wrappers.Step)
             self.assertEqual(s.id, sid)
             self.assertIn(sid, steps)
@@ -214,7 +214,7 @@ class TestWorkflow(unittest.TestCase):
         # OR
         # {'571': {'id': 'b', 'src': 'ld'}, '572': {'id': 'a', 'src': 'ld'}}
         self.assertEqual(set(input_map), set(['571', '572']))
-        for d in input_map.itervalues():
+        for d in six.itervalues(input_map):
             self.assertEqual(set(d), set(['id', 'src']))
             self.assertEqual(d['src'], 'ld')
             self.assertIn(d['id'], 'ab')
@@ -269,7 +269,7 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
             wf_dump = json.load(f)
             wf_info = self.gi.gi.workflows.import_workflow_json(wf_dump)
             wf_dict = self.gi.gi.workflows.show_workflow(wf_info['id'])
-            for id_, step in wf_dict['steps'].iteritems():
+            for id_, step in six.iteritems(wf_dict['steps']):
                 if step['type'] == 'tool':
                     for k in 'tool_inputs', 'tool_version':
                         wf_dict['steps'][id_][k] = None

@@ -8,6 +8,7 @@ import boto
 from boto.ec2.regioninfo import RegionInfo
 from boto.exception import EC2ResponseError, S3ResponseError
 from boto.s3.connection import OrdinaryCallingFormat, S3Connection, SubdomainCallingFormat
+import six
 from six.moves.http_client import HTTPConnection
 from six.moves.urllib.parse import urlparse
 
@@ -437,7 +438,7 @@ class CloudManLauncher(object):
         excluded_fields = ['sg_name', 'image_id', 'instance_id', 'kp_name',
                            'cloud', 'cloud_type', 'public_dns', 'cidr_range',
                            'kp_material', 'placement']
-        for key, value in user_provided_data.iteritems():
+        for key, value in six.iteritems(user_provided_data):
             if key not in excluded_fields:
                 form_data[key] = value
         # If the following user data keys are empty, do not include them in the request user data

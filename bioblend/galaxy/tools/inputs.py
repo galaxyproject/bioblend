@@ -1,3 +1,4 @@
+import six
 
 
 class InputsBuilder(object):
@@ -26,7 +27,7 @@ class InputsBuilder(object):
         return values
 
     def flat_iter(self, prefix=None):
-        for key, value in self._input_dict.iteritems():
+        for key, value in six.iteritems(self._input_dict):
             effective_key = key if prefix is None else "%s|%s" % (prefix, key)
             if hasattr(value, "flat_iter"):
                 for flattened_key, flattened_value in value.flat_iter(effective_key):

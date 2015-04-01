@@ -427,7 +427,7 @@ class HistoryClient(Client):
         state['state'] = history['state']
         if history.get('state_details') is not None:
             state['state_details'] = history['state_details']
-            total_complete = sum(history['state_details'].itervalues())
+            total_complete = sum(six.itervalues(history['state_details']))
             if total_complete > 0:
                 state['percent_complete'] = 100 * history['state_details']['ok'] / total_complete
             else:
