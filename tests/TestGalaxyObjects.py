@@ -11,6 +11,7 @@ import uuid
 
 from six.moves.urllib.request import urlopen
 from six.moves.urllib.error import URLError
+import six
 
 import bioblend
 bioblend.set_stream_logger('test', level='INFO')
@@ -170,23 +171,23 @@ class TestWorkflow(unittest.TestCase):
 
     def test_dag(self):
         inv_dag = {}
-        for h, tails in self.wf.dag.iteritems():
+        for h, tails in six.iteritems(self.wf.dag):
             for t in tails:
                 inv_dag.setdefault(str(t), set()).add(h)
         self.assertEqual(self.wf.inv_dag, inv_dag)
         heads = set(self.wf.dag)
-        self.assertEqual(heads, set.union(*self.wf.inv_dag.itervalues()))
+        self.assertEqual(heads, set.union(*self.wf.inv_dag.values()))
         tails = set(self.wf.inv_dag)
-        self.assertEqual(tails, set.union(*self.wf.dag.itervalues()))
+        self.assertEqual(tails, set.union(*self.wf.dag.values()))
         ids = self.wf.sorted_step_ids()
         self.assertEqual(set(ids), heads | tails)
-        for h, tails in self.wf.dag.iteritems():
+        for h, tails in six.iteritems(self.wf.dag):
             for t in tails:
                 self.assertLess(ids.index(h), ids.index(t))
 
     def test_steps(self):
         steps = SAMPLE_WF_DICT['steps']
-        for sid, s in self.wf.steps.iteritems():
+        for sid, s in six.iteritems(self.wf.steps):
             self.assertIsInstance(s, wrappers.Step)
             self.assertEqual(s.id, sid)
             self.assertIn(sid, steps)
@@ -213,7 +214,7 @@ class TestWorkflow(unittest.TestCase):
         # OR
         # {'571': {'id': 'b', 'src': 'ld'}, '572': {'id': 'a', 'src': 'ld'}}
         self.assertEqual(set(input_map), set(['571', '572']))
-        for d in input_map.itervalues():
+        for d in six.itervalues(input_map):
             self.assertEqual(set(d), set(['id', 'src']))
             self.assertEqual(d['src'], 'ld')
             self.assertIn(d['id'], 'ab')
@@ -268,7 +269,7 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
             wf_dump = json.load(f)
             wf_info = self.gi.gi.workflows.import_workflow_json(wf_dump)
             wf_dict = self.gi.gi.workflows.show_workflow(wf_info['id'])
-            for id_, step in wf_dict['steps'].iteritems():
+            for id_, step in six.iteritems(wf_dict['steps']):
                 if step['type'] == 'tool':
                     for k in 'tool_inputs', 'tool_version':
                         wf_dict['steps'][id_][k] = None
@@ -441,7 +442,7 @@ class TestLibrary(GalaxyObjectsTestBase):
             print("skipped 'url not reachable'")
 
     def test_dataset_from_local(self):
-        with tempfile.NamedTemporaryFile(prefix='bioblend_test_') as f:
+        with tempfile.NamedTemporaryFile(mode='w', prefix='bioblend_test_') as f:
             f.write(FOO_DATA)
             f.flush()
             ds = self.lib.upload_from_local(f.name)
@@ -497,23 +498,23 @@ class TestLDContents(GalaxyObjectsTestBase):
     @test_util.skip_unless_galaxy('release_14.08')
     def test_dataset_get_stream(self):
         for idx, c in enumerate(self.ds.get_stream(chunk_size=1)):
-            self.assertEqual(str(FOO_DATA[idx]), c)
+            self.assertEqual(six.b(FOO_DATA[idx]), c)
 
     @test_util.skip_unless_galaxy('release_14.08')
     def test_dataset_peek(self):
         fetched_data = self.ds.peek(chunk_size=4)
-        self.assertEqual(FOO_DATA[0:4], fetched_data)
+        self.assertEqual(six.b(FOO_DATA[0:4]), fetched_data)
 
     @test_util.skip_unless_galaxy('release_14.08')
     def test_dataset_download(self):
         with tempfile.TemporaryFile() as f:
             self.ds.download(f)
             f.seek(0)
-            self.assertEqual(FOO_DATA, f.read())
+            self.assertEqual(six.b(FOO_DATA), f.read())
 
     @test_util.skip_unless_galaxy('release_14.08')
     def test_dataset_get_contents(self):
-        self.assertEqual(FOO_DATA, self.ds.get_contents())
+        self.assertEqual(six.b(FOO_DATA), self.ds.get_contents())
 
     def test_dataset_delete(self):
         self.ds.delete()
@@ -559,7 +560,7 @@ class TestHistory(GalaxyObjectsTestBase):
         self.__check_dataset(hda)
 
     def test_upload_file(self):
-        with tempfile.NamedTemporaryFile(prefix='bioblend_test_') as f:
+        with tempfile.NamedTemporaryFile(mode='w', prefix='bioblend_test_') as f:
             f.write(FOO_DATA)
             f.flush()
             hda = self.hist.upload_file(f.name)
@@ -593,7 +594,7 @@ class TestHistory(GalaxyObjectsTestBase):
         tempdir = tempfile.mkdtemp(prefix='bioblend_test_')
         temp_fn = os.path.join(tempdir, 'export.tar.gz')
         try:
-            with open(temp_fn, 'w') as fo:
+            with open(temp_fn, 'wb') as fo:
                 self.hist.download(jeha_id, fo)
             self.assertTrue(tarfile.is_tarfile(temp_fn))
         finally:
@@ -624,21 +625,21 @@ class TestHDAContents(GalaxyObjectsTestBase):
 
     def test_dataset_get_stream(self):
         for idx, c in enumerate(self.ds.get_stream(chunk_size=1)):
-            self.assertEqual(str(FOO_DATA[idx]), c)
+            self.assertEqual(six.b(FOO_DATA[idx]), c)
 
     def test_dataset_peek(self):
         fetched_data = self.ds.peek(chunk_size=4)
-        self.assertEqual(FOO_DATA[0:4], fetched_data)
+        self.assertEqual(six.b(FOO_DATA[0:4]), fetched_data)
 
     def test_dataset_download(self):
         with tempfile.TemporaryFile() as f:
             self.ds.download(f)
             f.seek(0)
             data = f.read()
-            self.assertEqual(FOO_DATA, data)
+            self.assertEqual(six.b(FOO_DATA), data)
 
     def test_dataset_get_contents(self):
-        self.assertEqual(FOO_DATA, self.ds.get_contents())
+        self.assertEqual(six.b(FOO_DATA), self.ds.get_contents())
 
     def test_dataset_delete(self):
         self.ds.delete()
@@ -661,11 +662,6 @@ class TestRunWorkflow(GalaxyObjectsTestBase):
         self.wf.delete()
         self.lib.delete()
 
-    def __check_res(self, res, sep):
-        exp_rows = zip(*(_.splitlines() for _ in self.contents))
-        exp_res = "\n".join(sep.join(t) for t in exp_rows)
-        self.assertEqual(res.strip(), exp_res)
-
     def __test(self, existing_hist=False, params=False):
         if existing_hist:
             hist = self.gi.histories.create(self.hist_name)
@@ -685,7 +681,9 @@ class TestRunWorkflow(GalaxyObjectsTestBase):
         out_ds = outputs[0]
         self.assertIn(out_ds.id, out_hist.dataset_ids)
         res = out_ds.get_contents()
-        self.__check_res(res, sep)
+        exp_rows = zip(*(_.splitlines() for _ in self.contents))
+        exp_res = six.b("\n".join(sep.join(t) for t in exp_rows) + "\n")
+        self.assertEqual(res, exp_res)
         if existing_hist:
             self.assertEqual(out_hist.id, hist.id)
         out_hist.delete(purge=True)

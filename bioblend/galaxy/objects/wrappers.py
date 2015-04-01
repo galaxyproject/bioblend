@@ -160,7 +160,7 @@ class Step(Wrapper):
     def __init__(self, step_dict, parent):
         super(Step, self).__init__(step_dict, parent=parent, gi=parent.gi)
         if self.type == 'tool' and self.tool_inputs:
-            for k, v in self.tool_inputs.iteritems():
+            for k, v in six.iteritems(self.tool_inputs):
                 self.tool_inputs[k] = json.loads(v)
 
     @property
@@ -183,20 +183,20 @@ class Workflow(Wrapper):
     def __init__(self, wf_dict, gi=None):
         super(Workflow, self).__init__(wf_dict, gi=gi)
         missing_ids = []
-        for k, v in self.steps.iteritems():
+        for k, v in six.iteritems(self.steps):
             # convert step ids to str for consistency with outer keys
             v['id'] = str(v['id'])
-            for i in v['input_steps'].itervalues():
+            for i in six.itervalues(v['input_steps']):
                 i['source_step'] = str(i['source_step'])
             step = self._build_step(v, self)
             self.steps[k] = step
             if step.type == 'tool' and not step.tool_inputs:
                 missing_ids.append(k)
         input_labels_to_ids = {}
-        for id_, d in self.inputs.iteritems():
+        for id_, d in six.iteritems(self.inputs):
             input_labels_to_ids.setdefault(d['label'], set()).add(id_)
         tool_labels_to_ids = {}
-        for s in self.steps.itervalues():
+        for s in six.itervalues(self.steps):
             if s.type == 'tool':
                 tool_labels_to_ids.setdefault(s.tool_id, set()).add(s.id)
         object.__setattr__(self, 'input_labels_to_ids', input_labels_to_ids)
@@ -232,8 +232,8 @@ class Workflow(Wrapper):
           {'c': set(['a', 'b']), 'd': {'c'}, 'e': {'c'}, 'f': {'c'}}
         """
         dag, inv_dag = {}, {}
-        for s in self.steps.itervalues():
-            for i in s.input_steps.itervalues():
+        for s in six.itervalues(self.steps):
+            for i in six.itervalues(s.input_steps):
                 head, tail = i['source_step'], s.id
                 dag.setdefault(head, set()).add(tail)
                 inv_dag.setdefault(tail, set()).add(head)
@@ -245,7 +245,7 @@ class Workflow(Wrapper):
         """
         ids = []
         source_ids = self.source_ids.copy()
-        inv_dag = dict((k, v.copy()) for k, v in self.inv_dag.iteritems())
+        inv_dag = dict((k, v.copy()) for k, v in six.iteritems(self.inv_dag))
         while source_ids:
             head = source_ids.pop()
             ids.append(head)
@@ -274,7 +274,7 @@ class Workflow(Wrapper):
         """
         Return the list of data input steps for this workflow.
         """
-        return set(id_ for id_, s in self.steps.iteritems()
+        return set(id_ for id_, s in six.iteritems(self.steps)
                    if s.type == 'data_input')
 
     @property
@@ -282,7 +282,7 @@ class Workflow(Wrapper):
         """
         Return the list of tool steps for this workflow.
         """
-        return set(id_ for id_, s in self.steps.iteritems()
+        return set(id_ for id_, s in six.iteritems(self.steps)
                    if s.type == 'tool')
 
     @property
@@ -314,7 +314,7 @@ class Workflow(Wrapper):
           format required by the Galaxy web API.
         """
         m = {}
-        for label, slot_ids in self.input_labels_to_ids.iteritems():
+        for label, slot_ids in six.iteritems(self.input_labels_to_ids):
             datasets = input_map.get(label, [])
             if not isinstance(datasets, collections.Iterable):
                 datasets = [datasets]
@@ -529,7 +529,7 @@ class Dataset(Wrapper):
         try:
             return next(self.get_stream(chunk_size=chunk_size))
         except StopIteration:
-            return ''
+            return b''
 
     def download(self, file_object, chunk_size=bioblend.CHUNK_SIZE):
         """
@@ -549,7 +549,7 @@ class Dataset(Wrapper):
 
         See :meth:`.get_stream` for param info.
         """
-        return ''.join(self.get_stream(chunk_size=chunk_size))
+        return b''.join(self.get_stream(chunk_size=chunk_size))
 
     def refresh(self):
         """
@@ -1236,7 +1236,7 @@ class Tool(Wrapper):
         object, which will be automatically converted to the needed
         format.
         """
-        for k, v in inputs.iteritems():
+        for k, v in six.iteritems(inputs):
             if isinstance(v, Dataset):
                 inputs[k] = {'src': v.SRC, 'id': v.id}
         out_dict = self.gi.gi.tools.run_tool(history.id, self.id, inputs)
