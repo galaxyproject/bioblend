@@ -307,11 +307,11 @@ class CloudManLauncher(object):
             if rs is not None:
                 inst_state = rs[0].instances[0].update()
                 public_ip = rs[0].instances[0].ip_address
+                state['public_ip'] = public_ip
                 if inst_state == 'running':
                     cm_url = "http://{dns}/cloud".format(dns=public_ip)
                     # Wait until the CloudMan URL is accessible to return the data
                     if self._checkURL(cm_url) is True:
-                        state['public_ip'] = public_ip
                         state['instance_state'] = inst_state
                         state['placement'] = rs[0].instances[0].placement
                     else:
