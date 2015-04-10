@@ -142,7 +142,7 @@ class GalaxyClient(object):
             params = self.default_params
 
         payload = json.dumps(payload)
-        r = requests.put(url, data=payload, params=params)
+        r = requests.put(url, verify=self.verify, data=payload, params=params)
         return r
 
     @property
