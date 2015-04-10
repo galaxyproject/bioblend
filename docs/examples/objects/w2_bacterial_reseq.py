@@ -5,7 +5,7 @@ import sys
 from bioblend.galaxy.objects import GalaxyInstance
 from common import get_one
 
-URL = 'http://orione.crs4.it'
+URL = 'https://orione.crs4.it'
 API_KEY = os.getenv('GALAXY_API_KEY', 'YOUR_API_KEY')
 if API_KEY == 'YOUR_API_KEY':
     sys.exit('API_KEY not set, see the README.txt file')

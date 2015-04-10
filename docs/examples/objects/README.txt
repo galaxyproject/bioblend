@@ -14,7 +14,7 @@ microbiology workflows hosted by CRS4's Orione Galaxy server:
 All examples use workflows and datasets publicly available on Orione.
 Before you can run them, you have to register and obtain an API key:
 
- * go to http://orione.crs4.it and register -- or log in, if you are
+ * go to https://orione.crs4.it and register -- or log in, if you are
    already registered -- through the "User" menu at the top of the page;
  * open "User" -> "API Keys";
  * generate an API key if you don't have one.

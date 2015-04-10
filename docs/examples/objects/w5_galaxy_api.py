@@ -9,7 +9,7 @@ from six.moves.urllib.parse import urljoin
 # contains the code required to run the metagenomics workflow
 # *without* BioBlend.
 
-URL = os.getenv('GALAXY_URL', 'http://orione.crs4.it')
+URL = os.getenv('GALAXY_URL', 'https://orione.crs4.it')
 API_URL = urljoin(URL, 'api')
 API_KEY = os.getenv('GALAXY_API_KEY', 'YOUR_API_KEY')
 if API_KEY == 'YOUR_API_KEY':
