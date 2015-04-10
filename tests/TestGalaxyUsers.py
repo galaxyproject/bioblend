@@ -27,19 +27,24 @@ class TestGalaxyUsers(GalaxyTestBase.GalaxyTestBase):
 #        self.assertEqual(user['nice_total_disk_usage'], current_user['nice_total_disk_usage'])
 #        self.assertEqual(user['total_disk_usage'], current_user['total_disk_usage'])
 
+    @test_util.skip_unless_galaxy('release_14.06')
     def test_create_remote_user(self):
         # WARNING: only admins can create users!
-        # users = self.gi.users.create_remote_user('newuser@example.com')
-        # TODO: Since users cannot be deleted, this test cannot be executed
-        #       on a normal Galaxy instance, but may be activated for TravisCI.
-        pass
+        # WARNING: Users cannot be deleted in Galaxy, so execute this test only
+        #          on a disposable Galaxy instance!
+        if self.gi.config.get_config()['use_remote_user']:
+            user = self.gi.users.create_remote_user('newuser@example.com')
+            self.assertEqual(user['email'], 'newuser@example.com')
 
+    @test_util.skip_unless_galaxy('release_14.06')
     def test_create_local_user(self):
         # WARNING: only admins can create users!
-        # users = self.gi.users.create_local_user('newuser', 'newuser@example.com', 'secret')
-        # TODO: Since users cannot be deleted, this test cannot be executed
-        #       on a normal Galaxy instance, but may be activated for TravisCI.
-        pass
+        # WARNING: Users cannot be deleted in Galaxy, so execute this test only
+        #          on a disposable Galaxy instance!
+        if not self.gi.config.get_config()['use_remote_user']:
+            user = self.gi.users.create_local_user('newuser', 'newuser@example.com', 'secret')
+            self.assertEqual(user['username'], 'newuser')
+            self.assertEqual(user['email'], 'newuser@example.com')
 
     def test_get_current_user(self):
         user = self.gi.users.get_current_user()
