@@ -57,7 +57,7 @@ class GalaxyInstance(GalaxyClient):
         self.url = urljoin(url, 'api')
         self._init_auth(key, email, password)
         self.json_headers = {'Content-Type': 'application/json'}
-        self.verify = False  # Should SSL verification be done
+        self.verify = True  # Should SSL verification be done
         self.libraries = libraries.LibraryClient(self)
         self.histories = histories.HistoryClient(self)
         self.workflows = workflows.WorkflowClient(self)

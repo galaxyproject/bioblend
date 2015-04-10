@@ -104,7 +104,7 @@ class DatasetClient(Client):
 
         # Don't use self.gi.make_get_request as currently the download API does
         # not require a key
-        r = requests.get(url)
+        r = requests.get(url, verify=self.gi.verify)
 
         if file_path is None:
             return r.content
