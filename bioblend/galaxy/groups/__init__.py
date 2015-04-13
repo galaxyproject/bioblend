@@ -12,20 +12,15 @@ class GroupsClient(Client):
 
     def get_groups(self):
         """
-        Displays a collection (list) of groups.
-
+        Get all (not deleted) groups.
 
         :rtype: list
         :return: A list of dicts with details on individual groups.
                  For example::
 
-                   [ {"roles_url": "/api/groups/33abac023ff186c2/roles",
-                   "name": "Listeria", "url": "/api/groups/33abac023ff186c2",
-                   "users_url": "/api/groups/33abac023ff186c2/users",
+                   [ {"name": "Listeria", "url": "/api/groups/33abac023ff186c2",
                    "model_class": "Group", "id": "33abac023ff186c2"},
-                   {"roles_url": "/api/groups/73187219cd372cf8/roles",
-                   "name": "LPN", "url": "/api/groups/73187219cd372cf8",
-                   "users_url": "/api/groups/73187219cd372cf8/users",
+                   {"name": "LPN", "url": "/api/groups/73187219cd372cf8",
                    "model_class": "Group", "id": "73187219cd372cf8"}
                    ]
 
@@ -35,11 +30,10 @@ class GroupsClient(Client):
 
     def show_group(self, group_id):
         """
-        Display information on a single group
+        Get details of a given group.
 
         :type group_id: str
         :param group_id: Encoded group ID
-
 
         :rtype: dict
         :return: A description of group
@@ -56,10 +50,10 @@ class GroupsClient(Client):
 
     def create_group(self, group_name, user_ids=[], role_ids=[]):
         """
-        Create a new Galaxy group
+        Create a new group.
 
         :type group_name: str
-        :param group_name: A name for new group
+        :param group_name: A name for the new group
 
         :type user_ids: list
         :param user_ids: A list of encoded user IDs to add to the new group
@@ -81,3 +75,57 @@ class GroupsClient(Client):
         payload['user_ids'] = user_ids
         payload['role_ids'] = role_ids
         return Client._post(self, payload)
+
+    def update_group(self, group_id, group_name=None, user_ids=[], role_ids=[]):
+        """
+        Update a group.
+
+        :type group_id: str
+        :param group_id: Encoded group ID
+
+        :type group_name: str
+        :param group_name: A new name for the group. If None, the group name is
+          not changed.
+
+        :type user_ids: list
+        :param user_ids: New list of encoded user IDs for the group. It will
+          substitute the previous list of users (with [] if not specified)
+
+        :type role_ids: list
+        :param role_ids: New list of encoded role IDs for the group. It will
+          substitute the previous list of roles (with [] if not specified)
+
+        :rtype: int
+        :return: status code
+        """
+        payload = {}
+        payload['name'] = group_name
+        payload['user_ids'] = user_ids
+        payload['role_ids'] = role_ids
+        return Client._put(self, payload, id=group_id).status_code
+
+    def get_group_users(self, group_id):
+        """
+        Get the list of users associated to the given group.
+
+        :type group_id: str
+        :param group_id: Encoded group ID
+
+        :rtype: list of dicts
+        :return: List of group users' info
+        """
+        url = '/'.join([self.gi._make_url(self, group_id), 'users'])
+        return Client._get(self, url=url)
+
+    def get_group_roles(self, group_id):
+        """
+        Get the list of roles associated to the given group.
+
+        :type group_id: str
+        :param group_id: Encoded group ID
+
+        :rtype: list of dicts
+        :return: List of group roles' info
+        """
+        url = '/'.join([self.gi._make_url(self, group_id), 'roles'])
+        return Client._get(self, url=url)
