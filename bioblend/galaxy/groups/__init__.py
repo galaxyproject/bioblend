@@ -129,3 +129,61 @@ class GroupsClient(Client):
         """
         url = '/'.join([self.gi._make_url(self, group_id), 'roles'])
         return Client._get(self, url=url)
+
+    def add_group_user(self, group_id, user_id):
+        """
+        Add a user to the given group.
+
+        :type group_id: str
+        :param group_id: Encoded group ID
+
+        :type user_id: str
+        :param user_id: Encoded user ID to add to the group
+
+        :rtype: dict
+        :return: Added group user's info
+        """
+        url = '/'.join([self.gi._make_url(self, group_id), 'users', user_id])
+        return Client._put(self, dict(), url=url).json()
+
+    def add_group_role(self, group_id, role_id):
+        """
+        Add a role to the given group.
+
+        :type group_id: str
+        :param group_id: Encoded group ID
+
+        :type role_id: str
+        :param role_id: Encoded role ID to add to the group
+
+        :rtype: dict
+        :return: Added group role's info
+        """
+        url = '/'.join([self.gi._make_url(self, group_id), 'roles', role_id])
+        return Client._put(self, {}, url=url).json()
+
+    def delete_group_user(self, group_id, user_id):
+        """
+        Remove a user from the given group.
+
+        :type group_id: str
+        :param group_id: Encoded group ID
+
+        :type user_id: str
+        :param user_id: Encoded user ID to remove from the group
+        """
+        url = '/'.join([self.gi._make_url(self, group_id), 'users', user_id])
+        return Client._delete(self, {}, url=url)
+
+    def delete_group_role(self, group_id, role_id):
+        """
+        Remove a role from the given group.
+
+        :type group_id: str
+        :param group_id: Encoded group ID
+
+        :type role_id: str
+        :param role_id: Encoded role ID to remove from the group
+        """
+        url = '/'.join([self.gi._make_url(self, group_id), 'roles', role_id])
+        return Client._delete(self, {}, url=url)

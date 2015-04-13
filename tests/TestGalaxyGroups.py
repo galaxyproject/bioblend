@@ -53,3 +53,13 @@ class TestGalaxyGroups(GalaxyTestBase.GalaxyTestBase):
         self.assertEqual(set(updated_group_users), set(new_users))
         updated_group_roles = [_['id'] for _ in self.gi.groups.get_group_roles(self.group['id'])]
         self.assertEqual(set(updated_group_roles), set())
+
+    def test_add_delete_group_user(self):
+        new_user = self.gi.users.get_current_user()['id']
+        ret = self.gi.groups.add_group_user(self.group['id'], new_user)
+        self.assertEqual(ret['id'], new_user)
+        updated_group_users = [_['id'] for _ in self.gi.groups.get_group_users(self.group['id'])]
+        self.assertIn(new_user, updated_group_users)
+        self.gi.groups.delete_group_user(self.group['id'], new_user)
+        updated_group_users = [_['id'] for _ in self.gi.groups.get_group_users(self.group['id'])]
+        self.assertNotIn(new_user, updated_group_users)
