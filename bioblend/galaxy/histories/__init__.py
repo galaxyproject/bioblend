@@ -34,11 +34,12 @@ class HistoryClient(Client):
 
     def get_histories(self, history_id=None, name=None, deleted=False):
         """
-        Get all histories or filter the specific one(s) via the provided ``name``
-        or ``history_id``. Provide only one argument, ``name`` or ``history_id``,
-        but not both.
+        Get all histories or filter the specific one(s) via the provided
+        ``name`` or ``history_id``. Provide only one argument, ``name`` or
+        ``history_id``, but not both.
 
-        If ``deleted`` is set to ``True``, return histories that have been deleted.
+        If ``deleted`` is set to ``True``, return histories that have been
+        deleted.
 
         :type history_id: str
         :param history_id: Encoded history ID to filter on
@@ -69,17 +70,21 @@ class HistoryClient(Client):
         :type history_id: str
         :param history_id: Encoded history ID to filter on
 
-        :type contents: str
-        :param contents: When true, the complete list of datasets in the given history.
+        :type contents: bool
+        :param contents: When ``True``, the complete list of datasets in the
+          given history.
 
         :type deleted: str
-        :param deleted: Used when contents=True, includes deleted datasets is history dataset list
+        :param deleted: Used when contents=True, includes deleted datasets in
+          history dataset list
 
         :type visible: str
-        :param visible: Used when contents=True, includes only visible datasets is history dataset list
+        :param visible: Used when contents=True, includes only visible datasets
+          in history dataset list
 
         :type details: str
-        :param details: Used when contents=True, includes dataset details. Set to 'all' for the most information
+        :param details: Used when contents=True, includes dataset details. Set
+          to 'all' for the most information
 
         :type types: str
         :param types: ???
@@ -166,7 +171,7 @@ class HistoryClient(Client):
         :param name_filter: Only datasets whose name matches the
                             ``name_filter`` regular expression will be
                             returned; use plain strings for exact matches and
-                            None to match all datasets in the history.
+                            None to match all datasets in the history
         """
         if isinstance(name_filter, six.string_types):
             name_filter = re.compile(name_filter + '$')
@@ -189,7 +194,7 @@ class HistoryClient(Client):
         :type follow: bool
         :param follow: If ``follow`` is ``True``, recursively fetch dataset
                        provenance information for all inputs and their inputs,
-                       etc....
+                       etc...
         """
         url = self.gi._make_url(self, history_id, contents=True)
         url = '/'.join([url, dataset_id, "provenance"])
@@ -223,7 +228,6 @@ class HistoryClient(Client):
 
         :rtype: int
         :return: status code
-
         """
         kwds['name'] = name
         kwds['annotation'] = annotation
@@ -272,13 +276,14 @@ class HistoryClient(Client):
         :param dataset_collection_id: Encoded dataset_collection ID
 
         :type name: str
-        :param name: Replace history dataset collection name with the given string
+        :param name: Replace history dataset collection name with the given
+          string
 
         :type deleted: bool
-        :param deleted: Mark or unmark history dataset collection as deleted.
+        :param deleted: Mark or unmark history dataset collection as deleted
 
         :type visible: bool
-        :param visible: Mark or unmark history dataset collection as visible.
+        :param visible: Mark or unmark history dataset collection as visible
 
         :rtype: int
         :return: status code
@@ -459,7 +464,7 @@ class HistoryClient(Client):
         :param history_id: history ID
 
         :type gzip: bool
-        :param gzip: create .tar.gz archive if :obj:`True`, else .tar
+        :param gzip: create .tar.gz archive if ``True``, else .tar
 
         :type include_hidden: bool
         :param include_hidden: whether to include hidden datasets
@@ -470,12 +475,12 @@ class HistoryClient(Client):
           in the export
 
         :type wait: bool
-        :param wait: if :obj:`True`, block until the export is ready;
-          else, return immediately
+        :param wait: if ``True``, block until the export is ready; else, return
+          immediately
 
         :rtype: str
-        :return: ``jeha_id`` of the export, or empty if ``wait`` is
-          :obj:`False` and the export is not ready.
+        :return: ``jeha_id`` of the export, or empty if ``wait`` is ``False``
+          and the export is not ready.
         """
         params = {
             'gzip': gzip,

@@ -39,10 +39,10 @@ class ObjClient(object):
         Optional boolean kwargs for specific object types:
 
         ``deleted`` (libraries and histories)
-          if :obj:`True`, return only deleted objects
+          if ``True``, return only deleted objects
 
         ``published`` (workflows)
-          if :obj:`True`, return published workflows
+          if ``True``, return published workflows
 
         :rtype: list of :class:`~.wrappers.Preview`
         """

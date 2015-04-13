@@ -95,7 +95,7 @@ class Wrapper(object):
     @property
     def is_mapped(self):
         """
-        :obj:`True` if this wrapper is mapped to an actual Galaxy entity.
+        ``True`` if this wrapper is mapped to an actual Galaxy entity.
         """
         return self.id is not None
 
@@ -352,9 +352,9 @@ class Workflow(Wrapper):
         :param params: parameter settings for workflow steps (see below)
 
         :type import_inputs: bool
-        :param import_inputs: If :obj:`True`, workflow inputs will be
-          imported into the history; if :obj:`False`, only workflow
-          outputs will be visible in the history.
+        :param import_inputs: If ``True``, workflow inputs will be imported into
+          the history; if ``False``, only workflow outputs will be visible in
+          the history.
 
         :type replacement_params: :class:`~collections.Mapping`
         :param replacement_params: pattern-based replacements for
@@ -402,12 +402,12 @@ class Workflow(Wrapper):
 
         .. warning::
 
-          This is a blocking operation that can take a very long time.
-          If ``wait`` is set to :obj:`False`, the method will return
-          as soon as the workflow has been *scheduled*, otherwise it
-          will wait until the workflow has been *run*.  With a large
-          number of steps, however, the delay may not be negligible
-          even in the former case (e.g., minutes for 100 steps).
+          This is a blocking operation that can take a very long time. If
+          ``wait`` is set to ``False``, the method will return as soon as the
+          workflow has been *scheduled*, otherwise it will wait until the
+          workflow has been *run*. With a large number of steps, however, the
+          delay may not be negligible even in the former case (e.g. minutes for
+          100 steps).
         """
         if not self.is_mapped:
             raise RuntimeError('workflow is not mapped to a Galaxy object')
@@ -535,8 +535,8 @@ class Dataset(Wrapper):
         """
         Open dataset for reading and save its contents to ``file_object``.
 
-        :type outf: :obj:`file`
-        :param outf: output file object
+        :type file_object: file
+        :param file_object: output file object
 
         See :meth:`.get_stream` for info on other params.
         """
@@ -570,7 +570,7 @@ class Dataset(Wrapper):
         :param polling_interval: polling interval in seconds
 
         :type break_on_error: bool
-        :param break_on_error: if :obj:`True`, raise a RuntimeError exception if
+        :param break_on_error: if ``True``, raise a RuntimeError exception if
           the dataset ends in the 'error' state.
 
         .. warning::
@@ -896,7 +896,7 @@ class History(DatasetContainer):
         :param content: content of the new dataset to upload
 
         See :meth:`~bioblend.galaxy.tools.ToolClient.upload_file` for
-        the optional parameters.
+        the optional parameters (except file_name).
 
         :rtype: :class:`~.HistoryDatasetAssociation`
         :return: the uploaded dataset
@@ -977,8 +977,7 @@ class Library(DatasetContainer):
         :param data: dataset contents
 
         :type folder: :class:`~.Folder`
-        :param folder: a folder object, or :obj:`None` to upload to
-          the root folder
+        :param folder: a folder object, or ``None`` to upload to the root folder
 
         :rtype: :class:`~.LibraryDataset`
         :return: the dataset object that represents the uploaded content
@@ -1087,8 +1086,8 @@ class Library(DatasetContainer):
         :param description: optional folder description
 
         :type base_folder: :class:`~.Folder`
-        :param base_folder: parent folder, or :obj:`None` to create in
-          the root folder
+        :param base_folder: parent folder, or ``None`` to create in the root
+          folder
 
         :rtype: :class:`~.Folder`
         :return: the folder just created
