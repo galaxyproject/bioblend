@@ -38,3 +38,6 @@ cover
 
 # compiled docs
 docs/_build
+
+# Python virtualenv
+.venv
