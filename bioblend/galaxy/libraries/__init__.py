@@ -491,16 +491,16 @@ class LibraryClient(Client):
         :param library_id: id of the library
 
         :type access_in: list
-        :param access_in: list of user ids
+        :param access_in: list of role ids
 
         :type modify_in: list
-        :param modify_in: list of user ids
+        :param modify_in: list of role ids
 
         :type add_in: list
-        :param add_in: list of user ids
+        :param add_in: list of role ids
 
         :type manage_in: list
-        :param manage_in: list of user ids
+        :param manage_in: list of role ids
         """
 
         payload = {}
