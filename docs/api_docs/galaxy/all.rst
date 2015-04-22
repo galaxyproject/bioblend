@@ -20,15 +20,57 @@ Datasets
 
 -----
 
+Datatypes
+---------
+
+.. automodule:: bioblend.galaxy.datatypes
+
+-----
+
+Folders
+-------
+
+.. automodule:: bioblend.galaxy.folders
+
+-----
+
+Forms
+-----
+
+.. automodule:: bioblend.galaxy.forms
+
+-----
+
+FTP files
+---------
+
+.. automodule:: bioblend.galaxy.ftpfiles
+
+-----
+
 Genomes
 -------
 
 .. automodule:: bioblend.galaxy.genomes
 
+Groups
+------
+
+.. automodule:: bioblend.galaxy.groups
+
+-----
+
 Histories
 ---------
 
 .. automodule:: bioblend.galaxy.histories
+
+-----
+
+Jobs
+----
+
+.. automodule:: bioblend.galaxy.jobs
 
 -----
 
@@ -40,9 +82,16 @@ Libraries
 -----
 
 Quotas
---------
+------
 
 .. automodule:: bioblend.galaxy.quotas
+
+-----
+
+Roles
+-----
+
+.. automodule:: bioblend.galaxy.roles
 
 -----
 
@@ -50,6 +99,13 @@ Tools
 -----
 
 .. automodule:: bioblend.galaxy.tools
+
+-----
+
+Tool data tables
+----------------
+
+.. automodule:: bioblend.galaxy.tool_data
 
 -----
 
