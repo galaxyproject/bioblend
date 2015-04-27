@@ -54,8 +54,10 @@ fi
 # Install BioBlend
 BIOBLEND_DIR=$(get_abs_dirname $(dirname $0))
 cd ${BIOBLEND_DIR}
-python setup.py install --user || exit 1
-pip install --user "tox>=1.8.0"
+virtualenv .venv
+. .venv/bin/activate
+python setup.py install || exit 1
+pip install "tox>=1.8.0"
 
 # Setup Galaxy
 cd ${g_val}
@@ -105,6 +107,7 @@ else
   tox -e ${e_val}
 fi
 exit_code=$?
+deactivate
 
 # Stop Galaxy
 cd ${g_val}
