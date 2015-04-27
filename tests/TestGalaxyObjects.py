@@ -1,5 +1,4 @@
 # pylint: disable=C0103,E1101
-from __future__ import print_function
 import json
 import os
 import shutil
@@ -309,7 +308,7 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
             self.assertIsInstance(imported, wrappers.Workflow)
             imported.delete()
         else:
-            print("skipped 'manually publish a workflow to run this test'")
+            self.skipTest('no published workflows, manually publish a workflow to run this test')
 
     def test_get_libraries(self):
         self.__test_multi_get('library')
@@ -439,7 +438,7 @@ class TestLibrary(GalaxyObjectsTestBase):
             ds = self.lib.upload_from_url(self.DS_URL)
             self.__check_datasets([ds])
         else:
-            print("skipped 'url not reachable'")
+            self.skipTest('%s not reachable' % self.DS_URL)
 
     def test_dataset_from_local(self):
         with tempfile.NamedTemporaryFile(mode='w', prefix='bioblend_test_') as f:
