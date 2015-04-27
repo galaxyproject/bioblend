@@ -78,7 +78,7 @@ def is_reachable(url):
     res = None
     try:
         res = urlopen(url, timeout=1)
-    except URLError:
+    except (URLError, socket.timeout):
         return False
     if res is not None:
         res.close()
