@@ -2,10 +2,10 @@ language: python
 python:
   - "2.7"
 env:
-  - TOX_ENV=flake8 GALAXY_VERSION=dev
   - TOX_ENV=py34 GALAXY_VERSION=dev
   - TOX_ENV=py33 GALAXY_VERSION=dev
   - TOX_ENV=py27 GALAXY_VERSION=dev
+  - TOX_ENV=py27 GALAXY_VERSION=release_15.05
   - TOX_ENV=py27 GALAXY_VERSION=release_15.03
   - TOX_ENV=py27 GALAXY_VERSION=release_15.01
   - TOX_ENV=py27 GALAXY_VERSION=release_14.10
