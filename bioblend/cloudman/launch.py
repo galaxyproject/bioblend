@@ -484,7 +484,12 @@ class CloudManLauncher(object):
         """
         Returns the placement of a volume (or None, if it cannot be determined)
         """
-        vol = self.ec2_conn.get_all_volumes(volume_ids=[vol_id])
+        try:
+            vol = self.ec2_conn.get_all_volumes(volume_ids=[vol_id])
+        except EC2ResponseError, ec2e:
+            bioblend.log.error("EC2ResponseError querying for volume {0}: {1}"
+                               .format(vol_id, ec2e))
+            vol = None
         if vol:
             return vol[0].zone
         else:
@@ -521,8 +526,11 @@ class CloudManLauncher(object):
                         # No need to continue to iterate through
                         # filesystems, if we found one with a volume.
                         break
-            except Exception:
-                bioblend.log.exception("Exception while finding placement.  This can indicate malformed instance data.  Or that this method is broken.")
+            except Exception, exc:
+                bioblend.log.exception("Exception while finding placement for "
+                                       "cluster '{0}'. This can indicate malformed "
+                                       "instance data. Or that this method is "
+                                       "broken: {1}".format(cluster_name, exc))
                 placement = None
         return placement
 
