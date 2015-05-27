@@ -67,7 +67,7 @@ git checkout ${r_val}
 if git show-ref -q --verify "refs/heads/${r_val}" 2>/dev/null; then
   # ${r_val} is a branch
   export GALAXY_VERSION=${r_val}
-  git pull
+  git pull --ff-only
 fi
 # Setup Galaxy master API key and admin user
 if [ -f universe_wsgi.ini.sample ]; then
