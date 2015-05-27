@@ -64,6 +64,14 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
         self.assertEqual(self.history['name'], history_data['name'])
         self.assertEqual('new', history_data['state'])
 
+    @test_util.skip_unless_galaxy('release_14.04')
+    def test_create_history_tag(self):
+        new_tag = 'tag1'
+        self.gi.histories.create_history_tag(self.history['id'], new_tag)
+        updated_hist = self.gi.histories.show_history(self.history['id'])
+        self.assertEqual(self.history['id'], updated_hist['id'])
+        self.assertIn(new_tag, updated_hist['tags'])
+
     def test_show_dataset(self):
         history_id = self.history["id"]
         dataset1_id = self._test_dataset(history_id)
