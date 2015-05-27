@@ -486,7 +486,7 @@ class CloudManLauncher(object):
         """
         try:
             vol = self.ec2_conn.get_all_volumes(volume_ids=[vol_id])
-        except EC2ResponseError, ec2e:
+        except EC2ResponseError as ec2e:
             bioblend.log.error("EC2ResponseError querying for volume {0}: {1}"
                                .format(vol_id, ec2e))
             vol = None
@@ -526,7 +526,7 @@ class CloudManLauncher(object):
                         # No need to continue to iterate through
                         # filesystems, if we found one with a volume.
                         break
-            except Exception, exc:
+            except Exception as exc:
                 bioblend.log.exception("Exception while finding placement for "
                                        "cluster '{0}'. This can indicate malformed "
                                        "instance data. Or that this method is "
