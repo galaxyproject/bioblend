@@ -183,6 +183,7 @@ class Workflow(Wrapper):
     def __init__(self, wf_dict, gi=None):
         super(Workflow, self).__init__(wf_dict, gi=gi)
         missing_ids = []
+        tools_list_by_id = [t.id for t in gi.tools.list()]
         for k, v in six.iteritems(self.steps):
             # convert step ids to str for consistency with outer keys
             v['id'] = str(v['id'])
@@ -190,8 +191,9 @@ class Workflow(Wrapper):
                 i['source_step'] = str(i['source_step'])
             step = self._build_step(v, self)
             self.steps[k] = step
-            if step.type == 'tool' and not step.tool_inputs:
-                missing_ids.append(k)
+            if step.type == 'tool':
+                if not step.tool_inputs or step.tool_id not in tools_list_by_id:
+                    missing_ids.append(k)
         input_labels_to_ids = {}
         for id_, d in six.iteritems(self.inputs):
             input_labels_to_ids.setdefault(d['label'], set()).add(id_)
