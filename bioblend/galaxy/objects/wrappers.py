@@ -183,7 +183,10 @@ class Workflow(Wrapper):
     def __init__(self, wf_dict, gi=None):
         super(Workflow, self).__init__(wf_dict, gi=gi)
         missing_ids = []
-        tools_list_by_id = [t.id for t in gi.tools.list()]
+        if gi:
+            tools_list_by_id = [t.id for t in gi.tools.get_previews()]
+        else:
+            tools_list_by_id = []
         for k, v in six.iteritems(self.steps):
             # convert step ids to str for consistency with outer keys
             v['id'] = str(v['id'])
