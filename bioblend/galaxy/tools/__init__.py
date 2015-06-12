@@ -167,6 +167,8 @@ class ToolClient(Client):
         tool_input = {}
         tool_input["file_type"] = file_type
         tool_input["dbkey"] = keywords.get("dbkey", "?")
+        if "uuid" in keywords:
+            tool_input["files_0|uuid"] = keywords["uuid"]
         if file_name:
             tool_input["files_0|NAME"] = file_name
         tool_input["files_0|type"] = "upload_dataset"
