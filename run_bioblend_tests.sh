@@ -4,6 +4,8 @@ show_help () {
   echo "Usage:  $0 -g GALAXY_DIR [-p PORT] [-e TOX_ENV] [-t BIOBLEND_TESTS] [-r GALAXY_REV] [-c]
 
   Run tests for BioBlend. Useful for Continuous Integration testing.
+  *Please note* that this script overwrites the main.pid file and appends to the
+  main.log file inside the specified Galaxy directory (-g).
 
 Options:
   -g GALAXY_DIR
