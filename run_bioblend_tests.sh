@@ -17,10 +17,10 @@ Options:
       See 'man nosetests' for more information. Defaults to all tests.
   -r GALAXY_REV
       Branch or commit of the local Galaxy git repository to checkout. Defaults
-      to the dev branch."
+      to the dev branch.
   -c
       Force removal of the temporary directory created for Galaxy, even if some
-      test failed.
+      test failed."
 }
 
 get_abs_dirname () {
