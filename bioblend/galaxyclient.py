@@ -11,11 +11,30 @@ import json
 import requests
 from requests_toolbelt import MultipartEncoder
 import six
+from six.moves.urllib.parse import urljoin, urlparse
 
 from .galaxy.client import ConnectionError
 
 
 class GalaxyClient(object):
+
+    def __init__(self, url, key=None, email=None, password=None):
+        # Make sure the url scheme is defined (otherwise requests will not work)
+        if not urlparse(url).scheme:
+            url = "http://" + url
+        # All of Galaxy's and ToolShed's API's are rooted at <url>/api so make that the url
+        self.base_url = url
+        self.url = urljoin(url, 'api')
+        # If key has been supplied, use it; otherwise just set email and
+        # password and grab user's key before first request.
+        if key:
+            self._key = key
+        else:
+            self._key = None
+            self.email = email
+            self.password = password
+        self.json_headers = {'Content-Type': 'application/json'}
+        self.verify = True  # Should SSL verification be done
 
     def _make_url(self, module, module_id=None, deleted=False, contents=False):
         """
@@ -164,16 +183,6 @@ class GalaxyClient(object):
                 response = json.loads(response)
             self._key = response["api_key"]
         return self._key
-
-    def _init_auth(self, key, email, password):
-        # If key supplied use it, otherwise just set email and password and
-        # grab users key before first request.
-        if key:
-            self._key = key
-        else:
-            self._key = None
-            self.email = email
-            self.password = password
 
     @property
     def default_params(self):

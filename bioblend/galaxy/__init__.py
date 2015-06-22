@@ -1,8 +1,6 @@
 """
 A base representation of an instance of Galaxy
 """
-from six.moves.urllib.parse import urljoin, urlparse
-
 from bioblend.galaxy.client import Client
 from bioblend.galaxy import (libraries, histories, workflows, datasets, users,
                              genomes, tools, toolshed, config, visual, quotas,
@@ -49,15 +47,7 @@ class GalaxyInstance(GalaxyClient):
                          e-mail address. Ignored if key is supplied directly.
 
         """
-        # Make sure the url scheme is defined (otherwise requests will not work)
-        if not urlparse(url).scheme:
-            url = "http://" + url
-        # All of Galaxy's API's are rooted at <url>/api so make that the base url
-        self.base_url = url
-        self.url = urljoin(url, 'api')
-        self._init_auth(key, email, password)
-        self.json_headers = {'Content-Type': 'application/json'}
-        self.verify = True  # Should SSL verification be done
+        super(GalaxyInstance, self).__init__(url, key, email, password)
         self.libraries = libraries.LibraryClient(self)
         self.histories = histories.HistoryClient(self)
         self.workflows = workflows.WorkflowClient(self)
