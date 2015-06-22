@@ -55,6 +55,9 @@ class LibraryClient(Client):
         return Client._delete(self, payload, id=library_id)
 
     def __show_item(self, library_id, item_id):
+        """
+        Get details about a given library item.
+        """
         url = self.gi._make_url(self, library_id, contents=True)
         url = '/'.join([url, item_id])
         return Client._get(self, url=url)
@@ -237,13 +240,12 @@ class LibraryClient(Client):
         """
         return Client._get(self, id=library_id, contents=contents)
 
-    def _do_upload(self, **keywords):
+    def _do_upload(self, library_id, **keywords):
         """
         Set up the POST request and do the actual data upload to a data library.
         This method should not be called directly but instead refer to the methods
         specific for the desired type of data upload.
         """
-        library_id = keywords['library_id']
         folder_id = keywords.get('folder_id', None)
         if folder_id is None:
             folder_id = self._get_root_folder_id(library_id)
@@ -303,10 +305,9 @@ class LibraryClient(Client):
         :type dbkey: str
         :param dbkey: Dbkey
         """
-        # TODO: Is there a better way of removing self from locals?
-        vars = locals().copy()
-        del vars['self']
-        return self._do_upload(**vars)
+        return self._do_upload(library_id, file_url=file_url,
+                               folder_id=folder_id, file_type=file_type,
+                               dbkey=dbkey)
 
     def upload_file_contents(self, library_id, pasted_content, folder_id=None, file_type='auto', dbkey='?'):
         """
@@ -328,9 +329,9 @@ class LibraryClient(Client):
         :type dbkey: str
         :param dbkey: Dbkey
         """
-        vars = locals().copy()
-        del vars['self']
-        return self._do_upload(**vars)
+        return self._do_upload(library_id, pasted_content=pasted_content,
+                               folder_id=folder_id, file_type=file_type,
+                               dbkey=dbkey)
 
     def upload_file_from_local_path(self, library_id, file_local_path,
                                     folder_id=None, file_type='auto', dbkey='?'):
@@ -354,9 +355,9 @@ class LibraryClient(Client):
         :type dbkey: str
         :param dbkey: Dbkey
         """
-        vars = locals().copy()
-        del vars['self']
-        return self._do_upload(**vars)
+        return self._do_upload(library_id, file_local_path=file_local_path,
+                               folder_id=folder_id, file_type=file_type,
+                               dbkey=dbkey)
 
     def upload_file_from_server(self, library_id, server_dir, folder_id=None,
                                 file_type='auto', dbkey='?', link_data_only=None,
@@ -397,9 +398,10 @@ class LibraryClient(Client):
         :type roles: str
         :param roles: ???
         """
-        vars = locals().copy()
-        del vars['self']
-        return self._do_upload(**vars)
+        return self._do_upload(library_id, server_dir=server_dir,
+                               folder_id=folder_id, file_type=file_type,
+                               dbkey=dbkey, link_data_only=link_data_only,
+                               roles=roles)
 
     def upload_from_galaxy_filesystem(self, library_id, filesystem_paths, folder_id=None,
                                       file_type="auto", dbkey="?", link_data_only=None,
@@ -438,9 +440,10 @@ class LibraryClient(Client):
         :type roles: str
         :param roles: ???
         """
-        vars = locals().copy()
-        del vars['self']
-        return self._do_upload(**vars)
+        return self._do_upload(library_id, filesystem_paths=filesystem_paths,
+                               folder_id=folder_id, file_type=file_type,
+                               dbkey=dbkey, link_data_only=link_data_only,
+                               roles=roles)
 
     def copy_from_dataset(self, library_id, dataset_id, folder_id=None, message=''):
         """
