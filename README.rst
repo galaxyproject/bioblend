@@ -1,8 +1,9 @@
 .. image:: https://travis-ci.org/galaxyproject/bioblend.png
         :target: https://travis-ci.org/galaxyproject/bioblend
 
-.. image:: https://pypip.in/d/bioblend/badge.png
+.. image:: https://img.shields.io/pypi/dm/bioblend.svg
         :target: https://pypi.python.org/pypi/bioblend/
+        :alt: PyPI downloads in the last month
 
 .. image:: https://landscape.io/github/galaxyproject/bioblend/master/landscape.svg?style=flat
         :target: https://landscape.io/github/galaxyproject/bioblend/master
