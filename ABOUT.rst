@@ -1,5 +1,10 @@
-`BioBlend <http://bioblend.readthedocs.org/>`_ is a Python (2.6 or 2.7)
-library for interacting with `CloudMan`_ and `Galaxy`_'s API.
+`BioBlend <http://bioblend.readthedocs.org/>`_ is a Python library for
+interacting with `CloudMan`_ and `Galaxy`_'s API.
+
+BioBlend is supported and tested on:
+
+- Python 2.6 and 2.7 (Python 3.3 and 3.4 have been added in the unreleased master branch)
+- Galaxy release_14.02 and later.
 
 Conceptually, it makes it possible to script and automate the process
 of cloud infrastructure provisioning and scaling via CloudMan, and
