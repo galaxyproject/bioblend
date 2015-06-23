@@ -162,7 +162,7 @@ class LibraryClient(Client):
             payload['description'] = description
         return Client._post(self, payload, id=library_id, contents=True)
 
-    def get_folders(self, library_id, folder_id=None, name=None, deleted=False):
+    def get_folders(self, library_id, folder_id=None, name=None):
         """
         Get all the folders or filter specific one(s) via the provided ``name``
         or ``folder_id`` in data library with id ``library_id``. Provide only one
@@ -175,10 +175,6 @@ class LibraryClient(Client):
         :param name: filter for folder by name. For ``name`` specify the full
                      path of the folder starting from the library's root
                      folder, e.g. ``/subfolder/subsubfolder``.
-
-        :type deleted: bool
-        :param deleted: If set to ``True``, return folders that have been
-                        deleted.
 
         :rtype: dict
         :return: list of dicts each containing basic information about a folder.
