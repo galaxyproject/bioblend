@@ -1,4 +1,27 @@
-### BioBlend v0.5.3 - March 18, 2014
+### BioBlend v0.6.0 - June 2?, 2015
+
+* Add support for Python >= 3.3
+
+* Use Tox (https://tox.readthedocs.org/) to simplify testing
+
+* Add ``get_library_permissions()`` method to ``LibraryClient``
+
+* Add ``update_group()``, ``get_group_users()`` and ``get_group_roles()``
+  methods to ``GroupsClient``
+
+* Add ``add_group_user()``, ``add_group_role()``, ``delete_group_user()`` and
+  ``delete_group_role()`` to ``GroupsClient``
+
+* Add documentation about the Tool Shed and properly link all the docs on
+  ReadTheDocs
+
+* Various improvements to solidify automated testing
+
+* Verify SSL certificates by default
+
+* Remove several deprecated parameters
+
+### BioBlend v0.5.3 - March 18, 2015
 
 * Project source moved to new URL - https://github.com/galaxyproject/bioblend
 
