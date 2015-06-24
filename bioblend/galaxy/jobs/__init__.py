@@ -46,12 +46,16 @@ class JobsClient(Client):
         """
         return Client._get(self)
 
-    def show_job(self, job_id):
+    def show_job(self, job_id, full_details=False):
         """
         Display information on a single job from current user
 
         :type job_id: str
         :param job_id: Specific job ID
+
+        :type full_details: bool
+        :param full_details: When ``True``, the complete list of details for the
+          given job. (If user is an admin)
 
         :rtype: dict
         :return: A description of single job
@@ -72,8 +76,11 @@ class JobsClient(Client):
                  u'update_time': u'2014-03-01T16:17:31.930728'}
 
         """
+        params = {}
+        if full_details:
+            params['full'] = full_details
 
-        return Client._get(self, id=job_id)
+        return Client._get(self, id=job_id, params=params)
 
     def get_state(self, job_id):
         """

@@ -29,6 +29,7 @@ __all__ = [
     'LibraryDatasetDatasetAssociation',
     'LibraryDataset',
     'Tool',
+    'Job',
     'Preview',
     'LibraryPreview',
     'HistoryPreview',
@@ -1249,6 +1250,20 @@ class Tool(Wrapper):
             self.gi._wait_datasets(outputs, polling_interval=polling_interval)
         return outputs
 
+
+class Job(Wrapper):
+    """
+    Maps to a Galaxy job.
+    """
+    BASE_ATTRS = Wrapper.BASE_ATTRS
+    POLLING_INTERVAL = 10  # for output state monitoring
+
+    def __init__(self, t_dict, gi=None):
+        super(Job, self).__init__(t_dict, gi=gi)
+
+    @property
+    def gi_module(self):
+        return self.gi.jobs
 
 @six.add_metaclass(abc.ABCMeta)
 class Preview(Wrapper):

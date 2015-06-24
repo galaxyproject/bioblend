@@ -376,3 +376,22 @@ class ObjToolClient(ObjClient):
         # Moreover, the dicts returned by gi.tools.get_tools() are richer than
         # those returned by get(), so make this an alias for get_previews().
         return self.get_previews(name, trackster)
+
+
+class ObjJobClient(ObjClient):
+    """
+    Interacts with Galaxy jobs.
+    """
+    def __init__(self, obj_gi):
+        super(ObjJobClient, self).__init__(obj_gi)
+
+    def get(self, id_, full_details=False):
+        """
+        Retrieve the tool corresponding to the given id.
+
+        :rtype: :class:`~.wrappers.Job`
+        :return: the job corresponding to ``id_``
+        """
+        res = self.gi.jobs.show_job(id_, full_details)
+        job_dict = self._get_dict('job_tool', res)
+        return wrappers.Job(job_dict,gi=self.obj_gi)
