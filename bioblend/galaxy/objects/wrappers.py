@@ -1265,6 +1265,7 @@ class Job(Wrapper):
     def gi_module(self):
         return self.gi.jobs
 
+
 @six.add_metaclass(abc.ABCMeta)
 class Preview(Wrapper):
     """

@@ -394,4 +394,4 @@ class ObjJobClient(ObjClient):
         """
         res = self.gi.jobs.show_job(id_, full_details)
         job_dict = self._get_dict('job_tool', res)
-        return wrappers.Job(job_dict,gi=self.obj_gi)
+        return wrappers.Job(job_dict, gi=self.obj_gi)

@@ -57,7 +57,6 @@ class GalaxyInstance(object):
         self.__tools = client.ObjToolClient(self)
         self.__jobs = client.ObjJobClient(self)
 
-
     @property
     def histories(self):
         """
