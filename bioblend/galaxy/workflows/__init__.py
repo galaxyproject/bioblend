@@ -11,7 +11,8 @@ class WorkflowClient(Client):
         self.module = 'workflows'
         super(WorkflowClient, self).__init__(galaxy_instance)
 
-    def get_workflows(self, workflow_id=None, name=None, deleted=False, published=False):
+    # the 'deleted' option is not available for workflows
+    def get_workflows(self, workflow_id=None, name=None, published=False):
         """
         Get all workflows or filter the specific one(s) via the provided ``name``
         or ``workflow_id``. Provide only one argument, ``name`` or ``workflow_id``,
@@ -24,10 +25,6 @@ class WorkflowClient(Client):
         :param name: Filter by name of workflow (incompatible with
           ``workflow_id``). If multiple names match the given name, all the
           workflows matching the argument will be returned.
-
-        :type deleted: bool
-        :param deleted: this parameter is deprecated and ignored, it will be
-          removed in BioBlend 0.6
 
         :type published: bool
         :param published: if ``True``, return also published workflows

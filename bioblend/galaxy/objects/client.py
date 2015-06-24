@@ -285,15 +285,12 @@ class ObjWorkflowClient(ObjClient):
         return [wrappers.WorkflowPreview(_, gi=self.obj_gi) for _ in dicts]
 
     # the 'deleted' option is not available for workflows
-    def list(self, name=None, deleted=False, published=False):
+    def list(self, name=None, published=False):
         """
         Get workflows owned by the user of this Galaxy instance.
 
         :type name: str
         :param name: return only workflows with this name
-        :type deleted: bool
-        :param deleted: this parameter is deprecated and ignored, it will be
-          removed in BioBlend 0.6
         :type published: bool
         :param published: if ``True``, return also published workflows
 

@@ -361,14 +361,10 @@ class HistoryClient(Client):
         return Client._post(self, payload, id=history_id, contents=True)
 
     def download_dataset(self, history_id, dataset_id, file_path,
-                         use_default_filename=True, to_ext=None):
+                         use_default_filename=True):
         """
         Download a ``dataset_id`` from history with ``history_id`` to a
         file on the local file system, saving it to ``file_path``.
-
-        :type to_ext: str
-        :param to_ext: this parameter is deprecated and ignored, it will be
-          removed in BioBlend 0.6
 
         Refer to ``bioblend.galaxy.dataset.DatasetClient.download_dataset()``
         for the other available parameters.
