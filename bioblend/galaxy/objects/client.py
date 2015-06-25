@@ -387,7 +387,11 @@ class ObjJobClient(ObjClient):
 
     def get(self, id_, full_details=False):
         """
-        Retrieve the tool corresponding to the given id.
+        Retrieve the job corresponding to the given id.
+
+        :type full_details: bool
+        :param full_details: if ``True``, return the complete list of details
+          for the given job.
 
         :rtype: :class:`~.wrappers.Job`
         :return: the job corresponding to ``id_``
