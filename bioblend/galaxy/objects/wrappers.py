@@ -1255,11 +1255,10 @@ class Job(Wrapper):
     """
     Maps to a Galaxy job.
     """
-    BASE_ATTRS = Wrapper.BASE_ATTRS
-    POLLING_INTERVAL = 10  # for output state monitoring
+    BASE_ATTRS = Wrapper.BASE_ATTRS + ('state',)
 
-    def __init__(self, t_dict, gi=None):
-        super(Job, self).__init__(t_dict, gi=gi)
+    def __init__(self, j_dict, gi=None):
+        super(Job, self).__init__(j_dict, gi=gi)
 
     @property
     def gi_module(self):
