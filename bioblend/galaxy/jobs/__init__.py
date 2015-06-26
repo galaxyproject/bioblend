@@ -46,12 +46,16 @@ class JobsClient(Client):
         """
         return Client._get(self)
 
-    def show_job(self, job_id):
+    def show_job(self, job_id, full_details=False):
         """
         Display information on a single job from current user
 
         :type job_id: str
         :param job_id: Specific job ID
+
+        :type full_details: bool
+        :param full_details: When ``True``, the complete list of details for the
+          given job.
 
         :rtype: dict
         :return: A description of single job
@@ -72,8 +76,11 @@ class JobsClient(Client):
                  u'update_time': u'2014-03-01T16:17:31.930728'}
 
         """
+        params = {}
+        if full_details:
+            params['full'] = full_details
 
-        return Client._get(self, id=job_id)
+        return Client._get(self, id=job_id, params=params)
 
     def get_state(self, job_id):
         """
@@ -104,7 +111,8 @@ class JobsClient(Client):
         :returns:   list of dictionaries containing summary job information of the jobs that match the requested job run
 
         This method is designed to scan the list of previously run jobs and find records of jobs that had
-        the exact some input parameters and datasets. This can be used to minimize the amount of repeated work, and simply
+        the exact some input parameters and datasets. This can be used to minimize the amount of repeated work,
+        and simply
         recycle the old results.
 
         """

@@ -55,6 +55,7 @@ class GalaxyInstance(object):
         self.__libraries = client.ObjLibraryClient(self)
         self.__workflows = client.ObjWorkflowClient(self)
         self.__tools = client.ObjToolClient(self)
+        self.__jobs = client.ObjJobClient(self)
 
     @property
     def histories(self):
@@ -83,6 +84,13 @@ class GalaxyInstance(object):
         Client module for Galaxy tools.
         """
         return self.__tools
+
+    @property
+    def jobs(self):
+        """
+        Client module for Galaxy jobs.
+        """
+        return self.__jobs
 
     def _wait_datasets(self, datasets, polling_interval, break_on_error=True):
         """
