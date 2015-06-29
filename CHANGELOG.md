@@ -1,25 +1,32 @@
 ### BioBlend v0.6.0 - June 2?, 2015
 
-* Add support for Python >= 3.3
+* Add support for Python >= 3.3 .
 
-* Use Tox (https://tox.readthedocs.org/) to simplify testing
+* Add ``get_library_permissions()`` method to ``LibraryClient``.
 
-* Add ``get_library_permissions()`` method to ``LibraryClient``
+* Add ``update_group()``, ``get_group_users()``, ``get_group_roles()``,
+  ``add_group_user()``, ``add_group_role()``, ``delete_group_user()`` and
+  ``delete_group_role()`` methods to ``GroupsClient``.
 
-* Add ``update_group()``, ``get_group_users()`` and ``get_group_roles()``
-  methods to ``GroupsClient``
+* Add ``full_details`` parameter to ``JobsClient.show_job()`` (thanks to Rossano
+  Atzeni).
 
-* Add ``add_group_user()``, ``add_group_role()``, ``delete_group_user()`` and
-  ``delete_group_role()`` to ``GroupsClient``
+* BioBlend.objects: add ``ObjJobClient`` and ``Job`` wrapper (thanks to Rossano
+  Atzeni).
+
+* BioBlend.objects: add check to verify that all tools in a workflow are
+  installed on the Galaxy instance (thanks to Gianmauro Cuccuru).
+
+* Remove several deprecated parameters: see commits [19e168f](https://github.com/galaxyproject/bioblend/commit/19e168f5342f4c791d37694d7039a85f2669df71)
+  and [442ae98](https://github.com/galaxyproject/bioblend/commit/442ae98037be7455d57be15542553dc848d99431).
+
+* Verify SSL certificates by default.
 
 * Add documentation about the Tool Shed and properly link all the docs on
   ReadTheDocs
 
-* Various improvements to solidify automated testing
-
-* Verify SSL certificates by default
-
-* Remove several deprecated parameters
+* Solidify automated testing by using [tox](https://tox.readthedocs.org/) and
+  [flake8](https://gitlab.com/pycqa/flake8).
 
 ### BioBlend v0.5.3 - March 18, 2015
 
