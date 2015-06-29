@@ -12,21 +12,10 @@ class JobsClient(Client):
 
     def get_jobs(self):
         """
-        Get a list of jobs for current user
+        Get the list of jobs of the current user.
 
-        :type   state: str or list
-        :param  state: limit listing of jobs to those that match one of the included states. If none, all are returned.
-        Valid Galaxy job states include:
-        'new', 'upload', 'waiting', 'queued', 'running', 'ok', 'error', 'paused', 'deleted', 'deleted_new'
-
-        :type   tool_id: str or list
-        :param  tool_id: limit listing of jobs to those that match one of the included tool_ids. If none, all are returned.
-
-        :type   history_id: str
-        :param  history_id: limit listing of jobs to those that match the history_id. If none, all are returned.
-
-        :rtype:     list
-        :returns:   list of dictionaries containing summary job information
+        :rtype: list
+        :returns: list of dictionaries containing summary job information.
                  For example::
 
                  [{ u'create_time': u'2014-03-01T16:16:48.640550',
@@ -48,18 +37,17 @@ class JobsClient(Client):
 
     def show_job(self, job_id, full_details=False):
         """
-        Display information on a single job from current user
+        Display information for a given job of the current user.
 
         :type job_id: str
-        :param job_id: Specific job ID
+        :param job_id: job ID
 
         :type full_details: bool
-        :param full_details: When ``True``, the complete list of details for the
+        :param full_details: when ``True``, the complete list of details for the
           given job.
 
         :rtype: dict
-        :return: A description of single job
-                 For example::
+        :return: A description of the given job. For example::
 
                  {   u'create_time': u'2014-03-01T16:17:29.828624',
                  u'exit_code': 0,
@@ -84,15 +72,15 @@ class JobsClient(Client):
 
     def get_state(self, job_id):
         """
-        Display the current state for a single job from current user.
+        Display the current state for a given job of the current user.
 
         :type job_id: str
-        :param job_id: Specific job ID
+        :param job_id: job ID
 
         :rtype: str
-        :return: State of single job with the following being valid values:
-                 `new`, `queued`, `running`, `waiting`, `ok`. In case the
-                 state cannot be retrived, an empty string is returned.
+        :return: state of the given job among the following values: `new`,
+          `queued`, `running`, `waiting`, `ok`. If the state cannot be
+          retrieved, an empty string is returned.
 
         .. versionadded:: 0.5.3
         """
@@ -100,19 +88,20 @@ class JobsClient(Client):
 
     def search_jobs(self, job_info):
         """
-        Return jobs for current user based payload content
+        Return jobs for the current user based payload content.
 
-        :type   job_info: dict
-        :param  job_info: Dictionary containing description of requested job.
+        :type job_info: dict
+        :param job_info: dictionary containing description of the requested job.
           This is in the same format as a request to POST /api/tools would take
           to initiate a job
 
-        :rtype:     list
-        :returns:   list of dictionaries containing summary job information of the jobs that match the requested job run
+        :rtype: list
+        :returns: list of dictionaries containing summary job information of
+          the jobs that match the requested job run
 
-        This method is designed to scan the list of previously run jobs and find records of jobs that had
-        the exact some input parameters and datasets. This can be used to minimize the amount of repeated work,
-        and simply
+        This method is designed to scan the list of previously run jobs and find
+        records of jobs that had the exact some input parameters and datasets.
+        This can be used to minimize the amount of repeated work, and simply
         recycle the old results.
 
         """
