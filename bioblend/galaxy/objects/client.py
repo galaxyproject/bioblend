@@ -396,3 +396,16 @@ class ObjJobClient(ObjClient):
         res = self.gi.jobs.show_job(id_, full_details)
         job_dict = self._get_dict('job_tool', res)
         return wrappers.Job(job_dict, gi=self.obj_gi)
+
+    def get_previews(self):
+        dicts = self.gi.jobs.get_jobs()
+        return [wrappers.JobPreview(_, gi=self.obj_gi) for _ in dicts]
+
+    def list(self):
+        """
+        Get the list of jobs of the current user.
+
+        :rtype: list of :class:`~.wrappers.Job`
+        """
+        dicts = self.gi.jobs.get_jobs()
+        return [self.get(_['id']) for _ in dicts]

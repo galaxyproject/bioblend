@@ -1255,7 +1255,7 @@ class Job(Wrapper):
     """
     Maps to a Galaxy job.
     """
-    BASE_ATTRS = Wrapper.BASE_ATTRS + ('state',)
+    BASE_ATTRS = ('id', 'state')
 
     def __init__(self, j_dict, gi=None):
         super(Job, self).__init__(j_dict, gi=gi)
@@ -1327,3 +1327,20 @@ class WorkflowPreview(Preview):
     @property
     def gi_module(self):
         return self.gi.workflows
+
+
+class JobPreview(Preview):
+    """
+    Models Galaxy job 'previews'.
+
+    Instances of this class wrap dictionaries obtained by getting
+    ``/api/jobs`` from Galaxy.
+    """
+    BASE_ATTRS = ('id', 'state')
+
+    def __init__(self, pw_dict, gi=None):
+        super(JobPreview, self).__init__(pw_dict, gi=gi)
+
+    @property
+    def gi_module(self):
+        return self.gi.jobs

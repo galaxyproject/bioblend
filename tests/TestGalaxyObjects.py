@@ -697,6 +697,24 @@ class TestRunWorkflow(GalaxyObjectsTestBase):
         self.__test(params=True)
 
 
+@test_util.skip_unless_galaxy()
+class TestJob(GalaxyObjectsTestBase):
+
+    def setUp(self):
+        super(TestJob, self).setUp()
+
+    def test_get(self):
+        job_prevs = self.gi.jobs.get_previews()
+        if len(job_prevs) > 0:
+            job_prev = job_prevs[0]
+            self.assertIsInstance(job_prev, wrappers.JobPreview)
+            job = self.gi.jobs.get(job_prev.id)
+            self.assertIsInstance(job, wrappers.Job)
+            self.assertEqual(job.id, job_prev.id)
+        for job in self.gi.jobs.list():
+            self.assertIsInstance(job, wrappers.Job)
+
+
 # XXX: don't use TestLoader.loadTests* until support for Python 2.6 is dropped
 def suite():
     loader = unittest.TestLoader()
