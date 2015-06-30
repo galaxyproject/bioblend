@@ -1,6 +1,6 @@
-### BioBlend v0.6.0 - June 2?, 2015
+### BioBlend v0.6.0 - June 30, 2015
 
-* Add support for Python >= 3.3 .
+* Add support for Python >= 3.3.
 
 * Add ``get_library_permissions()`` method to ``LibraryClient``.
 
@@ -23,7 +23,7 @@
 * Verify SSL certificates by default.
 
 * Add documentation about the Tool Shed and properly link all the docs on
-  ReadTheDocs
+  ReadTheDocs.
 
 * Solidify automated testing by using [tox](https://tox.readthedocs.org/) and
   [flake8](https://gitlab.com/pycqa/flake8).
