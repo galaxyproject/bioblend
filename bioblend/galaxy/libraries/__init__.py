@@ -25,12 +25,12 @@ class LibraryClient(Client):
         :type synopsis: str
         :param synopsis: Optional data library synopsis
 
-        :rtype: list
-        :return: List of dicts describing created library
+        :rtype: dict
+        :return: details of the created library:
 
-            [{"id": "f740ab636b360a70",
+            {"id": "f740ab636b360a70",
               "name": "Library from bioblend",
-              "url": "/api/libraries/f740ab636b360a70"}]
+              "url": "/api/libraries/f740ab636b360a70"}
 
         """
         payload = {'name': name}
@@ -176,7 +176,7 @@ class LibraryClient(Client):
                      path of the folder starting from the library's root
                      folder, e.g. ``/subfolder/subsubfolder``.
 
-        :rtype: dict
+        :rtype: list
         :return: list of dicts each containing basic information about a folder.
         """
         if folder_id is not None and name is not None:
@@ -208,7 +208,7 @@ class LibraryClient(Client):
         :param deleted: If set to ``True``, return libraries that have been
                         deleted.
 
-        :rtype: dict
+        :rtype: list
         :return: list of dicts each containing basic information about a library.
         """
         if library_id is not None and name is not None:
@@ -231,8 +231,8 @@ class LibraryClient(Client):
         :type contents: bool
         :param contents: True if want to get contents of the library (rather than just the library details).
 
-        :rtype: list
-        :return: a list of dicts containing library details.
+        :rtype: dict
+        :return: details of the given library
         """
         return Client._get(self, id=library_id, contents=contents)
 

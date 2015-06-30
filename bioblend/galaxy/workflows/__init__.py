@@ -58,7 +58,7 @@ class WorkflowClient(Client):
         :type workflow_id: str
         :param workflow_id: Encoded workflow ID
 
-        :rtype: list
+        :rtype: dict
         :return: A description of the workflow and its inputs as a JSON object.
                  For example::
 

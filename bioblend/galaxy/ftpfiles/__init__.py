@@ -12,12 +12,9 @@ class FTPFilesClient(Client):
 
     def get_ftp_files(self, deleted=False):
         """
-        Get a list of local files
-
+        Get a list of local files.
 
         :rtype: list
-        :return: A list of dicts with details on individual files on ftp.
-
-
+        :return: A list of dicts with details on individual files on FTP
         """
         return Client._get(self)

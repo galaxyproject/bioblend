@@ -47,10 +47,10 @@ class HistoryClient(Client):
         :type name: str
         :param name: Name of history to filter on
 
-        :rtype: dict
+        :rtype: list
         :return: Return a list of history element dicts. If more than one
                  history matches the given ``name``, return the list of all the
-                 histories with the given name.
+                 histories with the given name
         """
         if history_id is not None and name is not None:
             raise ValueError('Provide only one argument between name or history_id, but not both')
@@ -88,6 +88,9 @@ class HistoryClient(Client):
 
         :type types: str
         :param types: ???
+
+        :rtype: dict
+        :return: details of the given history
         """
         params = {}
         if contents:
