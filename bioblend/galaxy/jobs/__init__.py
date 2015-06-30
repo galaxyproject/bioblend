@@ -16,28 +16,28 @@ class JobsClient(Client):
 
         :rtype: list
         :returns: list of dictionaries containing summary job information.
-                 For example::
+          For example::
 
-                 [{ u'create_time': u'2014-03-01T16:16:48.640550',
-                 u'exit_code': 0,
-                 u'id': u'ebfb8f50c6abde6d',
-                 u'model_class': u'Job',
-                 u'state': u'ok',
-                 u'tool_id': u'fasta2tab',
-                 u'update_time': u'2014-03-01T16:16:50.657399'},
-                 {u'create_time': u'2014-03-01T16:05:34.851246',
-                 u'exit_code': 0,
-                 u'id': u'1cd8e2f6b131e891',
-                 u'model_class': u'Job',
-                 u'state': u'ok',
-                 u'tool_id': u'upload1',
-                 u'update_time': u'2014-03-01T16:05:39.558458'}]
+            [{u'create_time': u'2014-03-01T16:16:48.640550',
+              u'exit_code': 0,
+              u'id': u'ebfb8f50c6abde6d',
+              u'model_class': u'Job',
+              u'state': u'ok',
+              u'tool_id': u'fasta2tab',
+              u'update_time': u'2014-03-01T16:16:50.657399'},
+             {u'create_time': u'2014-03-01T16:05:34.851246',
+              u'exit_code': 0,
+              u'id': u'1cd8e2f6b131e891',
+              u'model_class': u'Job',
+              u'state': u'ok',
+              u'tool_id': u'upload1',
+              u'update_time': u'2014-03-01T16:05:39.558458'}]
         """
         return Client._get(self)
 
     def show_job(self, job_id, full_details=False):
         """
-        Display information for a given job of the current user.
+        Get details of a given job of the current user.
 
         :type job_id: str
         :param job_id: job ID
@@ -47,22 +47,24 @@ class JobsClient(Client):
           given job.
 
         :rtype: dict
-        :return: A description of the given job. For example::
+        :return: A description of the given job.
+          For example::
 
-                 {   u'create_time': u'2014-03-01T16:17:29.828624',
-                 u'exit_code': 0,
-                 u'id': u'a799d38679e985db',
-                 u'inputs': {   u'input': {   u'id': u'ebfb8f50c6abde6d', u'src': u'hda'}},
-                 u'model_class': u'Job',
-                 u'outputs': {   u'output': {   u'id': u'a799d38679e985db', u'src': u'hda'}},
-                 u'params': {   u'chromInfo': u'"/opt/galaxy-central/tool-data/shared/ucsc/chrom/?.len"',
-                 u'dbkey': u'"?"',
-                 u'seq_col': u'"2"',
-                 u'title_col': u'["1"]'},
-                 u'state': u'ok',
-                 u'tool_id': u'tab2fasta',
-                 u'update_time': u'2014-03-01T16:17:31.930728'}
-
+            {u'create_time': u'2014-03-01T16:17:29.828624',
+             u'exit_code': 0,
+             u'id': u'a799d38679e985db',
+             u'inputs': {u'input': {u'id': u'ebfb8f50c6abde6d',
+               u'src': u'hda'}},
+             u'model_class': u'Job',
+             u'outputs': {u'output': {u'id': u'a799d38679e985db',
+               u'src': u'hda'}},
+             u'params': {u'chromInfo': u'"/opt/galaxy-central/tool-data/shared/ucsc/chrom/?.len"',
+               u'dbkey': u'"?"',
+               u'seq_col': u'"2"',
+               u'title_col': u'["1"]'},
+             u'state': u'ok',
+             u'tool_id': u'tab2fasta',
+             u'update_time': u'2014-03-01T16:17:31.930728'}
         """
         params = {}
         if full_details:

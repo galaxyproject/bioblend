@@ -118,21 +118,21 @@ class WorkflowClient(Client):
 
     def import_shared_workflow(self, workflow_id):
         """
-        Imports a new workflow from the shared published workflows
+        Imports a new workflow from the shared published workflows.
 
         :type workflow_id: str
         :param workflow_id: Encoded workflow ID
 
         :rtype: dict
         :return: A description of the workflow.
-                 For example::
+          For example::
 
-                   {u'id': u'ee0e2b4b696d9092',
-                    u'model_class': u'StoredWorkflow',
-                    u'name': u'Super workflow that solves everything!',
-                    u'published': False,
-                    u'tags': [],
-                    u'url': u'/api/workflows/ee0e2b4b696d9092'}
+            {u'id': u'ee0e2b4b696d9092',
+             u'model_class': u'StoredWorkflow',
+             u'name': u'Super workflow that solves everything!',
+             u'published': False,
+             u'tags': [],
+             u'url': u'/api/workflows/ee0e2b4b696d9092'}
 
         """
         payload = {}
@@ -224,28 +224,27 @@ class WorkflowClient(Client):
         :param replacement_params: pattern-based replacements for post-job actions (see below)
 
         :rtype: dict
-        :return: A dict containing the history ID where the outputs are placed as well as
-                 output dataset IDs.
-                 For example::
+        :return: A dict containing the history ID where the outputs are placed
+          as well as output dataset IDs. For example::
 
-                  {u'history': u'64177123325c9cfd',
-                   u'outputs': [u'aa4d3084af404259']}
+            {u'history': u'64177123325c9cfd',
+             u'outputs': [u'aa4d3084af404259']}
 
         The ``replacement_params`` dict should map parameter names in
-        post-job actions (PJAs) to their runtime values.  For
+        post-job actions (PJAs) to their runtime values. For
         instance, if the final step has a PJA like the following::
 
           {u'RenameDatasetActionout_file1': {
-             u'action_arguments': {u'newname': u'${output}'},
-             u'action_type': u'RenameDatasetAction',
-             u'output_name': u'out_file1'}}
+           u'action_arguments': {u'newname': u'${output}'},
+           u'action_type': u'RenameDatasetAction',
+           u'output_name': u'out_file1'}}
 
         then the following renames the output dataset to 'foo'::
 
           replacement_params = {'output': 'foo'}
 
-        see also `this thread
-        <http://lists.bx.psu.edu/pipermail/galaxy-dev/2011-September/006875.html>`_
+        see also `this email thread
+        <http://lists.bx.psu.edu/pipermail/galaxy-dev/2011-September/006875.html>`_.
         """
         payload = {}
         payload['workflow_id'] = workflow_id

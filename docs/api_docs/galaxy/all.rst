@@ -13,6 +13,13 @@ GalaxyInstance
 
 .. _libraries-api:
 
+Config
+--------
+
+.. automodule:: bioblend.galaxy.config
+
+-----
+
 Datasets
 --------
 
