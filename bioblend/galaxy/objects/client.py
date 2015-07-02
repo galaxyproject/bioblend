@@ -76,7 +76,7 @@ class ObjClient(object):
             self._error('%s: unexpected reply: %r' % (meth_name, reply))
 
 
-class ObjDatasetClient(ObjClient):
+class ObjDatasetContainerClient(ObjClient):
 
     def _get_container(self, id_, ctype):
         show_fname = 'show_%s' % ctype.__name__.lower()
@@ -92,7 +92,7 @@ class ObjDatasetClient(ObjClient):
         return ctype(cdict, content_infos=c_infos, gi=self.obj_gi)
 
 
-class ObjLibraryClient(ObjDatasetClient):
+class ObjLibraryClient(ObjDatasetContainerClient):
     """
     Interacts with Galaxy libraries.
     """
@@ -159,7 +159,7 @@ class ObjLibraryClient(ObjDatasetClient):
                 self._error('delete_library: unexpected reply: %r' % (res,))
 
 
-class ObjHistoryClient(ObjDatasetClient):
+class ObjHistoryClient(ObjDatasetContainerClient):
     """
     Interacts with Galaxy histories.
     """
