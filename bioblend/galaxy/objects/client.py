@@ -14,6 +14,7 @@ import bioblend
 from . import wrappers
 
 
+@six.add_metaclass(abc.ABCMeta)
 class ObjClient(object):
 
     @abc.abstractmethod
@@ -23,28 +24,30 @@ class ObjClient(object):
         self.log = bioblend.log
 
     @abc.abstractmethod
-    def get_previews(self, name=None, **kwargs):
+    def get_previews(self, **kwargs):
         """
-        Get object previews (listings).
+        Get a list of object previews.
 
-        Previews model entity summaries provided by REST collection
-        URIs, e.g., ``http://host:port/api/libraries``.  Being the
-        most lightweight objects associated to the various entities,
-        these are the ones that should be used to retrieve basic info
-        such as id and name.
+        Previews entity summaries provided by REST collection URIs, e.g.
+        ``http://host:port/api/libraries``.  Being the most lightweight objects
+        associated to the various entities, these are the ones that should be
+        used to retrieve their basic info.
 
-        :type name: str
-        :param name: return only objects with this name
+        :rtype: list
+        :return: a list of object previews
+        """
+        pass
 
-        Optional boolean kwargs for specific object types:
+    @abc.abstractmethod
+    def list(self, **kwargs):
+        """
+        Get a list of objects.
 
-        ``deleted`` (libraries and histories)
-          if ``True``, return only deleted objects
+        This method first gets the entity summaries, then gets the complete
+        description for each entity with an additional GET call, so may be slow.
 
-        ``published`` (workflows)
-          if ``True``, return published workflows
-
-        :rtype: list of :class:`~.wrappers.Preview`
+        :rtype: list
+        :return: a list of objects
         """
         pass
 
