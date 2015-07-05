@@ -178,7 +178,7 @@ class ToolClient(Client):
             # If files_attached - this will be posted as multi-part form data
             # and so each individual parameter needs to be encoded so can be
             # decoded as JSON by Galaxy (hence dumping complex parameters).
-            # If not files are attached the whole thing is posted a
+            # If no files are attached, the whole thing is posted as
             # application/json and dumped/loaded all at once by requests and
             # Galaxy.
             complex_payload_params = ["inputs"]

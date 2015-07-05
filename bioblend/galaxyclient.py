@@ -151,7 +151,7 @@ class GalaxyClient(object):
 
     def make_put_request(self, url, payload=None, params=None):
         """
-        Make a PUT request using the provided ``url`` with required playload
+        Make a PUT request using the provided ``url`` with required payload.
         The ``payload`` must be a dict that can be converted into a JSON
         object (via ``json.dumps``)
         """
