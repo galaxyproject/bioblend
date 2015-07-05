@@ -22,12 +22,18 @@ class ToolShedClient(Client):
                  repositories present in the Tool Shed.
                  For example::
 
-                     [{u'times_downloaded': 0, u'user_id': u'5cefd48bc04af6d4',
-                     u'description': u'Order Contigs', u'deleted': False,
-                     u'deprecated': False, u'private': False,
-                     u'url': u'/api/repositories/287bd69f724b99ce',
-                     u'owner': u'billybob', u'id': u'287bd69f724b99ce',
-                     u'name': u'best_tool_ever'}]
+                     [{
+                        u'times_downloaded': 0,
+                        u'user_id': u'5cefd48bc04af6d4',
+                        u'description': u'Order Contigs',
+                        u'deleted': False,
+                        u'deprecated': False,
+                        u'private': False,
+                        u'url': u'/api/repositories/287bd69f724b99ce',
+                        u'owner': u'billybob',
+                        u'id': u'287bd69f724b99ce',
+                        u'name': u'best_tool_ever'
+                    }]
 
         .. versionchanged:: 0.4.1
             Changed method name from ``get_tools`` to ``get_repositories`` to
@@ -46,12 +52,18 @@ class ToolShedClient(Client):
         :return: Information about the tool
                  For example::
 
-                     {{u'times_downloaded': 0, u'user_id': u'5cefd48bc04af6d4',
-                     u'description': u'Order Contigs', u'deleted': False,
-                     u'deprecated': False, u'private': False,
-                     u'url': u'/api/repositories/287bd69f724b99ce',
-                     u'owner': u'billybob', u'id': u'287bd69f724b99ce',
-                     u'name': u'best_tool_ever'}
+                    {
+                        u'times_downloaded': 0,
+                        u'user_id': u'5cefd48bc04af6d4',
+                        u'description': u'Order Contigs',
+                        u'deleted': False,
+                        u'deprecated': False,
+                        u'private': False,
+                        u'url': u'/api/repositories/287bd69f724b99ce',
+                        u'owner': u'billybob',
+                        u'id': u'287bd69f724b99ce',
+                        u'name': u'best_tool_ever'
+                    }
 
         .. versionchanged:: 0.4.1
             Changed method name from ``show_tool`` to ``show_repository`` to
@@ -107,9 +119,66 @@ class ToolShedClient(Client):
 
                  For example::
 
-                     [{u'times_downloaded': 269, u'user_id': u'1de29d50c3c44272', u'description': u'Galaxy Freebayes Bayesian genetic variant detector tool', u'deleted': False, u'deprecated': False, u'private': False, u'long_description': u'Galaxy Freebayes Bayesian genetic variant detector tool originally included in the Galaxy code distribution but migrated to the tool shed.', u'url': u'/api/repositories/491b7a3fddf9366f', u'owner': u'devteam', u'id': u'491b7a3fddf9366f', u'name': u'freebayes'},
-                     {u'repository_id': u'491b7a3fddf9366f', u'has_repository_dependencies': False, u'includes_tools_for_display_in_tool_panel': True, u'url': u'/api/repository_revisions/504be8aaa652c154', u'malicious': False, u'includes_workflows': False, u'downloadable': True, u'includes_tools': True, u'changeset_revision': u'd291dc763c4c', u'id': u'504be8aaa652c154', u'includes_tool_dependencies': True, u'includes_datatypes': False}, {u'freebayes': [u'Galaxy Freebayes Bayesian genetic variant detector tool', u'http://takadonet@toolshed.g2.bx.psu.edu/repos/devteam/freebayes', u'd291dc763c4c', u'9', u'devteam', {},
-                     {u'freebayes/0.9.6_9608597d12e127c847ae03aa03440ab63992fedf': {u'repository_name': u'freebayes', u'name': u'freebayes', u'readme': u'FreeBayes requires g++ and the standard C and C++ development libraries. Additionally, cmake is required for building the BamTools API.', u'version': u'0.9.6_9608597d12e127c847ae03aa03440ab63992fedf', u'repository_owner': u'devteam', u'changeset_revision': u'd291dc763c4c', u'type': u'package'}, u'samtools/0.1.18': {u'repository_name': u'freebayes', u'name': u'samtools', u'readme': u'Compiling SAMtools requires the ncurses and zlib development libraries.', u'version': u'0.1.18', u'repository_owner': u'devteam', u'changeset_revision': u'd291dc763c4c', u'type': u'package'}}]}]
+                     [
+                        {
+                            u'times_downloaded': 269,
+                            u'user_id': u'1de29d50c3c44272',
+                            u'description': u'Galaxy Freebayes Bayesian genetic variant detector tool',
+                            u'deleted': False,
+                            u'deprecated': False,
+                            u'private': False,
+                            u'long_description': u'Galaxy Freebayes Bayesian genetic variant detector tool originally included in the Galaxy code distribution but migrated to the tool shed.',
+                            u'url': u'/api/repositories/491b7a3fddf9366f',
+                            u'owner': u'devteam',
+                            u'id': u'491b7a3fddf9366f',
+                            u'name': u'freebayes'
+                        },
+                        {
+                            u'repository_id': u'491b7a3fddf9366f',
+                            u'has_repository_dependencies': False,
+                            u'includes_tools_for_display_in_tool_panel': True,
+                            u'url': u'/api/repository_revisions/504be8aaa652c154',
+                            u'malicious': False,
+                            u'includes_workflows': False,
+                            u'downloadable': True,
+                            u'includes_tools': True,
+                            u'changeset_revision': u'd291dc763c4c',
+                            u'id': u'504be8aaa652c154',
+                            u'includes_tool_dependencies': True,
+                            u'includes_datatypes': False
+                        },
+                        {
+                            u'freebayes': [
+                                u'Galaxy Freebayes Bayesian genetic variant detector tool',
+                                u'http://takadonet@toolshed.g2.bx.psu.edu/repos/devteam/freebayes',
+                                u'd291dc763c4c',
+                                u'9',
+                                u'devteam',
+                                {},
+                                {
+                                    u'freebayes/0.9.6_9608597d12e127c847ae03aa03440ab63992fedf': {
+                                        u'repository_name': u'freebayes',
+                                        u'name': u'freebayes',
+                                        u'readme': u'FreeBayes requires g++ and the standard C and C++ development libraries. Additionally,
+                                        cmake is required for building the BamTools API.',
+                                        u'version': u'0.9.6_9608597d12e127c847ae03aa03440ab63992fedf',
+                                        u'repository_owner': u'devteam',
+                                        u'changeset_revision': u'd291dc763c4c',
+                                        u'type': u'package'
+                                    },
+                                    u'samtools/0.1.18': {
+                                        u'repository_name': u'freebayes',
+                                        u'name': u'samtools',
+                                        u'readme': u'Compiling SAMtools requires the ncurses and zlib development libraries.',
+                                        u'version': u'0.1.18',
+                                        u'repository_owner': u'devteam',
+                                        u'changeset_revision': u'd291dc763c4c',
+                                        u'type': u'package'
+                                    }
+                                }
+                            ]
+                        }
+                    ]
 
         """
 
@@ -160,8 +229,36 @@ class ToolShedClient(Client):
                  information about all repository revisions.
                  For example::
 
-                     [{u'repository_id': u'78f2604ff5e65707', u'has_repository_dependencies': False, u'includes_tools_for_display_in_tool_panel': True, u'url': u'/api/repository_revisions/92250afff777a169', u'malicious': False, u'includes_workflows': False, u'downloadable': True, u'includes_tools': True, u'changeset_revision': u'6e26c5a48e9a', u'id': u'92250afff777a169', u'includes_tool_dependencies': False, u'includes_datatypes': False},
-                     {u'repository_id': u'f9662009da7bfce0', u'has_repository_dependencies': False, u'includes_tools_for_display_in_tool_panel': True, u'url': u'/api/repository_revisions/d3823c748ae2205d', u'malicious': False, u'includes_workflows': False, u'downloadable': True, u'includes_tools': True, u'changeset_revision': u'15a54fa11ad7', u'id': u'd3823c748ae2205d', u'includes_tool_dependencies': False, u'includes_datatypes': False}]
+                    [
+                        {
+                            u'repository_id': u'78f2604ff5e65707',
+                            u'has_repository_dependencies': False,
+                            u'includes_tools_for_display_in_tool_panel': True,
+                            u'url': u'/api/repository_revisions/92250afff777a169',
+                            u'malicious': False,
+                            u'includes_workflows': False,
+                            u'downloadable': True,
+                            u'includes_tools': True,
+                            u'changeset_revision': u'6e26c5a48e9a',
+                            u'id': u'92250afff777a169',
+                            u'includes_tool_dependencies': False,
+                            u'includes_datatypes': False
+                        },
+                        {
+                            u'repository_id': u'f9662009da7bfce0',
+                            u'has_repository_dependencies': False,
+                            u'includes_tools_for_display_in_tool_panel': True,
+                            u'url': u'/api/repository_revisions/d3823c748ae2205d',
+                            u'malicious': False,
+                            u'includes_workflows': False,
+                            u'downloadable': True,
+                            u'includes_tools': True,
+                            u'changeset_revision': u'15a54fa11ad7',
+                            u'id': u'd3823c748ae2205d',
+                            u'includes_tool_dependencies': False,
+                            u'includes_datatypes': False
+                        }
+                    ]
 
         """
 
@@ -203,19 +300,21 @@ class ToolShedClient(Client):
                  repository revision.
                  For example::
 
-                     {u'repository_id': u'491b7a3fddf9366f',
-                      u'has_repository_dependencies': False,
-                      u'includes_tools_for_display_in_tool_panel': True,
-                      u'test_install_error': False,
-                      u'url': u'/api/repository_revisions/504be8aaa652c154',
-                      u'malicious': False,
-                      u'includes_workflows': False,
-                      u'id': u'504be8aaa652c154',
-                      u'do_not_test': False,
-                      u'downloadable': True,
-                      u'includes_tools': True,
-                      u'tool_test_results': {u'missing_test_components': [],,
-                      u'includes_datatypes': False}
+                    {
+                        u'repository_id': u'491b7a3fddf9366f',
+                        u'has_repository_dependencies': False,
+                        u'includes_tools_for_display_in_tool_panel': True,
+                        u'test_install_error': False,
+                        u'url': u'/api/repository_revisions/504be8aaa652c154',
+                        u'malicious': False,
+                        u'includes_workflows': False,
+                        u'id': u'504be8aaa652c154',
+                        u'do_not_test': False,
+                        u'downloadable': True,
+                        u'includes_tools': True,
+                        u'tool_test_results': {u'missing_test_components': []},
+                        u'includes_datatypes': False
+                    }
 
         '''
         # Not using '_make_url' or '_get' to create url since the module id used
@@ -235,12 +334,16 @@ class ToolShedClient(Client):
                  repository categories present in the Tool Shed.
                  For example::
 
-                    [{u'deleted': False,
-                      u'description': u'Tools for manipulating data',
-                      u'id': u'175812cd7caaf439',
-                      u'model_class': u'Category',
-                      u'name': u'Text Manipulation',
-                      u'url': u'/api/categories/175812cd7caaf439'},]
+                    [
+                        {
+                            u'deleted': False,
+                            u'description': u'Tools for manipulating data',
+                            u'id': u'175812cd7caaf439',
+                            u'model_class': u'Category',
+                            u'name': u'Text Manipulation',
+                            u'url': u'/api/categories/175812cd7caaf439'
+                        }
+                    ]
 
         .. versionadded:: 0.5.2
         """
