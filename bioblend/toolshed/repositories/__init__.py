@@ -53,11 +53,11 @@ class ToolShedClient(Client):
                 for the search
                 example:
                 {
-                u'hits': 
+                u'hits':
                 [
                     {
                         u'matched_terms': [],
-                        u'repository': 
+                        u'repository':
                             {
                                 u'approved': u'no',
                                 u'description': u'Convert export file to fastq',
@@ -75,7 +75,7 @@ class ToolShedClient(Client):
                     },
                    {
                         u'matched_terms': [],
-                        u'repository': 
+                        u'repository':
                             {
                                 u'approved': u'no',
                                 u'description': u'Convert BAM file to fastq',
