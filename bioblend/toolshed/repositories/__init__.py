@@ -1,5 +1,5 @@
 """
-Interaction with a Tool Shed instance
+Interaction with a Tool Shed instance repositories
 """
 from six.moves.urllib.parse import urljoin
 
@@ -34,6 +34,26 @@ class ToolShedClient(Client):
             better align with the Tool Shed concepts
         """
         return Client._get(self)
+
+    def search_repositories(self, q, page=1, page_size=10):
+        """
+        Search for repositories in a Galaxy Tool Shed
+
+        :type  q: str
+        :param q: query string for searching purposes
+
+        :type  page: str
+        :param page: page requested
+
+        :type  page_size: str
+        :param page_size: page size requested
+
+        :rtype:  dict
+        :return: dictionary containing search hits as well as metadata
+                for the search
+        """
+        params = dict(q=q, page=page, page_size=page_size)
+        return Client._get(self, params=params)
 
     def show_repository(self, toolShed_id):
         """
