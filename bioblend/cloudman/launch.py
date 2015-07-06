@@ -15,9 +15,11 @@ from six.moves.urllib.parse import urlparse
 import bioblend
 from bioblend.util import Bunch
 
-
-# Comment the following line if no logging at the prompt is desired
+# Uncomment the following line if no logging from boto is desired
+# bioblend.logging.getLogger('boto').setLevel(bioblend.logging.CRITICAL)
+# Uncomment the following line if logging at the prompt is desired
 # bioblend.set_stream_logger(__name__)
+
 
 def instance_types(cloud_name='generic'):
     """
@@ -132,7 +134,13 @@ class CloudManLauncher(object):
                'error': None}
         # First satisfy the prerequisites
         for sg in security_groups:
-            ret['sg_names'].append(self.create_cm_security_group(sg))
+            cmsg = self.create_cm_security_group(sg)
+            if cmsg['name']:
+                ret['sg_names'].append(cmsg['name'])
+            ret['error'] = cmsg['error']
+            if ret['error']:
+                return ret
+
         ret['kp_name'], ret['kp_material'] = self.create_key_pair(key_name)
         # If not provided, try to find a placement
         # TODO: Should placement always be checked? To make sure it's correct
@@ -178,23 +186,23 @@ class CloudManLauncher(object):
     def create_cm_security_group(self, sg_name='CloudMan'):
         """
         Create a security group with all authorizations required to run CloudMan.
+
         If the group already exists, check its rules and add the missing ones.
-        Return the name of the created security group.
+
+        :type sg_name: string
+        :param sg_name: A name for the security group to be created.
+
+        :rtype: dict
+        :return: A dictionary containing keys ``name`` (with the value being the
+                 name of the security group that was created), ``error``
+                 (with the value being the error message if there was an error
+                 or ``None`` if no error was encountered), and ``ports``
+                 (containing the list of tuples with port ranges that were
+                 opened or attempted to be opened).
+
+        .. versionchanged:: 0.6.1
+            The return value changed from a string to a dict
         """
-        cmsg = None
-        # Check if this security group already exists
-        sgs = self.ec2_conn.get_all_security_groups()
-        for sg in sgs:
-            if sg.name == sg_name:
-                cmsg = sg
-                bioblend.log.debug("Security group '%s' already exists; will add authorizations next." % sg_name)
-                break
-        # If it does not exist, create security group
-        if cmsg is None:
-            bioblend.log.debug("Creating Security Group %s" % sg_name)
-            cmsg = self.ec2_conn.create_security_group(sg_name, 'A security group for CloudMan')
-        # Add appropriate authorization rules
-        # If these rules already exist, nothing will be changed in the SG
         ports = (('20', '21'),  # FTP
                  ('22', '22'),  # SSH
                  ('80', '80'),  # Web UI
@@ -202,6 +210,41 @@ class CloudManLauncher(object):
                  ('8800', '8800'),  # NodeJS Proxy for Galaxy IPython IE
                  ('9600', '9700'),  # HTCondor
                  ('30000', '30100'))  # FTP transfer
+        progress = {'name': None,
+                    'error': None,
+                    'ports': ports}
+        cmsg = None
+        # Check if this security group already exists
+        try:
+            sgs = self.ec2_conn.get_all_security_groups()
+        except EC2ResponseError as e:
+            err_msg = "Problem getting security groups: {0} (code {1}; status {2})" \
+                      .format(e.message, e.error_code, e.status)
+            bioblend.log.exception(err_msg)
+            progress['error'] = err_msg
+            return progress
+        for sg in sgs:
+            if sg.name == sg_name:
+                cmsg = sg
+                bioblend.log.debug("Security group '%s' already exists; will "
+                                   "add authorizations next." % sg_name)
+                break
+        # If it does not exist, create security group
+        if cmsg is None:
+            bioblend.log.debug("Creating Security Group %s" % sg_name)
+            try:
+                cmsg = self.ec2_conn.create_security_group(sg_name, 'A security '
+                                                           'group for CloudMan')
+            except EC2ResponseError as e:
+                err_msg = "Problem creating security group {0}: {1} (code {2}; " \
+                          "status {2})" \
+                          .format(sg_name, e.message, e.error_code, e.status)
+                bioblend.log.exception(err_msg)
+                progress['error'] = err_msg
+        if cmsg:
+            progress['name'] = cmsg.name
+        # Add appropriate authorization rules
+        # If these rules already exist, nothing will be changed in the SG
         for port in ports:
             try:
                 if not self.rule_exists(cmsg.rules, from_port=port[0], to_port=port[1]):
@@ -209,31 +252,43 @@ class CloudManLauncher(object):
                 else:
                     bioblend.log.debug("Rule (%s:%s) already exists in the SG" % (port[0], port[1]))
             except EC2ResponseError:
-                bioblend.log.exception("A problem with security group authorizations.")
+                err_msg = "A problem adding security group authorizations: {0} " \
+                          "(code {1}; status {2})" \
+                          .format(e.message, e.error_code, e.status)
+                bioblend.log.exception(err_msg)
+                progress['error'] = err_msg
         # Add ICMP (i.e., ping) rule required by HTCondor
         try:
             if not self.rule_exists(cmsg.rules, from_port='-1', to_port='-1', ip_protocol='icmp'):
                 cmsg.authorize(ip_protocol='icmp', from_port=-1, to_port=-1, cidr_ip='0.0.0.0/0')
             else:
-                bioblend.log.debug("ICMP rule already exists in {0} SG".format(sg_name))
-        except EC2ResponseError:
-            bioblend.log.exception("A problem with security group authorizations.")
+                bioblend.log.debug("ICMP rule already exists in {0} SG.".format(sg_name))
+        except EC2ResponseError, e:
+            err_msg = "A problem with security ICMP rule authorization: {0} " \
+                      "(code {1}; status {2})" \
+                      .format(e.message, e.error_code, e.status)
+            bioblend.log.exception(err_msg)
+            progress['err_msg'] = err_msg
         # Add rule that allows communication between instances in the same SG
         g_rule_exists = False  # A flag to indicate if group rule already exists
         for rule in cmsg.rules:
             for grant in rule.grants:
                 if grant.name == cmsg.name:
                     g_rule_exists = True
-                    bioblend.log.debug("Group rule already exists in the SG")
+                    bioblend.log.debug("Group rule already exists in the SG.")
             if g_rule_exists:
                 break
         if not g_rule_exists:
             try:
                 cmsg.authorize(src_group=cmsg)
             except EC2ResponseError:
-                bioblend.log.exception("A problem with security group authorization.")
+                err_msg = "A problem with security group authorization: {0} " \
+                          "(code {1}; status {2})" \
+                          .format(e.message, e.error_code, e.status)
+                bioblend.log.exception(err_msg)
+                progress['err_msg'] = err_msg
         bioblend.log.info("Done configuring '%s' security group" % cmsg.name)
-        return cmsg.name
+        return progress
 
     def rule_exists(self, rules, from_port, to_port, ip_protocol='tcp', cidr_ip='0.0.0.0/0'):
         """
