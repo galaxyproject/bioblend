@@ -195,13 +195,13 @@ class CloudManLauncher(object):
             cmsg = self.ec2_conn.create_security_group(sg_name, 'A security group for CloudMan')
         # Add appropriate authorization rules
         # If these rules already exist, nothing will be changed in the SG
-        ports = (('80', '80'),  # Web UI
-                 ('443', '443'),  # SSL Web UI
-                 ('20', '21'),  # FTP
+        ports = (('20', '21'),  # FTP
                  ('22', '22'),  # SSH
+                 ('80', '80'),  # Web UI
+                 ('443', '443'),  # SSL Web UI
+                 ('8800', '8800'),  # NodeJS Proxy for Galaxy IPython IE
                  ('9600', '9700'),  # HTCondor
-                 ('30000', '30100'),  # FTP transfer
-                 ('42284', '42284'))  # CloudMan UI
+                 ('30000', '30100'))  # FTP transfer
         for port in ports:
             try:
                 if not self.rule_exists(cmsg.rules, from_port=port[0], to_port=port[1]):
