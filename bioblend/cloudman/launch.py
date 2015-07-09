@@ -140,8 +140,12 @@ class CloudManLauncher(object):
             ret['error'] = cmsg['error']
             if ret['error']:
                 return ret
-
-        ret['kp_name'], ret['kp_material'] = self.create_key_pair(key_name)
+        kp_info = self.create_key_pair(key_name)
+        ret['error'] = kp_info['error']
+        if ret['error']:
+            return ret
+        ret['kp_name'] = kp_info['name']
+        ret['kp_material'] = kp_info['material']
         # If not provided, try to find a placement
         # TODO: Should placement always be checked? To make sure it's correct
         # for existing clusters.
@@ -303,24 +307,53 @@ class CloudManLauncher(object):
 
     def create_key_pair(self, key_name='cloudman_key_pair'):
         """
-        Create a key pair with the provided ``key_name``.
-        Return the name of the key or ``None`` if there was an error creating the key.
+        If a key pair with the provided ``key_name`` does not exist, create it.
+
+        :type sg_name: string
+        :param sg_name: A name for the key pair to be created.
+
+        :rtype: dict
+        :return: A dictionary containing keys ``name`` (with the value being the
+                 name of the key pair that was created), ``error``
+                 (with the value being the error message if there was an error
+                 or ``None`` if no error was encountered), and ``material``
+                 (containing the unencrypted PEM encoded RSA private key if the
+                 key was created or ``None`` if the key already eixsted).
+
+        .. versionchanged:: 0.6.1
+            The return value changed from a tuple to a dict
         """
+        progress = {'name': None,
+                    'material': None,
+                    'error': None}
         kp = None
         # Check if a key pair under the given name already exists. If it does not,
         # create it, else return.
-        kps = self.ec2_conn.get_all_key_pairs()
+        try:
+            kps = self.ec2_conn.get_all_key_pairs()
+        except EC2ResponseError as e:
+            err_msg = "Problem getting key pairs: {0} (code {1}; status {2})" \
+                      .format(e.message, e.error_code, e.status)
+            bioblend.log.exception(err_msg)
+            progress['error'] = err_msg
+            return progress
         for akp in kps:
             if akp.name == key_name:
-                bioblend.log.debug("Key pair '%s' already exists; not creating it again." % key_name)
-                return akp.name, None
+                bioblend.log.info("Key pair '%s' already exists; reusing it." % key_name)
+                progress['name'] = akp.name
+                return progress
         try:
             kp = self.ec2_conn.create_key_pair(key_name)
         except EC2ResponseError:
-            bioblend.log.exception("Problem creating key pair '%s'." % key_name)
-            return None, None
+            err_msg = "Problem creating key pair '{0}': {1} (code {2}; status {3})" \
+                      .format(key_name, e.message, e.error_code, e.status)
+            bioblend.log.exception(err_msg)
+            progress['error'] = err_msg
+            return progress
         bioblend.log.info("Created key pair '%s'" % kp.name)
-        return kp.name, kp.material
+        progress['name'] = kp.name
+        progress['material'] = kp.material
+        return progress
 
     def get_status(self, instance_id):
         """
