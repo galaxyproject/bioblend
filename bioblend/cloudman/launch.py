@@ -241,7 +241,7 @@ class CloudManLauncher(object):
                                                            'group for CloudMan')
             except EC2ResponseError as e:
                 err_msg = "Problem creating security group {0}: {1} (code {2}; " \
-                          "status {2})" \
+                          "status {3})" \
                           .format(sg_name, e.message, e.error_code, e.status)
                 bioblend.log.exception(err_msg)
                 progress['error'] = err_msg
@@ -255,7 +255,7 @@ class CloudManLauncher(object):
                     cmsg.authorize(ip_protocol='tcp', from_port=port[0], to_port=port[1], cidr_ip='0.0.0.0/0')
                 else:
                     bioblend.log.debug("Rule (%s:%s) already exists in the SG" % (port[0], port[1]))
-            except EC2ResponseError:
+            except EC2ResponseError as e:
                 err_msg = "A problem adding security group authorizations: {0} " \
                           "(code {1}; status {2})" \
                           .format(e.message, e.error_code, e.status)
@@ -267,7 +267,7 @@ class CloudManLauncher(object):
                 cmsg.authorize(ip_protocol='icmp', from_port=-1, to_port=-1, cidr_ip='0.0.0.0/0')
             else:
                 bioblend.log.debug("ICMP rule already exists in {0} SG.".format(sg_name))
-        except EC2ResponseError, e:
+        except EC2ResponseError as e:
             err_msg = "A problem with security ICMP rule authorization: {0} " \
                       "(code {1}; status {2})" \
                       .format(e.message, e.error_code, e.status)
@@ -285,7 +285,7 @@ class CloudManLauncher(object):
         if not g_rule_exists:
             try:
                 cmsg.authorize(src_group=cmsg)
-            except EC2ResponseError:
+            except EC2ResponseError as e:
                 err_msg = "A problem with security group authorization: {0} " \
                           "(code {1}; status {2})" \
                           .format(e.message, e.error_code, e.status)
@@ -344,7 +344,7 @@ class CloudManLauncher(object):
                 return progress
         try:
             kp = self.ec2_conn.create_key_pair(key_name)
-        except EC2ResponseError:
+        except EC2ResponseError as e:
             err_msg = "Problem creating key pair '{0}': {1} (code {2}; status {3})" \
                       .format(key_name, e.message, e.error_code, e.status)
             bioblend.log.exception(err_msg)
