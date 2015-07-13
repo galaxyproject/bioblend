@@ -32,11 +32,10 @@ BioBlend requires a number of Python libraries. These libraries are installed
 automatically when BioBlend itself is installed, regardless whether it is installed
 via PyPi_ or by running ``python setup.py install`` command. The current list of
 required libraries is always available from `setup.py`_ in the source code
-repository and it is also replicated here: ``requests>=1.1.0, poster,
-boto, pyyaml``.
+repository.
 
-If you will also run tests locally, the following
-libraries are also required: ``nose, mock``. To install those, run::
+If you also want to run tests locally, some extra libraries are required. To
+install them, run::
 
     $ python setup.py test
 

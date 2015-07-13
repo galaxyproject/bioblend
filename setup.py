@@ -18,9 +18,11 @@ with open(os.path.join('bioblend', '__init__.py')) as f:
             version = ast.literal_eval(m.group(1))
             break
 
-tests_require = ['mock>=0.7.0', 'nose>=1.3.1']
+tests_require = ['nose>=1.3.1']
 if sys.version_info < (2, 7):
-    tests_require.append('unittest2>=0.5.1')
+    tests_require.extend(['mock>=0.7.0,<=1.0.1', 'unittest2>=0.5.1'])
+elif sys.version_info < (3, 3):
+    tests_require.append('mock>=0.7.0')
 
 setup(name="bioblend",
       version=version,
