@@ -174,8 +174,10 @@ class CloudManLauncher(object):
                                              placement=placement)
             ret['rs'] = rs
         except EC2ResponseError as e:
-            bioblend.log.exception("Problem launching an instance.")
-            ret['error'] = "Problem launching an instance."
+            err_msg = "Problem launching an instance: {0} (code {1}; status {2})" \
+                      .format(e.message, e.error_code, e.status)
+            bioblend.log.exception(err_msg)
+            ret['error'] = err_msg
             return ret
         else:
             try:
@@ -183,8 +185,11 @@ class CloudManLauncher(object):
                 ret['instance_id'] = rs.instances[0].id
                 ret['instance_ip'] = rs.instances[0].ip_address
             except Exception as e:
-                bioblend.log.exception("Problem with the launched instance object.")
-                ret['error'] = "Problem with the launched instance object: %s" % e
+                err_msg = "Problem with the launched instance object: {0} " \
+                          "(code {1}; status {2})" \
+                          .format(e.message, e.error_code, e.status)
+                bioblend.log.exception(err_msg)
+                ret['error'] = err_msg
         return ret
 
     def create_cm_security_group(self, sg_name='CloudMan'):
