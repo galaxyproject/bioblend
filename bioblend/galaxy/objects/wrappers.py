@@ -367,14 +367,14 @@ class Workflow(Wrapper):
           post-job actions (see the docs for
           :meth:`~bioblend.galaxy.workflows.WorkflowClient.run_workflow`)
 
-        :type wait: boolean
+        :type wait: bool
         :param wait: whether to wait while the returned datasets are
           in a pending state
 
         :type polling_interval: float
         :param polling_interval: polling interval in seconds
 
-        :type break_on_error: boolean
+        :type break_on_error: bool
         :param break_on_error: whether to break as soon as at least one
           of the returned datasets is in the 'error' state
 
@@ -816,16 +816,21 @@ class History(DatasetContainer):
         Update history metadata information. Some of the attributes that can be
         modified are documented below.
 
-        :type name: string
+        :type name: str
         :param name: Replace history name with the given string
-        :type annotation: string
-        :param annotation: Replace history annotation with given string
-        :type deleted: boolean
+
+        :type annotation: str
+        :param annotation: Replace history annotation with the given string
+
+        :type deleted: bool
         :param deleted: Mark or unmark history as deleted
-        :type published: boolean
+
+        :type published: bool
         :param published: Mark or unmark history as published
-        :type importable: boolean
+
+        :type importable: bool
         :param importable: Mark or unmark history as importable
+
         :type tags: list
         :param tags: Replace history tags with the given list
         """
@@ -1223,7 +1228,7 @@ class Tool(Wrapper):
         :type history: :class:`History`
         :param history: the history where to execute the tool
 
-        :type wait: boolean
+        :type wait: bool
         :param wait: whether to wait while the returned datasets are
           in a pending state
 

@@ -23,11 +23,11 @@ class ToolShedInstance(GalaxyClient):
 
             rl = ts.repositories.get_repositories()
 
-        :type url: string
+        :type url: str
         :param url: A FQDN or IP for a given instance of ToolShed. For example:
                     http://testtoolshed.g2.bx.psu.edu
 
-        :type key: string
+        :type key: str
         :param key: If required, user's API key for the given instance of ToolShed,
                     obtained from the user preferences.
         """

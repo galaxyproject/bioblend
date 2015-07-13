@@ -28,21 +28,21 @@ class GalaxyInstance(GalaxyClient):
 
             hl = gi.histories.get_histories()
 
-        :type url: string
+        :type url: str
         :param url: A FQDN or IP for a given instance of Galaxy. For example:
                     http://127.0.0.1:8080
 
-        :type key: string
+        :type key: str
         :param key: User's API key for the given instance of Galaxy, obtained
                     from the user preferences. If a key is not supplied, an
                     email address and password must be and key will
                     automatically be created for the user.
 
-        :type email: string
+        :type email: str
         :param email: Galaxy e-mail address corresponding to the user.
                       Ignored if key is supplied directly.
 
-        :type password: string
+        :type password: str
         :param password: Password of Galaxy account corresponding to the above
                          e-mail address. Ignored if key is supplied directly.
 

@@ -29,7 +29,7 @@ class ToolClient(Client):
         :type name: str
         :param name: name of the requested tool(s)
 
-        :type trackster: boolean
+        :type trackster: bool
         :param trackster: if True, only tools that are compatible with
           Trackster are returned
 

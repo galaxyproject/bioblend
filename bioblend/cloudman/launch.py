@@ -26,7 +26,7 @@ def instance_types(cloud_name='generic'):
     Return a list of dictionaries containing details about the available
     instance types for the given `cloud_name`.
 
-    :type cloud_name: string
+    :type cloud_name: str
     :param cloud_name: A name of the cloud for which the list of instance
                        types will be returned. Valid values are: `aws`,
                        `nectar`, `generic`.
@@ -193,7 +193,7 @@ class CloudManLauncher(object):
 
         If the group already exists, check its rules and add the missing ones.
 
-        :type sg_name: string
+        :type sg_name: str
         :param sg_name: A name for the security group to be created.
 
         :rtype: dict
@@ -309,7 +309,7 @@ class CloudManLauncher(object):
         """
         If a key pair with the provided ``key_name`` does not exist, create it.
 
-        :type sg_name: string
+        :type sg_name: str
         :param sg_name: A name for the key pair to be created.
 
         :rtype: dict

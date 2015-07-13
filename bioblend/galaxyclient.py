@@ -45,7 +45,7 @@ class GalaxyClient(object):
           example: an object of class LibraryClient, WorkflowClient,
           HistoryClient, ToolShedClient
 
-        :type module_id: string
+        :type module_id: str
         :param module_id: The encoded ID for a specific module (eg, library ID)
 
         :type deleted: bool

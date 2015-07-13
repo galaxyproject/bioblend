@@ -350,7 +350,7 @@ class ObjToolClient(ObjClient):
         :type name: str
         :param name: return only tools with this name
 
-        :type trackster: boolean
+        :type trackster: bool
         :param trackster: if True, only tools that are compatible with
           Trackster are returned
 
@@ -367,7 +367,7 @@ class ObjToolClient(ObjClient):
         :type name: str
         :param name: return only tools with this name
 
-        :type trackster: boolean
+        :type trackster: bool
         :param trackster: if True, only tools that are compatible with
           Trackster are returned
 

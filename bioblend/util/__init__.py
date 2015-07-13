@@ -35,10 +35,10 @@ def attach_file(path, name=None):
     """
     Attach a path to a request payload object.
 
-    :type path: string
+    :type path: str
     :param path: Path to file to attach to payload.
 
-    :type name: string
+    :type name: str
     :param name: Name to give file, if different than actual pathname.
 
     :rtype: object
