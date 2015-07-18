@@ -530,7 +530,7 @@ class CloudManLauncher(object):
         # any 'advanced startup fields' that might be added in the future
         excluded_fields = ['sg_name', 'image_id', 'instance_id', 'kp_name',
                            'cloud', 'cloud_type', 'public_dns', 'cidr_range',
-                           'kp_material', 'placement']
+                           'kp_material', 'placement', 'flavor_id']
         for key, value in six.iteritems(user_provided_data):
             if key not in excluded_fields:
                 form_data[key] = value
