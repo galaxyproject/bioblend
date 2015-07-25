@@ -1,3 +1,21 @@
+### BioBlend v0.6.1 - July 2?, 2015
+
+* BioBlend.objects: Rename ``ObjDatasetClient`` abstract class to
+  ``ObjDatasetContainerClient``.
+
+* BioBlend.objects: Add ``ABCMeta`` metaclass and ``list()`` method to
+  ``ObjClient``.
+
+* BioBlend.objects: Add ``io_details`` and ``link_details`` parameters to
+  ``ObjToolClient.get()`` method.
+
+* Open port 8800 when launching cloud instances for use by NodeJS proxy for
+  Galaxy IPython Interactive Environments.
+
+* When launching cloud instances, propagate error messages back to the called.
+  The return types for methods ``create_cm_security_group``, ``create_key_pair``
+  in ``CloudManLauncher`` class have changed as a result of this.
+
 ### BioBlend v0.6.0 - June 30, 2015
 
 * Add support for Python >= 3.3.
