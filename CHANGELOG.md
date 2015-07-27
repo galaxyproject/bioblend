@@ -1,4 +1,4 @@
-### BioBlend v0.6.1 - July 2?, 2015
+### BioBlend v0.6.1 - July 27, 2015
 
 * BioBlend.objects: Rename ``ObjDatasetClient`` abstract class to
   ``ObjDatasetContainerClient``.
