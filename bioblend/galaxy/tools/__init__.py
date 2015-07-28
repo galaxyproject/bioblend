@@ -138,22 +138,21 @@ class ToolClient(Client):
         finally:
             payload["files_0|file_data"].close()
 
-    def upload_from_ftp(self, history_id, path, **keywords):
+    def upload_from_ftp(self, path, history_id, **keywords):
         """
         Upload file specified by ``path`` from the user's FTP directory, to the
         history specified by ``history_id``.
 
-        :type history_id: str
-        :param history_id: id of the history where to upload the file
-
         :type path: str
         :param path: path of the file in the FTP directory
 
-        See :meth:`upload_file` for optional parameters
+        :type history_id: str
+        :param history_id: id of the history where to upload the file
+
+        See :meth:`upload_file` for optional parameters.
         """
         payload = self._upload_payload(history_id, **keywords)
         payload['files_0|ftp_files'] = path
-        import pprint; pprint.pprint(payload)
         return self._tool_post(payload)
 
     def paste_content(self, content, history_id, **kwds):

@@ -141,7 +141,7 @@ To upload a local file to a Galaxy server, you can run the ``upload_file`` metho
 
 If files are greater than 2GB in size, they will need to be uploaded via FTP. Importing files from the user's FTP folder can be done via running the upload tool again::
 
-    >>> gi.tools.upload_from_ftp('f3c2b0f3ecac9f02', 'test.txt')
+    >>> gi.tools.upload_from_ftp('test.txt', 'f3c2b0f3ecac9f02')
     {u'implicit_collections': [],
      u'jobs': [{u'create_time': u'2015-07-28T17:57:43.704394',
                 u'exit_code': None,
