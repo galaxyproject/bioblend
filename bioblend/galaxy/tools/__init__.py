@@ -143,20 +143,13 @@ class ToolClient(Client):
         Upload file specified by ``path`` from the user's FTP directory, to the
         history specified by ``history_id``.
 
-        :type path: str
-        :param path: path of the file in the FTP directory
-
         :type history_id: str
         :param history_id: id of the history where to upload the file
 
-        :type file_name: str
-        :param file_name: (optional) name of the new history dataset
+        :type path: str
+        :param path: path of the file in the FTP directory
 
-        :type file_type: str
-        :param file_type: Galaxy datatype for the new dataset, default is auto
-
-        :type dbkey: str
-        :param dbkey: (optional) genome dbkey
+        See :meth:`upload_file` for optional parameters
         """
         payload = self._upload_payload(history_id, **keywords)
         payload['files_0|ftp_files'] = path
