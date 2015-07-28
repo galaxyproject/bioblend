@@ -98,6 +98,86 @@ This gives us a dictionary containing the History's metadata. With ``contents=Fa
      u'state': u'ok',
      u'visible': True}    
 
+Uploading Datasets to a History
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To upload a local file to a Galaxy server, you can run the ``upload_file`` method, supplying the path to a local file::
+
+    >>> gi.tools.upload_file('test.txt', 'f3c2b0f3ecac9f02')
+    {u'implicit_collections': [],
+     u'jobs': [{u'create_time': u'2015-07-28T17:52:39.756488',
+                u'exit_code': None,
+                u'id': u'9752b387803d3e1e',
+                u'model_class': u'Job',
+                u'state': u'new',
+                u'tool_id': u'upload1',
+                u'update_time': u'2015-07-28T17:52:39.987509'}],
+     u'output_collections': [],
+     u'outputs': [{u'create_time': u'2015-07-28T17:52:39.331176',
+                   u'data_type': u'galaxy.datatypes.data.Text',
+                   u'deleted': False,
+                   u'file_ext': u'auto',
+                   u'file_size': 0,
+                   u'genome_build': u'?',
+                   u'hda_ldda': u'hda',
+                   u'hid': 16,
+                   u'history_content_type': u'dataset',
+                   u'history_id': u'f3c2b0f3ecac9f02',
+                   u'id': u'59c76a119581e190',
+                   u'metadata_data_lines': None,
+                   u'metadata_dbkey': u'?',
+                   u'misc_blurb': None,
+                   u'misc_info': None,
+                   u'model_class': u'HistoryDatasetAssociation',
+                   u'name': u'test.txt',
+                   u'output_name': u'output0',
+                   u'peek': u'<table cellspacing="0" cellpadding="3"></table>',
+                   u'purged': False,
+                   u'state': u'queued',
+                   u'tags': [],
+                   u'update_time': u'2015-07-28T17:52:39.611887',
+                   u'uuid': u'ff0ee99b-7542-4125-802d-7a193f388e7e',
+                   u'visible': True}]}
+
+If files are greater than 2GB in size, they will need to be uploaded via FTP. Importing files from the user's FTP folder can be done via running the upload tool again::
+
+    >>> gi.tools.upload_from_ftp('test.txt', 'f3c2b0f3ecac9f02')
+    {u'implicit_collections': [],
+     u'jobs': [{u'create_time': u'2015-07-28T17:57:43.704394',
+                u'exit_code': None,
+                u'id': u'82b264d8c3d11790',
+                u'model_class': u'Job',
+                u'state': u'new',
+                u'tool_id': u'upload1',
+                u'update_time': u'2015-07-28T17:57:43.910958'}],
+     u'output_collections': [],
+     u'outputs': [{u'create_time': u'2015-07-28T17:57:43.209041',
+                   u'data_type': u'galaxy.datatypes.data.Text',
+                   u'deleted': False,
+                   u'file_ext': u'auto',
+                   u'file_size': 0,
+                   u'genome_build': u'?',
+                   u'hda_ldda': u'hda',
+                   u'hid': 17,
+                   u'history_content_type': u'dataset',
+                   u'history_id': u'f3c2b0f3ecac9f02',
+                   u'id': u'a676e8f07209a3be',
+                   u'metadata_data_lines': None,
+                   u'metadata_dbkey': u'?',
+                   u'misc_blurb': None,
+                   u'misc_info': None,
+                   u'model_class': u'HistoryDatasetAssociation',
+                   u'name': u'test.txt',
+                   u'output_name': u'output0',
+                   u'peek': u'<table cellspacing="0" cellpadding="3"></table>',
+                   u'purged': False,
+                   u'state': u'queued',
+                   u'tags': [],
+                   u'update_time': u'2015-07-28T17:57:43.544407',
+                   u'uuid': u'2cbe8f0a-4019-47c4-87e2-005ce35b8449',
+                   u'visible': True}]}
+
+
 View Data Libraries
 ~~~~~~~~~~~~~~~~~~~
 
