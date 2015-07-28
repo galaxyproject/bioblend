@@ -138,6 +138,31 @@ class ToolClient(Client):
         finally:
             payload["files_0|file_data"].close()
 
+    def upload_from_ftp(self, history_id, path, **keywords):
+        """
+        Upload file specified by ``path`` from the user's FTP directory, to the
+        history specified by ``history_id``.
+
+        :type path: str
+        :param path: path of the file in the FTP directory
+
+        :type history_id: str
+        :param history_id: id of the history where to upload the file
+
+        :type file_name: str
+        :param file_name: (optional) name of the new history dataset
+
+        :type file_type: str
+        :param file_type: Galaxy datatype for the new dataset, default is auto
+
+        :type dbkey: str
+        :param dbkey: (optional) genome dbkey
+        """
+        payload = self._upload_payload(history_id, **keywords)
+        payload['files_0|ftp_files'] = path
+        import pprint; pprint.pprint(payload)
+        return self._tool_post(payload)
+
     def paste_content(self, content, history_id, **kwds):
         """
         Upload a string to a new dataset in the history specified by
