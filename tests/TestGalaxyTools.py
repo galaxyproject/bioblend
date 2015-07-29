@@ -1,14 +1,17 @@
 """
 """
 import os
-import GalaxyTestBase
-import test_util
+
+import six
+
 from bioblend.galaxy.tools.inputs import (
     inputs,
     dataset,
     repeat,
     conditional,
 )
+import GalaxyTestBase
+import test_util
 
 
 def get_abspath(path):
@@ -44,11 +47,16 @@ class TestGalaxyTools(GalaxyTestBase.GalaxyTestBase):
             self.assertIn(key, data)
         return True
 
-    def test_paste_data(self):
+    def test_paste_content(self):
         history = self.gi.histories.create_history(name="test_paste_data history")
-
-        tool_output = self.gi.tools.paste_content("test contents", history["id"])
+        paste_text = 'test contents'
+        tool_output = self.gi.tools.paste_content(paste_text, history["id"])
         self.assertEqual(len(tool_output["outputs"]), 1)
+        self._wait_and_verify_dataset(history['id'], tool_output['outputs'][0]['id'], six.b(paste_text.rstrip('\r\n') + "\n"))
+        # Same with space_to_tab=True
+        tool_output = self.gi.tools.paste_content(paste_text, history["id"], space_to_tab=True)
+        self.assertEqual(len(tool_output["outputs"]), 1)
+        self._wait_and_verify_dataset(history['id'], tool_output['outputs'][0]['id'], six.b("\t".join(paste_text.rstrip('\r\n').split()) + "\n"))
 
     def test_upload_file(self):
         history = self.gi.histories.create_history(name="test_upload_file history")

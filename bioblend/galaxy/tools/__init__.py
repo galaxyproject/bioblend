@@ -110,7 +110,7 @@ class ToolClient(Client):
 
     def upload_file(self, path, history_id, **keywords):
         """
-        Upload file specified by ``path`` to the history specified by
+        Upload the file specified by ``path`` to the history specified by
         ``history_id``.
 
         :type path: str
@@ -127,10 +127,18 @@ class ToolClient(Client):
 
         :type dbkey: str
         :param dbkey: (optional) genome dbkey
+
+        :type to_posix_lines: bool
+        :param to_posix_lines: if True, convert universal line endings to POSIX
+          line endings. Default is True. Set to False if you upload a gzip, bz2
+          or zip archive containing a binary file
+
+        :type space_to_tab: bool
+        :param space_to_tab: whether to convert spaces to tabs. Default is
+          False. Applicable only if to_posix_lines is True
         """
-        default_file_name = basename(path)
         if "file_name" not in keywords:
-            keywords["file_name"] = default_file_name
+            keywords["file_name"] = basename(path)
         payload = self._upload_payload(history_id, **keywords)
         payload["files_0|file_data"] = attach_file(path, name=keywords["file_name"])
         try:
@@ -140,16 +148,16 @@ class ToolClient(Client):
 
     def upload_from_ftp(self, path, history_id, **keywords):
         """
-        Upload file specified by ``path`` from the user's FTP directory, to the
-        history specified by ``history_id``.
+        Upload the file specified by ``path`` from the user's FTP directory to
+        the history specified by ``history_id``.
 
         :type path: str
-        :param path: path of the file in the FTP directory
+        :param path: path of the file in the user's FTP directory
 
         :type history_id: str
         :param history_id: id of the history where to upload the file
 
-        See :meth:`upload_file` for optional parameters.
+        See :meth:`upload_file` for the optional parameters.
         """
         payload = self._upload_payload(history_id, **keywords)
         payload['files_0|ftp_files'] = path
@@ -179,13 +187,15 @@ class ToolClient(Client):
         payload = {}
         payload["history_id"] = history_id
         payload["tool_id"] = keywords.get("tool_id", "upload1")
-        file_type = keywords.get("file_type", "auto")
-        file_name = keywords.get("file_name", None)
         tool_input = {}
-        tool_input["file_type"] = file_type
+        tool_input["file_type"] = keywords.get('file_type', 'auto')
         tool_input["dbkey"] = keywords.get("dbkey", "?")
-        if file_name:
-            tool_input["files_0|NAME"] = file_name
+        if not keywords.get('to_posix_lines', True):
+            tool_input['files_0|to_posix_lines'] = False
+        elif keywords.get('space_to_tab', False):
+            tool_input['files_0|space_to_tab'] = 'Yes'
+        if 'file_name' in keywords:
+            tool_input["files_0|NAME"] = keywords['file_name']
         tool_input["files_0|type"] = "upload_dataset"
         payload["inputs"] = tool_input
         return payload
