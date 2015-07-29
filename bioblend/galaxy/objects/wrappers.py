@@ -882,7 +882,7 @@ class History(DatasetContainer):
 
     def upload_file(self, path, **kwargs):
         """
-        Upload the file specified by path to this history.
+        Upload the file specified by ``path`` to this history.
 
         :type path: str
         :param path: path of the file to upload
@@ -898,6 +898,24 @@ class History(DatasetContainer):
         return self.get_dataset(out_dict['outputs'][0]['id'])
 
     upload_dataset = upload_file
+
+    def upload_from_ftp(self, path, **kwargs):
+        """
+        Upload the file specified by ``path`` from the user's FTP directory to
+        this history.
+
+        :type path: str
+        :param path: path of the file in the user's FTP directory
+
+        See :meth:`~bioblend.galaxy.tools.ToolClient.upload_file` for
+        the optional parameters.
+
+        :rtype: :class:`~.HistoryDatasetAssociation`
+        :return: the uploaded dataset
+        """
+        out_dict = self.gi.gi.tools.upload_from_ftp(path, self.id, **kwargs)
+        self.refresh()
+        return self.get_dataset(out_dict['outputs'][0]['id'])
 
     def paste_content(self, content, **kwargs):
         """
