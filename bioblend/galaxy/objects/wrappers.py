@@ -151,8 +151,8 @@ class Step(Wrapper):
     Abstract base class for workflow steps.
 
     Steps are the main building blocks of a Galaxy workflow.  A step
-    can refer to either an input dataset (type 'data_input`) or a
-    computational tool (type 'tool`).
+    can refer to either an input (type 'data_collection_input` or 'data_input`)
+    or a computational tool (type 'tool`).
     """
     BASE_ATTRS = Wrapper.BASE_ATTRS + (
         'input_steps', 'tool_id', 'tool_inputs', 'tool_version', 'type'
@@ -160,6 +160,12 @@ class Step(Wrapper):
 
     def __init__(self, step_dict, parent):
         super(Step, self).__init__(step_dict, parent=parent, gi=parent.gi)
+        try:
+            stype = step_dict['type']
+        except KeyError:
+            raise ValueError('not a step dict')
+        if stype not in set(['data_collection_input', 'data_input', 'tool']):
+            raise ValueError('Unknown step type: %r' % stype)
         if self.type == 'tool' and self.tool_inputs:
             for k, v in six.iteritems(self.tool_inputs):
                 self.tool_inputs[k] = json.loads(v)
@@ -193,7 +199,7 @@ class Workflow(Wrapper):
             v['id'] = str(v['id'])
             for i in six.itervalues(v['input_steps']):
                 i['source_step'] = str(i['source_step'])
-            step = self._build_step(v, self)
+            step = Step(v, self)
             self.steps[k] = step
             if step.type == 'tool':
                 if not step.tool_inputs or step.tool_id not in tools_list_by_id:
@@ -261,19 +267,6 @@ class Workflow(Wrapper):
                 if not incoming:
                     source_ids.add(tail)
         return ids
-
-    @staticmethod
-    def _build_step(step_dict, parent):
-        """
-        Return a Step object for the given parameters.
-        """
-        try:
-            stype = step_dict['type']
-        except KeyError:
-            raise ValueError('not a step dict')
-        if stype not in set(['data_input', 'tool']):
-            raise ValueError('unknown step type: %r' % (stype,))
-        return Step(step_dict, parent)
 
     @property
     def data_input_ids(self):
