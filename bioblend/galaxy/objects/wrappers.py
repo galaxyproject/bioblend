@@ -150,9 +150,9 @@ class Step(Wrapper):
     """
     Abstract base class for workflow steps.
 
-    Steps are the main building blocks of a Galaxy workflow.  A step
-    can refer to either an input (type 'data_collection_input` or 'data_input`)
-    or a computational tool (type 'tool`).
+    Steps are the main building blocks of a Galaxy workflow. A step can be: an
+    input (type 'data_collection_input` or 'data_input`), a computational tool
+    (type 'tool`) or a pause (type 'pause`).
     """
     BASE_ATTRS = Wrapper.BASE_ATTRS + (
         'input_steps', 'tool_id', 'tool_inputs', 'tool_version', 'type'
@@ -164,7 +164,8 @@ class Step(Wrapper):
             stype = step_dict['type']
         except KeyError:
             raise ValueError('not a step dict')
-        if stype not in set(['data_collection_input', 'data_input', 'tool']):
+        if stype not in set(['data_collection_input', 'data_input', 'pause',
+                             'tool']):
             raise ValueError('Unknown step type: %r' % stype)
         if self.type == 'tool' and self.tool_inputs:
             for k, v in six.iteritems(self.tool_inputs):
