@@ -180,16 +180,20 @@ class CloudManLauncher(object):
             ret['error'] = err_msg
             return ret
         else:
-            try:
-                bioblend.log.info("Launched an instance with ID %s" % rs.instances[0].id)
-                ret['instance_id'] = rs.instances[0].id
-                ret['instance_ip'] = rs.instances[0].ip_address
-            except Exception as e:
-                err_msg = "Problem with the launched instance object: {0} " \
-                          "(code {1}; status {2})" \
-                          .format(e.message, e.error_code, e.status)
-                bioblend.log.exception(err_msg)
-                ret['error'] = err_msg
+            if rs:
+                try:
+                    bioblend.log.info("Launched an instance with ID %s" % rs.instances[0].id)
+                    ret['instance_id'] = rs.instances[0].id
+                    ret['instance_ip'] = rs.instances[0].ip_address
+                except EC2ResponseError as e:
+                    err_msg = "Problem with the launched instance object: {0} " \
+                              "(code {1}; status {2})" \
+                              .format(e.message, e.error_code, e.status)
+                    bioblend.log.exception(err_msg)
+                    ret['error'] = err_msg
+            else:
+                    ret['error'] = ("No response after launching an instance. Check "
+                                    "your account permissions and try again.")
         return ret
 
     def create_cm_security_group(self, sg_name='CloudMan'):
