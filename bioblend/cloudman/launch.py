@@ -231,8 +231,10 @@ class CloudManLauncher(object):
         try:
             sgs = self.ec2_conn.get_all_security_groups()
         except EC2ResponseError as e:
-            err_msg = "Problem getting security groups: {0} (code {1}; status {2})" \
-                      .format(e.message, e.error_code, e.status)
+            err_msg = ("Problem getting security groups. This could indicate a "
+                       "problem with your account credentials or permissions: "
+                       "{0} (code {1}; status {2})"
+                       .format(e.message, e.error_code, e.status))
             bioblend.log.exception(err_msg)
             progress['error'] = err_msg
             return progress
