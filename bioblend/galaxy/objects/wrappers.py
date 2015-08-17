@@ -219,7 +219,12 @@ class Workflow(Wrapper):
         object.__setattr__(self, 'dag', dag)
         object.__setattr__(self, 'inv_dag', inv_dag)
         object.__setattr__(self, 'source_ids', heads - tails)
-        assert self.data_input_ids == set(self.inputs)
+        # In Galaxy release_14.06 (the first to support dataset collection
+        # inputs) `inputs` does not contain dataset collections, so test if it
+        # is a subset of (instead of equal to) the union of dataset collection
+        # and dataset input ids.
+        assert set(self.inputs) <= self.data_collection_input_ids | self.data_input_ids, \
+            "inputs is %r, while data_collection_input_ids is %r and data_input_ids is %r" % (self.inputs, self.data_collection_input_ids, self.data_input_ids)
         object.__setattr__(self, 'sink_ids', tails - heads)
         object.__setattr__(self, 'missing_ids', missing_ids)
 
@@ -276,6 +281,14 @@ class Workflow(Wrapper):
         """
         return set(id_ for id_, s in six.iteritems(self.steps)
                    if s.type == 'data_input')
+
+    @property
+    def data_collection_input_ids(self):
+        """
+        Return the list of data collection input steps for this workflow.
+        """
+        return set(id_ for id_, s in six.iteritems(self.steps)
+                   if s.type == 'data_collection_input')
 
     @property
     def tool_ids(self):
