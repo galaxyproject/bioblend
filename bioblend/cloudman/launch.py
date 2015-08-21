@@ -3,8 +3,10 @@ Setup and launch a CloudMan instance.
 """
 import datetime
 import yaml
+import socket
 
 import boto
+from boto.compat import http_client
 from boto.ec2.regioninfo import RegionInfo
 from boto.exception import EC2ResponseError, S3ResponseError
 from boto.s3.connection import OrdinaryCallingFormat, S3Connection, SubdomainCallingFormat
@@ -99,6 +101,9 @@ class CloudManLauncher(object):
         else:
             self.cloud = cloud
         self.ec2_conn = self.connect_ec2(self.access_key, self.secret_key, self.cloud)
+        # Define exceptions from http_client that we want to catch and retry
+        self.http_exceptions = (http_client.HTTPException, socket.error,
+                                socket.gaierror, http_client.BadStatusLine)
 
     def __repr__(self):
         return "Cloud: {0}; acct ID: {1}".format(self.cloud.name, self.access_key)
@@ -427,25 +432,48 @@ class CloudManLauncher(object):
 
     def get_clusters_pd(self, include_placement=True):
         """
-        Return a list containing the *persistent data* of all existing clusters
-        associated with this account. If no clusters are found, return an empty
-        list. Each list element is a dictionary with the following keys:
-        ``cluster_name``, ``persistent_data``, ``bucket_name`` and, optionally,
-        ``placement``. ``persistent_data`` value is yet another dictionary
-        containing given cluster's persistent data.
+        Return *persistent data* of all existing clusters for this account.
+
+        :type include_placement: bool
+        :param include_placement: Whether or not to include region placement for
+                                  the clusters. Setting this option will lead
+                                  to a longer function runtime.
+
+        :rtype: dict
+        :return: A dictionary containing keys 'clusters' and 'error'. The value
+                 of 'clusters' will be a dictionary with the following keys
+                 'cluster_name', 'persistent_data', 'bucket_name' and optionally
+                 `placement' or an empty list if no clusters were found or an
+                 error was encountered. ``persistent_data`` key value is yet
+                 another dictionary containing given cluster's persistent data.
+                 The value for the 'error' key will contain a string with the
+                 error message.
 
         .. versionadded:: 0.3
+        .. versionchanged:: 0.7.0
+            The return value changed from a list to a dictionary.
         """
-        s3_conn = self.connect_s3(self.access_key, self.secret_key, self.cloud)
-        buckets = s3_conn.get_all_buckets()
         clusters = []
+        response = {'clusters': clusters, 'error': None}
+        s3_conn = self.connect_s3(self.access_key, self.secret_key, self.cloud)
+        try:
+            buckets = s3_conn.get_all_buckets()
+        except S3ResponseError as e:
+            response['error'] = "S3ResponseError getting buckets: %s" % e
+        except self.http_exceptions as ex:
+            response['error'] = "Exception getting buckets: %s" % ex
+        if response['error']:
+            bioblend.log.exception(response['error'])
+            return response
         for bucket in [b for b in buckets if b.name.startswith('cm-')]:
             try:
                 # TODO: first lookup if persistent_data.yaml key exists
                 pd = bucket.get_key('persistent_data.yaml')
             except S3ResponseError:
-                # This can fail for a number of reasons for non-us and/or CNAME'd buckets.
-                bioblend.log.exception("Problem fetching persistent_data.yaml from bucket %s" % bucket)
+                # This can fail for a number of reasons for non-us and/or
+                # CNAME'd buckets but it is not a terminal error
+                bioblend.log.warning("Problem fetching persistent_data.yaml "
+                                     "from bucket %s" % bucket)
                 continue
             if pd:
                 # We are dealing with a CloudMan bucket
@@ -465,7 +493,8 @@ class CloudManLauncher(object):
                     placement = self._find_placement(cluster_name, cluster)
                     cluster['placement'] = placement
                 clusters.append(cluster)
-        return clusters
+        response['clusters'] = clusters
+        return response
 
     def get_cluster_pd(self, cluster_name):
         """
@@ -476,7 +505,7 @@ class CloudManLauncher(object):
         .. versionadded:: 0.3
         """
         cluster = {}
-        clusters = self.get_clusters_pd()
+        clusters = self.get_clusters_pd().get('clusters', [])
         for c in clusters:
             if c['cluster_name'] == cluster_name:
                 cluster = c
