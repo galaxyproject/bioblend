@@ -440,13 +440,13 @@ class CloudManLauncher(object):
                                   to a longer function runtime.
 
         :rtype: dict
-        :return: A dictionary containing keys 'clusters' and 'error'. The value
-                 of 'clusters' will be a dictionary with the following keys
-                 'cluster_name', 'persistent_data', 'bucket_name' and optionally
-                 `placement' or an empty list if no clusters were found or an
+        :return: A dictionary containing keys ``clusters`` and ``error``. The
+                 value of ``clusters`` will be a dictionary with the following keys
+                 ``cluster_name``, ``persistent_data``, ``bucket_name`` and optionally
+                 ``placement`` or an empty list if no clusters were found or an
                  error was encountered. ``persistent_data`` key value is yet
                  another dictionary containing given cluster's persistent data.
-                 The value for the 'error' key will contain a string with the
+                 The value for the ``error`` key will contain a string with the
                  error message.
 
         .. versionadded:: 0.3
@@ -628,45 +628,58 @@ class CloudManLauncher(object):
 
     def _find_placement(self, cluster_name, cluster=None):
         """
-        Find a placement zone for a cluster with the name ``cluster_name`` and
-        return the zone name as a string. By default, this method will search
-        for and fetch given cluster's persistent data; alternatively, persistent
-        data can be provided via ``cluster``. This dict needs to have
-        ``persistent_data`` key with the contents of cluster's persistent data.
+        Find a placement zone for a cluster with the name ``cluster_name``.
+
+        By default, this method will search for and fetch given cluster's
+        *persistent data*; alternatively, *persistent data* can be provided via
+        the ``cluster`` parameter. This dict needs to have ``persistent_data``
+        key with the contents of cluster's *persistent data*.
         If the cluster or the volume associated with the cluster cannot be found,
-        return ``None``.
+        cluster placement is set to ``None``.
+
+        :rtype: dict
+        :return: A dictionary with ``placement`` and ``error`` keywords.
+
+        .. versionchanged:: 0.7.0
+            The return value changed from a list to a dictionary.
         """
         placement = None
+        response = {'placement': placement, 'error': None}
         cluster = cluster or self.get_cluster_pd(cluster_name)
         if cluster and 'persistent_data' in cluster:
             pd = cluster['persistent_data']
             try:
                 if 'placement' in pd:
-                    placement = pd['placement']
+                    response['placement'] = pd['placement']
                 elif 'data_filesystems' in pd:
                     # We have v1 format persistent data so get the volume first and
                     # then the placement zone
                     vol_id = pd['data_filesystems']['galaxyData'][0]['vol_id']
-                    placement = self._get_volume_placement(vol_id)
+                    response['placement'] = self._get_volume_placement(vol_id)
                 elif 'filesystems' in pd:
                     # V2 format.
                     for fs in [fs for fs in pd['filesystems'] if fs.get('kind', None) == 'volume' and 'ids' in fs]:
                         vol_id = fs['ids'][0]  # All volumes must be in the same zone
-                        placement = self._get_volume_placement(vol_id)
+                        response['placement'] = self._get_volume_placement(vol_id)
                         # No need to continue to iterate through
                         # filesystems, if we found one with a volume.
                         break
             except Exception as exc:
-                bioblend.log.exception("Exception while finding placement for "
-                                       "cluster '{0}'. This can indicate malformed "
-                                       "instance data. Or that this method is "
-                                       "broken: {1}".format(cluster_name, exc))
-                placement = None
-        return placement
+                response['error'] = ("Exception while finding placement for "
+                                     "cluster '{0}'. This can indicate malformed "
+                                     "instance data. Or that this method is "
+                                     "broken: {1}".format(cluster_name, exc))
+                bioblend.log.error(response['error'])
+                response['placement'] = None
+        else:
+            bioblend.log.debug("Insufficient info about cluster {0} to get placement."
+                               .format(cluster_name))
+        return response
 
     def find_placements(self, ec2_conn, instance_type, cloud_type, cluster_name=None):
         """
-        Find a list of placement zones that support the requested instance type.
+        Find a list of placement zones that support the specified instance type.
+
         If ``cluster_name`` is given and a cluster with the given name exist,
         return a list with only one entry where the given cluster lives.
 
@@ -680,16 +693,27 @@ class CloudManLauncher(object):
         cluster is being recreated, in which case the cluster's placement zone is
         returned sa stored in its persistent data.
 
+        :rtype: dict
+        :return: A dictionary with ``zones`` and ``error`` keywords.
+
         .. versionchanged:: 0.3
             Changed method name from ``_find_placements`` to ``find_placements``.
             Also added ``cluster_name`` parameter.
+
+        .. versionchanged:: 0.7.0
+            The return value changed from a list to a dictionary.
         """
         # First look for a specific zone a given cluster is bound to
         zones = []
+        response = {'zones': zones, 'error': None}
         if cluster_name:
-            zones = self._find_placement(cluster_name) or []
+            placement = self._find_placement(cluster_name)
+            if placement.get('error'):
+                response['error'] = placement['error']
+                return response
+            response['zones'] = placement.get('placement', [])
         # If placement is not found, look for a list of available zones
-        if not zones:
+        if not response['zones']:
             in_the_past = datetime.datetime.now() - datetime.timedelta(hours=1)
             back_compatible_zone = "us-east-1e"
             for zone in [z for z in ec2_conn.get_all_zones() if z.state == 'available']:
@@ -704,9 +728,11 @@ class CloudManLauncher(object):
             if back_compatible_zone in zones:
                 zones = [back_compatible_zone] + [z for z in zones if z != back_compatible_zone]
             if len(zones) == 0:
-                bioblend.log.error("Did not find availabilty zone for {1}".format(instance_type))
+                response['error'] = ("Did not find availabilty zone for {1}"
+                                     .format(instance_type))
+                bioblend.log.error(response['error'])
                 zones.append(back_compatible_zone)
-        return zones
+        return response
 
     def _checkURL(self, url):
         """
