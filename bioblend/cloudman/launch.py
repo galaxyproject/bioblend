@@ -155,10 +155,7 @@ class CloudManLauncher(object):
         # TODO: Should placement always be checked? To make sure it's correct
         # for existing clusters.
         if not placement:
-            placement = self._find_placement(cluster_name)
-            if not placement:
-                # Let the cloud middleware assign a zone
-                placement = None
+            placement = self._find_placement(cluster_name).get('placement', None)
         # Compose user data for launching an instance, ensuring we have the required fields
         kwargs['access_key'] = self.access_key
         kwargs['secret_key'] = self.secret_key
