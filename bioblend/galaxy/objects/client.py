@@ -325,14 +325,21 @@ class ObjToolClient(ObjClient):
     def __init__(self, obj_gi):
         super(ObjToolClient, self).__init__(obj_gi)
 
-    def get(self, id_):
+    def get(self, id_, io_details=False, link_details=False):
         """
         Retrieve the tool corresponding to the given id.
+
+        :type io_details: bool
+        :param io_details: if True, get also input and output details
+
+        :type link_details: bool
+        :param link_details: if True, get also link details
 
         :rtype: :class:`~.wrappers.Tool`
         :return: the tool corresponding to ``id_``
         """
-        res = self.gi.tools.show_tool(id_)
+        res = self.gi.tools.show_tool(id_, io_details=io_details,
+                                      link_details=link_details)
         tool_dict = self._get_dict('show_tool', res)
         return wrappers.Tool(tool_dict, gi=self.obj_gi)
 
@@ -343,7 +350,7 @@ class ObjToolClient(ObjClient):
         :type name: str
         :param name: return only tools with this name
 
-        :type trackster: boolean
+        :type trackster: bool
         :param trackster: if True, only tools that are compatible with
           Trackster are returned
 
@@ -360,7 +367,7 @@ class ObjToolClient(ObjClient):
         :type name: str
         :param name: return only tools with this name
 
-        :type trackster: boolean
+        :type trackster: bool
         :param trackster: if True, only tools that are compatible with
           Trackster are returned
 

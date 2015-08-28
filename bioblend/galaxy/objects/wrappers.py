@@ -150,9 +150,9 @@ class Step(Wrapper):
     """
     Abstract base class for workflow steps.
 
-    Steps are the main building blocks of a Galaxy workflow.  A step
-    can refer to either an input dataset (type 'data_input`) or a
-    computational tool (type 'tool`).
+    Steps are the main building blocks of a Galaxy workflow. A step can be: an
+    input (type 'data_collection_input` or 'data_input`), a computational tool
+    (type 'tool`) or a pause (type 'pause`).
     """
     BASE_ATTRS = Wrapper.BASE_ATTRS + (
         'input_steps', 'tool_id', 'tool_inputs', 'tool_version', 'type'
@@ -160,6 +160,13 @@ class Step(Wrapper):
 
     def __init__(self, step_dict, parent):
         super(Step, self).__init__(step_dict, parent=parent, gi=parent.gi)
+        try:
+            stype = step_dict['type']
+        except KeyError:
+            raise ValueError('not a step dict')
+        if stype not in set(['data_collection_input', 'data_input', 'pause',
+                             'tool']):
+            raise ValueError('Unknown step type: %r' % stype)
         if self.type == 'tool' and self.tool_inputs:
             for k, v in six.iteritems(self.tool_inputs):
                 self.tool_inputs[k] = json.loads(v)
@@ -193,7 +200,7 @@ class Workflow(Wrapper):
             v['id'] = str(v['id'])
             for i in six.itervalues(v['input_steps']):
                 i['source_step'] = str(i['source_step'])
-            step = self._build_step(v, self)
+            step = Step(v, self)
             self.steps[k] = step
             if step.type == 'tool':
                 if not step.tool_inputs or step.tool_id not in tools_list_by_id:
@@ -212,7 +219,12 @@ class Workflow(Wrapper):
         object.__setattr__(self, 'dag', dag)
         object.__setattr__(self, 'inv_dag', inv_dag)
         object.__setattr__(self, 'source_ids', heads - tails)
-        assert self.data_input_ids == set(self.inputs)
+        # In Galaxy release_14.06 (the first to support dataset collection
+        # inputs) `inputs` does not contain dataset collections, so test if it
+        # is a subset of (instead of equal to) the union of dataset collection
+        # and dataset input ids.
+        assert set(self.inputs) <= self.data_collection_input_ids | self.data_input_ids, \
+            "inputs is %r, while data_collection_input_ids is %r and data_input_ids is %r" % (self.inputs, self.data_collection_input_ids, self.data_input_ids)
         object.__setattr__(self, 'sink_ids', tails - heads)
         object.__setattr__(self, 'missing_ids', missing_ids)
 
@@ -262,19 +274,6 @@ class Workflow(Wrapper):
                     source_ids.add(tail)
         return ids
 
-    @staticmethod
-    def _build_step(step_dict, parent):
-        """
-        Return a Step object for the given parameters.
-        """
-        try:
-            stype = step_dict['type']
-        except KeyError:
-            raise ValueError('not a step dict')
-        if stype not in set(['data_input', 'tool']):
-            raise ValueError('unknown step type: %r' % (stype,))
-        return Step(step_dict, parent)
-
     @property
     def data_input_ids(self):
         """
@@ -282,6 +281,14 @@ class Workflow(Wrapper):
         """
         return set(id_ for id_, s in six.iteritems(self.steps)
                    if s.type == 'data_input')
+
+    @property
+    def data_collection_input_ids(self):
+        """
+        Return the list of data collection input steps for this workflow.
+        """
+        return set(id_ for id_, s in six.iteritems(self.steps)
+                   if s.type == 'data_collection_input')
 
     @property
     def tool_ids(self):
@@ -367,14 +374,14 @@ class Workflow(Wrapper):
           post-job actions (see the docs for
           :meth:`~bioblend.galaxy.workflows.WorkflowClient.run_workflow`)
 
-        :type wait: boolean
+        :type wait: bool
         :param wait: whether to wait while the returned datasets are
           in a pending state
 
         :type polling_interval: float
         :param polling_interval: polling interval in seconds
 
-        :type break_on_error: boolean
+        :type break_on_error: bool
         :param break_on_error: whether to break as soon as at least one
           of the returned datasets is in the 'error' state
 
@@ -816,16 +823,21 @@ class History(DatasetContainer):
         Update history metadata information. Some of the attributes that can be
         modified are documented below.
 
-        :type name: string
+        :type name: str
         :param name: Replace history name with the given string
-        :type annotation: string
-        :param annotation: Replace history annotation with given string
-        :type deleted: boolean
+
+        :type annotation: str
+        :param annotation: Replace history annotation with the given string
+
+        :type deleted: bool
         :param deleted: Mark or unmark history as deleted
-        :type published: boolean
+
+        :type published: bool
         :param published: Mark or unmark history as published
-        :type importable: boolean
+
+        :type importable: bool
         :param importable: Mark or unmark history as importable
+
         :type tags: list
         :param tags: Replace history tags with the given list
         """
@@ -877,7 +889,7 @@ class History(DatasetContainer):
 
     def upload_file(self, path, **kwargs):
         """
-        Upload the file specified by path to this history.
+        Upload the file specified by ``path`` to this history.
 
         :type path: str
         :param path: path of the file to upload
@@ -893,6 +905,24 @@ class History(DatasetContainer):
         return self.get_dataset(out_dict['outputs'][0]['id'])
 
     upload_dataset = upload_file
+
+    def upload_from_ftp(self, path, **kwargs):
+        """
+        Upload the file specified by ``path`` from the user's FTP directory to
+        this history.
+
+        :type path: str
+        :param path: path of the file in the user's FTP directory
+
+        See :meth:`~bioblend.galaxy.tools.ToolClient.upload_file` for
+        the optional parameters.
+
+        :rtype: :class:`~.HistoryDatasetAssociation`
+        :return: the uploaded dataset
+        """
+        out_dict = self.gi.gi.tools.upload_from_ftp(path, self.id, **kwargs)
+        self.refresh()
+        return self.get_dataset(out_dict['outputs'][0]['id'])
 
     def paste_content(self, content, **kwargs):
         """
@@ -1223,7 +1253,7 @@ class Tool(Wrapper):
         :type history: :class:`History`
         :param history: the history where to execute the tool
 
-        :type wait: boolean
+        :type wait: bool
         :param wait: whether to wait while the returned datasets are
           in a pending state
 

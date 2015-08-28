@@ -105,7 +105,7 @@ class ToolShedClient(Client):
         """
         Display information of a repository from Tool Shed
 
-        :type toolShed_id: string
+        :type toolShed_id: str
         :param toolShed_id: Encoded toolShed ID
 
         :rtype: dictionary
@@ -130,10 +130,10 @@ class ToolShedClient(Client):
         Returns the ordered list of changeset revision hash strings that are associated
         with installable revisions.  As in the changelog, the list is ordered oldest to newest.
 
-        :type name: string
+        :type name: str
         :param name: the name of the repository
 
-        :type owner: string
+        :type owner: str
         :param owner: the owner of the repository
 
         :rtype: list
@@ -154,13 +154,13 @@ class ToolShedClient(Client):
         Return a list of dictionaries of metadata about a certain changeset
         revision for a single tool.
 
-        :type name: string
+        :type name: str
         :param name: the name of the repository
 
-        :type owner: string
+        :type owner: str
         :param owner: the owner of the repository
 
-        :type changeset_revision: string
+        :type changeset_revision: str
         :param changeset_revision: the changset_revision of the RepositoryMetadata
                                    object associated with the repository
 
@@ -261,7 +261,7 @@ class ToolShedClient(Client):
         Returns a dictionary that includes information about a specified repository
         revision.
 
-        :type metadata_id: string
+        :type metadata_id: str
         :param metadata_id: Encoded repository metadata ID
 
         :rtype: dictionary
@@ -318,13 +318,13 @@ class ToolShedClient(Client):
         Update the contents of a tool shed repository with specified tar
         ball.
 
-        :type id: string
+        :type id: str
         :param id: Encoded repository ID
 
-        :type tar_ball_path: string
+        :type tar_ball_path: str
         :param tar_ball_path: Path to file containing tar ball to upload.
 
-        :type commit_message: string
+        :type commit_message: str
         :param commit_message: Commit message used for underlying mercurial
                                repository backing tool shed repository.
 

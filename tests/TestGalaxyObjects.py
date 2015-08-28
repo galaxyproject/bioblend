@@ -23,6 +23,7 @@ import test_util
 socket.setdefaulttimeout(10.0)
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 SAMPLE_FN = os.path.join(THIS_DIR, 'data', 'paste_columns.ga')
+SAMPLE_WF_COLL_FN = os.path.join(THIS_DIR, 'data', 'paste_columns_collections.ga')
 FOO_DATA = 'foo\nbar\n'
 FOO_DATA_2 = 'foo2\nbar2\n'
 SAMPLE_WF_DICT = {
@@ -255,6 +256,12 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
 
     def test_workflow_from_str(self):
         with open(SAMPLE_FN) as f:
+            wf = self.gi.workflows.import_new(f.read())
+        self.__check_and_del_workflow(wf)
+
+    @test_util.skip_unless_galaxy('release_14.06')
+    def test_workflow_collections_from_str(self):
+        with open(SAMPLE_WF_COLL_FN) as f:
             wf = self.gi.workflows.import_new(f.read())
         self.__check_and_del_workflow(wf)
 

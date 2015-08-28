@@ -2,7 +2,6 @@
 A base representation of an instance of Tool Shed
 """
 from bioblend.toolshed import (repositories)
-from bioblend.toolshed import (tools)
 from bioblend.galaxyclient import GalaxyClient
 
 
@@ -24,16 +23,13 @@ class ToolShedInstance(GalaxyClient):
 
             rl = ts.repositories.get_repositories()
 
-            tools = ts.tools.search_tools('fastq')
-
-        :type url: string
+        :type url: str
         :param url: A FQDN or IP for a given instance of ToolShed. For example:
                     http://testtoolshed.g2.bx.psu.edu
 
-        :type key: string
+        :type key: str
         :param key: If required, user's API key for the given instance of ToolShed,
                     obtained from the user preferences.
         """
         super(ToolShedInstance, self).__init__(url, key, email, password)
         self.repositories = repositories.ToolShedClient(self)
-        self.tools = tools.ToolShedClient(self)

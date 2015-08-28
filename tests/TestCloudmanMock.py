@@ -7,9 +7,13 @@ current behaviour.
 
 Use ``nose`` to run these unit tests.
 """
-from test_util import unittest
-from mock import MagicMock
+try:
+    from unittest.mock import MagicMock
+except ImportError:
+    # Python < 3.3
+    from mock import MagicMock
 from bioblend import cloudman
+from test_util import unittest
 
 
 class TestCloudmanMock(unittest.TestCase):

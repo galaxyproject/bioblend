@@ -3,8 +3,10 @@ Setup and launch a CloudMan instance.
 """
 import datetime
 import yaml
+import socket
 
 import boto
+from boto.compat import http_client
 from boto.ec2.regioninfo import RegionInfo
 from boto.exception import EC2ResponseError, S3ResponseError
 from boto.s3.connection import OrdinaryCallingFormat, S3Connection, SubdomainCallingFormat
@@ -15,16 +17,18 @@ from six.moves.urllib.parse import urlparse
 import bioblend
 from bioblend.util import Bunch
 
-
-# Comment the following line if no logging at the prompt is desired
+# Uncomment the following line if no logging from boto is desired
+# bioblend.logging.getLogger('boto').setLevel(bioblend.logging.CRITICAL)
+# Uncomment the following line if logging at the prompt is desired
 # bioblend.set_stream_logger(__name__)
+
 
 def instance_types(cloud_name='generic'):
     """
     Return a list of dictionaries containing details about the available
     instance types for the given `cloud_name`.
 
-    :type cloud_name: string
+    :type cloud_name: str
     :param cloud_name: A name of the cloud for which the list of instance
                        types will be returned. Valid values are: `aws`,
                        `nectar`, `generic`.
@@ -97,6 +101,9 @@ class CloudManLauncher(object):
         else:
             self.cloud = cloud
         self.ec2_conn = self.connect_ec2(self.access_key, self.secret_key, self.cloud)
+        # Define exceptions from http_client that we want to catch and retry
+        self.http_exceptions = (http_client.HTTPException, socket.error,
+                                socket.gaierror, http_client.BadStatusLine)
 
     def __repr__(self):
         return "Cloud: {0}; acct ID: {1}".format(self.cloud.name, self.access_key)
@@ -132,16 +139,23 @@ class CloudManLauncher(object):
                'error': None}
         # First satisfy the prerequisites
         for sg in security_groups:
-            ret['sg_names'].append(self.create_cm_security_group(sg))
-        ret['kp_name'], ret['kp_material'] = self.create_key_pair(key_name)
+            cmsg = self.create_cm_security_group(sg)
+            ret['error'] = cmsg['error']
+            if ret['error']:
+                return ret
+            if cmsg['name']:
+                ret['sg_names'].append(cmsg['name'])
+        kp_info = self.create_key_pair(key_name)
+        ret['error'] = kp_info['error']
+        if ret['error']:
+            return ret
+        ret['kp_name'] = kp_info['name']
+        ret['kp_material'] = kp_info['material']
         # If not provided, try to find a placement
         # TODO: Should placement always be checked? To make sure it's correct
         # for existing clusters.
         if not placement:
-            placement = self._find_placement(cluster_name)
-            if not placement:
-                # Let the cloud middleware assign a zone
-                placement = None
+            placement = self._find_placement(cluster_name).get('placement', None)
         # Compose user data for launching an instance, ensuring we have the required fields
         kwargs['access_key'] = self.access_key
         kwargs['secret_key'] = self.secret_key
@@ -162,78 +176,138 @@ class CloudManLauncher(object):
                                              placement=placement)
             ret['rs'] = rs
         except EC2ResponseError as e:
-            bioblend.log.exception("Problem launching an instance.")
-            ret['error'] = "Problem launching an instance."
+            err_msg = "Problem launching an instance: {0} (code {1}; status {2})" \
+                      .format(e.message, e.error_code, e.status)
+            bioblend.log.exception(err_msg)
+            ret['error'] = err_msg
             return ret
         else:
-            try:
-                bioblend.log.info("Launched an instance with ID %s" % rs.instances[0].id)
-                ret['instance_id'] = rs.instances[0].id
-                ret['instance_ip'] = rs.instances[0].ip_address
-            except Exception as e:
-                bioblend.log.exception("Problem with the launched instance object.")
-                ret['error'] = "Problem with the launched instance object: %s" % e
+            if rs:
+                try:
+                    bioblend.log.info("Launched an instance with ID %s" % rs.instances[0].id)
+                    ret['instance_id'] = rs.instances[0].id
+                    ret['instance_ip'] = rs.instances[0].ip_address
+                except EC2ResponseError as e:
+                    err_msg = "Problem with the launched instance object: {0} " \
+                              "(code {1}; status {2})" \
+                              .format(e.message, e.error_code, e.status)
+                    bioblend.log.exception(err_msg)
+                    ret['error'] = err_msg
+            else:
+                    ret['error'] = ("No response after launching an instance. Check "
+                                    "your account permissions and try again.")
         return ret
 
     def create_cm_security_group(self, sg_name='CloudMan'):
         """
         Create a security group with all authorizations required to run CloudMan.
+
         If the group already exists, check its rules and add the missing ones.
-        Return the name of the created security group.
+
+        :type sg_name: str
+        :param sg_name: A name for the security group to be created.
+
+        :rtype: dict
+        :return: A dictionary containing keys ``name`` (with the value being the
+                 name of the security group that was created), ``error``
+                 (with the value being the error message if there was an error
+                 or ``None`` if no error was encountered), and ``ports``
+                 (containing the list of tuples with port ranges that were
+                 opened or attempted to be opened).
+
+        .. versionchanged:: 0.6.1
+            The return value changed from a string to a dict
         """
+        ports = (('20', '21'),  # FTP
+                 ('22', '22'),  # SSH
+                 ('80', '80'),  # Web UI
+                 ('443', '443'),  # SSL Web UI
+                 ('8800', '8800'),  # NodeJS Proxy for Galaxy IPython IE
+                 ('9600', '9700'),  # HTCondor
+                 ('30000', '30100'))  # FTP transfer
+        progress = {'name': None,
+                    'error': None,
+                    'ports': ports}
         cmsg = None
         # Check if this security group already exists
-        sgs = self.ec2_conn.get_all_security_groups()
+        try:
+            sgs = self.ec2_conn.get_all_security_groups()
+        except EC2ResponseError as e:
+            err_msg = ("Problem getting security groups. This could indicate a "
+                       "problem with your account credentials or permissions: "
+                       "{0} (code {1}; status {2})"
+                       .format(e.message, e.error_code, e.status))
+            bioblend.log.exception(err_msg)
+            progress['error'] = err_msg
+            return progress
         for sg in sgs:
             if sg.name == sg_name:
                 cmsg = sg
-                bioblend.log.debug("Security group '%s' already exists; will add authorizations next." % sg_name)
+                bioblend.log.debug("Security group '%s' already exists; will "
+                                   "add authorizations next." % sg_name)
                 break
         # If it does not exist, create security group
         if cmsg is None:
             bioblend.log.debug("Creating Security Group %s" % sg_name)
-            cmsg = self.ec2_conn.create_security_group(sg_name, 'A security group for CloudMan')
-        # Add appropriate authorization rules
-        # If these rules already exist, nothing will be changed in the SG
-        ports = (('80', '80'),  # Web UI
-                 ('443', '443'),  # SSL Web UI
-                 ('20', '21'),  # FTP
-                 ('22', '22'),  # SSH
-                 ('9600', '9700'),  # HTCondor
-                 ('30000', '30100'),  # FTP transfer
-                 ('42284', '42284'))  # CloudMan UI
-        for port in ports:
             try:
-                if not self.rule_exists(cmsg.rules, from_port=port[0], to_port=port[1]):
-                    cmsg.authorize(ip_protocol='tcp', from_port=port[0], to_port=port[1], cidr_ip='0.0.0.0/0')
+                cmsg = self.ec2_conn.create_security_group(sg_name, 'A security '
+                                                           'group for CloudMan')
+            except EC2ResponseError as e:
+                err_msg = "Problem creating security group '{0}': {1} (code {2}; " \
+                          "status {3})" \
+                          .format(sg_name, e.message, e.error_code, e.status)
+                bioblend.log.exception(err_msg)
+                progress['error'] = err_msg
+        if cmsg:
+            progress['name'] = cmsg.name
+            # Add appropriate authorization rules
+            # If these rules already exist, nothing will be changed in the SG
+            for port in ports:
+                try:
+                    if not self.rule_exists(cmsg.rules, from_port=port[0], to_port=port[1]):
+                        cmsg.authorize(ip_protocol='tcp', from_port=port[0], to_port=port[1], cidr_ip='0.0.0.0/0')
+                    else:
+                        bioblend.log.debug("Rule (%s:%s) already exists in the SG" % (port[0], port[1]))
+                except EC2ResponseError as e:
+                    err_msg = "A problem adding security group authorizations: {0} " \
+                              "(code {1}; status {2})" \
+                              .format(e.message, e.error_code, e.status)
+                    bioblend.log.exception(err_msg)
+                    progress['error'] = err_msg
+            # Add ICMP (i.e., ping) rule required by HTCondor
+            try:
+                if not self.rule_exists(cmsg.rules, from_port='-1', to_port='-1', ip_protocol='icmp'):
+                    cmsg.authorize(ip_protocol='icmp', from_port=-1, to_port=-1, cidr_ip='0.0.0.0/0')
                 else:
-                    bioblend.log.debug("Rule (%s:%s) already exists in the SG" % (port[0], port[1]))
-            except EC2ResponseError:
-                bioblend.log.exception("A problem with security group authorizations.")
-        # Add ICMP (i.e., ping) rule required by HTCondor
-        try:
-            if not self.rule_exists(cmsg.rules, from_port='-1', to_port='-1', ip_protocol='icmp'):
-                cmsg.authorize(ip_protocol='icmp', from_port=-1, to_port=-1, cidr_ip='0.0.0.0/0')
-            else:
-                bioblend.log.debug("ICMP rule already exists in {0} SG".format(sg_name))
-        except EC2ResponseError:
-            bioblend.log.exception("A problem with security group authorizations.")
-        # Add rule that allows communication between instances in the same SG
-        g_rule_exists = False  # A flag to indicate if group rule already exists
-        for rule in cmsg.rules:
-            for grant in rule.grants:
-                if grant.name == cmsg.name:
-                    g_rule_exists = True
-                    bioblend.log.debug("Group rule already exists in the SG")
-            if g_rule_exists:
-                break
-        if not g_rule_exists:
-            try:
-                cmsg.authorize(src_group=cmsg)
-            except EC2ResponseError:
-                bioblend.log.exception("A problem with security group authorization.")
-        bioblend.log.info("Done configuring '%s' security group" % cmsg.name)
-        return cmsg.name
+                    bioblend.log.debug("ICMP rule already exists in {0} SG.".format(sg_name))
+            except EC2ResponseError as e:
+                err_msg = "A problem with security ICMP rule authorization: {0} " \
+                          "(code {1}; status {2})" \
+                          .format(e.message, e.error_code, e.status)
+                bioblend.log.exception(err_msg)
+                progress['err_msg'] = err_msg
+            # Add rule that allows communication between instances in the same SG
+            g_rule_exists = False  # A flag to indicate if group rule already exists
+            for rule in cmsg.rules:
+                for grant in rule.grants:
+                    if grant.name == cmsg.name:
+                        g_rule_exists = True
+                        bioblend.log.debug("Group rule already exists in the SG.")
+                if g_rule_exists:
+                    break
+            if not g_rule_exists:
+                try:
+                    cmsg.authorize(src_group=cmsg)
+                except EC2ResponseError as e:
+                    err_msg = "A problem with security group authorization: {0} " \
+                              "(code {1}; status {2})" \
+                              .format(e.message, e.error_code, e.status)
+                    bioblend.log.exception(err_msg)
+                    progress['err_msg'] = err_msg
+            bioblend.log.info("Done configuring '%s' security group" % cmsg.name)
+        else:
+            bioblend.log.warning("Did not create security group '{0}'".format(sg_name))
+        return progress
 
     def rule_exists(self, rules, from_port, to_port, ip_protocol='tcp', cidr_ip='0.0.0.0/0'):
         """
@@ -248,24 +322,53 @@ class CloudManLauncher(object):
 
     def create_key_pair(self, key_name='cloudman_key_pair'):
         """
-        Create a key pair with the provided ``key_name``.
-        Return the name of the key or ``None`` if there was an error creating the key.
+        If a key pair with the provided ``key_name`` does not exist, create it.
+
+        :type sg_name: str
+        :param sg_name: A name for the key pair to be created.
+
+        :rtype: dict
+        :return: A dictionary containing keys ``name`` (with the value being the
+                 name of the key pair that was created), ``error``
+                 (with the value being the error message if there was an error
+                 or ``None`` if no error was encountered), and ``material``
+                 (containing the unencrypted PEM encoded RSA private key if the
+                 key was created or ``None`` if the key already eixsted).
+
+        .. versionchanged:: 0.6.1
+            The return value changed from a tuple to a dict
         """
+        progress = {'name': None,
+                    'material': None,
+                    'error': None}
         kp = None
         # Check if a key pair under the given name already exists. If it does not,
         # create it, else return.
-        kps = self.ec2_conn.get_all_key_pairs()
+        try:
+            kps = self.ec2_conn.get_all_key_pairs()
+        except EC2ResponseError as e:
+            err_msg = "Problem getting key pairs: {0} (code {1}; status {2})" \
+                      .format(e.message, e.error_code, e.status)
+            bioblend.log.exception(err_msg)
+            progress['error'] = err_msg
+            return progress
         for akp in kps:
             if akp.name == key_name:
-                bioblend.log.debug("Key pair '%s' already exists; not creating it again." % key_name)
-                return akp.name, None
+                bioblend.log.info("Key pair '%s' already exists; reusing it." % key_name)
+                progress['name'] = akp.name
+                return progress
         try:
             kp = self.ec2_conn.create_key_pair(key_name)
-        except EC2ResponseError:
-            bioblend.log.exception("Problem creating key pair '%s'." % key_name)
-            return None, None
+        except EC2ResponseError as e:
+            err_msg = "Problem creating key pair '{0}': {1} (code {2}; status {3})" \
+                      .format(key_name, e.message, e.error_code, e.status)
+            bioblend.log.exception(err_msg)
+            progress['error'] = err_msg
+            return progress
         bioblend.log.info("Created key pair '%s'" % kp.name)
-        return kp.name, kp.material
+        progress['name'] = kp.name
+        progress['material'] = kp.material
+        return progress
 
     def get_status(self, instance_id):
         """
@@ -326,25 +429,48 @@ class CloudManLauncher(object):
 
     def get_clusters_pd(self, include_placement=True):
         """
-        Return a list containing the *persistent data* of all existing clusters
-        associated with this account. If no clusters are found, return an empty
-        list. Each list element is a dictionary with the following keys:
-        ``cluster_name``, ``persistent_data``, ``bucket_name`` and, optionally,
-        ``placement``. ``persistent_data`` value is yet another dictionary
-        containing given cluster's persistent data.
+        Return *persistent data* of all existing clusters for this account.
+
+        :type include_placement: bool
+        :param include_placement: Whether or not to include region placement for
+                                  the clusters. Setting this option will lead
+                                  to a longer function runtime.
+
+        :rtype: dict
+        :return: A dictionary containing keys ``clusters`` and ``error``. The
+                 value of ``clusters`` will be a dictionary with the following keys
+                 ``cluster_name``, ``persistent_data``, ``bucket_name`` and optionally
+                 ``placement`` or an empty list if no clusters were found or an
+                 error was encountered. ``persistent_data`` key value is yet
+                 another dictionary containing given cluster's persistent data.
+                 The value for the ``error`` key will contain a string with the
+                 error message.
 
         .. versionadded:: 0.3
+        .. versionchanged:: 0.7.0
+            The return value changed from a list to a dictionary.
         """
-        s3_conn = self.connect_s3(self.access_key, self.secret_key, self.cloud)
-        buckets = s3_conn.get_all_buckets()
         clusters = []
+        response = {'clusters': clusters, 'error': None}
+        s3_conn = self.connect_s3(self.access_key, self.secret_key, self.cloud)
+        try:
+            buckets = s3_conn.get_all_buckets()
+        except S3ResponseError as e:
+            response['error'] = "S3ResponseError getting buckets: %s" % e
+        except self.http_exceptions as ex:
+            response['error'] = "Exception getting buckets: %s" % ex
+        if response['error']:
+            bioblend.log.exception(response['error'])
+            return response
         for bucket in [b for b in buckets if b.name.startswith('cm-')]:
             try:
                 # TODO: first lookup if persistent_data.yaml key exists
                 pd = bucket.get_key('persistent_data.yaml')
             except S3ResponseError:
-                # This can fail for a number of reasons for non-us and/or CNAME'd buckets.
-                bioblend.log.exception("Problem fetching persistent_data.yaml from bucket %s" % bucket)
+                # This can fail for a number of reasons for non-us and/or
+                # CNAME'd buckets but it is not a terminal error
+                bioblend.log.warning("Problem fetching persistent_data.yaml "
+                                     "from bucket %s" % bucket)
                 continue
             if pd:
                 # We are dealing with a CloudMan bucket
@@ -364,7 +490,8 @@ class CloudManLauncher(object):
                     placement = self._find_placement(cluster_name, cluster)
                     cluster['placement'] = placement
                 clusters.append(cluster)
-        return clusters
+        response['clusters'] = clusters
+        return response
 
     def get_cluster_pd(self, cluster_name):
         """
@@ -375,7 +502,7 @@ class CloudManLauncher(object):
         .. versionadded:: 0.3
         """
         cluster = {}
-        clusters = self.get_clusters_pd()
+        clusters = self.get_clusters_pd().get('clusters', [])
         for c in clusters:
             if c['cluster_name'] == cluster_name:
                 cluster = c
@@ -437,7 +564,7 @@ class CloudManLauncher(object):
         # any 'advanced startup fields' that might be added in the future
         excluded_fields = ['sg_name', 'image_id', 'instance_id', 'kp_name',
                            'cloud', 'cloud_type', 'public_dns', 'cidr_range',
-                           'kp_material', 'placement']
+                           'kp_material', 'placement', 'flavor_id']
         for key, value in six.iteritems(user_provided_data):
             if key not in excluded_fields:
                 form_data[key] = value
@@ -498,45 +625,58 @@ class CloudManLauncher(object):
 
     def _find_placement(self, cluster_name, cluster=None):
         """
-        Find a placement zone for a cluster with the name ``cluster_name`` and
-        return the zone name as a string. By default, this method will search
-        for and fetch given cluster's persistent data; alternatively, persistent
-        data can be provided via ``cluster``. This dict needs to have
-        ``persistent_data`` key with the contents of cluster's persistent data.
+        Find a placement zone for a cluster with the name ``cluster_name``.
+
+        By default, this method will search for and fetch given cluster's
+        *persistent data*; alternatively, *persistent data* can be provided via
+        the ``cluster`` parameter. This dict needs to have ``persistent_data``
+        key with the contents of cluster's *persistent data*.
         If the cluster or the volume associated with the cluster cannot be found,
-        return ``None``.
+        cluster placement is set to ``None``.
+
+        :rtype: dict
+        :return: A dictionary with ``placement`` and ``error`` keywords.
+
+        .. versionchanged:: 0.7.0
+            The return value changed from a list to a dictionary.
         """
         placement = None
+        response = {'placement': placement, 'error': None}
         cluster = cluster or self.get_cluster_pd(cluster_name)
         if cluster and 'persistent_data' in cluster:
             pd = cluster['persistent_data']
             try:
                 if 'placement' in pd:
-                    placement = pd['placement']
+                    response['placement'] = pd['placement']
                 elif 'data_filesystems' in pd:
                     # We have v1 format persistent data so get the volume first and
                     # then the placement zone
                     vol_id = pd['data_filesystems']['galaxyData'][0]['vol_id']
-                    placement = self._get_volume_placement(vol_id)
+                    response['placement'] = self._get_volume_placement(vol_id)
                 elif 'filesystems' in pd:
                     # V2 format.
                     for fs in [fs for fs in pd['filesystems'] if fs.get('kind', None) == 'volume' and 'ids' in fs]:
                         vol_id = fs['ids'][0]  # All volumes must be in the same zone
-                        placement = self._get_volume_placement(vol_id)
+                        response['placement'] = self._get_volume_placement(vol_id)
                         # No need to continue to iterate through
                         # filesystems, if we found one with a volume.
                         break
             except Exception as exc:
-                bioblend.log.exception("Exception while finding placement for "
-                                       "cluster '{0}'. This can indicate malformed "
-                                       "instance data. Or that this method is "
-                                       "broken: {1}".format(cluster_name, exc))
-                placement = None
-        return placement
+                response['error'] = ("Exception while finding placement for "
+                                     "cluster '{0}'. This can indicate malformed "
+                                     "instance data. Or that this method is "
+                                     "broken: {1}".format(cluster_name, exc))
+                bioblend.log.error(response['error'])
+                response['placement'] = None
+        else:
+            bioblend.log.debug("Insufficient info about cluster {0} to get placement."
+                               .format(cluster_name))
+        return response
 
     def find_placements(self, ec2_conn, instance_type, cloud_type, cluster_name=None):
         """
-        Find a list of placement zones that support the requested instance type.
+        Find a list of placement zones that support the specified instance type.
+
         If ``cluster_name`` is given and a cluster with the given name exist,
         return a list with only one entry where the given cluster lives.
 
@@ -550,16 +690,27 @@ class CloudManLauncher(object):
         cluster is being recreated, in which case the cluster's placement zone is
         returned sa stored in its persistent data.
 
+        :rtype: dict
+        :return: A dictionary with ``zones`` and ``error`` keywords.
+
         .. versionchanged:: 0.3
             Changed method name from ``_find_placements`` to ``find_placements``.
             Also added ``cluster_name`` parameter.
+
+        .. versionchanged:: 0.7.0
+            The return value changed from a list to a dictionary.
         """
         # First look for a specific zone a given cluster is bound to
         zones = []
+        response = {'zones': zones, 'error': None}
         if cluster_name:
-            zones = self._find_placement(cluster_name) or []
+            placement = self._find_placement(cluster_name)
+            if placement.get('error'):
+                response['error'] = placement['error']
+                return response
+            response['zones'] = placement.get('placement', [])
         # If placement is not found, look for a list of available zones
-        if not zones:
+        if not response['zones']:
             in_the_past = datetime.datetime.now() - datetime.timedelta(hours=1)
             back_compatible_zone = "us-east-1e"
             for zone in [z for z in ec2_conn.get_all_zones() if z.state == 'available']:
@@ -574,9 +725,11 @@ class CloudManLauncher(object):
             if back_compatible_zone in zones:
                 zones = [back_compatible_zone] + [z for z in zones if z != back_compatible_zone]
             if len(zones) == 0:
-                bioblend.log.error("Did not find availabilty zone for {1}".format(instance_type))
+                response['error'] = ("Did not find availabilty zone for {1}"
+                                     .format(instance_type))
+                bioblend.log.error(response['error'])
                 zones.append(back_compatible_zone)
-        return zones
+        return response
 
     def _checkURL(self, url):
         """

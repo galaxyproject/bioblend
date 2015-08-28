@@ -83,24 +83,24 @@ class CloudManConfig(object):
         """
         Initializes a CloudMan launch configuration object.
 
-        :type access_key: string
+        :type access_key: str
         :param access_key: Access credentials.
 
-        :type secret_key: string
+        :type secret_key: str
         :param secret_key: Access credentials.
 
-        :type cluster_name: string
+        :type cluster_name: str
         :param cluster_name: Name used to identify this CloudMan cluster.
 
-        :type image_id: string
+        :type image_id: str
         :param image_id: Machine image ID to use when launching this
                          CloudMan instance.
 
-        :type instance_type: string
+        :type instance_type: str
         :param instance_type: The type of the machine instance, as understood by
                               the chosen cloud provider. (e.g., ``m1.medium``)
 
-        :type password: string
+        :type password: str
         :param password: The administrative password for this CloudMan instance.
 
         :type cloud_metadata: Bunch
@@ -114,29 +114,29 @@ class CloudManConfig(object):
                                value for the ``cloud`` argument is provided, the
                                default is to use the Amazon cloud.
 
-        :type kernel_id: string
+        :type kernel_id: str
         :param kernel_id: The ID of the kernel with which to launch the
                           instances
 
-        :type ramdisk_id: string
+        :type ramdisk_id: str
         :param ramdisk_id: The ID of the RAM disk with which to launch the
                            instances
 
-        :type key_name: string
+        :type key_name: str
         :param key_name: The name of the key pair with which to launch instances
 
-        :type security_groups: list of strings
-        :param security_groups: The ID of the security groups with
-                                which to associate instances
+        :type security_groups: list of str
+        :param security_groups: The IDs of the security groups with which to
+                                associate instances
 
-        :type placement: string
+        :type placement: str
         :param placement: The availability zone in which to launch the instances
 
-        :type cluster_type: string
+        :type cluster_type: str
         :param cluster_type: The ``type``, either 'Galaxy', 'Data', or
                              'Test', defines the type of cluster platform to initialize.
 
-        :type galaxy_data_option: string
+        :type galaxy_data_option: str
         :param galaxy_data_option: The storage type to use for this instance.
                              May be 'transient', 'custom_size' or ''. The default is '',
                              which will result in ignoring the bioblend specified
@@ -149,7 +149,7 @@ class CloudManConfig(object):
                                      to either ``Galaxy`` or ``Data`` and ``galaxy_data_option``
                                      is set to ``custom_size``
 
-        :type block_until_ready: boolean
+        :type block_until_ready: bool
         :param block_until_ready: Specifies whether the launch method will block
                                  until the instance is ready and only return once
                                  all initialization is complete. The default is False.

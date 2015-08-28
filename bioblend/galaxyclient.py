@@ -45,7 +45,7 @@ class GalaxyClient(object):
           example: an object of class LibraryClient, WorkflowClient,
           HistoryClient, ToolShedClient
 
-        :type module_id: string
+        :type module_id: str
         :param module_id: The encoded ID for a specific module (eg, library ID)
 
         :type deleted: bool
@@ -151,7 +151,7 @@ class GalaxyClient(object):
 
     def make_put_request(self, url, payload=None, params=None):
         """
-        Make a PUT request using the provided ``url`` with required playload
+        Make a PUT request using the provided ``url`` with required payload.
         The ``payload`` must be a dict that can be converted into a JSON
         object (via ``json.dumps``)
         """
