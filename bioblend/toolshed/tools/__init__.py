@@ -17,10 +17,10 @@ class ToolShedClient(Client):
         :type  q: str
         :param q: query string for searching purposes
 
-        :type  page: str
+        :type  page: int
         :param page: page requested
 
-        :type  page_size: str
+        :type  page_size: int
         :param page_size: page size requested
 
         :rtype:  dict
