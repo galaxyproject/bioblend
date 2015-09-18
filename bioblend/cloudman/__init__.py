@@ -436,7 +436,7 @@ class CloudManInstance(GenericVMInstance):
         result = launcher.launch(
             cfg.cluster_name, cfg.image_id, cfg.instance_type, cfg.password,
             cfg.kernel_id, cfg.ramdisk_id, cfg.key_name, cfg.security_groups,
-            cfg.placement)
+            cfg.placement, **cfg.kwargs)
         if result['error'] is not None:
             raise VMLaunchException("Error launching cloudman instance: {0}".format(result['error']))
         instance = CloudManInstance(None, None, launcher=launcher,
