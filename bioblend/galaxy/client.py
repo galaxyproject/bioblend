@@ -81,7 +81,7 @@ class Client(object):
     def set_get_retry_delay(cls, value):
         """
         Set the delay (in seconds) to wait before retrying a failed GET
-        request. Default: 1
+        request. Default: 10
         """
         if value < 0:
             raise ValueError("Retry delay must be >= 0 (got: %s)" % value)
