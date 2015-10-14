@@ -56,10 +56,12 @@ fi
 # Install BioBlend
 BIOBLEND_DIR=$(get_abs_dirname $(dirname $0))
 cd ${BIOBLEND_DIR}
-virtualenv .venv
+if [ ! -d .venv ]; then
+  virtualenv .venv
+fi
 . .venv/bin/activate
 python setup.py install || exit 1
-pip install "tox>=1.8.0"
+pip install --upgrade "tox>=1.8.0"
 
 # Setup Galaxy
 cd ${g_val}
