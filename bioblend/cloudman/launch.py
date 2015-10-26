@@ -110,7 +110,7 @@ class CloudManLauncher(object):
 
     def launch(self, cluster_name, image_id, instance_type, password,
                kernel_id=None, ramdisk_id=None, key_name='cloudman_key_pair',
-               security_groups=['CloudMan'], placement='',subnet_id=None, **kwargs):
+               security_groups=['CloudMan'], placement='', subnet_id=None, **kwargs):
         """
         Check all the prerequisites (key pair and security groups) for
         launching a CloudMan instance, compose the user data based on the
@@ -173,7 +173,6 @@ class CloudManLauncher(object):
             rs = self.ec2_conn.run_instances(image_id=image_id,
                                              instance_type=instance_type,
                                              key_name=key_name,
-                                             #security_groups=security_groups,
                                              security_group_ids=security_group_ids,
                                              user_data=ud,
                                              kernel_id=kernel_id,
@@ -260,7 +259,7 @@ class CloudManLauncher(object):
                 cmsg = self.ec2_conn.create_security_group(sg_name, 'A security '
                                                            'group for CloudMan')
             except EC2ResponseError as e:
-                err_msg = "Problem creaInvalid value 'null' for protocol. VPC security group rules must specify protocols explicitlyting security group '{0}': {1} (code {2}; " \
+                err_msg = "Problem creating security group '{0}': {1} (code {2}; " \
                           "status {3})" \
                           .format(sg_name, e.message, e.error_code, e.status)
                 bioblend.log.exception(err_msg)
