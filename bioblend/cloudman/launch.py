@@ -110,7 +110,7 @@ class CloudManLauncher(object):
 
     def launch(self, cluster_name, image_id, instance_type, password,
                kernel_id=None, ramdisk_id=None, key_name='cloudman_key_pair',
-               security_groups=['CloudMan'], placement='', **kwargs):
+               security_groups=['CloudMan'], placement='', subnet_id=None, **kwargs):
         """
         Check all the prerequisites (key pair and security groups) for
         launching a CloudMan instance, compose the user data based on the
@@ -132,11 +132,13 @@ class CloudManLauncher(object):
         ``error`` containing an error message if there was one.
         """
         ret = {'sg_names': [],
+               'sg_ids': [],
                'kp_name': '',
                'kp_material': '',
                'rs': None,
                'instance_id': '',
                'error': None}
+        security_group_ids = []
         # First satisfy the prerequisites
         for sg in security_groups:
             cmsg = self.create_cm_security_group(sg)
@@ -145,6 +147,8 @@ class CloudManLauncher(object):
                 return ret
             if cmsg['name']:
                 ret['sg_names'].append(cmsg['name'])
+                ret['sg_ids'].append(cmsg['sg_id'])
+                security_group_ids.append(cmsg['sg_id'])
         kp_info = self.create_key_pair(key_name)
         ret['error'] = kp_info['error']
         if ret['error']:
@@ -169,10 +173,11 @@ class CloudManLauncher(object):
             rs = self.ec2_conn.run_instances(image_id=image_id,
                                              instance_type=instance_type,
                                              key_name=key_name,
-                                             security_groups=security_groups,
+                                             security_group_ids=security_group_ids,
                                              user_data=ud,
                                              kernel_id=kernel_id,
                                              ramdisk_id=ramdisk_id,
+                                             subnet_id=subnet_id,
                                              placement=placement)
             ret['rs'] = rs
         except EC2ResponseError as e:
@@ -226,6 +231,7 @@ class CloudManLauncher(object):
                  ('9600', '9700'),  # HTCondor
                  ('30000', '30100'))  # FTP transfer
         progress = {'name': None,
+                    'sg_id': None,
                     'error': None,
                     'ports': ports}
         cmsg = None
@@ -260,6 +266,7 @@ class CloudManLauncher(object):
                 progress['error'] = err_msg
         if cmsg:
             progress['name'] = cmsg.name
+            progress['sg_id'] = cmsg.id
             # Add appropriate authorization rules
             # If these rules already exist, nothing will be changed in the SG
             for port in ports:
@@ -297,7 +304,7 @@ class CloudManLauncher(object):
                     break
             if not g_rule_exists:
                 try:
-                    cmsg.authorize(src_group=cmsg)
+                    cmsg.authorize(src_group=cmsg,ip_protocol='tcp', from_port=0, to_port=65535)
                 except EC2ResponseError as e:
                     err_msg = "A problem with security group authorization: {0} " \
                               "(code {1}; status {2})" \
