@@ -3,14 +3,6 @@
 #This script should be run from inside the Galaxy base directory
 #cd `dirname $0`
 
-# If there is a .venv/ directory, assume it contains a virtualenv that we
-# should run this instance in.
-if [ -d .venv ];
-then
-    printf "Activating virtualenv at %s/.venv\n" $(pwd)
-    . .venv/bin/activate
-fi
-
 # If there is a file that defines a shell environment specific to this
 # instance of Galaxy, source the file.
 if [ -z "$GALAXY_LOCAL_ENV_FILE" ];
@@ -23,11 +15,8 @@ then
     . $GALAXY_LOCAL_ENV_FILE
 fi
 
-python ./scripts/check_python.py
-[ $? -ne 0 ] && exit 1
-
 if [ -f scripts/common_startup.sh ]; then
-    ./scripts/common_startup.sh
+    ./scripts/common_startup.sh || exit 1
 else
     if [ -f scripts/copy_sample_files.sh ]; then
         ./scripts/copy_sample_files.sh
@@ -85,6 +74,16 @@ else
         fi
     fi
 fi
+
+# If there is a .venv/ directory, assume it contains a virtualenv that we
+# should run this instance in.
+if [ -d .venv ];
+then
+    printf "Activating virtualenv at %s/.venv\n" $(pwd)
+    . .venv/bin/activate
+fi
+
+python ./scripts/check_python.py || exit 1
 
 if [ -n "$GALAXY_UNIVERSE_CONFIG_DIR" ]; then
     python ./scripts/build_universe_config.py "$GALAXY_UNIVERSE_CONFIG_DIR"
