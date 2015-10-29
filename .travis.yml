@@ -3,6 +3,7 @@ language: python
 python:
   - "2.7"
 env:
+  - TOX_ENV=py35 GALAXY_VERSION=dev
   - TOX_ENV=py34 GALAXY_VERSION=dev
   - TOX_ENV=py33 GALAXY_VERSION=dev
   - TOX_ENV=py27 GALAXY_VERSION=dev
@@ -18,6 +19,13 @@ env:
   - TOX_ENV=py27 GALAXY_VERSION=release_15.01
   - TOX_ENV=py27 GALAXY_VERSION=release_14.10
   - TOX_ENV=py26 GALAXY_VERSION=dev
+
+addons:
+  apt:
+    sources:
+      - deadsnakes
+    packages:
+      - python3.5-dev
 
 install:
   - python setup.py install
