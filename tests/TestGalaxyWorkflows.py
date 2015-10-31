@@ -4,6 +4,7 @@ Use ``nose`` to run these unit tests.
 import os
 import json
 import tempfile
+import time
 import shutil
 import GalaxyTestBase
 import test_util
@@ -15,6 +16,78 @@ def get_abspath(path):
 
 @test_util.skip_unless_galaxy()
 class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
+
+    def test_workflow_scheduling(self):
+        path = get_abspath(os.path.join('data', 'test_workflow_pause.ga'))
+        workflow = self.gi.workflows.import_workflow_from_local_path(path)
+        workflow_id = workflow["id"]
+        history_id = self.gi.histories.create_history(name="TestWorkflowState")["id"]
+        dataset1_id = self._test_dataset(history_id)
+
+        invocations = self.gi.workflows.get_invocations(workflow_id)
+        assert len(invocations) == 0
+
+        invocation = self.gi.workflows.invoke_workflow(
+            workflow["id"],
+            inputs={"0": {"src": "hda", "id": dataset1_id}},
+        )
+        invocation_id = invocation["id"]
+        invocations = self.gi.workflows.get_invocations(workflow_id)
+        assert len(invocations) == 1
+        assert invocations[0]["id"] == invocation_id
+
+        def invocation_steps_by_order_index():
+            invocation = self.gi.workflows.show_invocation(workflow_id, invocation_id)
+            return dict([(s["order_index"], s) for s in invocation["steps"]])
+
+        for i in xrange(20):
+            if 2 in invocation_steps_by_order_index():
+                break
+            time.sleep(.5)
+
+        invocation = self.gi.workflows.show_invocation(workflow_id, invocation_id)
+        assert invocation['state'] == "ready"
+
+        steps = invocation_steps_by_order_index()
+        pause_step = steps[2]
+        assert self.gi.workflows.show_invocation_step(workflow_id, invocation_id, pause_step["id"])["action"] is None
+        self.gi.workflows.run_invocation_step_action(workflow_id, invocation_id, pause_step["id"], action=True)
+        assert self.gi.workflows.show_invocation_step(workflow_id, invocation_id, pause_step["id"])["action"] is True
+        for i in xrange(20):
+            invocation = self.gi.workflows.show_invocation(workflow_id, invocation_id)
+            if invocation["state"] == "scheduled":
+                break
+
+            time.sleep(.5)
+
+        invocation = self.gi.workflows.show_invocation(workflow_id, invocation_id)
+        assert invocation["state"] == "scheduled"
+
+    def test_cancelling_workflow_scheduling(self):
+        path = get_abspath(os.path.join('data', 'test_workflow_pause.ga'))
+        workflow = self.gi.workflows.import_workflow_from_local_path(path)
+        workflow_id = workflow["id"]
+        history_id = self.gi.histories.create_history(name="TestWorkflowState")["id"]
+        dataset1_id = self._test_dataset(history_id)
+
+        invocations = self.gi.workflows.get_invocations(workflow_id)
+        assert len(invocations) == 0
+
+        invocation = self.gi.workflows.invoke_workflow(
+            workflow["id"],
+            inputs={"0": {"src": "hda", "id": dataset1_id}},
+        )
+        invocation_id = invocation["id"]
+        invocations = self.gi.workflows.get_invocations(workflow_id)
+        assert len(invocations) == 1
+        assert invocations[0]["id"] == invocation_id
+
+        invocation = self.gi.workflows.show_invocation(workflow_id, invocation_id)
+        assert invocation['state'] in ['new', 'ready']
+
+        self.gi.workflows.cancel_invocation(workflow_id, invocation_id)
+        invocation = self.gi.workflows.show_invocation(workflow_id, invocation_id)
+        assert invocation['state'] == 'cancelled'
 
     def test_import_workflow_from_local_path(self):
         with self.assertRaises(Exception):
