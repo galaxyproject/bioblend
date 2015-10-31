@@ -414,7 +414,7 @@ class WorkflowClient(Client):
     def show_invocation(self, workflow_id, invocation_id):
         """ Get a workflow invocation object representing the scheduling of
         a workflow. This object may be sparse at first (missing inputs and
-        and invocation steps) and will become more populated as the workflow
+        invocation steps) and will become more populated as the workflow
         is actually scheduled.
 
         :type workflow_id: str
