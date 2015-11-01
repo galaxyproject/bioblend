@@ -6,6 +6,8 @@ import json
 import tempfile
 import time
 import shutil
+from six.moves import range
+
 import GalaxyTestBase
 import test_util
 
@@ -41,7 +43,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
             invocation = self.gi.workflows.show_invocation(workflow_id, invocation_id)
             return dict([(s["order_index"], s) for s in invocation["steps"]])
 
-        for i in xrange(20):
+        for i in range(20):
             if 2 in invocation_steps_by_order_index():
                 break
             time.sleep(.5)
@@ -54,7 +56,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         assert self.gi.workflows.show_invocation_step(workflow_id, invocation_id, pause_step["id"])["action"] is None
         self.gi.workflows.run_invocation_step_action(workflow_id, invocation_id, pause_step["id"], action=True)
         assert self.gi.workflows.show_invocation_step(workflow_id, invocation_id, pause_step["id"])["action"] is True
-        for i in xrange(20):
+        for i in range(20):
             invocation = self.gi.workflows.show_invocation(workflow_id, invocation_id)
             if invocation["state"] == "scheduled":
                 break
