@@ -20,6 +20,8 @@ def get_abspath(path):
 class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
 
     @test_util.skip_unless_galaxy('release_15.01')
+    @test_util.skip_unless_tool("cat1")
+    @test_util.skip_unless_tool("cat")
     def test_workflow_scheduling(self):
         path = get_abspath(os.path.join('data', 'test_workflow_pause.ga'))
         workflow = self.gi.workflows.import_workflow_from_local_path(path)
@@ -67,6 +69,8 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         assert invocation["state"] == "scheduled"
 
     @test_util.skip_unless_galaxy('release_15.01')
+    @test_util.skip_unless_tool("cat1")
+    @test_util.skip_unless_tool("cat")
     def test_cancelling_workflow_scheduling(self):
         path = get_abspath(os.path.join('data', 'test_workflow_pause.ga'))
         workflow = self.gi.workflows.import_workflow_from_local_path(path)
