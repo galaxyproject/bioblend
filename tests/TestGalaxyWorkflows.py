@@ -19,7 +19,7 @@ def get_abspath(path):
 @test_util.skip_unless_galaxy()
 class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
 
-    @test_util.skip_unless_galaxy('release_15.01')
+    @test_util.skip_unless_galaxy('release_15.03')
     @test_util.skip_unless_tool("cat1")
     @test_util.skip_unless_tool("cat")
     def test_workflow_scheduling(self):
