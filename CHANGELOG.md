@@ -1,3 +1,31 @@
+### BioBlend v0.7.0 - November 2, 2015
+
+* BioBlend.objects: enable import of workflows containing dataset collection
+  inputs.
+
+* Implement APIs for a modern Galaxy workflow APIs (i.e., delayed scheduling).
+
+* Implement APIs to search tool shed repositories and tools.
+
+* Add support for uploading (importing) from FTP (thanks to Eric Rasche).
+
+* Add ``to_posix_lines`` and ``space_to_tab`` params to ``upload_file()``,
+  ``upload_from_ftp()`` and ``paste_content()`` methods of ToolClient.
+
+* Updated the testing framework to work with Galaxy wheels; use TravisCI's
+  container infrastructure; test Galaxy release 15.07.
+
+* Updated CloudmanLauncher's ``launch`` method to accept ``subnet_id`` parameter,
+  for VPC support (thanks to Matthew Ralston).
+
+* Properly pass extra parameters to cloud instance userdata.
+
+* Update placement finding methods and `get_clusters_pd` method to return a
+  dict vs. lists so error messages can be included.
+
+* A numer of documentation improvements and minor updates/fixes (see individual
+  commits).
+
 ### BioBlend v0.6.1 - July 27, 2015
 
 * BioBlend.objects: Rename ``ObjDatasetClient`` abstract class to
