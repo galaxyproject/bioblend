@@ -30,7 +30,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         dataset1_id = self._test_dataset(history_id)
 
         invocations = self.gi.workflows.get_invocations(workflow_id)
-        assert len(invocations) == 0
+        self.assertEqual(len(invocations), 0)
 
         invocation = self.gi.workflows.invoke_workflow(
             workflow["id"],
@@ -38,8 +38,8 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         )
         invocation_id = invocation["id"]
         invocations = self.gi.workflows.get_invocations(workflow_id)
-        assert len(invocations) == 1
-        assert invocations[0]["id"] == invocation_id
+        self.assertEqual(len(invocations), 1)
+        self.assertEqual(invocations[0]["id"], invocation_id)
 
         def invocation_steps_by_order_index():
             invocation = self.gi.workflows.show_invocation(workflow_id, invocation_id)
@@ -51,13 +51,13 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
             time.sleep(.5)
 
         invocation = self.gi.workflows.show_invocation(workflow_id, invocation_id)
-        assert invocation['state'] == "ready"
+        self.assertEqual(invocation['state'], "ready")
 
         steps = invocation_steps_by_order_index()
         pause_step = steps[2]
-        assert self.gi.workflows.show_invocation_step(workflow_id, invocation_id, pause_step["id"])["action"] is None
+        self.assertIsNone(self.gi.workflows.show_invocation_step(workflow_id, invocation_id, pause_step["id"])["action"])
         self.gi.workflows.run_invocation_step_action(workflow_id, invocation_id, pause_step["id"], action=True)
-        assert self.gi.workflows.show_invocation_step(workflow_id, invocation_id, pause_step["id"])["action"] is True
+        self.assertIsTrue(self.gi.workflows.show_invocation_step(workflow_id, invocation_id, pause_step["id"])["action"])
         for i in range(20):
             invocation = self.gi.workflows.show_invocation(workflow_id, invocation_id)
             if invocation["state"] == "scheduled":
@@ -66,7 +66,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
             time.sleep(.5)
 
         invocation = self.gi.workflows.show_invocation(workflow_id, invocation_id)
-        assert invocation["state"] == "scheduled"
+        self.assertEqual(invocation["state"], "scheduled")
 
     @test_util.skip_unless_galaxy('release_15.03')
     @test_util.skip_unless_tool("cat1")
@@ -79,7 +79,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         dataset1_id = self._test_dataset(history_id)
 
         invocations = self.gi.workflows.get_invocations(workflow_id)
-        assert len(invocations) == 0
+        self.assertEqual(len(invocations), 0)
 
         invocation = self.gi.workflows.invoke_workflow(
             workflow["id"],
@@ -87,15 +87,15 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         )
         invocation_id = invocation["id"]
         invocations = self.gi.workflows.get_invocations(workflow_id)
-        assert len(invocations) == 1
-        assert invocations[0]["id"] == invocation_id
+        self.assertEqual(len(invocations), 1)
+        self.assertEqual(invocations[0]["id"], invocation_id)
 
         invocation = self.gi.workflows.show_invocation(workflow_id, invocation_id)
-        assert invocation['state'] in ['new', 'ready']
+        self.assertIn(invocation['state'], ['new', 'ready'])
 
         self.gi.workflows.cancel_invocation(workflow_id, invocation_id)
         invocation = self.gi.workflows.show_invocation(workflow_id, invocation_id)
-        assert invocation['state'] == 'cancelled'
+        self.assertEqual(invocation['state'], 'cancelled')
 
     def test_import_workflow_from_local_path(self):
         with self.assertRaises(Exception):
