@@ -1,6 +1,5 @@
 """
 Contains possible interaction dealing with Galaxy tools.
-
 """
 from bioblend.galaxy.client import Client
 from bioblend.util import attach_file
@@ -35,6 +34,8 @@ class ToolClient(Client):
 
         :rtype: list
         :return: List of tool descriptions.
+
+        .. seealso:: bioblend.galaxy.toolshed.get_repositories()
         """
         if tool_id is not None and name is not None:
             raise ValueError('Provide only one argument between name or tool_id, but not both')
@@ -53,6 +54,8 @@ class ToolClient(Client):
         :rtype: list
         :return: List containing tools (if not in sections) or tool sections
                  with nested tool descriptions.
+
+        .. seealso:: bioblend.galaxy.toolshed.get_repositories()
         """
         return self._raw_get_tool(in_panel=True)
 

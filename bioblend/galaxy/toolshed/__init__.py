@@ -12,7 +12,7 @@ class ToolShedClient(Client):
 
     def get_repositories(self):
         """
-        Get the list of all repositories in the Tool Shed.
+        Get the list of all installed Tool Shed repositories on this Galaxy instance.
 
         :rtype: list
         :return: a list of dictionaries containing information about
@@ -30,12 +30,15 @@ class ToolShedClient(Client):
         .. versionchanged:: 0.4.1
             Changed method name from ``get_tools`` to ``get_repositories`` to
             better align with the Tool Shed concepts
+
+        .. seealso:: bioblend.galaxy.tools.get_tool_panel()
         """
         return Client._get(self)
 
     def show_repository(self, toolShed_id):
         """
-        Get details of a given repository from the Tool Shed.
+        Get details of a given Tool Shed repository as it is installed on this
+        Galaxy instance.
 
         :type toolShed_id: str
         :param toolShed_id: Encoded toolShed ID
