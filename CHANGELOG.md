@@ -5,12 +5,14 @@
 
 * Implement APIs for a modern Galaxy workflow APIs (i.e. delayed scheduling).
 
-* Implement APIs to search the Tool Shed repositories and tools.
+* Implement APIs to search Tool Shed repositories and tools.
 
 * Add support for uploading (importing) from FTP (thanks to Eric Rasche).
 
 * Add ``to_posix_lines`` and ``space_to_tab`` params to ``upload_file()``,
-  ``upload_from_ftp()`` and ``paste_content()`` methods of ToolClient.
+  ``upload_from_ftp()`` and ``paste_content()`` methods of ``ToolClient``.
+
+* BioBlend.objects: add ``upload_from_ftp()`` method to ``History``.
 
 * Updated the testing framework to work with Galaxy wheels; use TravisCI's
   container infrastructure; test Galaxy release 15.07.
