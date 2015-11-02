@@ -3,9 +3,9 @@
 * BioBlend.objects: enable import of workflows containing dataset collection
   inputs.
 
-* Implement APIs for a modern Galaxy workflow APIs (i.e., delayed scheduling).
+* Implement APIs for a modern Galaxy workflow APIs (i.e. delayed scheduling).
 
-* Implement APIs to search tool shed repositories and tools.
+* Implement APIs to search the Tool Shed repositories and tools.
 
 * Add support for uploading (importing) from FTP (thanks to Eric Rasche).
 
