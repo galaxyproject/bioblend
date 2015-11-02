@@ -32,6 +32,7 @@ before_script:
   # Create a PostgreSQL database for Galaxy. The default SQLite3 database makes test fail randomly because of "database locked" error.
   - createdb -U postgres galaxy-travis
   - if [ -f universe_wsgi.ini.sample ]; then GALAXY_CONFIG_FILE=universe_wsgi.ini; else GALAXY_CONFIG_FILE=config/galaxy.ini; fi
+  - if [ -f universe_wsgi.ini.sample ]; then GALAXY_CONFIG_DIR=.; else GALAXY_CONFIG_DIR=config; fi
   # Change Galaxy configuration to use the newly created PostgreSQL database
   - sed -e 's|^#database_connection.*|database_connection = postgresql://postgres:@localhost/galaxy-travis|' $GALAXY_CONFIG_FILE.sample > $GALAXY_CONFIG_FILE
   # Setup Galaxy master API key and admin user
@@ -42,6 +43,8 @@ before_script:
   - sed -i -e 's/^#allow_user_dataset_purge.*/allow_user_dataset_purge = True/' $GALAXY_CONFIG_FILE
   # Change Galaxy configuration needed by some library tests
   - sed -i -e 's/^#allow_library_path_paste.*/allow_library_path_paste = True/' $GALAXY_CONFIG_FILE
+  - sed -i -e 's/^#enable_beta_workflow_modules.*/enable_beta_workflow_modules = True/' $GALAXY_CONFIG_FILE
+  - if [ -f test/functional/tools/samples_tool_conf.xml ]; then sed -i -e "s/^#tool_config_file.*/tool_config_file = $GALAXY_CONFIG_DIR\/tool_conf.xml.sample,$GALAXY_CONFIG_DIR\/shed_tool_conf.xml.sample,test\/functional\/tools\/samples_tool_conf.xml/" $GALAXY_CONFIG_FILE; fi
   # Start Galaxy and wait for successful server start
   - GALAXY_RUN_ALL=1 ../run_galaxy.sh --daemon --wait
   # Use the master API key to create the admin user and get its API key

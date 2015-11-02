@@ -183,7 +183,7 @@ class Client(object):
             url = self.gi._make_url(self, module_id=id)
         return self.gi.make_put_request(url, payload=payload, params=params)
 
-    def _delete(self, payload, id=None, deleted=False, contents=None, url=None):
+    def _delete(self, payload=None, id=None, deleted=False, contents=None, url=None):
         """
         Do a generic DELETE request, composing the url from the contents of the
         arguments. Alternatively, an explicit ``url`` can be provided to use
@@ -193,7 +193,8 @@ class Client(object):
         if not url:
             url = self.gi._make_url(self, module_id=id, deleted=deleted,
                                     contents=contents)
-        payload = json.dumps(payload)
+        if payload is not None:
+            payload = json.dumps(payload)
         r = self.gi.make_delete_request(url, payload=payload)
         if r.status_code == 200:
             return r.json()
