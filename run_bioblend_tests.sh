@@ -76,8 +76,10 @@ fi
 # Setup Galaxy master API key and admin user
 if [ -f universe_wsgi.ini.sample ]; then
   GALAXY_SAMPLE_CONFIG_FILE=universe_wsgi.ini.sample
+  GALAXY_CONFIG_DIR=.
 else
   GALAXY_SAMPLE_CONFIG_FILE=config/galaxy.ini.sample
+  GALAXY_CONFIG_DIR=config
 fi
 TEMP_DIR=`mktemp -d 2>/dev/null || mktemp -d -t 'mytmpdir'`
 echo "Created temporary directory $TEMP_DIR"
@@ -86,10 +88,15 @@ GALAXY_MASTER_API_KEY=`date --rfc-3339=ns | md5sum | cut -f 1 -d ' '`
 GALAXY_USER_EMAIL=${USER}@localhost.localdomain
 sed -e "s/^#master_api_key.*/master_api_key = $GALAXY_MASTER_API_KEY/" -e "s/^#admin_users.*/admin_users = $GALAXY_USER_EMAIL/" $GALAXY_SAMPLE_CONFIG_FILE > $GALAXY_CONFIG_FILE
 sed -i -e "s|^#database_connection.*|database_connection = sqlite:///$TEMP_DIR/universe.sqlite?isolation_level=IMMEDIATE|" -e "s|^#file_path.*|file_path = $TEMP_DIR/files|" -e "s|^#new_file_path.*|new_file_path = $TEMP_DIR/tmp|" -e "s|#job_working_directory.*|job_working_directory = $TEMP_DIR/job_working_directory|" $GALAXY_CONFIG_FILE
-# Change configuration needed by many tests
+# Change Galaxy configuration needed by many tests
 sed -i -e 's/^#allow_user_dataset_purge.*/allow_user_dataset_purge = True/' $GALAXY_CONFIG_FILE
-# Change configuration needed by some library tests
+# Change Galaxy configuration needed by some library tests
 sed -i -e 's/^#allow_library_path_paste.*/allow_library_path_paste = True/' $GALAXY_CONFIG_FILE
+# Change Galaxy configuration needed by some workflow tests
+sed -i -e 's/^#enable_beta_workflow_modules.*/enable_beta_workflow_modules = True/' $GALAXY_CONFIG_FILE
+if [ -f test/functional/tools/samples_tool_conf.xml ]; then
+  sed -i -e "s/^#tool_config_file.*/tool_config_file = $GALAXY_CONFIG_DIR\/tool_conf.xml.sample,$GALAXY_CONFIG_DIR\/shed_tool_conf.xml.sample,test\/functional\/tools\/samples_tool_conf.xml/" $GALAXY_CONFIG_FILE
+fi
 if [ -n "${p_val}" ]; then
   # Change only the first occurence of port number
   sed -i -e "0,/^#port/ s/^#port.*/port = $p_val/" $GALAXY_CONFIG_FILE

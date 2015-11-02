@@ -57,7 +57,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         pause_step = steps[2]
         self.assertIsNone(self.gi.workflows.show_invocation_step(workflow_id, invocation_id, pause_step["id"])["action"])
         self.gi.workflows.run_invocation_step_action(workflow_id, invocation_id, pause_step["id"], action=True)
-        self.assertIsTrue(self.gi.workflows.show_invocation_step(workflow_id, invocation_id, pause_step["id"])["action"])
+        self.assertTrue(self.gi.workflows.show_invocation_step(workflow_id, invocation_id, pause_step["id"])["action"])
         for i in range(20):
             invocation = self.gi.workflows.show_invocation(workflow_id, invocation_id)
             if invocation["state"] == "scheduled":
