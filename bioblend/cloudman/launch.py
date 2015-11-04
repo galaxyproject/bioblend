@@ -150,11 +150,11 @@ class CloudManLauncher(object):
                 ret['sg_ids'].append(cmsg['sg_id'])
                 security_group_ids.append(cmsg['sg_id'])
         kp_info = self.create_key_pair(key_name)
+        ret['kp_name'] = kp_info['name']
+        ret['kp_material'] = kp_info['material']
         ret['error'] = kp_info['error']
         if ret['error']:
             return ret
-        ret['kp_name'] = kp_info['name']
-        ret['kp_material'] = kp_info['material']
         # If not provided, try to find a placement
         # TODO: Should placement always be checked? To make sure it's correct
         # for existing clusters.
