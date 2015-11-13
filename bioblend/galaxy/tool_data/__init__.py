@@ -42,7 +42,6 @@ class ToolDataClient(Client):
              "model_class": "TabularToolDataTable",
              "name": "all_fasta"}
         """
-
         return Client._get(self, id=data_table_id)
 
     def delete_data_table(self, data_table_id, values):
@@ -56,7 +55,5 @@ class ToolDataClient(Client):
         :param values: a "|" separated list of column contents, there must be a
           value for all the columns of the data table
         """
-        payload = {}
-        payload['values'] = values
-
-        return Client._delete(self, payload, id=data_table_id)
+        payload = {'values': values}
+        return Client._delete(self, payload=payload, id=data_table_id)

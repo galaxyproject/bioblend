@@ -40,10 +40,10 @@ class WorkflowClient(Client):
         """
         if workflow_id is not None and name is not None:
             raise ValueError('Provide only one argument between name or workflow_id, but not both')
-        kwargs = {}
+        params = {}
         if published:
-            kwargs['params'] = {'show_published': 'True'}
-        workflows = Client._get(self, **kwargs)
+            params['show_published'] = 'True'
+        workflows = Client._get(self, params=params)
         if workflow_id is not None:
             workflow = next((_ for _ in workflows if _['id'] == workflow_id), None)
             workflows = [workflow] if workflow is not None else []
@@ -96,8 +96,7 @@ class WorkflowClient(Client):
         :type workflow_json: str
         :param workflow_json: JSON string representing the workflow to be imported
         """
-        payload = {}
-        payload['workflow'] = workflow_json
+        payload = {'workflow': workflow_json}
 
         url = self.gi._make_url(self)
         url = _join(url, "upload")
@@ -135,8 +134,7 @@ class WorkflowClient(Client):
              u'url': u'/api/workflows/ee0e2b4b696d9092'}
 
         """
-        payload = {}
-        payload['workflow_id'] = workflow_id
+        payload = {'workflow_id': workflow_id}
         url = self.gi._make_url(self)
         url = _join(url, 'import')
         return Client._post(self, url=url, payload=payload)
@@ -253,8 +251,7 @@ class WorkflowClient(Client):
             ``invoke_workflow`` also features improved default behavior for
             dataset input handling.
         """
-        payload = {}
-        payload['workflow_id'] = workflow_id
+        payload = {'workflow_id': workflow_id}
         if dataset_map:
             payload['ds_map'] = dataset_map
 
@@ -388,8 +385,7 @@ class WorkflowClient(Client):
             is stable across workflow imports or the step UUID which is also stable.
 
         """
-        payload = {}
-        payload['workflow_id'] = workflow_id
+        payload = {'workflow_id': workflow_id}
         if inputs:
             payload['inputs'] = inputs
 
@@ -562,8 +558,7 @@ class WorkflowClient(Client):
             Deleting a workflow is irreversible - all workflow data
             will be permanently deleted.
         """
-        payload = {}
-        return Client._delete(self, payload, id=workflow_id)
+        return Client._delete(self, id=workflow_id)
 
     def _invocation_step_url(self, workflow_id, invocation_id, step_id):
         return _join(self._invocation_url(workflow_id, invocation_id), "steps", step_id)

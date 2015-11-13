@@ -51,8 +51,7 @@ class LibraryClient(Client):
             Deleting a data library is irreversible - all of the data from
             the library will be permanently deleted.
         """
-        payload = {}
-        return Client._delete(self, payload, id=library_id)
+        return Client._delete(self, id=library_id)
 
     def __show_item(self, library_id, item_id):
         """
@@ -85,7 +84,7 @@ class LibraryClient(Client):
         url = self.gi._make_url(self, library_id, contents=True)
         # Append the dataset_id to the base history contents URL
         url = '/'.join([url, dataset_id])
-        return Client._delete(self, url=url, payload={'purged': purged})
+        return Client._delete(self, payload={'purged': purged}, url=url)
 
     def show_dataset(self, library_id, dataset_id):
         """

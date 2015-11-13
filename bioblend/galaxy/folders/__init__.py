@@ -39,4 +39,4 @@ class FoldersClient(Client):
         :rtype:     dict
         """
         payload = {'undelete': undelete}
-        return Client._delete(self, payload, id=folder_id)
+        return Client._delete(self, payload=payload, id=folder_id)

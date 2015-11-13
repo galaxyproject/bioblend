@@ -117,7 +117,7 @@ class HistoryClient(Client):
         url = self.gi._make_url(self, history_id, contents=True)
         # Append the dataset_id to the base history contents URL
         url = '/'.join([url, dataset_id])
-        Client._delete(self, payload={}, url=url)
+        Client._delete(self, url=url)
 
     def delete_dataset_collection(self, history_id, dataset_collection_id):
         """
@@ -132,7 +132,7 @@ class HistoryClient(Client):
         url = self.gi._make_url(self, history_id, contents=True)
         # Append the dataset_id to the base history contents URL
         url = '/'.join([url, "dataset_collections", dataset_collection_id])
-        Client._delete(self, payload={}, url=url)
+        Client._delete(self, url=url)
 
     def show_dataset(self, history_id, dataset_id):
         """
@@ -399,7 +399,7 @@ class HistoryClient(Client):
         payload = {}
         if purge is True:
             payload['purge'] = purge
-        return Client._delete(self, payload, id=history_id)
+        return Client._delete(self, payload=payload, id=history_id)
 
     def undelete_history(self, history_id):
         """
