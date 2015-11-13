@@ -1,3 +1,5 @@
+* Added ``delete_user()`` method to ``UserClient``.
+
 * Removed deprecated method ``create_user()`` of ``UserClient``.
 
 ### BioBlend v0.7.0 - November 2, 2015

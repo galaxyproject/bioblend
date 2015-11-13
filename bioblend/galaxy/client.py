@@ -5,7 +5,6 @@ This class is primarily a helper for the library and user code
 should not use it directly.
 """
 
-import json
 import time
 
 import requests
@@ -183,19 +182,17 @@ class Client(object):
             url = self.gi._make_url(self, module_id=id)
         return self.gi.make_put_request(url, payload=payload, params=params)
 
-    def _delete(self, payload=None, id=None, deleted=False, contents=None, url=None):
+    def _delete(self, payload=None, id=None, deleted=False, contents=None, url=None, params=None):
         """
         Do a generic DELETE request, composing the url from the contents of the
         arguments. Alternatively, an explicit ``url`` can be provided to use
-        for the request. ``payload`` must be a dict that can be converted
-        into a JSON object (which will be done within this method)
+        for the request. ``payload`` must be a dict that contains additional
+        request arguments which will be sent along with the request body.
         """
         if not url:
             url = self.gi._make_url(self, module_id=id, deleted=deleted,
                                     contents=contents)
-        if payload is not None:
-            payload = json.dumps(payload)
-        r = self.gi.make_delete_request(url, payload=payload)
+        r = self.gi.make_delete_request(url, payload=payload, params=params)
         if r.status_code == 200:
             return r.json()
         # @see self.body for HTTP response body

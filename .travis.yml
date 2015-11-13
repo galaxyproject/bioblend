@@ -45,6 +45,8 @@ before_script:
   - sed -i -e 's/^#allow_library_path_paste.*/allow_library_path_paste = True/' $GALAXY_CONFIG_FILE
   # Change Galaxy configuration needed by some workflow tests
   - sed -i -e 's/^#enable_beta_workflow_modules.*/enable_beta_workflow_modules = True/' $GALAXY_CONFIG_FILE
+  # Change Galaxy configuration needed by some user tests
+  - sed -i -e 's/^#allow_user_deletion.*/allow_user_deletion = True/' $GALAXY_CONFIG_FILE
   - if [ -f test/functional/tools/samples_tool_conf.xml ]; then sed -i -e "s/^#tool_config_file.*/tool_config_file = $GALAXY_CONFIG_DIR\/tool_conf.xml.sample,$GALAXY_CONFIG_DIR\/shed_tool_conf.xml.sample,test\/functional\/tools\/samples_tool_conf.xml/" $GALAXY_CONFIG_FILE; fi
   # Start Galaxy and wait for successful server start
   - GALAXY_RUN_ALL=1 ../run_galaxy.sh --daemon --wait

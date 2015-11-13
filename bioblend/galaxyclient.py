@@ -146,6 +146,8 @@ class GalaxyClient(object):
             params['key'] = self.key
         else:
             params = self.default_params
+        if payload is not None:
+            payload = json.dumps(payload)
         r = requests.delete(url, verify=self.verify, data=payload, params=params)
         return r
 
