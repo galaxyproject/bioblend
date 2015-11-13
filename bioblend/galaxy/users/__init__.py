@@ -44,14 +44,6 @@ class UserClient(Client):
         """
         return Client._get(self, id=user_id, deleted=deleted)
 
-    def create_user(self, user_email):
-        """
-        Deprecated method.
-
-        Just an alias for create_remote_user().
-        """
-        return self.create_remote_user(user_email)
-
     def create_remote_user(self, user_email):
         """
         Create a new Galaxy remote user.

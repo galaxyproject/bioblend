@@ -1,3 +1,5 @@
+* Removed deprecated method ``create_user()`` of ``UserClient``.
+
 ### BioBlend v0.7.0 - November 2, 2015
 
 * BioBlend.objects: enabled import of workflows containing dataset collection
