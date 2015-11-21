@@ -87,6 +87,7 @@ def is_reachable(url):
 
 def upload_from_fs(lib, bnames, **kwargs):
     tempdir = tempfile.mkdtemp(prefix='bioblend_test_')
+    os.chmod(tempdir, 0o777)
     try:
         fnames = [os.path.join(tempdir, _) for _ in bnames]
         for fn in fnames:
