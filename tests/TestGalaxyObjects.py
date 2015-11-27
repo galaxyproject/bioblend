@@ -8,18 +8,19 @@ import tarfile
 import tempfile
 import uuid
 
+import six
 from six.moves.urllib.request import urlopen
 from six.moves.urllib.error import URLError
-import six
 
 import bioblend
-bioblend.set_stream_logger('test', level='INFO')
 import bioblend.galaxy.objects.wrappers as wrappers
 import bioblend.galaxy.objects.galaxy_instance as galaxy_instance
-from bioblend.galaxy.client import ConnectionError
-from test_util import unittest
-import test_util
+from bioblend import ConnectionError
 
+import test_util
+from test_util import unittest
+
+bioblend.set_stream_logger('test', level='INFO')
 socket.setdefaulttimeout(10.0)
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 SAMPLE_FN = os.path.join(THIS_DIR, 'data', 'paste_columns.ga')

@@ -18,23 +18,10 @@ try:
 except ImportError:
     ProtocolError = None  # pylint: disable=C0103
 
-import bioblend as bb
-
-
-class ConnectionError(Exception):
-    """
-    An exception class that is raised when unexpected HTTP responses come back.
-
-    Should make it easier to debug when strange HTTP things happen such as a
-    proxy server getting in the way of the request etc.
-    @see: body attribute to see the content of the http response
-    """
-    def __init__(self, message, body=None):
-        super(ConnectionError, self).__init__(message)
-        self.body = body
-
-    def __str__(self):
-        return "{0}: {1}".format(self.args[0], self.body)
+import bioblend
+# The following import must be preserved for compatibility because
+# ConnectionError class was originally defined here
+from bioblend import ConnectionError
 
 
 class Client(object):
@@ -116,8 +103,8 @@ class Client(object):
                                     contents=contents)
         attempts_left = self.max_get_retries()
         retry_delay = self.get_retry_delay()
-        bb.log.debug("GET - attempts left: %s; retry delay: %s",
-                     attempts_left, retry_delay)
+        bioblend.log.debug("GET - attempts left: %s; retry delay: %s",
+                           attempts_left, retry_delay)
         msg = ''
         while attempts_left > 0:
             attempts_left -= 1
@@ -142,10 +129,10 @@ class Client(object):
                     msg = "GET: error %s: %r" % (r.status_code, r.content)
             msg = "%s, %d attempts left" % (msg, attempts_left)
             if attempts_left <= 0:
-                bb.log.error(msg)
+                bioblend.log.error(msg)
                 raise ConnectionError(msg)
             else:
-                bb.log.warn(msg)
+                bioblend.log.warn(msg)
                 time.sleep(retry_delay)
 
     def _post(self, payload, id=None, deleted=False, contents=None, url=None,

@@ -82,3 +82,19 @@ def set_stream_logger(name, level=logging.DEBUG, format_string=None):
     fh.setFormatter(formatter)
     logger.addHandler(fh)
     log = logger
+
+
+class ConnectionError(Exception):
+    """
+    An exception class that is raised when unexpected HTTP responses come back.
+
+    Should make it easier to debug when strange HTTP things happen such as a
+    proxy server getting in the way of the request etc.
+    @see: body attribute to see the content of the http response
+    """
+    def __init__(self, message, body=None):
+        super(ConnectionError, self).__init__(message)
+        self.body = body
+
+    def __str__(self):
+        return "{0}: {1}".format(self.args[0], self.body)

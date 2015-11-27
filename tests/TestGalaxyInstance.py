@@ -5,8 +5,9 @@ Use ``nose`` to run these unit tests.
 """
 from test_util import unittest
 
+from bioblend import ConnectionError
 from bioblend.galaxy import GalaxyInstance
-from bioblend.galaxy.client import Client, ConnectionError
+from bioblend.galaxy.client import Client
 
 
 class TestGalaxyInstance(unittest.TestCase):

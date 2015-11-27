@@ -9,11 +9,11 @@ import base64
 import json
 
 import requests
-from requests_toolbelt import MultipartEncoder
 import six
+from requests_toolbelt import MultipartEncoder
 from six.moves.urllib.parse import urljoin, urlparse
 
-from .galaxy.client import ConnectionError
+from bioblend import ConnectionError
 
 
 class GalaxyClient(object):
@@ -56,8 +56,7 @@ class GalaxyClient(object):
         :param contents: If ``True``, include 'contents' in the URL, after the module ID:
                          ``<base_url>/api/libraries/<encoded_library_id>/contents``
         """
-        c_url = self.url
-        c_url = '/'.join([c_url, module.module])
+        c_url = '/'.join([self.url, module.module])
         if deleted is True:
             c_url = '/'.join([c_url, 'deleted'])
         if module_id is not None:
