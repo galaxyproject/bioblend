@@ -14,7 +14,6 @@ class LibraryClient(Client):
     def create_library(self, name, description=None, synopsis=None):
         """
         Create a data library with the properties defined in the arguments.
-        Return a list of JSON dicts, looking like so::
 
         :type name: str
         :param name: Name of the new data library
@@ -26,12 +25,12 @@ class LibraryClient(Client):
         :param synopsis: Optional data library synopsis
 
         :rtype: dict
-        :return: details of the created library:
+        :return: Details of the created library.
+          For example::
 
-            {"id": "f740ab636b360a70",
-              "name": "Library from bioblend",
-              "url": "/api/libraries/f740ab636b360a70"}
-
+            {'id': 'f740ab636b360a70',
+             'name': 'Library from bioblend',
+             'url': '/api/libraries/f740ab636b360a70'}
         """
         payload = {'name': name}
         if description:
@@ -45,11 +44,12 @@ class LibraryClient(Client):
         Delete a data library.
 
         :type library_id: str
-        :param library_id: Encoded data library ID identifying the library to be deleted
+        :param library_id: Encoded data library ID identifying the library to be
+          deleted
 
         .. warning::
-            Deleting a data library is irreversible - all of the data from
-            the library will be permanently deleted.
+          Deleting a data library is irreversible - all of the data from the
+          library will be permanently deleted.
         """
         return Client._delete(self, id=library_id)
 
@@ -72,15 +72,17 @@ class LibraryClient(Client):
         :param dataset_id: id of the dataset to be deleted
 
         :type purged: bool
-        :param purged: Indicate that the dataset should be purged (permanently deleted)
+        :param purged: Indicate that the dataset should be purged (permanently
+          deleted)
 
         :rtype: dict
-        :return: A dictionary containing the dataset id and whether the dataset has been deleted
-                 For example::
+        :return: A dictionary containing the dataset id and whether the dataset
+          has been deleted.
+          For example::
 
-                 {u'deleted': True, u'id': u'60e680a037f41974'}
+            {u'deleted': True,
+             u'id': u'60e680a037f41974'}
         """
-
         url = self.gi._make_url(self, library_id, contents=True)
         # Append the dataset_id to the base history contents URL
         url = '/'.join([url, dataset_id])
@@ -98,14 +100,15 @@ class LibraryClient(Client):
         :param dataset_id: id of the dataset to be inspected
 
         :rtype: dict
-        :return: A dictionary containing information about the dataset in the library
+        :return: A dictionary containing information about the dataset in the
+          library
         """
         return self.__show_item(library_id, dataset_id)
 
     def show_folder(self, library_id, folder_id):
         """
-        Get details about a given folder. The required ``folder_id``
-        can be obtained from the folder's library content details.
+        Get details about a given folder. The required ``folder_id`` can be
+        obtained from the folder's library content details.
 
         :type library_id: str
         :param library_id: library id to inspect folders in
@@ -164,8 +167,8 @@ class LibraryClient(Client):
     def get_folders(self, library_id, folder_id=None, name=None):
         """
         Get all the folders or filter specific one(s) via the provided ``name``
-        or ``folder_id`` in data library with id ``library_id``. Provide only one
-        argument: ``name`` or ``folder_id``, but not both.
+        or ``folder_id`` in data library with id ``library_id``. Provide only
+        one argument: ``name`` or ``folder_id``, but not both.
 
         :type folder_id: str
         :param folder_id: filter for folder by folder id
@@ -176,7 +179,7 @@ class LibraryClient(Client):
                      folder, e.g. ``/subfolder/subsubfolder``.
 
         :rtype: list
-        :return: list of dicts each containing basic information about a folder.
+        :return: list of dicts each containing basic information about a folder
         """
         if folder_id is not None and name is not None:
             raise ValueError('Provide only one argument between name or folder_id, but not both')
@@ -192,23 +195,23 @@ class LibraryClient(Client):
 
     def get_libraries(self, library_id=None, name=None, deleted=False):
         """
-        Get all the libraries or filter for specific one(s) via the provided name or ID.
-        Provide only one argument: ``name`` or ``library_id``, but not both.
+        Get all the libraries or filter for specific one(s) via the provided
+        name or ID. Provide only one argument: ``name`` or ``library_id``, but
+        not both.
 
         :type library_id: str
         :param library_id: filter for library by library id
 
         :type name: str
-        :param name: If ``name`` is set and multiple names match the given
-                     name, all the libraries matching the argument will be
-                     returned.
+        :param name: If ``name`` is set and multiple names match the given name,
+          all the libraries matching the argument will be returned
 
         :type deleted: bool
         :param deleted: If set to ``True``, return libraries that have been
-                        deleted.
+          deleted
 
         :rtype: list
-        :return: list of dicts each containing basic information about a library.
+        :return: list of dicts each containing basic information about a library
         """
         if library_id is not None and name is not None:
             raise ValueError('Provide only one argument between name or library_id, but not both')
@@ -228,7 +231,8 @@ class LibraryClient(Client):
         :param library_id: filter for library by library id
 
         :type contents: bool
-        :param contents: True if want to get contents of the library (rather than just the library details).
+        :param contents: True if want to get contents of the library (rather
+          than just the library details)
 
         :rtype: dict
         :return: details of the given library
@@ -238,8 +242,8 @@ class LibraryClient(Client):
     def _do_upload(self, library_id, **keywords):
         """
         Set up the POST request and do the actual data upload to a data library.
-        This method should not be called directly but instead refer to the methods
-        specific for the desired type of data upload.
+        This method should not be called directly but instead refer to the
+        methods specific for the desired type of data upload.
         """
         folder_id = keywords.get('folder_id', None)
         if folder_id is None:
@@ -373,7 +377,7 @@ class LibraryClient(Client):
         :param server_dir: relative path of the subdirectory of
           ``library_import_dir`` to upload. All and only the files (i.e. no
           subdirectories) contained in the specified directory will be
-          uploaded.
+          uploaded
 
         :type folder_id: str
         :param folder_id: id of the folder where to place the uploaded files.
@@ -500,7 +504,6 @@ class LibraryClient(Client):
         :type manage_in: list
         :param manage_in: list of role ids
         """
-
         payload = {}
         if access_in:
             payload['LIBRARY_ACCESS_in'] = access_in

@@ -16,17 +16,16 @@ class RolesClient(Client):
 
         :rtype: list
         :return: A list of dicts with details on individual roles.
-                 For example::
+          For example::
 
-                   [ {"id": "f2db41e1fa331b3e",
-                   "model_class": "Role",
-                   "name": "Foo",
-                   "url": "/api/roles/f2db41e1fa331b3e"},
-                   {"id": "f597429621d6eb2b",
-                   "model_class": "Role",
-                   "name": "Bar",
-                   "url": "/api/roles/f597429621d6eb2b"}
-                   ]
+            [{"id": "f2db41e1fa331b3e",
+              "model_class": "Role",
+              "name": "Foo",
+              "url": "/api/roles/f2db41e1fa331b3e"},
+             {"id": "f597429621d6eb2b",
+              "model_class": "Role",
+              "name": "Bar",
+              "url": "/api/roles/f597429621d6eb2b"}]
         """
         return Client._get(self)
 
@@ -39,14 +38,13 @@ class RolesClient(Client):
 
         :rtype: dict
         :return: A description of role
-                 For example::
+          For example::
 
-                   {"description": "Private Role for Foo",
-                   "id": "f2db41e1fa331b3e",
-                   "model_class": "Role",
-                   "name": "Foo",
-                   "type": "private",
-                   "url": "/api/roles/f2db41e1fa331b3e"}
+            {"description": "Private Role for Foo",
+             "id": "f2db41e1fa331b3e",
+             "model_class": "Role",
+             "name": "Foo",
+             "type": "private",
+             "url": "/api/roles/f2db41e1fa331b3e"}
         """
-
         return Client._get(self, id=role_id)

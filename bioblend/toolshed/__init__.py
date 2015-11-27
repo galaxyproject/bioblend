@@ -20,7 +20,7 @@ class ToolShedInstance(GalaxyClient):
 
             from bioblend import toolshed
 
-            ts = toolshed.ToolShedInstance(url='http://testtoolshed.g2.bx.psu.edu')
+            ts = toolshed.ToolShedInstance(url='https://testtoolshed.g2.bx.psu.edu')
 
             rl = ts.repositories.get_repositories()
 
@@ -28,7 +28,7 @@ class ToolShedInstance(GalaxyClient):
 
         :type url: str
         :param url: A FQDN or IP for a given instance of ToolShed. For example:
-                    http://testtoolshed.g2.bx.psu.edu
+                    https://testtoolshed.g2.bx.psu.edu
 
         :type key: str
         :param key: If required, user's API key for the given instance of ToolShed,

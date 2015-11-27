@@ -15,3 +15,7 @@ Repositories
 
 .. automodule:: bioblend.toolshed.repositories
 
+Tools
+-----
+
+.. automodule:: bioblend.toolshed.tools

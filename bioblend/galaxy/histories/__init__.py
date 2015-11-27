@@ -307,10 +307,12 @@ class HistoryClient(Client):
 
         :rtype: dict
         :return: A dictionary with information regarding the tag.
-                 For example::
+          For example::
 
-                 {'model_class':'HistoryTagAssociation', 'user_tname': 'NGS_PE_RUN', 'id': 'f792763bee8d277a', 'user_value': None}
-
+            {'id': 'f792763bee8d277a',
+             'model_class': 'HistoryTagAssociation',
+             'user_tname': 'NGS_PE_RUN',
+             'user_value': None}
         """
 
         # empty payload since we are adding the new tag using the url

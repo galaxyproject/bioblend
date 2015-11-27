@@ -16,15 +16,16 @@ class GroupsClient(Client):
 
         :rtype: list
         :return: A list of dicts with details on individual groups.
-                 For example::
+          For example::
 
-                   [ {"name": "Listeria", "url": "/api/groups/33abac023ff186c2",
-                   "model_class": "Group", "id": "33abac023ff186c2"},
-                   {"name": "LPN", "url": "/api/groups/73187219cd372cf8",
-                   "model_class": "Group", "id": "73187219cd372cf8"}
-                   ]
-
-
+            [{'id': '33abac023ff186c2',
+              'model_class': 'Group',
+              'name': 'Listeria',
+              'url': '/api/groups/33abac023ff186c2'},
+             {'id': '73187219cd372cf8',
+              'model_class': 'Group',
+              'name': 'LPN',
+              'url': '/api/groups/73187219cd372cf8'}]
         """
         return Client._get(self)
 
@@ -37,15 +38,15 @@ class GroupsClient(Client):
 
         :rtype: dict
         :return: A description of group
-                 For example::
+          For example::
 
-                   {"roles_url": "/api/groups/33abac023ff186c2/roles",
-                   "name": "Listeria", "url": "/api/groups/33abac023ff186c2",
-                   "users_url": "/api/groups/33abac023ff186c2/users",
-                   "model_class": "Group", "id": "33abac023ff186c2"}
-
+            {'id': '33abac023ff186c2',
+             'model_class': 'Group',
+             'name': 'Listeria',
+             'roles_url': '/api/groups/33abac023ff186c2/roles',
+             'url': '/api/groups/33abac023ff186c2',
+             'users_url': '/api/groups/33abac023ff186c2/users'}
         """
-
         return Client._get(self, id=group_id)
 
     def create_group(self, group_name, user_ids=[], role_ids=[]):
@@ -63,17 +64,18 @@ class GroupsClient(Client):
 
         :rtype: list
         :return: A (size 1) list with newly created group
-                 details, like::
+          details, like::
 
-                    [{u'id': u'7c9636938c3e83bf',
-                      u'model_class': u'Group',
-                      u'name': u'My Group Name',
-                      u'url': u'/api/groups/7c9636938c3e83bf'}]
+            [{u'id': u'7c9636938c3e83bf',
+              u'model_class': u'Group',
+              u'name': u'My Group Name',
+              u'url': u'/api/groups/7c9636938c3e83bf'}]
         """
-        payload = {}
-        payload['name'] = group_name
-        payload['user_ids'] = user_ids
-        payload['role_ids'] = role_ids
+        payload = {
+            'name': group_name,
+            'user_ids': user_ids,
+            'role_ids': role_ids
+        }
         return Client._post(self, payload)
 
     def update_group(self, group_id, group_name=None, user_ids=[], role_ids=[]):
@@ -98,10 +100,11 @@ class GroupsClient(Client):
         :rtype: int
         :return: status code
         """
-        payload = {}
-        payload['name'] = group_name
-        payload['user_ids'] = user_ids
-        payload['role_ids'] = role_ids
+        payload = {
+            'name': group_name,
+            'user_ids': user_ids,
+            'role_ids': role_ids
+        }
         return Client._put(self, payload, id=group_id).status_code
 
     def get_group_users(self, group_id):

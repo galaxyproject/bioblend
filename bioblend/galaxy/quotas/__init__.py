@@ -19,18 +19,16 @@ class QuotaClient(Client):
 
         :rtype: list
         :return: A list of dicts with details on individual quotas.
-                 For example::
+          For example::
 
-                   [{   u'id': u'0604c8a56abe9a50',
-                   u'model_class': u'Quota',
-                   u'name': u'test ',
-                   u'url': u'/api/quotas/0604c8a56abe9a50'},
-                   {   u'id': u'1ee267091d0190af',
-                   u'model_class': u'Quota',
-                   u'name': u'workshop',
-                   u'url': u'/api/quotas/1ee267091d0190af'}]
-
-
+            [{u'id': u'0604c8a56abe9a50',
+              u'model_class': u'Quota',
+              u'name': u'test ',
+              u'url': u'/api/quotas/0604c8a56abe9a50'},
+             {u'id': u'1ee267091d0190af',
+              u'model_class': u'Quota',
+              u'name': u'workshop',
+              u'url': u'/api/quotas/1ee267091d0190af'}]
         """
         return Client._get(self, deleted=deleted)
 
@@ -45,20 +43,18 @@ class QuotaClient(Client):
         :param deleted: Search for quota in list of ones already marked as deleted
 
         :rtype: dict
-        :return: A description of quota
-                 For example::
+        :return: A description of quota.
+          For example::
 
-                   {   u'bytes': 107374182400,
-                   u'default': [],
-                   u'description': u'just testing',
-                   u'display_amount': u'100.0 GB',
-                   u'groups': [],
-                   u'id': u'0604c8a56abe9a50',
-                   u'model_class': u'Quota',
-                   u'name': u'test ',
-                   u'operation': u'=',
-                   u'users': []}
-
-
+            {u'bytes': 107374182400,
+             u'default': [],
+             u'description': u'just testing',
+             u'display_amount': u'100.0 GB',
+             u'groups': [],
+             u'id': u'0604c8a56abe9a50',
+             u'model_class': u'Quota',
+             u'name': u'test ',
+             u'operation': u'=',
+             u'users': []}
         """
         return Client._get(self, id=quota_id, deleted=deleted)
