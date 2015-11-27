@@ -10,6 +10,11 @@ ToolShedInstance
     .. automethod:: bioblend.toolshed.ToolShedInstance.__init__
 
 
+Categories
+----------
+
+.. automodule:: bioblend.toolshed.categories
+
 Repositories
 ------------
 

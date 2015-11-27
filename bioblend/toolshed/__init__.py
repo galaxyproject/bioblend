@@ -1,9 +1,8 @@
 """
 A base representation of an instance of Tool Shed
 """
-from bioblend.toolshed import (repositories)
-from bioblend.toolshed import (tools)
 from bioblend.galaxyclient import GalaxyClient
+from bioblend.toolshed import categories, repositories, tools
 
 
 class ToolShedInstance(GalaxyClient):
@@ -35,5 +34,6 @@ class ToolShedInstance(GalaxyClient):
                     obtained from the user preferences.
         """
         super(ToolShedInstance, self).__init__(url, key, email, password)
-        self.repositories = repositories.ToolShedClient(self)
-        self.tools = tools.ToolShedClient(self)
+        self.categories = categories.ToolShedCategoryClient(self)
+        self.repositories = repositories.ToolShedRepositoryClient(self)
+        self.tools = tools.ToolShedToolClient(self)

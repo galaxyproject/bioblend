@@ -1,17 +1,15 @@
 """
 Interaction with a Tool Shed instance repositories
 """
-from six.moves.urllib.parse import urljoin
-
 from bioblend.galaxy.client import Client
 from bioblend.util import attach_file
 
 
-class ToolShedClient(Client):
+class ToolShedRepositoryClient(Client):
 
     def __init__(self, toolshed_instance):
         self.module = 'repositories'
-        super(ToolShedClient, self).__init__(toolshed_instance)
+        super(ToolShedRepositoryClient, self).__init__(toolshed_instance)
 
     def get_repositories(self):
         """
@@ -362,30 +360,7 @@ class ToolShedClient(Client):
         # Not using '_make_url' or '_get' to create url since the module id used
         # to create url is not the same as needed for this method
         # since metadata_id has to be defined, easy to create the url here
-        url = self.gi.url + '/repository_revisions/' + metadata_id
-
-        return Client._get(self, url=url)
-
-    def get_categories(self):
-        """
-        Returns a list of dictionaries that contain descriptions of the
-        repository categories found on the given Tool Shed instance.
-
-        :rtype: list
-        :return: A list of dictionaries containing information about
-                 repository categories present in the Tool Shed.
-                 For example::
-
-                    [{u'deleted': False,
-                      u'description': u'Tools for manipulating data',
-                      u'id': u'175812cd7caaf439',
-                      u'model_class': u'Category',
-                      u'name': u'Text Manipulation',
-                      u'url': u'/api/categories/175812cd7caaf439'}]
-
-        .. versionadded:: 0.5.2
-        """
-        url = urljoin(self.url, 'categories')
+        url = '/'.join([self.gi.url, 'repository_revisions', metadata_id])
         return Client._get(self, url=url)
 
     def update_repository(self, id, tar_ball_path, commit_message=None):

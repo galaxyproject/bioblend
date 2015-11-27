@@ -100,8 +100,8 @@
 
 * Added ``copy_from_dataset()`` method to ``LibraryClient``.
 
-* Added ``create_repository()`` method to ``ToolShedClient`` (thanks to Eric
-  Rasche).
+* Added ``create_repository()`` method to ``ToolShedRepositoryClient`` (thanks
+  to Eric Rasche).
 
 * Fixed ``DatasetClient.download_dataset()`` for certain proxied Galaxy
   deployments.
