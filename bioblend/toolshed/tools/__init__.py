@@ -4,11 +4,11 @@ Interaction with a Tool Shed instance tools
 from bioblend.galaxy.client import Client
 
 
-class ToolShedClient(Client):
+class ToolShedToolClient(Client):
 
     def __init__(self, toolshed_instance):
         self.module = 'tools'
-        super(ToolShedClient, self).__init__(toolshed_instance)
+        super(ToolShedToolClient, self).__init__(toolshed_instance)
 
     def search_tools(self, q, page=1, page_size=10):
         """
