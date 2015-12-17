@@ -350,7 +350,7 @@ class HistoryClient(Client):
         :type history_id: str
         :param history_id: Encoded history ID
 
-        :type collection_description: str
+        :type collection_description: bioblend.galaxy.dataset_collections.CollectionDescription
         :param collection_description: a description of the dataset collection
         """
         try:
