@@ -9,6 +9,7 @@ import six
 
 import bioblend
 from bioblend.galaxy.client import Client
+from bioblend.galaxy import dataset_collections as collections
 
 
 class HistoryClient(Client):
@@ -350,7 +351,7 @@ class HistoryClient(Client):
         :type history_id: str
         :param history_id: Encoded history ID
 
-        :type collection_description: str
+        :type collection_description: collections.CollectionDescription
         :param collection_description: a description of the dataset collection
         """
         try:
