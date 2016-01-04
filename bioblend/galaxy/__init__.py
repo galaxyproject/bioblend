@@ -30,7 +30,10 @@ class GalaxyInstance(GalaxyClient):
 
         :type url: str
         :param url: A FQDN or IP for a given instance of Galaxy. For example:
-                    http://127.0.0.1:8080
+                    http://127.0.0.1:8080. If a Galaxy instance is served under
+                    a prefix (e.g., http://127.0.0.1:8080/galaxy/), supply the
+                    entire URL including the prefix (note that the prefix must
+                    end with a slash).
 
         :type key: str
         :param key: User's API key for the given instance of Galaxy, obtained
