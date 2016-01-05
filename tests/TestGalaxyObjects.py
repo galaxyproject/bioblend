@@ -16,10 +16,10 @@ import bioblend
 import bioblend.galaxy.objects.wrappers as wrappers
 import bioblend.galaxy.objects.galaxy_instance as galaxy_instance
 from bioblend import ConnectionError
+from bioblend.galaxy import dataset_collections as collections
 
 import test_util
 from test_util import unittest
-
 bioblend.set_stream_logger('test', level='INFO')
 socket.setdefaulttimeout(10.0)
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -558,6 +558,15 @@ class TestHistory(GalaxyObjectsTestBase):
         self.assertEqual(len(self.hist.dataset_ids), 1)
         self.assertEqual(self.hist.dataset_ids[0], hda.id)
 
+    def __check_dataset_collection(self, hdca):
+        self.assertIsInstance(hdca, wrappers.HistoryDatasetCollectionAssociation)
+        self.assertIs(hdca.container, self.hist)
+        self.assertEqual(len(self.hist.dataset_ids), 2)
+        dataset1 = self.hist.get_dataset(self.hist.dataset_ids[0])
+        dataset2 = self.hist.get_dataset(self.hist.dataset_ids[1])
+        self.assertEqual(dataset1.id, hdca.elements[0]['object']['id'])
+        self.assertEqual(dataset2.id, hdca.elements[1]['object']['id'])
+
     def test_import_dataset(self):
         lib = self.gi.libraries.create('test_%s' % uuid.uuid4().hex)
         lds = lib.upload_data(FOO_DATA)
@@ -617,6 +626,18 @@ class TestHistory(GalaxyObjectsTestBase):
         self.assertEqual(self.hist.annotation, new_annotation)
         self.assertEqual(self.hist.tags, new_tags)
 
+    def test_new_dataset_collection(self):
+        dataset1 = self.hist.paste_content(FOO_DATA)
+        dataset2 = self.hist.paste_content(FOO_DATA_2)
+        collection_description=collections.CollectionDescription(
+            name="MyDatasetList",
+            elements=[
+                collections.HistoryDatasetElement(name="sample1", id=dataset1.id),
+                collections.HistoryDatasetElement(name="sample2", id=dataset2.id),
+            ]
+        )
+        collection_response = self.hist.new_dataset_collection(self.hist.id, collection_description)
+        self.__check_dataset_collection(collection_response)
 
 @test_util.skip_unless_galaxy()
 class TestHDAContents(GalaxyObjectsTestBase):
