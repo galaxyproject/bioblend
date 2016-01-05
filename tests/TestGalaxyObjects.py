@@ -639,6 +639,7 @@ class TestHistory(GalaxyObjectsTestBase):
         collection_response = self.hist.new_dataset_collection(self.hist.id, collection_description)
         self.__check_dataset_collection(collection_response)
 
+
 @test_util.skip_unless_galaxy()
 class TestHDAContents(GalaxyObjectsTestBase):
 

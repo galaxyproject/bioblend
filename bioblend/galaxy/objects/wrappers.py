@@ -631,7 +631,9 @@ class DatasetCollection(Wrapper):
     """
     Abstract base class for Galaxy dataset collections.
     """
-    BASE_ATTRS = Wrapper.BASE_ATTRS + ('deleted')
+    BASE_ATTRS = Wrapper.BASE_ATTRS + (
+        'state', 'deleted'
+    )
     POLLING_INTERVAL = 1  # for state monitoring
 
     @abc.abstractmethod
