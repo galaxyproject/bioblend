@@ -20,6 +20,7 @@ from bioblend.galaxy import dataset_collections as collections
 
 import test_util
 from test_util import unittest
+
 bioblend.set_stream_logger('test', level='INFO')
 socket.setdefaulttimeout(10.0)
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -628,12 +629,12 @@ class TestHistory(GalaxyObjectsTestBase):
 
     def test_new_dataset_collection(self):
         collection_description = self._create_collection_description()
-        collection_response = self.hist.new_dataset_collection(self.hist.id, collection_description)
-        self.__check_dataset_collection(collection_response)
+        dataset_collection = self.hist.new_dataset_collection(collection_description)
+        self.__check_dataset_collection(dataset_collection)
 
     def test_delete_dataset_collection(self):
         collection_description = self._create_collection_description()
-        dataset_collection = self.hist.new_dataset_collection(self.hist.id, collection_description)
+        dataset_collection = self.hist.new_dataset_collection(collection_description)
         dataset_collection.delete()
         self.assertTrue(dataset_collection.deleted)
 
@@ -734,6 +735,24 @@ class TestRunWorkflow(GalaxyObjectsTestBase):
 
     def test_params(self):
         self.__test(params=True)
+
+    def test_run_workflow_with_dataset_collection(self):
+        wf_file = os.path.join(THIS_DIR, 'data', 'dataset_collection_run.ga')
+        with open(wf_file) as f:
+            wf = self.gi.workflows.import_new(f.read())
+        history_name = "Run Workflow With Dataset Collection"
+        outputhist = self.gi.histories.create(history_name)
+        collection_description = collections.CollectionDescription(
+            name="MyDatasetList",
+            elements=[
+                collections.HistoryDatasetElement(name="sample1", id=self.inputs[0].id),
+                collections.HistoryDatasetElement(name="sample2", id=self.inputs[1].id),
+            ]
+        )
+        dataset_collection = outputhist.new_dataset_collection(collection_description)
+        input_map = {"Input Dataset Collection": dataset_collection}
+        outputs = wf.run(input_map, history_name)
+        self.assertEqual(len(outputs), 2)
 
 
 @test_util.skip_unless_galaxy()

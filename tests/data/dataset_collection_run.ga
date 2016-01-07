@@ -1,0 +1,65 @@
+{
+    "a_galaxy_workflow": "true", 
+    "annotation": "", 
+    "format-version": "0.1", 
+    "name": "DC Run", 
+    "steps": {
+        "0": {
+            "annotation": "", 
+            "id": 0, 
+            "input_connections": {}, 
+            "inputs": [
+                {
+                    "description": "", 
+                    "name": "Input Dataset Collection"
+                }
+            ], 
+            "label": null, 
+            "name": "Input dataset collection", 
+            "outputs": [], 
+            "position": {
+                "left": 338, 
+                "top": 306
+            }, 
+            "tool_errors": null, 
+            "tool_id": null, 
+            "tool_state": "{\"collection_type\": \"list\", \"name\": \"Input Dataset Collection\"}", 
+            "tool_version": null, 
+            "type": "data_collection_input", 
+            "user_outputs": [], 
+            "uuid": "4a497708-240c-420e-9c7c-a2dc0200476e"
+        }, 
+        "1": {
+            "annotation": "", 
+            "id": 1, 
+            "input_connections": {
+                "input": {
+                    "id": 0, 
+                    "output_name": "output"
+                }
+            }, 
+            "inputs": [], 
+            "label": null, 
+            "name": "Sort", 
+            "outputs": [
+                {
+                    "name": "out_file1", 
+                    "type": "input"
+                }
+            ], 
+            "position": {
+                "left": 676, 
+                "top": 286
+            }, 
+            "post_job_actions": {}, 
+            "tool_errors": null, 
+            "tool_id": "sort1", 
+            "tool_state": "{\"__page__\": 0, \"style\": \"\\\"num\\\"\", \"column\": \"\\\"1\\\"\", \"__rerun_remap_job_id__\": null, \"order\": \"\\\"DESC\\\"\", \"input\": \"null\", \"column_set\": \"[]\"}", 
+            "tool_version": "1.0.3", 
+            "type": "tool", 
+            "user_outputs": [], 
+            "uuid": "3c33333f-08ce-43bf-bc09-fa0b5776845b"
+        }
+    }, 
+    "uuid": "fd34f048-e17a-4e06-85e8-ed391192d284"
+}

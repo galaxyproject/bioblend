@@ -447,7 +447,6 @@ class Workflow(Wrapper):
         res = self.gi.gi.workflows.run_workflow(self.id, **kwargs)
         # res structure: {'history': HIST_ID, 'outputs': [DS_ID, DS_ID, ...]}
         out_hist = self.gi.histories.get(res['history'])
-        assert set(res['outputs']).issubset(out_hist.dataset_ids)
         outputs = [out_hist.get_dataset(_) for _ in res['outputs']]
 
         if wait:
@@ -1023,7 +1022,7 @@ class History(DatasetContainer):
         return self.gi.gi.histories.download_history(
             self.id, jeha_id, outf, chunk_size=chunk_size)
 
-    def new_dataset_collection(self, hist_id, collection_description):
+    def new_dataset_collection(self, collection_description):
         """
         Create a new dataset collection in the history by providing the dataset ids.
 
@@ -1033,7 +1032,7 @@ class History(DatasetContainer):
         :rtype: class:`~.HistoryDatasetCollectionAssociation`
         :return: the new dataset collection
         """
-        dataset_collection = self.gi.gi.histories.create_dataset_collection(hist_id, collection_description)
+        dataset_collection = self.gi.gi.histories.create_dataset_collection(self.id, collection_description)
         self.refresh()
         return self.get_dataset_collection(dataset_collection['id'])
 
