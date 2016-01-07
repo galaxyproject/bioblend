@@ -641,6 +641,17 @@ class DatasetCollection(Wrapper):
         super(DatasetCollection, self).__init__(dsc_dict, gi=gi)
         object.__setattr__(self, 'container', container)
 
+    def refresh(self):
+        """
+        Re-fetch the attributes pertaining to this object.
+
+        Returns: self
+        """
+        gi_client = getattr(self.gi.gi, self.container.API_MODULE)
+        dsc_dict = gi_client.show_dataset_collection(self.container.id, self.id)
+        self.__init__(dsc_dict, self.container, self.gi)
+        return self
+
 
 class HistoryDatasetCollectionAssociation(DatasetCollection):
     """

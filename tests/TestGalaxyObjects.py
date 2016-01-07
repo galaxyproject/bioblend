@@ -627,18 +627,27 @@ class TestHistory(GalaxyObjectsTestBase):
         self.assertEqual(self.hist.tags, new_tags)
 
     def test_new_dataset_collection(self):
+        collection_description = self._create_collection_description()
+        collection_response = self.hist.new_dataset_collection(self.hist.id, collection_description)
+        self.__check_dataset_collection(collection_response)
+
+    def test_delete_dataset_collection(self):
+        collection_description = self._create_collection_description()
+        dataset_collection = self.hist.new_dataset_collection(self.hist.id, collection_description)
+        dataset_collection.delete()
+        self.assertTrue(dataset_collection.deleted)
+
+    def _create_collection_description(self):
         dataset1 = self.hist.paste_content(FOO_DATA)
         dataset2 = self.hist.paste_content(FOO_DATA_2)
-        collection_description=collections.CollectionDescription(
+        collection_description = collections.CollectionDescription(
             name="MyDatasetList",
             elements=[
                 collections.HistoryDatasetElement(name="sample1", id=dataset1.id),
                 collections.HistoryDatasetElement(name="sample2", id=dataset2.id),
             ]
         )
-        collection_response = self.hist.new_dataset_collection(self.hist.id, collection_description)
-        self.__check_dataset_collection(collection_response)
-
+        return collection_description
 
 @test_util.skip_unless_galaxy()
 class TestHDAContents(GalaxyObjectsTestBase):
