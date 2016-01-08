@@ -650,6 +650,7 @@ class TestHistory(GalaxyObjectsTestBase):
         )
         return collection_description
 
+
 @test_util.skip_unless_galaxy()
 class TestHDAContents(GalaxyObjectsTestBase):
 
