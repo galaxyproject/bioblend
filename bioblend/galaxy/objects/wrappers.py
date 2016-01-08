@@ -26,6 +26,8 @@ __all__ = [
     'Folder',
     'Dataset',
     'HistoryDatasetAssociation',
+    'DatasetCollection',
+    'HistoryDatasetCollectionAssociation',
     'LibraryDatasetDatasetAssociation',
     'LibraryDataset',
     'Tool',
@@ -633,7 +635,6 @@ class DatasetCollection(Wrapper):
     BASE_ATTRS = Wrapper.BASE_ATTRS + (
         'state', 'deleted'
     )
-    POLLING_INTERVAL = 1  # for state monitoring
 
     @abc.abstractmethod
     def __init__(self, dsc_dict, container, gi=None):
