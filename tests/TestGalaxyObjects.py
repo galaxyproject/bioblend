@@ -16,7 +16,7 @@ import bioblend
 import bioblend.galaxy.objects.wrappers as wrappers
 import bioblend.galaxy.objects.galaxy_instance as galaxy_instance
 from bioblend import ConnectionError
-from bioblend.galaxy import dataset_collections as collections
+from bioblend.galaxy import dataset_collections
 
 import test_util
 from test_util import unittest
@@ -627,11 +627,13 @@ class TestHistory(GalaxyObjectsTestBase):
         self.assertEqual(self.hist.annotation, new_annotation)
         self.assertEqual(self.hist.tags, new_tags)
 
+    @test_util.skip_unless_galaxy('release_14.06')
     def test_new_dataset_collection(self):
         collection_description = self._create_collection_description()
         dataset_collection = self.hist.new_dataset_collection(collection_description)
         self.__check_dataset_collection(dataset_collection)
 
+    @test_util.skip_unless_galaxy('release_14.06')
     def test_delete_dataset_collection(self):
         collection_description = self._create_collection_description()
         dataset_collection = self.hist.new_dataset_collection(collection_description)
@@ -641,11 +643,11 @@ class TestHistory(GalaxyObjectsTestBase):
     def _create_collection_description(self):
         dataset1 = self.hist.paste_content(FOO_DATA)
         dataset2 = self.hist.paste_content(FOO_DATA_2)
-        collection_description = collections.CollectionDescription(
+        collection_description = dataset_collections.CollectionDescription(
             name="MyDatasetList",
             elements=[
-                collections.HistoryDatasetElement(name="sample1", id=dataset1.id),
-                collections.HistoryDatasetElement(name="sample2", id=dataset2.id),
+                dataset_collections.HistoryDatasetElement(name="sample1", id=dataset1.id),
+                dataset_collections.HistoryDatasetElement(name="sample2", id=dataset2.id),
             ]
         )
         return collection_description
@@ -737,17 +739,18 @@ class TestRunWorkflow(GalaxyObjectsTestBase):
     def test_params(self):
         self.__test(params=True)
 
+    @test_util.skip_unless_galaxy('release_14.06')
     def test_run_workflow_with_dataset_collection(self):
         wf_file = os.path.join(THIS_DIR, 'data', 'dataset_collection_run.ga')
         with open(wf_file) as f:
             wf = self.gi.workflows.import_new(f.read())
         history_name = "Run Workflow With Dataset Collection"
         outputhist = self.gi.histories.create(history_name)
-        collection_description = collections.CollectionDescription(
+        collection_description = dataset_collections.CollectionDescription(
             name="MyDatasetList",
             elements=[
-                collections.HistoryDatasetElement(name="sample1", id=self.inputs[0].id),
-                collections.HistoryDatasetElement(name="sample2", id=self.inputs[1].id),
+                dataset_collections.HistoryDatasetElement(name="sample1", id=self.inputs[0].id),
+                dataset_collections.HistoryDatasetElement(name="sample2", id=self.inputs[1].id),
             ]
         )
         dataset_collection = outputhist.new_dataset_collection(collection_description)
