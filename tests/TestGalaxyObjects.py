@@ -769,7 +769,7 @@ class TestRunDatasetCollectionWorkflow(GalaxyObjectsTestBase):
         outputs, out_hist = self.wf.run(input_map, self.hist, wait=True)
         self.assertIsInstance(outputs[0], wrappers.HistoryDatasetCollectionAssociation)
         self.assertEqual(len(outputs), 1)
-        self.asssertEqual(out_hist.id, self.hist.id)
+        self.assertEqual(out_hist.id, self.hist.id)
         out_hist.delete(purge=True)
 
 
