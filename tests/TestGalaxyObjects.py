@@ -630,13 +630,13 @@ class TestHistory(GalaxyObjectsTestBase):
     @test_util.skip_unless_galaxy('release_14.06')
     def test_create_dataset_collection(self):
         collection_description = self._create_collection_description()
-        dataset_collection = self.hist.new_dataset_collection(collection_description)
+        dataset_collection = self.hist.create_dataset_collection(collection_description)
         self.__check_dataset_collection(dataset_collection)
 
     @test_util.skip_unless_galaxy('release_14.06')
     def test_delete_dataset_collection(self):
         collection_description = self._create_collection_description()
-        dataset_collection = self.hist.new_dataset_collection(collection_description)
+        dataset_collection = self.hist.create_dataset_collection(collection_description)
         dataset_collection.delete()
         self.assertTrue(dataset_collection.deleted)
 
