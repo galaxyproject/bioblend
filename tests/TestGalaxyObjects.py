@@ -739,6 +739,7 @@ class TestRunWorkflow(GalaxyObjectsTestBase):
     def test_params(self):
         self.__test(params=True)
 
+
 @test_util.skip_unless_galaxy()
 class TestRunDatasetCollectionWorkflow(GalaxyObjectsTestBase):
 
