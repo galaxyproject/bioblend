@@ -628,7 +628,7 @@ class TestHistory(GalaxyObjectsTestBase):
         self.assertEqual(self.hist.tags, new_tags)
 
     @test_util.skip_unless_galaxy('release_14.06')
-    def test_new_dataset_collection(self):
+    def test_create_dataset_collection(self):
         collection_description = self._create_collection_description()
         dataset_collection = self.hist.new_dataset_collection(collection_description)
         self.__check_dataset_collection(dataset_collection)
@@ -739,24 +739,38 @@ class TestRunWorkflow(GalaxyObjectsTestBase):
     def test_params(self):
         self.__test(params=True)
 
-    @test_util.skip_unless_galaxy('release_14.06')
-    def test_run_workflow_with_dataset_collection(self):
+@test_util.skip_unless_galaxy()
+class TestRunDatasetCollectionWorkflow(GalaxyObjectsTestBase):
+
+    def setUp(self):
+        super(TestRunDatasetCollectionWorkflow, self).setUp()
         wf_file = os.path.join(THIS_DIR, 'data', 'dataset_collection_run.ga')
         with open(wf_file) as f:
-            wf = self.gi.workflows.import_new(f.read())
-        history_name = "Run Workflow With Dataset Collection"
-        outputhist = self.gi.histories.create(history_name)
+            self.wf = self.gi.workflows.import_new(f.read())
+        self.hist_name = 'test_%s' % uuid.uuid4().hex
+        self.hist = self.gi.histories.create(self.hist_name)
+
+    def tearDown(self):
+        self.wf.delete()
+
+    @test_util.skip_unless_galaxy('release_14.06')
+    def test_run_workflow_with_dataset_collection(self):
+        dataset1 = self.hist.paste_content('foo\nbar\n')
+        dataset2 = self.hist.paste_content('foo2\nbar2\n')
         collection_description = dataset_collections.CollectionDescription(
             name="MyDatasetList",
             elements=[
-                dataset_collections.HistoryDatasetElement(name="sample1", id=self.inputs[0].id),
-                dataset_collections.HistoryDatasetElement(name="sample2", id=self.inputs[1].id),
+                dataset_collections.HistoryDatasetElement(name="sample1", id=dataset1.id),
+                dataset_collections.HistoryDatasetElement(name="sample2", id=dataset2.id),
             ]
         )
-        dataset_collection = outputhist.new_dataset_collection(collection_description)
+        dataset_collection = self.hist.create_dataset_collection(collection_description)
         input_map = {"Input Dataset Collection": dataset_collection}
-        outputs = wf.run(input_map, history_name)
-        self.assertEqual(len(outputs), 2)
+        outputs, out_hist = self.wf.run(input_map, self.hist, wait=True)
+        self.assertIsInstance(outputs[0], wrappers.HistoryDatasetCollectionAssociation)
+        self.assertEqual(len(outputs), 1)
+        self.asssertEqual(out_hist.id, self.hist.id)
+        out_hist.delete(purge=True)
 
 
 @test_util.skip_unless_galaxy()

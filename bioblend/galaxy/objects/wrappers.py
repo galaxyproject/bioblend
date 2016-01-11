@@ -668,12 +668,6 @@ class HistoryDatasetCollectionAssociation(DatasetCollection):
     def gi_module(self):
         return self.gi.histories
 
-    @property
-    def _stream_url(self):
-        base_url = self.gi.gi._make_url(
-            self.gi.gi.histories, module_id=self.container.id, contents=True)
-        return "%s/%s/display" % (base_url, self.id)
-
     def delete(self):
         """
         Delete this dataset collection.
@@ -1023,7 +1017,7 @@ class History(DatasetContainer):
         return self.gi.gi.histories.download_history(
             self.id, jeha_id, outf, chunk_size=chunk_size)
 
-    def new_dataset_collection(self, collection_description):
+    def create_dataset_collection(self, collection_description):
         """
         Create a new dataset collection in the history by providing the dataset ids.
 
