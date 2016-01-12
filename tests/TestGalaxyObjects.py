@@ -274,16 +274,16 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
     def test_workflow_missing_tools(self):
         with open(SAMPLE_FN) as f:
             wf_dump = json.load(f)
-            wf_info = self.gi.gi.workflows.import_workflow_json(wf_dump)
-            wf_dict = self.gi.gi.workflows.show_workflow(wf_info['id'])
-            for id_, step in six.iteritems(wf_dict['steps']):
-                if step['type'] == 'tool':
-                    for k in 'tool_inputs', 'tool_version':
-                        wf_dict['steps'][id_][k] = None
-            wf = wrappers.Workflow(wf_dict, gi=self.gi)
-            self.assertFalse(wf.is_runnable)
-            self.assertRaises(RuntimeError, wf.run)
-            wf.delete()
+        wf_info = self.gi.gi.workflows.import_workflow_json(wf_dump)
+        wf_dict = self.gi.gi.workflows.show_workflow(wf_info['id'])
+        for id_, step in six.iteritems(wf_dict['steps']):
+            if step['type'] == 'tool':
+                for k in 'tool_inputs', 'tool_version':
+                    wf_dict['steps'][id_][k] = None
+        wf = wrappers.Workflow(wf_dict, gi=self.gi)
+        self.assertFalse(wf.is_runnable)
+        self.assertRaises(RuntimeError, wf.run)
+        wf.delete()
 
     def test_export(self):
         with open(SAMPLE_FN) as f:
@@ -644,8 +644,7 @@ class TestHDAContents(GalaxyObjectsTestBase):
         with tempfile.TemporaryFile() as f:
             self.ds.download(f)
             f.seek(0)
-            data = f.read()
-            self.assertEqual(six.b(FOO_DATA), data)
+            self.assertEqual(six.b(FOO_DATA), f.read())
 
     def test_dataset_get_contents(self):
         self.assertEqual(six.b(FOO_DATA), self.ds.get_contents())
