@@ -17,26 +17,24 @@ def skip_unless_cloudman():
     """ Decorate tests with this to skip the test if CloudMan is not
     configured.
     """
-    test = lambda f: f
     if 'BIOBLEND_AMI_ID' not in os.environ:
-        test = unittest.skip(NO_CLOUDMAN_MESSAGE)
-    return test
+        return unittest.skip(NO_CLOUDMAN_MESSAGE)
+    else:
+        return lambda f: f
 
 
 def skip_unless_galaxy(min_release=None):
     """ Decorate tests with this to skip the test if Galaxy is not
     configured.
     """
-    test = lambda f: f
-    for prop in ['BIOBLEND_GALAXY_URL', 'BIOBLEND_GALAXY_API_KEY']:
-        if prop not in os.environ:
-            test = unittest.skip(NO_GALAXY_MESSAGE)
-            break
     if min_release is not None:
         galaxy_release = os.environ.get('GALAXY_VERSION', None)
         if galaxy_release is not None and galaxy_release.startswith('release_') and galaxy_release < min_release:
-            test = unittest.skip(OLD_GALAXY_RELEASE % (galaxy_release, min_release))
-    return test
+            return unittest.skip(OLD_GALAXY_RELEASE % (galaxy_release, min_release))
+    for prop in ['BIOBLEND_GALAXY_URL', 'BIOBLEND_GALAXY_API_KEY']:
+        if prop not in os.environ:
+            return unittest.skip(NO_GALAXY_MESSAGE)
+    return lambda f: f
 
 
 def skip_unless_tool(tool_id):

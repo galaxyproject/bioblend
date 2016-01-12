@@ -352,7 +352,9 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
     def __test_multi_get(self, obj_type):
         create, get_objs, get_prevs, del_kwargs = self.__normalized_functions(
             obj_type)
-        ids = lambda seq: set(_.id for _ in seq)
+
+        def ids(seq):
+            return set(_.id for _ in seq)
         names = ['test_%s' % uuid.uuid4().hex for _ in range(2)]
         objs = []
         try:

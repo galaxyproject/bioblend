@@ -15,15 +15,15 @@ API_KEY = os.getenv('GALAXY_API_KEY', 'YOUR_API_KEY')
 if API_KEY == 'YOUR_API_KEY':
     sys.exit('API_KEY not set, see the README.txt file')
 
-# Clone the galaxy-dist mercurial repository and replace
+# Clone the galaxy git repository and replace
 # YOUR_GALAXY_PATH with the clone's local path in the following code, e.g.:
 #   cd /tmp
-#   hg clone https://bitbucket.org/galaxy/galaxy-dist
-#   GALAXY_PATH = '/tmp/galaxy-dist'
+#   git clone https://github.com/galaxyproject/galaxy
+#   GALAXY_PATH = '/tmp/galaxy'
 
 GALAXY_PATH = 'YOUR_GALAXY_PATH'
 sys.path.insert(1, os.path.join(GALAXY_PATH, 'scripts/api'))
-import common
+import common  # noqa
 
 # Select "W5 - Metagenomics" from published workflows
 

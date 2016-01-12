@@ -13,12 +13,13 @@
 
 import os
 import sys
-sys.path.append('../')
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), '..')))
+
+from bioblend import get_version  # noqa
 
 # -- General configuration -----------------------------------------------------
 
@@ -48,13 +49,11 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'BioBlend'
-copyright = '2012-2015, Enis Afgan'
+copyright = '2012-2016, Enis Afgan'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
-
-from bioblend import get_version
 
 # The short X.Y version.
 version = get_version()
