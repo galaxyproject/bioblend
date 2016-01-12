@@ -559,15 +559,6 @@ class TestHistory(GalaxyObjectsTestBase):
         self.assertEqual(len(self.hist.dataset_ids), 1)
         self.assertEqual(self.hist.dataset_ids[0], hda.id)
 
-    def __check_dataset_collection(self, hdca):
-        self.assertIsInstance(hdca, wrappers.HistoryDatasetCollectionAssociation)
-        self.assertIs(hdca.container, self.hist)
-        self.assertEqual(len(self.hist.dataset_ids), 2)
-        dataset1 = self.hist.get_dataset(self.hist.dataset_ids[0])
-        dataset2 = self.hist.get_dataset(self.hist.dataset_ids[1])
-        self.assertEqual(dataset1.id, hdca.elements[0]['object']['id'])
-        self.assertEqual(dataset2.id, hdca.elements[1]['object']['id'])
-
     def test_import_dataset(self):
         lib = self.gi.libraries.create('test_%s' % uuid.uuid4().hex)
         lds = lib.upload_data(FOO_DATA)
@@ -629,28 +620,32 @@ class TestHistory(GalaxyObjectsTestBase):
 
     @test_util.skip_unless_galaxy('release_14.06')
     def test_create_dataset_collection(self):
-        collection_description = self._create_collection_description()
-        dataset_collection = self.hist.create_dataset_collection(collection_description)
-        self.__check_dataset_collection(dataset_collection)
+        self._create_collection_description()
+        hdca = self.hist.create_dataset_collection(self.collection_description)
+        self.assertIsInstance(hdca, wrappers.HistoryDatasetCollectionAssociation)
+        self.assertEqual(hdca.collection_type, 'list')
+        self.assertIs(hdca.container, self.hist)
+        self.assertEqual(len(hdca.elements), 2)
+        self.assertEqual(self.dataset1.id, hdca.elements[0]['object']['id'])
+        self.assertEqual(self.dataset2.id, hdca.elements[1]['object']['id'])
 
     @test_util.skip_unless_galaxy('release_14.06')
     def test_delete_dataset_collection(self):
-        collection_description = self._create_collection_description()
-        dataset_collection = self.hist.create_dataset_collection(collection_description)
-        dataset_collection.delete()
-        self.assertTrue(dataset_collection.deleted)
+        self._create_collection_description()
+        hdca = self.hist.create_dataset_collection(self.collection_description)
+        hdca.delete()
+        self.assertTrue(hdca.deleted)
 
     def _create_collection_description(self):
-        dataset1 = self.hist.paste_content(FOO_DATA)
-        dataset2 = self.hist.paste_content(FOO_DATA_2)
-        collection_description = dataset_collections.CollectionDescription(
+        self.dataset1 = self.hist.paste_content(FOO_DATA)
+        self.dataset2 = self.hist.paste_content(FOO_DATA_2)
+        self.collection_description = dataset_collections.CollectionDescription(
             name="MyDatasetList",
             elements=[
-                dataset_collections.HistoryDatasetElement(name="sample1", id=dataset1.id),
-                dataset_collections.HistoryDatasetElement(name="sample2", id=dataset2.id),
+                dataset_collections.HistoryDatasetElement(name="sample1", id=self.dataset1.id),
+                dataset_collections.HistoryDatasetElement(name="sample2", id=self.dataset2.id),
             ]
         )
-        return collection_description
 
 
 @test_util.skip_unless_galaxy()
@@ -740,24 +735,22 @@ class TestRunWorkflow(GalaxyObjectsTestBase):
         self.__test(params=True)
 
 
-@test_util.skip_unless_galaxy()
+@test_util.skip_unless_galaxy('release_14.08')
 class TestRunDatasetCollectionWorkflow(GalaxyObjectsTestBase):
 
     def setUp(self):
         super(TestRunDatasetCollectionWorkflow, self).setUp()
-        wf_file = os.path.join(THIS_DIR, 'data', 'dataset_collection_run.ga')
-        with open(wf_file) as f:
+        with open(SAMPLE_WF_COLL_FN) as f:
             self.wf = self.gi.workflows.import_new(f.read())
-        self.hist_name = 'test_%s' % uuid.uuid4().hex
-        self.hist = self.gi.histories.create(self.hist_name)
+        self.hist = self.gi.histories.create('test_%s' % uuid.uuid4().hex)
 
     def tearDown(self):
         self.wf.delete()
+        self.hist.delete(purge=True)
 
-    @test_util.skip_unless_galaxy('release_14.06')
     def test_run_workflow_with_dataset_collection(self):
-        dataset1 = self.hist.paste_content('foo\nbar\n')
-        dataset2 = self.hist.paste_content('foo2\nbar2\n')
+        dataset1 = self.hist.paste_content(FOO_DATA)
+        dataset2 = self.hist.paste_content(FOO_DATA_2)
         collection_description = dataset_collections.CollectionDescription(
             name="MyDatasetList",
             elements=[
@@ -766,12 +759,15 @@ class TestRunDatasetCollectionWorkflow(GalaxyObjectsTestBase):
             ]
         )
         dataset_collection = self.hist.create_dataset_collection(collection_description)
-        input_map = {"Input Dataset Collection": dataset_collection}
+        input_map = {"Input Dataset Collection": dataset_collection,
+                     "Input 2": dataset1}
         outputs, out_hist = self.wf.run(input_map, self.hist, wait=True)
-        self.assertIsInstance(outputs[0], wrappers.HistoryDatasetCollectionAssociation)
         self.assertEqual(len(outputs), 1)
+        out_hdca = outputs[0]
+        self.assertIsInstance(out_hdca, wrappers.HistoryDatasetCollectionAssociation)
+        self.assertEqual(out_hdca.collection_type, 'list')
+        self.assertEqual(len(out_hdca.elements), 2)
         self.assertEqual(out_hist.id, self.hist.id)
-        out_hist.delete(purge=True)
 
 
 @test_util.skip_unless_galaxy()

@@ -447,9 +447,17 @@ class Workflow(Wrapper):
             raise TypeError(
                 'history must be either a history wrapper or a string')
         res = self.gi.gi.workflows.run_workflow(self.id, **kwargs)
-        # res structure: {'history': HIST_ID, 'outputs': [DS_ID, DS_ID, ...]}
+        # res structure: {'history': HIST_ID, 'outputs': [CI_ID, CI_ID, ...]}
         out_hist = self.gi.histories.get(res['history'])
-        outputs = [out_hist.get_dataset(_) for _ in res['outputs']]
+        content_infos_dict = dict()
+        for ci in out_hist.content_infos:
+            content_infos_dict[ci.id] = ci
+        outputs = []
+        for output_id in res['outputs']:
+            if content_infos_dict[output_id].type == 'file':
+                outputs.append(out_hist.get_dataset(output_id))
+            elif content_infos_dict[output_id].type == 'collection':
+                outputs.append(out_hist.get_dataset_collection(output_id))
 
         if wait:
             self.gi._wait_datasets(outputs, polling_interval=polling_interval,
@@ -633,7 +641,7 @@ class DatasetCollection(Wrapper):
     Abstract base class for Galaxy dataset collections.
     """
     BASE_ATTRS = Wrapper.BASE_ATTRS + (
-        'state', 'deleted'
+        'state', 'deleted', 'collection_type'
     )
 
     @abc.abstractmethod
