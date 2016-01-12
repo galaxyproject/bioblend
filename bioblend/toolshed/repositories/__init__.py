@@ -168,10 +168,11 @@ class ToolShedRepositoryClient(Client):
 
         :rtype: List of dictionaries
         :return: Returns a list of the following dictionaries:
-          - a dictionary defining the repository
-          - a dictionary defining the repository revision (RepositoryMetadata)
-          - a dictionary including the additional information required to
-            install the repository
+
+          #. a dictionary defining the repository
+          #. a dictionary defining the repository revision (RepositoryMetadata)
+          #. a dictionary including the additional information required to
+             install the repository
 
           For example::
 
