@@ -26,7 +26,7 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
     def test_download_dataset(self):
         with self.assertRaises(Exception):
             self.gi.datasets.download_dataset(None)
-        self._wait_for_history(self.history_id, timeout_seconds=25)
+        self._wait_for_history(self.history_id, timeout_seconds=30)
         with tempfile.NamedTemporaryFile(prefix='bioblend_test_') as f:
             self.gi.datasets.download_dataset(self.dataset_id, file_path=f.name, use_default_filename=False)
             f.flush()

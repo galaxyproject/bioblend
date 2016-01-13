@@ -35,7 +35,7 @@ class GalaxyTestBase(unittest.TestCase):
         raise Exception('Timeout expired while waiting for history')
 
     def _wait_and_verify_dataset(self, history_id, dataset_id, expected_contents):
-        self._wait_for_history(history_id)
+        self._wait_for_history(history_id, timeout_seconds=60)
         with tempfile.NamedTemporaryFile(prefix='bioblend_test_') as f:
             self.gi.histories.download_dataset(history_id, dataset_id, file_path=f.name, use_default_filename=False)
             f.flush()
