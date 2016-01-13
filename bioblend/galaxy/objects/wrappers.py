@@ -26,6 +26,8 @@ __all__ = [
     'Folder',
     'Dataset',
     'HistoryDatasetAssociation',
+    'DatasetCollection',
+    'HistoryDatasetCollectionAssociation',
     'LibraryDatasetDatasetAssociation',
     'LibraryDataset',
     'Tool',
@@ -445,10 +447,17 @@ class Workflow(Wrapper):
             raise TypeError(
                 'history must be either a history wrapper or a string')
         res = self.gi.gi.workflows.run_workflow(self.id, **kwargs)
-        # res structure: {'history': HIST_ID, 'outputs': [DS_ID, DS_ID, ...]}
+        # res structure: {'history': HIST_ID, 'outputs': [CI_ID, CI_ID, ...]}
         out_hist = self.gi.histories.get(res['history'])
-        assert set(res['outputs']).issubset(out_hist.dataset_ids)
-        outputs = [out_hist.get_dataset(_) for _ in res['outputs']]
+        content_infos_dict = dict()
+        for ci in out_hist.content_infos:
+            content_infos_dict[ci.id] = ci
+        outputs = []
+        for output_id in res['outputs']:
+            if content_infos_dict[output_id].type == 'file':
+                outputs.append(out_hist.get_dataset(output_id))
+            elif content_infos_dict[output_id].type == 'collection':
+                outputs.append(out_hist.get_dataset_collection(output_id))
 
         if wait:
             self.gi._wait_datasets(outputs, polling_interval=polling_interval,
@@ -622,6 +631,56 @@ class HistoryDatasetAssociation(Dataset):
         Delete this dataset.
         """
         self.gi.gi.histories.delete_dataset(self.container.id, self.id)
+        self.container.refresh()
+        self.refresh()
+
+
+@six.add_metaclass(abc.ABCMeta)
+class DatasetCollection(Wrapper):
+    """
+    Abstract base class for Galaxy dataset collections.
+    """
+    BASE_ATTRS = Wrapper.BASE_ATTRS + (
+        'state', 'deleted', 'collection_type'
+    )
+
+    @abc.abstractmethod
+    def __init__(self, dsc_dict, container, gi=None):
+        super(DatasetCollection, self).__init__(dsc_dict, gi=gi)
+        object.__setattr__(self, 'container', container)
+
+    def refresh(self):
+        """
+        Re-fetch the attributes pertaining to this object.
+
+        Returns: self
+        """
+        gi_client = getattr(self.gi.gi, self.container.API_MODULE)
+        dsc_dict = gi_client.show_dataset_collection(self.container.id, self.id)
+        self.__init__(dsc_dict, self.container, self.gi)
+        return self
+
+
+class HistoryDatasetCollectionAssociation(DatasetCollection):
+    """
+    Maps to a Galaxy ``HistoryDatasetCollectionAssociation``.
+    """
+    BASE_ATTRS = DatasetCollection.BASE_ATTRS + ('tags', 'visible', 'elements')
+    SRC = 'hdca'
+
+    def __init__(self, dsc_dict, container, gi=None):
+        super(HistoryDatasetCollectionAssociation, self).__init__(
+            dsc_dict, container, gi=gi)
+
+    @property
+    def gi_module(self):
+        return self.gi.histories
+
+    def delete(self):
+        """
+        Delete this dataset collection.
+        """
+        self.gi.gi.histories.delete_dataset_collection(self.container.id, self.id)
         self.container.refresh()
         self.refresh()
 
@@ -807,6 +866,7 @@ class History(DatasetContainer):
     """
     BASE_ATTRS = DatasetContainer.BASE_ATTRS + ('annotation', 'state', 'state_ids', 'state_details', 'tags')
     DS_TYPE = HistoryDatasetAssociation
+    DSC_TYPE = HistoryDatasetCollectionAssociation
     CONTENT_INFO_TYPE = HistoryContentInfo
     API_MODULE = 'histories'
 
@@ -964,6 +1024,33 @@ class History(DatasetContainer):
         """
         return self.gi.gi.histories.download_history(
             self.id, jeha_id, outf, chunk_size=chunk_size)
+
+    def create_dataset_collection(self, collection_description):
+        """
+        Create a new dataset collection in the history by providing the dataset ids.
+
+        :type collection_description: bioblend.galaxy.dataset_collections.CollectionDescription
+        :param collection_description: a description of the dataset collection
+
+        :rtype: class:`~.HistoryDatasetCollectionAssociation`
+        :return: the new dataset collection
+        """
+        dataset_collection = self.gi.gi.histories.create_dataset_collection(self.id, collection_description)
+        self.refresh()
+        return self.get_dataset_collection(dataset_collection['id'])
+
+    def get_dataset_collection(self, dsc_id):
+        """
+        Retrieve the dataset collection corresponding to the given id.
+
+        :type dsc_id: str
+        :param dsc_id: dataset collection id
+
+        :rtype: :class:`~.HistoryDatasetCollectionAssociation`
+        :return: the dataset collection corresponding to ``dsc_id``
+        """
+        dsc_dict = self.gi.gi.histories.show_dataset_collection(self.id, dsc_id)
+        return self.DSC_TYPE(dsc_dict, self, gi=self.gi)
 
 
 class Library(DatasetContainer):
