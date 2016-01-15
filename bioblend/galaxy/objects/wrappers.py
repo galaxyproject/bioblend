@@ -1027,12 +1027,12 @@ class History(DatasetContainer):
 
     def create_dataset_collection(self, collection_description):
         """
-        Create a new dataset collection in the history by providing the dataset ids.
+        Create a new dataset collection in the history by providing a collection description.
 
         :type collection_description: bioblend.galaxy.dataset_collections.CollectionDescription
         :param collection_description: a description of the dataset collection
 
-        :rtype: class:`~.HistoryDatasetCollectionAssociation`
+        :rtype: :class:`~.HistoryDatasetCollectionAssociation`
         :return: the new dataset collection
         """
         dataset_collection = self.gi.gi.histories.create_dataset_collection(self.id, collection_description)
