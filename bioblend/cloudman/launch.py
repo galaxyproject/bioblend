@@ -2,27 +2,26 @@
 Setup and launch a CloudMan instance.
 """
 import datetime
-import yaml
 import socket
 
+import bioblend
+from bioblend.util import Bunch
 import boto
 from boto.compat import http_client
 from boto.ec2.regioninfo import RegionInfo
 from boto.exception import EC2ResponseError, S3ResponseError
 from boto.s3.connection import OrdinaryCallingFormat, S3Connection, SubdomainCallingFormat
 import six
+import yaml
+
 from six.moves.http_client import HTTPConnection
 from six.moves.urllib.parse import urlparse
 
-import bioblend
-from bioblend.util import Bunch
 
 # Uncomment the following line if no logging from boto is desired
 # bioblend.logging.getLogger('boto').setLevel(bioblend.logging.CRITICAL)
 # Uncomment the following line if logging at the prompt is desired
 # bioblend.set_stream_logger(__name__)
-
-
 def instance_types(cloud_name='generic'):
     """
     Return a list of dictionaries containing details about the available
@@ -68,6 +67,7 @@ def instance_types(cloud_name='generic'):
 
 
 class CloudManLauncher(object):
+
     def __init__(self, access_key, secret_key, cloud=None):
         """
         Define the environment in which this instance of CloudMan will be launched.
@@ -100,13 +100,17 @@ class CloudManLauncher(object):
                                s3_conn_path='/')
         else:
             self.cloud = cloud
-        self.ec2_conn = self.connect_ec2(self.access_key, self.secret_key, self.cloud)
+        self.ec2_conn = self.connect_ec2(
+            self.access_key,
+            self.secret_key,
+            self.cloud)
         # Define exceptions from http_client that we want to catch and retry
         self.http_exceptions = (http_client.HTTPException, socket.error,
                                 socket.gaierror, http_client.BadStatusLine)
 
     def __repr__(self):
-        return "Cloud: {0}; acct ID: {1}".format(self.cloud.name, self.access_key)
+        return "Cloud: {0}; acct ID: {1}".format(
+            self.cloud.name, self.access_key)
 
     def launch(self, cluster_name, image_id, instance_type, password,
                kernel_id=None, ramdisk_id=None, key_name='cloudman_key_pair',
@@ -159,8 +163,10 @@ class CloudManLauncher(object):
         # TODO: Should placement always be checked? To make sure it's correct
         # for existing clusters.
         if not placement:
-            placement = self._find_placement(cluster_name).get('placement', None)
-        # Compose user data for launching an instance, ensuring we have the required fields
+            placement = self._find_placement(
+                cluster_name).get('placement', None)
+        # Compose user data for launching an instance, ensuring we have the
+        # required fields
         kwargs['access_key'] = self.access_key
         kwargs['secret_key'] = self.secret_key
         kwargs['cluster_name'] = cluster_name
@@ -173,6 +179,7 @@ class CloudManLauncher(object):
             rs = self.ec2_conn.run_instances(image_id=image_id,
                                              instance_type=instance_type,
                                              key_name=key_name,
+                                             security_groups=security_groups,
                                              security_group_ids=security_group_ids,
                                              user_data=ud,
                                              kernel_id=kernel_id,
@@ -189,7 +196,9 @@ class CloudManLauncher(object):
         else:
             if rs:
                 try:
-                    bioblend.log.info("Launched an instance with ID %s" % rs.instances[0].id)
+                    bioblend.log.info(
+                        "Launched an instance with ID %s" %
+                        rs.instances[0].id)
                     ret['instance_id'] = rs.instances[0].id
                     ret['instance_ip'] = rs.instances[0].ip_address
                 except EC2ResponseError as e:
@@ -199,8 +208,8 @@ class CloudManLauncher(object):
                     bioblend.log.exception(err_msg)
                     ret['error'] = err_msg
             else:
-                    ret['error'] = ("No response after launching an instance. Check "
-                                    "your account permissions and try again.")
+                ret['error'] = ("No response after launching an instance. Check "
+                                "your account permissions and try again.")
         return ret
 
     def create_cm_security_group(self, sg_name='CloudMan'):
@@ -271,10 +280,17 @@ class CloudManLauncher(object):
             # If these rules already exist, nothing will be changed in the SG
             for port in ports:
                 try:
-                    if not self.rule_exists(cmsg.rules, from_port=port[0], to_port=port[1]):
-                        cmsg.authorize(ip_protocol='tcp', from_port=port[0], to_port=port[1], cidr_ip='0.0.0.0/0')
+                    if not self.rule_exists(
+                            cmsg.rules, from_port=port[0], to_port=port[1]):
+                        cmsg.authorize(
+                            ip_protocol='tcp',
+                            from_port=port[0],
+                            to_port=port[1],
+                            cidr_ip='0.0.0.0/0')
                     else:
-                        bioblend.log.debug("Rule (%s:%s) already exists in the SG" % (port[0], port[1]))
+                        bioblend.log.debug(
+                            "Rule (%s:%s) already exists in the SG" %
+                            (port[0], port[1]))
                 except EC2ResponseError as e:
                     err_msg = "A problem adding security group authorizations: {0} " \
                               "(code {1}; status {2})" \
@@ -283,40 +299,57 @@ class CloudManLauncher(object):
                     progress['error'] = err_msg
             # Add ICMP (i.e., ping) rule required by HTCondor
             try:
-                if not self.rule_exists(cmsg.rules, from_port='-1', to_port='-1', ip_protocol='icmp'):
-                    cmsg.authorize(ip_protocol='icmp', from_port=-1, to_port=-1, cidr_ip='0.0.0.0/0')
+                if not self.rule_exists(
+                        cmsg.rules, from_port='-1', to_port='-1', ip_protocol='icmp'):
+                    cmsg.authorize(
+                        ip_protocol='icmp',
+                        from_port=-1,
+                        to_port=-1,
+                        cidr_ip='0.0.0.0/0')
                 else:
-                    bioblend.log.debug("ICMP rule already exists in {0} SG.".format(sg_name))
+                    bioblend.log.debug(
+                        "ICMP rule already exists in {0} SG.".format(sg_name))
             except EC2ResponseError as e:
                 err_msg = "A problem with security ICMP rule authorization: {0} " \
                           "(code {1}; status {2})" \
                           .format(e.message, e.error_code, e.status)
                 bioblend.log.exception(err_msg)
                 progress['err_msg'] = err_msg
-            # Add rule that allows communication between instances in the same SG
-            g_rule_exists = False  # A flag to indicate if group rule already exists
+            # Add rule that allows communication between instances in the same
+            # SG
+            # A flag to indicate if group rule already exists
+            g_rule_exists = False
             for rule in cmsg.rules:
                 for grant in rule.grants:
                     if grant.name == cmsg.name:
                         g_rule_exists = True
-                        bioblend.log.debug("Group rule already exists in the SG.")
+                        bioblend.log.debug(
+                            "Group rule already exists in the SG.")
                 if g_rule_exists:
                     break
             if not g_rule_exists:
                 try:
-                    cmsg.authorize(src_group=cmsg, ip_protocol='tcp', from_port=0, to_port=65535)
+                    cmsg.authorize(
+                        src_group=cmsg,
+                        ip_protocol='tcp',
+                        from_port=0,
+                        to_port=65535)
                 except EC2ResponseError as e:
                     err_msg = "A problem with security group authorization: {0} " \
                               "(code {1}; status {2})" \
                               .format(e.message, e.error_code, e.status)
                     bioblend.log.exception(err_msg)
                     progress['err_msg'] = err_msg
-            bioblend.log.info("Done configuring '%s' security group" % cmsg.name)
+            bioblend.log.info(
+                "Done configuring '%s' security group" %
+                cmsg.name)
         else:
-            bioblend.log.warning("Did not create security group '{0}'".format(sg_name))
+            bioblend.log.warning(
+                "Did not create security group '{0}'".format(sg_name))
         return progress
 
-    def rule_exists(self, rules, from_port, to_port, ip_protocol='tcp', cidr_ip='0.0.0.0/0'):
+    def rule_exists(
+            self, rules, from_port, to_port, ip_protocol='tcp', cidr_ip='0.0.0.0/0'):
         """
         A convenience method to check if an authorization rule in a security group
         already exists.
@@ -361,7 +394,9 @@ class CloudManLauncher(object):
             return progress
         for akp in kps:
             if akp.name == key_name:
-                bioblend.log.info("Key pair '%s' already exists; reusing it." % key_name)
+                bioblend.log.info(
+                    "Key pair '%s' already exists; reusing it." %
+                    key_name)
                 progress['name'] = akp.name
                 return progress
         try:
@@ -420,7 +455,8 @@ class CloudManLauncher(object):
                 state['public_ip'] = public_ip
                 if inst_state == 'running':
                     cm_url = "http://{dns}/cloud".format(dns=public_ip)
-                    # Wait until the CloudMan URL is accessible to return the data
+                    # Wait until the CloudMan URL is accessible to return the
+                    # data
                     if self._checkURL(cm_url) is True:
                         state['instance_state'] = inst_state
                         state['placement'] = rs[0].instances[0].placement
@@ -529,8 +565,10 @@ class CloudManLauncher(object):
         r = RegionInfo(name=ci['region_name'], endpoint=ci['region_endpoint'])
         ec2_conn = boto.connect_ec2(aws_access_key_id=a_key,
                                     aws_secret_access_key=s_key,
-                                    # api_version is needed for availability zone support for EC2
-                                    api_version='2012-06-01' if ci['cloud_type'] == 'ec2' else None,
+                                    # api_version is needed for availability
+                                    # zone support for EC2
+                                    api_version='2012-06-01' if ci[
+                                        'cloud_type'] == 'ec2' else None,
                                     is_secure=ci['is_secure'],
                                     region=r,
                                     port=ci['ec2_port'],
@@ -575,14 +613,20 @@ class CloudManLauncher(object):
         for key, value in six.iteritems(user_provided_data):
             if key not in excluded_fields:
                 form_data[key] = value
-        # If the following user data keys are empty, do not include them in the request user data
-        udkeys = ['post_start_script_url', 'worker_post_start_script_url', 'bucket_default', 'share_string']
+        # If the following user data keys are empty, do not include them in the
+        # request user data
+        udkeys = [
+            'post_start_script_url',
+            'worker_post_start_script_url',
+            'bucket_default',
+            'share_string']
         for udkey in udkeys:
             if udkey in form_data and form_data[udkey] == '':
                 del form_data[udkey]
         # If bucket_default was not provided, add a default value to the user data
         # (missing value does not play nicely with CloudMan's ec2autorun.py)
-        if not form_data.get('bucket_default', None) and self.cloud.bucket_default:
+        if not form_data.get(
+                'bucket_default', None) and self.cloud.bucket_default:
             form_data['bucket_default'] = self.cloud.bucket_default
         # Reuse the ``password`` for the ``freenxpass`` user data option
         if 'freenxpass' not in form_data and 'password' in form_data:
@@ -627,7 +671,9 @@ class CloudManLauncher(object):
         if vol:
             return vol[0].zone
         else:
-            bioblend.log.error("Requested placement of a volume '%s' that does not exist." % vol_id)
+            bioblend.log.error(
+                "Requested placement of a volume '%s' that does not exist." %
+                vol_id)
             return None
 
     def _find_placement(self, cluster_name, cluster=None):
@@ -662,9 +708,12 @@ class CloudManLauncher(object):
                     response['placement'] = self._get_volume_placement(vol_id)
                 elif 'filesystems' in pd:
                     # V2 format.
-                    for fs in [fs for fs in pd['filesystems'] if fs.get('kind', None) == 'volume' and 'ids' in fs]:
-                        vol_id = fs['ids'][0]  # All volumes must be in the same zone
-                        response['placement'] = self._get_volume_placement(vol_id)
+                    for fs in [fs for fs in pd['filesystems'] if fs.get(
+                            'kind', None) == 'volume' and 'ids' in fs]:
+                        # All volumes must be in the same zone
+                        vol_id = fs['ids'][0]
+                        response['placement'] = self._get_volume_placement(
+                            vol_id)
                         # No need to continue to iterate through
                         # filesystems, if we found one with a volume.
                         break
@@ -680,7 +729,8 @@ class CloudManLauncher(object):
                                .format(cluster_name))
         return response
 
-    def find_placements(self, ec2_conn, instance_type, cloud_type, cluster_name=None):
+    def find_placements(
+            self, ec2_conn, instance_type, cloud_type, cluster_name=None):
         """
         Find a list of placement zones that support the specified instance type.
 
@@ -720,7 +770,8 @@ class CloudManLauncher(object):
         if not response['zones']:
             in_the_past = datetime.datetime.now() - datetime.timedelta(hours=1)
             back_compatible_zone = "us-east-1e"
-            for zone in [z for z in ec2_conn.get_all_zones() if z.state == 'available']:
+            for zone in [
+                    z for z in ec2_conn.get_all_zones() if z.state == 'available']:
                 # Non EC2 clouds may not support get_spot_price_history
                 if instance_type is None or cloud_type != 'ec2':
                     zones.append(zone.name)
@@ -728,9 +779,11 @@ class CloudManLauncher(object):
                                                      end_time=in_the_past.isoformat(),
                                                      availability_zone=zone.name):
                     zones.append(zone.name)
-            zones.sort(reverse=True)  # Higher-lettered zones seem to have more availability currently
+            # Higher-lettered zones seem to have more availability currently
+            zones.sort(reverse=True)
             if back_compatible_zone in zones:
-                zones = [back_compatible_zone] + [z for z in zones if z != back_compatible_zone]
+                zones = [back_compatible_zone] + \
+                    [z for z in zones if z != back_compatible_zone]
             if len(zones) == 0:
                 response['error'] = ("Did not find availabilty zone for {1}"
                                      .format(instance_type))
@@ -749,7 +802,8 @@ class CloudManLauncher(object):
             h.putrequest('HEAD', p[2])
             h.endheaders()
             r = h.getresponse()
-            if r.status in (200, 401):  # CloudMan UI is pwd protected so include 401
+            # CloudMan UI is pwd protected so include 401
+            if r.status in (200, 401):
                 return True
         except Exception:
             # No response or no good response
