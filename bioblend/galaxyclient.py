@@ -124,9 +124,13 @@ class GalaxyClient(object):
         r = requests.post(url, data=payload, headers=headers,
                           verify=self.verify, params=post_params)
         if r.status_code == 200:
-            return r.json()
+            try:
+                return r.json()
+            except Exception as e:
+                raise ConnectionError("Request was successful, but cannot decode the response content: %s" %
+                                      e, body=r.content)
         # @see self.body for HTTP response body
-        raise ConnectionError("Unexpected response from galaxy: %s" %
+        raise ConnectionError("Unexpected HTTP status code: %s" %
                               r.status_code, body=r.text)
 
     def make_delete_request(self, url, payload=None, params=None):
