@@ -609,7 +609,7 @@ class HistoryDatasetAssociation(Dataset):
     """
     Maps to a Galaxy ``HistoryDatasetAssociation``.
     """
-    BASE_ATTRS = Dataset.BASE_ATTRS + ('tags', 'visible')
+    BASE_ATTRS = Dataset.BASE_ATTRS + ('annotation', 'genome_build', 'tags', 'visible')
     SRC = 'hda'
 
     def __init__(self, ds_dict, container, gi=None):
