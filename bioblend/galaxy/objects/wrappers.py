@@ -8,7 +8,6 @@ import abc
 import collections
 import json
 
-from six.moves import http_client
 import six
 
 import bioblend
@@ -904,10 +903,8 @@ class History(DatasetContainer):
         # TODO: wouldn't it be better if name and annotation were attributes?
         # TODO: do we need to ensure the attributes of `self` are the same as
         # the ones returned by the call to `update_history` below?
-        res = self.gi.gi.histories.update_history(
-            self.id, name=name, annotation=annotation, **kwds)
-        if res != http_client.OK:
-            raise RuntimeError('failed to update history')
+        self.gi.gi.histories.update_history(self.id, name=name,
+                                            annotation=annotation, **kwds)
         self.refresh()
         return self
 

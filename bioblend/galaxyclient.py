@@ -128,10 +128,10 @@ class GalaxyClient(object):
                 return r.json()
             except Exception as e:
                 raise ConnectionError("Request was successful, but cannot decode the response content: %s" %
-                                      e, body=r.content)
+                                      e, body=r.content, status_code=r.status_code)
         # @see self.body for HTTP response body
-        raise ConnectionError("Unexpected HTTP status code: %s" %
-                              r.status_code, body=r.text)
+        raise ConnectionError("Unexpected HTTP status code: %s" % r.status_code,
+                              body=r.text, status_code=r.status_code)
 
     def make_delete_request(self, url, payload=None, params=None):
         """
@@ -167,7 +167,15 @@ class GalaxyClient(object):
 
         payload = json.dumps(payload)
         r = requests.put(url, verify=self.verify, data=payload, params=params)
-        return r
+        if r.status_code == 200:
+            try:
+                return r.json()
+            except Exception as e:
+                raise ConnectionError("Request was successful, but cannot decode the response content: %s" %
+                                      e, body=r.content, status_code=r.status_code)
+        # @see self.body for HTTP response body
+        raise ConnectionError("Unexpected HTTP status code: %s" % r.status_code,
+                              body=r.text, status_code=r.status_code)
 
     @property
     def key(self):
