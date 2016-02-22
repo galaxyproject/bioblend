@@ -52,11 +52,11 @@ class TestGalaxyTools(GalaxyTestBase.GalaxyTestBase):
         paste_text = 'test contents'
         tool_output = self.gi.tools.paste_content(paste_text, history["id"])
         self.assertEqual(len(tool_output["outputs"]), 1)
-        self._wait_and_verify_dataset(history['id'], tool_output['outputs'][0]['id'], six.b(paste_text.rstrip('\r\n') + "\n"))
+        self._wait_and_verify_dataset(tool_output['outputs'][0]['id'], six.b(paste_text.rstrip('\r\n') + "\n"))
         # Same with space_to_tab=True
         tool_output = self.gi.tools.paste_content(paste_text, history["id"], space_to_tab=True)
         self.assertEqual(len(tool_output["outputs"]), 1)
-        self._wait_and_verify_dataset(history['id'], tool_output['outputs'][0]['id'], six.b("\t".join(paste_text.rstrip('\r\n').split()) + "\n"))
+        self._wait_and_verify_dataset(tool_output['outputs'][0]['id'], six.b("\t".join(paste_text.rstrip('\r\n').split()) + "\n"))
 
     def test_upload_file(self):
         history = self.gi.histories.create_history(name="test_upload_file history")
@@ -75,7 +75,7 @@ class TestGalaxyTools(GalaxyTestBase.GalaxyTestBase):
         output = tool_output['outputs'][0]
         self.assertEqual(output['name'], file_name)
         expected_contents = open(fn, "rb").read()
-        self._wait_and_verify_dataset(history["id"], output["id"], expected_contents)
+        self._wait_and_verify_dataset(output["id"], expected_contents)
 
     @test_util.skip_unless_tool("random_lines1")
     def test_run_random_lines(self):

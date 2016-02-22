@@ -114,7 +114,7 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
     def test_download_dataset(self):
         history_id = self.history["id"]
         dataset1_id = self._test_dataset(history_id)
-        self._wait_and_verify_dataset(history_id, dataset1_id, b"1\t2\t3\n")
+        self._wait_and_verify_dataset(dataset1_id, b"1\t2\t3\n")
 
     def test_delete_history(self):
         result = self.gi.histories.delete_history(self.history['id'])
