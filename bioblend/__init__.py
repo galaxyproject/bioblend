@@ -92,9 +92,10 @@ class ConnectionError(Exception):
     proxy server getting in the way of the request etc.
     @see: body attribute to see the content of the http response
     """
-    def __init__(self, message, body=None):
+    def __init__(self, message, body=None, status_code=None):
         super(ConnectionError, self).__init__(message)
         self.body = body
+        self.status_code = status_code
 
     def __str__(self):
         return "{0}: {1}".format(self.args[0], self.body)

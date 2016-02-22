@@ -28,8 +28,9 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
         new_name = 'buildbot - automated test renamed'
         new_annotation = 'Annotation for %s' % new_name
         new_tags = ['tag1', 'tag2']
-        self.gi.histories.update_history(self.history['id'], name=new_name, annotation=new_annotation, tags=new_tags)
-        updated_hist = self.gi.histories.show_history(self.history['id'])
+        updated_hist = self.gi.histories.update_history(self.history['id'], name=new_name, annotation=new_annotation, tags=new_tags)
+        if 'id' not in updated_hist:
+            updated_hist = self.gi.histories.show_history(self.history['id'])
         self.assertEqual(self.history['id'], updated_hist['id'])
         self.assertEqual(updated_hist['name'], new_name)
         self.assertEqual(updated_hist['annotation'], new_annotation)
@@ -102,9 +103,10 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
     def test_update_dataset(self):
         history_id = self.history["id"]
         dataset1_id = self._test_dataset(history_id)
-        self.gi.histories.update_dataset(history_id, dataset1_id, visible=False)
-        dataset = self.gi.histories.show_dataset(history_id, dataset1_id)
-        self.assertFalse(dataset["visible"])
+        updated_dataset = self.gi.histories.update_dataset(history_id, dataset1_id, visible=False)
+        if 'id' not in updated_dataset:
+            updated_dataset = self.gi.histories.show_dataset(history_id, dataset1_id)
+        self.assertFalse(updated_dataset["visible"])
 
     def test_upload_dataset_from_library(self):
         pass

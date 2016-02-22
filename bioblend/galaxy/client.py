@@ -112,9 +112,8 @@ class Client(object):
                 r = self.gi.make_get_request(url, params=params)
             except (requests.exceptions.ConnectionError, ProtocolError) as e:
                 msg = str(e)
+                r = requests.Response()  # empty Response object used when raising ConnectionError
             else:
-                if r is None:
-                    msg = "GET: no response"
                 if r.status_code == 200:
                     if not json:
                         return r
@@ -130,7 +129,8 @@ class Client(object):
             msg = "%s, %d attempts left" % (msg, attempts_left)
             if attempts_left <= 0:
                 bioblend.log.error(msg)
-                raise ConnectionError(msg)
+                raise ConnectionError(msg, body=r.text,
+                                      status_code=r.status_code)
             else:
                 bioblend.log.warn(msg)
                 time.sleep(retry_delay)
@@ -183,6 +183,5 @@ class Client(object):
         if r.status_code == 200:
             return r.json()
         # @see self.body for HTTP response body
-        raise ConnectionError(
-            "Unexpected HTTP status code: %s" % r.status_code, body=r.text
-        )
+        raise ConnectionError("Unexpected HTTP status code: %s" % r.status_code,
+                              body=r.text, status_code=r.status_code)

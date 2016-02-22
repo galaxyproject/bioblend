@@ -8,6 +8,7 @@ import time
 import six
 
 import bioblend
+from bioblend import ConnectionError
 from bioblend.galaxy.client import Client
 
 
@@ -229,12 +230,17 @@ class HistoryClient(Client):
         :type tags: list
         :param tags: Replace history tags with the given list
 
-        :rtype: int
-        :return: status code
+        :rtype: dict
+        :return: details of the updated history (for Galaxy release_15.01 and
+            earlier only the updated attributes)
+
+        .. warning::
+            The return value was changed in BioBlend v0.8.0, previously it was
+            the status code (type int).
         """
         kwds['name'] = name
         kwds['annotation'] = annotation
-        return Client._put(self, kwds, id=history_id).status_code
+        return Client._put(self, kwds, id=history_id)
 
     def update_dataset(self, history_id, dataset_id, **kwds):
         """
@@ -250,6 +256,9 @@ class HistoryClient(Client):
         :type name: str
         :param name: Replace history dataset name with the given string
 
+        :type genome_build: str
+        :param genome_build: Replace history dataset genome build (dbkey)
+
         :type annotation: str
         :param annotation: Replace history dataset annotation with given string
 
@@ -259,13 +268,18 @@ class HistoryClient(Client):
         :type visible: bool
         :param visible: Mark or unmark history dataset as visible
 
-        :rtype: int
-        :return: status code
+        :rtype: dict
+        :return: details of the updated dataset (for Galaxy release_15.01 and
+            earlier only the updated attributes)
+
+        .. warning::
+            The return value was changed in BioBlend v0.8.0, previously it was
+            the status code (type int).
         """
         url = self.gi._make_url(self, history_id, contents=True)
         # Append the dataset_id to the base history contents URL
         url = '/'.join([url, dataset_id])
-        return Client._put(self, payload=kwds, url=url).status_code
+        return Client._put(self, payload=kwds, url=url)
 
     def update_dataset_collection(self, history_id, dataset_collection_id, **kwds):
         """
@@ -288,12 +302,16 @@ class HistoryClient(Client):
         :type visible: bool
         :param visible: Mark or unmark history dataset collection as visible
 
-        :rtype: int
-        :return: status code
+        :rtype: dict
+        :return: the updated dataset collection attributes
+
+        .. warning::
+            The return value was changed in BioBlend v0.8.0, previously it was
+            the status code (type int).
         """
         url = self.gi._make_url(self, history_id, contents=True)
         url = '/'.join([url, "dataset_collections", dataset_collection_id])
-        return Client._put(self, payload=kwds, url=url).status_code
+        return Client._put(self, payload=kwds, url=url)
 
     def create_history_tag(self, history_id, tag):
         """
@@ -490,15 +508,19 @@ class HistoryClient(Client):
         }
         url = '%s/exports' % self.gi._make_url(self, history_id)
         while True:
-            r = Client._put(self, {}, url=url, params=params)
-            if not wait or r.status_code == 200:
+            try:
+                r = Client._put(self, {}, url=url, params=params)
+            except ConnectionError as e:
+                if e.status_code == 202:  # export is not ready
+                    if wait:
+                        time.sleep(1)
+                    else:
+                        return ''
+                else:
+                    raise
+            else:
                 break
-            time.sleep(1)
-        contents = r.json()
-        if contents:
-            jeha_id = contents['download_url'].rsplit('/', 1)[-1]
-        else:
-            jeha_id = ''  # export is not ready
+        jeha_id = r['download_url'].rsplit('/', 1)[-1]
         return jeha_id
 
     def download_history(self, history_id, jeha_id, outf,

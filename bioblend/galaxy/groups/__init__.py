@@ -96,16 +96,13 @@ class GroupsClient(Client):
         :type role_ids: list
         :param role_ids: New list of encoded role IDs for the group. It will
           substitute the previous list of roles (with [] if not specified)
-
-        :rtype: int
-        :return: status code
         """
         payload = {
             'name': group_name,
             'user_ids': user_ids,
             'role_ids': role_ids
         }
-        return Client._put(self, payload, id=group_id).status_code
+        return Client._put(self, payload, id=group_id)
 
     def get_group_users(self, group_id):
         """
@@ -147,7 +144,7 @@ class GroupsClient(Client):
         :return: Added group user's info
         """
         url = '/'.join([self.gi._make_url(self, group_id), 'users', user_id])
-        return Client._put(self, dict(), url=url).json()
+        return Client._put(self, dict(), url=url)
 
     def add_group_role(self, group_id, role_id):
         """
@@ -163,7 +160,7 @@ class GroupsClient(Client):
         :return: Added group role's info
         """
         url = '/'.join([self.gi._make_url(self, group_id), 'roles', role_id])
-        return Client._put(self, {}, url=url).json()
+        return Client._put(self, {}, url=url)
 
     def delete_group_user(self, group_id, user_id):
         """

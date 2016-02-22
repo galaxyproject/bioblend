@@ -1,4 +1,12 @@
+### BioBlend v0.8.0 - Unreleased
+
 * Added ``delete_user()`` method to ``UserClient``.
+
+* Modified ``update_dataset()``, ``update_dataset_collection()`` and
+  ``update_history()`` methods of ``HistoryClient`` to return the details
+  instead of the status code.
+
+* BioBlend.objects: added ``update()`` method to ``HistoryDatasetAssociation``.
 
 * Removed deprecated method ``create_user()`` of ``UserClient``.
 
