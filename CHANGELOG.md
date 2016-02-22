@@ -6,6 +6,8 @@
   ``update_history()`` methods of ``HistoryClient`` to return the details
   instead of the status code.
 
+* BioBlend.objects: added ``update()`` method to ``HistoryDatasetAssociation``.
+
 * Removed deprecated method ``create_user()`` of ``UserClient``.
 
 ### BioBlend v0.7.0 - November 2, 2015

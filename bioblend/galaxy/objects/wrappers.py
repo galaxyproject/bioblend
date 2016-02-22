@@ -625,9 +625,39 @@ class HistoryDatasetAssociation(Dataset):
             self.gi.gi.histories, module_id=self.container.id, contents=True)
         return "%s/%s/display" % (base_url, self.id)
 
+    def update(self, **kwds):
+        """
+        Update this history dataset metadata. Some of the attributes that can be
+        modified are documented below.
+
+        :type name: str
+        :param name: Replace history dataset name with the given string
+
+        :type genome_build: str
+        :param genome_build: Replace history dataset genome build (dbkey)
+
+        :type annotation: str
+        :param annotation: Replace history dataset annotation with given string
+
+        :type deleted: bool
+        :param deleted: Mark or unmark history dataset as deleted
+
+        :type visible: bool
+        :param visible: Mark or unmark history dataset as visible
+        """
+        res = self.gi.gi.histories.update_dataset(self.container.id, self.id, **kwds)
+        # Refresh also the history because the dataset may have been (un)deleted
+        self.container.refresh()
+        if 'id' in res:
+            self.__init__(res, self.container, gi=self.gi)
+        else:
+            # for Galaxy < release_15.03 res contains only the updated fields
+            self.refresh()
+        return self
+
     def delete(self):
         """
-        Delete this dataset.
+        Delete this history dataset.
         """
         self.gi.gi.histories.delete_dataset(self.container.id, self.id)
         self.container.refresh()

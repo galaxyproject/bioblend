@@ -679,6 +679,16 @@ class TestHDAContents(GalaxyObjectsTestBase):
     def test_dataset_get_contents(self):
         self.assertEqual(six.b(FOO_DATA), self.ds.get_contents())
 
+    def test_dataset_update(self):
+        new_name = 'test_%s' % uuid.uuid4().hex
+        new_annotation = 'Annotation for %s' % new_name
+        new_genome_build = 'hg19'
+        updated_hda = self.ds.update(name=new_name, annotation=new_annotation, genome_build=new_genome_build)
+        self.assertEqual(self.ds.id, updated_hda.id)
+        self.assertEqual(self.ds.name, new_name)
+        self.assertEqual(self.ds.annotation, new_annotation)
+        self.assertEqual(self.ds.genome_build, new_genome_build)
+
     def test_dataset_delete(self):
         self.ds.delete()
         self.assertTrue(self.ds.deleted)
