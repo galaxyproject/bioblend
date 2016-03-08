@@ -412,6 +412,12 @@ class CloudManLauncher(object):
         progress['material'] = kp.material
         return progress
 
+    def assign_floating_ip(self, ec2_conn, instance):
+        address = ec2_conn.allocate_address()
+        bioblend.log.info("Assigning floating ip: %s", address.public_ip)
+        ec2_conn.associate_address(instance_id=instance.id,
+                                   public_ip=address.public_ip)
+
     def get_status(self, instance_id):
         """
         Check on the status of an instance. ``instance_id`` needs to be a
@@ -454,6 +460,10 @@ class CloudManLauncher(object):
                 public_ip = rs[0].instances[0].ip_address
                 state['public_ip'] = public_ip
                 if inst_state == 'running':
+                    # if there's a private ip, but no public ip
+                    # attempt auto allocation of floating IP
+                    if rs[0].instances[0].private_ip_address and not public_ip:
+                        self.assign_floating_ip(ec2_conn, rs[0].instances[0])
                     cm_url = "http://{dns}/cloud".format(dns=public_ip)
                     # Wait until the CloudMan URL is accessible to return the
                     # data
