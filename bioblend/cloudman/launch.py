@@ -114,7 +114,8 @@ class CloudManLauncher(object):
 
     def launch(self, cluster_name, image_id, instance_type, password,
                kernel_id=None, ramdisk_id=None, key_name='cloudman_key_pair',
-               security_groups=['CloudMan'], placement='', subnet_id=None, **kwargs):
+               security_groups=['CloudMan'], placement='', subnet_id=None,
+               ebs_optimized=False, **kwargs):
         """
         Check all the prerequisites (key pair and security groups) for
         launching a CloudMan instance, compose the user data based on the
@@ -185,7 +186,8 @@ class CloudManLauncher(object):
                                              kernel_id=kernel_id,
                                              ramdisk_id=ramdisk_id,
                                              subnet_id=subnet_id,
-                                             placement=placement)
+                                             placement=placement,
+                                             ebs_optimized=ebs_optimized)
             ret['rs'] = rs
         except EC2ResponseError as e:
             err_msg = "Problem launching an instance: {0} (code {1}; status {2})" \
