@@ -575,10 +575,6 @@ class CloudManLauncher(object):
         r = RegionInfo(name=ci['region_name'], endpoint=ci['region_endpoint'])
         ec2_conn = boto.connect_ec2(aws_access_key_id=a_key,
                                     aws_secret_access_key=s_key,
-                                    # api_version is needed for availability
-                                    # zone support for EC2
-                                    api_version='2012-06-01' if ci[
-                                        'cloud_type'] == 'ec2' else None,
                                     is_secure=ci['is_secure'],
                                     region=r,
                                     port=ci['ec2_port'],
