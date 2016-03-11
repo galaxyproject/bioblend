@@ -793,7 +793,7 @@ class CloudManLauncher(object):
                 zones = [back_compatible_zone] + \
                     [z for z in zones if z != back_compatible_zone]
             if len(zones) == 0:
-                response['error'] = ("Did not find availabilty zone for {1}"
+                response['error'] = ("Did not find availabilty zone for {0}"
                                      .format(instance_type))
                 bioblend.log.error(response['error'])
                 zones.append(back_compatible_zone)
