@@ -104,6 +104,10 @@ class CloudManLauncher(object):
             self.access_key,
             self.secret_key,
             self.cloud)
+        self.vpc_conn = self.connect_vpc(
+            self.access_key,
+            self.secret_key,
+            self.cloud)
         # Define exceptions from http_client that we want to catch and retry
         self.http_exceptions = (http_client.HTTPException, socket.error,
                                 socket.gaierror, http_client.BadStatusLine)
@@ -143,17 +147,34 @@ class CloudManLauncher(object):
                'rs': None,
                'instance_id': '',
                'error': None}
-        security_group_ids = []
         # First satisfy the prerequisites
         for sg in security_groups:
-            cmsg = self.create_cm_security_group(sg)
+            # Get VPC ID in case we're launching into a VPC
+            vpc_id = None
+            if subnet_id:
+                try:
+                    sn = self.vpc_conn.get_all_subnets(subnet_id)[0]
+                    vpc_id = sn.vpc_id
+                except (EC2ResponseError, IndexError) as e:
+                    bioblend.log.exception("Trouble fetching subnet %s: %s" %
+                                           (subnet_id, e))
+            cmsg = self.create_cm_security_group(sg, vpc_id=vpc_id)
             ret['error'] = cmsg['error']
             if ret['error']:
                 return ret
             if cmsg['name']:
                 ret['sg_names'].append(cmsg['name'])
                 ret['sg_ids'].append(cmsg['sg_id'])
-                security_group_ids.append(cmsg['sg_id'])
+                if subnet_id:
+                    # Must setup a network interface if launching into VPC
+                    security_groups = None
+                    interface = boto.ec2.networkinterface.NetworkInterfaceSpecification(
+                        subnet_id=subnet_id, groups=[cmsg['sg_id']],
+                        associate_public_ip_address=True)
+                    network_interfaces = (boto.ec2.networkinterface.
+                                          NetworkInterfaceCollection(interface))
+                else:
+                    network_interfaces = None
         kp_info = self.create_key_pair(key_name)
         ret['kp_name'] = kp_info['name']
         ret['kp_material'] = kp_info['material']
@@ -176,16 +197,21 @@ class CloudManLauncher(object):
         ud = self._compose_user_data(kwargs)
         # Now launch an instance
         try:
+
             rs = None
             rs = self.ec2_conn.run_instances(image_id=image_id,
                                              instance_type=instance_type,
                                              key_name=key_name,
                                              security_groups=security_groups,
-                                             security_group_ids=security_group_ids,
+                                             # The following two arguments are
+                                             # provided in the network_interface
+                                             # instead of arguments:
+                                             # security_group_ids=security_group_ids,
+                                             # subnet_id=subnet_id,
+                                             network_interfaces=network_interfaces,
                                              user_data=ud,
                                              kernel_id=kernel_id,
                                              ramdisk_id=ramdisk_id,
-                                             subnet_id=subnet_id,
                                              placement=placement,
                                              ebs_optimized=ebs_optimized)
             ret['rs'] = rs
@@ -214,7 +240,7 @@ class CloudManLauncher(object):
                                 "your account permissions and try again.")
         return ret
 
-    def create_cm_security_group(self, sg_name='CloudMan'):
+    def create_cm_security_group(self, sg_name='CloudMan', vpc_id=None):
         """
         Create a security group with all authorizations required to run CloudMan.
 
@@ -222,6 +248,9 @@ class CloudManLauncher(object):
 
         :type sg_name: str
         :param sg_name: A name for the security group to be created.
+
+        :type vpc_id: str
+        :param vpc_id: VPC ID under which to create the security group.
 
         :rtype: dict
         :return: A dictionary containing keys ``name`` (with the value being the
@@ -246,9 +275,12 @@ class CloudManLauncher(object):
                     'error': None,
                     'ports': ports}
         cmsg = None
+        filters = None
+        if vpc_id:
+            filters = {'vpc-id': vpc_id}
         # Check if this security group already exists
         try:
-            sgs = self.ec2_conn.get_all_security_groups()
+            sgs = self.ec2_conn.get_all_security_groups(filters=filters)
         except EC2ResponseError as e:
             err_msg = ("Problem getting security groups. This could indicate a "
                        "problem with your account credentials or permissions: "
@@ -268,7 +300,8 @@ class CloudManLauncher(object):
             bioblend.log.debug("Creating Security Group %s" % sg_name)
             try:
                 cmsg = self.ec2_conn.create_security_group(sg_name, 'A security '
-                                                           'group for CloudMan')
+                                                           'group for CloudMan',
+                                                           vpc_id=vpc_id)
             except EC2ResponseError as e:
                 err_msg = "Problem creating security group '{0}': {1} (code {2}; " \
                           "status {3})" \
@@ -337,8 +370,8 @@ class CloudManLauncher(object):
                         from_port=0,
                         to_port=65535)
                 except EC2ResponseError as e:
-                    err_msg = "A problem with security group authorization: {0} " \
-                              "(code {1}; status {2})" \
+                    err_msg = "A problem with security group group " \
+                              "authorization: {0} (code {1}; status {2})" \
                               .format(e.message, e.error_code, e.status)
                     bioblend.log.exception(err_msg)
                     progress['err_msg'] = err_msg
@@ -415,8 +448,14 @@ class CloudManLauncher(object):
         return progress
 
     def assign_floating_ip(self, ec2_conn, instance):
-        address = ec2_conn.allocate_address()
-        bioblend.log.info("Assigning floating ip: %s", address.public_ip)
+        try:
+            bioblend.log.debug("Allocating a new floating IP address.")
+            address = ec2_conn.allocate_address()
+        except EC2ResponseError as e:
+            bioblend.log.exception("Exception allocating a new floating IP "
+                                   "address: %s" % e)
+        bioblend.log.info("Associating floating IP %s to instance %s" %
+                          (address.public_ip, instance.id))
         ec2_conn.associate_address(instance_id=instance.id,
                                    public_ip=address.public_ip)
 
@@ -603,6 +642,26 @@ class CloudManLauncher(object):
             is_secure=ci['is_secure'], port=ci['s3_port'], host=ci['s3_host'],
             path=ci['s3_conn_path'], calling_format=calling_format)
         return s3_conn
+
+    def connect_vpc(self, a_key, s_key, cloud=None):
+        """
+        Establish a connection to the VPC service.
+
+        TODO: Make this work with non-default clouds as well.
+        """
+        if cloud is None:
+            cloud = self.cloud
+        ci = self._get_cloud_info(cloud)
+        r = RegionInfo(name=ci['region_name'], endpoint=ci['region_endpoint'])
+        vpc_conn = boto.connect_vpc(
+            aws_access_key_id=a_key,
+            aws_secret_access_key=s_key,
+            is_secure=ci['is_secure'],
+            region=r,
+            port=ci['ec2_port'],
+            path=ci['ec2_conn_path'],
+            validate_certs=False)
+        return vpc_conn
 
     def _compose_user_data(self, user_provided_data):
         """
