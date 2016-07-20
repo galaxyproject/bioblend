@@ -12,6 +12,7 @@ from six.moves.urllib.parse import urljoin
 from six.moves.urllib.request import urlopen
 
 from bioblend.galaxy.client import Client
+import bioblend
 
 log = logging.getLogger(__name__)
 
@@ -104,7 +105,9 @@ class DatasetClient(Client):
 
         # Don't use self.gi.make_get_request as currently the download API does
         # not require a key
-        r = requests.get(url, verify=self.gi.verify)
+        stream_content = file_path is not None
+        r = requests.get(url, verify=self.gi.verify, stream=stream_content)
+        r.raise_for_status()
 
         if file_path is None:
             return r.content
@@ -125,7 +128,9 @@ class DatasetClient(Client):
                 file_local_path = file_path
 
             with open(file_local_path, 'wb') as fp:
-                fp.write(r.content)
+                for chunk in r.iter_content(chunk_size=bioblend.CHUNK_SIZE):
+                    if chunk:
+                        fp.write(chunk)
 
             # Return location file was saved to
             return file_local_path
