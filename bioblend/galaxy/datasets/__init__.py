@@ -44,7 +44,7 @@ class DatasetClient(Client):
     def download_dataset(self, dataset_id, file_path=None, use_default_filename=True,
                          wait_for_completion=False, maxwait=12000):
         """
-        Downloads the dataset identified by 'id'.
+        Download a dataset to file or in memory.
 
         :type dataset_id: str
         :param dataset_id: Encoded dataset ID
