@@ -107,6 +107,7 @@ class DatasetClient(Client):
         # not require a key
         stream_content = file_path is not None
         r = requests.get(url, verify=self.gi.verify, stream=stream_content)
+        r.raise_for_status()
 
         if file_path is None:
             return r.content
