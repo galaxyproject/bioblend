@@ -12,6 +12,7 @@ from six.moves.urllib.parse import urljoin
 from six.moves.urllib.request import urlopen
 
 from bioblend.galaxy.client import Client
+import bioblend
 
 log = logging.getLogger(__name__)
 
@@ -126,7 +127,7 @@ class DatasetClient(Client):
                 file_local_path = file_path
 
             with open(file_local_path, 'wb') as fp:
-                for chunk in r.iter_content(chunk_size=1024):
+                for chunk in r.iter_content(chunk_size=bioblend.CHUNK_SIZE):
                     if chunk:
                         fp.write(chunk)
 
