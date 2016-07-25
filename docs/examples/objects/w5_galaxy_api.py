@@ -23,7 +23,7 @@ if API_KEY == 'YOUR_API_KEY':
 
 GALAXY_PATH = 'YOUR_GALAXY_PATH'
 sys.path.insert(1, os.path.join(GALAXY_PATH, 'scripts/api'))
-import common  # noqa
+import common  # noqa: E402
 
 # Select "W5 - Metagenomics" from published workflows
 

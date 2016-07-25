@@ -391,7 +391,7 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
         create, _, get_prevs, del_kwargs = self.__normalized_functions(
             obj_type)
         name = 'test_%s' % uuid.uuid4().hex
-        objs = [create(name) for _ in range(2)]  # noqa
+        objs = [create(name) for _ in range(2)]  # noqa: F812
         final_name = objs[0].name
         prevs = [_ for _ in get_prevs(name=final_name) if not _.deleted]
         self.assertEqual(len(prevs), len(objs))
