@@ -371,10 +371,15 @@ class HistoryClient(Client):
         :type collection_description: bioblend.galaxy.dataset_collections.CollectionDescription
         :param collection_description: a description of the dataset collection
           For example::
-            {'name': 'My collection list',
-             'collection_type': 'list',
-             'element_identifiers': [{'name': 'element 1', 'src': 'hda', 'id': 'f792763bee8d277a'},
-                                     {'name': 'element 2', 'src': 'hda', 'id': 'f792763bee8d277a'}]}
+
+            {'collection_type': 'list',
+             'element_identifiers': [{'id': 'f792763bee8d277a',
+                                      'name': 'element 1',
+                                      'src': 'hda'},
+                                     {'id': 'f792763bee8d277a',
+                                      'name': 'element 2',
+                                      'src': 'hda'}],
+             'name': 'My collection list'}
         """
         try:
             collection_description = collection_description.to_dict()
