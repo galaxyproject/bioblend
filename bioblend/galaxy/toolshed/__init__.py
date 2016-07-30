@@ -63,6 +63,7 @@ class ToolShedClient(Client):
                                     changeset_revision,
                                     install_tool_dependencies=False,
                                     install_repository_dependencies=False,
+                                    install_resolver_dependencies=False,
                                     tool_panel_section_id=None,
                                     new_tool_panel_section_label=None):
         """
@@ -71,7 +72,10 @@ class ToolShedClient(Client):
         that contains valid tools, loading them into a section of the Galaxy tool
         panel or creating a new tool panel section.
         You can choose if tool dependencies or repository dependencies should be
-        installed, use ``install_tool_dependencies`` or ``install_repository_dependencies``.
+        installed through the tool shed,
+        (use ``install_tool_dependencies`` or ``install_repository_dependencies``)
+        or through a resolver that supports installing dependencies
+        (use ``install_resolver_dependencies``).
 
         Installing the repository into an existing tool panel section requires
         the tool panel config file (e.g., tool_conf.xml, shed_tool_conf.xml, etc)
@@ -105,6 +109,10 @@ class ToolShedClient(Client):
                                                 (see http://wiki.galaxyproject.org/DefiningRepositoryDependencies
                                                 for more details)
 
+        :type install_resolver_dependencies: bool
+        :param install_resolver_dependencies: Whether or not to automatically
+                                                install resolver dependencies (e.g. conda)
+
         :type tool_panel_section_id: str
         :param tool_panel_section_id: The ID of the Galaxy tool panel section
                                       where the tool should be insterted under.
@@ -125,6 +133,7 @@ class ToolShedClient(Client):
         payload['changeset_revision'] = changeset_revision
         payload['install_tool_dependencies'] = install_tool_dependencies
         payload['install_repository_dependencies'] = install_repository_dependencies
+        payload['install_resolver_dependencies'] = install_resolver_dependencies
         if tool_panel_section_id:
             payload['tool_panel_section_id'] = tool_panel_section_id
         elif new_tool_panel_section_label:
