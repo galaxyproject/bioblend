@@ -396,11 +396,8 @@ class HistoryClient(Client):
     def download_dataset(self, history_id, dataset_id, file_path,
                          use_default_filename=True):
         """
-        Download a ``dataset_id`` from history with ``history_id`` to a
-        file on the local file system, saving it to ``file_path``.
-
-        Refer to ``bioblend.galaxy.dataset.DatasetClient.download_dataset()``
-        for the other available parameters.
+        Deprecated method, use
+        ``bioblend.galaxy.dataset.DatasetClient.download_dataset()`` instead.
         """
         meta = self.show_dataset(history_id, dataset_id)
         if use_default_filename:
