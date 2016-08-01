@@ -24,8 +24,7 @@ class DatasetClient(Client):
 
     def show_dataset(self, dataset_id, deleted=False, hda_ldda='hda'):
         """
-        Display information about and/or content of a dataset. This can be a
-        history or a library dataset.
+        Get details about a given dataset. This can be a history or a library dataset.
 
         :type dataset_id: str
         :param dataset_id: Encoded dataset ID
@@ -51,21 +50,21 @@ class DatasetClient(Client):
         :param dataset_id: Encoded dataset ID
 
         :type file_path: str
-        :param file_path: If the file_path argument is provided, the dataset will be streamed to disk
-                          at that path (Should not contain filename if use_default_name=True).
+        :param file_path: If this argument is provided, the dataset will be streamed to disk
+                          at that path (should be a directory if use_default_filename=True).
                           If the file_path argument is not provided, the dataset content is loaded into memory
                           and returned by the method (Memory consumption may be heavy as the entire file
                           will be in memory).
 
         :type use_default_filename: bool
-        :param use_default_filename: If the use_default_name parameter is True, the exported
+        :param use_default_filename: If this argument is True, the exported
                                  file will be saved as file_path/%s,
                                  where %s is the dataset name.
-                                 If use_default_name is False, file_path is assumed to
-                                 contain the full file path including filename.
+                                 If this argument is False, file_path is assumed to
+                                 contain the full file path including the filename.
 
         :type wait_for_completion: bool
-        :param wait_for_completion: If wait_for_completion is True, this call will block until the dataset is ready.
+        :param wait_for_completion: If this argument is True, this method call will block until the dataset is ready.
                                     If the dataset state becomes invalid, a DatasetStateException will be thrown.
 
         :type maxwait: float
@@ -113,16 +112,17 @@ class DatasetClient(Client):
             return r.content
         else:
             if use_default_filename:
-                try:
-                    # First try to get the filename from the response headers
-                    # We expect tokens 'filename' '=' to be followed by the quoted filename
-                    tokens = [x for x in shlex.shlex(r.headers['content-disposition'], posix=True)]
-                    header_filepath = tokens[tokens.index('filename') + 2]
-                    filename = os.path.basename(header_filepath)
-                except (ValueError, IndexError):
-                    # If the filename was not in the header, build a useable filename ourselves.
-                    filename = dataset['name'] + '.' + file_ext
-
+                # Build a useable filename
+                filename = dataset['name'] + '.' + file_ext
+                # Now try to get a better filename from the response headers
+                # We expect tokens 'filename' '=' to be followed by the quoted filename
+                if 'content-disposition' in r.headers:
+                    tokens = list(shlex.shlex(r.headers['content-disposition'], posix=True))
+                    try:
+                        header_filepath = tokens[tokens.index('filename') + 2]
+                        filename = os.path.basename(header_filepath)
+                    except (ValueError, IndexError):
+                        pass
                 file_local_path = os.path.join(file_path, filename)
             else:
                 file_local_path = file_path
@@ -160,7 +160,7 @@ class DatasetClient(Client):
 
     def show_stderr(self, dataset_id):
         """
-        Display stderr output of a dataset.
+        Get the stderr output of a dataset.
 
         :type dataset_id: str
         :param dataset_id: Encoded dataset ID
@@ -170,7 +170,7 @@ class DatasetClient(Client):
 
     def show_stdout(self, dataset_id):
         """
-        Display stdout output of a dataset.
+        Get the stdout output of a dataset.
 
         :type dataset_id: str
         :param dataset_id: Encoded dataset ID
