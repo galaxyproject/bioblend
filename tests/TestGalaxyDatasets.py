@@ -1,6 +1,11 @@
 """
 Use ``nose`` to run these unit tests.
 """
+import shutil
+import tempfile
+
+import six
+
 import GalaxyTestBase
 import test_util
 
@@ -11,7 +16,8 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
     def setUp(self):
         super(TestGalaxyDatasets, self).setUp()
         self.history_id = self.gi.histories.create_history(name='TestShowDataset')['id']
-        self.dataset_id = self._test_dataset(self.history_id)
+        self.dataset_contents = "line 1\nline 2\rline 3\r\nline 4"
+        self.dataset_id = self._test_dataset(self.history_id, contents=self.dataset_contents)
 
     def tearDown(self):
         self.gi.histories.delete_history(self.history_id, purge=True)
@@ -24,7 +30,22 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
     def test_download_dataset(self):
         with self.assertRaises(Exception):
             self.gi.datasets.download_dataset(None)
-        self._wait_and_verify_dataset(self.dataset_id, b"1\t2\t3\n", timeout_seconds=25)
+        expected_contents = six.b("\n".join(self.dataset_contents.splitlines()) + "\n")
+        # download_dataset() with file_path=None is already tested in TestGalaxyTools.test_paste_content()
+        # self._wait_and_verify_dataset(self.dataset_id, expected_contents)
+        tempdir = tempfile.mkdtemp(prefix='bioblend_test_')
+        try:
+            downloaded_dataset = self.gi.datasets.download_dataset(self.dataset_id, file_path=tempdir, wait_for_completion=True, maxwait=15)
+            self.assertTrue(downloaded_dataset.startswith(tempdir))
+            with open(downloaded_dataset, 'rb') as f:
+                self.assertEqual(f.read(), expected_contents)
+        finally:
+            shutil.rmtree(tempdir)
+        with tempfile.NamedTemporaryFile(prefix='bioblend_test_') as f:
+            download_filename = self.gi.datasets.download_dataset(self.dataset_id, file_path=f.name, use_default_filename=False, wait_for_completion=True, maxwait=15)
+            self.assertEqual(download_filename, f.name)
+            f.flush()
+            self.assertEqual(f.read(), expected_contents)
 
     def test_show_stderr(self):
         stderr = self.gi.datasets.show_stderr(self.dataset_id)

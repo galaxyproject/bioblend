@@ -140,7 +140,7 @@ class DatasetClient(Client):
         state = dataset['state']
         return (state == 'ok' or state == 'error')
 
-    def _block_until_dataset_ready(self, dataset_id, maxwait=12000, interval=30, raise_on_timeout=True):
+    def _block_until_dataset_ready(self, dataset_id, maxwait=12000, interval=3, raise_on_timeout=True):
         """
         Wait until the dataset state changes to ok or error.
         Based on: https://github.com/salimfadhley/jenkinsapi/blob/master/jenkinsapi/api.py
