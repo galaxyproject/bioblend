@@ -1,15 +1,15 @@
 """
 Use ``nose`` to run these unit tests.
 """
-import os
 import json
+import os
+import shutil
 import tempfile
 import time
-import shutil
+
 from six.moves import range
 
-import GalaxyTestBase
-import test_util
+from . import GalaxyTestBase, test_util
 
 
 def get_abspath(path):

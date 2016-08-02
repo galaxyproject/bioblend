@@ -2,7 +2,8 @@ import os
 
 import bioblend
 import bioblend.galaxy
-from test_util import unittest
+
+from .test_util import unittest
 
 bioblend.set_stream_logger('test', level='INFO')
 

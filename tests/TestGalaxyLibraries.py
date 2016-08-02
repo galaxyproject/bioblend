@@ -5,8 +5,7 @@ import os
 import shutil
 import tempfile
 
-import GalaxyTestBase
-import test_util
+from . import GalaxyTestBase, test_util
 
 FOO_DATA = 'foo\nbar\n'
 

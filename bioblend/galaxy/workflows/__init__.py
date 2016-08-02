@@ -1,9 +1,10 @@
 """
 Contains possible interactions with the Galaxy Workflows
 """
-from bioblend.galaxy.client import Client
 import json
 import os
+
+from bioblend.galaxy.client import Client
 
 
 class WorkflowClient(Client):

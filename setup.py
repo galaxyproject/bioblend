@@ -3,7 +3,7 @@ import os.path
 import re
 import sys
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 # Cannot use "from bioblend import get_version" because that would try to import
 # the six package which may not be installed yet.

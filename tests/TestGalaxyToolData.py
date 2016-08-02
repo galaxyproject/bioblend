@@ -4,8 +4,7 @@ credentials to supported cloud infrastructure.
 
 Use ``nose`` to run these unit tests.
 """
-import GalaxyTestBase
-import test_util
+from . import GalaxyTestBase, test_util
 
 
 @test_util.skip_unless_galaxy('release_15.01')

@@ -4,18 +4,18 @@ Setup and launch a CloudMan instance.
 import datetime
 import socket
 
-import bioblend
-from bioblend.util import Bunch
 import boto
+import six
+import yaml
 from boto.compat import http_client
 from boto.ec2.regioninfo import RegionInfo
 from boto.exception import EC2ResponseError, S3ResponseError
 from boto.s3.connection import OrdinaryCallingFormat, S3Connection, SubdomainCallingFormat
-import six
-import yaml
-
 from six.moves.http_client import HTTPConnection
 from six.moves.urllib.parse import urlparse
+
+import bioblend
+from bioblend.util import Bunch
 
 
 # Uncomment the following line if no logging from boto is desired

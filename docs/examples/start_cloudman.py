@@ -13,11 +13,11 @@ Example:
 python start_cloudman.py "cluster bioblend" pwd SGE m1.small ami-00000032 <access_key> <secret_key>
 """
 from __future__ import print_function
+
 import sys
 
+from bioblend.cloudman import CloudManConfig, CloudManInstance
 from bioblend.util import Bunch
-from bioblend.cloudman import CloudManConfig
-from bioblend.cloudman import CloudManInstance
 
 
 def start_cloudman(name, pwd, cm_type, inst_type, ami, ak, sk):

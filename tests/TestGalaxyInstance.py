@@ -3,11 +3,13 @@ Tests on the GalaxyInstance object itself.
 
 Use ``nose`` to run these unit tests.
 """
-from test_util import unittest
+import time
 
 from bioblend import ConnectionError
 from bioblend.galaxy import GalaxyInstance
 from bioblend.galaxy.client import Client
+
+from .test_util import unittest
 
 
 class TestGalaxyInstance(unittest.TestCase):
@@ -30,7 +32,6 @@ class TestGalaxyInstance(unittest.TestCase):
         # failing.
         self.gi.max_get_attempts = 2
         self.gi.get_retry_delay = 5
-        import time
         start = time.time()
         try:
             self.gi.libraries.get_libraries()

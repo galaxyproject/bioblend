@@ -6,8 +6,7 @@ import tempfile
 
 import six
 
-import GalaxyTestBase
-import test_util
+from . import GalaxyTestBase, test_util
 
 
 @test_util.skip_unless_galaxy()

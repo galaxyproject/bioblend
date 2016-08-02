@@ -1,10 +1,12 @@
 from __future__ import print_function
+
 import os
 import sys
 import tempfile
 
 from bioblend.galaxy.objects import GalaxyInstance
-from common import get_one
+
+from .common import get_one
 
 # This is a "toy" example that should run much faster
 # (once the cluster's resource manager allows it to run) than the

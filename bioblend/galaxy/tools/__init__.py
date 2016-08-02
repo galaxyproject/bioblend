@@ -1,10 +1,11 @@
 """
 Contains possible interaction dealing with Galaxy tools.
 """
+from json import dumps
+from os.path import basename
+
 from bioblend.galaxy.client import Client
 from bioblend.util import attach_file
-from os.path import basename
-from json import dumps
 
 
 class ToolClient(Client):

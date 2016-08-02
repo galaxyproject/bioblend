@@ -4,6 +4,7 @@ This example retrieves details of all the Workflows in our Galaxy account and li
 Usage: python list_workflows.py <Galaxy_URL> <Galaxy_API_key>
 """
 from __future__ import print_function
+
 import sys
 
 from bioblend.galaxy.objects import GalaxyInstance

@@ -1,8 +1,8 @@
 from bioblend.galaxy.tools.inputs import (
-    inputs,
     conditional,
+    dataset,
+    inputs,
     repeat,
-    dataset
 )
 
 

@@ -12,8 +12,10 @@ try:
 except ImportError:
     # Python < 3.3
     from mock import MagicMock
+
 from bioblend import cloudman
-from test_util import unittest
+
+from .test_util import unittest
 
 
 class TestCloudmanMock(unittest.TestCase):

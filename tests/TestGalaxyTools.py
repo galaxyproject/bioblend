@@ -5,13 +5,13 @@ import os
 import six
 
 from bioblend.galaxy.tools.inputs import (
-    inputs,
-    dataset,
-    repeat,
     conditional,
+    dataset,
+    inputs,
+    repeat,
 )
-import GalaxyTestBase
-import test_util
+
+from . import GalaxyTestBase, test_util
 
 
 def get_abspath(path):

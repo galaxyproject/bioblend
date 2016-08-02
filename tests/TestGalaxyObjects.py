@@ -9,17 +9,17 @@ import tempfile
 import uuid
 
 import six
-from six.moves.urllib.request import urlopen
 from six.moves.urllib.error import URLError
+from six.moves.urllib.request import urlopen
 
 import bioblend
-import bioblend.galaxy.objects.wrappers as wrappers
 import bioblend.galaxy.objects.galaxy_instance as galaxy_instance
+import bioblend.galaxy.objects.wrappers as wrappers
 from bioblend import ConnectionError
 from bioblend.galaxy import dataset_collections
 
-import test_util
-from test_util import unittest
+from . import test_util
+from .test_util import unittest
 
 bioblend.set_stream_logger('test', level='INFO')
 socket.setdefaulttimeout(10.0)

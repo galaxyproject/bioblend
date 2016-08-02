@@ -12,6 +12,7 @@ In this case we expect Tophat wrapper 1.5.0 and Cufflinks wrapper 0.0.5.
 Usage: python run_imported_workflow.py <galaxy-url> <galaxy-API-key>
 """
 from __future__ import print_function
+
 import sys
 
 from bioblend import galaxy

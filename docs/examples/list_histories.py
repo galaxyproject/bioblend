@@ -4,6 +4,7 @@ This example retrieves details of all the Histories in our Galaxy account and li
 Usage: python list_histories.py <galaxy-url> <galaxy-API-key>
 """
 from __future__ import print_function
+
 import sys
 
 from bioblend.galaxy import GalaxyInstance

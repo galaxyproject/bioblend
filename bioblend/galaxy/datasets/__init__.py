@@ -11,8 +11,8 @@ from six.moves import range
 from six.moves.urllib.parse import urljoin
 from six.moves.urllib.request import urlopen
 
-from bioblend.galaxy.client import Client
 import bioblend
+from bioblend.galaxy.client import Client
 
 log = logging.getLogger(__name__)
 
