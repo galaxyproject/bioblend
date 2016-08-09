@@ -1,5 +1,5 @@
 """
-Interaction with a Galaxy Tool Shed
+Interaction with a Galaxy Tool Shed.
 """
 from bioblend.galaxy.client import Client
 
@@ -72,10 +72,11 @@ class ToolShedClient(Client):
         that contains valid tools, loading them into a section of the Galaxy tool
         panel or creating a new tool panel section.
         You can choose if tool dependencies or repository dependencies should be
-        installed through the tool shed,
+        installed through the Tool Shed,
         (use ``install_tool_dependencies`` or ``install_repository_dependencies``)
         or through a resolver that supports installing dependencies
-        (use ``install_resolver_dependencies``).
+        (use ``install_resolver_dependencies``). Note that any combination of
+        the three dependency resolving variables is valid.
 
         Installing the repository into an existing tool panel section requires
         the tool panel config file (e.g., tool_conf.xml, shed_tool_conf.xml, etc)
