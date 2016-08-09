@@ -1,14 +1,51 @@
 ### BioBlend v0.8.0 - Unreleased
 
-* Added ``delete_user()`` method to ``UserClient``.
+* Removed deprecated method ``create_user()`` of ``UserClient``.
+
+* Deprecate ``HistoryClient.download_dataset()`` in favor of
+  ``DatasetClient.download_dataset()``.
 
 * Modified ``update_dataset()``, ``update_dataset_collection()`` and
   ``update_history()`` methods of ``HistoryClient`` to return the details
   instead of the status code.
 
+* Modified ``update_dataset()``, ``update_dataset_collection()`` and
+  ``update_history()`` methods of ``HistoryClient`` to return the details
+  instead of the status code.
+
+* Modified ``GalaxyClient.make_put_request()`` to return the decoded response
+  content.
+
+* Update param type for ``create_dataset_collection()`` to
+  ``collections.CollectionDescription`` instead of a ``str``.
+
+* Added ``install_resolver_dependencies`` keyword to
+``install_repository_revision``, applicable for Galaxy versions 16.07 and newer.
+
+* Added support to stream downloaded dataset to a file.
+
+* Added dataset collections to the outputs of ``Workflow.run()``.
+
+* Added ``update()`` method to ``HistoryDatasetAssociation``.
+
+* Added ``bioblend.toolshed.categories.ToolShedCategoryClient``;
+  renamed ``bioblend.toolshed.repositories.ToolShedClient`` class to
+  ``bioblend.toolshed.repositories.ToolShedRepositoryClient``;
+  renamed ``bioblend.toolshed.tools.ToolShedClient`` class to
+  ``bioblend.toolshed.tools.ToolShedToolClient``.
+
+* Added ``delete_user()`` method to ``UserClient``.
+
+* BioBlend.objects: added ``annotation`` and ``genome_build`` attributes to
+  ``HistoryDatasetAssociation``.
+
 * BioBlend.objects: added ``update()`` method to ``HistoryDatasetAssociation``.
 
-* Removed deprecated method ``create_user()`` of ``UserClient``.
+* BioBlend.objects: added ability to create and delete dataset collections
+
+* Added ability to launch Galaxy CloudMan instances into AWS VPC.
+
+* A number of testing tweaks and documentation improvements.
 
 ### BioBlend v0.7.0 - November 2, 2015
 
