@@ -2,7 +2,7 @@
 
 * Removed deprecated method ``create_user()`` of ``UserClient``.
 
-* Deprecate ``HistoryClient.download_dataset()`` in favor of
+* Deprecated ``HistoryClient.download_dataset()`` in favor of
   ``DatasetClient.download_dataset()``.
 
 * Modified ``update_dataset()``, ``update_dataset_collection()`` and
@@ -16,17 +16,12 @@
 * Modified ``GalaxyClient.make_put_request()`` to return the decoded response
   content.
 
-* Update param type for ``create_dataset_collection()`` to
-  ``collections.CollectionDescription`` instead of a ``str``.
+* Added ``install_resolver_dependencies`` parameter to
+  ``ToolShedClient.install_repository_revision()``, applicable for Galaxy
+  release_16.07 and later (thanks to Marius van den Beek).
 
-* Added ``install_resolver_dependencies`` keyword to
-``install_repository_revision``, applicable for Galaxy versions 16.07 and newer.
-
-* Added support to stream downloaded dataset to a file.
-
-* Added dataset collections to the outputs of ``Workflow.run()``.
-
-* Added ``update()`` method to ``HistoryDatasetAssociation``.
+* Improve ``DatasetClient.download_dataset()`` by downloading the dataset in
+  chunks when saving to file (thanks to Jorrit Boekel).
 
 * Added ``bioblend.toolshed.categories.ToolShedCategoryClient``;
   renamed ``bioblend.toolshed.repositories.ToolShedClient`` class to
@@ -36,16 +31,22 @@
 
 * Added ``delete_user()`` method to ``UserClient``.
 
+* BioBlend.objects: added ``update()`` method to ``HistoryDatasetAssociation``.
+
 * BioBlend.objects: added ``annotation`` and ``genome_build`` attributes to
-  ``HistoryDatasetAssociation``.
+  ``HistoryDatasetAssociation`` objects.
 
 * BioBlend.objects: added ``update()`` method to ``HistoryDatasetAssociation``.
 
 * BioBlend.objects: added ability to create and delete dataset collections
+  (thanks to Alex MacLean).
+
+* BioBlend.objects: added dataset collections to the outputs of
+  ``Workflow.run()``.
 
 * Added ability to launch Galaxy CloudMan instances into AWS VPC.
 
-* A number of testing tweaks and documentation improvements.
+* A number of testing tweaks, documentation improvements and minor fixes.
 
 ### BioBlend v0.7.0 - November 2, 2015
 
