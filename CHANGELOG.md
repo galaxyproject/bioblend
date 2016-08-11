@@ -1,4 +1,4 @@
-### BioBlend v0.8.0 - Unreleased
+### BioBlend v0.8.0 - August 11, 2016
 
 * Removed deprecated method ``create_user()`` of ``UserClient``.
 
