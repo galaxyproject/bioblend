@@ -97,6 +97,9 @@ class Client(object):
         The request will optionally be retried as configured by
         ``max_get_retries`` and ``get_retry_delay``: this offers some
         resilience in the presence of temporary failures.
+
+        :return: The decoded response if ``json`` is set to ``True``, otherwise
+          the response object
         """
         if not url:
             url = self.gi._make_url(self, module_id=id, deleted=deleted,
@@ -148,7 +151,7 @@ class Client(object):
         If ``files_attached`` is set to ``False``, the request body will be
         JSON-encoded; otherwise, it will be encoded as multipart/form-data.
 
-        The return value will contain the response body as a JSON object.
+        :return: The decoded response.
         """
         if not url:
             url = self.gi._make_url(self, module_id=id, deleted=deleted,
@@ -163,7 +166,7 @@ class Client(object):
         for the request. ``payload`` must be a dict that contains additional
         request arguments which will be sent along with the request body.
 
-        This method returns the HTTP request object.
+        :return: The decoded response.
         """
         if not url:
             url = self.gi._make_url(self, module_id=id)
@@ -175,6 +178,8 @@ class Client(object):
         arguments. Alternatively, an explicit ``url`` can be provided to use
         for the request. ``payload`` must be a dict that contains additional
         request arguments which will be sent along with the request body.
+
+        :return: The decoded response.
         """
         if not url:
             url = self.gi._make_url(self, module_id=id, deleted=deleted,

@@ -77,6 +77,9 @@ class GalaxyClient(object):
         If params are provided and the provided dict does not have ``key`` key,
         the default ``self.key`` value will be included in what's passed to
         the server via the request.
+
+        :rtype: requests.Response
+        :return: the response object.
         """
         params = kwargs.get('params')
         if params is not None and params.get('key', False) is False:
@@ -100,7 +103,7 @@ class GalaxyClient(object):
         the default ``self.key`` value will be included in what's passed to
         the server via the request.
 
-        The return value will contain the response body as a JSON object.
+        :return: The decoded response.
         """
         if params is not None and params.get('key', False) is False:
             params['key'] = self.key
@@ -144,6 +147,9 @@ class GalaxyClient(object):
         If params are provided and the provided dict does not have ``key`` key,
         the default ``self.key`` value will be included in what's passed to
         the server via the request.
+
+        :rtype: requests.Response
+        :return: the response object.
         """
         if params is not None and params.get('key', False) is False:
             params['key'] = self.key
@@ -158,7 +164,9 @@ class GalaxyClient(object):
         """
         Make a PUT request using the provided ``url`` with required payload.
         The ``payload`` must be a dict that can be converted into a JSON
-        object (via ``json.dumps``)
+        object (via ``json.dumps``).
+
+        :return: The decoded response.
         """
         if params is not None and params.get('key', False) is False:
             params['key'] = self.key
