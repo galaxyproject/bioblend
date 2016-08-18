@@ -44,6 +44,16 @@ class ToolDataClient(Client):
         """
         return Client._get(self, id=data_table_id)
 
+    def reload_data_table(self, data_table_id):
+        """
+        Reload a data table.
+
+        :type data_table_id: str
+        :param data_table_id: ID of the data table
+        """
+        url = "%s/tool_data/%s/reload" % (self.gi.url, data_table_id)
+        return Client._get(self, url=url)
+
     def delete_data_table(self, data_table_id, values):
         """
         Delete an item from a data table.
