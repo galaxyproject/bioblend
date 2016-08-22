@@ -64,7 +64,7 @@ class ToolClient(Client):
         params = {}
         params['in_panel'] = in_panel
         params['trackster'] = trackster
-        return Client._get(self, params=params)
+        return self._get(params=params)
 
     def show_tool(self, tool_id, io_details=False, link_details=False):
         """
@@ -82,7 +82,7 @@ class ToolClient(Client):
         params = {}
         params['io_details'] = io_details
         params['link_details'] = link_details
-        return Client._get(self, id=tool_id, params=params)
+        return self._get(id=tool_id, params=params)
 
     def run_tool(self, history_id, tool_id, tool_inputs):
         """
@@ -216,4 +216,4 @@ class ToolClient(Client):
             for key in complex_payload_params:
                 if key in payload:
                     payload[key] = dumps(payload[key])
-        return Client._post(self, payload, files_attached=files_attached)
+        return self._post(payload, files_attached=files_attached)

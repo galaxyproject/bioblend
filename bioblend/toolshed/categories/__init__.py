@@ -32,7 +32,7 @@ class ToolShedCategoryClient(Client):
 
         .. versionadded:: 0.5.2
         """
-        return Client._get(self, deleted=deleted)
+        return self._get(deleted=deleted)
 
     def show_category(self, category_id):
         """
@@ -44,4 +44,4 @@ class ToolShedCategoryClient(Client):
         :rtype: dict
         :return: details of the given category
         """
-        return Client._get(self, id=category_id)
+        return self._get(id=category_id)

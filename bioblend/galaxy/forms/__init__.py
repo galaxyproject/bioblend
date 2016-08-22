@@ -27,7 +27,7 @@ class FormsClient(Client):
               u'name': u'second form',
               u'url': u'/api/forms/ebfb8f50c6abde6d'}]
         """
-        return Client._get(self)
+        return self._get()
 
     def show_form(self, form_id):
         """
@@ -49,7 +49,7 @@ class FormsClient(Client):
              u'name': u'First form',
              u'url': u'/api/forms/f2db41e1fa331b3e'}
         """
-        return Client._get(self, id=form_id)
+        return self._get(id=form_id)
 
     def create_form(self, form_xml_text):
         """
@@ -62,4 +62,4 @@ class FormsClient(Client):
         :returns:   Unique url of newly created form with encoded id
         """
         payload = form_xml_text
-        return Client._post(self, payload=payload)
+        return self._post(payload=payload)

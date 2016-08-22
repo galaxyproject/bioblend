@@ -33,7 +33,7 @@ class ToolShedClient(Client):
 
         .. seealso:: bioblend.galaxy.tools.get_tool_panel()
         """
-        return Client._get(self)
+        return self._get()
 
     def show_repository(self, toolShed_id):
         """
@@ -57,7 +57,7 @@ class ToolShedClient(Client):
             Changed method name from ``show_tool`` to ``show_repository`` to
             better align with the Tool Shed concepts
         """
-        return Client._get(self, id=toolShed_id)
+        return self._get(id=toolShed_id)
 
     def install_repository_revision(self, tool_shed_url, name, owner,
                                     changeset_revision,
@@ -143,4 +143,4 @@ class ToolShedClient(Client):
 
         url = "%s%s" % (self.gi.url, '/tool_shed_repositories/new/install_repository_revision')
 
-        return Client._post(self, url=url, payload=payload)
+        return self._post(url=url, payload=payload)

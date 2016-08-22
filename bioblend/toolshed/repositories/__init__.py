@@ -39,7 +39,7 @@ class ToolShedRepositoryClient(Client):
           Changed method name from ``get_tools`` to ``get_repositories`` to
           better align with the Tool Shed concepts.
         """
-        return Client._get(self)
+        return self._get()
 
     def search_repositories(self, q, page=1, page_size=10):
         """
@@ -91,7 +91,7 @@ class ToolShedRepositoryClient(Client):
              u'total_results': u'64'}
         """
         params = dict(q=q, page=page, page_size=page_size)
-        return Client._get(self, params=params)
+        return self._get(params=params)
 
     def show_repository(self, toolShed_id):
         """
@@ -124,7 +124,7 @@ class ToolShedRepositoryClient(Client):
           Changed method name from ``show_tool`` to ``show_repository`` to
           better align with the Tool Shed concepts.
         """
-        return Client._get(self, id=toolShed_id)
+        return self._get(id=toolShed_id)
 
     def get_ordered_installable_revisions(self, name, owner):
         """
@@ -146,7 +146,7 @@ class ToolShedRepositoryClient(Client):
             'name': name,
             'owner': owner
         }
-        r = Client._get(self, url=url, params=params)
+        r = self._get(url=url, params=params)
 
         return r
 
@@ -228,7 +228,7 @@ class ToolShedRepositoryClient(Client):
             'owner': owner,
             'changeset_revision': changeset_revision
         }
-        return Client._get(self, url=url, params=params)
+        return self._get(url=url, params=params)
 
     def repository_revisions(self, downloadable=None, malicious=None,
                              tools_functionally_correct=None,
@@ -324,7 +324,7 @@ class ToolShedRepositoryClient(Client):
             params['test_install_error'] = True
         if skip_tool_test:
             params['skip_tool_test'] = True
-        return Client._get(self, url=url, params=params)
+        return self._get(url=url, params=params)
 
     def show_repository_revision(self, metadata_id):
         '''
@@ -362,7 +362,7 @@ class ToolShedRepositoryClient(Client):
         # to create url is not the same as needed for this method
         # since metadata_id has to be defined, easy to create the url here
         url = '/'.join([self.gi.url, 'repository_revisions', metadata_id])
-        return Client._get(self, url=url)
+        return self._get(url=url)
 
     def update_repository(self, id, tar_ball_path, commit_message=None):
         """
@@ -396,7 +396,7 @@ class ToolShedRepositoryClient(Client):
         if commit_message is not None:
             payload['commit_message'] = commit_message
         try:
-            return Client._post(self, id=id, payload=payload, files_attached=True, url=url)
+            return self._post(payload=payload, files_attached=True, url=url)
         finally:
             payload['file'].close()
 
@@ -464,4 +464,4 @@ class ToolShedRepositoryClient(Client):
             payload['homepage_url'] = homepage_url
         if category_ids is not None:
             payload['category_ids[]'] = category_ids
-        return Client._post(self, payload)
+        return self._post(payload)

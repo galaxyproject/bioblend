@@ -21,7 +21,7 @@ class FoldersClient(Client):
         :return: dictionary including details of the folder
         """
 
-        return Client._get(self, id=folder_id)
+        return self._get(id=folder_id)
 
     def delete_folder(self, folder_id, undelete=False):
         """
@@ -39,4 +39,4 @@ class FoldersClient(Client):
         :rtype:     dict
         """
         payload = {'undelete': undelete}
-        return Client._delete(self, payload=payload, id=folder_id)
+        return self._delete(payload=payload, id=folder_id)

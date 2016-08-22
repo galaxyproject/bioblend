@@ -44,7 +44,7 @@ class WorkflowClient(Client):
         params = {}
         if published:
             params['show_published'] = 'True'
-        workflows = Client._get(self, params=params)
+        workflows = self._get(params=params)
         if workflow_id is not None:
             workflow = next((_ for _ in workflows if _['id'] == workflow_id), None)
             workflows = [workflow] if workflow is not None else []
@@ -69,7 +69,7 @@ class WorkflowClient(Client):
                    u'url': u'/api/workflows/92c56938c2f9b315'}
 
         """
-        return Client._get(self, id=workflow_id)
+        return self._get(id=workflow_id)
 
     def get_workflow_inputs(self, workflow_id, label):
         """
@@ -85,7 +85,7 @@ class WorkflowClient(Client):
         :rtype: list
         :return: list of workflow inputs matching the label query
         """
-        wf = Client._get(self, id=workflow_id)
+        wf = self._get(id=workflow_id)
         inputs = wf['inputs']
         return [id for id in inputs if inputs[id]['label'] == label]
 
@@ -101,7 +101,7 @@ class WorkflowClient(Client):
 
         url = self.gi._make_url(self)
         url = _join(url, "upload")
-        return Client._post(self, url=url, payload=payload)
+        return self._post(url=url, payload=payload)
 
     def import_workflow_from_local_path(self, file_local_path):
         """
@@ -138,7 +138,7 @@ class WorkflowClient(Client):
         payload = {'workflow_id': workflow_id}
         url = self.gi._make_url(self)
         url = _join(url, 'import')
-        return Client._post(self, url=url, payload=payload)
+        return self._post(url=url, payload=payload)
 
     def export_workflow_json(self, workflow_id):
         """
@@ -152,7 +152,7 @@ class WorkflowClient(Client):
         """
         url = self.gi._make_url(self)
         url = _join(url, "download", workflow_id)
-        return Client._get(self, url=url)
+        return self._get(url=url)
 
     def export_workflow_to_local_path(self, workflow_id, file_local_path, use_default_filename=True):
         """
@@ -268,7 +268,7 @@ class WorkflowClient(Client):
             payload['history'] = history_name
         if import_inputs_to_history is False:
             payload['no_add_to_history'] = True
-        return Client._post(self, payload)
+        return self._post(payload)
 
     def invoke_workflow(self, workflow_id, inputs=None, params=None,
                         history_id=None, history_name=None,
@@ -405,7 +405,7 @@ class WorkflowClient(Client):
             payload['allow_tool_state_corrections'] = allow_tool_state_corrections
         url = self.gi._make_url(self)
         url = _join(url, workflow_id, "invocations")
-        return Client._post(self, payload, url=url)
+        return self._post(payload, url=url)
 
     def show_invocation(self, workflow_id, invocation_id):
         """
@@ -456,7 +456,7 @@ class WorkflowClient(Client):
              u'workflow_id': u'03501d7626bd192f'}
         """
         url = self._invocation_url(workflow_id, invocation_id)
-        return Client._get(self, url=url)
+        return self._get(url=url)
 
     def get_invocations(self, workflow_id):
         """
@@ -479,7 +479,7 @@ class WorkflowClient(Client):
               u'workflow_id': u'03501d7626bd192f'}]
         """
         url = self._invocations_url(workflow_id)
-        return Client._get(self, url=url)
+        return self._get(url=url)
 
     def cancel_invocation(self, workflow_id, invocation_id):
         """
@@ -492,7 +492,7 @@ class WorkflowClient(Client):
         :param invocation_id: Encoded workflow invocation ID
         """
         url = self._invocation_url(workflow_id, invocation_id)
-        return Client._delete(self, url=url)
+        return self._delete(url=url)
 
     def show_invocation_step(self, workflow_id, invocation_id, step_id):
         """
@@ -523,7 +523,7 @@ class WorkflowClient(Client):
              u'workflow_step_uuid': u'4060554c-1dd5-4287-9040-8b4f281cf9dc'}
         """
         url = self._invocation_step_url(workflow_id, invocation_id, step_id)
-        return Client._get(self, url=url)
+        return self._get(url=url)
 
     def run_invocation_step_action(self, workflow_id, invocation_id, step_id, action):
         """ Execute an action for an active workflow invocation step. The
@@ -547,7 +547,7 @@ class WorkflowClient(Client):
         """
         url = self._invocation_step_url(workflow_id, invocation_id, step_id)
         payload = {"action": action}
-        return Client._put(self, payload, url=url)
+        return self._put(payload=payload, url=url)
 
     def delete_workflow(self, workflow_id):
         """
@@ -560,7 +560,7 @@ class WorkflowClient(Client):
             Deleting a workflow is irreversible - all workflow data
             will be permanently deleted.
         """
-        return Client._delete(self, id=workflow_id)
+        return self._delete(id=workflow_id)
 
     def _invocation_step_url(self, workflow_id, invocation_id, step_id):
         return _join(self._invocation_url(workflow_id, invocation_id), "steps", step_id)

@@ -21,7 +21,7 @@ class ToolDataClient(Client):
             [{"model_class": "TabularToolDataTable", "name": "fasta_indexes"},
              {"model_class": "TabularToolDataTable", "name": "bwa_indexes"}]
         """
-        return Client._get(self)
+        return self._get()
 
     def show_data_table(self, data_table_id):
         """
@@ -42,7 +42,7 @@ class ToolDataClient(Client):
              "model_class": "TabularToolDataTable",
              "name": "all_fasta"}
         """
-        return Client._get(self, id=data_table_id)
+        return self._get(id=data_table_id)
 
     def reload_data_table(self, data_table_id):
         """
@@ -64,7 +64,7 @@ class ToolDataClient(Client):
              "name": "all_fasta"}
         """
         url = "%s/tool_data/%s/reload" % (self.gi.url, data_table_id)
-        return Client._get(self, url=url)
+        return self._get(url=url)
 
     def delete_data_table(self, data_table_id, values):
         """
@@ -78,4 +78,4 @@ class ToolDataClient(Client):
           value for all the columns of the data table
         """
         payload = {'values': values}
-        return Client._delete(self, payload=payload, id=data_table_id)
+        return self._delete(payload=payload, id=data_table_id)

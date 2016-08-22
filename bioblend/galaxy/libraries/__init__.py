@@ -37,7 +37,7 @@ class LibraryClient(Client):
             payload['description'] = description
         if synopsis:
             payload['synopsis'] = synopsis
-        return Client._post(self, payload)
+        return self._post(payload)
 
     def delete_library(self, library_id):
         """
@@ -51,7 +51,7 @@ class LibraryClient(Client):
           Deleting a data library is irreversible - all of the data from the
           library will be permanently deleted.
         """
-        return Client._delete(self, id=library_id)
+        return self._delete(id=library_id)
 
     def __show_item(self, library_id, item_id):
         """
@@ -59,7 +59,7 @@ class LibraryClient(Client):
         """
         url = self.gi._make_url(self, library_id, contents=True)
         url = '/'.join([url, item_id])
-        return Client._get(self, url=url)
+        return self._get(url=url)
 
     def delete_library_dataset(self, library_id, dataset_id, purged=False):
         """
@@ -86,7 +86,7 @@ class LibraryClient(Client):
         url = self.gi._make_url(self, library_id, contents=True)
         # Append the dataset_id to the base history contents URL
         url = '/'.join([url, dataset_id])
-        return Client._delete(self, payload={'purged': purged}, url=url)
+        return self._delete(payload={'purged': purged}, url=url)
 
     def show_dataset(self, library_id, dataset_id):
         """
@@ -162,7 +162,7 @@ class LibraryClient(Client):
         payload['create_type'] = 'folder'
         if description is not None:
             payload['description'] = description
-        return Client._post(self, payload, id=library_id, contents=True)
+        return self._post(payload, id=library_id, contents=True)
 
     def get_folders(self, library_id, folder_id=None, name=None):
         """
@@ -215,7 +215,7 @@ class LibraryClient(Client):
         """
         if library_id is not None and name is not None:
             raise ValueError('Provide only one argument between name or library_id, but not both')
-        libraries = Client._get(self, deleted=deleted)
+        libraries = self._get(deleted=deleted)
         if library_id is not None:
             library = next((_ for _ in libraries if _['id'] == library_id), None)
             libraries = [library] if library is not None else []
@@ -237,7 +237,7 @@ class LibraryClient(Client):
         :rtype: dict
         :return: details of the given library
         """
-        return Client._get(self, id=library_id, contents=contents)
+        return self._get(id=library_id, contents=contents)
 
     def _do_upload(self, library_id, **keywords):
         """
@@ -278,8 +278,8 @@ class LibraryClient(Client):
             payload["filesystem_paths"] = keywords["filesystem_paths"]
 
         try:
-            return Client._post(self, payload, id=library_id, contents=True,
-                                files_attached=files_attached)
+            return self._post(payload, id=library_id, contents=True,
+                              files_attached=files_attached)
         finally:
             if payload.get('files_0|file_data', None) is not None:
                 payload['files_0|file_data'].close()
@@ -468,7 +468,7 @@ class LibraryClient(Client):
         payload['create_type'] = 'file'
         payload['from_hda_id'] = dataset_id
         payload['ldda_message'] = message
-        return Client._post(self, payload, id=library_id, contents=True)
+        return self._post(payload, id=library_id, contents=True)
 
     def get_library_permissions(self, library_id):
         """
@@ -481,7 +481,7 @@ class LibraryClient(Client):
         :return: dictionary with all applicable permissions' values
         """
         url = '/'.join([self.gi._make_url(self, library_id), 'permissions'])
-        return Client._get(self, url=url)
+        return self._get(url=url)
 
     def set_library_permissions(self, library_id, access_in=None,
                                 modify_in=None, add_in=None, manage_in=None):
@@ -514,4 +514,4 @@ class LibraryClient(Client):
         if manage_in:
             payload['LIBRARY_MANAGE_in'] = manage_in
         url = '/'.join([self.gi._make_url(self, library_id), 'permissions'])
-        return Client._post(self, payload, url=url)
+        return self._post(payload, url=url)

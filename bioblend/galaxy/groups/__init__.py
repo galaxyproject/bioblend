@@ -27,7 +27,7 @@ class GroupsClient(Client):
               'name': 'LPN',
               'url': '/api/groups/73187219cd372cf8'}]
         """
-        return Client._get(self)
+        return self._get()
 
     def show_group(self, group_id):
         """
@@ -47,7 +47,7 @@ class GroupsClient(Client):
              'url': '/api/groups/33abac023ff186c2',
              'users_url': '/api/groups/33abac023ff186c2/users'}
         """
-        return Client._get(self, id=group_id)
+        return self._get(id=group_id)
 
     def create_group(self, group_name, user_ids=[], role_ids=[]):
         """
@@ -76,7 +76,7 @@ class GroupsClient(Client):
             'user_ids': user_ids,
             'role_ids': role_ids
         }
-        return Client._post(self, payload)
+        return self._post(payload)
 
     def update_group(self, group_id, group_name=None, user_ids=[], role_ids=[]):
         """
@@ -102,7 +102,7 @@ class GroupsClient(Client):
             'user_ids': user_ids,
             'role_ids': role_ids
         }
-        return Client._put(self, payload, id=group_id)
+        return self._put(payload=payload, id=group_id)
 
     def get_group_users(self, group_id):
         """
@@ -115,7 +115,7 @@ class GroupsClient(Client):
         :return: List of group users' info
         """
         url = '/'.join([self.gi._make_url(self, group_id), 'users'])
-        return Client._get(self, url=url)
+        return self._get(url=url)
 
     def get_group_roles(self, group_id):
         """
@@ -128,7 +128,7 @@ class GroupsClient(Client):
         :return: List of group roles' info
         """
         url = '/'.join([self.gi._make_url(self, group_id), 'roles'])
-        return Client._get(self, url=url)
+        return self._get(url=url)
 
     def add_group_user(self, group_id, user_id):
         """
@@ -144,7 +144,7 @@ class GroupsClient(Client):
         :return: Added group user's info
         """
         url = '/'.join([self.gi._make_url(self, group_id), 'users', user_id])
-        return Client._put(self, dict(), url=url)
+        return self._put(payload={}, url=url)
 
     def add_group_role(self, group_id, role_id):
         """
@@ -160,7 +160,7 @@ class GroupsClient(Client):
         :return: Added group role's info
         """
         url = '/'.join([self.gi._make_url(self, group_id), 'roles', role_id])
-        return Client._put(self, {}, url=url)
+        return self._put(payload={}, url=url)
 
     def delete_group_user(self, group_id, user_id):
         """
@@ -173,7 +173,7 @@ class GroupsClient(Client):
         :param user_id: Encoded user ID to remove from the group
         """
         url = '/'.join([self.gi._make_url(self, group_id), 'users', user_id])
-        return Client._delete(self, {}, url=url)
+        return self._delete(url=url)
 
     def delete_group_role(self, group_id, role_id):
         """
@@ -186,4 +186,4 @@ class GroupsClient(Client):
         :param role_id: Encoded role ID to remove from the group
         """
         url = '/'.join([self.gi._make_url(self, group_id), 'roles', role_id])
-        return Client._delete(self, {}, url=url)
+        return self._delete(url=url)

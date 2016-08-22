@@ -17,4 +17,4 @@ class FTPFilesClient(Client):
         :rtype: list
         :return: A list of dicts with details on individual files on FTP
         """
-        return Client._get(self)
+        return self._get()

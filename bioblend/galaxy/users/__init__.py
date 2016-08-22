@@ -26,7 +26,7 @@ class UserClient(Client):
                      u'url': u'/api/users/dda47097d9189f15'}]
 
         """
-        return Client._get(self, deleted=deleted)
+        return self._get(deleted=deleted)
 
     def show_user(self, user_id, deleted=False):
         """
@@ -41,7 +41,7 @@ class UserClient(Client):
         :rtype: dict
         :return: a dictionary containing information about the user
         """
-        return Client._get(self, id=user_id, deleted=deleted)
+        return self._get(id=user_id, deleted=deleted)
 
     def create_remote_user(self, user_email):
         """
@@ -63,7 +63,7 @@ class UserClient(Client):
         """
         payload = {}
         payload['remote_user_email'] = user_email
-        return Client._post(self, payload)
+        return self._post(payload)
 
     def create_local_user(self, username, user_email, password):
         """
@@ -91,7 +91,7 @@ class UserClient(Client):
         payload['username'] = username
         payload['email'] = user_email
         payload['password'] = password
-        return Client._post(self, payload)
+        return self._post(payload)
 
     def get_current_user(self):
         """
@@ -103,7 +103,7 @@ class UserClient(Client):
         """
         url = self.gi._make_url(self, None)
         url = '/'.join([url, 'current'])
-        return Client._get(self, url=url)
+        return self._get(url=url)
 
     def create_user_apikey(self, user_id):
         """
@@ -121,7 +121,7 @@ class UserClient(Client):
         payload = {}
         payload['user_id'] = user_id
 
-        return Client._post(self, payload, url=url)
+        return self._post(payload, url=url)
 
     def delete_user(self, user_id, purge=False):
         """
@@ -144,4 +144,4 @@ class UserClient(Client):
         params = {}
         if purge is True:
             params['purge'] = purge
-        return Client._delete(self, id=user_id, params=params)
+        return self._delete(id=user_id, params=params)

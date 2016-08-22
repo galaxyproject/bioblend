@@ -34,4 +34,4 @@ class ConfigClient(Client):
              u'user_library_import_dir': None,
              u'wiki_url': u'http://g2.trac.bx.psu.edu/'}
         """
-        return Client._get(self)
+        return self._get()

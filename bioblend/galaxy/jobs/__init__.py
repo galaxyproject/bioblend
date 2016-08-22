@@ -33,7 +33,7 @@ class JobsClient(Client):
               u'tool_id': u'upload1',
               u'update_time': u'2014-03-01T16:05:39.558458'}]
         """
-        return Client._get(self)
+        return self._get()
 
     def show_job(self, job_id, full_details=False):
         """
@@ -70,7 +70,7 @@ class JobsClient(Client):
         if full_details:
             params['full'] = full_details
 
-        return Client._get(self, id=job_id, params=params)
+        return self._get(id=job_id, params=params)
 
     def get_state(self, job_id):
         """
@@ -113,4 +113,4 @@ class JobsClient(Client):
         url = self.gi._make_url(self)
         url = '/'.join([url, "search"])
 
-        return Client._post(self, url=url, payload=payload)
+        return self._post(url=url, payload=payload)

@@ -39,7 +39,7 @@ class DatasetClient(Client):
         params = dict(
             hda_ldda=hda_ldda,
         )
-        return Client._get(self, id=dataset_id, deleted=deleted, params=params)
+        return self._get(id=dataset_id, deleted=deleted, params=params)
 
     def download_dataset(self, dataset_id, file_path=None, use_default_filename=True,
                          wait_for_completion=False, maxwait=12000):

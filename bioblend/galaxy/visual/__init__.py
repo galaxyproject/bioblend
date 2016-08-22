@@ -29,8 +29,7 @@ class VisualClient(Client):
               u'type': u'trackster',
               u'url': u'/api/visualizations/a669f50f8bf55b02'}]
         """
-        results = Client._get(self)
-        return results
+        return self._get()
 
     def show_visualization(self, visual_id):
         """
@@ -55,4 +54,4 @@ class VisualClient(Client):
              u'url': u'/u/azaron/v/visualization-for-grant-1',
              u'user_id': u'21e4aed91386ca8b'}
         """
-        return Client._get(self, id=visual_id)
+        return self._get(id=visual_id)

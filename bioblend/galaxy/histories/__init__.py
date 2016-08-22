@@ -31,7 +31,7 @@ class HistoryClient(Client):
         payload = {}
         if name is not None:
             payload['name'] = name
-        return Client._post(self, payload)
+        return self._post(payload)
 
     def get_histories(self, history_id=None, name=None, deleted=False):
         """
@@ -55,7 +55,7 @@ class HistoryClient(Client):
         """
         if history_id is not None and name is not None:
             raise ValueError('Provide only one argument between name or history_id, but not both')
-        histories = Client._get(self, deleted=deleted)
+        histories = self._get(deleted=deleted)
         if history_id is not None:
             history = next((_ for _ in histories if _['id'] == history_id), None)
             histories = [history] if history is not None else []
@@ -103,7 +103,7 @@ class HistoryClient(Client):
                 params['visible'] = visible
             if types is not None:
                 params['types'] = types.join(",")
-        return Client._get(self, id=history_id, contents=contents, params=params)
+        return self._get(id=history_id, contents=contents, params=params)
 
     def delete_dataset(self, history_id, dataset_id):
         """
@@ -118,7 +118,7 @@ class HistoryClient(Client):
         url = self.gi._make_url(self, history_id, contents=True)
         # Append the dataset_id to the base history contents URL
         url = '/'.join([url, dataset_id])
-        Client._delete(self, url=url)
+        self._delete(url=url)
 
     def delete_dataset_collection(self, history_id, dataset_collection_id):
         """
@@ -133,7 +133,7 @@ class HistoryClient(Client):
         url = self.gi._make_url(self, history_id, contents=True)
         # Append the dataset_id to the base history contents URL
         url = '/'.join([url, "dataset_collections", dataset_collection_id])
-        Client._delete(self, url=url)
+        self._delete(url=url)
 
     def show_dataset(self, history_id, dataset_id):
         """
@@ -148,7 +148,7 @@ class HistoryClient(Client):
         url = self.gi._make_url(self, history_id, contents=True)
         # Append the dataset_id to the base history contents URL
         url = '/'.join([url, dataset_id])
-        return Client._get(self, url=url)
+        return self._get(url=url)
 
     def show_dataset_collection(self, history_id, dataset_collection_id):
         """
@@ -162,7 +162,7 @@ class HistoryClient(Client):
         """
         url = self.gi._make_url(self, history_id, contents=True)
         url = '/'.join([url, "dataset_collections", dataset_collection_id])
-        return Client._get(self, url=url)
+        return self._get(url=url)
 
     def show_matching_datasets(self, history_id, name_filter=None):
         """
@@ -202,7 +202,7 @@ class HistoryClient(Client):
         """
         url = self.gi._make_url(self, history_id, contents=True)
         url = '/'.join([url, dataset_id, "provenance"])
-        return Client._get(self, url=url)
+        return self._get(url=url)
 
     def update_history(self, history_id, name=None, annotation=None, **kwds):
         """
@@ -240,7 +240,7 @@ class HistoryClient(Client):
         """
         kwds['name'] = name
         kwds['annotation'] = annotation
-        return Client._put(self, kwds, id=history_id)
+        return self._put(payload=kwds, id=history_id)
 
     def update_dataset(self, history_id, dataset_id, **kwds):
         """
@@ -279,7 +279,7 @@ class HistoryClient(Client):
         url = self.gi._make_url(self, history_id, contents=True)
         # Append the dataset_id to the base history contents URL
         url = '/'.join([url, dataset_id])
-        return Client._put(self, payload=kwds, url=url)
+        return self._put(payload=kwds, url=url)
 
     def update_dataset_collection(self, history_id, dataset_collection_id, **kwds):
         """
@@ -311,7 +311,7 @@ class HistoryClient(Client):
         """
         url = self.gi._make_url(self, history_id, contents=True)
         url = '/'.join([url, "dataset_collections", dataset_collection_id])
-        return Client._put(self, payload=kwds, url=url)
+        return self._put(payload=kwds, url=url)
 
     def create_history_tag(self, history_id, tag):
         """
@@ -340,7 +340,7 @@ class HistoryClient(Client):
         url = self.url
         url = '/'.join([url, history_id, 'tags', tag])
 
-        return Client._post(self, payload, url=url)
+        return self._post(payload, url=url)
 
     def upload_dataset_from_library(self, history_id, lib_dataset_id):
         """
@@ -359,7 +359,7 @@ class HistoryClient(Client):
             'source': 'library',
             'from_ld_id': lib_dataset_id,  # compatibility with old API
         }
-        return Client._post(self, payload, id=history_id, contents=True)
+        return self._post(payload, id=history_id, contents=True)
 
     def create_dataset_collection(self, history_id, collection_description):
         """
@@ -391,7 +391,7 @@ class HistoryClient(Client):
             collection_type=collection_description["collection_type"],
             element_identifiers=collection_description["element_identifiers"],
         )
-        return Client._post(self, payload, id=history_id, contents=True)
+        return self._post(payload, id=history_id, contents=True)
 
     def download_dataset(self, history_id, dataset_id, file_path,
                          use_default_filename=True):
@@ -426,7 +426,7 @@ class HistoryClient(Client):
         payload = {}
         if purge is True:
             payload['purge'] = purge
-        return Client._delete(self, payload=payload, id=history_id)
+        return self._delete(payload=payload, id=history_id)
 
     def undelete_history(self, history_id):
         """
@@ -438,7 +438,7 @@ class HistoryClient(Client):
         url = self.gi._make_url(self, history_id, deleted=True)
         # Append the 'undelete' action to the history URL
         url = '/'.join([url, 'undelete'])
-        return Client._post(self, payload={}, url=url)
+        return self._post(payload={}, url=url)
 
     def get_status(self, history_id):
         """
@@ -479,7 +479,7 @@ class HistoryClient(Client):
         """
         url = self.gi._make_url(self, None)
         url = '/'.join([url, 'most_recently_used'])
-        return Client._get(self, url=url)
+        return self._get(url=url)
 
     def export_history(self, history_id, gzip=True, include_hidden=False,
                        include_deleted=False, wait=False):
@@ -516,7 +516,7 @@ class HistoryClient(Client):
         url = '%s/exports' % self.gi._make_url(self, history_id)
         while True:
             try:
-                r = Client._put(self, {}, url=url, params=params)
+                r = self._put(payload={}, url=url, params=params)
             except ConnectionError as e:
                 if e.status_code == 202:  # export is not ready
                     if wait:

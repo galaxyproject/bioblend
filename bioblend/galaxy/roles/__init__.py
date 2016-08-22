@@ -27,7 +27,7 @@ class RolesClient(Client):
               "name": "Bar",
               "url": "/api/roles/f597429621d6eb2b"}]
         """
-        return Client._get(self)
+        return self._get()
 
     def show_role(self, role_id):
         """
@@ -47,4 +47,4 @@ class RolesClient(Client):
              "type": "private",
              "url": "/api/roles/f2db41e1fa331b3e"}
         """
-        return Client._get(self, id=role_id)
+        return self._get(id=role_id)

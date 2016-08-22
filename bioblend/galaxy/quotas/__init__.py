@@ -30,7 +30,7 @@ class QuotaClient(Client):
               u'name': u'workshop',
               u'url': u'/api/quotas/1ee267091d0190af'}]
         """
-        return Client._get(self, deleted=deleted)
+        return self._get(deleted=deleted)
 
     def show_quota(self, quota_id, deleted=False):
         """
@@ -57,4 +57,4 @@ class QuotaClient(Client):
              u'operation': u'=',
              u'users': []}
         """
-        return Client._get(self, id=quota_id, deleted=deleted)
+        return self._get(id=quota_id, deleted=deleted)

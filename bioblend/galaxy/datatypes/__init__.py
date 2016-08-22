@@ -37,7 +37,7 @@ class DatatypesClient(Client):
         if upload_only:
             params['upload_only'] = True
 
-        return Client._get(self, params=params)
+        return self._get(params=params)
 
     def get_sniffers(self):
         """
@@ -61,4 +61,4 @@ class DatatypesClient(Client):
         url = self.gi._make_url(self)
         url = '/'.join([url, "sniffers"])
 
-        return Client._get(self, url=url)
+        return self._get(url=url)

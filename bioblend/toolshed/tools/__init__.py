@@ -47,4 +47,4 @@ class ToolShedToolClient(Client):
              u'total_results': u'118'}
         """
         params = dict(q=q, page=page, page_size=page_size)
-        return Client._get(self, params=params)
+        return self._get(params=params)
