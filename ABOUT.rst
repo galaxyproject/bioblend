@@ -55,6 +55,6 @@ things like this:
     with an instance of Galaxy running on your laptop.
 
 .. References/hyperlinks used above
-.. _CloudMan: http://usecloudman.org/
+.. _CloudMan: https://wiki.galaxyproject.org/CloudMan
 .. _Galaxy: http://usegalaxy.org/
 .. _Git repository: https://github.com/afgane/bioblend
