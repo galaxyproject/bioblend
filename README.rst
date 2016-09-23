@@ -31,5 +31,5 @@ Full docs are available at http://bioblend.readthedocs.org with a quick library
 overview also available in `ABOUT.rst <./ABOUT.rst>`_.
 
 .. References/hyperlinks used above
-.. _CloudMan: http://usecloudman.org/
+.. _CloudMan: https://wiki.galaxyproject.org/CloudMan
 .. _Galaxy: http://usegalaxy.org/
