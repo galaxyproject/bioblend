@@ -60,8 +60,7 @@ class WorkflowClient(Client):
         :param workflow_id: Encoded workflow ID
 
         :rtype: dict
-        :return: A description of the workflow and its inputs as a JSON object.
-                 For example::
+        :return: A description of the workflow and its inputs. For example::
 
                   {u'id': u'92c56938c2f9b315',
                    u'inputs': {u'23': {u'label': u'Input Dataset', u'value': u''}},
@@ -89,19 +88,27 @@ class WorkflowClient(Client):
         inputs = wf['inputs']
         return [id for id in inputs if inputs[id]['label'] == label]
 
-    def import_workflow_json(self, workflow_json):
+    def import_workflow_dict(self, workflow_dict):
         """
-        Imports a new workflow given a json representation of a previously exported
-        workflow.
+        Imports a new workflow given a dictionary representing a previously
+        exported workflow.
 
-        :type workflow_json: str
-        :param workflow_json: JSON string representing the workflow to be imported
+        :type workflow_dict: dict
+        :param workflow_dict: dictionary representing the workflow to be imported
         """
-        payload = {'workflow': workflow_json}
+        payload = {'workflow': workflow_dict}
 
         url = self.gi._make_url(self)
         url = _join(url, "upload")
         return self._post(url=url, payload=payload)
+
+    def import_workflow_json(self, workflow_json):
+        """
+        Deprecated method.
+
+        Just an alias for import_workflow_dict().
+        """
+        return self.import_workflow_dict(workflow_json)
 
     def import_workflow_from_local_path(self, file_local_path):
         """
@@ -140,23 +147,31 @@ class WorkflowClient(Client):
         url = _join(url, 'import')
         return self._post(url=url, payload=payload)
 
-    def export_workflow_json(self, workflow_id):
+    def export_workflow_dict(self, workflow_id):
         """
-        Exports a workflow
+        Exports a workflow.
 
         :type workflow_id: str
         :param workflow_id: Encoded workflow ID
 
         :rtype: dict
-        :return: Dict representing the workflow requested
+        :return: Dictionary representing the requested workflow
         """
         url = self.gi._make_url(self)
         url = _join(url, "download", workflow_id)
         return self._get(url=url)
 
+    def export_workflow_json(self, workflow_id):
+        """
+        Deprecated method.
+
+        Just an alias for export_workflow_dict().
+        """
+        return self.export_workflow_dict(workflow_id)
+
     def export_workflow_to_local_path(self, workflow_id, file_local_path, use_default_filename=True):
         """
-        Exports a workflow in json format to a given local path.
+        Exports a workflow in JSON format to a given local path.
 
         :type workflow_id: str
         :param workflow_id: Encoded workflow ID
@@ -171,14 +186,14 @@ class WorkflowClient(Client):
           is the workflow name. If use_default_name is False, file_local_path
           is assumed to contain the full file path including filename.
         """
-        workflow_json = self.export_workflow_json(workflow_id)
+        workflow_dict = self.export_workflow_dict(workflow_id)
 
         if use_default_filename:
-            filename = 'Galaxy-Workflow-%s.ga' % workflow_json['name']
+            filename = 'Galaxy-Workflow-%s.ga' % workflow_dict['name']
             file_local_path = os.path.join(file_local_path, filename)
 
         with open(file_local_path, 'w') as fp:
-            json.dump(workflow_json, fp)
+            json.dump(workflow_dict, fp)
 
     def run_workflow(self, workflow_id, dataset_map=None, params=None,
                      history_id=None, history_name=None,

@@ -470,7 +470,7 @@ class Workflow(Wrapper):
         :rtype: dict
         :return: a JSON-serializable dump of the workflow
         """
-        return self.gi.gi.workflows.export_workflow_json(self.id)
+        return self.gi.gi.workflows.export_workflow_dict(self.id)
 
     def delete(self):
         """

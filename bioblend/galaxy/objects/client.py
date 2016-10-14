@@ -255,7 +255,7 @@ class ObjWorkflowClient(ObjClient):
                 wf_dict = json.loads(src)
             except (TypeError, ValueError):
                 self._error('src not supported: %r' % (src,))
-        wf_info = self.gi.workflows.import_workflow_json(wf_dict)
+        wf_info = self.gi.workflows.import_workflow_dict(wf_dict)
         return self.get(wf_info['id'])
 
     def import_shared(self, id_):

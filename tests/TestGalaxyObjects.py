@@ -23,9 +23,8 @@ from .test_util import unittest
 
 bioblend.set_stream_logger('test', level='INFO')
 socket.setdefaulttimeout(10.0)
-THIS_DIR = os.path.dirname(os.path.abspath(__file__))
-SAMPLE_FN = os.path.join(THIS_DIR, 'data', 'paste_columns.ga')
-SAMPLE_WF_COLL_FN = os.path.join(THIS_DIR, 'data', 'paste_columns_collections.ga')
+SAMPLE_FN = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
+SAMPLE_WF_COLL_FN = test_util.get_abspath(os.path.join('data', 'paste_columns_collections.ga'))
 FOO_DATA = 'foo\nbar\n'
 FOO_DATA_2 = 'foo2\nbar2\n'
 SAMPLE_WF_DICT = {
@@ -275,7 +274,7 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
     def test_workflow_missing_tools(self):
         with open(SAMPLE_FN) as f:
             wf_dump = json.load(f)
-        wf_info = self.gi.gi.workflows.import_workflow_json(wf_dump)
+        wf_info = self.gi.gi.workflows.import_workflow_dict(wf_dump)
         wf_dict = self.gi.gi.workflows.show_workflow(wf_info['id'])
         for id_, step in six.iteritems(wf_dict['steps']):
             if step['type'] == 'tool':

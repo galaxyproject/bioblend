@@ -14,10 +14,6 @@ from bioblend.galaxy.tools.inputs import (
 from . import GalaxyTestBase, test_util
 
 
-def get_abspath(path):
-    return os.path.join(os.path.dirname(__file__), path)
-
-
 @test_util.skip_unless_galaxy()
 class TestGalaxyTools(GalaxyTestBase.GalaxyTestBase):
 
@@ -64,7 +60,7 @@ class TestGalaxyTools(GalaxyTestBase.GalaxyTestBase):
     def test_upload_file(self):
         history = self.gi.histories.create_history(name="test_upload_file history")
 
-        fn = get_abspath(os.path.join(os.pardir, "setup.py"))
+        fn = test_util.get_abspath(os.path.join(os.pardir, "setup.py"))
         file_name = "test1"
         tool_output = self.gi.tools.upload_file(
             fn,
@@ -84,7 +80,7 @@ class TestGalaxyTools(GalaxyTestBase.GalaxyTestBase):
     def test_run_random_lines(self):
         # Run second test case from randomlines.xml
         history_id = self.gi.histories.create_history(name="test_run_random_lines history")["id"]
-        with open(get_abspath(os.path.join("data", "1.bed"))) as f:
+        with open(test_util.get_abspath(os.path.join("data", "1.bed"))) as f:
             contents = f.read()
         dataset_id = self._test_dataset(history_id, contents=contents)
         tool_inputs = inputs().set(

@@ -59,3 +59,7 @@ def skip_unless_tool(tool_id):
         return wrapped_method
 
     return method_wrapper
+
+
+def get_abspath(path):
+    return os.path.abspath(os.path.join(os.path.dirname(__file__), path))
