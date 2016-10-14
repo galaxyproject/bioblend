@@ -140,7 +140,7 @@ class WorkflowClient(Client):
         url = _join(url, 'import')
         return self._post(url=url, payload=payload)
 
-    def export_workflow_json(self, workflow_id):
+    def export_workflow_dict(self, workflow_id):
         """
         Exports a workflow
 
