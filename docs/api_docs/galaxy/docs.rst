@@ -271,23 +271,23 @@ This returns a list of metadata dictionaries. We can get the details of a partic
      u'url': u'/api/workflows/e8b85ad72aefca86'
      }
 
-Export or import a Workflow
+Export or import a workflow
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Workflows can be exported from or imported into Galaxy as JSON. This makes it possible to archive Workflows, or to move them between Galaxy instances. 
+Workflows can be exported from or imported into Galaxy. This makes it possible to archive workflows, or to move them between Galaxy instances.
 
 To export a workflow, we can call::
 
-    >>> workflow_string = gi.workflows.export_workflow_json('e8b85ad72aefca86')
+    >>> workflow_dict = gi.workflows.export_workflow_dict('e8b85ad72aefca86')
 
-This gives us a (rather long) string with a JSON-encoded representation of the Workflow. We can import this string as a new Workflow with::
+This gives us a complex dictionary representing the workflow. We can import this dictionary as a new workflow with::
 
-    >>> gi.workflows.import_workflow_json(workflow_string)
+    >>> gi.workflows.import_workflow_dict(workflow_dict)
     {u'id': u'c0bacafdfe211f9a',
      u'name': u'TopHat + cufflinks part 1 (imported from API)',
      u'url': u'/api/workflows/c0bacafdfe211f9a'}
      
-This call returns a dictionary containing basic metadata on the new Workflow object. Since in this case we have imported the JSON string into the original Galaxy instance, we now have a duplicate of the original Workflow in our account:
+This call returns a dictionary containing basic metadata on the new workflow. Since in this case we have imported the dictionary into the original Galaxy instance, we now have a duplicate of the original workflow in our account:
 
     >>> gi.workflows.get_workflows()
     [{u'id': u'c0bacafdfe211f9a',
@@ -300,9 +300,9 @@ This call returns a dictionary containing basic metadata on the new Workflow obj
       u'name': u'CuffDiff',
       u'url': u'/api/workflows/b0631c44aa74526d'}]
 
-Instead of using JSON strings directly, Workflows can be exported to or imported from files on the local disk using the ``export_workflow_to_local_path`` and ``import_workflow_from_local_path`` methods. See the :ref:`API reference <workflows-api>` for details.
+Instead of using dictionaries directly, workflows can be exported to or imported from files on the local disk using the ``export_workflow_to_local_path`` and ``import_workflow_from_local_path`` methods. See the :ref:`API reference <workflows-api>` for details.
 
-.. Note:: If we export a Workflow from one Galaxy instance and import it into another, Galaxy will only run it without modification if it has the same versions of the tool wrappers installed. This is to ensure reproducibility. Otherwise, we will need to manually update the Workflow to use the new tool versions.
+.. Note:: If we export a workflow from one Galaxy instance and import it into another, Galaxy will only run it without modification if it has the same versions of the tool wrappers installed. This is to ensure reproducibility. Otherwise, we will need to manually update the workflow to use the new tool versions.
 
 
 Run a Workflow

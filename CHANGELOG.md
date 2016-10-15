@@ -1,3 +1,9 @@
+### BioBlend v0.9.0 - Unreleased
+
+* Deprecated ``import_workflow_json()`` and ``export_workflow_json()`` methods
+  of ``WorkflowClient`` in favor of ``import_workflow_dict()`` and
+  ``export_workflow_dict()`` (reported by @manabuishii)
+
 ### BioBlend v0.8.0 - August 11, 2016
 
 * Removed deprecated method ``create_user()`` of ``UserClient``.

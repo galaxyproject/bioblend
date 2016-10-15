@@ -37,12 +37,12 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
 
     def test_get_histories(self):
         # Make sure there's at least one value - the one we created
-        full_history = self.gi.histories.get_histories()
-        self.assertIsNotNone(full_history)
+        all_histories = self.gi.histories.get_histories()
+        self.assertGreater(len(all_histories), 0)
 
         # Check whether name is correct, when searched by id
-        new_history = self.gi.histories.get_histories(history_id=self.history['id'])
-        self.assertTrue(any(d['name'] == self.default_history_name for d in new_history))
+        new_history = self.gi.histories.get_histories(history_id=self.history['id'])[0]
+        self.assertEqual(new_history['name'], self.default_history_name)
 
         # Check whether id is present, when searched by name
         new_history = self.gi.histories.get_histories(name=self.default_history_name)
@@ -56,7 +56,7 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
         # get_histories() will return both not-deleted and deleted histories
         # and we can uncomment the following test.
         # deleted_history = self.gi.histories.get_histories(deleted=True)
-        # self.assertGreaterEqual(len(full_history), len(deleted_history))
+        # self.assertGreaterEqual(len(all_histories), len(deleted_history))
 
     def test_show_history(self):
         history_data = self.gi.histories.show_history(self.history['id'])
@@ -116,14 +116,14 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
         result = self.gi.histories.delete_history(self.history['id'])
         self.assertTrue(result['deleted'])
 
-        full_history = self.gi.histories.get_histories()
-        self.assertTrue(not any(d['id'] == self.history['id'] for d in full_history))
+        all_histories = self.gi.histories.get_histories()
+        self.assertTrue(not any(d['id'] == self.history['id'] for d in all_histories))
 
     def test_undelete_history(self):
         self.gi.histories.delete_history(self.history['id'])
         self.gi.histories.undelete_history(self.history['id'])
-        full_history = self.gi.histories.get_histories()
-        self.assertTrue(any(d['id'] == self.history['id'] for d in full_history))
+        all_histories = self.gi.histories.get_histories()
+        self.assertTrue(any(d['id'] == self.history['id'] for d in all_histories))
 
     def test_get_status(self):
         state = self.gi.histories.get_status(self.history['id'])
