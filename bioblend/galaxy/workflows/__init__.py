@@ -313,8 +313,9 @@ class WorkflowClient(Client):
 
         :type params: str or dict
         :param params: A mapping of tool parameters that are non-datasets
-          parameters. The map must be in the following format:
+          parameters. The map must be in one of the following formats:
           ``{'blastn': {'param': 'evalue', 'value': '1e-06'}}``
+          ``{'blastn': {'evalue': '1e-06'}}``
 
         :type history_id: str
         :param history_id: The encoded history ID where to store the workflow
