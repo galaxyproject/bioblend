@@ -397,7 +397,7 @@ class HistoryClient(Client):
                          use_default_filename=True):
         """
         Deprecated method, use
-        ``bioblend.galaxy.dataset.DatasetClient.download_dataset()`` instead.
+        :meth:`~bioblend.galaxy.datasets.DatasetClient.download_dataset` instead.
         """
         meta = self.show_dataset(history_id, dataset_id)
         if use_default_filename:
@@ -469,7 +469,7 @@ class HistoryClient(Client):
         """
         Deprecated method.
 
-        Just an alias for get_most_recently_used_history().
+        Just an alias for :meth:`get_most_recently_used_history`.
         """
         return self.get_most_recently_used_history()
 

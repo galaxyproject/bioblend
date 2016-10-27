@@ -362,18 +362,18 @@ class Workflow(Wrapper):
           stored there) or a string (a new history will be created with
           the given name).
 
-        :type params: :class:`~collections.Mapping`
-        :param params: parameter settings for workflow steps (see below)
+        :type params: dict
+        :param params: a mapping of non-datasets tool parameters (see below)
 
         :type import_inputs: bool
         :param import_inputs: If ``True``, workflow inputs will be imported into
           the history; if ``False``, only workflow outputs will be visible in
           the history.
 
-        :type replacement_params: :class:`~collections.Mapping`
+        :type replacement_params: dict
         :param replacement_params: pattern-based replacements for
           post-job actions (see the docs for
-          :meth:`~bioblend.galaxy.workflows.WorkflowClient.run_workflow`)
+          :meth:`~bioblend.galaxy.workflows.WorkflowClient.invoke_workflow`)
 
         :type wait: bool
         :param wait: whether to wait while the returned datasets are
@@ -389,15 +389,18 @@ class Workflow(Wrapper):
         :rtype: tuple
         :return: list of output datasets, output history
 
-        The ``params`` dict should be structured as follows::
+        The ``params`` dict should be specified as follows::
 
-          PARAMS = {STEP_ID: PARAM_DICT, ...}
-          PARAM_DICT = {NAME: VALUE, ...}
+          {STEP_ID: PARAM_DICT, ...}
+
+        where PARAM_DICT is::
+
+          {PARAM_NAME: VALUE, ...}
 
         For backwards compatibility, the following (deprecated) format is
-        also supported::
+        also supported for ``params``::
 
-          PARAMS = {TOOL_ID: PARAM_DICT, ...}
+          {TOOL_ID: PARAM_DICT, ...}
 
         in which case PARAM_DICT affects all steps with the given tool id.
         If both by-tool-id and by-step-id specifications are used, the
@@ -406,7 +409,7 @@ class Workflow(Wrapper):
         Finally (again, for backwards compatibility), PARAM_DICT can also
         be specified as::
 
-          PARAM_DICT = {'param': NAME, 'value': VALUE}
+          {'param': PARAM_NAME, 'value': VALUE}
 
         Note that this format allows only one parameter to be set per step.
 
