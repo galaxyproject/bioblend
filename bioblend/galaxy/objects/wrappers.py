@@ -12,7 +12,7 @@ import six
 
 import bioblend
 
-__all__ = [
+__all__ = (
     'Wrapper',
     'Step',
     'Workflow',
@@ -35,7 +35,7 @@ __all__ = [
     'LibraryPreview',
     'HistoryPreview',
     'WorkflowPreview',
-]
+)
 
 
 @six.add_metaclass(abc.ABCMeta)

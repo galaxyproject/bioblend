@@ -77,10 +77,10 @@ class LibraryDatasetElement(SimpleElement):
         ))
 
 
-__all__ = [
+__all__ = (
     "CollectionDescription",
     "CollectionElement",
     "HistoryDatasetElement",
     "HistoryDatasetCollectionElement",
     "LibraryDatasetElement",
-]
+)

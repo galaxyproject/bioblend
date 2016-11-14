@@ -52,6 +52,7 @@ def start_cloudman(name, pwd, cm_type, inst_type, ami, ak, sk):
     print("Done! CloudMan IP is {0}".format(cmi.cloudman_url))
     return cmc, cmi
 
+
 if __name__ == "__main__":
     if len(sys.argv) != 8:
         print("\nUsage:\n"

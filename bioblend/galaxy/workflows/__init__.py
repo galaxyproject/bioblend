@@ -639,4 +639,4 @@ def _join(*args):
     return "/".join(args)
 
 
-__all__ = ['WorkflowClient']
+__all__ = ('WorkflowClient', )

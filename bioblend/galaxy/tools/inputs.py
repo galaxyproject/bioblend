@@ -65,10 +65,11 @@ class DatasetParam(Param):
             value = dict(src=src, id=value)
         super(DatasetParam, self).__init__(value)
 
+
 inputs = InputsBuilder
 repeat = RepeatBuilder
 conditional = InputsBuilder
 param = Param
 dataset = DatasetParam
 
-__all__ = ["inputs", "repeat", "conditional", "param"]
+__all__ = ("inputs", "repeat", "conditional", "param")

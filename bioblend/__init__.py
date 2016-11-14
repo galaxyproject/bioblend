@@ -39,11 +39,11 @@ class NullHandler(logging.Handler):
     def emit(self, record):
         pass
 
+
 # By default, do not force any logging by the library. If you want to see the
 # log messages in your scripts, add the following to the top of your script:
 #   import logging
 #   logging.basicConfig(filename="bioblend.log", level=logging.DEBUG)
-
 default_format_string = "%(asctime)s %(name)s [%(levelname)s]: %(message)s"
 log = logging.getLogger('bioblend')
 log.addHandler(NullHandler())

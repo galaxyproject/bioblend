@@ -50,7 +50,8 @@ def attach_file(path, name=None):
     attachment = FileStream(name, open(path, "rb"))
     return attachment
 
-__all__ = [
+
+__all__ = (
     'Bunch',
     'attach_file',
-]
+)
