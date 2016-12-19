@@ -260,7 +260,6 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
             wf = self.gi.workflows.import_new(f.read())
         self.__check_and_del_workflow(wf)
 
-    @test_util.skip_unless_galaxy('release_14.06')
     def test_workflow_collections_from_str(self):
         with open(SAMPLE_WF_COLL_FN) as f:
             wf = self.gi.workflows.import_new(f.read())
@@ -504,24 +503,20 @@ class TestLDContents(GalaxyObjectsTestBase):
     def tearDown(self):
         self.lib.delete()
 
-    @test_util.skip_unless_galaxy('release_14.08')
     def test_dataset_get_stream(self):
         for idx, c in enumerate(self.ds.get_stream(chunk_size=1)):
             self.assertEqual(six.b(FOO_DATA[idx]), c)
 
-    @test_util.skip_unless_galaxy('release_14.08')
     def test_dataset_peek(self):
         fetched_data = self.ds.peek(chunk_size=4)
         self.assertEqual(six.b(FOO_DATA[0:4]), fetched_data)
 
-    @test_util.skip_unless_galaxy('release_14.08')
     def test_dataset_download(self):
         with tempfile.TemporaryFile() as f:
             self.ds.download(f)
             f.seek(0)
             self.assertEqual(six.b(FOO_DATA), f.read())
 
-    @test_util.skip_unless_galaxy('release_14.08')
     def test_dataset_get_contents(self):
         self.assertEqual(six.b(FOO_DATA), self.ds.get_contents())
 
@@ -619,7 +614,6 @@ class TestHistory(GalaxyObjectsTestBase):
         self.assertEqual(self.hist.annotation, new_annotation)
         self.assertEqual(self.hist.tags, new_tags)
 
-    @test_util.skip_unless_galaxy('release_14.06')
     def test_create_dataset_collection(self):
         self._create_collection_description()
         hdca = self.hist.create_dataset_collection(self.collection_description)
@@ -630,7 +624,6 @@ class TestHistory(GalaxyObjectsTestBase):
         self.assertEqual(self.dataset1.id, hdca.elements[0]['object']['id'])
         self.assertEqual(self.dataset2.id, hdca.elements[1]['object']['id'])
 
-    @test_util.skip_unless_galaxy('release_14.06')
     def test_delete_dataset_collection(self):
         self._create_collection_description()
         hdca = self.hist.create_dataset_collection(self.collection_description)
@@ -745,7 +738,6 @@ class TestRunWorkflow(GalaxyObjectsTestBase):
         self.__test(params=True)
 
 
-@test_util.skip_unless_galaxy('release_14.08')
 class TestRunDatasetCollectionWorkflow(GalaxyObjectsTestBase):
 
     def setUp(self):

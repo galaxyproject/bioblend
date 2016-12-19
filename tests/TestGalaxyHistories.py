@@ -64,7 +64,6 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
         self.assertEqual(self.history['name'], history_data['name'])
         self.assertEqual('new', history_data['state'])
 
-    @test_util.skip_unless_galaxy('release_14.04')
     def test_create_history_tag(self):
         new_tag = 'tag1'
         self.gi.histories.create_history_tag(self.history['id'], new_tag)
@@ -88,8 +87,7 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
         history_id = self.history["id"]
         dataset1_id = self._test_dataset(history_id)
         prov = self.gi.histories.show_dataset_provenance(history_id, dataset1_id)
-        # 'job_id' key was added in Galaxy release_14.06
-        for key in ["id", "stdout", "stderr", "parameters", "tool_id"]:
+        for key in ["id", "job_id", "parameters", "stderr", "stdout", "tool_id"]:
             self.assertIn(key, prov)
 
     def test_delete_dataset(self):
