@@ -220,11 +220,7 @@ class Workflow(Wrapper):
         object.__setattr__(self, 'dag', dag)
         object.__setattr__(self, 'inv_dag', inv_dag)
         object.__setattr__(self, 'source_ids', heads - tails)
-        # In Galaxy release_14.06 (the first to support dataset collection
-        # inputs) `inputs` does not contain dataset collections, so test if it
-        # is a subset of (instead of equal to) the union of dataset collection
-        # and dataset input ids.
-        assert set(self.inputs) <= self.data_collection_input_ids | self.data_input_ids, \
+        assert set(self.inputs) == self.data_collection_input_ids | self.data_input_ids, \
             "inputs is %r, while data_collection_input_ids is %r and data_input_ids is %r" % (self.inputs, self.data_collection_input_ids, self.data_input_ids)
         object.__setattr__(self, 'sink_ids', tails - heads)
         object.__setattr__(self, 'missing_ids', missing_ids)
@@ -524,14 +520,6 @@ class Dataset(Wrapper):
 
         :type chunk_size: int
         :param chunk_size: read this amount of bytes at a time
-
-        .. warning::
-
-          Due to a change in the Galaxy API endpoint, this method does
-          not work on :class:`LibraryDataset` instances with Galaxy
-          ``release_2014.06.02``. Methods that delegate work to this one
-          are also affected: :meth:`peek`, :meth:`download` and
-          :meth:`get_contents`.
         """
         kwargs = {'stream': True}
         if isinstance(self, LibraryDataset):
