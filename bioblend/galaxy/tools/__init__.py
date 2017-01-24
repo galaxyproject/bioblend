@@ -66,6 +66,19 @@ class ToolClient(Client):
         params['trackster'] = trackster
         return self._get(params=params)
 
+    def install_dependencies(self, tool_id):
+        """
+        Install dependencies for a given tool via a resolver.
+        This works only for Conda currently.
+        This functionality is available since Galaxy release_16.10
+        and is available only to Galaxy admins.
+
+        :type tool_id: str
+        :param tool_id: id of the requested tool
+        """
+        url = "%s/tools/%s/install_dependencies" % (self.gi.url, tool_id)
+        return self._post(payload={}, url=url)
+
     def show_tool(self, tool_id, io_details=False, link_details=False):
         """
         Get details of a given tool.
