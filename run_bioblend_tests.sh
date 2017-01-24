@@ -92,6 +92,8 @@ sed -i -e "s|^#database_connection.*|database_connection = sqlite:///$TEMP_DIR/u
 sed -i -e 's/^#allow_user_dataset_purge.*/allow_user_dataset_purge = True/' $GALAXY_CONFIG_FILE
 # Change Galaxy configuration needed by some library tests
 sed -i -e 's/^#allow_library_path_paste.*/allow_library_path_paste = True/' $GALAXY_CONFIG_FILE
+# Change Galaxy configuration needed by some tool tests
+sed -i -e 's/^#conda_auto_init.*/conda_auto_init = True/' $GALAXY_CONFIG_FILE
 # Change Galaxy configuration needed by some workflow tests
 sed -i -e 's/^#enable_beta_workflow_modules.*/enable_beta_workflow_modules = True/' $GALAXY_CONFIG_FILE
 # Change Galaxy configuration needed by some user tests
