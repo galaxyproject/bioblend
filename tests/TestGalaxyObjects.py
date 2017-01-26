@@ -247,14 +247,6 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
         lib.delete()
         self.assertFalse(lib.is_mapped)
 
-    def test_history(self):
-        name = 'test_%s' % uuid.uuid4().hex
-        hist = self.gi.histories.create(name)
-        self.assertEqual(hist.name, name)
-        self.assertIn(hist.id, [_.id for _ in self.gi.histories.list()])
-        hist.delete(purge=True)
-        self.assertFalse(hist.is_mapped)
-
     def test_workflow_from_str(self):
         with open(SAMPLE_FN) as f:
             wf = self.gi.workflows.import_new(f.read())
@@ -284,7 +276,7 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
         self.assertRaises(RuntimeError, wf.run)
         wf.delete()
 
-    def test_export(self):
+    def test_workflow_export(self):
         with open(SAMPLE_FN) as f:
             wf1 = self.gi.workflows.import_new(f.read())
         wf2 = self.gi.workflows.import_new(wf1.export())
@@ -537,9 +529,12 @@ class TestHistory(GalaxyObjectsTestBase):
     def tearDown(self):
         self.hist.delete(purge=True)
 
-    def test_delete(self):
-        hist = self.gi.histories.create('test_%s' % uuid.uuid4().hex)
+    def test_create_delete(self):
+        name = 'test_%s' % uuid.uuid4().hex
+        hist = self.gi.histories.create(name)
+        self.assertEqual(hist.name, name)
         hist_id = hist.id
+        self.assertIn(hist_id, [_.id for _ in self.gi.histories.list()])
         hist.delete(purge=True)
         self.assertFalse(hist.is_mapped)
         try:
@@ -696,17 +691,17 @@ class TestRunWorkflow(GalaxyObjectsTestBase):
             self.wf = self.gi.workflows.import_new(f.read())
         self.contents = ['one\ntwo\n', '1\n2\n']
         self.inputs = [self.lib.upload_data(_) for _ in self.contents]
-        self.hist_name = 'test_%s' % uuid.uuid4().hex
 
     def tearDown(self):
         self.wf.delete()
         self.lib.delete()
 
     def __test(self, existing_hist=False, params=False):
+        hist_name = 'test_%s' % uuid.uuid4().hex
         if existing_hist:
-            hist = self.gi.histories.create(self.hist_name)
+            hist = self.gi.histories.create(hist_name)
         else:
-            hist = self.hist_name
+            hist = hist_name
         if params:
             params = {'Paste1': {'delimiter': 'U'}}
             sep = '_'  # 'U' maps to '_' in the paste tool
