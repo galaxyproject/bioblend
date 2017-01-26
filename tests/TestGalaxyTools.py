@@ -126,3 +126,8 @@ class TestGalaxyTools(GalaxyTestBase.GalaxyTestBase):
         self.assertEqual(len(tool_output["outputs"]), 1)
         # TODO: Wait for results and verify it has 3 lines - 1 2 3, 4 5 6,
         # and 7 8 9.
+
+    @test_util.skip_unless_galaxy('release_16.10')
+    def test_tool_dependency_install(self):
+        installed_dependencies = self.gi.tools.install_dependencies('__SET_METADATA__')
+        self.assertTrue(any([True for d in installed_dependencies if d.get('name') == 'samtools' and d.get('dependency_type') == 'conda']))
