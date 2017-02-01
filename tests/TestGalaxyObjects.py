@@ -288,6 +288,18 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
         # Galaxy appends additional text to imported workflow names
         self.assertTrue(wf.name.startswith('paste_columns'))
         self.assertEqual(len(wf.steps), 3)
+        for step_id, step in six.iteritems(wf.steps):
+            self.assertIsInstance(step, wrappers.Step)
+            self.assertEqual(step_id, step.id)
+            self.assertIsInstance(step.tool_inputs, dict)
+            if step.type == 'tool':
+                self.assertIsNotNone(step.tool_id)
+                self.assertIsNotNone(step.tool_version)
+                self.assertIsInstance(step.input_steps, dict)
+            elif step.type in ('data_collection_input', 'data_input'):
+                self.assertIsNone(step.tool_id)
+                self.assertIsNone(step.tool_version)
+                self.assertEqual(step.input_steps, {})
         wf_ids = set(_.id for _ in self.gi.workflows.list())
         self.assertIn(wf.id, wf_ids)
         wf.delete()
