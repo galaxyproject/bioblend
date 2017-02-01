@@ -5,5 +5,3 @@ include setup.py
 
 graft bioblend
 graft docs
-graft tests
-
