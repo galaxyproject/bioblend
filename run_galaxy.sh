@@ -1,7 +1,6 @@
 #!/bin/sh
 
 #This script should be run from inside the Galaxy base directory
-#cd `dirname $0`
 
 # If there is a file that defines a shell environment specific to this
 # instance of Galaxy, source the file.
