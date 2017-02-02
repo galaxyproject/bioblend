@@ -127,8 +127,8 @@ class WorkflowClient(Client):
         """
         Imports a new workflow from the shared published workflows.
 
-        :type shared_workflow_id: str
-        :param shared_workflow_id: Encoded workflow ID
+        :type workflow_id: str
+        :param workflow_id: Encoded workflow ID
 
         :rtype: dict
         :return: A description of the workflow.
