@@ -123,7 +123,7 @@ class WorkflowClient(Client):
 
         return self.import_workflow_json(workflow_json)
 
-    def import_shared_workflow(self, shared_workflow_id):
+    def import_shared_workflow(self, workflow_id):
         """
         Imports a new workflow from the shared published workflows.
 
