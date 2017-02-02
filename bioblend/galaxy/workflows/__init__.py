@@ -123,12 +123,12 @@ class WorkflowClient(Client):
 
         return self.import_workflow_json(workflow_json)
 
-    def import_shared_workflow(self, workflow_id):
+    def import_shared_workflow(self, shared_workflow_id):
         """
         Imports a new workflow from the shared published workflows.
 
-        :type workflow_id: str
-        :param workflow_id: Encoded workflow ID
+        :type shared_workflow_id: str
+        :param shared_workflow_id: Encoded workflow ID
 
         :rtype: dict
         :return: A description of the workflow.
@@ -140,11 +140,9 @@ class WorkflowClient(Client):
              u'published': False,
              u'tags': [],
              u'url': u'/api/workflows/ee0e2b4b696d9092'}
-
         """
-        payload = {'workflow_id': workflow_id}
+        payload = {'shared_workflow_id': shared_workflow_id}
         url = self.gi._make_url(self)
-        url = _join(url, 'import')
         return self._post(url=url, payload=payload)
 
     def export_workflow_dict(self, workflow_id):
