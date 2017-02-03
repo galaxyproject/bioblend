@@ -140,11 +140,9 @@ class WorkflowClient(Client):
              u'published': False,
              u'tags': [],
              u'url': u'/api/workflows/ee0e2b4b696d9092'}
-
         """
-        payload = {'workflow_id': workflow_id}
+        payload = {'shared_workflow_id': workflow_id}
         url = self.gi._make_url(self)
-        url = _join(url, 'import')
         return self._post(url=url, payload=payload)
 
     def export_workflow_dict(self, workflow_id):
