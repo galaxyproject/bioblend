@@ -105,7 +105,7 @@ class HistoryClient(Client):
                 params['types'] = types.join(",")
         return self._get(id=history_id, contents=contents, params=params)
 
-    def delete_dataset(self, history_id, dataset_id):
+    def delete_dataset(self, history_id, dataset_id, purge=False):
         """
         Mark corresponding dataset as deleted.
 
@@ -114,11 +114,28 @@ class HistoryClient(Client):
 
         :type dataset_id: str
         :param dataset_id: Encoded dataset ID
+
+        :type purge: bool
+        :param purge: if ``True``, also purge (permanently delete) the dataset
+
+        .. note::
+            For the purge option to work, the Galaxy instance must have the
+            ``allow_user_dataset_purge`` option set to ``True`` in the
+            ``config/galaxy.ini`` configuration file.
+
+        .. warning::
+            If you purge a dataset which has not been previously deleted,
+            Galaxy since release_15.03 wrongly does not set the ``deleted``
+            attribute of the dataset to True, see
+            https://github.com/galaxyproject/galaxy/issues/3548
         """
         url = self.gi._make_url(self, history_id, contents=True)
         # Append the dataset_id to the base history contents URL
         url = '/'.join([url, dataset_id])
-        self._delete(url=url)
+        payload = {}
+        if purge is True:
+            payload['purge'] = purge
+        self._delete(payload=payload, url=url)
 
     def delete_dataset_collection(self, history_id, dataset_collection_id):
         """

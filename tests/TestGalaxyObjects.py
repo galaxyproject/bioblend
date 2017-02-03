@@ -691,6 +691,13 @@ class TestHDAContents(GalaxyObjectsTestBase):
     def test_dataset_delete(self):
         self.ds.delete()
         self.assertTrue(self.ds.deleted)
+        self.assertFalse(self.ds.purged)
+
+    def test_dataset_purge(self):
+        self.ds.delete(purge=True)
+        # Galaxy since release_15.03 wrongly reports ds.deleted as False, see https://github.com/galaxyproject/galaxy/issues/3548
+        # self.assertTrue(self.ds.deleted)
+        self.assertTrue(self.ds.purged)
 
 
 @test_util.skip_unless_galaxy()

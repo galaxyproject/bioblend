@@ -489,7 +489,7 @@ class Dataset(Wrapper):
     Abstract base class for Galaxy datasets.
     """
     BASE_ATTRS = Wrapper.BASE_ATTRS + (
-        'data_type', 'file_name', 'file_size', 'state', 'deleted', 'file_ext'
+        'data_type', 'file_name', 'file_size', 'state', 'deleted', 'file_ext', 'purged'
     )
     POLLING_INTERVAL = 1  # for state monitoring
 
@@ -646,11 +646,25 @@ class HistoryDatasetAssociation(Dataset):
             self.refresh()
         return self
 
-    def delete(self):
+    def delete(self, purge=False):
         """
         Delete this history dataset.
+
+        :type purge: bool
+        :param purge: if ``True``, also purge (permanently delete) the dataset
+
+        .. note::
+            For the purge option to work, the Galaxy instance must have the
+            ``allow_user_dataset_purge`` option set to ``True`` in the
+            ``config/galaxy.ini`` configuration file.
+
+        .. warning::
+            If you purge a dataset which has not been previously deleted,
+            Galaxy since release_15.03 wrongly does not set the ``deleted``
+            attribute of the dataset to True, see
+            https://github.com/galaxyproject/galaxy/issues/3548
         """
-        self.gi.gi.histories.delete_dataset(self.container.id, self.id)
+        self.gi.gi.histories.delete_dataset(self.container.id, self.id, purge=purge)
         self.container.refresh()
         self.refresh()
 
