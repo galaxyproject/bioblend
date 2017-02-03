@@ -38,27 +38,27 @@ before_script:
   # Change Galaxy configuration to use the newly created PostgreSQL database
   - sed -e 's|^#database_connection.*|database_connection = postgresql://postgres:@localhost/galaxy-travis|' $GALAXY_CONFIG_FILE.sample > $GALAXY_CONFIG_FILE
   # Setup Galaxy master API key and admin user
-  - GALAXY_MASTER_API_KEY=`date --rfc-3339=ns | md5sum | cut -f 1 -d ' '`
+  - GALAXY_MASTER_API_KEY=$(cat /dev/urandom | LC_ALL=C tr -dc A-Za-z0-9 | head -c 32)
   - GALAXY_USER_EMAIL=${USER}@localhost.localdomain
-  - sed -i -e "s/^#master_api_key.*/master_api_key = $GALAXY_MASTER_API_KEY/" -e "s/^#admin_users.*/admin_users = $GALAXY_USER_EMAIL/" $GALAXY_CONFIG_FILE
+  - sed -i.bak -e "s/^#master_api_key.*/master_api_key = $GALAXY_MASTER_API_KEY/" -e "s/^#admin_users.*/admin_users = $GALAXY_USER_EMAIL/" $GALAXY_CONFIG_FILE
   # Change Galaxy configuration needed by many tests
-  - sed -i -e 's/^#allow_user_dataset_purge.*/allow_user_dataset_purge = True/' $GALAXY_CONFIG_FILE
+  - sed -i.bak -e 's/^#allow_user_dataset_purge.*/allow_user_dataset_purge = True/' $GALAXY_CONFIG_FILE
   # Change Galaxy configuration needed by some library tests
-  - sed -i -e 's/^#allow_library_path_paste.*/allow_library_path_paste = True/' $GALAXY_CONFIG_FILE
+  - sed -i.bak -e 's/^#allow_library_path_paste.*/allow_library_path_paste = True/' $GALAXY_CONFIG_FILE
   # Change Galaxy configuration needed by some tool tests
-  - sed -i -e 's/^#conda_auto_init.*/conda_auto_init = True/' $GALAXY_CONFIG_FILE
+  - sed -i.bak -e 's/^#conda_auto_init.*/conda_auto_init = True/' $GALAXY_CONFIG_FILE
   # Change Galaxy configuration needed by some workflow tests
-  - sed -i -e 's/^#enable_beta_workflow_modules.*/enable_beta_workflow_modules = True/' $GALAXY_CONFIG_FILE
+  - sed -i.bak -e 's/^#enable_beta_workflow_modules.*/enable_beta_workflow_modules = True/' $GALAXY_CONFIG_FILE
   # Change Galaxy configuration needed by some user tests
-  - sed -i -e 's/^#allow_user_deletion.*/allow_user_deletion = True/' $GALAXY_CONFIG_FILE
-  - if [ -f test/functional/tools/samples_tool_conf.xml ]; then sed -i -e "s/^#tool_config_file.*/tool_config_file = $GALAXY_CONFIG_DIR\/tool_conf.xml.sample,$GALAXY_CONFIG_DIR\/shed_tool_conf.xml.sample,test\/functional\/tools\/samples_tool_conf.xml/" $GALAXY_CONFIG_FILE; fi
+  - sed -i.bak -e 's/^#allow_user_deletion.*/allow_user_deletion = True/' $GALAXY_CONFIG_FILE
+  - if [ -f test/functional/tools/samples_tool_conf.xml ]; then sed -i.bak -e "s/^#tool_config_file.*/tool_config_file = $GALAXY_CONFIG_DIR\/tool_conf.xml.sample,$GALAXY_CONFIG_DIR\/shed_tool_conf.xml.sample,test\/functional\/tools\/samples_tool_conf.xml/" $GALAXY_CONFIG_FILE; fi
   # Start Galaxy and wait for successful server start
   - GALAXY_RUN_ALL=1 ../run_galaxy.sh --daemon --wait
   # Use the master API key to create the admin user and get its API key
   - export BIOBLEND_GALAXY_URL=http://localhost:8080
   - GALAXY_USER=$USER
-  - GALAXY_USER_PASSWD=`date --rfc-3339=ns | md5sum | cut -f 1 -d ' '`
-  - export BIOBLEND_GALAXY_API_KEY=`python $TRAVIS_BUILD_DIR/docs/examples/create_user_get_api_key.py $BIOBLEND_GALAXY_URL $GALAXY_MASTER_API_KEY $GALAXY_USER $GALAXY_USER_EMAIL $GALAXY_USER_PASSWD`
+  - GALAXY_USER_PASSWD=$(LC_ALL=C cat /dev/urandom | tr -dc A-Za-z0-9 | head -c 32)
+  - export BIOBLEND_GALAXY_API_KEY=$(python $TRAVIS_BUILD_DIR/docs/examples/create_user_get_api_key.py $BIOBLEND_GALAXY_URL $GALAXY_MASTER_API_KEY $GALAXY_USER $GALAXY_USER_EMAIL $GALAXY_USER_PASSWD)
   - echo "Created new Galaxy user $GALAXY_USER with email $GALAXY_USER_EMAIL , password $GALAXY_USER_PASSWD and API key $BIOBLEND_GALAXY_API_KEY"
 
 script:
