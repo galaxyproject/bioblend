@@ -111,7 +111,7 @@ GALAXY_RUN_ALL=1 ${BIOBLEND_DIR}/run_galaxy.sh --daemon --wait || exit 1
 # Use the master API key to create the admin user and get its API key
 export BIOBLEND_GALAXY_URL=http://localhost:${p_val}
 GALAXY_USER=$USER
-GALAXY_USER_PASSWD=$(LC_ALL=C cat /dev/urandom | tr -dc A-Za-z0-9 | head -c 32)
+GALAXY_USER_PASSWD=$(cat /dev/urandom | LC_ALL=C tr -dc A-Za-z0-9 | head -c 32)
 export BIOBLEND_GALAXY_API_KEY=$(python ${BIOBLEND_DIR}/docs/examples/create_user_get_api_key.py $BIOBLEND_GALAXY_URL $GALAXY_MASTER_API_KEY $GALAXY_USER $GALAXY_USER_EMAIL $GALAXY_USER_PASSWD)
 echo "Created new Galaxy user $GALAXY_USER with email $GALAXY_USER_EMAIL , password $GALAXY_USER_PASSWD and API key $BIOBLEND_GALAXY_API_KEY"
 # Run the tests
