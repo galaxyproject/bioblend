@@ -130,4 +130,4 @@ class TestGalaxyTools(GalaxyTestBase.GalaxyTestBase):
     @test_util.skip_unless_galaxy('release_16.10')
     def test_tool_dependency_install(self):
         installed_dependencies = self.gi.tools.install_dependencies('__SET_METADATA__')
-        self.assertTrue(any([True for d in installed_dependencies if d.get('name') == 'samtools' and d.get('dependency_type') == 'conda']))
+        self.assertTrue(any(True for d in installed_dependencies if d.get('name') == 'samtools' and d.get('dependency_type') == 'conda'))
