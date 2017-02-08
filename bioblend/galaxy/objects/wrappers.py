@@ -1116,7 +1116,7 @@ class Library(DatasetContainer):
         self.gi.libraries.delete(id_=self.id)
         self.unmap()
 
-    def __pre_upload(self, folder):
+    def _pre_upload(self, folder):
         """
         Return the id of the given folder, after sanity checking.
         """
@@ -1139,7 +1139,7 @@ class Library(DatasetContainer):
 
         Optional keyword arguments: ``file_type``, ``dbkey``.
         """
-        fid = self.__pre_upload(folder)
+        fid = self._pre_upload(folder)
         res = self.gi.gi.libraries.upload_file_contents(
             self.id, data, folder_id=fid, **kwargs)
         self.refresh()
@@ -1154,7 +1154,7 @@ class Library(DatasetContainer):
 
         See :meth:`.upload_data` for info on other params.
         """
-        fid = self.__pre_upload(folder)
+        fid = self._pre_upload(folder)
         res = self.gi.gi.libraries.upload_file_from_url(
             self.id, url, folder_id=fid, **kwargs)
         self.refresh()
@@ -1169,7 +1169,7 @@ class Library(DatasetContainer):
 
         See :meth:`.upload_data` for info on other params.
         """
-        fid = self.__pre_upload(folder)
+        fid = self._pre_upload(folder)
         res = self.gi.gi.libraries.upload_file_from_local_path(
             self.id, path, folder_id=fid, **kwargs)
         self.refresh()
@@ -1197,7 +1197,7 @@ class Library(DatasetContainer):
 
         See :meth:`.upload_data` for info on other params.
         """
-        fid = self.__pre_upload(folder)
+        fid = self._pre_upload(folder)
         if isinstance(paths, six.string_types):
             paths = (paths,)
         paths = '\n'.join(paths)
@@ -1224,7 +1224,7 @@ class Library(DatasetContainer):
 
         See :meth:`.upload_data` for info on other params.
         """
-        fid = self.__pre_upload(folder)
+        fid = self._pre_upload(folder)
         res = self.gi.gi.libraries.copy_from_dataset(
             self.id, hda.id, folder_id=fid, message=message)
         self.refresh()

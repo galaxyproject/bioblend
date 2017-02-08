@@ -53,7 +53,7 @@ class LibraryClient(Client):
         """
         return self._delete(id=library_id)
 
-    def __show_item(self, library_id, item_id):
+    def _show_item(self, library_id, item_id):
         """
         Get details about a given library item.
         """
@@ -103,7 +103,7 @@ class LibraryClient(Client):
         :return: A dictionary containing information about the dataset in the
           library
         """
-        return self.__show_item(library_id, dataset_id)
+        return self._show_item(library_id, dataset_id)
 
     def show_folder(self, library_id, folder_id):
         """
@@ -116,7 +116,7 @@ class LibraryClient(Client):
         :type folder_id: str
         :param folder_id: id of the folder to be inspected
         """
-        return self.__show_item(library_id, folder_id)
+        return self._show_item(library_id, folder_id)
 
     def _get_root_folder_id(self, library_id):
         """

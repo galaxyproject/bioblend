@@ -51,46 +51,11 @@ class GalaxyInstance(object):
     def __init__(self, url, api_key=None, email=None, password=None):
         self.gi = bioblend.galaxy.GalaxyInstance(url, api_key, email, password)
         self.log = bioblend.log
-        self.__histories = client.ObjHistoryClient(self)
-        self.__libraries = client.ObjLibraryClient(self)
-        self.__workflows = client.ObjWorkflowClient(self)
-        self.__tools = client.ObjToolClient(self)
-        self.__jobs = client.ObjJobClient(self)
-
-    @property
-    def histories(self):
-        """
-        Client module for Galaxy histories.
-        """
-        return self.__histories
-
-    @property
-    def libraries(self):
-        """
-        Client module for Galaxy libraries.
-        """
-        return self.__libraries
-
-    @property
-    def workflows(self):
-        """
-        Client module for Galaxy workflows.
-        """
-        return self.__workflows
-
-    @property
-    def tools(self):
-        """
-        Client module for Galaxy tools.
-        """
-        return self.__tools
-
-    @property
-    def jobs(self):
-        """
-        Client module for Galaxy jobs.
-        """
-        return self.__jobs
+        self.histories = client.ObjHistoryClient(self)
+        self.libraries = client.ObjLibraryClient(self)
+        self.workflows = client.ObjWorkflowClient(self)
+        self.tools = client.ObjToolClient(self)
+        self.jobs = client.ObjJobClient(self)
 
     def _wait_datasets(self, datasets, polling_interval, break_on_error=True):
         """

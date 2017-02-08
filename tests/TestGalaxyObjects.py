@@ -250,17 +250,17 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
     def test_workflow_from_str(self):
         with open(SAMPLE_FN) as f:
             wf = self.gi.workflows.import_new(f.read())
-        self.__check_and_del_workflow(wf)
+        self._check_and_del_workflow(wf)
 
     def test_workflow_collections_from_str(self):
         with open(SAMPLE_WF_COLL_FN) as f:
             wf = self.gi.workflows.import_new(f.read())
-        self.__check_and_del_workflow(wf)
+        self._check_and_del_workflow(wf)
 
     def test_workflow_from_dict(self):
         with open(SAMPLE_FN) as f:
             wf = self.gi.workflows.import_new(json.load(f))
-        self.__check_and_del_workflow(wf)
+        self._check_and_del_workflow(wf)
 
     def test_workflow_missing_tools(self):
         with open(SAMPLE_FN) as f:
@@ -282,9 +282,9 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
         wf2 = self.gi.workflows.import_new(wf1.export())
         self.assertNotEqual(wf1.id, wf2.id)
         for wf in wf1, wf2:
-            self.__check_and_del_workflow(wf)
+            self._check_and_del_workflow(wf)
 
-    def __check_and_del_workflow(self, wf):
+    def _check_and_del_workflow(self, wf):
         # Galaxy appends additional text to imported workflow names
         self.assertTrue(wf.name.startswith('paste_columns'))
         self.assertEqual(len(wf.steps), 3)
@@ -322,15 +322,15 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
             self.skipTest('no published workflows, manually publish a workflow to run this test')
 
     def test_get_libraries(self):
-        self.__test_multi_get('library')
+        self._test_multi_get('library')
 
     def test_get_histories(self):
-        self.__test_multi_get('history')
+        self._test_multi_get('history')
 
     def test_get_workflows(self):
-        self.__test_multi_get('workflow')
+        self._test_multi_get('workflow')
 
-    def __normalized_functions(self, obj_type):
+    def _normalized_functions(self, obj_type):
         if obj_type == 'library':
             create = self.gi.libraries.create
             get_objs = self.gi.libraries.list
@@ -352,8 +352,8 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
             del_kwargs = {}
         return create, get_objs, get_prevs, del_kwargs
 
-    def __test_multi_get(self, obj_type):
-        create, get_objs, get_prevs, del_kwargs = self.__normalized_functions(
+    def _test_multi_get(self, obj_type):
+        create, get_objs, get_prevs, del_kwargs = self._normalized_functions(
             obj_type)
 
         def ids(seq):
@@ -381,16 +381,16 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
                 o.delete(**del_kwargs)
 
     def test_delete_libraries_by_name(self):
-        self.__test_delete_by_name('library')
+        self._test_delete_by_name('library')
 
     def test_delete_histories_by_name(self):
-        self.__test_delete_by_name('history')
+        self._test_delete_by_name('history')
 
     def test_delete_workflows_by_name(self):
-        self.__test_delete_by_name('workflow')
+        self._test_delete_by_name('workflow')
 
-    def __test_delete_by_name(self, obj_type):
-        create, _, get_prevs, del_kwargs = self.__normalized_functions(
+    def _test_delete_by_name(self, obj_type):
+        create, _, get_prevs, del_kwargs = self._normalized_functions(
             obj_type)
         name = 'test_%s' % uuid.uuid4().hex
         objs = [create(name) for _ in range(2)]  # noqa: F812
@@ -433,7 +433,7 @@ class TestLibrary(GalaxyObjectsTestBase):
         retrieved = self.lib.get_folder(folder.id)
         self.assertEqual(folder.id, retrieved.id)
 
-    def __check_datasets(self, dss):
+    def _check_datasets(self, dss):
         self.assertEqual(len(dss), len(self.lib.dataset_ids))
         self.assertEqual(set(_.id for _ in dss), set(self.lib.dataset_ids))
         for ds in dss:
@@ -444,12 +444,12 @@ class TestLibrary(GalaxyObjectsTestBase):
         ds = self.lib.upload_data(FOO_DATA, folder=folder)
         self.assertEqual(len(self.lib.content_infos), 3)
         self.assertEqual(len(self.lib.folder_ids), 2)
-        self.__check_datasets([ds])
+        self._check_datasets([ds])
 
     def test_dataset_from_url(self):
         if is_reachable(self.DS_URL):
             ds = self.lib.upload_from_url(self.DS_URL)
-            self.__check_datasets([ds])
+            self._check_datasets([ds])
         else:
             self.skipTest('%s not reachable' % self.DS_URL)
 
@@ -458,12 +458,12 @@ class TestLibrary(GalaxyObjectsTestBase):
             f.write(FOO_DATA)
             f.flush()
             ds = self.lib.upload_from_local(f.name)
-        self.__check_datasets([ds])
+        self._check_datasets([ds])
 
     def test_datasets_from_fs(self):
         bnames = ['f%d.txt' % i for i in range(2)]
         dss, fnames = upload_from_fs(self.lib, bnames)
-        self.__check_datasets(dss)
+        self._check_datasets(dss)
         dss, fnames = upload_from_fs(
             self.lib, bnames, link_data_only='link_to_files')
         for ds, fn in zip(dss, fnames):
@@ -476,7 +476,7 @@ class TestLibrary(GalaxyObjectsTestBase):
             ds = self.lib.copy_from_dataset(hda)
         finally:
             hist.delete(purge=True)
-        self.__check_datasets([ds])
+        self._check_datasets([ds])
 
     def test_get_dataset(self):
         ds = self.lib.upload_data(FOO_DATA)
@@ -556,7 +556,7 @@ class TestHistory(GalaxyObjectsTestBase):
             # Galaxy up to release_2015.01.13 gives a ConnectionError
             pass
 
-    def __check_dataset(self, hda):
+    def _check_dataset(self, hda):
         self.assertIsInstance(hda, wrappers.HistoryDatasetAssociation)
         self.assertIs(hda.container, self.hist)
         self.assertEqual(len(self.hist.dataset_ids), 1)
@@ -568,18 +568,18 @@ class TestHistory(GalaxyObjectsTestBase):
         self.assertEqual(len(self.hist.dataset_ids), 0)
         hda = self.hist.import_dataset(lds)
         lib.delete()
-        self.__check_dataset(hda)
+        self._check_dataset(hda)
 
     def test_upload_file(self):
         with tempfile.NamedTemporaryFile(mode='w', prefix='bioblend_test_') as f:
             f.write(FOO_DATA)
             f.flush()
             hda = self.hist.upload_file(f.name)
-        self.__check_dataset(hda)
+        self._check_dataset(hda)
 
     def test_paste_content(self):
         hda = self.hist.paste_content(FOO_DATA)
-        self.__check_dataset(hda)
+        self._check_dataset(hda)
 
     def test_get_dataset(self):
         hda = self.hist.paste_content(FOO_DATA)
@@ -715,7 +715,7 @@ class TestRunWorkflow(GalaxyObjectsTestBase):
         self.wf.delete()
         self.lib.delete()
 
-    def __test(self, existing_hist=False, params=False):
+    def _test(self, existing_hist=False, params=False):
         hist_name = 'test_%s' % uuid.uuid4().hex
         if existing_hist:
             hist = self.gi.histories.create(hist_name)
@@ -743,13 +743,13 @@ class TestRunWorkflow(GalaxyObjectsTestBase):
         out_hist.delete(purge=True)
 
     def test_existing_history(self):
-        self.__test(existing_hist=True)
+        self._test(existing_hist=True)
 
     def test_new_history(self):
-        self.__test(existing_hist=False)
+        self._test(existing_hist=False)
 
     def test_params(self):
-        self.__test(params=True)
+        self._test(params=True)
 
 
 class TestRunDatasetCollectionWorkflow(GalaxyObjectsTestBase):
