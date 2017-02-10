@@ -170,7 +170,13 @@ class Step(Wrapper):
             raise ValueError('Unknown step type: %r' % stype)
         if self.type == 'tool' and self.tool_inputs:
             for k, v in six.iteritems(self.tool_inputs):
-                self.tool_inputs[k] = json.loads(v)
+                # In Galaxy before release_17.05, v is a JSON-encoded string
+                if not isinstance(v, six.string_types):
+                    break
+                try:
+                    self.tool_inputs[k] = json.loads(v)
+                except ValueError:
+                    break
 
     @property
     def gi_module(self):
@@ -196,6 +202,7 @@ class Workflow(Wrapper):
             tools_list_by_id = [t.id for t in gi.tools.get_previews()]
         else:
             tools_list_by_id = []
+        tool_labels_to_ids = {}
         for k, v in six.iteritems(self.steps):
             # convert step ids to str for consistency with outer keys
             v['id'] = str(v['id'])
@@ -206,13 +213,10 @@ class Workflow(Wrapper):
             if step.type == 'tool':
                 if not step.tool_inputs or step.tool_id not in tools_list_by_id:
                     missing_ids.append(k)
+                tool_labels_to_ids.setdefault(step.tool_id, set()).add(step.id)
         input_labels_to_ids = {}
         for id_, d in six.iteritems(self.inputs):
             input_labels_to_ids.setdefault(d['label'], set()).add(id_)
-        tool_labels_to_ids = {}
-        for s in six.itervalues(self.steps):
-            if s.type == 'tool':
-                tool_labels_to_ids.setdefault(s.tool_id, set()).add(s.id)
         object.__setattr__(self, 'input_labels_to_ids', input_labels_to_ids)
         object.__setattr__(self, 'tool_labels_to_ids', tool_labels_to_ids)
         dag, inv_dag = self._get_dag()
@@ -274,7 +278,7 @@ class Workflow(Wrapper):
     @property
     def data_input_ids(self):
         """
-        Return the list of data input steps for this workflow.
+        Return the ids of data input steps for this workflow.
         """
         return set(id_ for id_, s in six.iteritems(self.steps)
                    if s.type == 'data_input')
@@ -282,7 +286,7 @@ class Workflow(Wrapper):
     @property
     def data_collection_input_ids(self):
         """
-        Return the list of data collection input steps for this workflow.
+        Return the ids of data collection input steps for this workflow.
         """
         return set(id_ for id_, s in six.iteritems(self.steps)
                    if s.type == 'data_collection_input')
@@ -290,7 +294,7 @@ class Workflow(Wrapper):
     @property
     def tool_ids(self):
         """
-        Return the list of tool steps for this workflow.
+        Return the ids of tool steps for this workflow.
         """
         return set(id_ for id_, s in six.iteritems(self.steps)
                    if s.type == 'tool')
