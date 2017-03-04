@@ -3,6 +3,7 @@
     "annotation": "",
     "format-version": "0.1",
     "name": "paste_columns",
+    "uuid" : "bdbdf826-08fa-43be-a633-05cd910bf98e",
     "steps": {
         "0": {
             "annotation": "",
