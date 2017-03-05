@@ -21,6 +21,11 @@ if sys.version_info < (2, 7):
 elif sys.version_info < (3, 3):
     tests_require.append('mock>=0.7.0')
 
+ENTRY_POINTS = '''
+    [console_scripts]
+    bioblend-galaxy-tests=bioblend._tests.pytest_galaxy_test_wrapper:main
+'''
+
 setup(name="bioblend",
       version=version,
       description="CloudMan and Galaxy API library",
@@ -30,6 +35,10 @@ setup(name="bioblend",
       install_requires=['requests>=2.4.3,!=2.12.0,!=2.12.1', 'requests-toolbelt', 'boto>=2.9.7', 'pyyaml', 'six'],
       tests_require=tests_require,
       packages=find_packages(),
+      entry_points=ENTRY_POINTS,
+      extras_require={
+          'testing': ["pytest"],
+      },
       license='MIT',
       platforms="Posix; MacOS X; Windows",
       classifiers=["Development Status :: 4 - Beta",
