@@ -902,7 +902,7 @@ class History(DatasetContainer):
     """
     Maps to a Galaxy history.
     """
-    BASE_ATTRS = DatasetContainer.BASE_ATTRS + ('annotation', 'state', 'state_ids', 'state_details', 'tags')
+    BASE_ATTRS = DatasetContainer.BASE_ATTRS + ('annotation', 'published', 'state', 'state_ids', 'state_details', 'tags')
     DS_TYPE = HistoryDatasetAssociation
     DSC_TYPE = HistoryDatasetCollectionAssociation
     CONTENT_INFO_TYPE = HistoryContentInfo
@@ -916,7 +916,7 @@ class History(DatasetContainer):
     def gi_module(self):
         return self.gi.histories
 
-    def update(self, name=None, annotation=None, **kwds):
+    def update(self, **kwds):
         """
         Update history metadata information. Some of the attributes that can be
         modified are documented below.
@@ -930,6 +930,10 @@ class History(DatasetContainer):
         :type deleted: bool
         :param deleted: Mark or unmark history as deleted
 
+        :type purged: bool
+        :param purged: If True, mark history as purged (permanently deleted).
+            Ignored on Galaxy release_15.01 and earlier
+
         :type published: bool
         :param published: Mark or unmark history as published
 
@@ -940,10 +944,7 @@ class History(DatasetContainer):
         :param tags: Replace history tags with the given list
         """
         # TODO: wouldn't it be better if name and annotation were attributes?
-        # TODO: do we need to ensure the attributes of `self` are the same as
-        # the ones returned by the call to `update_history` below?
-        self.gi.gi.histories.update_history(self.id, name=name,
-                                            annotation=annotation, **kwds)
+        self.gi.gi.histories.update_history(self.id, **kwds)
         self.refresh()
         return self
 

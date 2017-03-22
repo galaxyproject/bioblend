@@ -620,6 +620,9 @@ class TestHistory(GalaxyObjectsTestBase):
         self.assertEqual(self.hist.name, new_name)
         self.assertEqual(self.hist.annotation, new_annotation)
         self.assertEqual(self.hist.tags, new_tags)
+        updated_hist = self.hist.update(published=True)
+        self.assertEqual(self.hist.id, updated_hist.id)
+        self.assertTrue(self.hist.published)
 
     def test_create_dataset_collection(self):
         self._create_collection_description()

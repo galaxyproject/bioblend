@@ -34,6 +34,11 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
         self.assertEqual(updated_hist['name'], new_name)
         self.assertEqual(updated_hist['annotation'], new_annotation)
         self.assertEqual(updated_hist['tags'], new_tags)
+        updated_hist = self.gi.histories.update_history(self.history['id'], published=True)
+        if 'id' not in updated_hist:
+            updated_hist = self.gi.histories.show_history(self.history['id'])
+        self.assertEqual(self.history['id'], updated_hist['id'])
+        self.assertTrue(updated_hist['published'])
 
     def test_get_histories(self):
         # Make sure there's at least one value - the one we created

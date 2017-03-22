@@ -221,7 +221,7 @@ class HistoryClient(Client):
         url = '/'.join([url, dataset_id, "provenance"])
         return self._get(url=url)
 
-    def update_history(self, history_id, name=None, annotation=None, **kwds):
+    def update_history(self, history_id, **kwds):
         """
         Update history metadata information. Some of the attributes that can be
         modified are documented below.
@@ -237,6 +237,10 @@ class HistoryClient(Client):
 
         :type deleted: bool
         :param deleted: Mark or unmark history as deleted
+
+        :type purged: bool
+        :param purged: If True, mark history as purged (permanently deleted).
+            Ignored on Galaxy release_15.01 and earlier
 
         :type published: bool
         :param published: Mark or unmark history as published
@@ -255,8 +259,6 @@ class HistoryClient(Client):
             The return value was changed in BioBlend v0.8.0, previously it was
             the status code (type int).
         """
-        kwds['name'] = name
-        kwds['annotation'] = annotation
         return self._put(payload=kwds, id=history_id)
 
     def update_dataset(self, history_id, dataset_id, **kwds):
