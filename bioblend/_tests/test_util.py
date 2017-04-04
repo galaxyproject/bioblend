@@ -1,8 +1,13 @@
 """ General support infrastructure not tied to any particular test.
 """
 import os
+import random
+import string
 
 import unittest
+
+import bioblend
+
 if not hasattr(unittest, 'skip'):
     # Python < 2.7
     import unittest2 as unittest
@@ -31,9 +36,40 @@ def skip_unless_galaxy(min_release=None):
         galaxy_release = os.environ.get('GALAXY_VERSION', None)
         if galaxy_release is not None and galaxy_release.startswith('release_') and galaxy_release < min_release:
             return unittest.skip(OLD_GALAXY_RELEASE % (galaxy_release, min_release))
-    for prop in ['BIOBLEND_GALAXY_URL', 'BIOBLEND_GALAXY_API_KEY']:
-        if prop not in os.environ:
-            return unittest.skip(NO_GALAXY_MESSAGE)
+
+    if 'BIOBLEND_GALAXY_URL' not in os.environ:
+        return unittest.skip(NO_GALAXY_MESSAGE)
+
+    if 'BIOBLEND_GALAXY_API_KEY' not in os.environ and 'BIOBLEND_GALAXY_MASTER_API_KEY' in os.environ:
+        galaxy_url = os.environ['BIOBLEND_GALAXY_URL']
+        galaxy_master_api_key = os.environ['BIOBLEND_GALAXY_MASTER_API_KEY']
+        gi = bioblend.galaxy.GalaxyInstance(galaxy_url, galaxy_master_api_key)
+
+        if 'BIOBLEND_GALAXY_USER' in os.environ:
+            galaxy_user = os.environ['BIOBLEND_GALAXY_USER']
+        else:
+            galaxy_user = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(5))
+
+        galaxy_user_id = None
+        for user in gi.users.get_users():
+            if user["username"] == galaxy_user:
+                galaxy_user_id = user["id"]
+                break
+
+        if galaxy_user_id is None:
+            galaxy_user_email = galaxy_user + "@localhost.localdomain"
+            galaxy_password = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(20))
+
+            # Create a new user and get a new API key for her
+            new_user = gi.users.create_local_user(galaxy_user, galaxy_user_email, galaxy_password)
+            galaxy_user_id = new_user["id"]
+
+        api_key = gi.users.create_user_apikey(galaxy_user_id)
+        os.environ["BIOBLEND_GALAXY_API_KEY"] = api_key
+
+    if 'BIOBLEND_GALAXY_API_KEY' not in os.environ:
+        return unittest.skip(NO_GALAXY_MESSAGE)
+
     return lambda f: f
 
 
