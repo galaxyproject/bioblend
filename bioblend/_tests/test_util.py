@@ -45,19 +45,19 @@ def skip_unless_galaxy(min_release=None):
         galaxy_master_api_key = os.environ['BIOBLEND_GALAXY_MASTER_API_KEY']
         gi = bioblend.galaxy.GalaxyInstance(galaxy_url, galaxy_master_api_key)
 
-        if 'BIOBLEND_GALAXY_USER' in os.environ:
-            galaxy_user = os.environ['BIOBLEND_GALAXY_USER']
+        if 'BIOBLEND_GALAXY_USER_EMAIL' in os.environ:
+            galaxy_user_email = os.environ['BIOBLEND_GALAXY_USER_EMAIL']
         else:
-            galaxy_user = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(5))
+            galaxy_user_email = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(5)) + "@localhost.localdomain"
 
         galaxy_user_id = None
         for user in gi.users.get_users():
-            if user["username"] == galaxy_user:
+            if user["email"] == galaxy_user_email:
                 galaxy_user_id = user["id"]
                 break
 
         if galaxy_user_id is None:
-            galaxy_user_email = galaxy_user + "@localhost.localdomain"
+            galaxy_user = galaxy_user_email.split("@", 1)[0]
             galaxy_password = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(20))
 
             # Create a new user and get a new API key for her

@@ -47,9 +47,8 @@ before_script:
   - sed -e 's|^#database_connection.*|database_connection = postgresql://postgres:@localhost/galaxy-travis|' $GALAXY_CONFIG_FILE.sample > $GALAXY_CONFIG_FILE
   # Setup Galaxy master API key and admin user
   - export BIOBLEND_GALAXY_MASTER_API_KEY=$(cat /dev/urandom | LC_ALL=C tr -dc A-Za-z0-9 | head -c 32)
-  - export BIOBLEND_GALAXY_USER=${USER}
-  - GALAXY_USER_EMAIL=${BIOBLEND_GALAXY_USER}@localhost.localdomain
-  - sed -i.bak -e "s/^#master_api_key.*/master_api_key = $BIOBLEND_GALAXY_MASTER_API_KEY/" -e "s/^#admin_users.*/admin_users = $GALAXY_USER_EMAIL/" $GALAXY_CONFIG_FILE
+  - export BIOBLEND_GALAXY_USER_EMAIL=${USER}@localhost.localdomain
+  - sed -i.bak -e "s/^#master_api_key.*/master_api_key = $BIOBLEND_GALAXY_MASTER_API_KEY/" -e "s/^#admin_users.*/admin_users = $BIOBLEND_GALAXY_USER_EMAIL/" $GALAXY_CONFIG_FILE
   # Change Galaxy configuration needed by many tests
   - sed -i.bak -e 's/^#allow_user_dataset_purge.*/allow_user_dataset_purge = True/' $GALAXY_CONFIG_FILE
   # Change Galaxy configuration needed by some library tests

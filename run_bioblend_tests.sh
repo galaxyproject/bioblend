@@ -85,9 +85,8 @@ TEMP_DIR=$(mktemp -d 2>/dev/null || mktemp -d -t 'mytmpdir')
 echo "Created temporary directory $TEMP_DIR"
 export GALAXY_CONFIG_FILE=$TEMP_DIR/galaxy.ini
 export BIOBLEND_GALAXY_MASTER_API_KEY=$(cat /dev/urandom | LC_ALL=C tr -dc A-Za-z0-9 | head -c 32)
-export BIOBLEND_GALAXY_USER="${USER}"
-GALAXY_USER_EMAIL="${USER}@localhost.localdomain"
-sed -e "s/^#master_api_key.*/master_api_key = $BIOBLEND_GALAXY_MASTER_API_KEY/" -e "s/^#admin_users.*/admin_users = $GALAXY_USER_EMAIL/" $GALAXY_SAMPLE_CONFIG_FILE > $GALAXY_CONFIG_FILE
+export BIOBLEND_GALAXY_USER_EMAIL="${USER}@localhost.localdomain"
+sed -e "s/^#master_api_key.*/master_api_key = $BIOBLEND_GALAXY_MASTER_API_KEY/" -e "s/^#admin_users.*/admin_users = $BIOBLEND_GALAXY_USER_EMAIL/" $GALAXY_SAMPLE_CONFIG_FILE > $GALAXY_CONFIG_FILE
 sed -i.bak -e "s|^#database_connection.*|database_connection = sqlite:///$TEMP_DIR/universe.sqlite?isolation_level=IMMEDIATE|" -e "s|^#file_path.*|file_path = $TEMP_DIR/files|" -e "s|^#new_file_path.*|new_file_path = $TEMP_DIR/tmp|" -e "s|#job_working_directory.*|job_working_directory = $TEMP_DIR/job_working_directory|" $GALAXY_CONFIG_FILE
 # Change Galaxy configuration needed by many tests
 sed -i.bak -e 's/^#allow_user_dataset_purge.*/allow_user_dataset_purge = True/' $GALAXY_CONFIG_FILE
