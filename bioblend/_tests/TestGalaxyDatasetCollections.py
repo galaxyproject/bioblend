@@ -1,8 +1,9 @@
 from bioblend.galaxy import dataset_collections as collections
 
-from . import GalaxyTestBase
+from . import GalaxyTestBase, test_util
 
 
+@test_util.skip_unless_galaxy()
 class TestGalaxyDatasetCollections(GalaxyTestBase.GalaxyTestBase):
 
     def test_create_list_in_history(self):
