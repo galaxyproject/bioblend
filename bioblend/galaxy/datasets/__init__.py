@@ -107,6 +107,8 @@ class DatasetClient(Client):
         stream_content = file_path is not None
         r = requests.get(url, verify=self.gi.verify, stream=stream_content)
         r.raise_for_status()
+        if 'content-length' in r.headers and len(r.content) != int(r.headers['content-length']):
+            log.warn("Transferred content size does not match content-length header (%s != %s)" % (len(r.content), r.headers['content-length']))
 
         if file_path is None:
             return r.content
