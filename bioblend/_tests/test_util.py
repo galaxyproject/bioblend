@@ -57,11 +57,20 @@ def skip_unless_galaxy(min_release=None):
                 break
 
         if galaxy_user_id is None:
-            galaxy_user = galaxy_user_email.split("@", 1)[0]
-            galaxy_password = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(20))
+            try:
+                config = gi.config.get_config()
+            except Exception:
+                # If older Galaxy for instance just assume use_remote_user is False.
+                config = {}
 
-            # Create a new user and get a new API key for her
-            new_user = gi.users.create_local_user(galaxy_user, galaxy_user_email, galaxy_password)
+            if config.get("use_remote_user", False):
+                new_user = gi.users.create_remote_user(galaxy_user_email)
+            else:
+                galaxy_user = galaxy_user_email.split("@", 1)[0]
+                galaxy_password = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(20))
+
+                # Create a new user and get a new API key for her
+                new_user = gi.users.create_local_user(galaxy_user, galaxy_user_email, galaxy_password)
             galaxy_user_id = new_user["id"]
 
         api_key = gi.users.create_user_apikey(galaxy_user_id)
