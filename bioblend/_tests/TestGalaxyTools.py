@@ -60,7 +60,7 @@ class TestGalaxyTools(GalaxyTestBase.GalaxyTestBase):
     def test_upload_file(self):
         history = self.gi.histories.create_history(name="test_upload_file history")
 
-        fn = test_util.get_abspath(os.path.join(os.pardir, "setup.py"))
+        fn = test_util.get_abspath("test_util.py")
         file_name = "test1"
         tool_output = self.gi.tools.upload_file(
             fn,
