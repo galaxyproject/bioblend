@@ -85,7 +85,7 @@ class FoldersClient(Client):
 
     def get_permissions(self, folder_id, scope):
         """
-        Display information about a folder.
+        Get the permissions of a folder.
 
         :type folder_id: str
         :param folder_id: the folder's encoded id, prefixed by 'F'
@@ -102,7 +102,7 @@ class FoldersClient(Client):
 
     def set_permissions(self, folder_id, action='set_permissions', add_ids=None, manage_ids=None, modify_ids=None):
         """
-        Display information about a folder.
+        Set the permissions of a folder.
 
         :type folder_id: str
         :param folder_id: the folder's encoded id, prefixed by 'F'
