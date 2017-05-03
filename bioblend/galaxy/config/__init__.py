@@ -35,3 +35,18 @@ class ConfigClient(Client):
              u'wiki_url': u'https://galaxyproject.org/'}
         """
         return self._get()
+
+    def get_version(self):
+        """
+        Get the current version of the Galaxy instance.
+
+        :rtype: dict
+        :return: Version of the Galaxy instance
+
+        For example::
+
+            {'extra': {}, 'version_major': '17.01'}
+        """
+        url = self.gi._make_url(self, None)
+        url = url.rstrip('configuration') + 'version'
+        return self._get(url=url)
