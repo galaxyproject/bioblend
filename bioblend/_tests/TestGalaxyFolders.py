@@ -1,10 +1,6 @@
 """
 Use ``nose`` to run these unit tests.
 """
-import os
-import shutil
-import tempfile
-
 from . import GalaxyTestBase, test_util
 
 FOO_DATA = 'foo\nbar\n'
