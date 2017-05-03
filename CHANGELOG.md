@@ -1,8 +1,37 @@
 ### BioBlend v0.9.0 - Unreleased
 
+* Dropped support for Galaxy releases 14.02, 14.04, 14.06 and 14.08. Added
+  support for Python 3.5 and Galaxy releases 16.07, 16.10, 17.01 and 17.05.
+
 * Deprecated ``import_workflow_json()`` and ``export_workflow_json()`` methods
   of ``WorkflowClient`` in favor of ``import_workflow_dict()`` and
   ``export_workflow_dict()`` (reported by @manabuishii)
+
+* Added ``install_dependencies()`` method to ``ToolClient`` (thanks to Marius
+  van den Beek).
+
+* Added ``reload_data_table()`` method to ``ToolDataClient`` (thanks to Marius
+  van den Beek).
+
+* Added ``purge`` parameter to ``HistoryClient.delete_dataset()`` method.
+
+* Updated ``WorkflowClient.import_shared_workflow()`` method to use the newer
+  Galaxy API request (thanks to @DamCorreia).
+
+* Fixed ``HistoryClient.update_history()`` and ``History.update()`` methods
+  when ``name`` parameter is not specified
+
+* Added warning if content size differs from content-length header in
+  ``DatasetClient.download_dataset()``
+
+* BioBlend.objects: added ``purge`` parameter to
+  ``HistoryDatasetAssociation.delete()`` method.
+
+* BioBlend.objects: added ``purged`` attribute to ``Dataset`` objects.
+
+* BioBlend.objects: added ``published`` attribute to ``History`` objects.
+
+* Code refactoring, added tests and documentation improvements.
 
 ### BioBlend v0.8.0 - August 11, 2016
 
