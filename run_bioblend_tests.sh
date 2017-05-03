@@ -27,7 +27,7 @@ Options:
 
 get_abs_dirname () {
   # $1 : relative dirname
-  echo $(cd "$1" && pwd)
+  cd "$1" && pwd
 }
 
 e_val=py27
@@ -39,7 +39,7 @@ do
     h) show_help
        exit;;
     c) c_val=1;;
-    g) g_val=$(get_abs_dirname $OPTARG);;
+    g) g_val=$(get_abs_dirname "$OPTARG");;
     e) e_val=$OPTARG;;
     p) p_val=$OPTARG;;
     t) t_val=$OPTARG;;
@@ -54,8 +54,8 @@ if [ -z "$g_val" ]; then
 fi
 
 # Install BioBlend
-BIOBLEND_DIR=$(get_abs_dirname $(dirname $0))
-cd ${BIOBLEND_DIR}
+BIOBLEND_DIR=$(get_abs_dirname "$(dirname "$0")")
+cd "${BIOBLEND_DIR}" || exit 1
 if [ ! -d .venv ]; then
   virtualenv .venv
 fi
@@ -64,10 +64,10 @@ python setup.py install || exit 1
 pip install --upgrade "tox>=1.8.0"
 
 # Setup Galaxy
-cd ${g_val}
+cd "${g_val}" || exit 1
 # Update repository (may change the sample files or the list of eggs)
 git fetch
-git checkout ${r_val}
+git checkout "${r_val}"
 if git show-ref -q --verify "refs/heads/${r_val}" 2>/dev/null; then
   # ${r_val} is a branch
   export GALAXY_VERSION=${r_val}
@@ -83,47 +83,48 @@ else
 fi
 TEMP_DIR=$(mktemp -d 2>/dev/null || mktemp -d -t 'mytmpdir')
 echo "Created temporary directory $TEMP_DIR"
-export GALAXY_CONFIG_FILE=$TEMP_DIR/galaxy.ini
-export BIOBLEND_GALAXY_MASTER_API_KEY=$(cat /dev/urandom | LC_ALL=C tr -dc A-Za-z0-9 | head -c 32)
+export GALAXY_CONFIG_FILE="$TEMP_DIR/galaxy.ini"
+BIOBLEND_GALAXY_MASTER_API_KEY=$(LC_ALL=C tr -dc A-Za-z0-9 < /dev/urandom | head -c 32)
+export BIOBLEND_GALAXY_MASTER_API_KEY
 export BIOBLEND_GALAXY_USER_EMAIL="${USER}@localhost.localdomain"
-sed -e "s/^#master_api_key.*/master_api_key = $BIOBLEND_GALAXY_MASTER_API_KEY/" -e "s/^#admin_users.*/admin_users = $BIOBLEND_GALAXY_USER_EMAIL/" $GALAXY_SAMPLE_CONFIG_FILE > $GALAXY_CONFIG_FILE
-sed -i.bak -e "s|^#database_connection.*|database_connection = sqlite:///$TEMP_DIR/universe.sqlite?isolation_level=IMMEDIATE|" -e "s|^#file_path.*|file_path = $TEMP_DIR/files|" -e "s|^#new_file_path.*|new_file_path = $TEMP_DIR/tmp|" -e "s|#job_working_directory.*|job_working_directory = $TEMP_DIR/job_working_directory|" $GALAXY_CONFIG_FILE
+sed -e "s/^#master_api_key.*/master_api_key = $BIOBLEND_GALAXY_MASTER_API_KEY/" -e "s/^#admin_users.*/admin_users = $BIOBLEND_GALAXY_USER_EMAIL/" $GALAXY_SAMPLE_CONFIG_FILE > "$GALAXY_CONFIG_FILE"
+sed -i.bak -e "s|^#database_connection.*|database_connection = sqlite:///$TEMP_DIR/universe.sqlite?isolation_level=IMMEDIATE|" -e "s|^#file_path.*|file_path = $TEMP_DIR/files|" -e "s|^#new_file_path.*|new_file_path = $TEMP_DIR/tmp|" -e "s|#job_working_directory.*|job_working_directory = $TEMP_DIR/job_working_directory|" "$GALAXY_CONFIG_FILE"
 # Change Galaxy configuration needed by many tests
-sed -i.bak -e 's/^#allow_user_dataset_purge.*/allow_user_dataset_purge = True/' $GALAXY_CONFIG_FILE
+sed -i.bak -e 's/^#allow_user_dataset_purge.*/allow_user_dataset_purge = True/' "$GALAXY_CONFIG_FILE"
 # Change Galaxy configuration needed by some library tests
-sed -i.bak -e 's/^#allow_library_path_paste.*/allow_library_path_paste = True/' $GALAXY_CONFIG_FILE
+sed -i.bak -e 's/^#allow_library_path_paste.*/allow_library_path_paste = True/' "$GALAXY_CONFIG_FILE"
 # Change Galaxy configuration needed by some tool tests
-sed -i.bak -e 's/^#conda_auto_init.*/conda_auto_init = True/' $GALAXY_CONFIG_FILE
+sed -i.bak -e 's/^#conda_auto_init.*/conda_auto_init = True/' "$GALAXY_CONFIG_FILE"
 # Change Galaxy configuration needed by some workflow tests
-sed -i.bak -e 's/^#enable_beta_workflow_modules.*/enable_beta_workflow_modules = True/' $GALAXY_CONFIG_FILE
+sed -i.bak -e 's/^#enable_beta_workflow_modules.*/enable_beta_workflow_modules = True/' "$GALAXY_CONFIG_FILE"
 # Change Galaxy configuration needed by some user tests
-sed -i.bak -e 's/^#allow_user_deletion.*/allow_user_deletion = True/' $GALAXY_CONFIG_FILE
+sed -i.bak -e 's/^#allow_user_deletion.*/allow_user_deletion = True/' "$GALAXY_CONFIG_FILE"
 if [ -f test/functional/tools/samples_tool_conf.xml ]; then
-  sed -i.bak -e "s/^#tool_config_file.*/tool_config_file = $GALAXY_CONFIG_DIR\/tool_conf.xml.sample,$GALAXY_CONFIG_DIR\/shed_tool_conf.xml.sample,test\/functional\/tools\/samples_tool_conf.xml/" $GALAXY_CONFIG_FILE
+  sed -i.bak -e "s/^#tool_config_file.*/tool_config_file = $GALAXY_CONFIG_DIR\/tool_conf.xml.sample,$GALAXY_CONFIG_DIR\/shed_tool_conf.xml.sample,test\/functional\/tools\/samples_tool_conf.xml/" "$GALAXY_CONFIG_FILE"
 fi
 if [ -n "${p_val}" ]; then
   # Change only the first occurence of port number
-  sed -i.bak -e "0,/^#port/ s/^#port.*/port = $p_val/" $GALAXY_CONFIG_FILE
+  sed -i.bak -e "0,/^#port/ s/^#port.*/port = $p_val/" "$GALAXY_CONFIG_FILE"
 fi
 # Start Galaxy and wait for successful server start
-GALAXY_RUN_ALL=1 ${BIOBLEND_DIR}/run_galaxy.sh --daemon --wait || exit 1
+GALAXY_RUN_ALL=1 "${BIOBLEND_DIR}/run_galaxy.sh" --daemon --wait || exit 1
 
 # Use the master API key to create the admin user and get its API key
 export BIOBLEND_GALAXY_URL=http://localhost:${p_val}
 # Run the tests
-cd ${BIOBLEND_DIR}
+cd "${BIOBLEND_DIR}" || exit 1
 if [ -n "${t_val}" ]; then
-  tox -e ${e_val} -- --tests ${t_val}
+  tox -e "${e_val}" -- --tests "${t_val}"
 else
-  tox -e ${e_val}
+  tox -e "${e_val}"
 fi
 exit_code=$?
 deactivate
 
 # Stop Galaxy
-cd ${g_val}
+cd "${g_val}" || exit 1
 GALAXY_RUN_ALL=1 ./run.sh --daemon stop
 # Remove temporary directory if -c is specified or if all tests passed
 if [ -n "${c_val}" ] || [ $exit_code -eq 0 ]; then
-  rm -rf $TEMP_DIR
+  rm -rf "$TEMP_DIR"
 fi
