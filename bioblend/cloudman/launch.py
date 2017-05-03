@@ -127,7 +127,7 @@ class CloudManLauncher(object):
         defined in the object's ``cloud`` field.
 
         For the current list of user data fields that can be provided via
-        ``kwargs``, see `<http://wiki.g2.bx.psu.edu/CloudMan/UserData>`_
+        ``kwargs``, see `<https://galaxyproject.org/cloudman/userdata/>`_
 
         Return a dict containing the properties and info with which an instance
         was launched, namely: ``sg_names`` containing the names of the security

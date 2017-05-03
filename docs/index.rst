@@ -132,7 +132,7 @@ two variables::
     $ export BIOBLEND_GALAXY_API_KEY=<API key>
 
 The unit tests, stored in the ``tests`` folder, can be run using
-`nose <https://github.com/nose-devs/nose>`_. From the project root::
+`nose <https://nose.readthedocs.io/>`_. From the project root::
 
     $ nosetests
 
@@ -149,7 +149,7 @@ Related documentation
 
 Links to other documentation and libraries relevant to this library:
 
-    * `Galaxy API documentation <http://wiki.galaxyproject.org/Learn/API>`_
+    * `Galaxy API documentation <https://galaxyproject.org/develop/api/>`_
     * `Blend4j <https://github.com/jmchilton/blend4j>`_: Galaxy API wrapper for Java
     * `clj-blend <https://github.com/chapmanb/clj-blend>`_: Galaxy API wrapper for Clojure
 
@@ -161,5 +161,6 @@ Indices and tables
 * :ref:`search`
 
 .. References/hyperlinks used above
+.. _Git repository: https://github.com/galaxyproject/bioblend
 .. _PyPi: https://pypi.python.org/pypi/bioblend/
 .. _setup.py: https://github.com/galaxyproject/bioblend/blob/master/setup.py

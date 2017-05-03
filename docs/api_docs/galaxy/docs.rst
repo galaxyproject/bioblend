@@ -10,7 +10,7 @@ In addition to this page, there are functional examples of complete scripts in t
 Connect to a Galaxy server
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To connect to a running Galaxy server, you will need an account on that Galaxy instance and an API key for the account. Instructions on getting an API key can be found at http://wiki.galaxyproject.org/Learn/API .
+To connect to a running Galaxy server, you will need an account on that Galaxy instance and an API key for the account. Instructions on getting an API key can be found at https://galaxyproject.org/develop/api/ .
 
 To open a connection call::
 

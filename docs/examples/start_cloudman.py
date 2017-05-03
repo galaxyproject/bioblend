@@ -7,7 +7,7 @@ Usage::
   python start_cloudman.py <cluster_name> <password> <cm_type> <instance_type> <AMI> <access_key> <secret_key>
 
 ``<cm_type>`` can be 'Galaxy', 'Data', or 'SGE'
-(see http://wiki.g2.bx.psu.edu/CloudMan, Step 3 for more details on types)
+(see https://galaxyproject.org/cloudman/ for more details on types)
 
 Example:
 python start_cloudman.py "cluster bioblend" pwd SGE m1.small ami-00000032 <access_key> <secret_key>

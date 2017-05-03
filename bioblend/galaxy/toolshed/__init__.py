@@ -87,7 +87,7 @@ class ToolShedClient(Client):
 
         :type tool_shed_url: str
         :param tool_shed_url: URL of the Tool Shed from which the repository should
-                              be installed from (e.g., ``http://testtoolshed.g2.bx.psu.edu``)
+                              be installed from (e.g., ``https://testtoolshed.g2.bx.psu.edu``)
 
         :type name: str
         :param name: The name of the repository that should be installed
@@ -101,13 +101,13 @@ class ToolShedClient(Client):
         :type install_tool_dependencies: bool
         :param install_tool_dependencies: Whether or not to automatically handle
                                           tool dependencies (see
-                                          http://wiki.galaxyproject.org/AToolOrASuitePerRepository
+                                          https://galaxyproject.org/toolshed/tool-dependency-recipes/
                                           for more details)
 
         :type install_repository_dependencies: bool
         :param install_repository_dependencies: Whether or not to automatically
                                                 handle repository dependencies
-                                                (see http://wiki.galaxyproject.org/DefiningRepositoryDependencies
+                                                (see https://galaxyproject.org/toolshed/defining-repository-dependencies/
                                                 for more details)
 
         :type install_resolver_dependencies: bool

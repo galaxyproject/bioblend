@@ -1,9 +1,9 @@
-`BioBlend <http://bioblend.readthedocs.org/>`_ is a Python library for
+`BioBlend <https://bioblend.readthedocs.io/>`_ is a Python library for
 interacting with `CloudMan`_ and `Galaxy`_'s API.
 
 BioBlend is supported and tested on:
 
-- Python 2.6, 2.7, 3.3 and 3.4
+- Python 2.6, 2.7, 3.3, 3.4 and 3.5
 - Galaxy release_14.10 and later.
 
 Conceptually, it makes it possible to script and automate the process
@@ -55,6 +55,5 @@ things like this:
     with an instance of Galaxy running on your laptop.
 
 .. References/hyperlinks used above
-.. _CloudMan: https://wiki.galaxyproject.org/CloudMan
-.. _Galaxy: http://usegalaxy.org/
-.. _Git repository: https://github.com/afgane/bioblend
+.. _CloudMan: https://galaxyproject.org/cloudman/
+.. _Galaxy: https://galaxyproject.org/

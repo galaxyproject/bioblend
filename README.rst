@@ -8,7 +8,7 @@
 
 .. image:: https://readthedocs.org/projects/bioblend/badge/
     :alt: Documentation Status
-    :target: https://bioblend.readthedocs.org/
+    :target: https://bioblend.readthedocs.io/
 
 .. image:: https://travis-ci.org/galaxyproject/bioblend.png
     :target: https://travis-ci.org/galaxyproject/bioblend
@@ -24,12 +24,12 @@ API.
 
 BioBlend is supported and tested on:
 
-- Python 2.6, 2.7, 3.3 and 3.4
+- Python 2.6, 2.7, 3.3, 3.4 and 3.5
 - Galaxy release_14.10 and later.
 
-Full docs are available at http://bioblend.readthedocs.org with a quick library
+Full docs are available at https://bioblend.readthedocs.io/ with a quick library
 overview also available in `ABOUT.rst <./ABOUT.rst>`_.
 
 .. References/hyperlinks used above
-.. _CloudMan: https://wiki.galaxyproject.org/CloudMan
-.. _Galaxy: http://usegalaxy.org/
+.. _CloudMan: https://galaxyproject.org/cloudman/
+.. _Galaxy: https://galaxyproject.org/
