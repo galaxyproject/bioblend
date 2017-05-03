@@ -12,10 +12,24 @@ class UserClient(Client):
         self.module = 'users'
         super(UserClient, self).__init__(galaxy_instance)
 
-    def get_users(self, deleted=False):
+    def get_users(self, deleted=False, f_email=None, f_name=None, f_any=None):
         """
         Get a list of all registered users. If ``deleted`` is set to ``True``,
         get a list of deleted users.
+
+        The f_email, f_name, and f_any parameters will work for non-admin users
+        only if the Galaxy instance sets expose_user_email and expose_user_name.
+        The `corresponding Galaxy documentation <https://docs.galaxyproject.org/en/master/lib/galaxy.webapps.galaxy.api.html#galaxy.webapps.galaxy.api.users.UserAPIController.index>`__
+        has further information.
+
+        :type f_email: str
+        :param f_email: filter for user emails
+
+        :type f_name: str
+        :param f_name: filter for user names
+
+        :type f_any: str
+        :param f_any: filter for user email or name
 
         :rtype: list
         :return: a list of dicts with user details.
@@ -26,7 +40,14 @@ class UserClient(Client):
                      u'url': u'/api/users/dda47097d9189f15'}]
 
         """
-        return self._get(deleted=deleted)
+        params = {}
+        if f_email:
+            params['f_email'] = f_email
+        if f_name:
+            params['f_name'] = f_name
+        if f_any:
+            params['f_any'] = f_any
+        return self._get(deleted=deleted, params=params)
 
     def show_user(self, user_id, deleted=False):
         """
