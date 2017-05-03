@@ -166,3 +166,21 @@ class UserClient(Client):
         if purge is True:
             params['purge'] = purge
         return self._delete(id=user_id, params=params)
+
+    def get_user_apikey(self, user_id):
+        """
+        Get the current API key for a given user.
+
+        :type user_id: str
+        :param user_id: encoded user ID
+
+        :rtype: str
+        :return: the API key for the user
+        """
+
+        url = self.gi._make_url(self, None)
+        url = '/'.join([url, user_id, 'api_key', 'inputs'])
+        payload = {}
+        payload['user_id'] = user_id
+
+        return self._get(payload, url=url)['inputs'][0]['value']
