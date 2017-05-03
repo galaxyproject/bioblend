@@ -99,6 +99,11 @@ sed -i.bak -e 's/^#conda_auto_init.*/conda_auto_init = True/' "$GALAXY_CONFIG_FI
 sed -i.bak -e 's/^#enable_beta_workflow_modules.*/enable_beta_workflow_modules = True/' "$GALAXY_CONFIG_FILE"
 # Change Galaxy configuration needed by some user tests
 sed -i.bak -e 's/^#allow_user_deletion.*/allow_user_deletion = True/' "$GALAXY_CONFIG_FILE"
+# Update kombu requirement (and its dependency amqp) to a version compatible with Python 2.7.11, see https://github.com/celery/kombu/pull/540
+if [ -f eggs.ini ]; then
+  sed -i.bak -e 's/^kombu = .*$/kombu = 3.0.30/' -e 's/^amqp = .*$/amqp = 1.4.8/' eggs.ini
+fi
+# Add "cat" tool to the toolbox
 if [ -f test/functional/tools/samples_tool_conf.xml ]; then
   sed -i.bak -e "s/^#tool_config_file.*/tool_config_file = $GALAXY_CONFIG_DIR\/tool_conf.xml.sample,$GALAXY_CONFIG_DIR\/shed_tool_conf.xml.sample,test\/functional\/tools\/samples_tool_conf.xml/" "$GALAXY_CONFIG_FILE"
 fi

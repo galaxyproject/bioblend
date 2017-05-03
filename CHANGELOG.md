@@ -1,7 +1,8 @@
 ### BioBlend v0.9.0 - Unreleased
 
 * Dropped support for Galaxy releases 14.02, 14.04, 14.06 and 14.08. Added
-  support for Python 3.5 and Galaxy releases 16.07, 16.10, 17.01 and 17.05.
+  support for Python 3.5 and 3.6, and Galaxy releases 16.07, 16.10, 17.01 and
+  17.05.
 
 * Deprecated ``import_workflow_json()`` and ``export_workflow_json()`` methods
   of ``WorkflowClient`` in favor of ``import_workflow_dict()`` and

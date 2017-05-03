@@ -1,9 +1,9 @@
+dist: trusty
 sudo: false
 language: python
 python: "2.7"
 env:
   - TOX_ENV=py34 GALAXY_VERSION=dev
-  - TOX_ENV=py33 GALAXY_VERSION=dev
   - TOX_ENV=py27 GALAXY_VERSION=dev
   - TOX_ENV=py27 GALAXY_VERSION=release_17.05
   - TOX_ENV=py27 GALAXY_VERSION=release_17.01
@@ -17,10 +17,17 @@ env:
   - TOX_ENV=py27 GALAXY_VERSION=release_15.03
   - TOX_ENV=py27 GALAXY_VERSION=release_15.01
   - TOX_ENV=py27 GALAXY_VERSION=release_14.10
-  - TOX_ENV=py26 GALAXY_VERSION=dev
 
 matrix:
   include:
+    - python: "2.7"
+      env: TOX_ENV=py36 GALAXY_VERSION=dev
+      addons:
+        apt:
+          sources:
+            - deadsnakes
+          packages:
+            - python3.6-dev
     - python: "2.7"
       env: TOX_ENV=py35 GALAXY_VERSION=dev
       addons:
@@ -29,6 +36,22 @@ matrix:
             - deadsnakes
           packages:
             - python3.5-dev
+    - python: "2.7"
+      env: TOX_ENV=py33 GALAXY_VERSION=dev
+      addons:
+        apt:
+          sources:
+            - deadsnakes
+          packages:
+            - python3.3-dev
+    - python: "2.7"
+      env: TOX_ENV=py26 GALAXY_VERSION=dev
+      addons:
+        apt:
+          sources:
+            - deadsnakes
+          packages:
+            - python2.6-dev
 
 install:
   - python setup.py install
@@ -62,6 +85,9 @@ before_script:
   - sed -i.bak -e 's/^#enable_beta_workflow_modules.*/enable_beta_workflow_modules = True/' $GALAXY_CONFIG_FILE
   # Change Galaxy configuration needed by some user tests
   - sed -i.bak -e 's/^#allow_user_deletion.*/allow_user_deletion = True/' $GALAXY_CONFIG_FILE
+  # Update kombu requirement (and its dependency amqp) to a version compatible with Python 2.7.11, see https://github.com/celery/kombu/pull/540
+  - if [ -f eggs.ini ]; then sed -i.bak -e 's/^kombu = .*$/kombu = 3.0.30/' -e 's/^amqp = .*$/amqp = 1.4.8/' eggs.ini; fi
+  # Add "cat" tool to the toolbox
   - if [ -f test/functional/tools/samples_tool_conf.xml ]; then sed -i.bak -e "s/^#tool_config_file.*/tool_config_file = $GALAXY_CONFIG_DIR\/tool_conf.xml.sample,$GALAXY_CONFIG_DIR\/shed_tool_conf.xml.sample,test\/functional\/tools\/samples_tool_conf.xml/" $GALAXY_CONFIG_FILE; fi
   # Start Galaxy and wait for successful server start
   - GALAXY_RUN_ALL=1 ../run_galaxy.sh --daemon --wait
