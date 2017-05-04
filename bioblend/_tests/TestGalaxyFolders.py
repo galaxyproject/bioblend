@@ -6,7 +6,7 @@ from . import GalaxyTestBase, test_util
 FOO_DATA = 'foo\nbar\n'
 
 
-@test_util.skip_unless_galaxy()
+@test_util.skip_unless_galaxy("release_16.01")
 class TestGalaxyFolders(GalaxyTestBase.GalaxyTestBase):
 
     def setUp(self):
