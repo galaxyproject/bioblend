@@ -17,9 +17,10 @@ class UserClient(Client):
         Get a list of all registered users. If ``deleted`` is set to ``True``,
         get a list of deleted users.
 
-        The f_email, f_name, and f_any parameters will work for non-admin users
-        only if the Galaxy instance sets expose_user_email and expose_user_name.
-        The `corresponding Galaxy documentation <https://docs.galaxyproject.org/en/master/lib/galaxy.webapps.galaxy.api.html#galaxy.webapps.galaxy.api.users.UserAPIController.index>`__
+        The ``f_email``, ``f_name``, and ``f_any`` parameters will work for
+        non-admin users only if the Galaxy instance sets expose_user_email and
+        expose_user_name. The `corresponding Galaxy documentation
+        <https://docs.galaxyproject.org/en/master/lib/galaxy.webapps.galaxy.api.html#galaxy.webapps.galaxy.api.users.UserAPIController.index>`__
         has further information.
 
         :type f_email: str
