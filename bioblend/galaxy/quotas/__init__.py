@@ -71,15 +71,15 @@ class QuotaClient(Client):
         :param description: Quota description
 
         :type amount: str
-        :param amount: Quota size (E.g. "10000MB", "99 gb", "0.2T", "unlimited")
+        :param amount: Quota size (E.g. ``10000MB``, ``99 gb``, ``0.2T``, ``unlimited``)
 
         :type operation: str
-        :param operation: One of ("+", "-", "=")
+        :param operation: One of (``+``, ``-``, ``=``)
 
         :type default: str
         :param default: Whether or not this is a default quota. Valid values
-                        are "no", "unregistered", "registered". None is
-                        equivalent to "no".
+                        are ``no``, ``unregistered``, ``registered``. None is
+                        equivalent to ``no``.
 
         :type in_users: list of str
         :param in_users: A list of user IDs or user emails.
@@ -128,18 +128,18 @@ class QuotaClient(Client):
                             but not the name, an error will be thrown.
 
         :type amount: str
-        :param amount: Quota size (E.g. "10000MB", "99 gb", "0.2T", "unlimited")
+        :param amount: Quota size (E.g. ``10000MB``, ``99 gb``, ``0.2T``, ``unlimited``)
 
         :type operation: str
-        :param operation: One of ("+", "-", "="). If you wish to change this
+        :param operation: One of (``+``, ``-``, ``=``). If you wish to change this
                           value, you must also provide the ``amount``,
                           otherwise it will not take effect.
 
         :type default: str
         :param default: Whether or not this is a default quota. Valid values
-                        are "no", "unregistered", "registered". Calling update
-                        twice with a default of "no" will throw an error. Not
-                        passing this parameter is equivalent to passing "no".
+                        are ``no``, ``unregistered``, ``registered``. Calling update
+                        twice with a default of ``no`` will throw an error. Not
+                        passing this parameter is equivalent to passing ``no``.
 
         :type in_users: list of str
         :param in_users: A list of user IDs or user emails.
