@@ -60,7 +60,7 @@ class QuotaClient(Client):
         return self._get(id=quota_id, deleted=deleted)
 
     def create_quota(self, name, description, amount, operation,
-                     default='no', in_users=None, in_groups=None):
+                     default='no', in_users=[], in_groups=[]):
         """
         Create a new quota
 
@@ -113,7 +113,7 @@ class QuotaClient(Client):
         return self._post(payload)
 
     def update_quota(self, quota_id, name=None, description=None, amount=None, operation=None,
-                     default='no', in_users=None, in_groups=None):
+                     default='no', in_users=[], in_groups=[]):
         """
         Update an existing quota
 
