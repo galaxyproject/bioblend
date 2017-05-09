@@ -12,10 +12,31 @@ class UserClient(Client):
         self.module = 'users'
         super(UserClient, self).__init__(galaxy_instance)
 
-    def get_users(self, deleted=False):
+    def get_users(self, deleted=False, f_email=None, f_name=None, f_any=None):
         """
         Get a list of all registered users. If ``deleted`` is set to ``True``,
         get a list of deleted users.
+
+        :type f_email: str
+        :param f_email: filter for user emails. The filter will be active for
+            non-admin users only if the Galaxy instance has the
+            ``expose_user_email`` option set to ``True`` in the
+            ``config/galaxy.ini`` configuration file. This parameter is silently
+            ignored for non-admin users in Galaxy ``release_15.01`` and earlier.
+
+        :type f_name: str
+        :param f_name: filter for user names. The filter will be active for
+            non-admin users only if the Galaxy instance has the
+            ``expose_user_name`` option set to ``True`` in the
+            ``config/galaxy.ini`` configuration file. This parameter is silently
+            ignored in Galaxy ``release_15.10`` and earlier.
+
+        :type f_any: str
+        :param f_any: filter for user email or name. Each filter will be active
+            for non-admin users only if the Galaxy instance has the
+            corresponding ``expose_user_*`` option set to ``True`` in the
+            ``config/galaxy.ini`` configuration file. This parameter is silently
+            ignored in Galaxy ``release_15.10`` and earlier.
 
         :rtype: list
         :return: a list of dicts with user details.
@@ -26,7 +47,14 @@ class UserClient(Client):
                      u'url': u'/api/users/dda47097d9189f15'}]
 
         """
-        return self._get(deleted=deleted)
+        params = {}
+        if f_email:
+            params['f_email'] = f_email
+        if f_name:
+            params['f_name'] = f_name
+        if f_any:
+            params['f_any'] = f_any
+        return self._get(deleted=deleted, params=params)
 
     def show_user(self, user_id, deleted=False):
         """
@@ -145,3 +173,20 @@ class UserClient(Client):
         if purge is True:
             params['purge'] = purge
         return self._delete(id=user_id, params=params)
+
+    def get_user_apikey(self, user_id):
+        """
+        Get the current API key for a given user.
+        This functionality is available since Galaxy ``release_17.01``.
+
+        :type user_id: str
+        :param user_id: encoded user ID
+
+        :rtype: str
+        :return: the API key for the user
+        """
+
+        url = self.gi._make_url(self, None)
+        url = '/'.join([url, user_id, 'api_key', 'inputs'])
+
+        return self._get(url=url)['inputs'][0]['value']

@@ -14,7 +14,17 @@
 * Added ``reload_data_table()`` method to ``ToolDataClient`` (thanks to Marius
   van den Beek).
 
+* Added ``create_folder()``, ``update_folder()``, ``get_permissions()``,
+  ``set_permissions()`` methods to ``FoldersClient`` (thanks to Eric Rasche).
+
+* Added ``get_version()`` method to ``ConfigClient`` (thanks to Eric Rasche).
+
+* Added ``get_user_apikey()`` method to ``UserClient`` (thanks to Eric Rasche).
+
 * Added ``purge`` parameter to ``HistoryClient.delete_dataset()`` method.
+
+* Added ``f_email``, ``f_name``, and ``f_any`` parameters to
+  ``UserClient.get_users()`` method (thanks to Eric Rasche).
 
 * Updated ``WorkflowClient.import_shared_workflow()`` method to use the newer
   Galaxy API request (thanks to @DamCorreia).
