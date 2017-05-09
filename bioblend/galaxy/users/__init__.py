@@ -17,20 +17,26 @@ class UserClient(Client):
         Get a list of all registered users. If ``deleted`` is set to ``True``,
         get a list of deleted users.
 
-        The ``f_email``, ``f_name``, and ``f_any`` parameters will work for
-        non-admin users only if the Galaxy instance sets expose_user_email and
-        expose_user_name. The `corresponding Galaxy documentation
-        <https://docs.galaxyproject.org/en/master/lib/galaxy.webapps.galaxy.api.html#galaxy.webapps.galaxy.api.users.UserAPIController.index>`__
-        has further information.
-
         :type f_email: str
-        :param f_email: filter for user emails
+        :param f_email: filter for user emails. The filter will be active for
+            non-admin users only if the Galaxy instance has the
+            ``expose_user_email`` option set to ``True`` in the
+            ``config/galaxy.ini`` configuration file. This parameter is silently
+            ignored for non-admin users in Galaxy ``release_15.01`` and earlier.
 
         :type f_name: str
-        :param f_name: filter for user names
+        :param f_name: filter for user names. The filter will be active for
+            non-admin users only if the Galaxy instance has the
+            ``expose_user_name`` option set to ``True`` in the
+            ``config/galaxy.ini`` configuration file. This parameter is silently
+            ignored in Galaxy ``release_15.10`` and earlier.
 
         :type f_any: str
-        :param f_any: filter for user email or name
+        :param f_any: filter for user email or name. Each filter will be active
+            for non-admin users only if the Galaxy instance has the
+            corresponding ``expose_user_*`` option set to ``True`` in the
+            ``config/galaxy.ini`` configuration file. This parameter is silently
+            ignored in Galaxy ``release_15.10`` and earlier.
 
         :rtype: list
         :return: a list of dicts with user details.
@@ -171,6 +177,7 @@ class UserClient(Client):
     def get_user_apikey(self, user_id):
         """
         Get the current API key for a given user.
+        This functionality is available since Galaxy ``release_17.01``.
 
         :type user_id: str
         :param user_id: encoded user ID
@@ -181,7 +188,5 @@ class UserClient(Client):
 
         url = self.gi._make_url(self, None)
         url = '/'.join([url, user_id, 'api_key', 'inputs'])
-        payload = {}
-        payload['user_id'] = user_id
 
-        return self._get(payload, url=url)['inputs'][0]['value']
+        return self._get(url=url)['inputs'][0]['value']
