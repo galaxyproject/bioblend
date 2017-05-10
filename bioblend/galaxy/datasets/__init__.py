@@ -164,6 +164,10 @@ class DatasetClient(Client):
         """
         Get the stderr output of a dataset.
 
+        .. deprecated:: 0.9.0
+           Use :meth:`~bioblend.galaxy.jobs.JobsClient.show_job` with
+           ``full_details=True`` instead.
+
         :type dataset_id: str
         :param dataset_id: Encoded dataset ID
         """
@@ -173,6 +177,10 @@ class DatasetClient(Client):
     def show_stdout(self, dataset_id):
         """
         Get the stdout output of a dataset.
+
+        .. deprecated:: 0.9.0
+           Use :meth:`~bioblend.galaxy.jobs.JobsClient.show_job` with
+           ``full_details=True`` instead.
 
         :type dataset_id: str
         :param dataset_id: Encoded dataset ID

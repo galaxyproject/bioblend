@@ -54,19 +54,19 @@ class WorkflowClient(Client):
 
     def show_workflow(self, workflow_id):
         """
-        Display information needed to run a workflow
+        Display information needed to run a workflow.
 
         :type workflow_id: str
         :param workflow_id: Encoded workflow ID
 
         :rtype: dict
-        :return: A description of the workflow and its inputs. For example::
+        :return: A description of the workflow and its inputs.
+          For example::
 
-                  {u'id': u'92c56938c2f9b315',
-                   u'inputs': {u'23': {u'label': u'Input Dataset', u'value': u''}},
-                   u'name': u'Simple',
-                   u'url': u'/api/workflows/92c56938c2f9b315'}
-
+            {u'id': u'92c56938c2f9b315',
+             u'inputs': {u'23': {u'label': u'Input Dataset', u'value': u''}},
+             u'name': u'Simple',
+             u'url': u'/api/workflows/92c56938c2f9b315'}
         """
         return self._get(id=workflow_id)
 
@@ -104,9 +104,8 @@ class WorkflowClient(Client):
 
     def import_workflow_json(self, workflow_json):
         """
-        Deprecated method.
-
-        Just an alias for :meth:`import_workflow_dict`.
+        .. deprecated:: 0.9.0
+           Use :meth:`import_workflow_dict` instead.
         """
         return self.import_workflow_dict(workflow_json)
 
@@ -161,9 +160,8 @@ class WorkflowClient(Client):
 
     def export_workflow_json(self, workflow_id):
         """
-        Deprecated method.
-
-        Just an alias for :meth:`export_workflow_dict`.
+        .. deprecated:: 0.9.0
+           Use :meth:`export_workflow_dict` instead.
         """
         return self.export_workflow_dict(workflow_id)
 
@@ -197,8 +195,10 @@ class WorkflowClient(Client):
                      history_id=None, history_name=None,
                      import_inputs_to_history=False, replacement_params=None):
         """
-        Run the workflow identified by ``workflow_id``. This method is
-        deprecated, please use :meth:`invoke_workflow` instead.
+        Run the workflow identified by ``workflow_id``.
+
+        .. deprecated:: 0.7.0
+           Use :meth:`invoke_workflow` instead.
 
         :type workflow_id: str
         :param workflow_id: Encoded workflow ID
