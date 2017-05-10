@@ -99,6 +99,8 @@ sed -i.bak -e 's/^#conda_auto_init.*/conda_auto_init = True/' "$GALAXY_CONFIG_FI
 sed -i.bak -e 's/^#enable_beta_workflow_modules.*/enable_beta_workflow_modules = True/' "$GALAXY_CONFIG_FILE"
 # Change Galaxy configuration needed by some user tests
 sed -i.bak -e 's/^#allow_user_deletion.*/allow_user_deletion = True/' "$GALAXY_CONFIG_FILE"
+# Change Galaxy configuration needed by quota tests
+sed -i.bak -e 's/^#enable_quotas.*/enable_quotas = True/' $GALAXY_CONFIG_FILE
 # Update kombu requirement (and its dependency amqp) to a version compatible with Python 2.7.11, see https://github.com/celery/kombu/pull/540
 if [ -f eggs.ini ]; then
   sed -i.bak -e 's/^kombu = .*$/kombu = 3.0.30/' -e 's/^amqp = .*$/amqp = 1.4.8/' eggs.ini
