@@ -23,7 +23,6 @@ class TestGalaxyQuotas(GalaxyTestBase.GalaxyTestBase):
         self.gi.quotas.update_quota(self.quota['id'], default='registered')
         self.gi.quotas.update_quota(self.quota['id'], default='no')
         self.gi.quotas.delete_quota(self.quota['id'])
-        # self.gi.libraries.delete_library(self.library['id'])
 
     def test_create_quota(self):
         quota = self.gi.quotas.show_quota(self.quota['id'])
