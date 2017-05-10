@@ -8,6 +8,10 @@
   of ``WorkflowClient`` in favor of ``import_workflow_dict()`` and
   ``export_workflow_dict()`` (reported by @manabuishii)
 
+* Deprecated ``show_stderr()`` and ``show_stdout()`` methods of
+  ``DatasetClient`` in favour of ``JobsClient.show_job()`` with
+  ``full_details=True``.
+
 * Added ``install_dependencies()`` method to ``ToolClient`` (thanks to Marius
   van den Beek).
 

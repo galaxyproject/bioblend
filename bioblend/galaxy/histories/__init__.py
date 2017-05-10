@@ -415,8 +415,9 @@ class HistoryClient(Client):
     def download_dataset(self, history_id, dataset_id, file_path,
                          use_default_filename=True):
         """
-        Deprecated method, use
-        :meth:`~bioblend.galaxy.datasets.DatasetClient.download_dataset` instead.
+        .. deprecated:: 0.8.0
+           Use :meth:`~bioblend.galaxy.datasets.DatasetClient.download_dataset`
+           instead.
         """
         meta = self.show_dataset(history_id, dataset_id)
         if use_default_filename:
@@ -486,9 +487,8 @@ class HistoryClient(Client):
 
     def get_current_history(self):
         """
-        Deprecated method.
-
-        Just an alias for :meth:`get_most_recently_used_history`.
+        .. deprecated:: 0.5.2
+           Use :meth:`get_most_recently_used_history` instead.
         """
         return self.get_most_recently_used_history()
 
