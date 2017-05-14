@@ -1,7 +1,7 @@
 """
 Use ``nose`` to run these unit tests.
 """
-import time
+import uuid
 
 from . import GalaxyTestBase, test_util
 
@@ -13,7 +13,7 @@ class TestGalaxyQuotas(GalaxyTestBase.GalaxyTestBase):
         super(TestGalaxyQuotas, self).setUp()
         # Quota names must be unique, and they're impossible to delete
         # without accessing the database.
-        self.quota_name = 'BioBlend-Test-Quota-%s' % time.time()
+        self.quota_name = 'BioBlend-Test-Quota-%s' % uuid.uuid4().hex
         self.quota = self.gi.quotas.create_quota(
             self.quota_name, 'testing', '100 GB', '=',
             default='registered'

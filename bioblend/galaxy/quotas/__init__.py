@@ -180,7 +180,7 @@ class QuotaClient(Client):
         """
         Delete a quota
 
-        Before a quota can be deleted, the quota must not not be a default quota.
+        Before a quota can be deleted, the quota must not be a default quota.
 
         :type quota_id: str
         :param quota_id: Encoded quota ID.
@@ -195,7 +195,7 @@ class QuotaClient(Client):
 
     def undelete_quota(self, quota_id):
         """
-        Unelete a quota
+        Undelete a quota
 
         :type quota_id: str
         :param quota_id: Encoded quota ID.
