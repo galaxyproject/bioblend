@@ -34,14 +34,19 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
         # self._wait_and_verify_dataset(self.dataset_id, expected_contents)
         tempdir = tempfile.mkdtemp(prefix='bioblend_test_')
         try:
-            downloaded_dataset = self.gi.datasets.download_dataset(self.dataset_id, file_path=tempdir, wait_for_completion=True, maxwait=15)
+            downloaded_dataset = self.gi.datasets.download_dataset(
+                self.dataset_id, file_path=tempdir, wait_for_completion=True,
+                maxwait=GalaxyTestBase.BIOBLEND_TEST_JOB_TIMEOUT)
             self.assertTrue(downloaded_dataset.startswith(tempdir))
             with open(downloaded_dataset, 'rb') as f:
                 self.assertEqual(f.read(), expected_contents)
         finally:
             shutil.rmtree(tempdir)
         with tempfile.NamedTemporaryFile(prefix='bioblend_test_') as f:
-            download_filename = self.gi.datasets.download_dataset(self.dataset_id, file_path=f.name, use_default_filename=False, wait_for_completion=True, maxwait=15)
+            download_filename = self.gi.datasets.download_dataset(
+                self.dataset_id, file_path=f.name, use_default_filename=False,
+                wait_for_completion=True,
+                maxwait=GalaxyTestBase.BIOBLEND_TEST_JOB_TIMEOUT)
             self.assertEqual(download_filename, f.name)
             f.flush()
             self.assertEqual(f.read(), expected_contents)
