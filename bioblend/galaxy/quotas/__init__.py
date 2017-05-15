@@ -137,8 +137,9 @@ class QuotaClient(Client):
 
         :type default: str
         :param default: Whether or not this is a default quota. Valid values
-                        are ``no``, ``unregistered``, ``registered``. Calling update
-                        twice with a default of ``no`` will throw an error. Not
+                        are ``no``, ``unregistered``, ``registered``.
+                        Calling this method with ``default="no"`` on a
+                        non-default quota will throw an error. Not
                         passing this parameter is equivalent to passing ``no``.
 
         :type in_users: list of str
