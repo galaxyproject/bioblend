@@ -33,7 +33,7 @@ class TestGalaxyQuotas(GalaxyTestBase.GalaxyTestBase):
 
     def test_get_quotas(self):
         quotas = self.gi.quotas.get_quotas()
-        self.assertTrue(self.quota['id'] in [quota['id'] for quota in quotas])
+        self.assertIn(self.quota['id'], [quota['id'] for quota in quotas])
 
     def test_update_quota(self):
         response = self.gi.quotas.update_quota(
@@ -41,7 +41,7 @@ class TestGalaxyQuotas(GalaxyTestBase.GalaxyTestBase):
             description='asdf', default='registered', operation='-',
             amount='.01 TB'
         )
-        self.assertTrue("""Quota '%s' has been renamed to '%s-new'""" % (self.quota_name, self.quota_name) in response)
+        self.assertIn("""Quota '%s' has been renamed to '%s-new'""" % (self.quota_name, self.quota_name), response)
 
         quota = self.gi.quotas.show_quota(self.quota['id'])
         self.assertEqual(quota['name'], self.quota_name + '-new')
