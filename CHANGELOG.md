@@ -25,6 +25,9 @@
 
 * Added ``get_user_apikey()`` method to ``UserClient`` (thanks to Eric Rasche).
 
+* Added ``create_quota()``, ``update_quota()``, ``delete_quota()`` and
+  ``undelete_quota()`` methods to ``QuotaClient`` (thanks to Eric Rasche).
+
 * Added ``purge`` parameter to ``HistoryClient.delete_dataset()`` method.
 
 * Added ``f_email``, ``f_name``, and ``f_any`` parameters to
