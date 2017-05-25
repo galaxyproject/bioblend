@@ -1,7 +1,8 @@
-global-exclude *.swp .gitignore
+# Add non-Python files
+graft bioblend/_tests
+# Add documentation
+graft docs
+
+global-exclude *.swp *.pyc .gitignore
 
 include *.rst
-include setup.py
-
-graft bioblend
-graft docs
