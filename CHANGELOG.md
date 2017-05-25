@@ -1,4 +1,4 @@
-### BioBlend v0.9.0 - Unreleased
+### BioBlend v0.9.0 - 2017-05-25
 
 * Dropped support for Galaxy releases 14.02, 14.04, 14.06 and 14.08. Added
   support for Python 3.5 and 3.6, and Galaxy releases 16.07, 16.10, 17.01 and
@@ -51,7 +51,7 @@
 
 * Code refactoring, added tests and documentation improvements.
 
-### BioBlend v0.8.0 - August 11, 2016
+### BioBlend v0.8.0 - 2016-08-11
 
 * Removed deprecated method ``create_user()`` of ``UserClient``.
 
@@ -101,7 +101,7 @@
 
 * A number of testing tweaks, documentation improvements and minor fixes.
 
-### BioBlend v0.7.0 - November 2, 2015
+### BioBlend v0.7.0 - 2015-11-02
 
 * BioBlend.objects: enabled import of workflows containing dataset collection
   inputs.
@@ -131,7 +131,7 @@
 * A numer of documentation improvements and minor updates/fixes (see individual
   commits).
 
-### BioBlend v0.6.1 - July 27, 2015
+### BioBlend v0.6.1 - 2015-07-27
 
 * BioBlend.objects: renamed ``ObjDatasetClient`` abstract class to
   ``ObjDatasetContainerClient``.
@@ -149,7 +149,7 @@
   The return types for methods ``create_cm_security_group``, ``create_key_pair``
   in ``CloudManLauncher`` class have changed as a result of this.
 
-### BioBlend v0.6.0 - June 30, 2015
+### BioBlend v0.6.0 - 2015-06-30
 
 * Added support for Python >= 3.3.
 
@@ -179,7 +179,7 @@
 * Solidified automated testing by using [tox](https://tox.readthedocs.org/) and
   [flake8](https://gitlab.com/pycqa/flake8).
 
-### BioBlend v0.5.3 - March 18, 2015
+### BioBlend v0.5.3 - 2015-03-18
 
 * Project source moved to new URL - https://github.com/galaxyproject/bioblend
 
@@ -244,7 +244,7 @@
 * Add ``run_bioblend_tests.sh`` script (useful for Continuous Integration
   testing).
 
-### BioBlend v0.5.2 - October 17, 2014
+### BioBlend v0.5.2 - 2014-10-17
 
 * BioBlend.objects: enabled email&password auth
 
@@ -265,7 +265,7 @@
 * A number of documentation improvements and other small fixes (see
   the commit messages for more details)
 
-### BioBlend v0.5.1 - August 19, 2014
+### BioBlend v0.5.1 - 2014-08-19
 
 * Fixed url joining problem described in issue #82
 
