@@ -25,7 +25,8 @@ class TestGalaxyFolders(GalaxyTestBase.GalaxyTestBase):
     def test_show_folder(self):
         f2 = self.gi.folders.show_folder(self.folder['id'])
         self.assertEqual(f2['id'], self.folder['id'])
-
+        
+    @test_util.skip_unless_galaxy("release_16.01")
     def test_show_folder_contents(self):
         f2 = self.gi.folders.show_folder(self.folder['id'], contents=True)
         self.assertIn('folder_contents', f2)
