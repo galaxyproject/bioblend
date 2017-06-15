@@ -31,18 +31,22 @@ class FoldersClient(Client):
             payload['description'] = description
         return self._post(payload=payload, id=parent_folder_id)
 
-    def show_folder(self, folder_id):
+    def show_folder(self, folder_id, contents=False):
         """
         Display information about a folder.
 
         :type folder_id: str
         :param folder_id: the folder's encoded id, prefixed by 'F'
 
+        :type contents: bool
+        :param contents: True if want to get contents of the folder (rather
+          than just the folder details)
+
         :rtype: dict
         :return: dictionary including details of the folder
         """
 
-        return self._get(id=folder_id)
+        return self._get(id=folder_id, contents=contents)
 
     def delete_folder(self, folder_id, undelete=False):
         """
