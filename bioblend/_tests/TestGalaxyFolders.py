@@ -26,12 +26,13 @@ class TestGalaxyFolders(GalaxyTestBase.GalaxyTestBase):
         f2 = self.gi.folders.show_folder(self.folder['id'])
         self.assertEqual(f2['id'], self.folder['id'])
 
-    @test_util.skip_unless_galaxy("release_16.01")
     def test_show_folder_contents(self):
         f2 = self.gi.folders.show_folder(self.folder['id'], contents=True)
         self.assertIn('folder_contents', f2)
         self.assertIn('metadata', f2)
-        self.assertEqual(self.name, f2['metadata']['folder_name'])
+        # 'folder_name' key of metadata dict was added in release_16.01
+        if 'folder_name' in f2['metadata']:
+            self.assertEqual(self.name, f2['metadata']['folder_name'])
 
     @test_util.skip_unless_galaxy("release_15.01")
     def test_delete_folder(self):

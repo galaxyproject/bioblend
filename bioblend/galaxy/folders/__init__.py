@@ -34,7 +34,6 @@ class FoldersClient(Client):
     def show_folder(self, folder_id, contents=False):
         """
         Display information about a folder.
-        This functionality is available since Galaxy ``release_16.01``.
 
         :type folder_id: str
         :param folder_id: the folder's encoded id, prefixed by 'F'
