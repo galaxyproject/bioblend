@@ -34,8 +34,13 @@ def skip_unless_galaxy(min_release=None):
     """
     if min_release is not None:
         galaxy_release = os.environ.get('GALAXY_VERSION', None)
-        if galaxy_release is not None and galaxy_release.startswith('release_') and galaxy_release < min_release:
-            return unittest.skip(OLD_GALAXY_RELEASE % (galaxy_release, min_release))
+        if galaxy_release is not None and galaxy_release != 'dev':
+            if not galaxy_release.startswith('release_'):
+                raise ValueError("The value of GALAXY_VERSION environment variable should start with 'release_'")
+            if not min_release.startswith('release_'):
+                raise Exception("min_release should start with 'release_'")
+            if galaxy_release[8:] < min_release[8:]:
+                return unittest.skip(OLD_GALAXY_RELEASE % (galaxy_release, min_release))
 
     if 'BIOBLEND_GALAXY_URL' not in os.environ:
         return unittest.skip(NO_GALAXY_MESSAGE)
