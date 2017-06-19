@@ -18,7 +18,11 @@ from bioblend import ConnectionError
 
 class GalaxyClient(object):
 
-    def __init__(self, url, key=None, email=None, password=None):
+    def __init__(self, url, key=None, email=None, password=None, verify=True):
+        """
+        :param verify: Whether to verify the server's TLS certificate
+        :type verify: boolean
+        """
         # Make sure the url scheme is defined (otherwise requests will not work)
         if not urlparse(url).scheme:
             url = "http://" + url
@@ -34,7 +38,7 @@ class GalaxyClient(object):
             self.email = email
             self.password = password
         self.json_headers = {'Content-Type': 'application/json'}
-        self.verify = True  # Should SSL verification be done
+        self.verify = verify
 
     def _make_url(self, module, module_id=None, deleted=False, contents=False):
         """

@@ -10,17 +10,14 @@ from bioblend.galaxyclient import GalaxyClient
 
 
 class GalaxyInstance(GalaxyClient):
-    def __init__(self, url, key=None, email=None, password=None):
+    def __init__(self, url, key=None, email=None, password=None, verify=True):
         """
-        A base representation of an instance of Galaxy, identified by a
-        URL and a user's API key.
+        A base representation of a connection to a Galaxy instance, identified
+        by the server URL and user credentials.
 
-        After you have created an ``GalaxyInstance`` object, access various
-        modules via the class fields (see the source for the most up-to-date
-        list): ``libraries``, ``histories``, ``workflows``, ``datasets``,
-        and ``users`` are the minimum set supported. For example, to work with
-        histories, and get a list of all the user's histories, the following
-        should be done::
+        After you have created a ``GalaxyInstance`` object, access various
+        modules via the class fields. For example, to work with histories and
+        get a list of all the user's histories, the following should be done::
 
             from bioblend import galaxy
 
@@ -30,7 +27,7 @@ class GalaxyInstance(GalaxyClient):
 
         :type url: str
         :param url: A FQDN or IP for a given instance of Galaxy. For example:
-                    http://127.0.0.1:8080. If a Galaxy instance is served under
+                    http://127.0.0.1:8080 . If a Galaxy instance is served under
                     a prefix (e.g., http://127.0.0.1:8080/galaxy/), supply the
                     entire URL including the prefix (note that the prefix must
                     end with a slash).
@@ -38,7 +35,7 @@ class GalaxyInstance(GalaxyClient):
         :type key: str
         :param key: User's API key for the given instance of Galaxy, obtained
                     from the user preferences. If a key is not supplied, an
-                    email address and password must be and key will
+                    email address and password must be and the key will
                     automatically be created for the user.
 
         :type email: str
@@ -49,8 +46,10 @@ class GalaxyInstance(GalaxyClient):
         :param password: Password of Galaxy account corresponding to the above
                          e-mail address. Ignored if key is supplied directly.
 
+        :param verify: Whether to verify the server's TLS certificate
+        :type verify: boolean
         """
-        super(GalaxyInstance, self).__init__(url, key, email, password)
+        super(GalaxyInstance, self).__init__(url, key, email, password, verify=verify)
         self.libraries = libraries.LibraryClient(self)
         self.histories = histories.HistoryClient(self)
         self.workflows = workflows.WorkflowClient(self)
