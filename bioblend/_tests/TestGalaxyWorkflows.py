@@ -12,7 +12,6 @@ from six.moves import range
 from . import GalaxyTestBase, test_util
 
 
-@test_util.skip_unless_galaxy()
 class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
 
     @test_util.skip_unless_galaxy('release_15.03')

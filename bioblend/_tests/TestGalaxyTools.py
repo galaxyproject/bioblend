@@ -14,7 +14,6 @@ from bioblend.galaxy.tools.inputs import (
 from . import GalaxyTestBase, test_util
 
 
-@test_util.skip_unless_galaxy()
 class TestGalaxyTools(GalaxyTestBase.GalaxyTestBase):
 
     def setUp(self):

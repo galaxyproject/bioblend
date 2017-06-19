@@ -5,10 +5,9 @@ import shutil
 import tarfile
 import tempfile
 
-from . import GalaxyTestBase, test_util
+from . import GalaxyTestBase
 
 
-@test_util.skip_unless_galaxy()
 class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
 
     def setUp(self):

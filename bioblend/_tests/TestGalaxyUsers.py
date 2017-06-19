@@ -7,7 +7,6 @@ Use ``nose`` to run these unit tests.
 from . import GalaxyTestBase, test_util
 
 
-@test_util.skip_unless_galaxy()
 class TestGalaxyUsers(GalaxyTestBase.GalaxyTestBase):
 
     def test_get_users(self):

@@ -3,10 +3,9 @@ WARNING: only admins can operate on groups!
 """
 import uuid
 
-from . import GalaxyTestBase, test_util
+from . import GalaxyTestBase
 
 
-@test_util.skip_unless_galaxy()
 class TestGalaxyGroups(GalaxyTestBase.GalaxyTestBase):
 
     def setUp(self):

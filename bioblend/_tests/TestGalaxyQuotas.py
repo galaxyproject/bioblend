@@ -3,10 +3,9 @@ Use ``nose`` to run these unit tests.
 """
 import uuid
 
-from . import GalaxyTestBase, test_util
+from . import GalaxyTestBase
 
 
-@test_util.skip_unless_galaxy()
 class TestGalaxyQuotas(GalaxyTestBase.GalaxyTestBase):
 
     def setUp(self):

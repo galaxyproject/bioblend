@@ -6,10 +6,9 @@ import tempfile
 
 import six
 
-from . import GalaxyTestBase, test_util
+from . import GalaxyTestBase
 
 
-@test_util.skip_unless_galaxy()
 class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
 
     def setUp(self):

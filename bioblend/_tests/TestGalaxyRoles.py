@@ -4,10 +4,9 @@ credentials to supported cloud infrastructure.
 
 Use ``nose`` to run these unit tests.
 """
-from . import GalaxyTestBase, test_util
+from . import GalaxyTestBase
 
 
-@test_util.skip_unless_galaxy()
 class TestGalaxyRoles(GalaxyTestBase.GalaxyTestBase):
 
     def test_get_roles(self):

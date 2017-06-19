@@ -221,6 +221,7 @@ class TestWorkflow(unittest.TestCase):
             self.assertIn(d['id'], 'ab')
 
 
+@test_util.skip_unless_galaxy()
 class GalaxyObjectsTestBase(unittest.TestCase):
 
     def setUp(self):
@@ -229,7 +230,6 @@ class GalaxyObjectsTestBase(unittest.TestCase):
         self.gi = galaxy_instance.GalaxyInstance(galaxy_url, galaxy_key)
 
 
-@test_util.skip_unless_galaxy()
 class TestGalaxyInstance(GalaxyObjectsTestBase):
 
     def test_library(self):
@@ -403,7 +403,6 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
         self.assertEqual(len(prevs), 0)
 
 
-@test_util.skip_unless_galaxy()
 class TestLibrary(GalaxyObjectsTestBase):
 
     # just something that can be expected to be always up
@@ -495,7 +494,6 @@ class TestLibrary(GalaxyObjectsTestBase):
         self.assertEqual(selected[0].name, bnames[0])
 
 
-@test_util.skip_unless_galaxy()
 class TestLDContents(GalaxyObjectsTestBase):
 
     def setUp(self):
@@ -531,7 +529,6 @@ class TestLDContents(GalaxyObjectsTestBase):
         # self.assertTrue(self.ds.deleted)
 
 
-@test_util.skip_unless_galaxy()
 class TestHistory(GalaxyObjectsTestBase):
 
     def setUp(self):
@@ -652,7 +649,6 @@ class TestHistory(GalaxyObjectsTestBase):
         )
 
 
-@test_util.skip_unless_galaxy()
 class TestHDAContents(GalaxyObjectsTestBase):
 
     def setUp(self):
@@ -703,7 +699,6 @@ class TestHDAContents(GalaxyObjectsTestBase):
         self.assertTrue(self.ds.purged)
 
 
-@test_util.skip_unless_galaxy()
 class TestRunWorkflow(GalaxyObjectsTestBase):
 
     def setUp(self):
@@ -789,7 +784,6 @@ class TestRunDatasetCollectionWorkflow(GalaxyObjectsTestBase):
         self.assertEqual(out_hist.id, self.hist.id)
 
 
-@test_util.skip_unless_galaxy()
 class TestJob(GalaxyObjectsTestBase):
 
     def setUp(self):

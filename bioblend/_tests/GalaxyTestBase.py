@@ -3,6 +3,7 @@ import os
 import bioblend
 import bioblend.galaxy
 
+from . import test_util
 from .test_util import unittest
 
 bioblend.set_stream_logger('test', level='INFO')
@@ -10,6 +11,7 @@ bioblend.set_stream_logger('test', level='INFO')
 BIOBLEND_TEST_JOB_TIMEOUT = int(os.environ.get("BIOBLEND_TEST_JOB_TIMEOUT", "60"))
 
 
+@test_util.skip_unless_galaxy()
 class GalaxyTestBase(unittest.TestCase):
 
     def setUp(self):
