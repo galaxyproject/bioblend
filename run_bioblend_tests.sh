@@ -115,9 +115,8 @@ if [ -n "${p_val}" ]; then
 fi
 # Start Galaxy and wait for successful server start
 GALAXY_RUN_ALL=1 "${BIOBLEND_DIR}/run_galaxy.sh" --daemon --wait || exit 1
-
-# Use the master API key to create the admin user and get its API key
 export BIOBLEND_GALAXY_URL=http://localhost:${p_val}
+
 # Run the tests
 cd "${BIOBLEND_DIR}" || exit 1
 if [ -n "${t_val}" ]; then
