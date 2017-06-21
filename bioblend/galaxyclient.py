@@ -157,7 +157,8 @@ class GalaxyClient(object):
             params = self.default_params
         if payload is not None:
             payload = json.dumps(payload)
-        r = requests.delete(url, verify=self.verify, data=payload, params=params)
+        headers = self.json_headers
+        r = requests.delete(url, verify=self.verify, data=payload, params=params, headers=headers)
         return r
 
     def make_put_request(self, url, payload=None, params=None):
