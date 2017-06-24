@@ -40,7 +40,7 @@ def main(args=None):
 def _pytest_main(args):
     if pytest is None:
         raise Exception("pytest is required to use this script.")
-    pytest.main(args)
+    sys.exit(pytest.main(args))
 
 
 if __name__ == "__main__":
