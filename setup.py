@@ -34,7 +34,7 @@ setup(name="bioblend",
       url="http://bioblend.readthedocs.org/",
       install_requires=['requests>=2.4.3,!=2.12.0,!=2.12.1', 'requests-toolbelt', 'boto>=2.9.7', 'pyyaml', 'six'],
       tests_require=tests_require,
-      packages=find_packages(),
+      packages=find_packages(exclude=['tests']),
       package_data={'bioblend': ['_tests/data/*']},
       entry_points=ENTRY_POINTS,
       extras_require={
