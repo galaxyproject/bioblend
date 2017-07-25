@@ -69,11 +69,11 @@ class RolesClient(Client):
         :return: A (size 1) list with newly created role
           details, like::
 
-            [{u'description': u'desc', 
-              u'url': u'/api/roles/ebfb8f50c6abde6d', 
-              u'model_class': u'Role', 
-              u'type': u'admin', 
-              u'id': u'ebfb8f50c6abde6d', 
+            [{u'description': u'desc',
+              u'url': u'/api/roles/ebfb8f50c6abde6d',
+              u'model_class': u'Role',
+              u'type': u'admin',
+              u'id': u'ebfb8f50c6abde6d',
               u'name': u'Foo'}]
         """
         payload = {
