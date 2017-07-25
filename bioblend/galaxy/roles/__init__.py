@@ -74,7 +74,7 @@ class RolesClient(Client):
               u'model_class': u'Role', 
               u'type': u'admin', 
               u'id': u'ebfb8f50c6abde6d', 
-              u'name': u'role3'}]
+              u'name': u'Foo'}]
         """
         payload = {
             'name': role_name,
