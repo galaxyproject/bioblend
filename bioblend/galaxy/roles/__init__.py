@@ -48,3 +48,38 @@ class RolesClient(Client):
              "url": "/api/roles/f2db41e1fa331b3e"}
         """
         return self._get(id=role_id)
+
+    def create_role(self, role_name, description, user_ids=[], role_ids=[]):
+        """
+        Create a new role.
+
+        :type role_name: str
+        :param role_name: A name for the new role
+
+        :type description: str
+        :param description: Description for the new role
+
+        :type user_ids: list
+        :param user_ids: A list of encoded user IDs to add to the new role
+
+        :type group_ids: list
+        :param group_ids: A list of encoded group IDs to add to the new role
+
+        :rtype: list
+        :return: A (size 1) list with newly created role
+          details, like::
+
+            [{u'description': u'desc', 
+              u'url': u'/api/roles/ebfb8f50c6abde6d', 
+              u'model_class': u'Role', 
+              u'type': u'admin', 
+              u'id': u'ebfb8f50c6abde6d', 
+              u'name': u'role3'}]
+        """
+        payload = {
+            'name': role_name,
+            'description': description,
+            'user_ids': user_ids,
+            'role_ids': role_ids
+        }
+        return self._post(payload)
