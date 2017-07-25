@@ -49,7 +49,7 @@ class RolesClient(Client):
         """
         return self._get(id=role_id)
 
-    def create_role(self, role_name, description, user_ids=[], role_ids=[]):
+    def create_role(self, role_name, description, user_ids=[], group_ids=[]):
         """
         Create a new role.
 
@@ -80,6 +80,6 @@ class RolesClient(Client):
             'name': role_name,
             'description': description,
             'user_ids': user_ids,
-            'role_ids': role_ids
+            'group_ids': group_ids
         }
         return self._post(payload)
