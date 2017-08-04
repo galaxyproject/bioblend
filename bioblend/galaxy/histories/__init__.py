@@ -131,7 +131,7 @@ class HistoryClient(Client):
         """
         url = self.gi._make_url(self, history_id, contents=True)
         # Append the dataset_id to the base history contents URL
-        url = '/'.join([url, dataset_id])
+        url = '/'.join([url, hda_id])
         payload = {}
         if purge is True:
             payload['purge'] = purge
