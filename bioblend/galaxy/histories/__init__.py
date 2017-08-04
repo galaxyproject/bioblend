@@ -105,15 +105,15 @@ class HistoryClient(Client):
                 params['types'] = types.join(",")
         return self._get(id=history_id, contents=contents, params=params)
 
-    def delete_dataset(self, history_id, dataset_id, purge=False):
+    def delete_dataset(self, history_id, hda_id, purge=False):
         """
         Mark corresponding dataset as deleted.
 
         :type history_id: str
         :param history_id: Encoded history ID
 
-        :type dataset_id: str
-        :param dataset_id: Encoded dataset ID
+        :type hda_id: str
+        :param hda_id: Encoded history_dataset_association ID
 
         :type purge: bool
         :param purge: if ``True``, also purge (permanently delete) the dataset
