@@ -21,38 +21,46 @@ if sys.version_info < (2, 7):
 elif sys.version_info < (3, 3):
     tests_require.append('mock>=0.7.0')
 
-ENTRY_POINTS = '''
-    [console_scripts]
-    bioblend-galaxy-tests=bioblend._tests.pytest_galaxy_test_wrapper:main
-'''
-
-setup(name="bioblend",
-      version=version,
-      description="CloudMan and Galaxy API library",
-      author="Enis Afgan",
-      author_email="afgane@gmail.com",
-      url="http://bioblend.readthedocs.org/",
-      install_requires=['requests>=2.4.3,!=2.12.0,!=2.12.1', 'requests-toolbelt', 'boto>=2.9.7', 'pyyaml', 'six'],
-      tests_require=tests_require,
-      packages=find_packages(exclude=['tests']),
-      package_data={'bioblend': ['_tests/data/*']},
-      entry_points=ENTRY_POINTS,
-      extras_require={
-          'testing': ["pytest"],
-      },
-      license='MIT',
-      platforms="Posix; MacOS X; Windows",
-      classifiers=["Development Status :: 4 - Beta",
-                   "Intended Audience :: Developers",
-                   "License :: OSI Approved :: MIT License",
-                   "Operating System :: OS Independent",
-                   "Topic :: Scientific/Engineering",
-                   "Programming Language :: Python :: 2",
-                   "Programming Language :: Python :: 2.6",
-                   "Programming Language :: Python :: 2.7",
-                   "Programming Language :: Python :: 3",
-                   "Programming Language :: Python :: 3.3",
-                   "Programming Language :: Python :: 3.4",
-                   "Programming Language :: Python :: 3.5",
-                   "Programming Language :: Python :: 3.6"],
-      test_suite='nose.collector')
+setup(
+    name="bioblend",
+    version=version,
+    description="CloudMan and Galaxy API library",
+    author="Enis Afgan",
+    author_email="afgane@gmail.com",
+    url="https://bioblend.readthedocs.io/",
+    install_requires=[
+        'boto>=2.9.7',
+        'pyyaml',
+        'requests>=2.4.3,!=2.12.0,!=2.12.1',
+        'requests-toolbelt',
+        'six'
+    ],
+    tests_require=tests_require,
+    packages=find_packages(exclude=['tests']),
+    package_data={'bioblend': ['_tests/data/*']},
+    entry_points={
+        'console_scripts': [
+            'bioblend-galaxy-tests = bioblend._tests.pytest_galaxy_test_wrapper:main [testing]'
+        ]
+    },
+    extras_require={
+        'testing': ["pytest"],
+    },
+    license='MIT',
+    platforms="Posix; MacOS X; Windows",
+    classifiers=[
+        "Development Status :: 4 - Beta",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python :: 2",
+        "Programming Language :: Python :: 2.6",
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.3",
+        "Programming Language :: Python :: 3.4",
+        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
+        "Topic :: Scientific/Engineering",
+    ],
+    test_suite='nose.collector')
