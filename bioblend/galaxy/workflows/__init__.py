@@ -102,14 +102,14 @@ class WorkflowClient(Client):
         url = _join(url, "upload")
         return self._post(url=url, payload=payload)
 
-    def import_workflow_json(self, workflow_json):
+    def import_workflow_json(self, workflow_json, publish=False):
         """
         .. deprecated:: 0.9.0
            Use :meth:`import_workflow_dict` instead.
         """
-        return self.import_workflow_dict(workflow_json)
+        return self.import_workflow_dict(workflow_json, publish)
 
-    def import_workflow_from_local_path(self, file_local_path):
+    def import_workflow_from_local_path(self, file_local_path, publish=False):
         """
         Imports a new workflow given the path to a file containing a previously
         exported workflow.
@@ -120,7 +120,7 @@ class WorkflowClient(Client):
         with open(file_local_path, 'r') as fp:
             workflow_json = json.load(fp)
 
-        return self.import_workflow_json(workflow_json)
+        return self.import_workflow_json(workflow_json, publish)
 
     def import_shared_workflow(self, workflow_id):
         """
