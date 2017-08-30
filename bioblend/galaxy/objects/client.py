@@ -236,7 +236,7 @@ class ObjWorkflowClient(ObjClient):
     def __init__(self, obj_gi):
         super(ObjWorkflowClient, self).__init__(obj_gi)
 
-    def import_new(self, src):
+    def import_new(self, src, publish=False):
         """
         Imports a new workflow into Galaxy.
 
@@ -255,7 +255,7 @@ class ObjWorkflowClient(ObjClient):
                 wf_dict = json.loads(src)
             except (TypeError, ValueError):
                 self._error('src not supported: %r' % (src,))
-        wf_info = self.gi.workflows.import_workflow_dict(wf_dict)
+        wf_info = self.gi.workflows.import_workflow_dict(wf_dict, publish)
         return self.get(wf_info['id'])
 
     def import_shared(self, id_):
