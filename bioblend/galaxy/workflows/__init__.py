@@ -95,6 +95,10 @@ class WorkflowClient(Client):
 
         :type workflow_dict: dict
         :param workflow_dict: dictionary representing the workflow to be imported
+
+        :type publish: bool
+        :param publish:  if ``True`` the uploaded workflow will be sharable;
+                         otherwise it will be visible only by the user which uploads it (default)
         """
         payload = {'workflow': workflow_dict, 'publish': publish}
 
@@ -106,6 +110,14 @@ class WorkflowClient(Client):
         """
         .. deprecated:: 0.9.0
            Use :meth:`import_workflow_dict` instead.
+
+        :type workflow_json: dict
+        :param workflow_json: dictionary representing the workflow to be imported
+
+        :type publish: bool
+        :param publish:  if ``True`` the uploaded workflow will be sharable;
+                         otherwise it will be visible only by the user which uploads it (default)
+
         """
         return self.import_workflow_dict(workflow_json, publish)
 
@@ -116,6 +128,11 @@ class WorkflowClient(Client):
 
         :type file_local_path: str
         :param file_local_path: File to upload to the server for new workflow
+
+        :type publish: bool
+        :param publish:  if ``True`` the uploaded workflow will be sharable;
+                         otherwise it will be visible only by the user which uploads it (default)
+
         """
         with open(file_local_path, 'r') as fp:
             workflow_json = json.load(fp)
@@ -637,4 +654,4 @@ def _join(*args):
     return "/".join(args)
 
 
-__all__ = ('WorkflowClient', )
+__all__ = ('WorkflowClient',)
