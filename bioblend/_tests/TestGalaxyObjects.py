@@ -100,7 +100,6 @@ def upload_from_fs(lib, bnames, **kwargs):
 
 
 class MockWrapper(wrappers.Wrapper):
-
     BASE_ATTRS = frozenset(['a', 'b'])
 
     def __init__(self, *args, **kwargs):
@@ -112,7 +111,6 @@ class MockWrapper(wrappers.Wrapper):
 
 
 class TestWrapper(unittest.TestCase):
-
     def setUp(self):
         self.d = {'a': 1, 'b': [2, 3], 'c': {'x': 4}}
         self.assertRaises(TypeError, wrappers.Wrapper, self.d)
@@ -153,7 +151,6 @@ class TestWrapper(unittest.TestCase):
 
 
 class TestWorkflow(unittest.TestCase):
-
     def setUp(self):
         self.wf = wrappers.Workflow(SAMPLE_WF_DICT)
 
@@ -207,6 +204,7 @@ class TestWorkflow(unittest.TestCase):
 
             def __init__(self, id_):
                 self.id = id_
+
         label = 'Input Dataset'
         self.assertEqual(self.wf.input_labels, set([label]))
         input_map = self.wf.convert_input_map(
@@ -223,7 +221,6 @@ class TestWorkflow(unittest.TestCase):
 
 @test_util.skip_unless_galaxy()
 class GalaxyObjectsTestBase(unittest.TestCase):
-
     def setUp(self):
         galaxy_key = os.environ['BIOBLEND_GALAXY_API_KEY']
         galaxy_url = os.environ['BIOBLEND_GALAXY_URL']
@@ -231,7 +228,6 @@ class GalaxyObjectsTestBase(unittest.TestCase):
 
 
 class TestGalaxyInstance(GalaxyObjectsTestBase):
-
     def test_library(self):
         name = 'test_%s' % uuid.uuid4().hex
         description, synopsis = 'D', 'S'
@@ -354,6 +350,7 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
                     d = json.load(f)
                 d['name'] = name
                 return self.gi.workflows.import_new(d)
+
             get_objs = self.gi.workflows.list
             get_prevs = self.gi.workflows.get_previews
             del_kwargs = {}
@@ -365,6 +362,7 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
 
         def ids(seq):
             return set(_.id for _ in seq)
+
         names = ['test_%s' % uuid.uuid4().hex for _ in range(2)]
         objs = []
         try:
@@ -411,7 +409,6 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
 
 
 class TestLibrary(GalaxyObjectsTestBase):
-
     # just something that can be expected to be always up
     DS_URL = 'http://tools.ietf.org/rfc/rfc1866.txt'
 
@@ -502,7 +499,6 @@ class TestLibrary(GalaxyObjectsTestBase):
 
 
 class TestLDContents(GalaxyObjectsTestBase):
-
     def setUp(self):
         super(TestLDContents, self).setUp()
         self.lib = self.gi.libraries.create('test_%s' % uuid.uuid4().hex)
@@ -537,7 +533,6 @@ class TestLDContents(GalaxyObjectsTestBase):
 
 
 class TestHistory(GalaxyObjectsTestBase):
-
     def setUp(self):
         super(TestHistory, self).setUp()
         self.hist = self.gi.histories.create('test_%s' % uuid.uuid4().hex)
@@ -657,7 +652,6 @@ class TestHistory(GalaxyObjectsTestBase):
 
 
 class TestHDAContents(GalaxyObjectsTestBase):
-
     def setUp(self):
         super(TestHDAContents, self).setUp()
         self.hist = self.gi.histories.create('test_%s' % uuid.uuid4().hex)
@@ -707,7 +701,6 @@ class TestHDAContents(GalaxyObjectsTestBase):
 
 
 class TestRunWorkflow(GalaxyObjectsTestBase):
-
     def setUp(self):
         super(TestRunWorkflow, self).setUp()
         self.lib = self.gi.libraries.create('test_%s' % uuid.uuid4().hex)
@@ -758,7 +751,6 @@ class TestRunWorkflow(GalaxyObjectsTestBase):
 
 
 class TestRunDatasetCollectionWorkflow(GalaxyObjectsTestBase):
-
     def setUp(self):
         super(TestRunDatasetCollectionWorkflow, self).setUp()
         with open(SAMPLE_WF_COLL_FN) as f:
@@ -792,7 +784,6 @@ class TestRunDatasetCollectionWorkflow(GalaxyObjectsTestBase):
 
 
 class TestJob(GalaxyObjectsTestBase):
-
     def setUp(self):
         super(TestJob, self).setUp()
 
