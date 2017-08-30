@@ -88,7 +88,7 @@ class WorkflowClient(Client):
         inputs = wf['inputs']
         return [id for id in inputs if inputs[id]['label'] == label]
 
-    def import_workflow_dict(self, workflow_dict):
+    def import_workflow_dict(self, workflow_dict, publish=False):
         """
         Imports a new workflow given a dictionary representing a previously
         exported workflow.
@@ -96,7 +96,7 @@ class WorkflowClient(Client):
         :type workflow_dict: dict
         :param workflow_dict: dictionary representing the workflow to be imported
         """
-        payload = {'workflow': workflow_dict}
+        payload = {'workflow': workflow_dict, 'publish': publish}
 
         url = self.gi._make_url(self)
         url = _join(url, "upload")
