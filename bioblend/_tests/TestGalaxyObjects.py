@@ -262,6 +262,11 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
             wf = self.gi.workflows.import_new(json.load(f))
         self._check_and_del_workflow(wf)
 
+    def test_workflow_publish_from_dict(self):
+        with open(SAMPLE_FN) as f:
+            wf = self.gi.workflows.import_new(json.load(f), publish=True)
+        self._check_and_del_workflow(wf, check_is_public=True)
+
     def test_workflow_missing_tools(self):
         with open(SAMPLE_FN) as f:
             wf_dump = json.load(f)
@@ -284,7 +289,7 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
         for wf in wf1, wf2:
             self._check_and_del_workflow(wf)
 
-    def _check_and_del_workflow(self, wf):
+    def _check_and_del_workflow(self, wf, check_is_public=False):
         # Galaxy appends additional text to imported workflow names
         self.assertTrue(wf.name.startswith('paste_columns'))
         self.assertEqual(len(wf.steps), 3)
@@ -302,6 +307,8 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
                 self.assertEqual(step.input_steps, {})
         wf_ids = set(_.id for _ in self.gi.workflows.list())
         self.assertIn(wf.id, wf_ids)
+        if check_is_public:
+            self.assertTrue(wf.published)
         wf.delete()
 
     # not very accurate:
