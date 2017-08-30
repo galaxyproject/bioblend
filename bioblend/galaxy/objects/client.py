@@ -16,7 +16,6 @@ from . import wrappers
 
 @six.add_metaclass(abc.ABCMeta)
 class ObjClient(object):
-
     @abc.abstractmethod
     def __init__(self, obj_gi):
         self.obj_gi = obj_gi
@@ -80,7 +79,6 @@ class ObjClient(object):
 
 
 class ObjDatasetContainerClient(ObjClient):
-
     def _get_container(self, id_, ctype):
         show_fname = 'show_%s' % ctype.__name__.lower()
         gi_client = getattr(self.gi, ctype.API_MODULE)
@@ -99,6 +97,7 @@ class ObjLibraryClient(ObjDatasetContainerClient):
     """
     Interacts with Galaxy libraries.
     """
+
     def __init__(self, obj_gi):
         super(ObjLibraryClient, self).__init__(obj_gi)
 
@@ -326,6 +325,7 @@ class ObjToolClient(ObjClient):
     """
     Interacts with Galaxy tools.
     """
+
     def __init__(self, obj_gi):
         super(ObjToolClient, self).__init__(obj_gi)
 
@@ -393,6 +393,7 @@ class ObjJobClient(ObjClient):
     """
     Interacts with Galaxy jobs.
     """
+
     def __init__(self, obj_gi):
         super(ObjJobClient, self).__init__(obj_gi)
 
