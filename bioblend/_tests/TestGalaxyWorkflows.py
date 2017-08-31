@@ -115,8 +115,6 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         self.assertIsInstance(exported_wf_dict, dict)
 
     def test_import_publish_workflow_from_local_path(self):
-        with self.assertRaises(Exception):
-            self.gi.workflows.import_workflow_from_local_path(None)
         path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
         imported_wf = self.gi.workflows.import_workflow_from_local_path(path, publish=True)
         self.assertIsInstance(imported_wf, dict)
