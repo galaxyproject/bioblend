@@ -13,6 +13,7 @@ from . import GalaxyTestBase, test_util
 
 
 class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
+
     @test_util.skip_unless_galaxy('release_15.03')
     @test_util.skip_unless_tool("cat1")
     @test_util.skip_unless_tool("cat")

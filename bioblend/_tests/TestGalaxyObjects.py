@@ -111,6 +111,7 @@ class MockWrapper(wrappers.Wrapper):
 
 
 class TestWrapper(unittest.TestCase):
+
     def setUp(self):
         self.d = {'a': 1, 'b': [2, 3], 'c': {'x': 4}}
         self.assertRaises(TypeError, wrappers.Wrapper, self.d)
@@ -151,6 +152,7 @@ class TestWrapper(unittest.TestCase):
 
 
 class TestWorkflow(unittest.TestCase):
+
     def setUp(self):
         self.wf = wrappers.Workflow(SAMPLE_WF_DICT)
 
@@ -221,6 +223,7 @@ class TestWorkflow(unittest.TestCase):
 
 @test_util.skip_unless_galaxy()
 class GalaxyObjectsTestBase(unittest.TestCase):
+
     def setUp(self):
         galaxy_key = os.environ['BIOBLEND_GALAXY_API_KEY']
         galaxy_url = os.environ['BIOBLEND_GALAXY_URL']
@@ -228,6 +231,7 @@ class GalaxyObjectsTestBase(unittest.TestCase):
 
 
 class TestGalaxyInstance(GalaxyObjectsTestBase):
+
     def test_library(self):
         name = 'test_%s' % uuid.uuid4().hex
         description, synopsis = 'D', 'S'
@@ -499,6 +503,7 @@ class TestLibrary(GalaxyObjectsTestBase):
 
 
 class TestLDContents(GalaxyObjectsTestBase):
+
     def setUp(self):
         super(TestLDContents, self).setUp()
         self.lib = self.gi.libraries.create('test_%s' % uuid.uuid4().hex)
@@ -533,6 +538,7 @@ class TestLDContents(GalaxyObjectsTestBase):
 
 
 class TestHistory(GalaxyObjectsTestBase):
+
     def setUp(self):
         super(TestHistory, self).setUp()
         self.hist = self.gi.histories.create('test_%s' % uuid.uuid4().hex)
@@ -652,6 +658,7 @@ class TestHistory(GalaxyObjectsTestBase):
 
 
 class TestHDAContents(GalaxyObjectsTestBase):
+
     def setUp(self):
         super(TestHDAContents, self).setUp()
         self.hist = self.gi.histories.create('test_%s' % uuid.uuid4().hex)
@@ -701,6 +708,7 @@ class TestHDAContents(GalaxyObjectsTestBase):
 
 
 class TestRunWorkflow(GalaxyObjectsTestBase):
+
     def setUp(self):
         super(TestRunWorkflow, self).setUp()
         self.lib = self.gi.libraries.create('test_%s' % uuid.uuid4().hex)
@@ -751,6 +759,7 @@ class TestRunWorkflow(GalaxyObjectsTestBase):
 
 
 class TestRunDatasetCollectionWorkflow(GalaxyObjectsTestBase):
+
     def setUp(self):
         super(TestRunDatasetCollectionWorkflow, self).setUp()
         with open(SAMPLE_WF_COLL_FN) as f:
@@ -784,6 +793,7 @@ class TestRunDatasetCollectionWorkflow(GalaxyObjectsTestBase):
 
 
 class TestJob(GalaxyObjectsTestBase):
+
     def setUp(self):
         super(TestJob, self).setUp()
 
