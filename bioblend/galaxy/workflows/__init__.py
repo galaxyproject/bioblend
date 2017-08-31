@@ -97,7 +97,7 @@ class WorkflowClient(Client):
         :param workflow_dict: dictionary representing the workflow to be imported
 
         :type publish: bool
-        :param publish:  if ``True`` the uploaded workflow will be sharable;
+        :param publish:  if ``True`` the uploaded workflow will be published;
                          otherwise it will be visible only by the user which uploads it (default)
         """
         payload = {'workflow': workflow_dict, 'publish': publish}
@@ -115,7 +115,7 @@ class WorkflowClient(Client):
         :param workflow_json: dictionary representing the workflow to be imported
 
         :type publish: bool
-        :param publish:  if ``True`` the uploaded workflow will be sharable;
+        :param publish:  if ``True`` the uploaded workflow will be published;
                          otherwise it will be visible only by the user which uploads it (default)
 
         """
@@ -130,7 +130,7 @@ class WorkflowClient(Client):
         :param file_local_path: File to upload to the server for new workflow
 
         :type publish: bool
-        :param publish:  if ``True`` the uploaded workflow will be sharable;
+        :param publish:  if ``True`` the uploaded workflow will be published;
                          otherwise it will be visible only by the user which uploads it (default)
 
         """

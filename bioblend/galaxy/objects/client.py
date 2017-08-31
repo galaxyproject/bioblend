@@ -245,7 +245,7 @@ class ObjWorkflowClient(ObjClient):
           a workflow from Galaxy).
 
         :type publish: bool
-        :param publish:  if ``True`` the uploaded workflow will be sharable;
+        :param publish:  if ``True`` the uploaded workflow will be published;
                          otherwise it will be visible only by the user which uploads it (default).
 
         :rtype: :class:`~.wrappers.Workflow`
