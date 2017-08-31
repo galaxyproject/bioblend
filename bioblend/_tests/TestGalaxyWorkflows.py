@@ -114,7 +114,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
             shutil.rmtree(export_dir)
         self.assertIsInstance(exported_wf_dict, dict)
 
-    def test_import_publish_export_workflow_from_local_path(self):
+    def test_import_publish_workflow_from_local_path(self):
         with self.assertRaises(Exception):
             self.gi.workflows.import_workflow_from_local_path(None)
         path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
@@ -134,7 +134,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         exported_wf_dict = self.gi.workflows.export_workflow_dict(imported_wf['id'])
         self.assertIsInstance(exported_wf_dict, dict)
 
-    def test_import_publish_export_workflow_dict(self):
+    def test_import_publish_workflow_dict(self):
         path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
         with open(path, 'r') as f:
             wf_dict = json.load(f)
