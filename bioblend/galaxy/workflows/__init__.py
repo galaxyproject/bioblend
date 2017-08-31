@@ -133,7 +133,7 @@ class WorkflowClient(Client):
         with open(file_local_path, 'r') as fp:
             workflow_json = json.load(fp)
 
-        return self.import_workflow_json(workflow_json, publish)
+        return self.import_workflow_dict(workflow_json, publish)
 
     def import_shared_workflow(self, workflow_id):
         """
