@@ -106,20 +106,16 @@ class WorkflowClient(Client):
         url = _join(url, "upload")
         return self._post(url=url, payload=payload)
 
-    def import_workflow_json(self, workflow_json, publish=False):
+    def import_workflow_json(self, workflow_json):
         """
         .. deprecated:: 0.9.0
            Use :meth:`import_workflow_dict` instead.
 
         :type workflow_json: dict
         :param workflow_json: dictionary representing the workflow to be imported
-
-        :type publish: bool
-        :param publish:  if ``True`` the uploaded workflow will be published;
-                         otherwise it will be visible only by the user which uploads it (default)
-
+        
         """
-        return self.import_workflow_dict(workflow_json, publish)
+        return self.import_workflow_dict(workflow_json)
 
     def import_workflow_from_local_path(self, file_local_path, publish=False):
         """
