@@ -92,7 +92,7 @@ sed -i.bak -e "s|^#database_connection.*|database_connection = sqlite:///$TEMP_D
 # Change Galaxy configuration needed by many tests
 sed -i.bak -e 's/^#allow_user_dataset_purge.*/allow_user_dataset_purge = True/' "$GALAXY_CONFIG_FILE"
 # Change Galaxy configuration needed by some library tests
-sed -i.bak -e 's/^#allow_library_path_paste.*/allow_library_path_paste = True/' "$GALAXY_CONFIG_FILE"
+sed -i.bak -e 's/^#allow_.*path_paste.*/allow_library_path_paste = True/' "$GALAXY_CONFIG_FILE"
 # Change Galaxy configuration needed by some tool tests
 sed -i.bak -e 's/^#conda_auto_init.*/conda_auto_init = True/' "$GALAXY_CONFIG_FILE"
 # Change Galaxy configuration needed by some workflow tests
