@@ -16,6 +16,7 @@ from . import wrappers
 
 @six.add_metaclass(abc.ABCMeta)
 class ObjClient(object):
+
     @abc.abstractmethod
     def __init__(self, obj_gi):
         self.obj_gi = obj_gi
@@ -79,6 +80,7 @@ class ObjClient(object):
 
 
 class ObjDatasetContainerClient(ObjClient):
+
     def _get_container(self, id_, ctype):
         show_fname = 'show_%s' % ctype.__name__.lower()
         gi_client = getattr(self.gi, ctype.API_MODULE)
