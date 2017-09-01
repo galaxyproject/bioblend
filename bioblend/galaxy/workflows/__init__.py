@@ -113,7 +113,6 @@ class WorkflowClient(Client):
 
         :type workflow_json: dict
         :param workflow_json: dictionary representing the workflow to be imported
-        
         """
         return self.import_workflow_dict(workflow_json)
 
