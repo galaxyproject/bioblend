@@ -50,7 +50,8 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
 
         steps = invocation_steps_by_order_index()
         pause_step = steps[2]
-        self.assertIsNone(self.gi.workflows.show_invocation_step(workflow_id, invocation_id, pause_step["id"])["action"])
+        self.assertIsNone(
+            self.gi.workflows.show_invocation_step(workflow_id, invocation_id, pause_step["id"])["action"])
         self.gi.workflows.run_invocation_step_action(workflow_id, invocation_id, pause_step["id"], action=True)
         self.assertTrue(self.gi.workflows.show_invocation_step(workflow_id, invocation_id, pause_step["id"])["action"])
         for i in range(20):
@@ -99,6 +100,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         imported_wf = self.gi.workflows.import_workflow_from_local_path(path)
         self.assertIsInstance(imported_wf, dict)
         self.assertFalse(imported_wf['deleted'])
+        self.assertFalse(imported_wf['published'])
         with self.assertRaises(Exception):
             self.gi.workflows.export_workflow_to_local_path(None, None, None)
         export_dir = tempfile.mkdtemp(prefix='bioblend_test_')
@@ -113,6 +115,13 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
             shutil.rmtree(export_dir)
         self.assertIsInstance(exported_wf_dict, dict)
 
+    def test_import_publish_workflow_from_local_path(self):
+        path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
+        imported_wf = self.gi.workflows.import_workflow_from_local_path(path, publish=True)
+        self.assertIsInstance(imported_wf, dict)
+        self.assertFalse(imported_wf['deleted'])
+        self.assertTrue(imported_wf['published'])
+
     def test_import_export_workflow_dict(self):
         path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
         with open(path, 'r') as f:
@@ -120,8 +129,18 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         imported_wf = self.gi.workflows.import_workflow_dict(wf_dict)
         self.assertIsInstance(imported_wf, dict)
         self.assertFalse(imported_wf['deleted'])
+        self.assertFalse(imported_wf['published'])
         exported_wf_dict = self.gi.workflows.export_workflow_dict(imported_wf['id'])
         self.assertIsInstance(exported_wf_dict, dict)
+
+    def test_import_publish_workflow_dict(self):
+        path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
+        with open(path, 'r') as f:
+            wf_dict = json.load(f)
+        imported_wf = self.gi.workflows.import_workflow_dict(wf_dict, publish=True)
+        self.assertIsInstance(imported_wf, dict)
+        self.assertFalse(imported_wf['deleted'])
+        self.assertTrue(imported_wf['published'])
 
     def test_get_workflows(self):
         path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))

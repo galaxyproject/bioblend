@@ -100,7 +100,6 @@ def upload_from_fs(lib, bnames, **kwargs):
 
 
 class MockWrapper(wrappers.Wrapper):
-
     BASE_ATTRS = frozenset(['a', 'b'])
 
     def __init__(self, *args, **kwargs):
@@ -207,6 +206,7 @@ class TestWorkflow(unittest.TestCase):
 
             def __init__(self, id_):
                 self.id = id_
+
         label = 'Input Dataset'
         self.assertEqual(self.wf.input_labels, set([label]))
         input_map = self.wf.convert_input_map(
@@ -262,6 +262,11 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
             wf = self.gi.workflows.import_new(json.load(f))
         self._check_and_del_workflow(wf)
 
+    def test_workflow_publish_from_dict(self):
+        with open(SAMPLE_FN) as f:
+            wf = self.gi.workflows.import_new(json.load(f), publish=True)
+        self._check_and_del_workflow(wf, check_is_public=True)
+
     def test_workflow_missing_tools(self):
         with open(SAMPLE_FN) as f:
             wf_dump = json.load(f)
@@ -284,7 +289,7 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
         for wf in wf1, wf2:
             self._check_and_del_workflow(wf)
 
-    def _check_and_del_workflow(self, wf):
+    def _check_and_del_workflow(self, wf, check_is_public=False):
         # Galaxy appends additional text to imported workflow names
         self.assertTrue(wf.name.startswith('paste_columns'))
         self.assertEqual(len(wf.steps), 3)
@@ -302,6 +307,8 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
                 self.assertEqual(step.input_steps, {})
         wf_ids = set(_.id for _ in self.gi.workflows.list())
         self.assertIn(wf.id, wf_ids)
+        if check_is_public:
+            self.assertTrue(wf.published)
         wf.delete()
 
     # not very accurate:
@@ -347,6 +354,7 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
                     d = json.load(f)
                 d['name'] = name
                 return self.gi.workflows.import_new(d)
+
             get_objs = self.gi.workflows.list
             get_prevs = self.gi.workflows.get_previews
             del_kwargs = {}
@@ -358,6 +366,7 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
 
         def ids(seq):
             return set(_.id for _ in seq)
+
         names = ['test_%s' % uuid.uuid4().hex for _ in range(2)]
         objs = []
         try:
@@ -404,7 +413,6 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
 
 
 class TestLibrary(GalaxyObjectsTestBase):
-
     # just something that can be expected to be always up
     DS_URL = 'http://tools.ietf.org/rfc/rfc1866.txt'
 

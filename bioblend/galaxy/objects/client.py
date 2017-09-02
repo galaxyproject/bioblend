@@ -99,6 +99,7 @@ class ObjLibraryClient(ObjDatasetContainerClient):
     """
     Interacts with Galaxy libraries.
     """
+
     def __init__(self, obj_gi):
         super(ObjLibraryClient, self).__init__(obj_gi)
 
@@ -236,7 +237,7 @@ class ObjWorkflowClient(ObjClient):
     def __init__(self, obj_gi):
         super(ObjWorkflowClient, self).__init__(obj_gi)
 
-    def import_new(self, src):
+    def import_new(self, src, publish=False):
         """
         Imports a new workflow into Galaxy.
 
@@ -244,6 +245,10 @@ class ObjWorkflowClient(ObjClient):
         :param src: deserialized (dictionary) or serialized (str) JSON
           dump of the workflow (this is normally obtained by exporting
           a workflow from Galaxy).
+
+        :type publish: bool
+        :param publish:  if ``True`` the uploaded workflow will be published;
+                         otherwise it will be visible only by the user which uploads it (default).
 
         :rtype: :class:`~.wrappers.Workflow`
         :return: the workflow just imported
@@ -255,7 +260,7 @@ class ObjWorkflowClient(ObjClient):
                 wf_dict = json.loads(src)
             except (TypeError, ValueError):
                 self._error('src not supported: %r' % (src,))
-        wf_info = self.gi.workflows.import_workflow_dict(wf_dict)
+        wf_info = self.gi.workflows.import_workflow_dict(wf_dict, publish)
         return self.get(wf_info['id'])
 
     def import_shared(self, id_):
@@ -322,6 +327,7 @@ class ObjToolClient(ObjClient):
     """
     Interacts with Galaxy tools.
     """
+
     def __init__(self, obj_gi):
         super(ObjToolClient, self).__init__(obj_gi)
 
@@ -389,6 +395,7 @@ class ObjJobClient(ObjClient):
     """
     Interacts with Galaxy jobs.
     """
+
     def __init__(self, obj_gi):
         super(ObjJobClient, self).__init__(obj_gi)
 

@@ -88,15 +88,19 @@ class WorkflowClient(Client):
         inputs = wf['inputs']
         return [id for id in inputs if inputs[id]['label'] == label]
 
-    def import_workflow_dict(self, workflow_dict):
+    def import_workflow_dict(self, workflow_dict, publish=False):
         """
         Imports a new workflow given a dictionary representing a previously
         exported workflow.
 
         :type workflow_dict: dict
         :param workflow_dict: dictionary representing the workflow to be imported
+
+        :type publish: bool
+        :param publish:  if ``True`` the uploaded workflow will be published;
+                         otherwise it will be visible only by the user which uploads it (default)
         """
-        payload = {'workflow': workflow_dict}
+        payload = {'workflow': workflow_dict, 'publish': publish}
 
         url = self.gi._make_url(self)
         url = _join(url, "upload")
@@ -106,21 +110,29 @@ class WorkflowClient(Client):
         """
         .. deprecated:: 0.9.0
            Use :meth:`import_workflow_dict` instead.
+
+        :type workflow_json: dict
+        :param workflow_json: dictionary representing the workflow to be imported
         """
         return self.import_workflow_dict(workflow_json)
 
-    def import_workflow_from_local_path(self, file_local_path):
+    def import_workflow_from_local_path(self, file_local_path, publish=False):
         """
         Imports a new workflow given the path to a file containing a previously
         exported workflow.
 
         :type file_local_path: str
         :param file_local_path: File to upload to the server for new workflow
+
+        :type publish: bool
+        :param publish:  if ``True`` the uploaded workflow will be published;
+                         otherwise it will be visible only by the user which uploads it (default)
+
         """
         with open(file_local_path, 'r') as fp:
             workflow_json = json.load(fp)
 
-        return self.import_workflow_json(workflow_json)
+        return self.import_workflow_dict(workflow_json, publish)
 
     def import_shared_workflow(self, workflow_id):
         """
@@ -637,4 +649,4 @@ def _join(*args):
     return "/".join(args)
 
 
-__all__ = ('WorkflowClient', )
+__all__ = ('WorkflowClient',)
