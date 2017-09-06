@@ -95,7 +95,9 @@ class DatasetClient(Client):
         # everything but /api without auth
         if 'url' in dataset:
             # This is Galaxy release_15.03 or later
-            download_url = dataset['download_url'] + '?to_ext=' + file_ext
+            download_url = dataset['download_url']
+            if file_ext:
+                download_url += '?to_ext=' + file_ext
         else:
             # This is Galaxy release_15.01 or earlier, for which the preferred
             # URL does not work without a key, so resort to the old URL
