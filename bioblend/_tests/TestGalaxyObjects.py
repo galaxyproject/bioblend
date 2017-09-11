@@ -809,7 +809,6 @@ class TestJob(GalaxyObjectsTestBase):
             self.assertIsInstance(job, wrappers.Job)
 
 
-# XXX: don't use TestLoader.loadTests* until support for Python 2.6 is dropped
 def suite():
     loader = unittest.TestLoader()
     s = unittest.TestSuite()
