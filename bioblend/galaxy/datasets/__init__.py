@@ -105,7 +105,7 @@ class DatasetClient(Client):
         # Don't use self.gi.make_get_request as currently the download API does
         # not require a key
         stream_content = file_path is not None
-        r = requests.get(url, verify=self.gi.verify, stream=stream_content)
+        r = requests.get(url, verify=self.gi.verify, stream=stream_content, timeout=self.gi.timeout)
         r.raise_for_status()
 
         if file_path is None:

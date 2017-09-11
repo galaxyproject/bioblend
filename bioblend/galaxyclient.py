@@ -18,10 +18,12 @@ from bioblend import ConnectionError
 
 class GalaxyClient(object):
 
-    def __init__(self, url, key=None, email=None, password=None, verify=True):
+    def __init__(self, url, key=None, email=None, password=None, verify=True, timeout=None):
         """
         :param verify: Whether to verify the server's TLS certificate
         :type verify: boolean
+        :param timeout: Timeout for requests operations, set to None for no timeout (the default).
+        :type timeout: float
         """
         # Make sure the url scheme is defined (otherwise requests will not work)
         if not urlparse(url).scheme:
@@ -39,6 +41,7 @@ class GalaxyClient(object):
             self.password = password
         self.json_headers = {'Content-Type': 'application/json'}
         self.verify = verify
+        self.timeout = timeout
 
     def _make_url(self, module, module_id=None, deleted=False, contents=False):
         """
@@ -92,6 +95,7 @@ class GalaxyClient(object):
             params = self.default_params
         kwargs['params'] = params
         kwargs.setdefault('verify', self.verify)
+        kwargs.setdefault('timeout', self.timeout)
         r = requests.get(url, **kwargs)
         return r
 
@@ -129,7 +133,8 @@ class GalaxyClient(object):
             post_params = params
 
         r = requests.post(url, data=payload, headers=headers,
-                          verify=self.verify, params=post_params)
+                          verify=self.verify, params=post_params,
+                          timeout=self.timeout)
         if r.status_code == 200:
             try:
                 return r.json()
@@ -162,7 +167,8 @@ class GalaxyClient(object):
         if payload is not None:
             payload = json.dumps(payload)
         headers = self.json_headers
-        r = requests.delete(url, verify=self.verify, data=payload, params=params, headers=headers)
+        r = requests.delete(url, verify=self.verify, data=payload, params=params,
+                            headers=headers, timeout=self.timeout)
         return r
 
     def make_put_request(self, url, payload=None, params=None):
@@ -180,7 +186,8 @@ class GalaxyClient(object):
 
         payload = json.dumps(payload)
         headers = self.json_headers
-        r = requests.put(url, data=payload, params=params, headers=headers, verify=self.verify)
+        r = requests.put(url, data=payload, params=params, headers=headers,
+                         verify=self.verify, timeout=self.timeout)
         if r.status_code == 200:
             try:
                 return r.json()
