@@ -1,3 +1,7 @@
+### BioBlend v - unreleased
+
+* Dropped support for Python 2.6.
+
 ### BioBlend v0.9.0 - 2017-05-25
 
 * Dropped support for Galaxy releases 14.02, 14.04, 14.06 and 14.08. Added

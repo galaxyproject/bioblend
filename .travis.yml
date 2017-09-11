@@ -3,7 +3,6 @@ sudo: false
 language: python
 python: "2.7"
 env:
-  - TOX_ENV=py35 GALAXY_VERSION=dev
   - TOX_ENV=py34 GALAXY_VERSION=dev
   - TOX_ENV=py27 GALAXY_VERSION=dev
   - TOX_ENV=py27 GALAXY_VERSION=release_17.05
@@ -30,6 +29,14 @@ matrix:
           packages:
             - python3.6-dev
     - python: "2.7"
+      env: TOX_ENV=py35 GALAXY_VERSION=dev
+      addons:
+        apt:
+          sources:
+            - deadsnakes
+          packages:
+            - python3.5-dev
+    - python: "2.7"
       env: TOX_ENV=py33 GALAXY_VERSION=dev
       addons:
         apt:
@@ -37,14 +44,6 @@ matrix:
             - deadsnakes
           packages:
             - python3.3-dev
-    - python: "2.7"
-      env: TOX_ENV=py26 GALAXY_VERSION=dev
-      addons:
-        apt:
-          sources:
-            - deadsnakes
-          packages:
-            - python2.6-dev
 
 install:
   - python setup.py install

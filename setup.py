@@ -16,9 +16,7 @@ with open(os.path.join('bioblend', '__init__.py')) as f:
             break
 
 tests_require = ['nose>=1.3.1']
-if sys.version_info < (2, 7):
-    tests_require.extend(['mock>=0.7.0,<=1.0.1', 'unittest2>=0.5.1'])
-elif sys.version_info < (3, 3):
+if sys.version_info < (3, 3):
     tests_require.append('mock>=0.7.0')
 
 setup(
@@ -54,7 +52,6 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 2",
-        "Programming Language :: Python :: 2.6",
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.3",
