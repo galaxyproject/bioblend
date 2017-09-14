@@ -202,7 +202,7 @@ class GalaxyClient(object):
     def key(self):
         if not self._key and self.email is not None and self.password is not None:
             unencoded_credentials = "%s:%s" % (self.email, self.password)
-            authorization = base64.b64encode(unencoded_credentials)
+            authorization = base64.b64encode(unencoded_credentials.encode())
             headers = self.json_headers.copy()
             headers["Authorization"] = authorization
             auth_url = "%s/authenticate/baseauth" % self.url
