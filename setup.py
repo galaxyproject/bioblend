@@ -23,6 +23,7 @@ setup(
     name="bioblend",
     version=version,
     description="CloudMan and Galaxy API library",
+    long_description=open('README.rst').read(),
     author="Enis Afgan",
     author_email="afgane@gmail.com",
     url="https://bioblend.readthedocs.io/",
