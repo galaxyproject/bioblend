@@ -1,6 +1,35 @@
-### BioBlend v - unreleased
+### BioBlend v0.10.0 - 2017-09-26
 
-* Dropped support for Python 2.6.
+* Dropped support for Python 2.6. Added support for Galaxy release 17.09.
+
+* Added ``contents`` parameter to ``FoldersClient.show_folder()`` method
+  (thanks to Eric Rasche).
+
+* Exposed the `verify` attribute of `GalaxyInstance` and `ToolShedInstance`
+  objects as `__init__()` parameter.
+
+* Added ``create_role()`` method to ``RolesClient`` (thanks to Ashok
+  Varadharajan).
+
+* Added ``timeout`` parameter to ``GalaxyClient.__init__()`` method.
+
+* Added ``publish`` parameter to ``import_workflow_dict()`` and
+  ``import_workflow_from_local_path()`` methods of ``WorkflowClient`` (thanks to
+  Marco Enrico Piras).
+
+* BioBlend.objects: added ``publish`` parameter to
+  ``ObjWorkflowClient.import_new()`` method (thanks to Marco Enrico Piras).
+
+* Do not check for mismatching content size when streaming a dataset to file
+  (reported by Jorrit Boekel).
+
+* Fixed delete requests when Galaxy uses external authentication (thanks to Eric
+  Rasche).
+
+* Fixed retrieval of the API key when a ``GalaxyClient`` object is initialised
+  with email and password on Python 3 (thanks to Marius van den Beek).
+
+* Documentation improvements.
 
 ### BioBlend v0.9.0 - 2017-05-25
 
@@ -10,7 +39,7 @@
 
 * Deprecated ``import_workflow_json()`` and ``export_workflow_json()`` methods
   of ``WorkflowClient`` in favor of ``import_workflow_dict()`` and
-  ``export_workflow_dict()`` (reported by @manabuishii)
+  ``export_workflow_dict()`` (reported by @manabuishii).
 
 * Deprecated ``show_stderr()`` and ``show_stdout()`` methods of
   ``DatasetClient`` in favour of ``JobsClient.show_job()`` with
@@ -41,10 +70,10 @@
   Galaxy API request (thanks to @DamCorreia).
 
 * Fixed ``HistoryClient.update_history()`` and ``History.update()`` methods
-  when ``name`` parameter is not specified
+  when ``name`` parameter is not specified.
 
 * Added warning if content size differs from content-length header in
-  ``DatasetClient.download_dataset()``
+  ``DatasetClient.download_dataset()``.
 
 * BioBlend.objects: added ``purge`` parameter to
   ``HistoryDatasetAssociation.delete()`` method.
@@ -124,8 +153,8 @@
 * Updated the testing framework to work with Galaxy wheels; use TravisCI's
   container infrastructure; test Galaxy release 15.07.
 
-* Updated CloudmanLauncher's ``launch`` method to accept ``subnet_id`` parameter,
-  for VPC support (thanks to Matthew Ralston).
+* Updated CloudmanLauncher's ``launch`` method to accept ``subnet_id``
+  parameter, for VPC support (thanks to Matthew Ralston).
 
 * Properly pass extra parameters to cloud instance userdata.
 
@@ -277,8 +306,8 @@
 
 * Added script to create a user and get its API key
 
-* Deprecated ``create_user()`` method in favor of clearer ``create_remote_user()``.
-  Added ``create_local_user()``.
+* Deprecated ``create_user()`` method in favor of clearer
+  ``create_remote_user()``. Added ``create_local_user()``.
 
 * Skip instead of fail tests when ``BIOBLEND_GALAXY_URL`` and
   ``BIOBLEND_GALAXY_API_KEY`` environment variables are not defined.
@@ -290,7 +319,8 @@
 * GalaxyClient: changed ``make_put_request`` to return whole ``requests``
   response object
 
-* Added Tool wrapper to *BioBlend.objects* plus methods to list tools and get one
+* Added Tool wrapper to *BioBlend.objects* plus methods to list tools and get
+  one.
 
 * Added ``show_tool()`` method to ``ToolClient`` class
 
