@@ -87,6 +87,9 @@ class DatasetClient(Client):
         # N.B.: data_type cannot be used for Galaxy release_14.10 and later
         # because it was changed to the Galaxy datatype class
         file_ext = dataset.get('file_ext', dataset['data_type'])
+        # Resort to 'data' when Galaxy returns an empty or temporary extension
+        if not file_ext or file_ext == 'auto' or file_ext == '_sniff_':
+            file_ext = 'data'
         # The preferred download URL is
         # '/api/histories/<history_id>/contents/<dataset_id>/display?to_ext=<dataset_ext>'
         # since the old URL:
