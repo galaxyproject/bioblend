@@ -31,7 +31,7 @@ def init_logging():
     for config_file in BioBlendConfigLocations:
         try:
             logging.config.fileConfig(os.path.expanduser(config_file))
-        except:
+        except Exception:
             pass
 
 

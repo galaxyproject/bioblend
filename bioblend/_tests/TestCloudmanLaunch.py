@@ -43,5 +43,5 @@ class TestCloudmanLaunch(CloudmanTestBase.CloudmanTestBase):
             # TODO: The terminate method is unpredictable! Needs fix.
             result = cmi.terminate(delete_cluster=True)
             self.assertEqual(result['cluster_status'], 'SHUTDOWN', "Cluster should be in status SHUTDOWN after call to terminate!")
-        except:
+        except Exception:
             pass

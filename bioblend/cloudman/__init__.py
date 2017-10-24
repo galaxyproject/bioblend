@@ -478,7 +478,7 @@ class CloudManInstance(GenericVMInstance):
         try:
             r = self._make_get_request("cloudman_version")
             return r['version']
-        except:
+        except Exception:
             return 1
 
     @block_until_vm_ready
@@ -725,5 +725,5 @@ class CloudManInstance(GenericVMInstance):
         try:
             json = r.json()
             return json
-        except:
+        except Exception:
             return r.text

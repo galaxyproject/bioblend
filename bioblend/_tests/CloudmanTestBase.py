@@ -67,5 +67,5 @@ class CloudmanTestBase(unittest.TestCase):
         try:
             # TODO: cloudman's terminate method has a bug. Needs fix
             cls.cmi.terminate(delete_cluster=True)
-        except:
+        except Exception:
             pass

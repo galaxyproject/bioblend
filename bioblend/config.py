@@ -34,21 +34,21 @@ class Config(configparser.SafeConfigParser):
     def get(self, section, name, default=None):
         try:
             val = configparser.SafeConfigParser.get(self, section, name)
-        except:
+        except Exception:
             val = default
         return val
 
     def getint(self, section, name, default=0):
         try:
             val = configparser.SafeConfigParser.getint(self, section, name)
-        except:
+        except Exception:
             val = int(default)
         return val
 
     def getfloat(self, section, name, default=0.0):
         try:
             val = configparser.SafeConfigParser.getfloat(self, section, name)
-        except:
+        except Exception:
             val = float(default)
         return val
 
