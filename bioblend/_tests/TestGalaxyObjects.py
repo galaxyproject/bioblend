@@ -7,6 +7,7 @@ import sys
 import tarfile
 import tempfile
 import uuid
+from ssl import SSLError
 
 import six
 from six.moves.urllib.error import URLError
@@ -78,8 +79,8 @@ SAMPLE_WF_DICT = {
 def is_reachable(url):
     res = None
     try:
-        res = urlopen(url, timeout=1)
-    except (URLError, socket.timeout):
+        res = urlopen(url, timeout=5)
+    except (SSLError, URLError, socket.timeout):
         return False
     if res is not None:
         res.close()
@@ -414,7 +415,7 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
 
 class TestLibrary(GalaxyObjectsTestBase):
     # just something that can be expected to be always up
-    DS_URL = 'http://tools.ietf.org/rfc/rfc1866.txt'
+    DS_URL = 'https://tools.ietf.org/rfc/rfc1866.txt'
 
     def setUp(self):
         super(TestLibrary, self).setUp()
