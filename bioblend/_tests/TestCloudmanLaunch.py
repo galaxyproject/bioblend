@@ -5,7 +5,6 @@ credentials to supported cloud infrastructure.
 Use ``nose`` to run these unit tests.
 """
 from bioblend.cloudman import CloudManConfig, CloudManInstance
-
 from . import CloudmanTestBase, test_util
 
 

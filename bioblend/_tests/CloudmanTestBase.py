@@ -7,7 +7,6 @@ Use ``nose`` to run these unit tests.
 import os
 
 from bioblend.cloudman.launch import Bunch
-
 from . import test_util
 from .test_util import unittest
 

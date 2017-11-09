@@ -8,7 +8,6 @@ import time
 from bioblend import ConnectionError
 from bioblend.galaxy import GalaxyInstance
 from bioblend.galaxy.client import Client
-
 from .test_util import unittest
 
 

@@ -18,7 +18,6 @@ import bioblend.galaxy.objects.galaxy_instance as galaxy_instance
 import bioblend.galaxy.objects.wrappers as wrappers
 from bioblend import ConnectionError
 from bioblend.galaxy import dataset_collections
-
 from . import test_util
 from .test_util import unittest
 

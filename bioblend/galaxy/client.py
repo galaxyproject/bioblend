@@ -8,20 +8,12 @@ should not use it directly.
 import time
 
 import requests
-try:
-    # The following import will work only for Requests >= 2.4.0 and is
-    # needed to workaround its "urllib3.exceptions.ProtocolError not
-    # wrapped" bug: https://github.com/kennethreitz/requests/issues/2192
-    # pylint: disable=E0611,F0401
-    from requests.packages.urllib3.exceptions import ProtocolError
-    # pylint: enable=E0611,F0401
-except ImportError:
-    ProtocolError = None  # pylint: disable=C0103
+from requests.packages.urllib3.exceptions import ProtocolError
 
 import bioblend
 # The following import must be preserved for compatibility because
 # ConnectionError class was originally defined here
-from bioblend import ConnectionError
+from bioblend import ConnectionError  # noqa: I202
 
 
 class Client(object):

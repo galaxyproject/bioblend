@@ -1,5 +1,4 @@
 from bioblend.galaxy import dataset_collections as collections
-
 from . import GalaxyTestBase
 
 

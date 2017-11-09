@@ -4,7 +4,6 @@ import os
 import sys
 
 from bioblend.galaxy.objects import GalaxyInstance
-
 from .common import get_one
 
 URL = 'https://orione.crs4.it'

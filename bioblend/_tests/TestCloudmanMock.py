@@ -14,7 +14,6 @@ except ImportError:
     from mock import MagicMock
 
 from bioblend import cloudman
-
 from .test_util import unittest
 
 

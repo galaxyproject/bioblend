@@ -10,7 +10,6 @@ from bioblend.galaxy.tools.inputs import (
     inputs,
     repeat,
 )
-
 from . import GalaxyTestBase, test_util
 
 

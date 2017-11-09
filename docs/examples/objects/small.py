@@ -5,7 +5,6 @@ import sys
 import tempfile
 
 from bioblend.galaxy.objects import GalaxyInstance
-
 from .common import get_one
 
 # This is a "toy" example that should run much faster

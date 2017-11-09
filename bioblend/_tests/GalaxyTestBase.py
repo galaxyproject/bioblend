@@ -2,7 +2,6 @@ import os
 
 import bioblend
 import bioblend.galaxy
-
 from . import test_util
 from .test_util import unittest
 

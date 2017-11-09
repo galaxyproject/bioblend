@@ -3,7 +3,6 @@
 import os
 import random
 import string
-
 import unittest
 
 import bioblend
