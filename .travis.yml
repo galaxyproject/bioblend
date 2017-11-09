@@ -2,6 +2,8 @@ dist: trusty
 sudo: false
 language: python
 python: "2.7"
+services:
+  - postgresql
 env:
   - TOX_ENV=py34 GALAXY_VERSION=dev
   - TOX_ENV=py27 GALAXY_VERSION=dev
@@ -45,9 +47,20 @@ matrix:
             - deadsnakes
           packages:
             - python3.3-dev
+    - os: osx
+      # No version of Python is available via virtualenv on OS X workers, see https://github.com/travis-ci/travis-ci/issues/2312
+      language: generic
+      env: TOX_ENV=py27 GALAXY_VERSION=dev
+      before_install:
+        # PostgreSQL on OSX is not started, see https://github.com/travis-ci/travis-ci/issues/1875
+        - rm -rf /usr/local/var/postgres
+        - initdb /usr/local/var/postgres
+        - pg_ctl -D /usr/local/var/postgres start
+        - createuser -s postgres
+        - virtualenv .venv
+        - . .venv/bin/activate
 
 install:
-  - python setup.py install
   - cp run_galaxy.sh $HOME
   - pip install "tox>=1.8.0"
 
