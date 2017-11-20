@@ -68,11 +68,21 @@ class TestGalaxyTools(GalaxyTestBase.GalaxyTestBase):
             dbkey="?",
             file_type="txt",
         )
-        self.assertEqual(len(tool_output["outputs"]), 1)
-        output = tool_output['outputs'][0]
-        self.assertEqual(output['name'], file_name)
-        expected_contents = open(fn, "rb").read()
-        self._wait_and_verify_dataset(output["id"], expected_contents)
+        self._wait_for_and_verify_upload(tool_output, file_name, fn, expected_dbkey="?")
+
+    def test_upload_file_dbkey(self):
+        history = self.gi.histories.create_history(name="test_upload_file history")
+        fn = test_util.get_abspath("test_util.py")
+        file_name = "test1"
+        dbkey = "hg19"
+        tool_output = self.gi.tools.upload_file(
+            fn,
+            history_id=history["id"],
+            file_name=file_name,
+            dbkey=dbkey,
+            file_type="txt",
+        )
+        self._wait_for_and_verify_upload(tool_output, file_name, fn, expected_dbkey=dbkey)
 
     @test_util.skip_unless_tool("random_lines1")
     def test_run_random_lines(self):
@@ -129,3 +139,11 @@ class TestGalaxyTools(GalaxyTestBase.GalaxyTestBase):
     def test_tool_dependency_install(self):
         installed_dependencies = self.gi.tools.install_dependencies('__SET_METADATA__')
         self.assertTrue(any(True for d in installed_dependencies if d.get('name') == 'samtools' and d.get('dependency_type') == 'conda'))
+
+    def _wait_for_and_verify_upload(self, tool_output, file_name, fn, expected_dbkey="?"):
+        self.assertEqual(len(tool_output["outputs"]), 1)
+        output = tool_output['outputs'][0]
+        self.assertEqual(output['name'], file_name)
+        expected_contents = open(fn, "rb").read()
+        self._wait_and_verify_dataset(output["id"], expected_contents)
+        self.assertEqual(output["genome_build"], expected_dbkey)
