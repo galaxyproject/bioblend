@@ -62,44 +62,31 @@ matrix:
         - . .venv/bin/activate
 
 install:
-  - cp run_galaxy.sh $HOME
   - pip install "tox>=1.8.0"
 
 before_script:
+  # Create a PostgreSQL database for Galaxy. The default SQLite3 database makes test fail randomly because of "database locked" error.
+  - createdb -U postgres galaxy-travis
   # Install Galaxy
   - cd $HOME
   - wget https://github.com/galaxyproject/galaxy/archive/${GALAXY_VERSION}.tar.gz
   - tar xvzf ${GALAXY_VERSION}.tar.gz | tail
   # Releases/dev branch are named differently
   - cd galaxy-${GALAXY_VERSION}/
-  # Create a PostgreSQL database for Galaxy. The default SQLite3 database makes test fail randomly because of "database locked" error.
-  - createdb -U postgres galaxy-travis
-  - if [ -f universe_wsgi.ini.sample ]; then GALAXY_CONFIG_FILE=universe_wsgi.ini; else GALAXY_CONFIG_FILE=config/galaxy.ini; fi
-  - if [ -f universe_wsgi.ini.sample ]; then GALAXY_CONFIG_DIR=.; else GALAXY_CONFIG_DIR=config; fi
-  # Change Galaxy configuration to use the newly created PostgreSQL database
-  - sed -e 's|^#database_connection.*|database_connection = postgresql://postgres:@localhost/galaxy-travis|' $GALAXY_CONFIG_FILE.sample > $GALAXY_CONFIG_FILE
-  # Setup Galaxy master API key and admin user
-  - export BIOBLEND_GALAXY_MASTER_API_KEY=$(cat /dev/urandom | LC_ALL=C tr -dc A-Za-z0-9 | head -c 32)
+  # Export GALAXY_CONFIG_FILE environment variable to be used by run_galaxy.sh
+  - export GALAXY_CONFIG_FILE=config/galaxy.ini
+  # Export BIOBLEND_ environment variables to be used in BioBlend tests
+  - export BIOBLEND_GALAXY_MASTER_API_KEY=$(LC_ALL=C tr -dc A-Za-z0-9 < /dev/urandom | head -c 32)
   - export BIOBLEND_GALAXY_USER_EMAIL=${USER}@localhost.localdomain
-  - sed -i.bak -e "s/^#master_api_key.*/master_api_key = $BIOBLEND_GALAXY_MASTER_API_KEY/" -e "s/^#admin_users.*/admin_users = $BIOBLEND_GALAXY_USER_EMAIL/" $GALAXY_CONFIG_FILE
-  # Change Galaxy configuration needed by many tests
-  - sed -i.bak -e 's/^#allow_user_dataset_purge.*/allow_user_dataset_purge = True/' $GALAXY_CONFIG_FILE
-  # Change Galaxy configuration needed by some library tests
-  - sed -i.bak -e 's/^#allow_.*path_paste.*/allow_library_path_paste = True/' $GALAXY_CONFIG_FILE
-  # Change Galaxy configuration needed by some tool tests
-  - sed -i.bak -e 's/^#conda_auto_init.*/conda_auto_init = True/' $GALAXY_CONFIG_FILE
-  # Change Galaxy configuration needed by some workflow tests
-  - sed -i.bak -e 's/^#enable_beta_workflow_modules.*/enable_beta_workflow_modules = True/' $GALAXY_CONFIG_FILE
-  # Change Galaxy configuration needed by some user tests
-  - sed -i.bak -e 's/^#allow_user_deletion.*/allow_user_deletion = True/' $GALAXY_CONFIG_FILE
-  # Change Galaxy configuration needed by quota tests
-  - sed -i.bak -e 's/^#enable_quotas.*/enable_quotas = True/' $GALAXY_CONFIG_FILE
+  - DATABASE_CONNECTION=postgresql://postgres:@localhost/galaxy-travis
+  - eval "echo \"$(cat "${TRAVIS_BUILD_DIR}/tests/template_galaxy.ini")\"" > "$GALAXY_CONFIG_FILE"
   # Update kombu requirement (and its dependency amqp) to a version compatible with Python 2.7.11, see https://github.com/celery/kombu/pull/540
-  - if [ -f eggs.ini ]; then sed -i.bak -e 's/^kombu = .*$/kombu = 3.0.30/' -e 's/^amqp = .*$/amqp = 1.4.8/' eggs.ini; fi
-  # Add "cat" tool to the toolbox
-  - if [ -f test/functional/tools/samples_tool_conf.xml ]; then sed -i.bak -e "s/^#tool_config_file.*/tool_config_file = $GALAXY_CONFIG_DIR\/tool_conf.xml.sample,$GALAXY_CONFIG_DIR\/shed_tool_conf.xml.sample,test\/functional\/tools\/samples_tool_conf.xml/" $GALAXY_CONFIG_FILE; fi
+  - |
+    if [ -f eggs.ini ]; then
+      sed -i.bak -e 's/^kombu = .*$/kombu = 3.0.30/' -e 's/^amqp = .*$/amqp = 1.4.8/' eggs.ini;
+    fi
   # Start Galaxy and wait for successful server start
-  - GALAXY_RUN_ALL=1 ../run_galaxy.sh --daemon --wait
+  - GALAXY_RUN_ALL=1 "${TRAVIS_BUILD_DIR}/run_galaxy.sh" --daemon --wait
   - export BIOBLEND_GALAXY_URL=http://localhost:8080
 
 script:
