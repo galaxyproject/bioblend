@@ -127,7 +127,7 @@ class Client(object):
                 raise ConnectionError(msg, body=r.text,
                                       status_code=r.status_code)
             else:
-                bioblend.log.warn(msg)
+                bioblend.log.warning(msg)
                 time.sleep(retry_delay)
 
     def _post(self, payload, id=None, deleted=False, contents=None, url=None,

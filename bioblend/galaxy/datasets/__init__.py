@@ -113,7 +113,7 @@ class DatasetClient(Client):
 
         if file_path is None:
             if 'content-length' in r.headers and len(r.content) != int(r.headers['content-length']):
-                log.warn("Transferred content size does not match content-length header (%s != %s)" % (len(r.content), r.headers['content-length']))
+                log.warning("Transferred content size does not match content-length header (%s != %s)" % (len(r.content), r.headers['content-length']))
             return r.content
         else:
             if use_default_filename:
@@ -157,7 +157,7 @@ class DatasetClient(Client):
         for time_left in range(maxwait, 0, -interval):
             if self._is_dataset_complete(dataset_id):
                 return
-            log.warn("Waiting for dataset %s to complete. Will wait another %is" % (dataset_id, time_left))
+            log.warning("Waiting for dataset %s to complete. Will wait another %is" % (dataset_id, time_left))
             time.sleep(interval)
         if raise_on_timeout:
             # noinspection PyUnboundLocalVariable
