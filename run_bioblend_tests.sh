@@ -18,8 +18,7 @@ Options:
       Subset of tests to run, e.g. 'tests/TestGalaxyObjects.py:TestHistory'.
       See 'man nosetests' for more information. Defaults to all tests.
   -r GALAXY_REV
-      Branch or commit of the local Galaxy git repository to checkout. Defaults
-      to the dev branch.
+      Branch or commit of the local Galaxy git repository to checkout.
   -c
       Force removal of the temporary directory created for Galaxy, even if some
       test failed."
@@ -32,7 +31,6 @@ get_abs_dirname () {
 
 e_val=py27
 GALAXY_PORT=8080
-r_val=dev
 while getopts 'hcg:e:p:t:r:' option
 do
   case $option in
@@ -65,13 +63,22 @@ pip install --upgrade "tox>=1.8.0"
 
 # Setup Galaxy
 cd "${g_val}" || exit 1
-# Update repository (may change the sample files or the list of eggs)
-git fetch
-git checkout "${r_val}"
-if git show-ref -q --verify "refs/heads/${r_val}" 2>/dev/null; then
-  # ${r_val} is a branch
-  export GALAXY_VERSION=${r_val}
-  git pull --ff-only
+if [ -n "${r_val}" ]; then
+    # Update repository (may change the sample files or the list of eggs)
+    git fetch
+    git checkout "${r_val}"
+    if git show-ref -q --verify "refs/heads/${r_val}" 2>/dev/null; then
+        # ${r_val} is a branch
+        export GALAXY_VERSION=${r_val}
+        git pull --ff-only
+    fi
+else
+    BRANCH=$(git rev-parse --abbrev-ref HEAD)
+    case $BRANCH in
+        dev | release_*)
+            export GALAXY_VERSION=$BRANCH
+            ;;
+    esac
 fi
 # Setup Galaxy master API key and admin user
 TEMP_DIR=$(mktemp -d 2>/dev/null || mktemp -d -t 'mytmpdir')
