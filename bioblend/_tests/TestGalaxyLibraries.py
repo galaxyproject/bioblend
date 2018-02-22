@@ -58,8 +58,14 @@ class TestGalaxyLibraries(GalaxyTestBase.GalaxyTestBase):
                 with open(fn, 'w') as f:
                     f.write(FOO_DATA)
             filesystem_paths = '\n'.join(fnames)
-            self.gi.libraries.upload_from_galaxy_filesystem(self.library['id'], filesystem_paths)
-            self.gi.libraries.upload_from_galaxy_filesystem(self.library['id'], filesystem_paths, link_data_only='link_to_files')
+            ret = self.gi.libraries.upload_from_galaxy_filesystem(self.library['id'], filesystem_paths)
+            for dataset_dict in ret:
+                dataset = self.gi.libraries.wait_for_dataset(self.library['id'], dataset_dict['id'])
+                self.assertEqual(dataset['state'], 'ok')
+            ret = self.gi.libraries.upload_from_galaxy_filesystem(self.library['id'], filesystem_paths, link_data_only='link_to_files')
+            for dataset_dict in ret:
+                dataset = self.gi.libraries.wait_for_dataset(self.library['id'], dataset_dict['id'])
+                self.assertEqual(dataset['state'], 'ok')
         finally:
             shutil.rmtree(tempdir)
 
