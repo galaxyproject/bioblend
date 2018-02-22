@@ -23,5 +23,5 @@ class GalaxyTestBase(unittest.TestCase):
         return tool_output["outputs"][0]["id"]
 
     def _wait_and_verify_dataset(self, dataset_id, expected_contents, timeout_seconds=BIOBLEND_TEST_JOB_TIMEOUT):
-        dataset_contents = self.gi.datasets.download_dataset(dataset_id, wait_for_completion=True, maxwait=timeout_seconds)
+        dataset_contents = self.gi.datasets.download_dataset(dataset_id, maxwait=timeout_seconds)
         self.assertEqual(dataset_contents, expected_contents)

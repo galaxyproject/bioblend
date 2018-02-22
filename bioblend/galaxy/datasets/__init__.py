@@ -7,7 +7,6 @@ import shlex
 import time
 
 import requests
-from six.moves import range
 from six.moves.urllib.parse import urljoin
 from six.moves.urllib.request import urlopen
 
@@ -15,6 +14,8 @@ import bioblend
 from bioblend.galaxy.client import Client
 
 log = logging.getLogger(__name__)
+
+terminal_states = ('ok', 'empty', 'error', 'discarded', 'failed_metadata')
 
 
 class DatasetClient(Client):
@@ -42,9 +43,10 @@ class DatasetClient(Client):
         return self._get(id=dataset_id, deleted=deleted, params=params)
 
     def download_dataset(self, dataset_id, file_path=None, use_default_filename=True,
-                         wait_for_completion=False, maxwait=12000):
+                         wait_for_completion=True, maxwait=12000):
         """
-        Download a dataset to file or in memory.
+        Download a dataset to file or in memory. If the dataset state is not
+        'ok', a ``DatasetStateException`` will be thrown.
 
         :type dataset_id: str
         :param dataset_id: Encoded dataset ID
@@ -63,24 +65,18 @@ class DatasetClient(Client):
                                  If this argument is False, file_path is assumed to
                                  contain the full file path including the filename.
 
-        :type wait_for_completion: bool
-        :param wait_for_completion: If this argument is True, this method call will block until the dataset is ready.
-                                    If the dataset state becomes invalid, a DatasetStateException will be thrown.
-
         :type maxwait: float
-        :param maxwait: Time (in seconds) to wait for dataset to complete.
-                        If the dataset state is not complete within this time, a DatasetTimeoutException will be thrown.
+        :param maxwait: Total time (in seconds) to wait for the dataset state to
+          become terminal. If the dataset state is not terminal within this
+          time, a ``DatasetTimeoutException`` will be thrown.
 
         :rtype: dict
         :return: If a file_path argument is not provided, returns a dict containing the file_content.
                  Otherwise returns nothing.
         """
-        if wait_for_completion:
-            self._block_until_dataset_ready(dataset_id, maxwait=maxwait)
-
-        dataset = self.show_dataset(dataset_id)
+        dataset = self._block_until_dataset_terminal(dataset_id, maxwait=maxwait)
         if not dataset['state'] == 'ok':
-            raise DatasetStateException("Dataset not ready. Dataset id: %s, current state: %s" % (dataset_id, dataset['state']))
+            raise DatasetStateException("Dataset state is not 'ok'. Dataset id: %s, current state: %s" % (dataset_id, dataset['state']))
 
         # Galaxy release_13.01 and earlier does not have file_ext in the dataset
         # dict, so resort to data_type.
@@ -140,28 +136,26 @@ class DatasetClient(Client):
             # Return location file was saved to
             return file_local_path
 
-    def _is_dataset_complete(self, dataset_id):
-        dataset = self.show_dataset(dataset_id)
-        state = dataset['state']
-        return (state == 'ok' or state == 'error')
-
-    def _block_until_dataset_ready(self, dataset_id, maxwait=12000, interval=3, raise_on_timeout=True):
+    def _block_until_dataset_terminal(self, dataset_id, maxwait=12000, interval=3):
         """
-        Wait until the dataset state changes to ok or error.
-        Based on: https://github.com/salimfadhley/jenkinsapi/blob/master/jenkinsapi/api.py
+        Wait until the dataset state is terminal ('ok', 'empty', 'error',
+        'discarded' or 'failed_metadata').
         """
-        assert maxwait > 0
-        assert maxwait > interval
+        assert maxwait >= 0
         assert interval > 0
 
-        for time_left in range(maxwait, 0, -interval):
-            if self._is_dataset_complete(dataset_id):
-                return
-            log.warning("Waiting for dataset %s to complete. Will wait another %is" % (dataset_id, time_left))
-            time.sleep(interval)
-        if raise_on_timeout:
-            # noinspection PyUnboundLocalVariable
-            raise DatasetTimeoutException("Waited too long for dataset to complete: %s" % dataset_id)
+        time_left = maxwait
+        while True:
+            dataset = self.show_dataset(dataset_id)
+            state = dataset['state']
+            if state in terminal_states:
+                return dataset
+            time_left -= interval
+            if time_left > 0:
+                log.warning("Waiting for dataset %s to complete. Will wait another %i s" % (dataset_id, time_left))
+                time.sleep(min(time_left, interval))
+            else:
+                raise DatasetTimeoutException("Waited too long for dataset %s to complete" % dataset_id)
 
     def show_stderr(self, dataset_id):
         """
@@ -193,16 +187,8 @@ class DatasetClient(Client):
 
 
 class DatasetStateException(Exception):
-    def __init__(self, value):
-        self.value = value
-
-    def __str__(self):
-        return repr(self.value)
+    pass
 
 
 class DatasetTimeoutException(Exception):
-    def __init__(self, value):
-        self.value = value
-
-    def __str__(self):
-        return repr(self.value)
+    pass
