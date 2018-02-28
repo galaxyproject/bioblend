@@ -137,8 +137,8 @@ class TestGalaxyTools(GalaxyTestBase.GalaxyTestBase):
 
     @test_util.skip_unless_galaxy('release_16.10')
     def test_tool_dependency_install(self):
-        installed_dependencies = self.gi.tools.install_dependencies('__SET_METADATA__')
-        self.assertTrue(any(True for d in installed_dependencies if d.get('name') == 'samtools' and d.get('dependency_type') == 'conda'))
+        installed_dependencies = self.gi.tools.install_dependencies('qual_stats_boxplot')
+        self.assertTrue(any(True for d in installed_dependencies if d.get('name') == 'gnuplot' and d.get('dependency_type') == 'conda'))
 
     def _wait_for_and_verify_upload(self, tool_output, file_name, fn, expected_dbkey="?"):
         self.assertEqual(len(tool_output["outputs"]), 1)

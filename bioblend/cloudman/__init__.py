@@ -338,8 +338,8 @@ class GenericVMInstance(object):
                 bioblend.log.error(msg)
                 raise VMLaunchException(msg)
             else:
-                bioblend.log.warn("Instance not ready yet (it's in state '{0}'); waiting another {1} seconds..."
-                                  .format(status['instance_state'], time_left))
+                bioblend.log.warning("Instance not ready yet (it's in state '{0}'); waiting another {1} seconds..."
+                                     .format(status['instance_state'], time_left))
                 time.sleep(vm_ready_check_interval)
 
         raise VMLaunchException("Waited too long for instance to become ready. Instance Id: %s"

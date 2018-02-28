@@ -18,8 +18,7 @@ Options:
       Subset of tests to run, e.g. 'tests/TestGalaxyObjects.py:TestHistory'.
       See 'man nosetests' for more information. Defaults to all tests.
   -r GALAXY_REV
-      Branch or commit of the local Galaxy git repository to checkout. Defaults
-      to the dev branch.
+      Branch or commit of the local Galaxy git repository to checkout.
   -c
       Force removal of the temporary directory created for Galaxy, even if some
       test failed."
@@ -31,8 +30,7 @@ get_abs_dirname () {
 }
 
 e_val=py27
-p_val=8080
-r_val=dev
+GALAXY_PORT=8080
 while getopts 'hcg:e:p:t:r:' option
 do
   case $option in
@@ -41,7 +39,7 @@ do
     c) c_val=1;;
     g) g_val=$(get_abs_dirname "$OPTARG");;
     e) e_val=$OPTARG;;
-    p) p_val=$OPTARG;;
+    p) GALAXY_PORT=$OPTARG;;
     t) t_val=$OPTARG;;
     r) r_val=$OPTARG;;
   esac
@@ -65,57 +63,41 @@ pip install --upgrade "tox>=1.8.0"
 
 # Setup Galaxy
 cd "${g_val}" || exit 1
-# Update repository (may change the sample files or the list of eggs)
-git fetch
-git checkout "${r_val}"
-if git show-ref -q --verify "refs/heads/${r_val}" 2>/dev/null; then
-  # ${r_val} is a branch
-  export GALAXY_VERSION=${r_val}
-  git pull --ff-only
+if [ -n "${r_val}" ]; then
+    # Update repository (may change the sample files or the list of eggs)
+    git fetch
+    git checkout "${r_val}"
+    if git show-ref -q --verify "refs/heads/${r_val}" 2>/dev/null; then
+        # ${r_val} is a branch
+        export GALAXY_VERSION=${r_val}
+        git pull --ff-only
+    fi
+else
+    BRANCH=$(git rev-parse --abbrev-ref HEAD)
+    case $BRANCH in
+        dev | release_*)
+            export GALAXY_VERSION=$BRANCH
+            ;;
+    esac
 fi
 # Setup Galaxy master API key and admin user
-if [ -f universe_wsgi.ini.sample ]; then
-  GALAXY_SAMPLE_CONFIG_FILE=universe_wsgi.ini.sample
-  GALAXY_CONFIG_DIR=.
-else
-  GALAXY_SAMPLE_CONFIG_FILE=config/galaxy.ini.sample
-  GALAXY_CONFIG_DIR=config
-fi
 TEMP_DIR=$(mktemp -d 2>/dev/null || mktemp -d -t 'mytmpdir')
 echo "Created temporary directory $TEMP_DIR"
+# Export GALAXY_CONFIG_FILE environment variable to be used by run_galaxy.sh
 export GALAXY_CONFIG_FILE="$TEMP_DIR/galaxy.ini"
-BIOBLEND_GALAXY_MASTER_API_KEY=$(LC_ALL=C tr -dc A-Za-z0-9 < /dev/urandom | head -c 32)
-export BIOBLEND_GALAXY_MASTER_API_KEY
+# Export BIOBLEND_ environment variables to be used in BioBlend tests
+export BIOBLEND_GALAXY_MASTER_API_KEY=$(LC_ALL=C tr -dc A-Za-z0-9 < /dev/urandom | head -c 32)
 export BIOBLEND_GALAXY_USER_EMAIL="${USER}@localhost.localdomain"
-sed -e "s/^#master_api_key.*/master_api_key = $BIOBLEND_GALAXY_MASTER_API_KEY/" -e "s/^#admin_users.*/admin_users = $BIOBLEND_GALAXY_USER_EMAIL/" $GALAXY_SAMPLE_CONFIG_FILE > "$GALAXY_CONFIG_FILE"
-sed -i.bak -e "s|^#database_connection.*|database_connection = sqlite:///$TEMP_DIR/universe.sqlite?isolation_level=IMMEDIATE|" -e "s|^#file_path.*|file_path = $TEMP_DIR/files|" -e "s|^#new_file_path.*|new_file_path = $TEMP_DIR/tmp|" -e "s|#job_working_directory.*|job_working_directory = $TEMP_DIR/job_working_directory|" "$GALAXY_CONFIG_FILE"
-# Change Galaxy configuration needed by many tests
-sed -i.bak -e 's/^#allow_user_dataset_purge.*/allow_user_dataset_purge = True/' "$GALAXY_CONFIG_FILE"
-# Change Galaxy configuration needed by some library tests
-sed -i.bak -e 's/^#allow_.*path_paste.*/allow_library_path_paste = True/' "$GALAXY_CONFIG_FILE"
-# Change Galaxy configuration needed by some tool tests
-sed -i.bak -e 's/^#conda_auto_init.*/conda_auto_init = True/' "$GALAXY_CONFIG_FILE"
-# Change Galaxy configuration needed by some workflow tests
-sed -i.bak -e 's/^#enable_beta_workflow_modules.*/enable_beta_workflow_modules = True/' "$GALAXY_CONFIG_FILE"
-# Change Galaxy configuration needed by some user tests
-sed -i.bak -e 's/^#allow_user_deletion.*/allow_user_deletion = True/' "$GALAXY_CONFIG_FILE"
-# Change Galaxy configuration needed by quota tests
-sed -i.bak -e 's/^#enable_quotas.*/enable_quotas = True/' "$GALAXY_CONFIG_FILE"
+DATABASE_CONNECTION="sqlite:///$TEMP_DIR/universe.sqlite?isolation_level=IMMEDIATE"
+eval "echo \"$(cat "${BIOBLEND_DIR}/tests/template_galaxy.ini")\"" > "$GALAXY_CONFIG_FILE"
 # Update kombu requirement (and its dependency amqp) to a version compatible with Python 2.7.11, see https://github.com/celery/kombu/pull/540
 if [ -f eggs.ini ]; then
   sed -i.bak -e 's/^kombu = .*$/kombu = 3.0.30/' -e 's/^amqp = .*$/amqp = 1.4.8/' eggs.ini
 fi
-# Add "cat" tool to the toolbox
-if [ -f test/functional/tools/samples_tool_conf.xml ]; then
-  sed -i.bak -e "s/^#tool_config_file.*/tool_config_file = $GALAXY_CONFIG_DIR\/tool_conf.xml.sample,$GALAXY_CONFIG_DIR\/shed_tool_conf.xml.sample,test\/functional\/tools\/samples_tool_conf.xml/" "$GALAXY_CONFIG_FILE"
-fi
-if [ -n "${p_val}" ]; then
-  # Change only the first occurence of port number
-  sed -i.bak -e "0,/^#port/ s/^#port.*/port = $p_val/" "$GALAXY_CONFIG_FILE"
-fi
+
 # Start Galaxy and wait for successful server start
 GALAXY_RUN_ALL=1 "${BIOBLEND_DIR}/run_galaxy.sh" --daemon --wait || exit 1
-export BIOBLEND_GALAXY_URL=http://localhost:${p_val}
+export BIOBLEND_GALAXY_URL=http://localhost:${GALAXY_PORT}
 
 # Run the tests
 cd "${BIOBLEND_DIR}" || exit 1
@@ -129,7 +111,7 @@ deactivate
 
 # Stop Galaxy
 cd "${g_val}" || exit 1
-GALAXY_RUN_ALL=1 ./run.sh --daemon stop
+GALAXY_RUN_ALL=1 "${BIOBLEND_DIR}/run_galaxy.sh" --daemon stop
 # Remove temporary directory if -c is specified or if all tests passed
 if [ -n "${c_val}" ] || [ $exit_code -eq 0 ]; then
   rm -rf "$TEMP_DIR"

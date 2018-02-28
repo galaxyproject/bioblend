@@ -1,8 +1,16 @@
 """
 Contains possible interactions with the Galaxy Data Libraries
 """
+import logging
+import time
+
+from six.moves import range
+
 from bioblend.galaxy.client import Client
+from bioblend.galaxy.datasets import DatasetTimeoutException, terminal_states
 from bioblend.util import attach_file
+
+log = logging.getLogger(__name__)
 
 
 class LibraryClient(Client):
@@ -104,6 +112,43 @@ class LibraryClient(Client):
           library
         """
         return self._show_item(library_id, dataset_id)
+
+    def wait_for_dataset(self, library_id, dataset_id, maxwait=12000, interval=3):
+        """
+        Wait until the library dataset state is terminal ('ok', 'empty',
+        'error', 'discarded' or 'failed_metadata').
+
+        :type library_id: str
+        :param library_id: library id where dataset is found in
+
+        :type dataset_id: str
+        :param dataset_id: id of the dataset to wait for
+
+        :type maxwait: float
+        :param maxwait: Total time (in seconds) to wait for the dataset state to
+          become terminal. If the dataset state is not terminal within this
+          time, a ``DatasetTimeoutException`` will be thrown.
+
+        :type interval: float
+        :param interval: Time (in seconds) to wait between 2 consecutive checks.
+
+        :rtype: dict
+        :return: A dictionary containing information about the dataset in the
+          library
+        """
+        assert maxwait > 0
+        assert interval > 0
+
+        for time_left in range(maxwait, 0, -interval):
+            dataset = self.show_dataset(library_id, dataset_id)
+            state = dataset['state']
+            if state in terminal_states:
+                return dataset
+            if time_left > 0:
+                log.warning("Waiting for library %s dataset %s to complete. Will wait another %i s", library_id, dataset_id, time_left)
+                time.sleep(min(time_left, interval))
+            else:
+                raise DatasetTimeoutException("Waited too long for library %s dataset %s to complete" % (library_id, dataset_id))
 
     def show_folder(self, library_id, folder_id):
         """
