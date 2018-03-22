@@ -101,7 +101,7 @@ class DatasetClient(Client):
         url = urljoin(self.gi.base_url, download_url)
 
         stream_content = file_path is not None
-        r = self.gi.make_get_request(url, verify=self.gi.verify, stream=stream_content, timeout=self.gi.timeout)
+        r = self.gi.make_get_request(url, stream=stream_content)
         r.raise_for_status()
 
         if file_path is None:
