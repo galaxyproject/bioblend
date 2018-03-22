@@ -6,7 +6,6 @@ import os
 import shlex
 import time
 
-import requests
 from six.moves.urllib.parse import urljoin
 from six.moves.urllib.request import urlopen
 
