@@ -1,3 +1,7 @@
+### BioBlend v - unreleased
+
+* Dropped supported for Python 3.3. Added support for Galaxy release 18.01.
+
 ### BioBlend v0.10.0 - 2017-09-26
 
 * Dropped support for Python 2.6. Added support for Galaxy release 17.09.
