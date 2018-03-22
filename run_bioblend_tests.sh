@@ -96,6 +96,7 @@ if [ -f eggs.ini ]; then
 fi
 
 # Start Galaxy and wait for successful server start
+export GALAXY_SKIP_CLIENT_BUILD=1
 GALAXY_RUN_ALL=1 "${BIOBLEND_DIR}/run_galaxy.sh" --daemon --wait || exit 1
 export BIOBLEND_GALAXY_URL=http://localhost:${GALAXY_PORT}
 

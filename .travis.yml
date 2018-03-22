@@ -78,6 +78,7 @@ before_script:
       sed -i.bak -e 's/^kombu = .*$/kombu = 3.0.30/' -e 's/^amqp = .*$/amqp = 1.4.8/' eggs.ini;
     fi
   # Start Galaxy and wait for successful server start
+  - export GALAXY_SKIP_CLIENT_BUILD=1
   - GALAXY_RUN_ALL=1 "${TRAVIS_BUILD_DIR}/run_galaxy.sh" --daemon --wait
   - export BIOBLEND_GALAXY_URL=http://localhost:8080
 
