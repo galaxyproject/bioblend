@@ -6,7 +6,6 @@ import os
 import shlex
 import time
 
-import requests
 from six.moves.urllib.parse import urljoin
 from six.moves.urllib.request import urlopen
 
@@ -101,10 +100,8 @@ class DatasetClient(Client):
             download_url = 'datasets/' + dataset_id + '/display?to_ext=' + file_ext
         url = urljoin(self.gi.base_url, download_url)
 
-        # Don't use self.gi.make_get_request as currently the download API does
-        # not require a key
         stream_content = file_path is not None
-        r = requests.get(url, verify=self.gi.verify, stream=stream_content, timeout=self.gi.timeout)
+        r = self.gi.make_get_request(url, stream=stream_content)
         r.raise_for_status()
 
         if file_path is None:
