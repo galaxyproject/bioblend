@@ -1,10 +1,6 @@
 .. image:: https://img.shields.io/pypi/v/bioblend.svg
-    :target: https://pypi.python.org/pypi/bioblend/
+    :target: https://pypi.org/project/bioblend/
     :alt: latest version available on PyPI
-
-.. image:: https://img.shields.io/pypi/dm/bioblend.svg
-    :target: https://pypi.python.org/pypi/bioblend/
-    :alt: PyPI downloads in the last month
 
 .. image:: https://readthedocs.org/projects/bioblend/badge/
     :alt: Documentation Status
