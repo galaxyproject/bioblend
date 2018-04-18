@@ -1,6 +1,21 @@
-### BioBlend v - unreleased
+### BioBlend v0.11.0 - 2018-04-18
 
 * Dropped supported for Python 3.3. Added support for Galaxy release 18.01.
+
+* Always wait for terminal state when downloading a dataset.
+
+* Deprecated ``wait_for_completion`` parameter of
+  ``DatasetClient.download_dataset()`` method.
+
+* Fixed downloading of datasets receiving a HTTP 500 status code (thanks to Eric
+  Rasche).
+
+* Added ``wait_for_dataset()`` method to ``LibraryClient``.
+
+* Added ``verify`` parameter to ``GalaxyInstance.__init__()`` method (thanks to
+  Devon Ryan).
+
+* Improvements to tests and documentation.
 
 ### BioBlend v0.10.0 - 2017-09-26
 

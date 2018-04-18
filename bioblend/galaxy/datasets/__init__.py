@@ -64,6 +64,10 @@ class DatasetClient(Client):
                                  If this argument is False, file_path is assumed to
                                  contain the full file path including the filename.
 
+        :type wait_for_completion: bool
+        :param wait_for_completion: This parameter is deprecated and ignored, it
+          will be removed in BioBlend 0.12.
+
         :type maxwait: float
         :param maxwait: Total time (in seconds) to wait for the dataset state to
           become terminal. If the dataset state is not terminal within this
