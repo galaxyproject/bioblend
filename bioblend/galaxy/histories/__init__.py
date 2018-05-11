@@ -574,3 +574,38 @@ class HistoryClient(Client):
         r.raise_for_status()
         for chunk in r.iter_content(chunk_size):
             outf.write(chunk)
+
+    def import_history_from_url(self, url):
+        """
+        Import a history from a web-accessible history archive.
+
+        :type url: str
+        :param url: URL where history archive is accessible
+
+        :rtype: dict
+        :return: Message indicating that the import has started.
+        """
+        payload = {
+            'archive_source': url,
+            'archive_file': ''
+
+        }
+        return self._post(payload, files_attached=True)
+
+    def import_history_from_path(self, path):
+        """
+        Import a history from a locally accessible history archive file.
+
+        :type path: str
+        :param path: URL where history archive is accessible
+
+        :rtype: dict
+        :return: Message indicating that the import has started.
+        """
+        with open(path, 'r') as handle:
+            payload = {
+                'archive_source': '',
+                'archive_file': handle
+            }
+            result = self._post(payload, files_attached=True)
+        return result
