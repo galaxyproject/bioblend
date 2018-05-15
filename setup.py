@@ -30,7 +30,7 @@ setup(
     install_requires=[
         'boto>=2.9.7',
         'pyyaml',
-        'requests>=2.4.3,!=2.12.0,!=2.12.1',
+        'requests[security]>=2.4.3,!=2.12.0,!=2.12.1',
         'requests-toolbelt',
         'six'
     ],
