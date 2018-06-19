@@ -961,6 +961,12 @@ class History(DatasetContainer):
           ``config/galaxy.ini`` configuration file.
         """
         self.gi.histories.delete(id_=self.id, purge=purge)
+        try:
+            self.refresh()
+        except Exception:
+            # Galaxy release_15.01 and earlier requires passing 'deleted=False'
+            # when getting the details of a deleted history
+            pass
         self.unmap()
 
     def import_dataset(self, lds):
@@ -1119,6 +1125,7 @@ class Library(DatasetContainer):
         Delete this library.
         """
         self.gi.libraries.delete(id_=self.id)
+        self.refresh()
         self.unmap()
 
     def _pre_upload(self, folder):
