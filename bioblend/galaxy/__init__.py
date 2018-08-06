@@ -71,20 +71,39 @@ class GalaxyInstance(GalaxyClient):
         self.folders = folders.FoldersClient(self)
 
     @property
-    def max_get_attempts(self):
-        return Client.max_get_retries()
+    def max_attempts(self):
+        return Client.max_retries()
 
-    @max_get_attempts.setter
-    def max_get_attempts(self, v):
-        Client.set_max_get_retries(v)
+    @max_attempts.setter
+    def max_attempts(self, v):
+        Client.set_max_retries(v)
 
     @property
-    def get_retry_delay(self):
-        return Client.get_retry_delay()
+    def retry_delay(self):
+        return Client.retry_delay()
 
-    @get_retry_delay.setter
-    def get_retry_delay(self, v):
-        Client.set_get_retry_delay(v)
+    @retry_delay.setter
+    def retry_delay(self, v):
+        Client.set_retry_delay(v)
+
+    @property
+    def retry_methods(self):
+        return Client.retry_methods()
+
+    @retry_methods.setter
+    def retry_methods(self, v):
+        Client.set_retry_methods(v)
+
+    @property
+    def retry_idempotent(self):
+        a = Client.retry_methods()
+        b = Client._idempotent_methods
+        return len(a) == len(b) and len(set(a) & set(b)) == b
+
+    @retry_idempotent.setter
+    def retry_idempotent(self, v):
+        if v:
+            Client.set_retry_methods(Client._idempotent_methods)
 
     def __repr__(self):
         """

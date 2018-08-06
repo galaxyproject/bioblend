@@ -18,53 +18,71 @@ from bioblend import ConnectionError  # noqa: I202
 
 class Client(object):
 
-    # Class variables that configure GET request retries.  Note that since these
+    # Class variables that configure request retries.  Note that since these
     # are class variables their values are shared by all Client instances --
     # i.e., HistoryClient, WorkflowClient, etc.
     #
-    # Number of attempts before giving up on a GET request.
-    _max_get_retries = 1
+    # Number of attempts before giving up on a request.
+    _max_retries = 1
     # Delay in seconds between subsequent retries.
-    _get_retry_delay = 10
+    _retry_delay = 10
+    # Methods to retry
+    _retry_methods = ['GET']
+    _idempotent_methods = ['GET', 'PUT', 'DELETE']
 
     @classmethod
-    def max_get_retries(cls):
+    def max_retries(cls):
         """
-        The maximum number of attempts for a GET request.
+        The maximum number of attempts for a request.
         """
-        return cls._max_get_retries
+        return cls._max_retries
 
     @classmethod
-    def set_max_get_retries(cls, value):
+    def set_max_retries(cls, value):
         """
-        Set the maximum number of attempts for GET requests. A value greater
-        than one causes failed GET requests to be retried `value` - 1 times.
+        Set the maximum number of attempts for requests. A value greater
+        than one causes failed requests to be retried `value` - 1 times.
 
         Default: 1
         """
         if value < 1:
             raise ValueError("Number of retries must be >= 1 (got: %s)" % value)
-        cls._max_get_retries = value
+        cls._max_retries = value
         return cls
 
     @classmethod
-    def get_retry_delay(cls):
+    def retry_delay(cls):
         """
-        The delay (in seconds) to wait before retrying a failed GET
+        The delay (in seconds) to wait before retrying a failed
         request.
         """
-        return cls._get_retry_delay
+        return cls._retry_delay
 
     @classmethod
-    def set_get_retry_delay(cls, value):
+    def set_retry_delay(cls, value):
         """
-        Set the delay (in seconds) to wait before retrying a failed GET
+        Set the delay (in seconds) to wait before retrying a failed
         request. Default: 10
         """
         if value < 0:
             raise ValueError("Retry delay must be >= 0 (got: %s)" % value)
-        cls._get_retry_delay = value
+        cls._retry_delay = value
         return cls
+
+    @classmethod
+    def retry_methods(cls):
+        """
+        Which classes of methods should be retried.
+        """
+        return cls._retry_methods
+
+    @classmethod
+    def set_retry_methods(cls, v):
+        """
+        Set which methods should be retried under the automatic retry logic.
+        default: ['GET']
+        """
+        cls._retry_methods = v
 
     def __init__(self, galaxy_instance):
         """
@@ -77,6 +95,46 @@ class Client(object):
         """
         self.gi = galaxy_instance
         self.url = '/'.join([self.gi.url, self.module])
+
+    def retry(self, method, func, func_args, func_kwargs, json=True):
+        attempts_left = self.max_retries()
+        retry_delay = self.retry_delay()
+
+        # If we should not retry, then only make a single attempt
+        if method not in self.retry_methods():
+            attempts_left = 1
+
+        bioblend.log.debug("%s - attempts left: %s; retry delay: %s",
+                           method, attempts_left, retry_delay)
+        msg = ''
+        while attempts_left > 0:
+            attempts_left -= 1
+            try:
+                r = func(*func_args, **func_kwargs)
+            except (requests.exceptions.ConnectionError, ProtocolError) as e:
+                msg = str(e)
+                r = requests.Response()  # empty Response object used when raising ConnectionError
+            else:
+                if r.status_code == 200:
+                    if not json:
+                        return r
+                    elif not r.content:
+                        msg = "%s: empty response" % method
+                    else:
+                        try:
+                            return r.json()
+                        except ValueError:
+                            msg = "%s: invalid JSON : %r" % (method, r.content)
+                else:
+                    msg = "%s: error %s: %r" % (method, r.status_code, r.content)
+            msg = "%s, %d attempts left" % (msg, attempts_left)
+            if attempts_left <= 0:
+                bioblend.log.error(msg)
+                raise ConnectionError(msg, body=r.text,
+                                      status_code=r.status_code)
+            else:
+                bioblend.log.warning(msg)
+                time.sleep(retry_delay)
 
     def _get(self, id=None, deleted=False, contents=None, url=None,
              params=None, json=True):
@@ -96,39 +154,8 @@ class Client(object):
         if not url:
             url = self.gi._make_url(self, module_id=id, deleted=deleted,
                                     contents=contents)
-        attempts_left = self.max_get_retries()
-        retry_delay = self.get_retry_delay()
-        bioblend.log.debug("GET - attempts left: %s; retry delay: %s",
-                           attempts_left, retry_delay)
-        msg = ''
-        while attempts_left > 0:
-            attempts_left -= 1
-            try:
-                r = self.gi.make_get_request(url, params=params)
-            except (requests.exceptions.ConnectionError, ProtocolError) as e:
-                msg = str(e)
-                r = requests.Response()  # empty Response object used when raising ConnectionError
-            else:
-                if r.status_code == 200:
-                    if not json:
-                        return r
-                    elif not r.content:
-                        msg = "GET: empty response"
-                    else:
-                        try:
-                            return r.json()
-                        except ValueError:
-                            msg = "GET: invalid JSON : %r" % (r.content,)
-                else:
-                    msg = "GET: error %s: %r" % (r.status_code, r.content)
-            msg = "%s, %d attempts left" % (msg, attempts_left)
-            if attempts_left <= 0:
-                bioblend.log.error(msg)
-                raise ConnectionError(msg, body=r.text,
-                                      status_code=r.status_code)
-            else:
-                bioblend.log.warning(msg)
-                time.sleep(retry_delay)
+        return self.retry('GET', self.gi.make_get_request, [url],
+                          dict(params=params), json=json)
 
     def _post(self, payload, id=None, deleted=False, contents=None, url=None,
               files_attached=False):
@@ -148,8 +175,10 @@ class Client(object):
         if not url:
             url = self.gi._make_url(self, module_id=id, deleted=deleted,
                                     contents=contents)
-        return self.gi.make_post_request(url, payload=payload,
-                                         files_attached=files_attached)
+
+        return self.retry('POST', self.gi.make_post_request, [url],
+                          dict(payload=payload, files_attached=files_attached),
+                          json=False)
 
     def _put(self, payload, id=None, url=None, params=None):
         """
@@ -162,7 +191,8 @@ class Client(object):
         """
         if not url:
             url = self.gi._make_url(self, module_id=id)
-        return self.gi.make_put_request(url, payload=payload, params=params)
+        return self.retry('PUT', self.gi.make_put_request, [url],
+                          dict(payload=payload, params=params), json=False)
 
     def _delete(self, payload=None, id=None, deleted=False, contents=None, url=None, params=None):
         """
@@ -176,7 +206,9 @@ class Client(object):
         if not url:
             url = self.gi._make_url(self, module_id=id, deleted=deleted,
                                     contents=contents)
-        r = self.gi.make_delete_request(url, payload=payload, params=params)
+
+        r = self.retry('DELETE', self.gi.make_delete_request, [url],
+                       dict(payload=payload, params=params), json=False)
         if r.status_code == 200:
             return r.json()
         # @see self.body for HTTP response body
