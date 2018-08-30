@@ -335,10 +335,8 @@ class LibraryClient(Client):
             payload["roles"] = keywords["roles"]
         if keywords.get("link_data_only", None) and keywords['link_data_only'] != 'copy_files':
             payload["link_data_only"] = 'link_to_files'
-        if keywords.get('tag_using_filenames', False):
-            payload["tag_using_filenames"] = False
-        if keywords.get('preserve_dirs', True):
-            payload["preserve_dirs"] = True
+        payload['tag_using_filenames'] = str(keywords.get('tag_using_filenames', True))
+        payload['preserve_dirs'] = str(keywords.get('preserve_dirs', False))
         # upload options
         if keywords.get('file_url', None) is not None:
             payload['upload_option'] = 'upload_file'
