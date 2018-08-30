@@ -335,6 +335,10 @@ class LibraryClient(Client):
             payload["roles"] = keywords["roles"]
         if keywords.get("link_data_only", None) and keywords['link_data_only'] != 'copy_files':
             payload["link_data_only"] = 'link_to_files'
+        if keywords.get('tag_using_filenames', False):
+            payload["tag_using_filenames"] = False
+        if keywords.get('preserve_dirs', True):
+            payload["preserve_dirs"] = True
         # upload options
         if keywords.get('file_url', None) is not None:
             payload['upload_option'] = 'upload_file'
@@ -436,7 +440,7 @@ class LibraryClient(Client):
 
     def upload_file_from_server(self, library_id, server_dir, folder_id=None,
                                 file_type='auto', dbkey='?', link_data_only=None,
-                                roles=""):
+                                roles="", preserve_dirs=False, tag_using_filenames=True):
         """
         Upload all files in the specified subdirectory of the Galaxy library
         import directory to a library.
@@ -472,15 +476,22 @@ class LibraryClient(Client):
 
         :type roles: str
         :param roles: ???
+
+        :type preserve_dirs: bool
+        :param preserve_dirs: Indicate whether to preserve the directory structure when importing dir
+
+        :type tag_using_filenames: bool
+        :param tag_using_filenames: Indicate whether to generate dataset tags from filenames
         """
         return self._do_upload(library_id, server_dir=server_dir,
                                folder_id=folder_id, file_type=file_type,
                                dbkey=dbkey, link_data_only=link_data_only,
-                               roles=roles)
+                               roles=roles, preserve_dirs=preserve_dirs,
+                               tag_using_filenames=tag_using_filenames)
 
     def upload_from_galaxy_filesystem(self, library_id, filesystem_paths, folder_id=None,
                                       file_type="auto", dbkey="?", link_data_only=None,
-                                      roles=""):
+                                      roles="", preserve_dirs=False, tag_using_filenames=True):
         """
         Upload a set of files already present on the filesystem of the Galaxy
         server to a library.
@@ -515,11 +526,18 @@ class LibraryClient(Client):
 
         :type roles: str
         :param roles: ???
+
+        :type preserve_dirs: bool
+        :param preserve_dirs: Indicate whether to preserve the directory structure when importing dir
+
+        :type tag_using_filenames: bool
+        :param tag_using_filenames: Indicate whether to generate dataset tags from filenames
         """
         return self._do_upload(library_id, filesystem_paths=filesystem_paths,
                                folder_id=folder_id, file_type=file_type,
                                dbkey=dbkey, link_data_only=link_data_only,
-                               roles=roles)
+                               roles=roles, preserve_dirs=preserve_dirs,
+                               tag_using_filenames=tag_using_filenames)
 
     def copy_from_dataset(self, library_id, dataset_id, folder_id=None, message=''):
         """
