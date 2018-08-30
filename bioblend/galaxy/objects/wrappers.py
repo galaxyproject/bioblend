@@ -781,6 +781,7 @@ class LibraryDataset(LibRelatedDataset):
             self.container.id, self.id, **kwds)
         self.container.refresh()
         self.__init__(res, self.container, gi=self.gi)
+        return self
 
 
 @six.add_metaclass(abc.ABCMeta)
