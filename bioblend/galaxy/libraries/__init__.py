@@ -96,6 +96,37 @@ class LibraryClient(Client):
         url = '/'.join([url, dataset_id])
         return self._delete(payload={'purged': purged}, url=url)
 
+    def update_library_dataset(self, library_id, dataset_id, **kwds):
+        """
+        Update library dataset metadata. Some of the attributes that can be
+        modified are documented below.
+
+        :type library_id: str
+        :param library_id: library id where dataset is found in
+
+        :type dataset_id: str
+        :param dataset_id: id of the dataset to be deleted
+
+        :type name: str
+        :param name: Replace library dataset name with the given string
+
+        :type misc_info: str
+        :param misc_info: Replace library dataset misc_info with given string
+
+        :type file_ext: str
+        :param file_ext: Replace library dataset extension (must exist in the Galaxy registry)
+
+        :type genome_build: str
+        :param genome_build: Replace library dataset genome build (dbkey)
+
+        :rtype: dict
+        :return: details of the updated dataset
+        """
+        url = self.gi._make_url(self, library_id, contents=True)
+        # Append the dataset_id to the base history contents URL
+        url = '/'.join([url, dataset_id])
+        return self._put(payload=kwds, url=url)
+
     def show_dataset(self, library_id, dataset_id):
         """
         Get details about a given library dataset. The required ``library_id``

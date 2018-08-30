@@ -766,6 +766,22 @@ class LibraryDataset(LibRelatedDataset):
         self.container.refresh()
         self.refresh()
 
+    def update(self, **kwds):
+        """
+        Update this library dataset metadata. Some of the attributes that can be
+        modified are documented below.
+
+        :type name: str
+        :param name: Replace history dataset name with the given string
+
+        :type genome_build: str
+        :param genome_build: Replace history dataset genome build (dbkey)
+        """
+        res = self.gi.gi.libraries.update_library_dataset(
+            self.container.id, self.id, **kwds)
+        self.container.refresh()
+        self.__init__(res, self.container, gi=self.gi)
+
 
 @six.add_metaclass(abc.ABCMeta)
 class ContentInfo(Wrapper):

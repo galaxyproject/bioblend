@@ -74,6 +74,13 @@ class TestGalaxyLibraries(GalaxyTestBase.GalaxyTestBase):
         dataset_id = self._test_dataset(history['id'])
         self.gi.libraries.copy_from_dataset(self.library['id'], dataset_id, message='Copied from dataset')
 
+    def test_update_dataset(self):
+        library_id = self.library["id"]
+        dataset1_id = self._test_dataset(library_id)
+        updated_dataset = self.gi.libraries.update_library_dataset(library_id, dataset1_id, name='Modified name', misc_info='Modified the name succesfully')
+        self.assertEqual(updated_dataset["name"], 'Modified name')
+        self.assertEqual(updated_dataset["misc_info"], 'Modified the name succesfully')
+
     @test_util.skip_unless_galaxy('release_14.10')
     def test_library_permissions(self):
         current_user = self.gi.users.get_current_user()
