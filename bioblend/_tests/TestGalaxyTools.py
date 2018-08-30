@@ -135,7 +135,8 @@ class TestGalaxyTools(GalaxyTestBase.GalaxyTestBase):
         # TODO: Wait for results and verify it has 3 lines - 1 2 3, 4 5 6,
         # and 7 8 9.
 
-    @test_util.skip_unless_galaxy('release_16.10')
+    # This test doesn't work any more on Galaxy 16.10 because that release uses an old Conda 3.19.3
+    @test_util.skip_unless_galaxy('release_17.01')
     def test_tool_dependency_install(self):
         installed_dependencies = self.gi.tools.install_dependencies('Summary_Statistics1')
         self.assertTrue(any(True for d in installed_dependencies if d.get('name') == 'rpy2' and d.get('dependency_type') == 'conda'))
