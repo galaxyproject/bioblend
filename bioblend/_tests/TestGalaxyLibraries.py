@@ -77,7 +77,7 @@ class TestGalaxyLibraries(GalaxyTestBase.GalaxyTestBase):
     def test_update_dataset(self):
         library_id = self.library["id"]
         dataset1_id = self._test_dataset(library_id)
-        updated_dataset = self.gi.libraries.update_library_dataset(library_id, dataset1_id, name='Modified name', misc_info='Modified the name succesfully')
+        updated_dataset = self.gi.libraries.update_library_dataset(dataset1_id, name='Modified name', misc_info='Modified the name succesfully')
         self.assertEqual(updated_dataset["name"], 'Modified name')
         self.assertEqual(updated_dataset["misc_info"], 'Modified the name succesfully')
 

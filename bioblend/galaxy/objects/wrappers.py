@@ -777,8 +777,7 @@ class LibraryDataset(LibRelatedDataset):
         :type genome_build: str
         :param genome_build: Replace history dataset genome build (dbkey)
         """
-        res = self.gi.gi.libraries.update_library_dataset(
-            self.container.id, self.id, **kwds)
+        res = self.gi.gi.libraries.update_library_dataset(self.id, **kwds)
         self.container.refresh()
         self.__init__(res, self.container, gi=self.gi)
         return self

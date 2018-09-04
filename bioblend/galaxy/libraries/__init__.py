@@ -96,13 +96,10 @@ class LibraryClient(Client):
         url = '/'.join([url, dataset_id])
         return self._delete(payload={'purged': purged}, url=url)
 
-    def update_library_dataset(self, library_id, dataset_id, **kwds):
+    def update_library_dataset(self, dataset_id, **kwds):
         """
         Update library dataset metadata. Some of the attributes that can be
         modified are documented below.
-
-        :type library_id: str
-        :param library_id: library id where dataset is found in
 
         :type dataset_id: str
         :param dataset_id: id of the dataset to be deleted
@@ -122,9 +119,7 @@ class LibraryClient(Client):
         :rtype: dict
         :return: details of the updated dataset
         """
-        url = self.gi._make_url(self, library_id, contents=True)
-        # Append the dataset_id to the base history contents URL
-        url = '/'.join([url, dataset_id])
+        url = '/'.join([self.gi._make_url(self), 'datasets', dataset_id])
         return self._put(payload=kwds, url=url)
 
     def show_dataset(self, library_id, dataset_id):
