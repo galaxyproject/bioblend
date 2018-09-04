@@ -543,7 +543,7 @@ class TestLDContents(GalaxyObjectsTestBase):
         updated_ldda = self.ds.update(name=new_name, misc_info=new_misc_info, genome_build=new_genome_build)
         self.assertEqual(self.ds.id, updated_ldda.id)
         self.assertEqual(self.ds.name, new_name)
-        self.assertEqual(self.ds.annotation, new_misc_info)
+        self.assertEqual(self.ds.misc_info, new_misc_info)
         self.assertEqual(self.ds.genome_build, new_genome_build)
 
 
