@@ -164,6 +164,19 @@ class Client(object):
             url = self.gi._make_url(self, module_id=id)
         return self.gi.make_put_request(url, payload=payload, params=params)
 
+    def _patch(self, payload, id=None, url=None, params=None):
+        """
+        Do a generic PATCH request, composing the url from the contents of the
+        arguments. Alternatively, an explicit ``url`` can be provided to use
+        for the request. ``payload`` must be a dict that contains additional
+        request arguments which will be sent along with the request body.
+
+        :return: The decoded response.
+        """
+        if not url:
+            url = self.gi._make_url(self, module_id=id)
+        return self.gi.make_patch_request(url, payload=payload, params=params)
+
     def _delete(self, payload=None, id=None, deleted=False, contents=None, url=None, params=None):
         """
         Do a generic DELETE request, composing the url from the contents of the
