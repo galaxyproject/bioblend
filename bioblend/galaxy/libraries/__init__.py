@@ -120,7 +120,7 @@ class LibraryClient(Client):
         :return: details of the updated dataset
         """
         url = '/'.join([self.gi._make_url(self), 'datasets', dataset_id])
-        return self._put(payload=kwds, url=url)
+        return self._patch(payload=kwds, url=url)
 
     def show_dataset(self, library_id, dataset_id):
         """
