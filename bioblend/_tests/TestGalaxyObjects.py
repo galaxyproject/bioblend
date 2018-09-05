@@ -536,6 +536,7 @@ class TestLDContents(GalaxyObjectsTestBase):
         # by the API at the moment
         # self.assertTrue(self.ds.deleted)
 
+    @test_util.skip_unless_galaxy('release_17.09')
     def test_dataset_update(self):
         new_name = 'test_%s' % uuid.uuid4().hex
         new_misc_info = 'Annotation for %s' % new_name

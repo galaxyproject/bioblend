@@ -74,6 +74,7 @@ class TestGalaxyLibraries(GalaxyTestBase.GalaxyTestBase):
         dataset_id = self._test_dataset(history['id'])
         self.gi.libraries.copy_from_dataset(self.library['id'], dataset_id, message='Copied from dataset')
 
+    @test_util.skip_unless_galaxy('release_17.09')
     def test_update_dataset(self):
         library_id = self.library["id"]
         dataset1 = self.gi.libraries.upload_file_contents(library_id, FOO_DATA)
