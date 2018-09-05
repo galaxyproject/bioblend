@@ -493,7 +493,7 @@ class Dataset(Wrapper):
     Abstract base class for Galaxy datasets.
     """
     BASE_ATTRS = Wrapper.BASE_ATTRS + (
-        'data_type', 'file_name', 'file_size', 'state', 'deleted', 'file_ext', 'purged'
+        'data_type', 'file_ext', 'file_name', 'file_size', 'genome_build', 'misc_info', 'state'
     )
     POLLING_INTERVAL = 1  # for state monitoring
 
@@ -603,7 +603,7 @@ class HistoryDatasetAssociation(Dataset):
     """
     Maps to a Galaxy ``HistoryDatasetAssociation``.
     """
-    BASE_ATTRS = Dataset.BASE_ATTRS + ('annotation', 'genome_build', 'tags', 'visible')
+    BASE_ATTRS = Dataset.BASE_ATTRS + ('annotation', 'deleted', 'purged', 'tags', 'visible')
     SRC = 'hda'
 
     def __init__(self, ds_dict, container, gi=None):
@@ -745,6 +745,7 @@ class LibraryDatasetDatasetAssociation(LibRelatedDataset):
     """
     Maps to a Galaxy ``LibraryDatasetDatasetAssociation``.
     """
+    BASE_ATTRS = LibRelatedDataset.BASE_ATTRS + ('deleted',)
     SRC = 'ldda'
 
 
@@ -765,6 +766,22 @@ class LibraryDataset(LibRelatedDataset):
             self.container.id, self.id, purged=purged)
         self.container.refresh()
         self.refresh()
+
+    def update(self, **kwds):
+        """
+        Update this library dataset metadata. Some of the attributes that can be
+        modified are documented below.
+
+        :type name: str
+        :param name: Replace history dataset name with the given string
+
+        :type genome_build: str
+        :param genome_build: Replace history dataset genome build (dbkey)
+        """
+        res = self.gi.gi.libraries.update_library_dataset(self.id, **kwds)
+        self.container.refresh()
+        self.__init__(res, self.container, gi=self.gi)
+        return self
 
 
 @six.add_metaclass(abc.ABCMeta)

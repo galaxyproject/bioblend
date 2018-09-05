@@ -536,6 +536,17 @@ class TestLDContents(GalaxyObjectsTestBase):
         # by the API at the moment
         # self.assertTrue(self.ds.deleted)
 
+    @test_util.skip_unless_galaxy('release_17.09')
+    def test_dataset_update(self):
+        new_name = 'test_%s' % uuid.uuid4().hex
+        new_misc_info = 'Annotation for %s' % new_name
+        new_genome_build = 'hg19'
+        updated_ldda = self.ds.update(name=new_name, misc_info=new_misc_info, genome_build=new_genome_build)
+        self.assertEqual(self.ds.id, updated_ldda.id)
+        self.assertEqual(self.ds.name, new_name)
+        self.assertEqual(self.ds.misc_info, new_misc_info)
+        self.assertEqual(self.ds.genome_build, new_genome_build)
+
 
 class TestHistory(GalaxyObjectsTestBase):
 

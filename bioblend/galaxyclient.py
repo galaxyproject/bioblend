@@ -198,6 +198,33 @@ class GalaxyClient(object):
         raise ConnectionError("Unexpected HTTP status code: %s" % r.status_code,
                               body=r.text, status_code=r.status_code)
 
+    def make_patch_request(self, url, payload=None, params=None):
+        """
+        Make a PATCH request using the provided ``url`` with required payload.
+        The ``payload`` must be a dict that can be converted into a JSON
+        object (via ``json.dumps``).
+
+        :return: The decoded response.
+        """
+        if params is not None and params.get('key', False) is False:
+            params['key'] = self.key
+        else:
+            params = self.default_params
+
+        payload = json.dumps(payload)
+        headers = self.json_headers
+        r = requests.patch(url, data=payload, params=params, headers=headers,
+                           verify=self.verify, timeout=self.timeout)
+        if r.status_code == 200:
+            try:
+                return r.json()
+            except Exception as e:
+                raise ConnectionError("Request was successful, but cannot decode the response content: %s" %
+                                      e, body=r.content, status_code=r.status_code)
+        # @see self.body for HTTP response body
+        raise ConnectionError("Unexpected HTTP status code: %s" % r.status_code,
+                              body=r.text, status_code=r.status_code)
+
     @property
     def key(self):
         if not self._key and self.email is not None and self.password is not None:
