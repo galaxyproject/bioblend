@@ -1,5 +1,4 @@
 dist: trusty
-sudo: false
 language: python
 python: "2.7"
 services:
@@ -56,6 +55,10 @@ matrix:
         - pip install --upgrade virtualenv
         - virtualenv .venv
         - . .venv/bin/activate
+
+before_install:
+  # Workaround for https://github.com/travis-ci/travis-ci/issues/7940
+  - sudo rm -f /etc/boto.cfg
 
 install:
   - pip install "tox>=1.8.0"
