@@ -20,7 +20,7 @@ API.
 
 BioBlend is supported and tested on:
 
-- Python 2.7, 3.4, 3.5 and 3.6
+- Python 2.7, 3.4, 3.5, 3.6 and 3.7
 - Galaxy release_14.10 and later.
 
 Full docs are available at https://bioblend.readthedocs.io/ with a quick library
