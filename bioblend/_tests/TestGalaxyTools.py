@@ -138,8 +138,8 @@ class TestGalaxyTools(GalaxyTestBase.GalaxyTestBase):
     # This test doesn't work any more on Galaxy 16.10 because that release uses an old Conda 3.19.3
     @test_util.skip_unless_galaxy('release_17.01')
     def test_tool_dependency_install(self):
-        installed_dependencies = self.gi.tools.install_dependencies('Summary_Statistics1')
-        self.assertTrue(any(True for d in installed_dependencies if d.get('name') == 'rpy2' and d.get('dependency_type') == 'conda'))
+        installed_dependencies = self.gi.tools.install_dependencies('CONVERTER_fasta_to_bowtie_color_index')
+        self.assertTrue(any(True for d in installed_dependencies if d.get('name') == 'bowtie' and d.get('dependency_type') == 'conda'), "installed_dependencies is %s" % installed_dependencies)
 
     def _wait_for_and_verify_upload(self, tool_output, file_name, fn, expected_dbkey="?"):
         self.assertEqual(len(tool_output["outputs"]), 1)
