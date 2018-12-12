@@ -1,7 +1,6 @@
 import ast
 import os.path
 import re
-import sys
 
 from setuptools import find_packages, setup
 
@@ -14,10 +13,6 @@ with open(os.path.join('bioblend', '__init__.py')) as f:
         if m:
             version = ast.literal_eval(m.group(1))
             break
-
-tests_require = ['nose>=1.3.1']
-if sys.version_info < (3, 3):
-    tests_require.append('mock>=0.7.0')
 
 setup(
     name="bioblend",
@@ -34,7 +29,6 @@ setup(
         'requests-toolbelt',
         'six'
     ],
-    tests_require=tests_require,
     packages=find_packages(exclude=['tests']),
     package_data={'bioblend': ['_tests/data/*']},
     entry_points={
@@ -59,5 +53,5 @@ setup(
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Topic :: Scientific/Engineering",
-    ],
-    test_suite='nose.collector')
+    ]
+)

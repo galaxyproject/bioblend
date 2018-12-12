@@ -1,6 +1,3 @@
-"""
-Use ``nose`` to run these unit tests.
-"""
 import shutil
 import tempfile
 

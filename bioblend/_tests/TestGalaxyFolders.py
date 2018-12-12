@@ -1,6 +1,3 @@
-"""
-Use ``nose`` to run these unit tests.
-"""
 from . import GalaxyTestBase, test_util
 
 FOO_DATA = 'foo\nbar\n'

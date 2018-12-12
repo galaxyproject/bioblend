@@ -1,7 +1,5 @@
 """
 Tests on the GalaxyInstance object itself.
-
-Use ``nose`` to run these unit tests.
 """
 import time
 

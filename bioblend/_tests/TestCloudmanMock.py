@@ -4,8 +4,6 @@ calls to a remote CloudMan instance/server. These don't actually ensure
 that BioBlend is integrated with CloudMan correctly. They only ensure that
 if you refactor the BioBlend CloudMan API code, that it will maintain its
 current behaviour.
-
-Use ``nose`` to run these unit tests.
 """
 try:
     from unittest.mock import MagicMock

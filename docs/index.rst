@@ -132,9 +132,9 @@ two variables::
     $ export BIOBLEND_GALAXY_API_KEY=<API key>
 
 The unit tests, stored in the ``tests`` folder, can be run using
-`nose <https://nose.readthedocs.io/>`_. From the project root::
+`pytest <https://docs.pytest.org/>`_. From the project root::
 
-    $ nosetests
+    $ pytest
 
 Getting help
 ============

@@ -90,5 +90,4 @@ before_script:
   - export BIOBLEND_GALAXY_URL=http://localhost:8080
 
 script:
-  # Run nosetests through setuptools, so it will install test depedencies
   - cd $TRAVIS_BUILD_DIR && tox -e $TOX_ENV

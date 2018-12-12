@@ -1,3 +1,7 @@
+### BioBlend v - unreleased
+
+* Run tests with pytest instead of nose
+
 ### BioBlend v0.11.0 - 2018-04-18
 
 * Dropped supported for Python 3.3. Added support for Galaxy release 18.01.

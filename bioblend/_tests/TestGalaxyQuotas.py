@@ -1,6 +1,3 @@
-"""
-Use ``nose`` to run these unit tests.
-"""
 import uuid
 
 from . import GalaxyTestBase

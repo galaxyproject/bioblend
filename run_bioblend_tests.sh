@@ -15,8 +15,9 @@ Options:
   -e TOX_ENV
       Work against specified tox environments. Defaults to py27.
   -t BIOBLEND_TESTS
-      Subset of tests to run, e.g. 'tests/TestGalaxyObjects.py:TestHistory'.
-      See 'man nosetests' for more information. Defaults to all tests.
+      Subset of tests to run, e.g.
+      'tests/TestGalaxyObjects.py::TestHistory::test_create_delete' . Defaults
+      to all tests.
   -r GALAXY_REV
       Branch or commit of the local Galaxy git repository to checkout.
   -c
@@ -103,7 +104,7 @@ export BIOBLEND_GALAXY_URL=http://localhost:${GALAXY_PORT}
 # Run the tests
 cd "${BIOBLEND_DIR}" || exit 1
 if [ -n "${t_val}" ]; then
-  tox -e "${e_val}" -- --tests "${t_val}"
+  tox -e "${e_val}" -- "${t_val}"
 else
   tox -e "${e_val}"
 fi
