@@ -1,7 +1,26 @@
-### BioBlend v - unreleased
+### BioBlend v0.12.0 - 2018-12-17
 
 * Added supported for Python 3.7. Added support for Galaxy releases 18.05 and
   18.09.
+
+* Added ``update_library_dataset()`` method to ``LibraryClient`` (thanks to
+  Anthony Bretaudeau).
+
+* Added ``preserve_dirs`` and ``tag_using_filenames`` parameters to
+  ``upload_file_from_server()`` and ``upload_from_galaxy_filesystem()`` methods
+  of ``LibraryClient`` (thanks to Anthony Bretaudeau).
+
+* Removed deprecated ``wait_for_completion`` parameter of
+  ``DatasetClient.download_dataset()`` method.
+
+* BioBlend.objects: added ``genome_build`` and ``misc_info`` attributes to
+  ``Dataset`` objects. Moved ``deleted`` attribute from ``Dataset`` to
+  ``HistoryDatasetAssociation`` and ``LibraryDatasetDatasetAssociation``
+  objects. Moved ``purged`` attribute from ``Dataset`` to
+  ``HistoryDatasetAssociation`` objects.
+
+* BioBlend.objects: added ``update()`` method to ``LibraryDataset`` (thanks to
+  Anthony Bretaudeau).
 
 * Run tests with pytest instead of nose
 
@@ -112,7 +131,7 @@
 
 ### BioBlend v0.8.0 - 2016-08-11
 
-* Removed deprecated method ``create_user()`` of ``UserClient``.
+* Removed deprecated ``create_user()`` method of ``UserClient``.
 
 * Deprecated ``HistoryClient.download_dataset()`` in favor of
   ``DatasetClient.download_dataset()``.

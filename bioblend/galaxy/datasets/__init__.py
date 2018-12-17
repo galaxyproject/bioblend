@@ -42,7 +42,7 @@ class DatasetClient(Client):
         return self._get(id=dataset_id, deleted=deleted, params=params)
 
     def download_dataset(self, dataset_id, file_path=None, use_default_filename=True,
-                         wait_for_completion=True, maxwait=12000):
+                         maxwait=12000):
         """
         Download a dataset to file or in memory. If the dataset state is not
         'ok', a ``DatasetStateException`` will be thrown.
@@ -63,10 +63,6 @@ class DatasetClient(Client):
                                  where %s is the dataset name.
                                  If this argument is False, file_path is assumed to
                                  contain the full file path including the filename.
-
-        :type wait_for_completion: bool
-        :param wait_for_completion: This parameter is deprecated and ignored, it
-          will be removed in BioBlend 0.12.
 
         :type maxwait: float
         :param maxwait: Total time (in seconds) to wait for the dataset state to
