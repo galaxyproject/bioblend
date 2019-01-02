@@ -1,9 +1,13 @@
 IN_VENV=. .venv/bin/activate
 
-.PHONY: release venv
+.PHONY: clean release venv
 
 all:
 	@echo "This makefile is used for the release process. A sensible all target is not implemented."
+
+clean:
+	rm -rf bioblend.egg-info/ build/ dist/
+	make -C docs/ clean
 
 venv:
 	# Create and activate a virtual environment
@@ -15,14 +19,10 @@ venv:
 	  pip install --upgrade twine wheel; \
 	)
 
-release: venv
-	# Cleanup
-	rm -rf bioblend.egg-info/ build/ dist/
-	make -C docs/ clean
+release: clean venv
 	( $(IN_VENV); \
 	  # Create files in dist/ \
-	  python setup.py sdist; \
-	  python setup.py bdist_wheel; \
+	  python setup.py sdist bdist_wheel; \
 	  twine upload dist/*; \
 	  deactivate; \
 	)
