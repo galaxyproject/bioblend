@@ -10,10 +10,6 @@
     :target: https://travis-ci.org/galaxyproject/bioblend
     :alt: Build Status
 
-.. image:: https://landscape.io/github/galaxyproject/bioblend/master/landscape.svg?style=flat
-    :target: https://landscape.io/github/galaxyproject/bioblend/master
-    :alt: Code Health
-
 
 BioBlend is a Python library for interacting with `CloudMan`_ and `Galaxy`_'s
 API.
