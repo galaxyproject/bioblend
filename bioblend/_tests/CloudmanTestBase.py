@@ -4,7 +4,7 @@ credentials to supported cloud infrastructure.
 """
 import os
 
-from bioblend.cloudman.launch import Bunch
+from bioblend.util import Bunch
 from . import test_util
 from .test_util import unittest
 
