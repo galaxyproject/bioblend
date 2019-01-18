@@ -43,7 +43,7 @@ class WorkflowClient(Client):
             raise ValueError('Provide only one argument between name or workflow_id, but not both')
         params = {}
         if published:
-            params['show_published'] = 'True'
+            params['show_published'] = True
         workflows = self._get(params=params)
         if workflow_id is not None:
             workflow = next((_ for _ in workflows if _['id'] == workflow_id), None)
