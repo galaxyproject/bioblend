@@ -26,7 +26,7 @@ setup(
         'boto>=2.9.7',
         'pyyaml',
         'requests>=2.20.0',
-        'requests-toolbelt',
+        'requests-toolbelt>=0.5.1',
         'six'
     ],
     packages=find_packages(exclude=['tests']),
