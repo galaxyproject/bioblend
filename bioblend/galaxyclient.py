@@ -14,6 +14,7 @@ from requests_toolbelt import MultipartEncoder
 from six.moves.urllib.parse import urljoin, urlparse
 
 from bioblend import ConnectionError
+from bioblend.util import FileStream
 
 
 class GalaxyClient(object):
@@ -113,6 +114,17 @@ class GalaxyClient(object):
 
         :return: The decoded response.
         """
+
+        def my_dumps(d):
+            """
+            Apply ``json.dumps()`` to the values of the dict ``d`` if they are
+            not of type ``FileStream``.
+            """
+            for k, v in d.items():
+                if not isinstance(v, FileStream):
+                    d[k] = json.dumps(v)
+            return d
+
         if params is not None and params.get('key', False) is False:
             params['key'] = self.key
         else:
@@ -122,6 +134,7 @@ class GalaxyClient(object):
         # leveraging the requests-toolbelt library if any files have
         # been attached.
         if files_attached:
+            payload = my_dumps(payload)
             payload.update(params)
             payload = MultipartEncoder(fields=payload)
             headers = self.json_headers.copy()

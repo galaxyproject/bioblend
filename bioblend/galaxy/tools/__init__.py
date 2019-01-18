@@ -1,7 +1,6 @@
 """
 Contains possible interaction dealing with Galaxy tools.
 """
-from json import dumps
 from os.path import basename
 
 from bioblend.galaxy.client import Client
@@ -124,7 +123,7 @@ class ToolClient(Client):
             payload["inputs"] = tool_inputs.to_dict()
         except AttributeError:
             payload["inputs"] = tool_inputs
-        return self._tool_post(payload)
+        return self._post(payload)
 
     def upload_file(self, path, history_id, **keywords):
         """
@@ -160,7 +159,7 @@ class ToolClient(Client):
         payload = self._upload_payload(history_id, **keywords)
         payload["files_0|file_data"] = attach_file(path, name=keywords["file_name"])
         try:
-            return self._tool_post(payload, files_attached=True)
+            return self._post(payload, files_attached=True)
         finally:
             payload["files_0|file_data"].close()
 
@@ -179,7 +178,7 @@ class ToolClient(Client):
         """
         payload = self._upload_payload(history_id, **keywords)
         payload['files_0|ftp_files'] = path
-        return self._tool_post(payload)
+        return self._post(payload)
 
     def paste_content(self, content, history_id, **kwds):
         """
@@ -197,7 +196,7 @@ class ToolClient(Client):
         """
         payload = self._upload_payload(history_id, **kwds)
         payload["files_0|url_paste"] = content
-        return self._tool_post(payload, files_attached=False)
+        return self._post(payload, files_attached=False)
 
     put_url = paste_content
 
@@ -217,17 +216,3 @@ class ToolClient(Client):
         tool_input["files_0|type"] = "upload_dataset"
         payload["inputs"] = tool_input
         return payload
-
-    def _tool_post(self, payload, files_attached=False):
-        if files_attached:
-            # If files_attached - this will be posted as multi-part form data
-            # and so each individual parameter needs to be encoded so can be
-            # decoded as JSON by Galaxy (hence dumping complex parameters).
-            # If no files are attached, the whole thing is posted as
-            # application/json and dumped/loaded all at once by requests and
-            # Galaxy.
-            complex_payload_params = ["inputs"]
-            for key in complex_payload_params:
-                if key in payload:
-                    payload[key] = dumps(payload[key])
-        return self._post(payload, files_attached=files_attached)
