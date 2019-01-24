@@ -286,7 +286,7 @@ class LibraryClient(Client):
         """
         if library_id is not None and name is not None:
             raise ValueError('Provide only one argument between name or library_id, but not both')
-        libraries = self._get(deleted=deleted)
+        libraries = self._get(params={"deleted":deleted})
         if library_id is not None:
             library = next((_ for _ in libraries if _['id'] == library_id), None)
             libraries = [library] if library is not None else []

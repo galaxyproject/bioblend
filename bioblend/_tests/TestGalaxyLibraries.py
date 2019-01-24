@@ -12,7 +12,10 @@ class TestGalaxyLibraries(GalaxyTestBase.GalaxyTestBase):
     def setUp(self):
         super(TestGalaxyLibraries, self).setUp()
         self.name = 'automated test library'
+        self.deleted_name = 'deleted test library'
         self.library = self.gi.libraries.create_library(self.name, description='automated test', synopsis='automated test synopsis')
+        self.deleted_library = self.gi.libraries.create_library(self.deleted_name, description='a deleted library', synopsis='automated test synopsis')
+        self.gi.libraries.delete_library(self.deleted_library['id'])
 
     def tearDown(self):
         self.gi.libraries.delete_library(self.library['id'])
@@ -23,8 +26,15 @@ class TestGalaxyLibraries(GalaxyTestBase.GalaxyTestBase):
 
     def test_get_libraries(self):
         # Make sure there's at least one value - the one we created
-        all_libraries = self.gi.libraries.get_libraries()
-        self.assertGreaterEqual(len(all_libraries), 1)
+        # deleted = False -> default
+        all_libraries = self.gi.libraries.get_libraries(deleted=None) # all
+        deleted_libraries = self.gi.libraries.get_libraries(deleted=True, library_id=self.deleted_library['id'])
+        viable_libraries = self.gi.libraries.get_libraries(deleted=False, library_id=self.library['id'])
+        self.assertEqual(len(deleted_libraries), 1)
+        self.assertTrue(deleted_libraries[0]['name'] == self.deleted_name)
+        self.assertEqual(len(viable_libraries), 1)
+        self.assertTrue(viable_libraries[0]['name'] == self.name)
+        self.assertGreaterEqual(len(all_libraries), 2)
 
     def test_show_library(self):
         library_data = self.gi.libraries.show_library(self.library['id'])
