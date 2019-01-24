@@ -25,9 +25,9 @@ class TestGalaxyLibraries(GalaxyTestBase.GalaxyTestBase):
         self.assertIsNotNone(self.library['id'])
 
     def test_get_libraries(self):
-        # Make sure there's at least one value - the one we created
-        # deleted = False -> default
-        all_libraries = self.gi.libraries.get_libraries(deleted=None) # all
+        # Make sure there's at least two values - the two we created
+        #  - one deleted, one not, with the same IDs provided on creation
+        all_libraries = self.gi.libraries.get_libraries(deleted=None)
         deleted_libraries = self.gi.libraries.get_libraries(deleted=True, library_id=self.deleted_library['id'])
         viable_libraries = self.gi.libraries.get_libraries(deleted=False, library_id=self.library['id'])
         self.assertEqual(len(deleted_libraries), 1)
