@@ -29,8 +29,8 @@ class ToolClient(Client):
         :param name: name of the requested tool(s)
 
         :type trackster: bool
-        :param trackster: if True, only tools that are compatible with
-          Trackster are returned
+        :param trackster: whether to return only tools that are compatible with
+          Trackster
 
         :rtype: list
         :return: List of tool descriptions.
@@ -86,10 +86,10 @@ class ToolClient(Client):
         :param tool_id: id of the requested tool
 
         :type io_details: bool
-        :param io_details: if True, get also input and output details
+        :param io_details: whether to get also input and output details
 
         :type link_details: bool
-        :param link_details: if True, get also link details
+        :param link_details: whether to get also link details
         """
         params = {}
         params['io_details'] = io_details
@@ -146,13 +146,13 @@ class ToolClient(Client):
         :param dbkey: (optional) genome dbkey
 
         :type to_posix_lines: bool
-        :param to_posix_lines: if True, convert universal line endings to POSIX
-          line endings. Default is True. Set to False if you upload a gzip, bz2
-          or zip archive containing a binary file
+        :param to_posix_lines: if ``True`` (the default), convert universal line
+          endings to POSIX line endings. Set to ``False`` when uploading a gzip,
+          bz2 or zip archive containing a binary file
 
         :type space_to_tab: bool
         :param space_to_tab: whether to convert spaces to tabs. Default is
-          False. Applicable only if to_posix_lines is True
+          ``False``. Applicable only if to_posix_lines is ``True``
         """
         if "file_name" not in keywords:
             keywords["file_name"] = basename(path)

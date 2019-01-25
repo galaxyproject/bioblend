@@ -52,16 +52,16 @@ class DatasetClient(Client):
 
         :type file_path: str
         :param file_path: If this argument is provided, the dataset will be streamed to disk
-                          at that path (should be a directory if use_default_filename=True).
+                          at that path (should be a directory if ``use_default_filename=True``).
                           If the file_path argument is not provided, the dataset content is loaded into memory
                           and returned by the method (Memory consumption may be heavy as the entire file
                           will be in memory).
 
         :type use_default_filename: bool
-        :param use_default_filename: If this argument is True, the exported
-                                 file will be saved as file_path/%s,
-                                 where %s is the dataset name.
-                                 If this argument is False, file_path is assumed to
+        :param use_default_filename: If ``True``, the exported
+                                 file will be saved as ``file_path/%s``,
+                                 where ``%s`` is the dataset name.
+                                 If ``False``, ``file_path`` is assumed to
                                  contain the full file path including the filename.
 
         :type maxwait: float
@@ -70,7 +70,7 @@ class DatasetClient(Client):
           time, a ``DatasetTimeoutException`` will be thrown.
 
         :rtype: dict
-        :return: If a file_path argument is not provided, returns a dict containing the file_content.
+        :return: If a ``file_path`` argument is not provided, returns a dict containing the file content.
                  Otherwise returns nothing.
         """
         dataset = self._block_until_dataset_terminal(dataset_id, maxwait=maxwait)

@@ -278,8 +278,9 @@ class LibraryClient(Client):
           all the libraries matching the argument will be returned
 
         :type deleted: bool
-        :param deleted: If set to ``True``, return libraries that have been
-          deleted
+        :param deleted: If ``False`` (the default), return only non-deleted
+          libraries. If ``True``, return only deleted libraries. If ``None`,
+          return both deleted and non-deleted libraries.
 
         :rtype: list
         :return: list of dicts each containing basic information about a library
@@ -302,7 +303,7 @@ class LibraryClient(Client):
         :param library_id: filter for library by library id
 
         :type contents: bool
-        :param contents: True if want to get contents of the library (rather
+        :param contents: whether to get contents of the library (rather
           than just the library details)
 
         :rtype: dict
