@@ -22,17 +22,16 @@ class TestGalaxyLibraries(GalaxyTestBase.GalaxyTestBase):
         self.assertIsNotNone(self.library['id'])
 
     def test_get_libraries(self):
+        library_data = self.gi.libraries.get_libraries(library_id=self.library['id'], deleted=False)[0]
+        self.assertTrue(library_data['name'] == self.name)
         deleted_name = 'deleted test library'
         deleted_library = self.gi.libraries.create_library(deleted_name, description='a deleted library', synopsis='automated test synopsis')
         self.gi.libraries.delete_library(deleted_library['id'])
-        # Make sure there's at least two values - the two we created
-        #  - one deleted, one not, with the same IDs provided on creation
-        all_libraries = self.gi.libraries.get_libraries(deleted=None)
-        self.assertGreaterEqual(len(all_libraries), 2)
-        library_data = self.gi.libraries.get_libraries(library_id=self.library['id'], deleted=False)[0]
-        self.assertTrue(library_data['name'] == self.name)
         deleted_library_data = self.gi.libraries.get_libraries(library_id=deleted_library['id'], deleted=True)[0]
         self.assertTrue(deleted_library_data['name'] == deleted_name)
+        all_libraries = self.gi.libraries.get_libraries(deleted=None)
+        self.assertTrue(any(l['id'] == self.library['id'] for l in all_libraries))
+        self.assertTrue(any(l['id'] == deleted_library['id'] for l in all_libraries))
 
     def test_show_library(self):
         library_data = self.gi.libraries.show_library(self.library['id'])
