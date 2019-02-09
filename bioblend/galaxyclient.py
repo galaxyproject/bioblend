@@ -162,13 +162,14 @@ class GalaxyClient(object):
         """
         Make a DELETE request using the provided ``url`` and the optional
         arguments.
-        The ``payload`` must be a dict that can be converted into a JSON
-        object (via ``json.dumps``)
 
         If the ``params`` are not provided, use ``default_params`` class field.
         If params are provided and the provided dict does not have ``key`` key,
         the default ``self.key`` value will be included in what's passed to
         the server via the request.
+
+        :type payload: dict
+        :param payload: a JSON-serializable dictionary
 
         :rtype: requests.Response
         :return: the response object.
@@ -187,8 +188,9 @@ class GalaxyClient(object):
     def make_put_request(self, url, payload=None, params=None):
         """
         Make a PUT request using the provided ``url`` with required payload.
-        The ``payload`` must be a dict that can be converted into a JSON
-        object (via ``json.dumps``).
+
+        :type payload: dict
+        :param payload: a JSON-serializable dictionary
 
         :return: The decoded response.
         """
@@ -214,8 +216,9 @@ class GalaxyClient(object):
     def make_patch_request(self, url, payload=None, params=None):
         """
         Make a PATCH request using the provided ``url`` with required payload.
-        The ``payload`` must be a dict that can be converted into a JSON
-        object (via ``json.dumps``).
+
+        :type payload: dict
+        :param payload: a JSON-serializable dictionary
 
         :return: The decoded response.
         """
