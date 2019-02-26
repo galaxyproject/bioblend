@@ -6,6 +6,7 @@ services:
 env:
   - TOX_ENV=py35 GALAXY_VERSION=dev
   - TOX_ENV=py27 GALAXY_VERSION=dev
+  - TOX_ENV=py27 GALAXY_VERSION=release_19.01
   - TOX_ENV=py27 GALAXY_VERSION=release_18.09
   - TOX_ENV=py27 GALAXY_VERSION=release_18.05
   - TOX_ENV=py27 GALAXY_VERSION=release_18.01
