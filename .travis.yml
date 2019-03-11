@@ -79,8 +79,8 @@ before_script:
   - cd $HOME
   - wget https://github.com/galaxyproject/galaxy/archive/${GALAXY_VERSION}.tar.gz
   - tar xvzf ${GALAXY_VERSION}.tar.gz | tail
-  # Releases/dev branch are named differently
-  - cd galaxy-${GALAXY_VERSION}/
+  - cd galaxy-${GALAXY_VERSION}
+  - GALAXY_DIR=$PWD
   # Export GALAXY_CONFIG_FILE environment variable to be used by run_galaxy.sh
   - export GALAXY_CONFIG_FILE=config/galaxy.ini
   # Export BIOBLEND_ environment variables to be used in BioBlend tests
@@ -99,4 +99,8 @@ before_script:
   - export BIOBLEND_GALAXY_URL=http://localhost:8080
 
 script:
-  - cd $TRAVIS_BUILD_DIR && tox -e $TOX_ENV
+  - cd ${TRAVIS_BUILD_DIR}
+  - tox -e $TOX_ENV
+
+after_failure:
+  - cat ${GALAXY_DIR}/main.log
