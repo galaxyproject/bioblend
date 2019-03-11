@@ -149,7 +149,7 @@ class DatasetClient(Client):
                 return dataset
             time_left -= interval
             if time_left > 0:
-                log.warning("Waiting for dataset %s to complete. Will wait another %i s" % (dataset_id, time_left))
+                log.warning("Waiting for dataset %s to complete. Will wait %i more s" % (dataset_id, time_left))
                 time.sleep(min(time_left, interval))
             else:
                 raise DatasetTimeoutException("Waited too long for dataset %s to complete" % dataset_id)

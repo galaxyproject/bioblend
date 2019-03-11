@@ -152,8 +152,7 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
 
     def test_download_history(self):
         jeha_id = self.gi.histories.export_history(
-            self.history['id'], wait=True
-        )
+            self.history['id'], wait=True, maxwait=60)
         self.assertTrue(jeha_id)
         tempdir = tempfile.mkdtemp(prefix='bioblend_test_')
         temp_fn = os.path.join(tempdir, 'export.tar.gz')

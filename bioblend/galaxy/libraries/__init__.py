@@ -171,7 +171,7 @@ class LibraryClient(Client):
             if state in terminal_states:
                 return dataset
             if time_left > 0:
-                log.warning("Waiting for library %s dataset %s to complete. Will wait another %i s", library_id, dataset_id, time_left)
+                log.warning("Waiting for library %s dataset %s to complete. Will wait %i more s", library_id, dataset_id, time_left)
                 time.sleep(min(time_left, interval))
             else:
                 raise DatasetTimeoutException("Waited too long for library %s dataset %s to complete" % (library_id, dataset_id))

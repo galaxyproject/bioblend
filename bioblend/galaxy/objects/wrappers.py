@@ -1062,18 +1062,15 @@ class History(DatasetContainer):
         return self.get_dataset(out_dict['outputs'][0]['id'])
 
     def export(self, gzip=True, include_hidden=False, include_deleted=False,
-               wait=False):
+               wait=False, maxwait=None):
         """
         Start a job to create an export archive for this history.  See
         :meth:`~bioblend.galaxy.histories.HistoryClient.export_history`
         for parameter and return value info.
         """
         return self.gi.gi.histories.export_history(
-            self.id,
-            gzip=gzip,
-            include_hidden=include_hidden,
-            include_deleted=include_deleted,
-            wait=wait)
+            self.id, gzip=gzip, include_hidden=include_hidden,
+            include_deleted=include_deleted, wait=wait, maxwait=maxwait)
 
     def download(self, jeha_id, outf, chunk_size=bioblend.CHUNK_SIZE):
         """

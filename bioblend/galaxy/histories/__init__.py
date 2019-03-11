@@ -4,6 +4,7 @@ Contains possible interactions with the Galaxy Histories
 import logging
 import os
 import re
+import sys
 import time
 
 import six
@@ -504,7 +505,7 @@ class HistoryClient(Client):
         return self._get(url=url)
 
     def export_history(self, history_id, gzip=True, include_hidden=False,
-                       include_deleted=False, wait=False):
+                       include_deleted=False, wait=False, maxwait=None):
         """
         Start a job to create an export archive for the given history.
 
@@ -526,6 +527,10 @@ class HistoryClient(Client):
         :param wait: if ``True``, block until the export is ready; else, return
           immediately
 
+        :type maxwait: float
+        :param maxwait: Total time (in seconds) to wait for the export to become
+          ready. When set, implies that ``wait`` is ``True``.
+
         :rtype: str
         :return: ``jeha_id`` of the export, or empty if ``wait`` is ``False``
           and the export is not ready.
@@ -536,13 +541,18 @@ class HistoryClient(Client):
             'include_deleted': include_deleted,
         }
         url = '%s/exports' % self.gi._make_url(self, history_id)
+        if wait and maxwait is None:
+            maxwait = sys.maxsize
+        time_left = maxwait
         while True:
             try:
                 r = self._put(payload={}, url=url, params=params)
             except ConnectionError as e:
                 if e.status_code == 202:  # export is not ready
-                    if wait:
-                        log.warning("Waiting for the export of history %s to complete" % (history_id))
+                    if maxwait is not None:
+                        time_left -= 1
+                    if time_left > 0:
+                        log.warning("Waiting for the export of history %s to complete. Will wait %i more s" % (history_id, time_left))
                         time.sleep(1)
                     else:
                         return ''

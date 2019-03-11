@@ -616,7 +616,7 @@ class TestHistory(GalaxyObjectsTestBase):
         self.assertEqual(selected[0].name, bnames[0])
 
     def test_export_and_download(self):
-        jeha_id = self.hist.export(wait=True)
+        jeha_id = self.hist.export(wait=True, maxwait=60)
         self.assertTrue(jeha_id)
         tempdir = tempfile.mkdtemp(prefix='bioblend_test_')
         temp_fn = os.path.join(tempdir, 'export.tar.gz')
