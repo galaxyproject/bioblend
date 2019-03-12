@@ -1,6 +1,7 @@
 """
 Contains possible interactions with the Galaxy Histories
 """
+import logging
 import os
 import re
 import time
@@ -10,6 +11,8 @@ import six
 import bioblend
 from bioblend import ConnectionError
 from bioblend.galaxy.client import Client
+
+log = logging.getLogger(__name__)
 
 
 class HistoryClient(Client):
@@ -539,6 +542,7 @@ class HistoryClient(Client):
             except ConnectionError as e:
                 if e.status_code == 202:  # export is not ready
                     if wait:
+                        log.warning("Waiting for the export of history %s to complete" % (history_id))
                         time.sleep(1)
                     else:
                         return ''
