@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 
 show_help () {
   echo "Usage:  $0 -g GALAXY_DIR [-p PORT] [-e TOX_ENV] [-t BIOBLEND_TESTS] [-r GALAXY_REV] [-c]
@@ -54,16 +55,16 @@ fi
 
 # Install BioBlend
 BIOBLEND_DIR=$(get_abs_dirname "$(dirname "$0")")
-cd "${BIOBLEND_DIR}" || exit 1
+cd "${BIOBLEND_DIR}"
 if [ ! -d .venv ]; then
   virtualenv .venv
 fi
 . .venv/bin/activate
-python setup.py install || exit 1
+python setup.py install
 pip install --upgrade "tox>=1.8.0"
 
 # Setup Galaxy
-cd "${g_val}" || exit 1
+cd "${g_val}"
 if [ -n "${r_val}" ]; then
     # Update repository (may change the sample files or the list of eggs)
     git fetch
@@ -98,11 +99,11 @@ fi
 
 # Start Galaxy and wait for successful server start
 export GALAXY_SKIP_CLIENT_BUILD=1
-GALAXY_RUN_ALL=1 "${BIOBLEND_DIR}/run_galaxy.sh" --daemon --wait || exit 1
+GALAXY_RUN_ALL=1 "${BIOBLEND_DIR}/run_galaxy.sh" --daemon --wait
 export BIOBLEND_GALAXY_URL=http://localhost:${GALAXY_PORT}
 
 # Run the tests
-cd "${BIOBLEND_DIR}" || exit 1
+cd "${BIOBLEND_DIR}"
 if [ -n "${t_val}" ]; then
   tox -e "${e_val}" -- "${t_val}"
 else
@@ -112,7 +113,7 @@ exit_code=$?
 deactivate
 
 # Stop Galaxy
-cd "${g_val}" || exit 1
+cd "${g_val}"
 GALAXY_RUN_ALL=1 "${BIOBLEND_DIR}/run_galaxy.sh" --daemon stop
 # Remove temporary directory if -c is specified or if all tests passed
 if [ -n "${c_val}" ] || [ $exit_code -eq 0 ]; then
