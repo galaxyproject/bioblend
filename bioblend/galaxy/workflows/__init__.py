@@ -453,7 +453,7 @@ class WorkflowClient(Client):
         At the time of this writing, the ability to set the second parameter (or the n-th) is limited by the workflow
         provided in the invoke call to have been added at least 2 parameters before being exported in the UI. If the UI,
         at the moment of exporting the workflow, only had one parameter of the repeat set there, then only the first element
-        above ("n_genes") will be set succesfully on calling ``invoke_workflow``.
+        above ("n_genes") will be set successfully when calling ``invoke_workflow``.
 
         The ``replacement_params`` dict should map parameter names in
         post-job actions (PJAs) to their runtime values. For
