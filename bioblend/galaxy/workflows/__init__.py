@@ -429,9 +429,9 @@ class WorkflowClient(Client):
           {'param': PARAM_NAME, 'value': VALUE}
 
         Note that this format allows only one parameter to be set per step.
-        
+
         Note that for a repeat parameter configured in the tool XML like::
-        
+
           <repeat name="cutoff" title="Parameters used to filter cells" min="1">
             <param name="name" type="text" value="n_genes" label="Name of param...">
               <option value="n_genes">n_genes</option>
@@ -440,16 +440,20 @@ class WorkflowClient(Client):
             <param name="min" type="float" value="0" min="0" label="Min value"/>
             <param name="max" type="float" value="1e9" label="Max value"/>
           </repeat>
-          
+
         the content of the parameter dictionary for that step needs to follow this syntax::
-        
-          "cutoff_0|name": "n_genes",
-          "cutoff_0|min": "2",
-          "cutoff_0|max": "1000.0",
-          "cutoff_1|name": "n_counts",
-          "cutoff_1|min": "4",
-          "cutoff_1|max": "19000.0",
-          
+
+          "step_id": {
+            ...
+            "cutoff_0|name": "n_genes",
+            "cutoff_0|min": "2",
+            "cutoff_0|max": "1000.0",
+            "cutoff_1|name": "n_counts",
+            "cutoff_1|min": "4",
+            "cutoff_1|max": "19000.0",
+            ...
+          }
+
         At the time of this writing, the ability to set the second parameter (or the n-th) is limited by the workflow
         provided in the invoke call to have been added at least 2 parameters before being exported in the UI. If the UI,
         at the moment of exporting the workflow, only had one parameter of the repeat set there, then only the first element
