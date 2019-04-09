@@ -430,7 +430,7 @@ class WorkflowClient(Client):
 
         Note that this format allows only one parameter to be set per step.
         
-        Note that for a repeat parameter configured in the tool xml like::
+        Note that for a repeat parameter configured in the tool XML like::
         
           <repeat name="cutoff" title="Parameters used to filter cells" min="1">
             <param name="name" type="text" value="n_genes" label="Name of param...">
