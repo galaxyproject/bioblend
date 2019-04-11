@@ -456,7 +456,7 @@ class WorkflowClient(Client):
         At the time of this writing, it is not possible to change the number of
         times the contained parameters are repeated. Therefore, the parameter
         indexes can go from 0 to n-1, where n is the number of times the
-        repeated element was added when the workflow was saved.
+        repeated element was added when the workflow was saved in the Galaxy UI.
 
         The ``replacement_params`` dict should map parameter names in
         post-job actions (PJAs) to their runtime values. For
