@@ -430,6 +430,34 @@ class WorkflowClient(Client):
 
         Note that this format allows only one parameter to be set per step.
 
+        For a ``repeat`` parameter, the names of the contained parameters needs
+        to be specified as ``<repeat name>_<repeat index>|<param name>``, with
+        the repeat index starting at 0. For example, if the tool XML contains::
+
+          <repeat name="cutoff" title="Parameters used to filter cells" min="1">
+            <param name="name" type="text" value="n_genes" label="Name of param...">
+              <option value="n_genes">n_genes</option>
+              <option value="n_counts">n_counts</option>
+            </param>
+            <param name="min" type="float" value="0" min="0" label="Min value"/>
+          </repeat>
+
+        then the PARAM_DICT should be something like::
+
+          {
+            ...
+            "cutoff_0|name": "n_genes",
+            "cutoff_0|min": "2",
+            "cutoff_1|name": "n_counts",
+            "cutoff_1|min": "4",
+            ...
+          }
+
+        At the time of this writing, it is not possible to change the number of
+        times the contained parameters are repeated. Therefore, the parameter
+        indexes can go from 0 to n-1, where n is the number of times the
+        repeated element was added when the workflow was saved in the Galaxy UI.
+
         The ``replacement_params`` dict should map parameter names in
         post-job actions (PJAs) to their runtime values. For
         instance, if the final step has a PJA like the following::
