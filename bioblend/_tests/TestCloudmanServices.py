@@ -52,4 +52,4 @@ class TestCloudmanServices(CloudmanTestBase.CloudmanTestBase):
         self.cmi.adjust_autoscaling(minimum_nodes=3, maximum_nodes=4)
 
 #    def test_get_galaxy_state_stopped(self):
-#        self.assertEquals(self.cmi.get_galaxy_state(), "'Galaxy' is not running")
+#        self.assertEqual(self.cmi.get_galaxy_state(), "'Galaxy' is not running")

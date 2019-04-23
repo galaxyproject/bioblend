@@ -136,6 +136,6 @@ class TestCloudmanMock(unittest.TestCase):
         return_json = {"status": "'Galaxy' is not running", "srvc": "Galaxy"}
         self.cm._make_get_request = MagicMock(return_value=return_json)
 
-        self.assertEquals(self.cm.get_galaxy_state()['status'], "'Galaxy' is not running")
+        self.assertEqual(self.cm.get_galaxy_state()['status'], "'Galaxy' is not running")
         params = {'srvc': "Galaxy"}
         self.cm._make_get_request.assert_called_with("get_srvc_status", parameters=params)
