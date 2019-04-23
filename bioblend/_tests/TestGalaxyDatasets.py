@@ -3,7 +3,10 @@ import tempfile
 
 import six
 
-from . import GalaxyTestBase
+from . import (
+    GalaxyTestBase,
+    test_util
+)
 
 
 class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
@@ -17,9 +20,12 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
     def tearDown(self):
         self.gi.histories.delete_history(self.history_id, purge=True)
 
-    def test_show_dataset(self):
+    @test_util.skip_unless_galaxy('release_19.05')
+    def test_show_nonexistent_dataset(self):
         with self.assertRaises(Exception):
-            self.gi.datasets.show_dataset(None)
+            self.gi.datasets.show_dataset('nonexistent_id')
+
+    def test_show_dataset(self):
         self.gi.datasets.show_dataset(self.dataset_id)
 
     def test_download_dataset(self):
