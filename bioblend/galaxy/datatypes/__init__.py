@@ -14,6 +14,12 @@ class DatatypesClient(Client):
         """
         Get the list of all installed datatypes.
 
+        :type extension_only: bool
+        :param extension_only: Return only the extension rather than the datatype name
+
+        :type upload_only: bool
+        :param upload_only: Filter for datatypes wihch can be uploaded
+
         :rtype: list
         :return: A list of datatype names.
           For example::

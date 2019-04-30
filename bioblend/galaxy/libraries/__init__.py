@@ -241,6 +241,9 @@ class LibraryClient(Client):
         or ``folder_id`` in data library with id ``library_id``. Provide only
         one argument: ``name`` or ``folder_id``, but not both.
 
+        :type library_id: str
+        :param library_id: library id to use
+
         :type folder_id: str
         :param folder_id: filter for folder by folder id
 

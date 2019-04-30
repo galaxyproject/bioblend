@@ -52,6 +52,9 @@ class HistoryClient(Client):
         :type name: str
         :param name: Name of history to filter on
 
+        :type deleted: bool
+        :param deleted: Include deleted histories
+
         :rtype: list
         :return: Return a list of history element dicts. If more than one
                  history matches the given ``name``, return the list of all the
