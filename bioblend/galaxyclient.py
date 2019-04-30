@@ -22,7 +22,7 @@ class GalaxyClient(object):
     def __init__(self, url, key=None, email=None, password=None, verify=True, timeout=None):
         """
         :param verify: Whether to verify the server's TLS certificate
-        :type verify: boolean
+        :type verify: bool
         :param timeout: Timeout for requests operations, set to None for no timeout (the default).
         :type timeout: float
         """

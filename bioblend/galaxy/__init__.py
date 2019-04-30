@@ -47,7 +47,7 @@ class GalaxyInstance(GalaxyClient):
                          e-mail address. Ignored if key is supplied directly.
 
         :param verify: Whether to verify the server's TLS certificate
-        :type verify: boolean
+        :type verify: bool
         """
         super(GalaxyInstance, self).__init__(url, key, email, password, verify=verify)
         self.libraries = libraries.LibraryClient(self)
