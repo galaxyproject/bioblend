@@ -60,8 +60,8 @@ class FoldersClient(Client):
         :param undelete: If set to True, the folder will be undeleted
                          (i.e. the `deleted` mark will be removed)
 
-        :returns:   detailed folder information
-        :rtype:     dict
+        :return: detailed folder information
+        :rtype: dict
         """
         payload = {'undelete': undelete}
         return self._delete(payload=payload, id=folder_id)
