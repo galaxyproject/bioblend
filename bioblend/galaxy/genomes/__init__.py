@@ -13,6 +13,9 @@ class GenomeClient(Client):
     def get_genomes(self):
         """
         Returns a list of installed genomes
+
+        :rtype: list
+        :return: List of installed genomes
         """
         genomes = self._get()
         return genomes
@@ -35,6 +38,9 @@ class GenomeClient(Client):
 
         :type high: str
         :param high: high
+
+        :rtype: dict
+        :return: Information about the genome build
         """
         params = {}
         if num:
