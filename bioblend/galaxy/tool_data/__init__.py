@@ -76,6 +76,9 @@ class ToolDataClient(Client):
         :type values: str
         :param values: a "|" separated list of column contents, there must be a
           value for all the columns of the data table
+
+        :rtype: dict
+        :return: Remaining contents of the given data table
         """
         payload = {'values': values}
         return self._delete(payload=payload, id=data_table_id)
