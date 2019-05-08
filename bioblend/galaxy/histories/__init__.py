@@ -91,8 +91,10 @@ class HistoryClient(Client):
         :param details: Used when contents=True, includes dataset details. Set
           to 'all' for the most information
 
-        :type types: str
-        :param types: ???
+        :type types: list
+        :param types: When set allows filtering for history content types.
+           To return only datasets use ['dataset'], to only receive dataset collections
+           use ['dataset_collection']. If not set returns dataset collections and datasets
 
         :rtype: dict
         :return: details of the given history
@@ -106,7 +108,7 @@ class HistoryClient(Client):
             if visible is not None:
                 params['visible'] = visible
             if types is not None:
-                params['types'] = types.join(",")
+                params['types'] = types
         return self._get(id=history_id, contents=contents, params=params)
 
     def delete_dataset(self, history_id, dataset_id, purge=False):

@@ -68,6 +68,25 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
         self.assertEqual(self.history['name'], history_data['name'])
         self.assertEqual('new', history_data['state'])
 
+    def test_show_history_with_contents(self):
+        # Create a history
+        history_id = self.history["id"]
+        contents = self.gi.histories.show_history(self.history['id'], contents=True)
+        # Empty history has no datsets, content length should be 0
+        self.assertEqual(len(contents), 0)
+        self._test_dataset(history_id)
+        contents = self.gi.histories.show_history(self.history['id'], contents=True)
+        # history has 1 datset, content length should be 1
+        self.assertEqual(len(contents), 1)
+        contents = self.gi.histories.show_history(self.history['id'], contents=True, types=['dataset'])
+        # filtering for dataset, content length should still be 1
+        self.assertEqual(len(contents), 1)
+        contents = self.gi.histories.show_history(self.history['id'], contents=True, types=['dataset_collection'])
+        # filtering for dataset collection but there's no collection in the history
+        self.assertEqual(len(contents), 0)
+        contents = self.gi.histories.show_history(self.history['id'], contents=True, types=['dataset', 'dataset_collection'])
+        self.assertEqual(len(contents), 1)
+
     def test_create_history_tag(self):
         new_tag = 'tag1'
         self.gi.histories.create_history_tag(self.history['id'], new_tag)
