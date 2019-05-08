@@ -410,6 +410,9 @@ class HistoryClient(Client):
                                       'name': 'element 2',
                                       'src': 'hda'}],
              'name': 'My collection list'}
+
+        :rtype: dict
+        :return: Information about the new HDCA
         """
         try:
             collection_description = collection_description.to_dict()
@@ -449,6 +452,12 @@ class HistoryClient(Client):
         :type purge: bool
         :param purge: if ``True``, also purge (permanently delete) the history
 
+        :rtype: dict
+        :return: An error object if an error occurred or a dictionary
+                 containing; id: the encoded id of the history, deleted: if the
+                 history was marked as deleted, purged: if the history was
+                 purged
+
         .. note::
           For the purge option to work, the Galaxy instance must have the
           ``allow_user_dataset_purge`` option set to ``True`` in the
@@ -465,6 +474,9 @@ class HistoryClient(Client):
 
         :type history_id: str
         :param history_id: Encoded history ID
+
+        :rtype: str
+        :return: 'OK' if it was deleted
         """
         url = self.gi._make_url(self, history_id, deleted=True)
         # Append the 'undelete' action to the history URL
@@ -506,6 +518,9 @@ class HistoryClient(Client):
     def get_most_recently_used_history(self):
         """
         Returns the current user's most recently used history (not deleted).
+
+        :rtype: dict
+        :return: History representation
         """
         url = self.gi._make_url(self, None)
         url = '/'.join([url, 'most_recently_used'])
@@ -588,6 +603,9 @@ class HistoryClient(Client):
 
         :type chunk_size: int
         :param chunk_size: how many bytes at a time should be read into memory
+
+        :rtype: None
+        :return: None
         """
         url = '%s/exports/%s' % (
             self.gi._make_url(self, module_id=history_id), jeha_id)
