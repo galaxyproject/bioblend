@@ -15,7 +15,7 @@ class JobsClient(Client):
         Get the list of jobs of the current user.
 
         :rtype: list
-        :returns: list of dictionaries containing summary job information.
+        :return: list of dictionaries containing summary job information.
           For example::
 
             [{u'create_time': u'2014-03-01T16:16:48.640550',
@@ -98,7 +98,7 @@ class JobsClient(Client):
           to initiate a job
 
         :rtype: list
-        :returns: list of dictionaries containing summary job information of
+        :return: list of dictionaries containing summary job information of
           the jobs that match the requested job run
 
         This method is designed to scan the list of previously run jobs and find

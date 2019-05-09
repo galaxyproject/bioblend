@@ -99,6 +99,21 @@ class WorkflowClient(Client):
         :type publish: bool
         :param publish:  if ``True`` the uploaded workflow will be published;
                          otherwise it will be visible only by the user which uploads it (default)
+
+        :rtype: dict
+        :return: Information about the imported workflow.
+          For example::
+
+            {u'name': 'Training: 16S rRNA sequencing with mothur: main tutorial',
+             u'tags': [],
+             u'deleted': false,
+             u'latest_workflow_uuid': '368c6165-ccbe-4945-8a3c-d27982206d66',
+             u'url': '/api/workflows/94bac0a90086bdcf',
+             u'number_of_steps': 44,
+             u'published': false,
+             u'owner': 'jane-doe',
+             u'model_class': 'StoredWorkflow',
+             u'id': '94bac0a90086bdcf'}
         """
         payload = {'workflow': workflow_dict, 'publish': publish}
 
@@ -127,6 +142,21 @@ class WorkflowClient(Client):
         :type publish: bool
         :param publish:  if ``True`` the uploaded workflow will be published;
                          otherwise it will be visible only by the user which uploads it (default)
+
+        :rtype: dict
+        :return: Information about the imported workflow.
+          For example::
+
+            {u'name': 'Training: 16S rRNA sequencing with mothur: main tutorial',
+             u'tags': [],
+             u'deleted': false,
+             u'latest_workflow_uuid': '368c6165-ccbe-4945-8a3c-d27982206d66',
+             u'url': '/api/workflows/94bac0a90086bdcf',
+             u'number_of_steps': 44,
+             u'published': false,
+             u'owner': 'jane-doe',
+             u'model_class': 'StoredWorkflow',
+             u'id': '94bac0a90086bdcf'}
 
         """
         with open(file_local_path, 'r') as fp:
@@ -193,6 +223,9 @@ class WorkflowClient(Client):
           file will be saved as file_local_path/Galaxy-Workflow-%s.ga, where %s
           is the workflow name. If use_default_name is False, file_local_path
           is assumed to contain the full file path including filename.
+
+        :rtype: None
+        :return: None
         """
         workflow_dict = self.export_workflow_dict(workflow_id)
 
@@ -586,6 +619,9 @@ class WorkflowClient(Client):
 
         :type invocation_id: str
         :param invocation_id: Encoded workflow invocation ID
+
+        :rtype: dict
+        :return: The workflow invocation being cancelled
         """
         url = self._invocation_url(workflow_id, invocation_id)
         return self._delete(url=url)
@@ -640,6 +676,8 @@ class WorkflowClient(Client):
         :param action: Action to use when updating state, semantics depends on
            step type.
 
+        :rtype: dict
+        :return: Representation of the workflow invocation step
         """
         url = self._invocation_step_url(workflow_id, invocation_id, step_id)
         payload = {"action": action}
@@ -651,6 +689,9 @@ class WorkflowClient(Client):
 
         :type workflow_id: str
         :param workflow_id: Encoded workflow ID
+
+        :rtype: str
+        :return: A message about the deletion
 
         .. warning::
             Deleting a workflow is irreversible - all workflow data

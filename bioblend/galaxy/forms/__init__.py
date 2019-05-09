@@ -15,7 +15,7 @@ class FormsClient(Client):
         Get the list of all forms.
 
         :rtype: list
-        :returns: Displays a collection (list) of forms.
+        :return: Displays a collection (list) of forms.
           For example::
 
             [{u'id': u'f2db41e1fa331b3e',
@@ -59,7 +59,7 @@ class FormsClient(Client):
         :param  form_xml_text: Form xml to create a form on galaxy instance
 
         :rtype:     str
-        :returns:   Unique url of newly created form with encoded id
+        :return:   Unique URL of newly created form with encoded id
         """
         payload = form_xml_text
         return self._post(payload=payload)

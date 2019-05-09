@@ -96,6 +96,9 @@ class GroupsClient(Client):
         :type role_ids: list
         :param role_ids: New list of encoded role IDs for the group. It will
           substitute the previous list of roles (with [] if not specified)
+
+        :rtype: None
+        :return: None
         """
         payload = {
             'name': group_name,
@@ -171,6 +174,9 @@ class GroupsClient(Client):
 
         :type user_id: str
         :param user_id: Encoded user ID to remove from the group
+
+        :rtype: dict
+        :return: The user which was removed
         """
         url = '/'.join([self.gi._make_url(self, group_id), 'users', user_id])
         return self._delete(url=url)
@@ -184,6 +190,9 @@ class GroupsClient(Client):
 
         :type role_id: str
         :param role_id: Encoded role ID to remove from the group
+
+        :rtype: dict
+        :return: The role which was removed
         """
         url = '/'.join([self.gi._make_url(self, group_id), 'roles', role_id])
         return self._delete(url=url)

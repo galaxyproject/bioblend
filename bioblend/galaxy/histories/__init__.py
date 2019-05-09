@@ -52,6 +52,10 @@ class HistoryClient(Client):
         :type name: str
         :param name: Name of history to filter on
 
+        :type deleted: bool
+        :param deleted: whether to filter for the deleted histories (``True``)
+          or for the non-deleted ones (``False``)
+
         :rtype: list
         :return: Return a list of history element dicts. If more than one
                  history matches the given ``name``, return the list of all the
@@ -127,6 +131,8 @@ class HistoryClient(Client):
         :type purge: bool
         :param purge: if ``True``, also purge (permanently delete) the dataset
 
+        :rtype: None
+        :return: None
         .. note::
             For the purge option to work, the Galaxy instance must have the
             ``allow_user_dataset_purge`` option set to ``True`` in the
@@ -155,6 +161,9 @@ class HistoryClient(Client):
 
         :type dataset_collection_id: str
         :param dataset_collection_id: Encoded dataset collection ID
+
+        :rtype: None
+        :return: None
         """
         url = self.gi._make_url(self, history_id, contents=True)
         # Append the dataset_id to the base history contents URL
@@ -170,6 +179,9 @@ class HistoryClient(Client):
 
         :type dataset_id: str
         :param dataset_id: Encoded dataset ID
+
+        :rtype: dict
+        :return: Information about the dataset
         """
         url = self.gi._make_url(self, history_id, contents=True)
         # Append the dataset_id to the base history contents URL
@@ -185,6 +197,9 @@ class HistoryClient(Client):
 
         :type dataset_collection_id: str
         :param dataset_collection_id: Encoded dataset collection ID
+
+        :rtype: dict
+        :return: Information about the dataset collection
         """
         url = self.gi._make_url(self, history_id, contents=True)
         url = '/'.join([url, "dataset_collections", dataset_collection_id])
@@ -202,6 +217,9 @@ class HistoryClient(Client):
                             ``name_filter`` regular expression will be
                             returned; use plain strings for exact matches and
                             None to match all datasets in the history
+
+        :rtype: list
+        :return: List of dictionaries
         """
         if isinstance(name_filter, six.string_types):
             name_filter = re.compile(name_filter + '$')
@@ -224,6 +242,34 @@ class HistoryClient(Client):
         :type follow: bool
         :param follow: If ``True``, recursively fetch dataset provenance
           information for all inputs and their inputs, etc.
+
+        :rtype: dict
+        :return: Dataset provenance information
+          For example::
+
+            {
+                "tool_id": "toolshed.g2.bx.psu.edu/repos/ziru-zhou/macs2/modencode_peakcalling_macs2/2.0.10.2",
+                "job_id": "5471ba76f274f929",
+                "parameters": {
+                    "input_chipseq_file1": {
+                        "id": "6f0a311a444290f2",
+                        "uuid": null
+                    },
+                    "dbkey": "\"mm9\"",
+                    "experiment_name": "\"H3K4me3_TAC_MACS2\"",
+                    "input_control_file1": {
+                        "id": "c21816a91f5dc24e",
+                        "uuid": null
+                    },
+                    "major_command": "{\"gsize\": \"2716965481.0\", \"bdg\": \"False\", \"__current_case__\": 0, \"advanced_options\": {\"advanced_options_selector\": \"off\", \"__current_case__\": 1}, \"input_chipseq_file1\": 104715, \"xls_to_interval\": \"False\", \"major_command_selector\": \"callpeak\", \"input_control_file1\": 104721, \"pq_options\":
+            {\"pq_options_selector\": \"qvalue\", \"qvalue\": \"0.05\", \"__current_case__\": 1}, \"bw\": \"300\", \"nomodel_type\": {\"nomodel_type_selector\": \"create_model\", \"__current_case__\": 1}}",
+                    "chromInfo": "\"/usr/local/galaxy/galaxy-dist/tool-data/shared/ucsc/chrom/mm9.len\""
+                },
+                "stdout": "",
+                "stderr": "",
+                "id": "6fbd9b2274c62ebe",
+                "uuid": null
+            }
         """
         url = self.gi._make_url(self, history_id, contents=True)
         url = '/'.join([url, dataset_id, "provenance"])
@@ -380,6 +426,9 @@ class HistoryClient(Client):
 
         :type lib_dataset_id: str
         :param lib_dataset_id: Encoded library dataset ID
+
+        :rtype: dict
+        :return: Information about the newly created HDA
         """
         payload = {
             'content': lib_dataset_id,
@@ -407,6 +456,9 @@ class HistoryClient(Client):
                                       'name': 'element 2',
                                       'src': 'hda'}],
              'name': 'My collection list'}
+
+        :rtype: dict
+        :return: Information about the new HDCA
         """
         try:
             collection_description = collection_description.to_dict()
@@ -446,6 +498,12 @@ class HistoryClient(Client):
         :type purge: bool
         :param purge: if ``True``, also purge (permanently delete) the history
 
+        :rtype: dict
+        :return: An error object if an error occurred or a dictionary
+                 containing: ``id`` (the encoded id of the history), ``deleted`` (if the
+                 history was marked as deleted), ``purged`` (if the history was
+                 purged).
+
         .. note::
           For the purge option to work, the Galaxy instance must have the
           ``allow_user_dataset_purge`` option set to ``True`` in the
@@ -462,6 +520,9 @@ class HistoryClient(Client):
 
         :type history_id: str
         :param history_id: Encoded history ID
+
+        :rtype: str
+        :return: 'OK' if it was deleted
         """
         url = self.gi._make_url(self, history_id, deleted=True)
         # Append the 'undelete' action to the history URL
@@ -503,6 +564,9 @@ class HistoryClient(Client):
     def get_most_recently_used_history(self):
         """
         Returns the current user's most recently used history (not deleted).
+
+        :rtype: dict
+        :return: History representation
         """
         url = self.gi._make_url(self, None)
         url = '/'.join([url, 'most_recently_used'])
@@ -585,6 +649,9 @@ class HistoryClient(Client):
 
         :type chunk_size: int
         :param chunk_size: how many bytes at a time should be read into memory
+
+        :rtype: None
+        :return: None
         """
         url = '%s/exports/%s' % (
             self.gi._make_url(self, module_id=history_id), jeha_id)

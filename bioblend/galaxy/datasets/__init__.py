@@ -35,6 +35,9 @@ class DatasetClient(Client):
         :type hda_ldda: str
         :param hda_ldda: Whether to show a history dataset ('hda' - the default) or library
                          dataset ('ldda').
+
+        :rtype: dict
+        :return: Information about the HDA or LDDA
         """
         params = dict(
             hda_ldda=hda_ldda,

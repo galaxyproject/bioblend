@@ -74,6 +74,9 @@ class ToolClient(Client):
 
         :type tool_id: str
         :param tool_id: id of the requested tool
+
+        :rtype: dict
+        :return: Tool requirement status
         """
         url = "%s/tools/%s/install_dependencies" % (self.gi.url, tool_id)
         return self._post(payload={}, url=url)
@@ -90,6 +93,9 @@ class ToolClient(Client):
 
         :type link_details: bool
         :param link_details: whether to get also link details
+
+        :rtype: dict
+        :return: Information about the tool's interface
         """
         params = {}
         params['io_details'] = io_details
@@ -110,6 +116,60 @@ class ToolClient(Client):
         :type tool_inputs: dict
         :param tool_inputs: dictionary of input datasets and parameters
           for the tool (see below)
+
+        :rtype: dict
+        :return: Information about outputs and job
+          For example::
+
+            {
+              "outputs": [
+                {
+                  "misc_blurb": "queued",
+                  "peek": null,
+                  "update_time": "2019-05-08T12:26:16.069798",
+                  "data_type": "galaxy.datatypes.tabular.Tabular",
+                  "tags": [],
+                  "deleted": false,
+                  "history_id": "df8fe5ddadbf3ab1",
+                  "metadata_column_names": null,
+                  "metadata_delimiter": "\t",
+                  "visible": true,
+                  "genome_build": "?",
+                  "create_time": "2019-05-08T12:26:15.997739",
+                  "hid": 42,
+                  "file_size": 0,
+                  "metadata_data_lines": null,
+                  "file_ext": "tabular",
+                  "id": "aeb65580396167f3",
+                  "misc_info": null,
+                  "hda_ldda": "hda",
+                  "history_content_type": "dataset",
+                  "name": "Cut on data 1",
+                  "metadata_columns": null,
+                  "uuid": "d91d10af-7546-45be-baa9-902010661466",
+                  "state": "new",
+                  "metadata_comment_lines": null,
+                  "model_class": "HistoryDatasetAssociation",
+                  "metadata_dbkey": "?",
+                  "output_name": "out_file1",
+                  "purged": false,
+                  "metadata_column_types": null
+                }
+              ],
+              "implicit_collections": [],
+              "jobs": [
+                {
+                  "tool_id": "cut1",
+                  "update_time": "2019-05-08T12:26:16.067389",
+                  "exit_code": null,
+                  "state": "new",
+                  "create_time": "2019-05-08T12:26:16.067372",
+                  "model_class": "Job",
+                  "id": "7dd125b61b35d782"
+                }
+              ],
+              "output_collections": []
+            }
 
         The ``tool_inputs`` dict should contain input datasets and parameters
         in the (largely undocumented) format used by the Galaxy API.
@@ -140,7 +200,7 @@ class ToolClient(Client):
         :param file_name: (optional) name of the new history dataset
 
         :type file_type: str
-        :param file_type: Galaxy datatype for the new dataset, default is auto
+        :param file_type: (optional) Galaxy datatype for the new dataset, default is auto
 
         :type dbkey: str
         :param dbkey: (optional) genome dbkey
@@ -153,6 +213,9 @@ class ToolClient(Client):
         :type space_to_tab: bool
         :param space_to_tab: whether to convert spaces to tabs. Default is
           ``False``. Applicable only if to_posix_lines is ``True``
+
+        :rtype: dict
+        :return: Information about the created upload job
         """
         if "file_name" not in keywords:
             keywords["file_name"] = basename(path)
@@ -175,6 +238,9 @@ class ToolClient(Client):
         :param history_id: id of the history where to upload the file
 
         See :meth:`upload_file` for the optional parameters.
+
+        :rtype: dict
+        :return: Information about the created upload job
         """
         payload = self._upload_payload(history_id, **keywords)
         payload['files_0|ftp_files'] = path
@@ -191,6 +257,9 @@ class ToolClient(Client):
 
         :type history_id: str
         :param history_id: id of the history where to upload the content
+
+        :rtype: dict
+        :return: Information about the created upload job
 
         See :meth:`upload_file` for the optional parameters.
         """

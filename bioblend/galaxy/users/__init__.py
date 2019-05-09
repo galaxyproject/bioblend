@@ -17,6 +17,10 @@ class UserClient(Client):
         Get a list of all registered users. If ``deleted`` is set to ``True``,
         get a list of deleted users.
 
+        :type deleted: bool
+        :param deleted: Whether to include deleted users
+
+
         :type f_email: str
         :param f_email: filter for user emails. The filter will be active for
             non-admin users only if the Galaxy instance has the

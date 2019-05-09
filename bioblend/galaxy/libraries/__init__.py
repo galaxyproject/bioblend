@@ -55,6 +55,9 @@ class LibraryClient(Client):
         :param library_id: Encoded data library ID identifying the library to be
           deleted
 
+        :rtype: dict
+        :return: Information about the deleted library
+
         .. warning::
           Deleting a data library is irreversible - all of the data from the
           library will be permanently deleted.
@@ -186,6 +189,9 @@ class LibraryClient(Client):
 
         :type folder_id: str
         :param folder_id: id of the folder to be inspected
+
+        :rtype: dict
+        :return: Information about the folder
         """
         return self._show_item(library_id, folder_id)
 
@@ -222,6 +228,9 @@ class LibraryClient(Client):
         :type base_folder_id: str
         :param base_folder_id: id of the folder where to create the new folder.
           If not provided, the root folder will be used
+
+        :rtype: list
+        :return: List with a single dictionary containing information about the new folder
         """
         # Get root folder ID if no ID was provided
         if base_folder_id is None:
@@ -240,6 +249,9 @@ class LibraryClient(Client):
         Get all the folders or filter specific one(s) via the provided ``name``
         or ``folder_id`` in data library with id ``library_id``. Provide only
         one argument: ``name`` or ``folder_id``, but not both.
+
+        :type library_id: str
+        :param library_id: library id to use
 
         :type folder_id: str
         :param folder_id: filter for folder by folder id
@@ -377,6 +389,9 @@ class LibraryClient(Client):
 
         :type dbkey: str
         :param dbkey: Dbkey
+
+        :rtype: list
+        :return: List with a single dictionary containing information about the LDDA
         """
         return self._do_upload(library_id, file_url=file_url,
                                folder_id=folder_id, file_type=file_type,
@@ -401,6 +416,9 @@ class LibraryClient(Client):
 
         :type dbkey: str
         :param dbkey: Dbkey
+
+        :rtype: list
+        :return: List with a single dictionary containing information about the LDDA
         """
         return self._do_upload(library_id, pasted_content=pasted_content,
                                folder_id=folder_id, file_type=file_type,
@@ -427,6 +445,9 @@ class LibraryClient(Client):
 
         :type dbkey: str
         :param dbkey: Dbkey
+
+        :rtype: list
+        :return: List with a single dictionary containing information about the LDDA
         """
         return self._do_upload(library_id, file_local_path=file_local_path,
                                folder_id=folder_id, file_type=file_type,
@@ -476,6 +497,9 @@ class LibraryClient(Client):
 
         :type tag_using_filenames: bool
         :param tag_using_filenames: Indicate whether to generate dataset tags from filenames
+
+        :rtype: list
+        :return: List with a single dictionary containing information about the LDDA
         """
         return self._do_upload(library_id, server_dir=server_dir,
                                folder_id=folder_id, file_type=file_type,
@@ -526,6 +550,9 @@ class LibraryClient(Client):
 
         :type tag_using_filenames: bool
         :param tag_using_filenames: Indicate whether to generate dataset tags from filenames
+
+        :rtype: list
+        :return: List with a single dictionary containing information about the LDDA
         """
         return self._do_upload(library_id, filesystem_paths=filesystem_paths,
                                folder_id=folder_id, file_type=file_type,
@@ -549,6 +576,9 @@ class LibraryClient(Client):
 
         :type message: str
         :param message: message for copying action
+
+        :rtype: dict
+        :return: LDDA information
         """
         if folder_id is None:
             folder_id = self._get_root_folder_id(library_id)
@@ -592,6 +622,9 @@ class LibraryClient(Client):
 
         :type manage_in: list
         :param manage_in: list of role ids
+
+        :rtype: dict
+        :return: General information about the library
         """
         payload = {}
         if access_in:
