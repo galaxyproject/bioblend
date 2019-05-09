@@ -53,7 +53,8 @@ class HistoryClient(Client):
         :param name: Name of history to filter on
 
         :type deleted: bool
-        :param deleted: Include deleted histories
+        :param deleted: whether to filter for the deleted histories (``True``)
+          or for the non-deleted ones (``False``)
 
         :rtype: list
         :return: Return a list of history element dicts. If more than one
@@ -499,9 +500,9 @@ class HistoryClient(Client):
 
         :rtype: dict
         :return: An error object if an error occurred or a dictionary
-                 containing; id: the encoded id of the history, deleted: if the
-                 history was marked as deleted, purged: if the history was
-                 purged
+                 containing: ``id`` (the encoded id of the history), ``deleted`` (if the
+                 history was marked as deleted), ``purged`` (if the history was
+                 purged).
 
         .. note::
           For the purge option to work, the Galaxy instance must have the

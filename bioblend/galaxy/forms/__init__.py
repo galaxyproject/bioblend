@@ -59,7 +59,7 @@ class FormsClient(Client):
         :param  form_xml_text: Form xml to create a form on galaxy instance
 
         :rtype:     str
-        :return:   Unique url of newly created form with encoded id
+        :return:   Unique URL of newly created form with encoded id
         """
         payload = form_xml_text
         return self._post(payload=payload)

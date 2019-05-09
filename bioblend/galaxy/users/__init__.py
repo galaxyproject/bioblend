@@ -18,7 +18,7 @@ class UserClient(Client):
         get a list of deleted users.
 
         :type deleted: bool
-        :param deleted: Include deleted users
+        :param deleted: Whether to include deleted users
 
 
         :type f_email: str

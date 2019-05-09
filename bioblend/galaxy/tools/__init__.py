@@ -95,7 +95,7 @@ class ToolClient(Client):
         :param link_details: whether to get also link details
 
         :rtype: dict
-        :return: Information about a tool's interface
+        :return: Information about the tool's interface
         """
         params = {}
         params['io_details'] = io_details
