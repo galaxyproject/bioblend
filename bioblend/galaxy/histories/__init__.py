@@ -76,23 +76,28 @@ class HistoryClient(Client):
         :param history_id: Encoded history ID to filter on
 
         :type contents: bool
-        :param contents: When ``True``, the complete list of datasets in the
-          given history.
+        :param contents: When ``True``, instead of the history details, return
+          the list of datasets in the given history.
 
-        :type deleted: str
-        :param deleted: Used when contents=True, includes deleted datasets in
-          history dataset list
+        :type deleted: bool or None
+        :param deleted: When ``contents=True``, whether to filter for the
+          deleted datasets (``True``) or for the non-deleted ones (``False``).
+          If not set, no filtering is applied.
 
-        :type visible: str
-        :param visible: Used when contents=True, includes only visible datasets
-          in history dataset list
+        :type visible: bool or None
+        :param visible: When ``contents=True``, whether to filter for the
+          visible datasets (``True``) or for the hidden ones (``False``). If not
+          set, no filtering is applied.
 
         :type details: str
-        :param details: Used when contents=True, includes dataset details. Set
-          to 'all' for the most information
+        :param details: When ``contents=True``, include dataset details. Set to
+          'all' for the most information.
 
-        :type types: str
-        :param types: ???
+        :type types: list
+        :param types: When ``contents=True``, filter for history content types.
+          If set to ``['dataset']``, return only datasets. If set to
+          ``['dataset_collection']``,  return only dataset collections. If not
+          set, no filtering is applied.
 
         :rtype: dict
         :return: details of the given history
@@ -106,7 +111,7 @@ class HistoryClient(Client):
             if visible is not None:
                 params['visible'] = visible
             if types is not None:
-                params['types'] = types.join(",")
+                params['types'] = types
         return self._get(id=history_id, contents=contents, params=params)
 
     def delete_dataset(self, history_id, dataset_id, purge=False):
@@ -217,9 +222,8 @@ class HistoryClient(Client):
         :param dataset_id: Encoded dataset ID
 
         :type follow: bool
-        :param follow: If ``follow`` is ``True``, recursively fetch dataset
-                       provenance information for all inputs and their inputs,
-                       etc...
+        :param follow: If ``True``, recursively fetch dataset provenance
+          information for all inputs and their inputs, etc.
         """
         url = self.gi._make_url(self, history_id, contents=True)
         url = '/'.join([url, dataset_id, "provenance"])
@@ -243,7 +247,7 @@ class HistoryClient(Client):
         :param deleted: Mark or unmark history as deleted
 
         :type purged: bool
-        :param purged: If True, mark history as purged (permanently deleted).
+        :param purged: If ``True``, mark history as purged (permanently deleted).
             Ignored on Galaxy release_15.01 and earlier
 
         :type published: bool
