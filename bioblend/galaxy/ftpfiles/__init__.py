@@ -15,7 +15,7 @@ class FTPFilesClient(Client):
         Get a list of local files.
 
         :type deleted: bool
-        :param deleted: Include deleted files
+        :param deleted: Whether to include deleted files
 
         :rtype: list
         :return: A list of dicts with details on individual files on FTP
