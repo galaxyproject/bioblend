@@ -18,7 +18,7 @@ class DatatypesClient(Client):
         :param extension_only: Return only the extension rather than the datatype name
 
         :type upload_only: bool
-        :param upload_only: Filter for datatypes wihch can be uploaded
+        :param upload_only: Whether to return only datatypes which can be uploaded
 
         :rtype: list
         :return: A list of datatype names.
