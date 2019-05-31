@@ -57,7 +57,8 @@ class GalaxyInstance(GalaxyClient):
         self.users = users.UserClient(self)
         self.genomes = genomes.GenomeClient(self)
         self.tools = tools.ToolClient(self)
-        self.toolShed = toolshed.ToolShedClient(self)
+        self.toolshed = toolshed.ToolShedClient(self)
+        self.toolShed = self.toolshed  # historical alias
         self.config = config.ConfigClient(self)
         self.visual = visual.VisualClient(self)
         self.quotas = quotas.QuotaClient(self)
