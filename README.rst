@@ -6,6 +6,10 @@
     :alt: Documentation Status
     :target: https://bioblend.readthedocs.io/
 
+.. image:: https://badges.gitter.im/galaxyproject/bioblend.svg
+   :alt: Join the chat at https://gitter.im/galaxyproject/bioblend
+   :target: https://gitter.im/galaxyproject/bioblend?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+
 .. image:: https://travis-ci.org/galaxyproject/bioblend.png
     :target: https://travis-ci.org/galaxyproject/bioblend
     :alt: Build Status
@@ -25,8 +29,3 @@ overview also available in `ABOUT.rst <./ABOUT.rst>`_.
 .. References/hyperlinks used above
 .. _CloudMan: https://galaxyproject.org/cloudman/
 .. _Galaxy: https://galaxyproject.org/
-
-
-.. image:: https://badges.gitter.im/galaxyproject/bioblend.svg
-   :alt: Join the chat at https://gitter.im/galaxyproject/bioblend
-   :target: https://gitter.im/galaxyproject/bioblend?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
