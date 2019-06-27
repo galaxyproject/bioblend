@@ -1,6 +1,11 @@
+### BioBlend v - unreleased
+
+* Dropped support for Python 3.4. Added support for Galaxy releases 19.01 and
+  19.05.
+
 ### BioBlend v0.12.0 - 2018-12-17
 
-* Added supported for Python 3.7. Added support for Galaxy releases 18.05 and
+* Added support for Python 3.7. Added support for Galaxy releases 18.05 and
   18.09.
 
 * Added ``update_library_dataset()`` method to ``LibraryClient`` (thanks to
@@ -26,7 +31,7 @@
 
 ### BioBlend v0.11.0 - 2018-04-18
 
-* Dropped supported for Python 3.3. Added support for Galaxy release 18.01.
+* Dropped support for Python 3.3. Added support for Galaxy release 18.01.
 
 * Always wait for terminal state when downloading a dataset.
 
