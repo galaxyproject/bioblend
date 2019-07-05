@@ -403,3 +403,61 @@ To get a list of users, call:
       u'id': u'0193a95acf427d2c',
       u'quota_percent': None,
       u'url': u'/api/users/0193a95acf427d2c'}]
+
+Using bioblend instead of requests
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Small explanation on how bioblend can be used to request the Galaxy API in a more convenient way than to use both bioblend and requests in a script that queries the Galaxy API.
+
+To query the API with bioblend for a GET request, call:
+
+    >>> gi.make_get_request(gi.base_url+"/api/version").json()
+    {u'version_major': u'19.05',
+     u'extra': {}}
+
+To query the API with bioblend for a POST request, call:
+
+    >>> gi.make_post_request(gi.base_url+"/api/histories", payload={"name": "test history"})
+    {u'importable': False,
+    u'create_time': u'2019-07-05T20:10:04.823716',
+    u'contents_url': u'/api/histories/a77b3f95070d689a/contents',
+    u'id': u'a77b3f95070d689a',
+    u'size': 0, u'user_id': u'5b732999121d4593',
+    u'username_and_slug': None,
+    u'annotation': None,
+    u'state_details': {u'discarded': 0,
+                       u'ok': 0,
+                       u'failed_metadata': 0,
+                       u'upload': 0,
+                       u'paused': 0,
+                       u'running': 0,
+                       u'setting_metadata': 0,
+                       u'error': 0,
+                       u'new': 0,
+                       u'queued': 0,
+                       u'empty': 0},
+    u'state': u'new',
+    u'empty': True,
+    u'update_time': u'2019-07-05T20:10:04.823742',
+    u'tags': [],
+    u'deleted': False,
+    u'genome_build': None,
+    u'slug': None,
+    u'name': u'test history',
+    u'url': u'/api/histories/a77b3f95070d689a',
+    u'state_ids': {u'discarded': [],
+                   u'ok': [],
+                   u'failed_metadata': [],
+                   u'upload': [],
+                   u'paused': [],
+                   u'running': [],
+                   u'setting_metadata': [],
+                   u'error': [],
+                   u'new': [],
+                   u'queued': [],
+                   u'empty': []},
+    u'published': False,
+    u'model_class': u'History',
+    u'purged': False}
+
+
