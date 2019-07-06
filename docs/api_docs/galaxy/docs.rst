@@ -404,20 +404,21 @@ To get a list of users, call:
       u'quota_percent': None,
       u'url': u'/api/users/0193a95acf427d2c'}]
 
-Using bioblend instead of requests
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Using BioBlend for raw API calls
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Small explanation on how bioblend can be used to request the Galaxy API in a more convenient way than to use both bioblend and requests in a script that queries the Galaxy API.
+BioBlend can be used to make HTTP requests to the Galaxy API in a more convenient way than using e.g. the ``requests`` Python library. There are 5 available methods corresponding to the most common HTTP methods: ``make_get_request``, ``make_post_request``, ``make_put_request``, ``make_delete_request`` and ``make_patch_request``.
+One advantage of using these methods is that the API keys stored in the ``GalaxyInstance`` object is automatically added to the request.
 
-To query the API with bioblend for a GET request, call:
+To make a GET request to the Galaxy API with BioBlend, call:
 
-    >>> gi.make_get_request(gi.base_url+"/api/version").json()
+    >>> gi.make_get_request(gi.base_url + "/api/version").json()
     {u'version_major': u'19.05',
      u'extra': {}}
 
-To query the API with bioblend for a POST request, call:
+To make a POST request to the Galaxy API with BioBlend, call:
 
-    >>> gi.make_post_request(gi.base_url+"/api/histories", payload={"name": "test history"})
+    >>> gi.make_post_request(gi.base_url + "/api/histories", payload={"name": "test history"})
     {u'importable': False,
     u'create_time': u'2019-07-05T20:10:04.823716',
     u'contents_url': u'/api/histories/a77b3f95070d689a/contents',
@@ -459,5 +460,3 @@ To query the API with bioblend for a POST request, call:
     u'published': False,
     u'model_class': u'History',
     u'purged': False}
-
-
