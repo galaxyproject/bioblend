@@ -664,8 +664,8 @@ class HistoryDatasetAssociation(Dataset):
 
         .. warning::
             If you purge a dataset which has not been previously deleted,
-            Galaxy since release_15.03 wrongly does not set the ``deleted``
-            attribute of the dataset to True, see
+            Galaxy from release_15.03 to release_17.01 does not set the
+            ``deleted`` attribute of the dataset to ``True``, see
             https://github.com/galaxyproject/galaxy/issues/3548
         """
         self.gi.gi.histories.delete_dataset(self.container.id, self.id, purge=purge)

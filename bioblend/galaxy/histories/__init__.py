@@ -140,8 +140,8 @@ class HistoryClient(Client):
 
         .. warning::
             If you purge a dataset which has not been previously deleted,
-            Galaxy since release_15.03 wrongly does not set the ``deleted``
-            attribute of the dataset to True, see
+            Galaxy from release_15.03 to release_17.01 does not set the
+            ``deleted`` attribute of the dataset to ``True``, see
             https://github.com/galaxyproject/galaxy/issues/3548
         """
         url = self.gi._make_url(self, history_id, contents=True)
