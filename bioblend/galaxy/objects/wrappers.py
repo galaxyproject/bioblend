@@ -659,8 +659,8 @@ class HistoryDatasetAssociation(Dataset):
 
         .. note::
             For the purge option to work, the Galaxy instance must have the
-            ``allow_user_dataset_purge`` option set to ``True`` in the
-            ``config/galaxy.ini`` configuration file.
+            ``allow_user_dataset_purge`` option set to ``true`` in the
+            ``config/galaxy.yml`` configuration file.
 
         .. warning::
             If you purge a dataset which has not been previously deleted,
@@ -974,8 +974,8 @@ class History(DatasetContainer):
 
         .. note::
           For the purge option to work, the Galaxy instance must have the
-          ``allow_user_dataset_purge`` option set to ``True`` in the
-          ``config/galaxy.ini`` configuration file.
+          ``allow_user_dataset_purge`` option set to ``true`` in the
+          ``config/galaxy.yml`` configuration file.
         """
         self.gi.histories.delete(id_=self.id, purge=purge)
         try:
@@ -1208,8 +1208,8 @@ class Library(DatasetContainer):
         .. note::
           For this method to work, the Galaxy instance must have the
           ``allow_path_paste`` (``allow_library_path_paste`` in Galaxy
-          ``release_17.05`` and earlier) option set to ``True`` in the
-          ``config/galaxy.ini`` configuration file.
+          ``release_17.05`` and earlier) option set to ``true`` in the
+          ``config/galaxy.yml`` configuration file.
 
         :type paths: str or :class:`~collections.Iterable` of str
         :param paths: server-side file paths from which data should be read

@@ -135,8 +135,8 @@ class HistoryClient(Client):
         :return: None
         .. note::
             For the purge option to work, the Galaxy instance must have the
-            ``allow_user_dataset_purge`` option set to ``True`` in the
-            ``config/galaxy.ini`` configuration file.
+            ``allow_user_dataset_purge`` option set to ``true`` in the
+            ``config/galaxy.yml`` configuration file.
 
         .. warning::
             If you purge a dataset which has not been previously deleted,
@@ -506,8 +506,8 @@ class HistoryClient(Client):
 
         .. note::
           For the purge option to work, the Galaxy instance must have the
-          ``allow_user_dataset_purge`` option set to ``True`` in the
-          ``config/galaxy.ini`` configuration file.
+          ``allow_user_dataset_purge`` option set to ``true`` in the
+          ``config/galaxy.yml`` configuration file.
         """
         payload = {}
         if purge is True:

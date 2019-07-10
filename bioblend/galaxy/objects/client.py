@@ -220,8 +220,8 @@ class ObjHistoryClient(ObjDatasetContainerClient):
 
         .. note::
           For the purge option to work, the Galaxy instance must have the
-          ``allow_user_dataset_purge`` option set to ``True`` in the
-          ``config/galaxy.ini`` configuration file.
+          ``allow_user_dataset_purge`` option set to ``true`` in the
+          ``config/galaxy.yml`` configuration file.
         """
         for id_ in self._select_ids(id_=id_, name=name):
             res = self.gi.histories.delete_history(id_, purge=purge)

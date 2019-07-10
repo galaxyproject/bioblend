@@ -24,22 +24,22 @@ class UserClient(Client):
         :type f_email: str
         :param f_email: filter for user emails. The filter will be active for
             non-admin users only if the Galaxy instance has the
-            ``expose_user_email`` option set to ``True`` in the
-            ``config/galaxy.ini`` configuration file. This parameter is silently
+            ``expose_user_email`` option set to ``true`` in the
+            ``config/galaxy.yml`` configuration file. This parameter is silently
             ignored for non-admin users in Galaxy ``release_15.01`` and earlier.
 
         :type f_name: str
         :param f_name: filter for user names. The filter will be active for
             non-admin users only if the Galaxy instance has the
-            ``expose_user_name`` option set to ``True`` in the
-            ``config/galaxy.ini`` configuration file. This parameter is silently
+            ``expose_user_name`` option set to ``true`` in the
+            ``config/galaxy.yml`` configuration file. This parameter is silently
             ignored in Galaxy ``release_15.10`` and earlier.
 
         :type f_any: str
         :param f_any: filter for user email or name. Each filter will be active
             for non-admin users only if the Galaxy instance has the
-            corresponding ``expose_user_*`` option set to ``True`` in the
-            ``config/galaxy.ini`` configuration file. This parameter is silently
+            corresponding ``expose_user_*`` option set to ``true`` in the
+            ``config/galaxy.yml`` configuration file. This parameter is silently
             ignored in Galaxy ``release_15.10`` and earlier.
 
         :rtype: list
@@ -82,7 +82,7 @@ class UserClient(Client):
         .. note::
           For this method to work, the Galaxy instance must have the
           ``allow_user_creation`` and ``use_remote_user`` options set to
-          ``True`` in the ``config/galaxy.ini`` configuration file. Also
+          ``true`` in the ``config/galaxy.yml`` configuration file. Also
           note that setting ``use_remote_user`` will require an upstream
           authentication proxy server; however, if you do not have one, access
           to Galaxy via a browser will not be possible.
@@ -103,9 +103,9 @@ class UserClient(Client):
 
         .. note::
           For this method to work, the Galaxy instance must have the
-          ``allow_user_creation`` option set to ``True`` and
-          ``use_remote_user`` option set to ``False`` in the
-          ``config/galaxy.ini`` configuration file.
+          ``allow_user_creation`` option set to ``true`` and
+          ``use_remote_user`` option set to ``false`` in the
+          ``config/galaxy.yml`` configuration file.
 
         :type username: str
         :param username: username of the user to be created
@@ -161,8 +161,8 @@ class UserClient(Client):
 
         .. note::
           For this method to work, the Galaxy instance must have the
-          ``allow_user_deletion`` option set to ``True`` in the
-          ``config/galaxy.ini`` configuration file.
+          ``allow_user_deletion`` option set to ``true`` in the
+          ``config/galaxy.yml`` configuration file.
 
         :type user_id: str
         :param user_id: encoded user ID
