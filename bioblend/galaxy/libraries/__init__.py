@@ -4,8 +4,6 @@ Contains possible interactions with the Galaxy Data Libraries
 import logging
 import time
 
-from six.moves import range
-
 from bioblend.galaxy.client import Client
 from bioblend.galaxy.datasets import DatasetTimeoutException, terminal_states
 from bioblend.util import attach_file
@@ -165,14 +163,16 @@ class LibraryClient(Client):
         :return: A dictionary containing information about the dataset in the
           library
         """
-        assert maxwait > 0
+        assert maxwait >= 0
         assert interval > 0
 
-        for time_left in range(maxwait, 0, -interval):
+        time_left = maxwait
+        while True:
             dataset = self.show_dataset(library_id, dataset_id)
             state = dataset['state']
             if state in terminal_states:
                 return dataset
+            time_left -= interval
             if time_left > 0:
                 log.warning("Waiting for library %s dataset %s to complete. Will wait %i more s", library_id, dataset_id, time_left)
                 time.sleep(min(time_left, interval))
