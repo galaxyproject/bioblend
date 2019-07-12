@@ -168,7 +168,7 @@ class LibraryClient(Client):
         assert maxwait > 0
         assert interval > 0
 
-        for time_left in range(maxwait, 0, -interval):
+        for time_left in range(int(maxwait), 0, int(-interval)):
             dataset = self.show_dataset(library_id, dataset_id)
             state = dataset['state']
             if state in terminal_states:
