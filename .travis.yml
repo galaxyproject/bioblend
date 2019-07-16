@@ -88,11 +88,11 @@ before_script:
     fi
   # Start Galaxy and wait for successful server start
   - export GALAXY_SKIP_CLIENT_BUILD=1
-  - GALAXY_RUN_ALL=1 "${TRAVIS_BUILD_DIR}/run_galaxy.sh" --daemon --wait
-  - export BIOBLEND_GALAXY_URL=http://localhost:8080
 
 script:
-  - cd ${TRAVIS_BUILD_DIR}
+  - GALAXY_RUN_ALL=1 "${TRAVIS_BUILD_DIR}/run_galaxy.sh" --daemon --wait
+  - export BIOBLEND_GALAXY_URL=http://localhost:8080
+  - cd "${TRAVIS_BUILD_DIR}"
   - tox -e $TOX_ENV
 
 after_failure:
