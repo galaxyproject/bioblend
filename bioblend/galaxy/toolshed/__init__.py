@@ -166,12 +166,10 @@ class ToolShedClient(Client):
         :rtype: dict
         :return: If successful, a dictionary with a message noting the removal
         """
-
-        payload = {}
-        payload['tool_shed_url'] = tool_shed_url
-        payload['name'] = name
-        payload['owner'] = owner
-        payload['changeset_revision'] = changeset_revision
-
-
+        payload = {
+            'tool_shed_url': tool_shed_url,
+            'name': name,
+            'owner': owner,
+            'changeset_revision': changeset_revision
+        }
         return self._delete(params=payload)
