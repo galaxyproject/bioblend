@@ -12,17 +12,17 @@ clean:
 venv:
 	# Create and activate a virtual environment
 	[ -f .venv/bin/activate ] || virtualenv .venv
-	( $(IN_VENV); \
+	( $(IN_VENV) && \
 	  # Install latest versions of pip and setuptools \
-	  pip install --upgrade pip setuptools; \
+	  pip install --upgrade pip setuptools && \
 	  # Install latest versions of other needed packages in the virtualenv \
-	  pip install --upgrade twine wheel; \
+	  pip install --upgrade twine wheel \
 	)
 
 release: clean venv
-	( $(IN_VENV); \
+	( $(IN_VENV) && \
 	  # Create files in dist/ \
-	  python setup.py sdist bdist_wheel; \
-	  twine upload dist/*; \
-	  deactivate; \
+	  python setup.py sdist bdist_wheel && \
+	  twine check dist/* && \
+	  twine upload dist/*
 	)
