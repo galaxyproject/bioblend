@@ -161,7 +161,11 @@ class ToolShedClient(Client):
 
         :type tool_shed_url: str
         :param tool_shed_url: URL of the Tool Shed from which the repository was
-                              installed from (e.g., ``https://testtoolshed.g2.bx.psu.edu``)
+          installed from (e.g., ``https://testtoolshed.g2.bx.psu.edu``)
+
+        :type remove_from_disk: bool
+        :param remove_from_disk: whether to also remove the repository from disk
+          (the default) or only deactivate it
 
         :rtype: dict
         :return: If successful, a dictionary with a message noting the removal
@@ -170,6 +174,7 @@ class ToolShedClient(Client):
             'tool_shed_url': tool_shed_url,
             'name': name,
             'owner': owner,
-            'changeset_revision': changeset_revision
+            'changeset_revision': changeset_revision,
+            'remove_from_disk': remove_from_disk
         }
         return self._delete(params=payload)
