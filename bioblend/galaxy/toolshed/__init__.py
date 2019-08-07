@@ -157,7 +157,7 @@ class ToolShedClient(Client):
         :param owner: The owner of the repository
 
         :type changeset_revision: str
-        :param changeset_revision: The revision of the repository to be installed
+        :param changeset_revision: The revision of the repository to uninstall
 
         :type tool_shed_url: str
         :param tool_shed_url: URL of the Tool Shed from which the repository was
@@ -173,7 +173,5 @@ class ToolShedClient(Client):
         payload['owner'] = owner
         payload['changeset_revision'] = changeset_revision
 
-        url = "%s%s" % (self.gi.url, '/tool_shed_repositories')
-        print(url, payload)
 
-        return self._delete(url=url, params=payload)
+        return self._delete(params=payload)
