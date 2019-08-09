@@ -1,7 +1,38 @@
-### BioBlend v - unreleased
+### BioBlend v0.13.0 - 2019-08-09
 
 * Dropped support for Python 3.4. Added support for Galaxy releases 19.01 and
   19.05.
+
+* Updated ``requests-toolbelt`` requirement to ``>=0.5.1`` to prevent failing of
+  uploads to Galaxy (reported by [m93](https://github.com/mmeier93)).
+
+* Added ``toolshed`` attribute to ``GalaxyInstance`` and made ``toolShed`` an
+  alias to it (reported by [Miriam Payá](https://github.com/mpaya)).
+
+* Added ``uninstall_repository_revision()`` method to ``ToolShedClient`` (thanks
+  to [Helena Rasche](https://github.com/erasche), reported by
+  [Alexander Lenail](https://github.com/alexlenail)).
+
+* Added ``maxwait`` parameter to ``HistoryClient.export_history()`` and
+  ``History.export()`` methods.
+
+* Fixed handling of ``type`` parameter in ``HistoryClient.show_history()``
+  (thanks to [Marius van den Beek](https://github.com/mvdbeek)).
+
+* Fixed handling of ``deleted`` parameter in ``LibraryClient.get_libraries()``
+  (thanks to [Luke Sargent](https://github.com/luke-c-sargent), reported by
+  [Katie](https://github.com/emartchenko)).
+
+* Fixed ``LibraryClient.wait_for_dataset()`` when ``maxwait`` or ``interval``
+  parameters are of type ``float``.
+
+* Unify JSON-encoding of non-file parameters of POST requests inside
+  ``GalaxyClient.make_post_request()``.
+
+* Improvements to tests and documentation (thanks to
+  [Helena Rasche](https://github.com/erasche),
+  [selten](https://github.com/selten) and
+  [Pablo Moreno](https://github.com/pcm32)).
 
 ### BioBlend v0.12.0 - 2018-12-17
 
@@ -38,8 +69,8 @@
 * Deprecated ``wait_for_completion`` parameter of
   ``DatasetClient.download_dataset()`` method.
 
-* Fixed downloading of datasets receiving a HTTP 500 status code (thanks to Eric
-  Rasche).
+* Fixed downloading of datasets receiving a HTTP 500 status code (thanks to
+  [Helena Rasche](https://github.com/erasche)).
 
 * Added ``wait_for_dataset()`` method to ``LibraryClient``.
 
@@ -53,7 +84,7 @@
 * Dropped support for Python 2.6. Added support for Galaxy release 17.09.
 
 * Added ``contents`` parameter to ``FoldersClient.show_folder()`` method
-  (thanks to Eric Rasche).
+  (thanks to [Helena Rasche](https://github.com/erasche)).
 
 * Exposed the `verify` attribute of `GalaxyInstance` and `ToolShedInstance`
   objects as `__init__()` parameter.
@@ -73,11 +104,12 @@
 * Do not check for mismatching content size when streaming a dataset to file
   (reported by Jorrit Boekel).
 
-* Fixed delete requests when Galaxy uses external authentication (thanks to Eric
-  Rasche).
+* Fixed delete requests when Galaxy uses external authentication (thanks to
+  [Helena Rasche](https://github.com/erasche)).
 
 * Fixed retrieval of the API key when a ``GalaxyClient`` object is initialised
-  with email and password on Python 3 (thanks to Marius van den Beek).
+  with email and password on Python 3 (thanks to
+  [Marius van den Beek](https://github.com/mvdbeek)).
 
 * Documentation improvements.
 
@@ -95,26 +127,31 @@
   ``DatasetClient`` in favour of ``JobsClient.show_job()`` with
   ``full_details=True``.
 
-* Added ``install_dependencies()`` method to ``ToolClient`` (thanks to Marius
-  van den Beek).
+* Added ``install_dependencies()`` method to ``ToolClient`` (thanks to
+  [Marius van den Beek](https://github.com/mvdbeek)).
 
-* Added ``reload_data_table()`` method to ``ToolDataClient`` (thanks to Marius
-  van den Beek).
+* Added ``reload_data_table()`` method to ``ToolDataClient`` (thanks to
+  [Marius van den Beek](https://github.com/mvdbeek)).
 
 * Added ``create_folder()``, ``update_folder()``, ``get_permissions()``,
-  ``set_permissions()`` methods to ``FoldersClient`` (thanks to Eric Rasche).
+  ``set_permissions()`` methods to ``FoldersClient`` (thanks to
+  [Helena Rasche](https://github.com/erasche)).
 
-* Added ``get_version()`` method to ``ConfigClient`` (thanks to Eric Rasche).
+* Added ``get_version()`` method to ``ConfigClient`` (thanks to
+  [Helena Rasche](https://github.com/erasche)).
 
-* Added ``get_user_apikey()`` method to ``UserClient`` (thanks to Eric Rasche).
+* Added ``get_user_apikey()`` method to ``UserClient`` (thanks to
+  [Helena Rasche](https://github.com/erasche)).
 
 * Added ``create_quota()``, ``update_quota()``, ``delete_quota()`` and
-  ``undelete_quota()`` methods to ``QuotaClient`` (thanks to Eric Rasche).
+  ``undelete_quota()`` methods to ``QuotaClient`` (thanks to
+  [Helena Rasche](https://github.com/erasche)).
 
 * Added ``purge`` parameter to ``HistoryClient.delete_dataset()`` method.
 
 * Added ``f_email``, ``f_name``, and ``f_any`` parameters to
-  ``UserClient.get_users()`` method (thanks to Eric Rasche).
+  ``UserClient.get_users()`` method (thanks to
+  [Helena Rasche](https://github.com/erasche)).
 
 * Updated ``WorkflowClient.import_shared_workflow()`` method to use the newer
   Galaxy API request (thanks to @DamCorreia).
@@ -154,7 +191,8 @@
 
 * Added ``install_resolver_dependencies`` parameter to
   ``ToolShedClient.install_repository_revision()``, applicable for Galaxy
-  release_16.07 and later (thanks to Marius van den Beek).
+  release_16.07 and later (thanks to
+  [Marius van den Beek](https://github.com/mvdbeek)).
 
 * Improve ``DatasetClient.download_dataset()`` by downloading the dataset in
   chunks when saving to file (thanks to Jorrit Boekel).
@@ -193,7 +231,8 @@
 
 * Implemented APIs to search Tool Shed repositories and tools.
 
-* Added support for uploading (importing) from FTP (thanks to Eric Rasche).
+* Added support for uploading (importing) from FTP (thanks to
+  [Helena Rasche](https://github.com/erasche)).
 
 * Added ``to_posix_lines`` and ``space_to_tab`` params to ``upload_file()``,
   ``upload_from_ftp()`` and ``paste_content()`` methods of ``ToolClient``.
@@ -270,7 +309,8 @@
   release_14.02 and all later versions to ensure backward compatibility
   (see `.travis.yml` for details).
 
-* Many documentation improvements (thanks to Eric Rasche).
+* Many documentation improvements (thanks to
+  [Helena Rasche](https://github.com/erasche)).
 
 * Added Galaxy clients for the tool data tables, the roles, and library
   folders (thanks to Anthony Bretaudeau).
@@ -283,7 +323,7 @@
 * Added ``copy_from_dataset()`` method to ``LibraryClient``.
 
 * Added ``create_repository()`` method to ``ToolShedRepositoryClient`` (thanks
-  to Eric Rasche).
+  to [Helena Rasche](https://github.com/erasche)).
 
 * Fixed ``DatasetClient.download_dataset()`` for certain proxied Galaxy
   deployments.
