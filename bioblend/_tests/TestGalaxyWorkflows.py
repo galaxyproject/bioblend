@@ -167,6 +167,30 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         with self.assertRaises(Exception):
             self.gi.workflows.run_workflow(wf['id'], None)
 
+    def test_invoke_workflow(self):
+        path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
+        wf = self.gi.workflows.import_workflow_from_local_path(path)
+        history_id = self.gi.histories.create_history(name="test_wf_invocation")['id']
+
+        fn = test_util.get_abspath("test_util.py")
+        file_name = "test1"
+        tool_output = self.gi.tools.upload_file(
+            fn,
+            history_id,
+            # First param could be a regular path also of course...
+            file_name=file_name,
+            dbkey="?",
+            file_type="tabular",
+        )
+        dataset = {'src': 'hda', 'id': tool_output['outputs'][0]['id']}
+        invoke_response = self.gi.workflows.invoke_workflow(
+            wf['id'],
+            inputs={'Input 1': dataset, 'Input 2': dataset},
+            history_id=history_id,
+            inputs_by='name',
+        )
+        assert invoke_response['state'] == 'new', invoke_response
+
         # TODO: Hard coded workflow ID. We need to either import, or have a fixed workflow id for testing
 #        workflowID = wf['id']
 #        sourcehist = '177346507b04acbf'
