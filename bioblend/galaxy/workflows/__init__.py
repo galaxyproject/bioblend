@@ -376,7 +376,7 @@ class WorkflowClient(Client):
                        Galaxy API. Alternatively workflow steps may be addressed by
                        the label that can be set in the workflow editor. If using
                        uuid or label you need to also set the ``inputs_by`` parameter
-                       to ``uuid`` or ``name``.
+                       to ``step_uuid`` or ``name``.
 
         :type params: dict
         :param params: A mapping of non-datasets tool parameters (see below)
