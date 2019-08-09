@@ -352,7 +352,7 @@ class WorkflowClient(Client):
     def invoke_workflow(self, workflow_id, inputs=None, params=None,
                         history_id=None, history_name=None,
                         import_inputs_to_history=False, replacement_params=None,
-                        allow_tool_state_corrections=None):
+                        allow_tool_state_corrections=None, inputs_by="step_index"):
         """
         Invoke the workflow identified by ``workflow_id``. This will
         cause a workflow to be scheduled and return an object describing
@@ -373,7 +373,10 @@ class WorkflowClient(Client):
 
                        This map may also be indexed by the UUIDs of the workflow steps,
                        as indicated by the ``uuid`` property of steps returned from the
-                       Galaxy API.
+                       Galaxy API. Alternatively workflow steps may be addressed by
+                       the label that can be set in the workflow editor. If using
+                       uuid or label you need to also set the ``inputs_by`` parameter
+                       to ``uuid`` or ``name``.
 
         :type params: dict
         :param params: A mapping of non-datasets tool parameters (see below)
@@ -403,6 +406,10 @@ class WorkflowClient(Client):
         :type replacement_params: dict
         :param replacement_params: pattern-based replacements for post-job
           actions (see below)
+
+        :type inputs_by: str
+        :param inputs_by: Determines how inputs are referenced. Can be
+          "step_index" (default), "step_uuid", or "name".
 
         :rtype: dict
         :return: A dict containing the workflow invocation describing the
@@ -532,6 +539,8 @@ class WorkflowClient(Client):
             payload['no_add_to_history'] = True
         if allow_tool_state_corrections is not None:
             payload['allow_tool_state_corrections'] = allow_tool_state_corrections
+        if inputs_by is not None:
+            payload['inputs_by'] = inputs_by
         url = self.gi._make_url(self)
         url = _join(url, workflow_id, "invocations")
         return self._post(payload, url=url)
