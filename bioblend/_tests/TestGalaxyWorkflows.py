@@ -167,27 +167,17 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         with self.assertRaises(Exception):
             self.gi.workflows.run_workflow(wf['id'], None)
 
-        # TODO: Hard coded workflow ID. We need to either import, or have a fixed workflow id for testing
-#        workflowID = wf['id']
-#        sourcehist = '177346507b04acbf'
-#
-#        # Do a run of a workflow over fastq files from a history
-#        print "Finding workflow"
-#        wf = self.gi.workflows.show_workflow(workflowID)
-#        print wf
-#        input = wf['inputs'].keys()[0]
-#
-#        print "Finding fastqsanger input files"
-#        sourcecontents = self.gi.histories.show_history(sourcehist, contents=True)
-#        sourcedata = [self.gi.histories.show_dataset(sourcehist, content['id']) for content in sourcecontents]
-#
-#        fastqdata = [data['id'] for data in sourcedata if data['data_type']=='fastqsanger']
-#
-#        fastqID = fastqdata[0]
-#        datamap = dict()
-#        datamap[input] = dict()
-#        datamap[input]['src'] = 'hda'
-#        datamap[input]['id'] = fastqID
-#        data_name = self.gi.histories.show_dataset(sourcehist, fastqID)['name']
-#        print "Running workflow on "+data_name
-#        self.gi.workflows.run_workflow(workflowID, datamap, history_name="automated_test", import_inputs_to_history=True)
+    @test_util.skip_unless_galaxy('release_15.03')
+    def test_invoke_workflow(self):
+        path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
+        wf = self.gi.workflows.import_workflow_from_local_path(path)
+        history_id = self.gi.histories.create_history(name="test_wf_invocation")['id']
+        dataset1_id = self._test_dataset(history_id)
+        dataset = {'src': 'hda', 'id': dataset1_id}
+        invoke_response = self.gi.workflows.invoke_workflow(
+            wf['id'],
+            inputs={'Input 1': dataset, 'Input 2': dataset},
+            history_id=history_id,
+            inputs_by='name',
+        )
+        assert invoke_response['state'] == 'new', invoke_response
