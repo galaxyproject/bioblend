@@ -181,28 +181,3 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
             inputs_by='name',
         )
         assert invoke_response['state'] == 'new', invoke_response
-
-        # TODO: Hard coded workflow ID. We need to either import, or have a fixed workflow id for testing
-#        workflowID = wf['id']
-#        sourcehist = '177346507b04acbf'
-#
-#        # Do a run of a workflow over fastq files from a history
-#        print "Finding workflow"
-#        wf = self.gi.workflows.show_workflow(workflowID)
-#        print wf
-#        input = wf['inputs'].keys()[0]
-#
-#        print "Finding fastqsanger input files"
-#        sourcecontents = self.gi.histories.show_history(sourcehist, contents=True)
-#        sourcedata = [self.gi.histories.show_dataset(sourcehist, content['id']) for content in sourcecontents]
-#
-#        fastqdata = [data['id'] for data in sourcedata if data['data_type']=='fastqsanger']
-#
-#        fastqID = fastqdata[0]
-#        datamap = dict()
-#        datamap[input] = dict()
-#        datamap[input]['src'] = 'hda'
-#        datamap[input]['id'] = fastqID
-#        data_name = self.gi.histories.show_dataset(sourcehist, fastqID)['name']
-#        print "Running workflow on "+data_name
-#        self.gi.workflows.run_workflow(workflowID, datamap, history_name="automated_test", import_inputs_to_history=True)
