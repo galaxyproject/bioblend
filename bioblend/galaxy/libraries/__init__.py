@@ -685,5 +685,5 @@ class LibraryClient(Client):
         payload['action'] = 'set_permissions'
         # change module and use datasets API
         self.module = 'libraries/datasets'
-        url = '/'.join([self.gi._make_url(self, dataset_id), 'permissions'])
+        url = '/'.join([self.gi.url, 'libraries/datasets', dataset_id, 'permissions'])
         return self._post(payload, url=url)
