@@ -591,7 +591,7 @@ class LibraryClient(Client):
 
     def get_library_permissions(self, library_id):
         """
-        Get the permessions for a library.
+        Get the permissions for a library.
 
         :type library_id: str
         :param library_id: id of the library
@@ -602,10 +602,23 @@ class LibraryClient(Client):
         url = '/'.join([self.gi._make_url(self, library_id), 'permissions'])
         return self._get(url=url)
 
+    def get_dataset_permissions(self, dataset_id):
+        """
+        Get the permissions for a dataset.
+
+        :type dataset_id: str
+        :param dataset_id: id of the dataset
+
+        :rtype: dict
+        :return: dictionary with all applicable permissions' values
+        """
+        url = '/'.join([self.gi.url, 'libraries/datasets', dataset_id, 'permissions'])
+        return self._get(url=url)
+
     def set_library_permissions(self, library_id, access_in=None,
                                 modify_in=None, add_in=None, manage_in=None):
         """
-        Set the permissions for a library.  Note: it will override all security
+        Set the permissions for a library. Note: it will override all security
         for this library even if you leave out a permission type.
 
         :type library_id: str
@@ -636,4 +649,37 @@ class LibraryClient(Client):
         if manage_in:
             payload['LIBRARY_MANAGE_in'] = manage_in
         url = '/'.join([self.gi._make_url(self, library_id), 'permissions'])
+        return self._post(payload, url=url)
+
+    def set_dataset_permissions(self, dataset_id, access_in=None,
+                                modify_in=None, manage_in=None):
+        """
+        Set the permissions for a dataset. Note: it will override all security
+        for this dataset even if you leave out a permission type.
+
+        :type dataset_id: str
+        :param dataset_id: id of the dataset
+
+        :type access_in: list
+        :param access_in: list of role ids
+
+        :type modify_in: list
+        :param modify_in: list of role ids
+
+        :type manage_in: list
+        :param manage_in: list of role ids
+
+        :rtype: dict
+        :return: dictionary with all applicable permissions' values
+        """
+        payload = {}
+        if access_in:
+            payload['access_ids[]'] = access_in
+        if modify_in:
+            payload['modify_ids[]'] = modify_in
+        if manage_in:
+            payload['manage_ids[]'] = manage_in
+        # we need here to define an action
+        payload['action'] = 'set_permissions'
+        url = '/'.join([self.gi.url, 'libraries/datasets', dataset_id, 'permissions'])
         return self._post(payload, url=url)
