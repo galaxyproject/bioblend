@@ -103,6 +103,7 @@ class TestGalaxyLibraries(GalaxyTestBase.GalaxyTestBase):
         self.assertEqual(set(_[1] for _ in ret['add_library_item_role_list']), set(user_id_list_new))
         self.assertEqual(set(_[1] for _ in ret['manage_library_role_list']), set(user_id_list_new))
 
+    @test_util.skip_unless_galaxy('release_16.04')
     def test_dataset_permissions(self):
         current_user = self.gi.users.get_current_user()
         user_id_list_new = [current_user['id']]
