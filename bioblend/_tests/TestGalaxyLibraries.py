@@ -112,3 +112,8 @@ class TestGalaxyLibraries(GalaxyTestBase.GalaxyTestBase):
         self.assertEqual(set(_[1] for _ in ret['access_dataset_roles']), set(user_id_list_new))
         self.assertEqual(set(_[1] for _ in ret['modify_item_roles']), set(user_id_list_new))
         self.assertEqual(set(_[1] for _ in ret['manage_dataset_roles']), set(user_id_list_new))
+        # test get_dataset_permissions
+        ret_get = self.gi.libraries.get_dataset_permissions(dataset1[0]['id'])
+        self.assertEqual(set(_[1] for _ in ret_get['access_dataset_roles']), set(user_id_list_new))
+        self.assertEqual(set(_[1] for _ in ret_get['modify_item_roles']), set(user_id_list_new))
+        self.assertEqual(set(_[1] for _ in ret_get['manage_dataset_roles']), set(user_id_list_new))
