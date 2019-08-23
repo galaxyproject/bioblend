@@ -613,7 +613,6 @@ class LibraryClient(Client):
         :return: dictionary with all applicable permissions' values
         """
         # change module and use datasets API
-        self.module = 'libraries/datasets'
         url = '/'.join([self.gi._make_url(self, dataset_id), 'permissions'])
         return self._get(url=url)
 
