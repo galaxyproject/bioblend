@@ -375,7 +375,9 @@ class LibraryClient(Client):
             if payload.get('files_0|file_data', None) is not None:
                 payload['files_0|file_data'].close()
 
-    def upload_file_from_url(self, library_id, file_url, folder_id=None, file_type='auto', dbkey='?'):
+    def upload_file_from_url(self, library_id, file_url, folder_id=None,
+                             file_type='auto', dbkey='?',
+                             tags=None):
         """
         Upload a file to a library from a URL.
 
@@ -395,14 +397,20 @@ class LibraryClient(Client):
         :type dbkey: str
         :param dbkey: Dbkey
 
+        :type tags: list
+        :param tags: A list of tags to add to the datasets
+
         :rtype: list
         :return: List with a single dictionary containing information about the LDDA
         """
         return self._do_upload(library_id, file_url=file_url,
                                folder_id=folder_id, file_type=file_type,
-                               dbkey=dbkey)
+                               dbkey=dbkey,
+                               tags=tags)
 
-    def upload_file_contents(self, library_id, pasted_content, folder_id=None, file_type='auto', dbkey='?'):
+    def upload_file_contents(self, library_id, pasted_content,
+                             folder_id=None, file_type='auto', dbkey='?',
+                             tags=None):
         """
         Upload pasted_content to a data library as a new file.
 
@@ -422,15 +430,20 @@ class LibraryClient(Client):
         :type dbkey: str
         :param dbkey: Dbkey
 
+        :type tags: list
+        :param tags: A list of tags to add to the datasets
+
         :rtype: list
         :return: List with a single dictionary containing information about the LDDA
         """
         return self._do_upload(library_id, pasted_content=pasted_content,
                                folder_id=folder_id, file_type=file_type,
-                               dbkey=dbkey)
+                               dbkey=dbkey,
+                               tags=tags)
 
     def upload_file_from_local_path(self, library_id, file_local_path,
-                                    folder_id=None, file_type='auto', dbkey='?'):
+                                    folder_id=None, file_type='auto', dbkey='?',
+                                    tags=None):
         """
         Read local file contents from file_local_path and upload data to a
         library.
@@ -451,12 +464,16 @@ class LibraryClient(Client):
         :type dbkey: str
         :param dbkey: Dbkey
 
+        :type tags: list
+        :param tags: A list of tags to add to the datasets
+
         :rtype: list
         :return: List with a single dictionary containing information about the LDDA
         """
         return self._do_upload(library_id, file_local_path=file_local_path,
                                folder_id=folder_id, file_type=file_type,
-                               dbkey=dbkey)
+                               dbkey=dbkey,
+                               tags=tags)
 
     def upload_file_from_server(self, library_id, server_dir, folder_id=None,
                                 file_type='auto', dbkey='?', link_data_only=None,
