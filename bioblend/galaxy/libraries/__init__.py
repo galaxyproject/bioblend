@@ -347,7 +347,7 @@ class LibraryClient(Client):
         if keywords.get("link_data_only", None) and keywords['link_data_only'] != 'copy_files':
             payload["link_data_only"] = 'link_to_files'
         payload['tag_using_filenames'] = keywords.get('tag_using_filenames', True)
-        if keywords.get('tags', None) is not None:
+        if keywords.get('tags'):
             payload['tags'] = keywords['tags']
         payload['preserve_dirs'] = keywords.get('preserve_dirs', False)
         # upload options
