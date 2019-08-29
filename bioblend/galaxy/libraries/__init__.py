@@ -118,7 +118,7 @@ class LibraryClient(Client):
         :param genome_build: Replace library dataset genome build (dbkey)
 
         :type tags: list
-        :param tags: A list of tags to add to the dataset
+        :param tags: Replace library dataset tags with the given list
 
         :rtype: dict
         :return: details of the updated dataset
