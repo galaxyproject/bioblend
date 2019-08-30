@@ -346,7 +346,7 @@ class LibraryClient(Client):
             payload["roles"] = keywords["roles"]
         if keywords.get("link_data_only", None) and keywords['link_data_only'] != 'copy_files':
             payload["link_data_only"] = 'link_to_files'
-        payload['tag_using_filenames'] = keywords.get('tag_using_filenames', True)
+        payload['tag_using_filenames'] = keywords.get('tag_using_filenames', False)
         if keywords.get('tags'):
             payload['tags'] = keywords['tags']
         payload['preserve_dirs'] = keywords.get('preserve_dirs', False)
@@ -477,7 +477,7 @@ class LibraryClient(Client):
 
     def upload_file_from_server(self, library_id, server_dir, folder_id=None,
                                 file_type='auto', dbkey='?', link_data_only=None,
-                                roles="", preserve_dirs=False, tag_using_filenames=True,
+                                roles="", preserve_dirs=False, tag_using_filenames=False,
                                 tags=None):
         """
         Upload all files in the specified subdirectory of the Galaxy library
@@ -536,7 +536,7 @@ class LibraryClient(Client):
 
     def upload_from_galaxy_filesystem(self, library_id, filesystem_paths, folder_id=None,
                                       file_type="auto", dbkey="?", link_data_only=None,
-                                      roles="", preserve_dirs=False, tag_using_filenames=True,
+                                      roles="", preserve_dirs=False, tag_using_filenames=False,
                                       tags=None):
         """
         Upload a set of files already present on the filesystem of the Galaxy
