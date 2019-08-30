@@ -45,7 +45,7 @@ class TestGalaxyLibraries(GalaxyTestBase.GalaxyTestBase):
         self.assertEqual(self.library['name'], library_data['name'])
 
     def test_upload_file_from_url(self):
-        pass
+        self.gi.libraries.upload_file_from_url(self.library['id'], 'https://zenodo.org/record/582600/files/wildtype.fna?download=1')
 
     def test_upload_file_contents(self):
         self.gi.libraries.upload_file_contents(self.library['id'], FOO_DATA)
@@ -118,3 +118,62 @@ class TestGalaxyLibraries(GalaxyTestBase.GalaxyTestBase):
         self.assertEqual(set(_[1] for _ in ret_get['access_dataset_roles']), set(user_id_list_new))
         self.assertEqual(set(_[1] for _ in ret_get['modify_item_roles']), set(user_id_list_new))
         self.assertEqual(set(_[1] for _ in ret_get['manage_dataset_roles']), set(user_id_list_new))
+
+    @test_util.skip_unless_galaxy('release_19.09')
+    def test_upload_file_contents_with_tags(self):
+        with tempfile.NamedTemporaryFile(mode='w', prefix='bioblend_test_') as f:
+            f.write(FOO_DATA)
+            f.flush()
+            datasets = self.gi.libraries.upload_file_contents(self.library['id'], FOO_DATA, tags=["foobar", "barfoo"])
+            dataset_show = self.gi.libraries.show_dataset(self.library['id'], datasets[0]['id'])
+            self.assertEqual(dataset_show['tags'], 'name:foobar, name:barfoo')
+
+    @test_util.skip_unless_galaxy('release_19.09')
+    def test_upload_file_local_path_with_tags(self):
+        with tempfile.NamedTemporaryFile(mode='w', prefix='bioblend_test_') as f:
+            f.write(FOO_DATA)
+            f.flush()
+            datasets = self.gi.libraries.upload_file_from_local_path(self.library['id'], f.name, tags=["foobar", "barfoo"])
+            dataset_show = self.gi.libraries.show_dataset(self.library['id'], datasets[0]['id'])
+            self.assertEqual(dataset_show['tags'], 'name:foobar, name:barfoo')
+
+    @test_util.skip_unless_galaxy('release_19.09')
+    def test_upload_from_galaxy_filesystem_with_tags(self):
+        bnames = ['f%d.txt' % i for i in range(2)]
+        tempdir = tempfile.mkdtemp(prefix='bioblend_test_')
+        try:
+            fnames = [os.path.join(tempdir, _) for _ in bnames]
+            for fn in fnames:
+                with open(fn, 'w') as f:
+                    f.write(FOO_DATA)
+            filesystem_paths = '\n'.join(fnames)
+            ret = self.gi.libraries.upload_from_galaxy_filesystem(self.library['id'], filesystem_paths, tags=["foobar", "barfoo"])
+            for dataset_dict in ret:
+                dataset = self.gi.libraries.wait_for_dataset(self.library['id'], dataset_dict['id'])
+                self.assertEqual(dataset['state'], 'ok')
+
+                dataset_show = self.gi.libraries.show_dataset(self.library['id'], dataset_dict['id'])
+                self.assertEqual(dataset_show['tags'], 'name:foobar, name:barfoo')
+            ret = self.gi.libraries.upload_from_galaxy_filesystem(self.library['id'], filesystem_paths, link_data_only='link_to_files', tags=["foobar", "barfoo"])
+            for dataset_dict in ret:
+                dataset = self.gi.libraries.wait_for_dataset(self.library['id'], dataset_dict['id'])
+                self.assertEqual(dataset['state'], 'ok')
+
+                dataset_show = self.gi.libraries.show_dataset(self.library['id'], dataset_dict['id'])
+                self.assertEqual(dataset_show['tags'], 'name:foobar, name:barfoo')
+        finally:
+            shutil.rmtree(tempdir)
+
+    @test_util.skip_unless_galaxy('release_19.09')
+    def test_upload_file_local_path_update_tags(self):
+        with tempfile.NamedTemporaryFile(mode='w', prefix='bioblend_test_') as f:
+            f.write(FOO_DATA)
+            f.flush()
+            datasets = self.gi.libraries.upload_file_from_local_path(self.library['id'], f.name)
+            dataset_show = self.gi.libraries.show_dataset(self.library['id'], datasets[0]['id'])
+            self.assertEqual(dataset_show['tags'], "")
+
+            updated_dataset = self.gi.libraries.update_library_dataset(datasets[0]['id'], tags=["foobar", "barfoo"])
+            dataset_show = self.gi.libraries.show_dataset(self.library['id'], updated_dataset['id'])
+
+            self.assertEqual(dataset_show['tags'], 'name:foobar, name:barfoo')
