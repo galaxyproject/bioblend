@@ -519,7 +519,11 @@ class LibraryClient(Client):
         :param preserve_dirs: Indicate whether to preserve the directory structure when importing dir
 
         :type tag_using_filenames: bool
-        :param tag_using_filenames: Indicate whether to generate dataset tags from filenames
+        :param tag_using_filenames: Indicate whether to generate dataset tags
+          from filenames.
+          .. warning::
+            The default was changed from ``True`` to ``False`` in BioBlend
+            v0.14.0.
 
         :type tags: list
         :param tags: A list of tags to add to the datasets
