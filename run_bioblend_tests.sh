@@ -104,6 +104,7 @@ export BIOBLEND_GALAXY_URL=http://localhost:${GALAXY_PORT}
 
 # Run the tests
 cd "${BIOBLEND_DIR}"
+set +e  # don't stop the script if tox fails
 if [ -n "${t_val}" ]; then
   tox -e "${e_val}" -- "${t_val}"
 else
