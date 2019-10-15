@@ -5,12 +5,16 @@ A basic object-oriented interface for Galaxy entities.
 """
 
 import abc
-import collections
 import json
 
 import six
 
 import bioblend
+
+if six.PY2:
+    from collections import Mapping, Iterable, Sequence
+else:
+    from collections.abc import Mapping, Iterable, Sequence
 
 __all__ = (
     'Wrapper',
@@ -66,7 +70,7 @@ class Wrapper(object):
         :type gi: :class:`GalaxyInstance`
         :param gi: the GalaxyInstance through which we can access this wrapper
         """
-        if not isinstance(wrapped, collections.Mapping):
+        if not isinstance(wrapped, Mapping):
             raise TypeError('wrapped object must be a mapping type')
         # loads(dumps(x)) is a bit faster than deepcopy and allows type checks
         try:
@@ -330,7 +334,7 @@ class Workflow(Wrapper):
         m = {}
         for label, slot_ids in six.iteritems(self.input_labels_to_ids):
             datasets = input_map.get(label, [])
-            if not isinstance(datasets, collections.Iterable):
+            if not isinstance(datasets, Iterable):
                 datasets = [datasets]
             if len(datasets) < len(slot_ids):
                 raise RuntimeError('not enough datasets for "%s"' % label)
@@ -1001,7 +1005,7 @@ class History(DatasetContainer):
         if not isinstance(lds, LibraryDataset):
             raise TypeError('lds is not a LibraryDataset')
         res = self.gi.gi.histories.upload_dataset_from_library(self.id, lds.id)
-        if not isinstance(res, collections.Mapping):
+        if not isinstance(res, Mapping):
             raise RuntimeError(
                 'upload_dataset_from_library: unexpected reply: %r' % res)
         self.refresh()
@@ -1211,7 +1215,7 @@ class Library(DatasetContainer):
           ``release_17.05`` and earlier) option set to ``true`` in the
           ``config/galaxy.yml`` configuration file.
 
-        :type paths: str or :class:`~collections.Iterable` of str
+        :type paths: str or :class:`~collections.abc.Iterable` of str
         :param paths: server-side file paths from which data should be read
 
         :type link_data_only: str
@@ -1233,7 +1237,7 @@ class Library(DatasetContainer):
             **kwargs)
         if res is None:
             raise RuntimeError('upload_from_galaxy_filesystem: no reply')
-        if not isinstance(res, collections.Sequence):
+        if not isinstance(res, Sequence):
             raise RuntimeError(
                 'upload_from_galaxy_filesystem: unexpected reply: %r' % res)
         new_datasets = [

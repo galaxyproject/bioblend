@@ -1,4 +1,4 @@
-from bioblend.galaxy import dataset_collections as collections
+from bioblend.galaxy import dataset_collections
 from . import GalaxyTestBase
 
 
@@ -11,12 +11,12 @@ class TestGalaxyDatasetCollections(GalaxyTestBase.GalaxyTestBase):
         dataset3_id = self._test_dataset(history_id)
         collection_response = self.gi.histories.create_dataset_collection(
             history_id=history_id,
-            collection_description=collections.CollectionDescription(
+            collection_description=dataset_collections.CollectionDescription(
                 name="MyDatasetList",
                 elements=[
-                    collections.HistoryDatasetElement(name="sample1", id=dataset1_id),
-                    collections.HistoryDatasetElement(name="sample2", id=dataset2_id),
-                    collections.HistoryDatasetElement(name="sample3", id=dataset3_id),
+                    dataset_collections.HistoryDatasetElement(name="sample1", id=dataset1_id),
+                    dataset_collections.HistoryDatasetElement(name="sample2", id=dataset2_id),
+                    dataset_collections.HistoryDatasetElement(name="sample3", id=dataset3_id),
                 ]
             )
         )
@@ -38,24 +38,24 @@ class TestGalaxyDatasetCollections(GalaxyTestBase.GalaxyTestBase):
         dataset4_id = self._test_dataset(history_id)
         collection_response = self.gi.histories.create_dataset_collection(
             history_id=history_id,
-            collection_description=collections.CollectionDescription(
+            collection_description=dataset_collections.CollectionDescription(
                 name="MyListOfPairedDatasets",
                 type="list:paired",
                 elements=[
-                    collections.CollectionElement(
+                    dataset_collections.CollectionElement(
                         name="sample1",
                         type="paired",
                         elements=[
-                            collections.HistoryDatasetElement(name="forward", id=dataset1_id),
-                            collections.HistoryDatasetElement(name="reverse", id=dataset2_id),
+                            dataset_collections.HistoryDatasetElement(name="forward", id=dataset1_id),
+                            dataset_collections.HistoryDatasetElement(name="reverse", id=dataset2_id),
                         ]
                     ),
-                    collections.CollectionElement(
+                    dataset_collections.CollectionElement(
                         name="sample2",
                         type="paired",
                         elements=[
-                            collections.HistoryDatasetElement(name="forward", id=dataset3_id),
-                            collections.HistoryDatasetElement(name="reverse", id=dataset4_id),
+                            dataset_collections.HistoryDatasetElement(name="forward", id=dataset3_id),
+                            dataset_collections.HistoryDatasetElement(name="reverse", id=dataset4_id),
                         ]
                     ),
                 ]
@@ -123,12 +123,12 @@ class TestGalaxyDatasetCollections(GalaxyTestBase.GalaxyTestBase):
         dataset2_id = self._test_dataset(history_id)
         collection_response = self.gi.histories.create_dataset_collection(
             history_id=history_id,
-            collection_description=collections.CollectionDescription(
+            collection_description=dataset_collections.CollectionDescription(
                 name="MyTestPair",
                 type="paired",
                 elements=[
-                    collections.HistoryDatasetElement(name="forward", id=dataset1_id),
-                    collections.HistoryDatasetElement(name="reverse", id=dataset2_id),
+                    dataset_collections.HistoryDatasetElement(name="forward", id=dataset1_id),
+                    dataset_collections.HistoryDatasetElement(name="reverse", id=dataset2_id),
                 ]
             )
         )

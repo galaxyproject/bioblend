@@ -5,13 +5,17 @@ Classes in this module should not be instantiated directly, but used
 via their handles in :class:`~.galaxy_instance.GalaxyInstance`.
 """
 import abc
-import collections
 import json
 
 import six
 
 import bioblend
 from . import wrappers
+
+if six.PY2:
+    from collections import Mapping, Sequence
+else:
+    from collections.abc import Mapping, Sequence
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -71,7 +75,7 @@ class ObjClient(object):
     def _get_dict(self, meth_name, reply):
         if reply is None:
             self._error('%s: no reply' % meth_name)
-        elif isinstance(reply, collections.Mapping):
+        elif isinstance(reply, Mapping):
             return reply
         try:
             return reply[0]
@@ -89,7 +93,7 @@ class ObjDatasetContainerClient(ObjClient):
         cdict = self._get_dict(show_fname, res)
         cdict['id'] = id_  # overwrite unencoded id
         c_infos = show_f(id_, contents=True)
-        if not isinstance(c_infos, collections.Sequence):
+        if not isinstance(c_infos, Sequence):
             self._error('%s: unexpected reply: %r' % (show_fname, c_infos))
         c_infos = [ctype.CONTENT_INFO_TYPE(_) for _ in c_infos]
         return ctype(cdict, content_infos=c_infos, gi=self.obj_gi)
@@ -159,7 +163,7 @@ class ObjLibraryClient(ObjDatasetContainerClient):
         """
         for id_ in self._select_ids(id_=id_, name=name):
             res = self.gi.libraries.delete_library(id_)
-            if not isinstance(res, collections.Mapping):
+            if not isinstance(res, Mapping):
                 self._error('delete_library: unexpected reply: %r' % (res,))
 
 
@@ -225,7 +229,7 @@ class ObjHistoryClient(ObjDatasetContainerClient):
         """
         for id_ in self._select_ids(id_=id_, name=name):
             res = self.gi.histories.delete_history(id_, purge=purge)
-            if not isinstance(res, collections.Mapping):
+            if not isinstance(res, Mapping):
                 self._error('delete_history: unexpected reply: %r' % (res,))
 
 
@@ -253,7 +257,7 @@ class ObjWorkflowClient(ObjClient):
         :rtype: :class:`~.wrappers.Workflow`
         :return: the workflow just imported
         """
-        if isinstance(src, collections.Mapping):
+        if isinstance(src, Mapping):
             wf_dict = src
         else:
             try:
