@@ -352,7 +352,7 @@ class WorkflowClient(Client):
     def invoke_workflow(self, workflow_id, inputs=None, params=None,
                         history_id=None, history_name=None,
                         import_inputs_to_history=False, replacement_params=None,
-                        allow_tool_state_corrections=None, inputs_by="step_index"):
+                        allow_tool_state_corrections=None, inputs_by=None):
         """
         Invoke the workflow identified by ``workflow_id``. This will
         cause a workflow to be scheduled and return an object describing
@@ -409,7 +409,7 @@ class WorkflowClient(Client):
 
         :type inputs_by: str
         :param inputs_by: Determines how inputs are referenced. Can be
-          "step_index" (default), "step_uuid", or "name".
+          "step_index|step_uuid" (default), "step_index", "step_id", "step_uuid", or "name".
 
         :rtype: dict
         :return: A dict containing the workflow invocation describing the
