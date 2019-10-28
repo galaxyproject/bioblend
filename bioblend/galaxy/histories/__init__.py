@@ -81,7 +81,10 @@ class HistoryClient(Client):
 
         :type contents: bool
         :param contents: When ``True``, instead of the history details, return
-          the list of datasets in the given history.
+          a list with info for all datasets in the given history.
+          Note that inside each dataset info dict, the id which should be used
+          for further requests about this history dataset is given by the value
+          of the `id` (not `dataset_id`) key.
 
         :type deleted: bool or None
         :param deleted: When ``contents=True``, whether to filter for the
@@ -103,8 +106,8 @@ class HistoryClient(Client):
           ``['dataset_collection']``,  return only dataset collections. If not
           set, no filtering is applied.
 
-        :rtype: dict
-        :return: details of the given history
+        :rtype: dict or list of dicts
+        :return: details of the given history or list of dataset info
         """
         params = {}
         if contents:
