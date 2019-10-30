@@ -117,6 +117,9 @@ class LibraryClient(Client):
         :type genome_build: str
         :param genome_build: Replace library dataset genome build (dbkey)
 
+        :type tags: list
+        :param tags: Replace library dataset tags with the given list
+
         :rtype: dict
         :return: details of the updated dataset
         """
@@ -343,7 +346,9 @@ class LibraryClient(Client):
             payload["roles"] = keywords["roles"]
         if keywords.get("link_data_only", None) and keywords['link_data_only'] != 'copy_files':
             payload["link_data_only"] = 'link_to_files'
-        payload['tag_using_filenames'] = keywords.get('tag_using_filenames', True)
+        payload['tag_using_filenames'] = keywords.get('tag_using_filenames', False)
+        if keywords.get('tags'):
+            payload['tags'] = keywords['tags']
         payload['preserve_dirs'] = keywords.get('preserve_dirs', False)
         # upload options
         if keywords.get('file_url', None) is not None:
@@ -370,7 +375,9 @@ class LibraryClient(Client):
             if payload.get('files_0|file_data', None) is not None:
                 payload['files_0|file_data'].close()
 
-    def upload_file_from_url(self, library_id, file_url, folder_id=None, file_type='auto', dbkey='?'):
+    def upload_file_from_url(self, library_id, file_url, folder_id=None,
+                             file_type='auto', dbkey='?',
+                             tags=None):
         """
         Upload a file to a library from a URL.
 
@@ -390,14 +397,20 @@ class LibraryClient(Client):
         :type dbkey: str
         :param dbkey: Dbkey
 
+        :type tags: list
+        :param tags: A list of tags to add to the datasets
+
         :rtype: list
         :return: List with a single dictionary containing information about the LDDA
         """
         return self._do_upload(library_id, file_url=file_url,
                                folder_id=folder_id, file_type=file_type,
-                               dbkey=dbkey)
+                               dbkey=dbkey,
+                               tags=tags)
 
-    def upload_file_contents(self, library_id, pasted_content, folder_id=None, file_type='auto', dbkey='?'):
+    def upload_file_contents(self, library_id, pasted_content,
+                             folder_id=None, file_type='auto', dbkey='?',
+                             tags=None):
         """
         Upload pasted_content to a data library as a new file.
 
@@ -417,15 +430,20 @@ class LibraryClient(Client):
         :type dbkey: str
         :param dbkey: Dbkey
 
+        :type tags: list
+        :param tags: A list of tags to add to the datasets
+
         :rtype: list
         :return: List with a single dictionary containing information about the LDDA
         """
         return self._do_upload(library_id, pasted_content=pasted_content,
                                folder_id=folder_id, file_type=file_type,
-                               dbkey=dbkey)
+                               dbkey=dbkey,
+                               tags=tags)
 
     def upload_file_from_local_path(self, library_id, file_local_path,
-                                    folder_id=None, file_type='auto', dbkey='?'):
+                                    folder_id=None, file_type='auto', dbkey='?',
+                                    tags=None):
         """
         Read local file contents from file_local_path and upload data to a
         library.
@@ -446,16 +464,21 @@ class LibraryClient(Client):
         :type dbkey: str
         :param dbkey: Dbkey
 
+        :type tags: list
+        :param tags: A list of tags to add to the datasets
+
         :rtype: list
         :return: List with a single dictionary containing information about the LDDA
         """
         return self._do_upload(library_id, file_local_path=file_local_path,
                                folder_id=folder_id, file_type=file_type,
-                               dbkey=dbkey)
+                               dbkey=dbkey,
+                               tags=tags)
 
     def upload_file_from_server(self, library_id, server_dir, folder_id=None,
                                 file_type='auto', dbkey='?', link_data_only=None,
-                                roles="", preserve_dirs=False, tag_using_filenames=True):
+                                roles="", preserve_dirs=False, tag_using_filenames=False,
+                                tags=None):
         """
         Upload all files in the specified subdirectory of the Galaxy library
         import directory to a library.
@@ -496,7 +519,14 @@ class LibraryClient(Client):
         :param preserve_dirs: Indicate whether to preserve the directory structure when importing dir
 
         :type tag_using_filenames: bool
-        :param tag_using_filenames: Indicate whether to generate dataset tags from filenames
+        :param tag_using_filenames: Indicate whether to generate dataset tags
+          from filenames.
+          .. warning::
+            The default was changed from ``True`` to ``False`` in BioBlend
+            v0.14.0.
+
+        :type tags: list
+        :param tags: A list of tags to add to the datasets
 
         :rtype: list
         :return: List with a single dictionary containing information about the LDDA
@@ -505,11 +535,13 @@ class LibraryClient(Client):
                                folder_id=folder_id, file_type=file_type,
                                dbkey=dbkey, link_data_only=link_data_only,
                                roles=roles, preserve_dirs=preserve_dirs,
-                               tag_using_filenames=tag_using_filenames)
+                               tag_using_filenames=tag_using_filenames,
+                               tags=tags)
 
     def upload_from_galaxy_filesystem(self, library_id, filesystem_paths, folder_id=None,
                                       file_type="auto", dbkey="?", link_data_only=None,
-                                      roles="", preserve_dirs=False, tag_using_filenames=True):
+                                      roles="", preserve_dirs=False, tag_using_filenames=False,
+                                      tags=None):
         """
         Upload a set of files already present on the filesystem of the Galaxy
         server to a library.
@@ -549,7 +581,14 @@ class LibraryClient(Client):
         :param preserve_dirs: Indicate whether to preserve the directory structure when importing dir
 
         :type tag_using_filenames: bool
-        :param tag_using_filenames: Indicate whether to generate dataset tags from filenames
+        :param tag_using_filenames: Indicate whether to generate dataset tags
+          from filenames.
+          .. warning::
+            The default was changed from ``True`` to ``False`` in BioBlend
+            v0.14.0.
+
+        :type tags: list
+        :param tags: A list of tags to add to the datasets
 
         :rtype: list
         :return: List with a single dictionary containing information about the LDDA
@@ -558,7 +597,8 @@ class LibraryClient(Client):
                                folder_id=folder_id, file_type=file_type,
                                dbkey=dbkey, link_data_only=link_data_only,
                                roles=roles, preserve_dirs=preserve_dirs,
-                               tag_using_filenames=tag_using_filenames)
+                               tag_using_filenames=tag_using_filenames,
+                               tags=tags)
 
     def copy_from_dataset(self, library_id, dataset_id, folder_id=None, message=''):
         """

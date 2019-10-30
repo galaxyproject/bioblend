@@ -45,7 +45,7 @@ class TestGalaxyLibraries(GalaxyTestBase.GalaxyTestBase):
         self.assertEqual(self.library['name'], library_data['name'])
 
     def test_upload_file_from_url(self):
-        pass
+        self.gi.libraries.upload_file_from_url(self.library['id'], 'https://zenodo.org/record/582600/files/wildtype.fna?download=1')
 
     def test_upload_file_contents(self):
         self.gi.libraries.upload_file_contents(self.library['id'], FOO_DATA)
@@ -118,3 +118,20 @@ class TestGalaxyLibraries(GalaxyTestBase.GalaxyTestBase):
         self.assertEqual(set(_[1] for _ in ret_get['access_dataset_roles']), set(user_id_list_new))
         self.assertEqual(set(_[1] for _ in ret_get['modify_item_roles']), set(user_id_list_new))
         self.assertEqual(set(_[1] for _ in ret_get['manage_dataset_roles']), set(user_id_list_new))
+
+    @test_util.skip_unless_galaxy('release_19.09')
+    def test_upload_file_contents_with_tags(self):
+        datasets = self.gi.libraries.upload_file_contents(self.library['id'], FOO_DATA, tags=["foobar", "barfoo"])
+        dataset_show = self.gi.libraries.show_dataset(self.library['id'], datasets[0]['id'])
+        self.assertEqual(dataset_show['tags'], 'name:foobar, name:barfoo')
+
+    @test_util.skip_unless_galaxy('release_19.09')
+    def test_update_dataset_tags(self):
+        datasets = self.gi.libraries.upload_file_contents(self.library['id'], FOO_DATA)
+        dataset_show = self.gi.libraries.show_dataset(self.library['id'], datasets[0]['id'])
+        self.assertEqual(dataset_show['tags'], "")
+
+        updated_dataset = self.gi.libraries.update_library_dataset(datasets[0]['id'], tags=["foobar", "barfoo"])
+        dataset_show = self.gi.libraries.show_dataset(self.library['id'], updated_dataset['id'])
+
+        self.assertEqual(dataset_show['tags'], 'name:foobar, name:barfoo')
