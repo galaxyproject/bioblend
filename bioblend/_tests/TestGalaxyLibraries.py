@@ -126,33 +126,6 @@ class TestGalaxyLibraries(GalaxyTestBase.GalaxyTestBase):
         self.assertEqual(dataset_show['tags'], 'name:foobar, name:barfoo')
 
     @test_util.skip_unless_galaxy('release_19.09')
-    def test_upload_from_galaxy_filesystem_with_tags(self):
-        bnames = ['f%d.txt' % i for i in range(2)]
-        tempdir = tempfile.mkdtemp(prefix='bioblend_test_')
-        try:
-            fnames = [os.path.join(tempdir, _) for _ in bnames]
-            for fn in fnames:
-                with open(fn, 'w') as f:
-                    f.write(FOO_DATA)
-            filesystem_paths = '\n'.join(fnames)
-            ret = self.gi.libraries.upload_from_galaxy_filesystem(self.library['id'], filesystem_paths, tags=["foobar", "barfoo"])
-            for dataset_dict in ret:
-                dataset = self.gi.libraries.wait_for_dataset(self.library['id'], dataset_dict['id'])
-                self.assertEqual(dataset['state'], 'ok')
-
-                dataset_show = self.gi.libraries.show_dataset(self.library['id'], dataset_dict['id'])
-                self.assertEqual(dataset_show['tags'], 'name:foobar, name:barfoo')
-            ret = self.gi.libraries.upload_from_galaxy_filesystem(self.library['id'], filesystem_paths, link_data_only='link_to_files', tags=["foobar", "barfoo"])
-            for dataset_dict in ret:
-                dataset = self.gi.libraries.wait_for_dataset(self.library['id'], dataset_dict['id'])
-                self.assertEqual(dataset['state'], 'ok')
-
-                dataset_show = self.gi.libraries.show_dataset(self.library['id'], dataset_dict['id'])
-                self.assertEqual(dataset_show['tags'], 'name:foobar, name:barfoo')
-        finally:
-            shutil.rmtree(tempdir)
-
-    @test_util.skip_unless_galaxy('release_19.09')
     def test_update_dataset_tags(self):
         datasets = self.gi.libraries.upload_file_contents(self.library['id'], FOO_DATA)
         dataset_show = self.gi.libraries.show_dataset(self.library['id'], datasets[0]['id'])
