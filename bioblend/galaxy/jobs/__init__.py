@@ -114,3 +114,18 @@ class JobsClient(Client):
         url = '/'.join([url, "search"])
 
         return self._post(url=url, payload=payload)
+
+    def get_metrics(self, job_id):
+        """
+        Return job metrics for specified job.
+
+        :type job_id: str
+        :param job_id: job ID
+
+        :rtype: list
+        :return: list containing job metrics
+        """
+        url = self.gi._make_url(self, module_id=job_id)
+        url = '/'.join([url, "metrics"])
+
+        return self._get(url=url)
