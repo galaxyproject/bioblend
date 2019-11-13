@@ -119,6 +119,13 @@ class JobsClient(Client):
         """
         Return job metrics for specified job.
 
+        .. note::
+          `show_job` offers this functionality in part, however the Galaxy API
+          in that case only returns metrics if the user is an admin.
+          This call allows to fetch metrics even as a normal user as long as
+          the Galaxy instance has
+          `expose_potentially_sensitive_job_metrics` set to true.
+
         :type job_id: str
         :param job_id: job ID
 
