@@ -180,4 +180,9 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
             history_id=history_id,
             inputs_by='name',
         )
+        summary = self.gi.workflows.get_invocation_summary(wf['id'], invoke_response['id'])
+        report = self.gi.workflows.get_invocation_report(wf['id'], invoke_response['id'])
+
         assert invoke_response['state'] == 'new', invoke_response
+        assert summary['states'] == {'ok': 1}
+        assert report['workflows'] == {wf['id']: {'name': 'paste_columns'}}
