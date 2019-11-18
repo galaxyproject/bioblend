@@ -182,7 +182,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         )
 
         assert invoke_response['state'] == 'new', invoke_response
-        
+
     @test_util.skip_unless_galaxy('release_19.09')
     def test_invocation_report(self):
         path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
