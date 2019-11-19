@@ -121,9 +121,9 @@ class TestGalaxyLibraries(GalaxyTestBase.GalaxyTestBase):
 
     @test_util.skip_unless_galaxy('release_19.09')
     def test_upload_file_contents_with_tags(self):
-        datasets = self.gi.libraries.upload_file_contents(self.library['id'], FOO_DATA, tags=["foobar", "barfoo"])
+        datasets = self.gi.libraries.upload_file_contents(self.library['id'], FOO_DATA, tags=["name:foobar", "barfoo"])
         dataset_show = self.gi.libraries.show_dataset(self.library['id'], datasets[0]['id'])
-        self.assertEqual(dataset_show['tags'], 'name:foobar, name:barfoo')
+        self.assertEqual(dataset_show['tags'], 'name:foobar, barfoo')
 
     @test_util.skip_unless_galaxy('release_19.09')
     def test_update_dataset_tags(self):
@@ -131,7 +131,7 @@ class TestGalaxyLibraries(GalaxyTestBase.GalaxyTestBase):
         dataset_show = self.gi.libraries.show_dataset(self.library['id'], datasets[0]['id'])
         self.assertEqual(dataset_show['tags'], "")
 
-        updated_dataset = self.gi.libraries.update_library_dataset(datasets[0]['id'], tags=["foobar", "barfoo"])
+        updated_dataset = self.gi.libraries.update_library_dataset(datasets[0]['id'], tags=["name:foobar", "barfoo"])
         dataset_show = self.gi.libraries.show_dataset(self.library['id'], updated_dataset['id'])
 
-        self.assertEqual(dataset_show['tags'], 'name:foobar, name:barfoo')
+        self.assertEqual(dataset_show['tags'], 'name:foobar, barfoo')
