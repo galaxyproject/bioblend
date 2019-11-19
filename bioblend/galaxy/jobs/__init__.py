@@ -117,20 +117,20 @@ class JobsClient(Client):
 
     def get_metrics(self, job_id):
         """
-        Return job metrics for specified job.
-
-        .. note::
-          `show_job` offers this functionality in part, however the Galaxy API
-          in that case only returns metrics if the user is an admin.
-          This call allows to fetch metrics even as a normal user as long as
-          the Galaxy instance has
-          `expose_potentially_sensitive_job_metrics` set to true.
+        Return job metrics for a given job.
 
         :type job_id: str
         :param job_id: job ID
 
         :rtype: list
         :return: list containing job metrics
+
+        .. note::
+          Calling ``show_job()`` with ``full_details=True`` also returns the
+          metrics for a job if the user is an admin. This method allows to fetch
+          metrics even as a normal user as long as the Galaxy instance has the
+          ``expose_potentially_sensitive_job_metrics`` option set to ``true`` in
+          the ``config/galaxy.yml`` configuration file.
         """
         url = self.gi._make_url(self, module_id=job_id)
         url = '/'.join([url, "metrics"])
