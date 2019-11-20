@@ -1,7 +1,4 @@
 import os
-import time
-
-from six.moves import range
 
 from . import GalaxyTestBase, test_util
 
@@ -13,7 +10,6 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
     def test_cancelling_workflow_scheduling(self):
         path = test_util.get_abspath(os.path.join('data', 'test_workflow_pause.ga'))
         workflow = self.gi.workflows.import_workflow_from_local_path(path)
-        workflow_id = workflow["id"]
         history_id = self.gi.histories.create_history(name="TestWorkflowState")["id"]
         dataset1_id = self._test_dataset(history_id)
 
@@ -36,7 +32,7 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
         invocation = self.gi.invocations.show_invocation(invocation_id)
         self.assertEqual(invocation['state'], 'cancelled')
 
-        step_id =  invocation['steps'][0]['id']
+        step_id = invocation['steps'][0]['id']
 
         self.assertIsNone(
             self.gi.invocations.show_invocation_step(invocation_id, step_id)["action"])
@@ -46,6 +42,5 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
         summary = self.gi.invocations.get_invocation_summary(invocation_id)
         report = self.gi.invocations.get_invocation_report(invocation_id)
 
-        assert invoke_response['state'] == 'new', invoke_response
         assert summary['states'] == {'ok': 1}
-        assert report['workflows'] == {wf['id']: {'name': 'paste_columns'}}
+        assert report['workflows'] == {workflow['id']: {'name': 'paste_columns'}}
