@@ -692,53 +692,6 @@ class WorkflowClient(Client):
         payload = {"action": action}
         return self._put(payload=payload, url=url)
 
-    def get_invocation_summary(self, workflow_id, invocation_id):
-        """
-        Get a summary of an invokation, stating the number of jobs which
-        succeed, which are paused and which have errored.
-
-        :type workflow_id: str
-        :param workflow_id: Encoded workflow ID
-
-        :type invocation_id: str
-        :param invocation_id: Encoded workflow invocation ID
-
-        :rtype: dict
-        :return: The invocation summary.
-          For example::
-
-            {'states': {'paused': 4, 'error': 2, 'ok': 2},
-             'model': 'WorkflowInvocation',
-             'id': 'a799d38679e985db',
-             'populated_state': 'ok'}
-        """
-        url = _join(self._invocation_url(workflow_id, invocation_id), "jobs_summary")
-        return self._get(url=url)
-
-    def get_invocation_report(self, workflow_id, invocation_id):
-        """
-        Get a markdown report for an invokation.
-
-        :type workflow_id: str
-        :param workflow_id: Encoded workflow ID
-
-        :type invocation_id: str
-        :param invocation_id: Encoded workflow invocation ID
-
-        :rtype: dict
-        :return: The invocation report.
-          For example::
-
-            {'markdown': '\n# Workflow Execution Summary of Example workflow\n\n
-             ## Workflow Inputs\n\n\n## Workflow Outputs\n\n\n
-             ## Workflow\n```galaxy\n
-             workflow_display(workflow_id=f2db41e1fa331b3e)\n```\n',
-             'render_format': 'markdown',
-             'workflows': {'f2db41e1fa331b3e': {'name': 'Example workflow'}}}
-        """
-        url = _join(self._invocation_url(workflow_id, invocation_id), "report")
-        return self._get(url=url)
-
     def delete_workflow(self, workflow_id):
         """
         Delete a workflow identified by `workflow_id`.

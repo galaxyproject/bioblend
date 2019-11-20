@@ -180,24 +180,4 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
             history_id=history_id,
             inputs_by='name',
         )
-
         assert invoke_response['state'] == 'new', invoke_response
-
-    @test_util.skip_unless_galaxy('release_19.09')
-    def test_invocation_report(self):
-        path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
-        wf = self.gi.workflows.import_workflow_from_local_path(path)
-        history_id = self.gi.histories.create_history(name="test_wf_invocation")['id']
-        dataset1_id = self._test_dataset(history_id)
-        dataset = {'src': 'hda', 'id': dataset1_id}
-        invoke_response = self.gi.workflows.invoke_workflow(
-            wf['id'],
-            inputs={'Input 1': dataset, 'Input 2': dataset},
-            history_id=history_id,
-            inputs_by='name',
-        )
-        summary = self.gi.workflows.get_invocation_summary(wf['id'], invoke_response['id'])
-        report = self.gi.workflows.get_invocation_report(wf['id'], invoke_response['id'])
-
-        assert summary['states'] == {}
-        assert report['workflows'] == {wf['id']: {'name': 'paste_columns'}}
