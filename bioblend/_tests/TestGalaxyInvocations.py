@@ -27,10 +27,6 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
         invocation = self.gi.invocations.show_invocation(invocation_id)
         self.assertEqual(invocation['state'], 'cancelled')
 
-        step_id = invocation['steps'][0]['id']
-        self.assertIsNone(
-            self.gi.invocations.show_invocation_step(invocation_id, step_id)["action"])
-
         summary = self.gi.invocations.get_invocation_summary(invocation_id)
         report = self.gi.invocations.get_invocation_report(invocation_id)
 
