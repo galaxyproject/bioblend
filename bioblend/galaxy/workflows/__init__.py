@@ -52,12 +52,15 @@ class WorkflowClient(Client):
             workflows = [_ for _ in workflows if _['name'] == name]
         return workflows
 
-    def show_workflow(self, workflow_id):
+    def show_workflow(self, workflow_id, version=None):
         """
         Display information needed to run a workflow.
 
         :type workflow_id: str
         :param workflow_id: Encoded workflow ID
+
+        :type version: int
+        :param version: Workflow version to show
 
         :rtype: dict
         :return: A description of the workflow and its inputs.
@@ -68,7 +71,11 @@ class WorkflowClient(Client):
              u'name': u'Simple',
              u'url': u'/api/workflows/92c56938c2f9b315'}
         """
-        return self._get(id=workflow_id)
+        params = {}
+        if version is not None:
+            params['version'] = version
+
+        return self._get(id=workflow_id, params=params)
 
     def get_workflow_inputs(self, workflow_id, label):
         """
@@ -186,19 +193,26 @@ class WorkflowClient(Client):
         url = self.gi._make_url(self)
         return self._post(url=url, payload=payload)
 
-    def export_workflow_dict(self, workflow_id):
+    def export_workflow_dict(self, workflow_id, version=None):
         """
         Exports a workflow.
 
         :type workflow_id: str
         :param workflow_id: Encoded workflow ID
 
+        :type version: int
+        :param version: Workflow version to export
+
         :rtype: dict
         :return: Dictionary representing the requested workflow
         """
+        params = {}
+        if version is not None:
+            params['version'] = version
+
         url = self.gi._make_url(self)
         url = _join(url, "download", workflow_id)
-        return self._get(url=url)
+        return self._get(url=url, params=params)
 
     def export_workflow_json(self, workflow_id):
         """
@@ -235,6 +249,33 @@ class WorkflowClient(Client):
 
         with open(file_local_path, 'w') as fp:
             json.dump(workflow_dict, fp)
+
+    def update_workflow(self, workflow_id, **kwds):
+        """
+        Update a given workflow.
+
+        :type workflow_id: str
+        :param workflow_id: Encoded workflow ID
+
+        :type workflow: dict
+        :param workflow: dictionary representing the workflow to be updated
+
+        :type name: str
+        :param name: New name of the workflow
+
+        :type annotation: str
+        :param annotation: New annotation for the workflow
+
+        :type menu_entry: bool
+        :param menu_entry: Whether the workflow should appear in the user's menu
+
+        :type tags: list of str
+        :param tags: Replace workflow tags with the given list
+
+        :rtype: dict
+        :return: Dictionary representing the updated workflow
+        """
+        return self._put(payload=kwds, id=workflow_id)
 
     def run_workflow(self, workflow_id, dataset_map=None, params=None,
                      history_id=None, history_name=None,
