@@ -3,6 +3,13 @@ language: python
 python: "2.7"
 services:
   - postgresql
+
+stages:
+  - lint
+  - test
+  - name: deploy
+    if: tag IS present
+
 env:
   - TOX_ENV=py35 GALAXY_VERSION=dev
   - TOX_ENV=py27 GALAXY_VERSION=dev
@@ -26,7 +33,13 @@ env:
 
 matrix:
   include:
-    - python: "2.7"
+    - stage: lint
+      python: '3.5'
+      before_install: {}
+      before_script: {}
+      script: tox -e flake8
+
+    - stage: test
       env: TOX_ENV=py38 GALAXY_VERSION=dev
       addons:
         apt:
@@ -35,7 +48,7 @@ matrix:
           packages:
             - python3.8-dev
             - python3.8-distutils
-    - python: "2.7"
+    - stage: test
       env: TOX_ENV=py37 GALAXY_VERSION=dev
       addons:
         apt:
@@ -43,7 +56,7 @@ matrix:
             - deadsnakes
           packages:
             - python3.7-dev
-    - python: "2.7"
+    - stage: test
       env: TOX_ENV=py36 GALAXY_VERSION=dev
       addons:
         apt:
@@ -51,7 +64,8 @@ matrix:
             - deadsnakes
           packages:
             - python3.6-dev
-    - os: osx
+    - stage: test
+      os: osx
       # No version of Python is available via virtualenv on OS X workers, see https://github.com/travis-ci/travis-ci/issues/2312
       language: generic
       env: TOX_ENV=py27 GALAXY_VERSION=dev
@@ -62,16 +76,28 @@ matrix:
         - pg_ctl -D /usr/local/var/postgres start
         - createuser -s postgres
         # virtualenv has not been installed on OS X workers any more since xcode9.4 became the default image, see https://github.com/travis-ci/travis-ci/issues/9966
-        - pip install --upgrade virtualenv
+        - python -m pip install --upgrade virtualenv
         - virtualenv .venv
         - . .venv/bin/activate
+
+    - stage: deploy
+      python: '3.6'
+      before_install: {}
+      install:
+        - python -m pip install --upgrade pip setuptools
+        - python -m pip install --upgrade twine wheel
+      before_script: {}
+      script:
+        - python setup.py sdist bdist_wheel
+        - twine check dist/*
+        - twine upload --skip-existing dist/*
 
 before_install:
   # Workaround for https://github.com/travis-ci/travis-ci/issues/7940
   - sudo rm -f /etc/boto.cfg
 
 install:
-  - pip install "tox>=1.8.0"
+  - python -m pip install "tox>=1.8.0"
 
 before_script:
   # Create a PostgreSQL database for Galaxy. The default SQLite3 database makes test fail randomly because of "database locked" error.

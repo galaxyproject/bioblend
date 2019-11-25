@@ -61,7 +61,7 @@ if [ ! -d .venv ]; then
 fi
 . .venv/bin/activate
 python setup.py install
-pip install --upgrade "tox>=1.8.0"
+python -m pip install --upgrade "tox>=1.8.0"
 
 # Setup Galaxy
 cd "${g_val}"

@@ -14,9 +14,9 @@ venv:
 	[ -f .venv/bin/activate ] || virtualenv .venv
 	( $(IN_VENV) && \
 	  # Install latest versions of pip and setuptools \
-	  pip install --upgrade pip setuptools && \
+	  python -m pip install --upgrade pip setuptools && \
 	  # Install latest versions of other needed packages in the virtualenv \
-	  pip install --upgrade twine wheel \
+	  python -m pip install --upgrade twine wheel \
 	)
 
 release: clean venv
