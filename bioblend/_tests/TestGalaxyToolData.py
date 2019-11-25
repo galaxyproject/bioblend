@@ -2,10 +2,9 @@
 Tests the functionality of the Blend CloudMan API. These tests require working
 credentials to supported cloud infrastructure.
 """
-from . import GalaxyTestBase, test_util
+from . import GalaxyTestBase
 
 
-@test_util.skip_unless_galaxy('release_15.01')
 class TestGalaxyToolData(GalaxyTestBase.GalaxyTestBase):
 
     def test_get_data_tables(self):

@@ -92,7 +92,6 @@ class TestGalaxyLibraries(GalaxyTestBase.GalaxyTestBase):
         self.assertEqual(updated_dataset["name"], 'Modified name')
         self.assertEqual(updated_dataset["misc_info"], 'Modified the name succesfully')
 
-    @test_util.skip_unless_galaxy('release_14.10')
     def test_library_permissions(self):
         current_user = self.gi.users.get_current_user()
         user_id_list_new = [current_user['id']]

@@ -31,7 +31,6 @@ class TestGalaxyFolders(GalaxyTestBase.GalaxyTestBase):
         if 'folder_name' in f2['metadata']:
             self.assertEqual(self.name, f2['metadata']['folder_name'])
 
-    @test_util.skip_unless_galaxy("release_15.01")
     def test_delete_folder(self):
         self.sub_folder = self.gi.folders.create_folder(self.folder['id'], self.name)
         self.gi.folders.delete_folder(self.sub_folder['id'])

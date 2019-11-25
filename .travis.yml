@@ -23,8 +23,6 @@ env:
   - TOX_ENV=py35 GALAXY_VERSION=release_15.07
   - TOX_ENV=py35 GALAXY_VERSION=release_15.05
   - TOX_ENV=py35 GALAXY_VERSION=release_15.03
-  - TOX_ENV=py35 GALAXY_VERSION=release_15.01
-  - TOX_ENV=py35 GALAXY_VERSION=release_14.10
 
 matrix:
   include:
