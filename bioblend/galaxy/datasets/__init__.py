@@ -80,11 +80,7 @@ class DatasetClient(Client):
         if not dataset['state'] == 'ok':
             raise DatasetStateException("Dataset state is not 'ok'. Dataset id: %s, current state: %s" % (dataset_id, dataset['state']))
 
-        # Galaxy release_13.01 and earlier does not have file_ext in the dataset
-        # dict, so resort to data_type.
-        # N.B.: data_type cannot be used for Galaxy release_14.10 and later
-        # because it was changed to the Galaxy datatype class
-        file_ext = dataset.get('file_ext', dataset['data_type'])
+        file_ext = dataset.get('file_ext')
         # Resort to 'data' when Galaxy returns an empty or temporary extension
         if not file_ext or file_ext == 'auto' or file_ext == '_sniff_':
             file_ext = 'data'
@@ -94,13 +90,7 @@ class DatasetClient(Client):
         # '/dataset/<dataset_id>/display/to_ext=<dataset_ext>'
         # does not work when using REMOTE_USER with access disabled to
         # everything but /api without auth
-        if 'url' in dataset:
-            # This is Galaxy release_15.03 or later
-            download_url = dataset['download_url'] + '?to_ext=' + file_ext
-        else:
-            # This is Galaxy release_15.01 or earlier, for which the preferred
-            # URL does not work without a key, so resort to the old URL
-            download_url = 'datasets/' + dataset_id + '/display?to_ext=' + file_ext
+        download_url = dataset['download_url'] + '?to_ext=' + file_ext
         url = urljoin(self.gi.base_url, download_url)
 
         stream_content = file_path is not None

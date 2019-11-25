@@ -297,7 +297,6 @@ class HistoryClient(Client):
 
         :type purged: bool
         :param purged: If ``True``, mark history as purged (permanently deleted).
-            Ignored on Galaxy release_15.01 and earlier
 
         :type published: bool
         :param published: Mark or unmark history as published
@@ -309,8 +308,7 @@ class HistoryClient(Client):
         :param tags: Replace history tags with the given list
 
         :rtype: dict
-        :return: details of the updated history (for Galaxy release_15.01 and
-            earlier only the updated attributes)
+        :return: details of the updated history
 
         .. warning::
             The return value was changed in BioBlend v0.8.0, previously it was
@@ -345,8 +343,7 @@ class HistoryClient(Client):
         :param visible: Mark or unmark history dataset as visible
 
         :rtype: dict
-        :return: details of the updated dataset (for Galaxy release_15.01 and
-            earlier only the updated attributes)
+        :return: details of the updated dataset
 
         .. warning::
             The return value was changed in BioBlend v0.8.0, previously it was

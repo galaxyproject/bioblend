@@ -16,7 +16,6 @@ from six.moves.urllib.request import urlopen
 import bioblend
 import bioblend.galaxy.objects.galaxy_instance as galaxy_instance
 import bioblend.galaxy.objects.wrappers as wrappers
-from bioblend import ConnectionError
 from bioblend.galaxy import dataset_collections
 from . import test_util
 from .test_util import unittest
@@ -565,12 +564,8 @@ class TestHistory(GalaxyObjectsTestBase):
         self.assertIn(hist_id, [_.id for _ in self.gi.histories.list()])
         hist.delete(purge=True)
         self.assertFalse(hist.is_mapped)
-        try:
-            h = self.gi.histories.get(hist_id)
-            self.assertTrue(h.deleted)
-        except ConnectionError:
-            # Galaxy up to release_2015.01.13 gives a ConnectionError
-            pass
+        h = self.gi.histories.get(hist_id)
+        self.assertTrue(h.deleted)
 
     def _check_dataset(self, hda):
         self.assertIsInstance(hda, wrappers.HistoryDatasetAssociation)

@@ -206,14 +206,7 @@ class LibraryClient(Client):
         :param library_id: library id to find root of
         """
         l = self.show_library(library_id=library_id)
-        if 'root_folder_id' in l:
-            return l['root_folder_id']
-        # Galaxy previous to release_13.04 does not have root_folder_id in
-        # library dictionary, so resort to find the folder with name '/'
-        library_contents = self.show_library(library_id=library_id, contents=True)
-        for f in library_contents:
-            if f['name'] == '/':
-                return f['id']
+        return l['root_folder_id']
 
     def create_folder(self, library_id, folder_name, description=None, base_folder_id=None):
         """
