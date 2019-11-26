@@ -10,10 +10,9 @@ About
 Installation
 ============
 
-Stable releases of BioBlend are best installed via ``pip`` or ``easy_install`` from
-PyPI using something like::
+Stable releases of BioBlend are best installed via ``pip`` from PyPI::
 
-    $ pip install bioblend
+    $ python -m pip install bioblend
 
 Alternatively, you may install the most current source code from our `Git repository`_,
 or fork the project on Github. To install from source, do the following::
