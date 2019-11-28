@@ -10,10 +10,28 @@ class InvocationClient(Client):
         self.module = 'invocations'
         super(InvocationClient, self).__init__(galaxy_instance)
 
+    def get_invocations(self):
+        """
+        Get a list containing all workflow invocations.
+
+        :rtype: list
+        :return: A list of workflow invocations.
+          For example::
+
+            [{u'history_id': u'2f94e8ae9edff68a',
+              u'id': u'df7a1f0c02a5b08e',
+              u'model_class': u'WorkflowInvocation',
+              u'state': u'new',
+              u'update_time': u'2015-10-31T22:00:22',
+              u'uuid': u'c8aa2b1c-801a-11e5-a9e5-8ca98228593c',
+              u'workflow_id': u'03501d7626bd192f'}]
+        """
+        return self._get()
+
     def show_invocation(self, invocation_id):
         """
-        Get a workflow invocation object representing the scheduling of a
-        workflow. This object may be sparse at first (missing inputs and
+        Get a workflow invocation dictionary representing the scheduling of a
+        workflow. This dictionary may be sparse at first (missing inputs and
         invocation steps) and will become more populated as the workflow is
         actually scheduled.
 
@@ -56,31 +74,7 @@ class InvocationClient(Client):
              u'workflow_id': u'03501d7626bd192f'}
         """
         url = self._invocation_url(invocation_id)
-        # return self._get(url=url)
-        # url = self.gi._make_url(self)
-        # url = _join(url, invocation_id)
         return self._get(url=url)
-
-    def get_invocations(self):
-        """
-        Get a list containing all the workflow invocations corresponding to the
-        specified workflow.
-
-        :rtype: list
-        :return: A list of workflow invocations.
-          For example::
-
-            [{u'history_id': u'2f94e8ae9edff68a',
-              u'id': u'df7a1f0c02a5b08e',
-              u'model_class': u'WorkflowInvocation',
-              u'state': u'new',
-              u'update_time': u'2015-10-31T22:00:22',
-              u'uuid': u'c8aa2b1c-801a-11e5-a9e5-8ca98228593c',
-              u'workflow_id': u'03501d7626bd192f'}]
-        """
-        # url = _join(self.gi._make_url(self), "invocations")
-        # return self._get(url=url)
-        return self._get()
 
     def cancel_invocation(self, invocation_id):
         """
@@ -148,7 +142,7 @@ class InvocationClient(Client):
 
     def get_invocation_summary(self, invocation_id):
         """
-        Get a summary of an invokation, stating the number of jobs which
+        Get a summary of an invocation, stating the number of jobs which
         succeed, which are paused and which have errored.
 
         :type invocation_id: str
@@ -168,7 +162,7 @@ class InvocationClient(Client):
 
     def get_invocation_report(self, invocation_id):
         """
-        Get a markdown report for an invokation.
+        Get a Markdown report for an invocation.
 
         :type invocation_id: str
         :param invocation_id: Encoded workflow invocation ID

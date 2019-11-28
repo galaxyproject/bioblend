@@ -1,11 +1,12 @@
 import os
+import time
 
 from . import GalaxyTestBase, test_util
 
 
 class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
     @test_util.skip_unless_galaxy('release_19.09')
-    def test_cancelling_workflow_scheduling(self):
+    def test_invocation(self):
         path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
         workflow = self.gi.workflows.import_workflow_from_local_path(path)
         history_id = self.gi.histories.create_history(name="TestWorkflowState")["id"]
@@ -32,3 +33,43 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
 
         assert summary['states'] == {'ok': 1}
         assert report['workflows'] == {workflow['id']: {'name': 'paste_columns'}}
+
+    @test_util.skip_unless_galaxy('release_19.09')
+    @test_util.skip_unless_tool("cat1")
+    @test_util.skip_unless_tool("cat")
+    def test_workflow_scheduling(self):
+        path = test_util.get_abspath(os.path.join('data', 'test_workflow_pause.ga'))
+        workflow = self.gi.workflows.import_workflow_from_local_path(path)
+        history_id = self.gi.histories.create_history(name="TestWorkflowState")["id"]
+        dataset1_id = self._test_dataset(history_id)
+
+        invocation = self.gi.workflows.invoke_workflow(
+            workflow["id"],
+            inputs={"0": {"src": "hda", "id": dataset1_id}},
+        )
+        invocation_id = invocation["id"]
+
+        def invocation_steps_by_order_index():
+            invocation = self.gi.show_invocation(invocation_id)
+            return dict((s["order_index"], s) for s in invocation["steps"])
+
+        for i in range(20):
+            if 2 in invocation_steps_by_order_index():
+                break
+            time.sleep(.5)
+
+        steps = invocation_steps_by_order_index()
+        pause_step = steps[2]
+        self.assertIsNone(
+            self.gi.invocations.show_invocation_step(invocation_id, pause_step["id"])["action"])
+        self.gi.invocations.run_invocation_step_action(invocation_id, pause_step["id"], action=True)
+        self.assertTrue(self.gi.invocations.show_invocation_step(invocation_id, pause_step["id"])["action"])
+        for i in range(20):
+            invocation = self.gi.invocations.show_invocation(invocation_id)
+            if invocation["state"] == "scheduled":
+                break
+
+            time.sleep(.5)
+
+        invocation = self.gi.show_invocation(invocation_id)
+        self.assertEqual(invocation["state"], "scheduled")
