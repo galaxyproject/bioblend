@@ -50,7 +50,7 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
         invocation_id = invocation["id"]
 
         def invocation_steps_by_order_index():
-            invocation = self.gi.show_invocation(invocation_id)
+            invocation = self.gi.invocations.show_invocation(invocation_id)
             return dict((s["order_index"], s) for s in invocation["steps"])
 
         for i in range(20):
