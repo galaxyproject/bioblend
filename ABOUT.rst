@@ -1,32 +1,15 @@
 `BioBlend <https://bioblend.readthedocs.io/>`_ is a Python library for
-interacting with `CloudMan`_ and `Galaxy`_'s API.
+interacting with `Galaxy`_ and `CloudMan`_  APIs.
 
 BioBlend is supported and tested on:
 
 - Python 2.7, 3.5, 3.6, 3.7 and 3.8
 - Galaxy release_15.03 and later.
 
-Conceptually, it makes it possible to script and automate the process
-of cloud infrastructure provisioning and scaling via CloudMan, and
-running of analyses via Galaxy. In reality, it makes it possible to do
-things like this:
-
-- Create a CloudMan compute cluster, via an API and directly from your
-  local machine::
-
-    from bioblend.cloudman import CloudManConfig
-    from bioblend.cloudman import CloudManInstance
-    cfg = CloudManConfig('<your cloud access key>', '<your cloud secret key>', 'My CloudMan',  'ami-<ID>', 'm1.small', '<password>')
-    cmi = CloudManInstance.launch_instance(cfg)
-    cmi.get_status()
-
-- Reconnect to an existing CloudMan instance and manipulate it::
-
-    from bioblend.cloudman import CloudManInstance
-    cmi = CloudManInstance("<instance IP>", "<password>")
-    cmi.add_nodes(3)
-    cluster_status = cmi.get_status()
-    cmi.remove_nodes(2)
+BioBlend's goal is to make it easier to script and automate the running of
+Galaxy analyses, administering of a Galaxy server, and cloud infrastructure
+provisioning and scaling via CloudMan.
+In practice, it makes it possible to do things like this:
 
 - Interact with Galaxy via a straightforward API::
 
@@ -46,6 +29,23 @@ things like this:
     input_map = dict(zip(wf.input_labels, inputs))
     params = {"Paste1": {"delimiter": "U"}}
     wf.run(input_map, "wf_output", params=params)
+
+- Create a CloudMan compute cluster, via an API and directly from your
+  local machine::
+
+    from bioblend.cloudman import CloudManConfig
+    from bioblend.cloudman import CloudManInstance
+    cfg = CloudManConfig('<your cloud access key>', '<your cloud secret key>', 'My CloudMan',  'ami-<ID>', 'm1.small', '<password>')
+    cmi = CloudManInstance.launch_instance(cfg)
+    cmi.get_status()
+
+- Reconnect to an existing CloudMan instance and manipulate it::
+
+    from bioblend.cloudman import CloudManInstance
+    cmi = CloudManInstance("<instance IP>", "<password>")
+    cmi.add_nodes(3)
+    cluster_status = cmi.get_status()
+    cmi.remove_nodes(2)
 
 .. note::
     Although this library allows you to blend these two services into

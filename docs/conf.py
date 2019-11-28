@@ -96,7 +96,10 @@ pygments_style = 'sphinx'
 
 # List of autodoc directive flags that should be automatically applied to all
 # autodoc directives
-autodoc_default_flags = ['members', 'undoc-members']
+autodoc_default_options = {
+    'members': True,
+    'undoc-members': True,
+}
 
 # Include the __init__ method's doc string in addition to the class doc string
 # in the documentation.

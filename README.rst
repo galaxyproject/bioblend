@@ -15,8 +15,8 @@
     :alt: Build Status
 
 
-BioBlend is a Python library for interacting with `CloudMan`_ and `Galaxy`_'s
-API.
+BioBlend is a Python library for interacting with `Galaxy`_ and  `CloudMan`_
+APIs.
 
 BioBlend is supported and tested on:
 

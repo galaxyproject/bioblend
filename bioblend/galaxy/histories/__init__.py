@@ -136,6 +136,7 @@ class HistoryClient(Client):
 
         :rtype: None
         :return: None
+
         .. note::
             For the purge option to work, the Galaxy instance must have the
             ``allow_user_dataset_purge`` option set to ``true`` in the

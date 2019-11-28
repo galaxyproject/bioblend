@@ -75,18 +75,6 @@ given history, etc.  Note that, at the moment, the oo API is still
 incomplete, providing access to a more restricted set of Galaxy
 modules with respect to the standard one.
 
-CloudMan API
-~~~~~~~~~~~~
-
-API used to manipulate the instantiated infrastructure. For example, scale the
-size of the compute cluster, get infrastructure status, get service status.
-
-.. toctree::
-    :maxdepth: 2
-    :glob:
-
-    api_docs/cloudman/*
-
 Galaxy API
 ~~~~~~~~~~
 
@@ -109,6 +97,18 @@ API used to interact with the Galaxy Toolshed, including repository management.
     :glob:
 
     api_docs/toolshed/*
+
+CloudMan API
+~~~~~~~~~~~~
+
+API used to manipulate the instantiated infrastructure. For example, scale the
+size of the compute cluster, get infrastructure status, get service status.
+
+.. toctree::
+    :maxdepth: 2
+    :glob:
+
+    api_docs/cloudman/*
 
 Configuration
 =============
