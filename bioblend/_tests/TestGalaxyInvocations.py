@@ -71,5 +71,5 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
 
             time.sleep(.5)
 
-        invocation = self.gi.show_invocation(invocation_id)
+        invocation = self.gi.invocations.show_invocation(invocation_id)
         self.assertEqual(invocation["state"], "scheduled")
