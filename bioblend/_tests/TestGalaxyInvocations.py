@@ -31,7 +31,7 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
         summary = self.gi.invocations.get_invocation_summary(invocation_id)
         report = self.gi.invocations.get_invocation_report(invocation_id)
 
-        assert summary['states'] == {'ok': 1}
+        assert summary['states'] == {}
         assert report['workflows'] == {workflow['id']: {'name': 'paste_columns'}}
 
     @test_util.skip_unless_galaxy('release_19.09')
