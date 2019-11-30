@@ -183,5 +183,10 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
         finally:
             shutil.rmtree(tempdir)
 
+    def test_import_history_from_path(self):
+        history_path = test_util.get_abspath(os.path.join("data", "a7c863d1bd131e56.tar.gz"))
+        result = self.gi.histories.import_history_from_path(history_path)
+        self.assertIn('This history will be visible when the import is complete.', result['message'])
+
     def tearDown(self):
         self.gi.histories.delete_history(self.history['id'], purge=True)
