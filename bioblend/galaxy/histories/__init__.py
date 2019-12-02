@@ -663,13 +663,16 @@ class HistoryClient(Client):
 
     def copy_dataset(self, history_id, dataset_id, hda_ldda='hda'):
         """
-        Add a dataset to a history.
+        Copy a dataset to a different history.
 
         :type history_id: str
-        :param history_id: history ID
+        :param history_id: history ID to which the dataset should be copied
 
         :type dataset_id: str
         :param dataset_id: dataset ID
+
+        :type hda_ldda: str
+        :param hda_ldda: Source of the dataset to be copied: 'hda' (the default) or 'library'
 
         :rtype: None
         :return: None
