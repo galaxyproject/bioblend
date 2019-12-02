@@ -62,6 +62,6 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
 
     def test_copy_dataset(self):
         self.history_id2 = self.gi.histories.create_history('TestCopyDataset')['id']
-        self.gi.histories.add_dataset(self.history_id2, self.dataset_id)
+        self.gi.histories.copy_dataset(self.history_id2, self.dataset_id)
         self.assertFalse(self.gi.histories.show_history(self.history_id2)['empty'])
         self.gi.histories.delete_history(self.history_id2, purge=True)
