@@ -183,5 +183,13 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
         finally:
             shutil.rmtree(tempdir)
 
+    def test_copy_dataset(self):
+        history_id = self.history["id"]
+        dataset1_id = self._test_dataset(history_id)
+        self.history_id2 = self.gi.histories.create_history('TestCopyDataset')['id']
+        self.gi.histories.copy_dataset(self.history_id2, dataset1_id)
+        self.assertFalse(self.gi.histories.show_history(self.history_id2)['empty'])
+        self.gi.histories.delete_history(self.history_id2, purge=True)
+
     def tearDown(self):
         self.gi.histories.delete_history(self.history['id'], purge=True)

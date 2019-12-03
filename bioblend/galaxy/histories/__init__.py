@@ -661,7 +661,7 @@ class HistoryClient(Client):
         for chunk in r.iter_content(chunk_size):
             outf.write(chunk)
 
-    def copy_dataset(self, history_id, dataset_id, hda_ldda='hda'):
+    def copy_dataset(self, history_id, dataset_id, source='hda'):
         """
         Copy a dataset to a different history.
 
@@ -671,16 +671,16 @@ class HistoryClient(Client):
         :type dataset_id: str
         :param dataset_id: dataset ID
 
-        :type hda_ldda: str
-        :param hda_ldda: Source of the dataset to be copied: 'hda' (the default) or 'library'
+        :type source: str
+        :param source: Source of the dataset to be copied: 'hda' (the default), 'library' or 'library_folder'
 
         :rtype: dict
-        :return: Information about the dataset
+        :return: Information about the copied dataset
         """
 
         payload = {
             'content': dataset_id,
-            'source': hda_ldda,
+            'source': source,
             'type': 'dataset'
         }
 
