@@ -185,10 +185,11 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
 
     def test_copy_dataset(self):
         history_id = self.history["id"]
-        dataset1_id = self._test_dataset(history_id)
+        expected_contents = "1\t2\t3"
+        dataset1_id = self._test_dataset(history_id, contents=expected_contents)
         self.history_id2 = self.gi.histories.create_history('TestCopyDataset')['id']
-        self.gi.histories.copy_dataset(self.history_id2, dataset1_id)
-        self.assertFalse(self.gi.histories.show_history(self.history_id2)['empty'])
+        copied_dataset = self.gi.histories.copy_dataset(self.history_id2, dataset1_id)
+        self._wait_and_verify_dataset(copied_dataset['id'], expected_contents)
         self.gi.histories.delete_history(self.history_id2, purge=True)
 
     def tearDown(self):

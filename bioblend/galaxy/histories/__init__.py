@@ -663,7 +663,7 @@ class HistoryClient(Client):
 
     def copy_dataset(self, history_id, dataset_id, source='hda'):
         """
-        Copy a dataset to a different history.
+        Copy a dataset to a history.
 
         :type history_id: str
         :param history_id: history ID to which the dataset should be copied
