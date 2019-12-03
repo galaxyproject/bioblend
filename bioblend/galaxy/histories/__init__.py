@@ -674,8 +674,8 @@ class HistoryClient(Client):
         :type hda_ldda: str
         :param hda_ldda: Source of the dataset to be copied: 'hda' (the default) or 'library'
 
-        :rtype: None
-        :return: None
+        :rtype: dict
+        :return: Information about the dataset
         """
 
         payload = {
