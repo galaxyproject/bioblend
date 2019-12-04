@@ -8,13 +8,14 @@ import abc
 import json
 
 import six
+from six.moves.collections_abc import (
+    Iterable,
+    Mapping,
+    Sequence,
+)
 
 import bioblend
 
-if six.PY2:
-    from collections import Mapping, Iterable, Sequence
-else:
-    from collections.abc import Mapping, Iterable, Sequence
 
 __all__ = (
     'Wrapper',

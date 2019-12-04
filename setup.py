@@ -27,7 +27,7 @@ setup(
         'pyyaml',
         'requests>=2.20.0',
         'requests-toolbelt>=0.5.1,!=0.9.0',
-        'six'
+        'six>=1.13.0'
     ],
     packages=find_packages(exclude=['tests']),
     package_data={'bioblend': ['_tests/data/*']},
