@@ -1,8 +1,6 @@
 import shutil
 import tempfile
 
-import six
-
 from . import (
     GalaxyTestBase,
     test_util
@@ -31,7 +29,7 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
     def test_download_dataset(self):
         with self.assertRaises(Exception):
             self.gi.datasets.download_dataset(None)
-        expected_contents = six.b("\n".join(self.dataset_contents.splitlines()) + "\n")
+        expected_contents = ("\n".join(self.dataset_contents.splitlines()) + "\n").encode()
         # download_dataset() with file_path=None is already tested in TestGalaxyTools.test_paste_content()
         # self._wait_and_verify_dataset(self.dataset_id, expected_contents)
         tempdir = tempfile.mkdtemp(prefix='bioblend_test_')
