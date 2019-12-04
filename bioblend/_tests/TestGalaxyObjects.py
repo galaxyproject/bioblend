@@ -514,20 +514,20 @@ class TestLDContents(GalaxyObjectsTestBase):
 
     def test_dataset_get_stream(self):
         for idx, c in enumerate(self.ds.get_stream(chunk_size=1)):
-            self.assertEqual(six.b(FOO_DATA[idx]), c)
+            self.assertEqual(FOO_DATA[idx].encode(), c)
 
     def test_dataset_peek(self):
         fetched_data = self.ds.peek(chunk_size=4)
-        self.assertEqual(six.b(FOO_DATA[0:4]), fetched_data)
+        self.assertEqual(FOO_DATA[0:4].encode(), fetched_data)
 
     def test_dataset_download(self):
         with tempfile.TemporaryFile() as f:
             self.ds.download(f)
             f.seek(0)
-            self.assertEqual(six.b(FOO_DATA), f.read())
+            self.assertEqual(FOO_DATA.encode(), f.read())
 
     def test_dataset_get_contents(self):
-        self.assertEqual(six.b(FOO_DATA), self.ds.get_contents())
+        self.assertEqual(FOO_DATA.encode(), self.ds.get_contents())
 
     def test_dataset_delete(self):
         self.ds.delete()
@@ -676,20 +676,20 @@ class TestHDAContents(GalaxyObjectsTestBase):
 
     def test_dataset_get_stream(self):
         for idx, c in enumerate(self.ds.get_stream(chunk_size=1)):
-            self.assertEqual(six.b(FOO_DATA[idx]), c)
+            self.assertEqual(FOO_DATA[idx].encode(), c)
 
     def test_dataset_peek(self):
         fetched_data = self.ds.peek(chunk_size=4)
-        self.assertEqual(six.b(FOO_DATA[0:4]), fetched_data)
+        self.assertEqual(FOO_DATA[0:4].encode(), fetched_data)
 
     def test_dataset_download(self):
         with tempfile.TemporaryFile() as f:
             self.ds.download(f)
             f.seek(0)
-            self.assertEqual(six.b(FOO_DATA), f.read())
+            self.assertEqual(FOO_DATA.encode(), f.read())
 
     def test_dataset_get_contents(self):
-        self.assertEqual(six.b(FOO_DATA), self.ds.get_contents())
+        self.assertEqual(FOO_DATA.encode(), self.ds.get_contents())
 
     def test_dataset_update(self):
         new_name = 'test_%s' % uuid.uuid4().hex
@@ -749,7 +749,7 @@ class TestRunWorkflow(GalaxyObjectsTestBase):
         self.assertIn(out_ds.id, out_hist.dataset_ids)
         res = out_ds.get_contents()
         exp_rows = zip(*(_.splitlines() for _ in self.contents))
-        exp_res = six.b("\n".join(sep.join(t) for t in exp_rows) + "\n")
+        exp_res = ("\n".join(sep.join(t) for t in exp_rows) + "\n").encode()
         self.assertEqual(res, exp_res)
         if existing_hist:
             self.assertEqual(out_hist.id, hist.id)

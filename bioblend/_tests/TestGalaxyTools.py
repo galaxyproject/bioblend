@@ -2,8 +2,6 @@
 """
 import os
 
-import six
-
 from bioblend.galaxy.tools.inputs import (
     conditional,
     dataset,
@@ -47,12 +45,12 @@ class TestGalaxyTools(GalaxyTestBase.GalaxyTestBase):
         tool_output = self.gi.tools.paste_content(paste_text, history["id"])
         self.assertEqual(len(tool_output["outputs"]), 1)
         # All lines in the resulting dataset should end with "\n"
-        expected_contents = six.b("\n".join(paste_text.splitlines()) + "\n")
+        expected_contents = ("\n".join(paste_text.splitlines()) + "\n").encode()
         self._wait_and_verify_dataset(tool_output['outputs'][0]['id'], expected_contents)
         # Same with space_to_tab=True
         tool_output = self.gi.tools.paste_content(paste_text, history["id"], space_to_tab=True)
         self.assertEqual(len(tool_output["outputs"]), 1)
-        expected_contents = six.b("\n".join("\t".join(_.split()) for _ in paste_text.splitlines()) + "\n")
+        expected_contents = ("\n".join("\t".join(_.split()) for _ in paste_text.splitlines()) + "\n").encode()
         self._wait_and_verify_dataset(tool_output['outputs'][0]['id'], expected_contents)
 
     def test_upload_file(self):
