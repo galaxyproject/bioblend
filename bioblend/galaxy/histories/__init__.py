@@ -12,6 +12,7 @@ import six
 import bioblend
 from bioblend import ConnectionError
 from bioblend.galaxy.client import Client
+from bioblend.util import attach_file
 
 log = logging.getLogger(__name__)
 
@@ -37,31 +38,15 @@ class HistoryClient(Client):
             payload['name'] = name
         return self._post(payload)
 
-    def import_history(self, import_data):
-        files = {}
-        archive_file = import_data.pop("archive_file", None)
-        if archive_file:
-            files["archive_file"] = archive_file
-        import_response = self._post("histories", data=import_data, files=files)
-        api_asserts.assert_status_code_is(import_response, 200)
+    def import_history(self, file_path=None, url=None, files_attached=False):
+        if file_path:
+            files_attached=True
+            archive_file=attach_file(file_path)
+            payload = dict(archive_source='', archive_file=archive_file)
+        else:
+            payload = dict(archive_source=url, archive_type='url')
 
-    def import_history_and_wait_for_name(self, import_data, history_name):
-        def history_names():
-            return dict((h["name"], h) for h in self.get_histories())
-
-        import_name = "imported from archive: %s" % history_name
-        assert import_name not in history_names()
-
-        self.import_history(import_data)
-
-        def has_history_with_name():
-            histories = history_names()
-            return histories.get(import_name, None)
-
-        imported_history = wait_on(has_history_with_name, desc="import history")
-        imported_history_id = imported_history["id"]
-        self.wait_for_history(imported_history_id)
-        return imported_history_id
+        return self._post(payload=payload,files_attached=files_attached)
 
     def get_histories(self, history_id=None, name=None, deleted=False):
         """
