@@ -46,7 +46,7 @@ class HistoryClient(Client):
         else:
             payload = dict(archive_source=url, archive_type='url')
 
-        return self._post(payload=payload,files_attached=files_attached)
+        return self._post(payload=payload, files_attached=files_attached)
 
     def get_histories(self, history_id=None, name=None, deleted=False):
         """
