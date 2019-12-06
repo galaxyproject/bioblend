@@ -42,7 +42,7 @@ class HistoryClient(Client):
         if file_path:
             files_attached=True
             archive_file=attach_file(file_path)
-            payload = dict(archive_source='', archive_file=archive_file)
+            payload = dict(archive_source='', archive_file=archive_file, archive_type="file")
         else:
             payload = dict(archive_source=url, archive_type='url')
 
