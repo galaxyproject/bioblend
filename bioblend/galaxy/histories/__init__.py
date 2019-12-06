@@ -40,7 +40,7 @@ class HistoryClient(Client):
 
     def import_history(self, file_path=None, url=None, files_attached=False):
         if file_path:
-            files_attached=True
+            files_attached = True
             archive_file = attach_file(file_path)
             payload = dict(archive_source='', archive_file=archive_file, archive_type="file")
         else:
