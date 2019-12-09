@@ -43,7 +43,6 @@ class HistoryClient(Client):
         Import a history from an archive on disk or a URL.
         :type file_path: str
         :param file_path: Path to exported history archive on disk.
-        
         :type url: str
         :param url: URL for an exported history archive
         """
