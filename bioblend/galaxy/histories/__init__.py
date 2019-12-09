@@ -49,7 +49,6 @@ class HistoryClient(Client):
         :param url: URL for an exported history archive
         """
         if file_path:
-            files_attached = True
             archive_file = attach_file(file_path)
             payload = dict(archive_source='', archive_file=archive_file, archive_type="file")
         else:
