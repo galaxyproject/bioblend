@@ -38,7 +38,16 @@ class HistoryClient(Client):
             payload['name'] = name
         return self._post(payload)
 
-    def import_history(self, file_path=None, url=None, files_attached=False):
+    def import_history(self, file_path=None, url=None):
+        """
+        Import a history from an archive on disk or a URL.
+        
+        :type file_path: str
+        :param file_path: Path to exported history archive on disk.
+        
+        :type url: str
+        :param url: URL for an exported history archive
+        """
         if file_path:
             files_attached = True
             archive_file = attach_file(file_path)
