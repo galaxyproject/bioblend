@@ -41,7 +41,6 @@ class HistoryClient(Client):
     def import_history(self, file_path=None, url=None):
         """
         Import a history from an archive on disk or a URL.
-        
         :type file_path: str
         :param file_path: Path to exported history archive on disk.
         
