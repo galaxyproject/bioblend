@@ -51,7 +51,7 @@ class GalaxyClient(object):
         :type module: :class:`~.galaxy.Client` subclass
         :param module: The base module for which to make the URL. For
           example: an object of class LibraryClient, WorkflowClient,
-          HistoryClient, ToolShedClient
+          InvocationClient, HistoryClient, ToolShedClient
 
         :type module_id: str
         :param module_id: The encoded ID for a specific module (eg, library ID)

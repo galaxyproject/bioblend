@@ -8,13 +8,14 @@ import abc
 import json
 
 import six
+from six.moves.collections_abc import (
+    Iterable,
+    Mapping,
+    Sequence,
+)
 
 import bioblend
 
-if six.PY2:
-    from collections import Mapping, Iterable, Sequence
-else:
-    from collections.abc import Mapping, Iterable, Sequence
 
 __all__ = (
     'Wrapper',
@@ -647,11 +648,7 @@ class HistoryDatasetAssociation(Dataset):
         res = self.gi.gi.histories.update_dataset(self.container.id, self.id, **kwds)
         # Refresh also the history because the dataset may have been (un)deleted
         self.container.refresh()
-        if 'id' in res:
-            self.__init__(res, self.container, gi=self.gi)
-        else:
-            # for Galaxy < release_15.03 res contains only the updated fields
-            self.refresh()
+        self.__init__(res, self.container, gi=self.gi)
         return self
 
     def delete(self, purge=False):
@@ -953,7 +950,6 @@ class History(DatasetContainer):
 
         :type purged: bool
         :param purged: If True, mark history as purged (permanently deleted).
-            Ignored on Galaxy release_15.01 and earlier
 
         :type published: bool
         :param published: Mark or unmark history as published
@@ -982,12 +978,7 @@ class History(DatasetContainer):
           ``config/galaxy.yml`` configuration file.
         """
         self.gi.histories.delete(id_=self.id, purge=purge)
-        try:
-            self.refresh()
-        except Exception:
-            # Galaxy release_15.01 and earlier requires passing 'deleted=False'
-            # when getting the details of a deleted history
-            pass
+        self.refresh()
         self.unmap()
 
     def import_dataset(self, lds):
@@ -1334,22 +1325,9 @@ class Folder(Wrapper):
         """
         Return the parent folder of this folder.
         """
-        # Galaxy release_13.04 and earlier does not have parent_id in the folder
-        # dictionary, may be implemented by searching for the folder with the
-        # correct name
-        if 'parent_id' not in self.wrapped:
-            raise NotImplementedError('This method has not been implemented for Galaxy release_13.04 and earlier')
         parent_id = self.wrapped['parent_id']
         if parent_id is None:
             return None
-        # Galaxy from release_14.02 to release_15.01 returns a dummy parent_id
-        # for the root folder instead of None, so check if this is the root
-        if self.id == self.gi.gi.libraries._get_root_folder_id(self.container.id):
-            return None
-        # Galaxy release_13.11 and earlier returns a parent_id without the
-        # initial 'F'
-        if not parent_id.startswith('F'):
-            parent_id = 'F' + parent_id
         return self.container.get_folder(parent_id)
 
     @property

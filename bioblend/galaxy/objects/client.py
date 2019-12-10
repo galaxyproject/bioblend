@@ -8,14 +8,13 @@ import abc
 import json
 
 import six
+from six.moves.collections_abc import (
+    Mapping,
+    Sequence,
+)
 
 import bioblend
 from . import wrappers
-
-if six.PY2:
-    from collections import Mapping, Sequence
-else:
-    from collections.abc import Mapping, Sequence
 
 
 @six.add_metaclass(abc.ABCMeta)

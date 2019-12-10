@@ -2,9 +2,10 @@
 A base representation of an instance of Galaxy
 """
 from bioblend.galaxy import (config, datasets, datatypes, folders, forms,
-                             ftpfiles, genomes, groups, histories, jobs,
-                             libraries, quotas, roles, tool_data, tools,
-                             toolshed, users, visual, workflows)
+                             ftpfiles, genomes, groups, histories,
+                             invocations, jobs, libraries, quotas, roles,
+                             tool_data, tools, toolshed, users, visual,
+                             workflows)
 from bioblend.galaxy.client import Client
 from bioblend.galaxyclient import GalaxyClient
 
@@ -53,6 +54,7 @@ class GalaxyInstance(GalaxyClient):
         self.libraries = libraries.LibraryClient(self)
         self.histories = histories.HistoryClient(self)
         self.workflows = workflows.WorkflowClient(self)
+        self.invocations = invocations.InvocationClient(self)
         self.datasets = datasets.DatasetClient(self)
         self.users = users.UserClient(self)
         self.genomes = genomes.GenomeClient(self)

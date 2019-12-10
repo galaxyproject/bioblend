@@ -186,5 +186,15 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
     def test_import_history(self):
         self.gi.histories.import_history(file_path='tests/data/Galaxy-History-test.tar.gz')
 
+    def test_copy_dataset(self):
+        history_id = self.history["id"]
+        contents = "1\t2\t3"
+        dataset1_id = self._test_dataset(history_id, contents=contents)
+        self.history_id2 = self.gi.histories.create_history('TestCopyDataset')['id']
+        copied_dataset = self.gi.histories.copy_dataset(self.history_id2, dataset1_id)
+        expected_contents = ("\n".join(contents.splitlines()) + "\n").encode()
+        self._wait_and_verify_dataset(copied_dataset['id'], expected_contents)
+        self.gi.histories.delete_history(self.history_id2, purge=True)
+
     def tearDown(self):
         self.gi.histories.delete_history(self.history['id'], purge=True)

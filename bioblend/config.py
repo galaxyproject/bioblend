@@ -32,6 +32,8 @@ class Config(configparser.SafeConfigParser):
         return self.get(section, name, default)
 
     def get(self, section, name, default=None):
+        """
+        """
         try:
             val = configparser.SafeConfigParser.get(self, section, name)
         except Exception:

@@ -206,14 +206,7 @@ class LibraryClient(Client):
         :param library_id: library id to find root of
         """
         l = self.show_library(library_id=library_id)
-        if 'root_folder_id' in l:
-            return l['root_folder_id']
-        # Galaxy previous to release_13.04 does not have root_folder_id in
-        # library dictionary, so resort to find the folder with name '/'
-        library_contents = self.show_library(library_id=library_id, contents=True)
-        for f in library_contents:
-            if f['name'] == '/':
-                return f['id']
+        return l['root_folder_id']
 
     def create_folder(self, library_id, folder_name, description=None, base_folder_id=None):
         """
@@ -294,7 +287,7 @@ class LibraryClient(Client):
 
         :type deleted: bool
         :param deleted: If ``False`` (the default), return only non-deleted
-          libraries. If ``True``, return only deleted libraries. If ``None`,
+          libraries. If ``True``, return only deleted libraries. If ``None``,
           return both deleted and non-deleted libraries.
 
         :rtype: list
@@ -521,6 +514,7 @@ class LibraryClient(Client):
         :type tag_using_filenames: bool
         :param tag_using_filenames: Indicate whether to generate dataset tags
           from filenames.
+
           .. warning::
             The default was changed from ``True`` to ``False`` in BioBlend
             v0.14.0.
@@ -583,6 +577,7 @@ class LibraryClient(Client):
         :type tag_using_filenames: bool
         :param tag_using_filenames: Indicate whether to generate dataset tags
           from filenames.
+
           .. warning::
             The default was changed from ``True`` to ``False`` in BioBlend
             v0.14.0.

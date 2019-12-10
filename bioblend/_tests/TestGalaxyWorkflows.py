@@ -96,6 +96,10 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
         imported_wf = self.gi.workflows.import_workflow_from_local_path(path)
         self.assertIsInstance(imported_wf, dict)
+        # Galaxy up to release_17.05 adds ' (imported from API)' to the
+        # imported workflow name
+        self.assertIn(imported_wf['name'], ('paste_columns', 'paste_columns (imported from API)'))
+        self.assertTrue(imported_wf['url'].startswith('/api/workflows/'))
         self.assertFalse(imported_wf['deleted'])
         self.assertFalse(imported_wf['published'])
         with self.assertRaises(Exception):
@@ -125,6 +129,10 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
             wf_dict = json.load(f)
         imported_wf = self.gi.workflows.import_workflow_dict(wf_dict)
         self.assertIsInstance(imported_wf, dict)
+        # Galaxy up to release_17.05 adds ' (imported from API)' to the
+        # imported workflow name
+        self.assertIn(imported_wf['name'], ('paste_columns', 'paste_columns (imported from API)'))
+        self.assertTrue(imported_wf['url'].startswith('/api/workflows/'))
         self.assertFalse(imported_wf['deleted'])
         self.assertFalse(imported_wf['published'])
         exported_wf_dict = self.gi.workflows.export_workflow_dict(imported_wf['id'])
@@ -155,10 +163,37 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
         wf = self.gi.workflows.import_workflow_from_local_path(path)
         wf_data = self.gi.workflows.show_workflow(wf['id'])
-        self.assertEqual(wf['id'], wf_data['id'])
-        self.assertEqual(wf['name'], wf_data['name'])
-        self.assertEqual(wf['url'], wf_data['url'])
+        self.assertEqual(wf_data['id'], wf['id'])
+        self.assertEqual(wf_data['name'], wf['name'])
+        self.assertEqual(wf_data['url'], wf['url'])
+        self.assertEqual(len(wf_data['steps']), 3)
         self.assertIsNotNone(wf_data['inputs'])
+
+    @test_util.skip_unless_galaxy('release_18.05')
+    def test_update_workflow_name(self):
+        path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
+        wf = self.gi.workflows.import_workflow_from_local_path(path)
+        new_name = 'new name'
+        updated_wf = self.gi.workflows.update_workflow(wf['id'], name=new_name)
+        self.assertEqual(updated_wf['name'], new_name)
+
+    @test_util.skip_unless_galaxy('release_19.09')  # due to Galaxy bug fixed in https://github.com/galaxyproject/galaxy/pull/9014
+    def test_show_workflow_versions(self):
+        path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
+        wf = self.gi.workflows.import_workflow_from_local_path(path)
+        wf_data = self.gi.workflows.show_workflow(wf['id'])
+        self.assertEqual(wf_data['version'], 0)
+        new_name = 'new name'
+        self.gi.workflows.update_workflow(wf['id'], name=new_name)
+        updated_wf = self.gi.workflows.show_workflow(wf['id'])
+        self.assertEqual(updated_wf['name'], new_name)
+        self.assertEqual(updated_wf['version'], 1)
+        updated_wf = self.gi.workflows.show_workflow(wf['id'], version=0)
+        self.assertEqual(updated_wf['name'], 'paste_columns')
+        self.assertEqual(updated_wf['version'], 0)
+        updated_wf = self.gi.workflows.show_workflow(wf['id'], version=1)
+        self.assertEqual(updated_wf['name'], new_name)
+        self.assertEqual(updated_wf['version'], 1)
 
     def test_run_workflow(self):
         path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))

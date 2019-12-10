@@ -16,7 +16,6 @@ from six.moves.urllib.request import urlopen
 import bioblend
 import bioblend.galaxy.objects.galaxy_instance as galaxy_instance
 import bioblend.galaxy.objects.wrappers as wrappers
-from bioblend import ConnectionError
 from bioblend.galaxy import dataset_collections
 from . import test_util
 from .test_util import unittest
@@ -515,20 +514,20 @@ class TestLDContents(GalaxyObjectsTestBase):
 
     def test_dataset_get_stream(self):
         for idx, c in enumerate(self.ds.get_stream(chunk_size=1)):
-            self.assertEqual(six.b(FOO_DATA[idx]), c)
+            self.assertEqual(FOO_DATA[idx].encode(), c)
 
     def test_dataset_peek(self):
         fetched_data = self.ds.peek(chunk_size=4)
-        self.assertEqual(six.b(FOO_DATA[0:4]), fetched_data)
+        self.assertEqual(FOO_DATA[0:4].encode(), fetched_data)
 
     def test_dataset_download(self):
         with tempfile.TemporaryFile() as f:
             self.ds.download(f)
             f.seek(0)
-            self.assertEqual(six.b(FOO_DATA), f.read())
+            self.assertEqual(FOO_DATA.encode(), f.read())
 
     def test_dataset_get_contents(self):
-        self.assertEqual(six.b(FOO_DATA), self.ds.get_contents())
+        self.assertEqual(FOO_DATA.encode(), self.ds.get_contents())
 
     def test_dataset_delete(self):
         self.ds.delete()
@@ -565,12 +564,8 @@ class TestHistory(GalaxyObjectsTestBase):
         self.assertIn(hist_id, [_.id for _ in self.gi.histories.list()])
         hist.delete(purge=True)
         self.assertFalse(hist.is_mapped)
-        try:
-            h = self.gi.histories.get(hist_id)
-            self.assertTrue(h.deleted)
-        except ConnectionError:
-            # Galaxy up to release_2015.01.13 gives a ConnectionError
-            pass
+        h = self.gi.histories.get(hist_id)
+        self.assertTrue(h.deleted)
 
     def _check_dataset(self, hda):
         self.assertIsInstance(hda, wrappers.HistoryDatasetAssociation)
@@ -681,20 +676,20 @@ class TestHDAContents(GalaxyObjectsTestBase):
 
     def test_dataset_get_stream(self):
         for idx, c in enumerate(self.ds.get_stream(chunk_size=1)):
-            self.assertEqual(six.b(FOO_DATA[idx]), c)
+            self.assertEqual(FOO_DATA[idx].encode(), c)
 
     def test_dataset_peek(self):
         fetched_data = self.ds.peek(chunk_size=4)
-        self.assertEqual(six.b(FOO_DATA[0:4]), fetched_data)
+        self.assertEqual(FOO_DATA[0:4].encode(), fetched_data)
 
     def test_dataset_download(self):
         with tempfile.TemporaryFile() as f:
             self.ds.download(f)
             f.seek(0)
-            self.assertEqual(six.b(FOO_DATA), f.read())
+            self.assertEqual(FOO_DATA.encode(), f.read())
 
     def test_dataset_get_contents(self):
-        self.assertEqual(six.b(FOO_DATA), self.ds.get_contents())
+        self.assertEqual(FOO_DATA.encode(), self.ds.get_contents())
 
     def test_dataset_update(self):
         new_name = 'test_%s' % uuid.uuid4().hex
@@ -754,7 +749,7 @@ class TestRunWorkflow(GalaxyObjectsTestBase):
         self.assertIn(out_ds.id, out_hist.dataset_ids)
         res = out_ds.get_contents()
         exp_rows = zip(*(_.splitlines() for _ in self.contents))
-        exp_res = six.b("\n".join(sep.join(t) for t in exp_rows) + "\n")
+        exp_res = ("\n".join(sep.join(t) for t in exp_rows) + "\n").encode()
         self.assertEqual(res, exp_res)
         if existing_hist:
             self.assertEqual(out_hist.id, hist.id)
