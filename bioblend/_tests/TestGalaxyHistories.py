@@ -183,5 +183,8 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
         finally:
             shutil.rmtree(tempdir)
 
+    def test_import_history(self):
+        self.gi.histories.import_history(file_path='tests/data/Galaxy-History-test.tar.gz')
+
     def tearDown(self):
         self.gi.histories.delete_history(self.history['id'], purge=True)
