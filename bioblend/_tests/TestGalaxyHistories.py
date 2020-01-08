@@ -183,6 +183,9 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
         finally:
             shutil.rmtree(tempdir)
 
+    def test_import_history(self):
+        self.gi.histories.import_history(file_path='tests/data/Galaxy-History-test.tar.gz')
+
     def test_copy_dataset(self):
         history_id = self.history["id"]
         contents = "1\t2\t3"

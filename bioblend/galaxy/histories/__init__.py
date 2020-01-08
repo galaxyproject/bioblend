@@ -12,6 +12,7 @@ import six
 import bioblend
 from bioblend import ConnectionError
 from bioblend.galaxy.client import Client
+from bioblend.util import attach_file
 
 log = logging.getLogger(__name__)
 
@@ -36,6 +37,22 @@ class HistoryClient(Client):
         if name is not None:
             payload['name'] = name
         return self._post(payload)
+
+    def import_history(self, file_path=None, url=None):
+        """
+        Import a history from an archive on disk or a URL.
+        :type file_path: str
+        :param file_path: Path to exported history archive on disk.
+        :type url: str
+        :param url: URL for an exported history archive
+        """
+        if file_path:
+            archive_file = attach_file(file_path)
+            payload = dict(archive_source='', archive_file=archive_file, archive_type="file")
+        else:
+            payload = dict(archive_source=url, archive_type='url')
+
+        return self._post(payload=payload, files_attached=file_path is not None)
 
     def get_histories(self, history_id=None, name=None, deleted=False):
         """
