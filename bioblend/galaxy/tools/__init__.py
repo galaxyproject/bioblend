@@ -174,7 +174,7 @@ class ToolClient(Client):
         The ``tool_inputs`` dict should contain input datasets and parameters
         in the (largely undocumented) format used by the Galaxy API.
         Some examples can be found in `Galaxy's API test suite
-        <https://github.com/galaxyproject/galaxy/blob/dev/test/api/test_tools.py>`_.
+        <https://github.com/galaxyproject/galaxy/blob/dev/lib/galaxy_test/api/test_tools.py>`_.
         """
         payload = {}
         payload["history_id"] = history_id
