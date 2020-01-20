@@ -7,11 +7,13 @@ A base representation of an instance
 """
 import base64
 import json
+from urllib.parse import (
+    urljoin,
+    urlparse,
+)
 
 import requests
-import six
 from requests_toolbelt import MultipartEncoder
-from six.moves.urllib.parse import urljoin, urlparse
 
 from bioblend import ConnectionError
 from bioblend.util import FileStream
@@ -255,7 +257,7 @@ class GalaxyClient(object):
             if r.status_code != 200:
                 raise Exception("Failed to authenticate user.")
             response = r.json()
-            if isinstance(response, (six.string_types, six.text_type)):
+            if isinstance(response, str):
                 # bug in Tool Shed
                 response = json.loads(response)
             self._key = response["api_key"]

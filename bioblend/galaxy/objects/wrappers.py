@@ -6,9 +6,7 @@ A basic object-oriented interface for Galaxy entities.
 
 import abc
 import json
-
-import six
-from six.moves.collections_abc import (
+from collections.abc import (
     Iterable,
     Mapping,
     Sequence,
@@ -43,8 +41,7 @@ __all__ = (
 )
 
 
-@six.add_metaclass(abc.ABCMeta)
-class Wrapper(object):
+class Wrapper(object, metaclass=abc.ABCMeta):
     """
     Abstract base class for Galaxy entity wrappers.
 
@@ -174,9 +171,9 @@ class Step(Wrapper):
                              'tool']):
             raise ValueError('Unknown step type: %r' % stype)
         if self.type == 'tool' and self.tool_inputs:
-            for k, v in six.iteritems(self.tool_inputs):
+            for k, v in self.tool_inputs.items():
                 # In Galaxy before release_17.05, v is a JSON-encoded string
-                if not isinstance(v, six.string_types):
+                if not isinstance(v, str):
                     break
                 try:
                     self.tool_inputs[k] = json.loads(v)
@@ -208,10 +205,10 @@ class Workflow(Wrapper):
         else:
             tools_list_by_id = []
         tool_labels_to_ids = {}
-        for k, v in six.iteritems(self.steps):
+        for k, v in self.steps.items():
             # convert step ids to str for consistency with outer keys
             v['id'] = str(v['id'])
-            for i in six.itervalues(v['input_steps']):
+            for i in v['input_steps'].values():
                 i['source_step'] = str(i['source_step'])
             step = Step(v, self)
             self.steps[k] = step
@@ -220,7 +217,7 @@ class Workflow(Wrapper):
                     missing_ids.append(k)
                 tool_labels_to_ids.setdefault(step.tool_id, set()).add(step.id)
         input_labels_to_ids = {}
-        for id_, d in six.iteritems(self.inputs):
+        for id_, d in self.inputs.items():
             input_labels_to_ids.setdefault(d['label'], set()).add(id_)
         object.__setattr__(self, 'input_labels_to_ids', input_labels_to_ids)
         object.__setattr__(self, 'tool_labels_to_ids', tool_labels_to_ids)
@@ -256,8 +253,8 @@ class Workflow(Wrapper):
           {'c': set(['a', 'b']), 'd': {'c'}, 'e': {'c'}, 'f': {'c'}}
         """
         dag, inv_dag = {}, {}
-        for s in six.itervalues(self.steps):
-            for i in six.itervalues(s.input_steps):
+        for s in self.steps.values():
+            for i in s.input_steps.values():
                 head, tail = i['source_step'], s.id
                 dag.setdefault(head, set()).add(tail)
                 inv_dag.setdefault(tail, set()).add(head)
@@ -269,7 +266,7 @@ class Workflow(Wrapper):
         """
         ids = []
         source_ids = self.source_ids.copy()
-        inv_dag = dict((k, v.copy()) for k, v in six.iteritems(self.inv_dag))
+        inv_dag = dict((k, v.copy()) for k, v in self.inv_dag.items())
         while source_ids:
             head = source_ids.pop()
             ids.append(head)
@@ -285,7 +282,7 @@ class Workflow(Wrapper):
         """
         Return the ids of data input steps for this workflow.
         """
-        return set(id_ for id_, s in six.iteritems(self.steps)
+        return set(id_ for id_, s in self.steps.items()
                    if s.type == 'data_input')
 
     @property
@@ -293,7 +290,7 @@ class Workflow(Wrapper):
         """
         Return the ids of data collection input steps for this workflow.
         """
-        return set(id_ for id_, s in six.iteritems(self.steps)
+        return set(id_ for id_, s in self.steps.items()
                    if s.type == 'data_collection_input')
 
     @property
@@ -301,7 +298,7 @@ class Workflow(Wrapper):
         """
         Return the ids of tool steps for this workflow.
         """
-        return set(id_ for id_, s in six.iteritems(self.steps)
+        return set(id_ for id_, s in self.steps.items()
                    if s.type == 'tool')
 
     @property
@@ -333,7 +330,7 @@ class Workflow(Wrapper):
           format required by the Galaxy web API.
         """
         m = {}
-        for label, slot_ids in six.iteritems(self.input_labels_to_ids):
+        for label, slot_ids in self.input_labels_to_ids.items():
             datasets = input_map.get(label, [])
             if not isinstance(datasets, Iterable):
                 datasets = [datasets]
@@ -448,7 +445,7 @@ class Workflow(Wrapper):
                 kwargs['history_id'] = history.id
             except AttributeError:
                 raise RuntimeError('history does not have an id')
-        elif isinstance(history, six.string_types):
+        elif isinstance(history, str):
             kwargs['history_name'] = history
         else:
             raise TypeError(
@@ -492,8 +489,7 @@ class Workflow(Wrapper):
         self.unmap()
 
 
-@six.add_metaclass(abc.ABCMeta)
-class Dataset(Wrapper):
+class Dataset(Wrapper, metaclass=abc.ABCMeta):
     """
     Abstract base class for Galaxy datasets.
     """
@@ -674,8 +670,7 @@ class HistoryDatasetAssociation(Dataset):
         self.refresh()
 
 
-@six.add_metaclass(abc.ABCMeta)
-class DatasetCollection(Wrapper):
+class DatasetCollection(Wrapper, metaclass=abc.ABCMeta):
     """
     Abstract base class for Galaxy dataset collections.
     """
@@ -785,8 +780,7 @@ class LibraryDataset(LibRelatedDataset):
         return self
 
 
-@six.add_metaclass(abc.ABCMeta)
-class ContentInfo(Wrapper):
+class ContentInfo(Wrapper, metaclass=abc.ABCMeta):
     """
     Instances of this class wrap dictionaries obtained by getting
     ``/api/{histories,libraries}/<ID>/contents`` from Galaxy.
@@ -826,8 +820,7 @@ class HistoryContentInfo(ContentInfo):
         return self.gi.histories
 
 
-@six.add_metaclass(abc.ABCMeta)
-class DatasetContainer(Wrapper):
+class DatasetContainer(Wrapper, metaclass=abc.ABCMeta):
     """
     Abstract base class for dataset containers (histories and libraries).
     """
@@ -1220,7 +1213,7 @@ class Library(DatasetContainer):
         See :meth:`.upload_data` for info on other params.
         """
         fid = self._pre_upload(folder)
-        if isinstance(paths, six.string_types):
+        if isinstance(paths, str):
             paths = (paths,)
         paths = '\n'.join(paths)
         res = self.gi.gi.libraries.upload_from_galaxy_filesystem(
@@ -1399,7 +1392,7 @@ class Tool(Wrapper):
         object, which will be automatically converted to the needed
         format.
         """
-        for k, v in six.iteritems(inputs):
+        for k, v in inputs.items():
             if isinstance(v, Dataset):
                 inputs[k] = {'src': v.SRC, 'id': v.id}
         out_dict = self.gi.gi.tools.run_tool(history.id, self.id, inputs)
@@ -1423,8 +1416,7 @@ class Job(Wrapper):
         return self.gi.jobs
 
 
-@six.add_metaclass(abc.ABCMeta)
-class Preview(Wrapper):
+class Preview(Wrapper, metaclass=abc.ABCMeta):
     """
     Abstract base class for Galaxy entity 'previews'.
 

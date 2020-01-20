@@ -3,16 +3,15 @@ Setup and launch a CloudMan instance.
 """
 import datetime
 import socket
+from http.client import HTTPConnection
+from urllib.parse import urlparse
 
 import boto
-import six
 import yaml
 from boto.compat import http_client
 from boto.ec2.regioninfo import RegionInfo
 from boto.exception import EC2ResponseError, S3ResponseError
 from boto.s3.connection import OrdinaryCallingFormat, S3Connection, SubdomainCallingFormat
-from six.moves.http_client import HTTPConnection
-from six.moves.urllib.parse import urlparse
 
 import bioblend
 from bioblend.util import Bunch
@@ -677,7 +676,7 @@ class CloudManLauncher(object):
         excluded_fields = ['sg_name', 'image_id', 'instance_id', 'kp_name',
                            'cloud', 'cloud_type', 'public_dns', 'cidr_range',
                            'kp_material', 'placement', 'flavor_id']
-        for key, value in six.iteritems(user_provided_data):
+        for key, value in user_provided_data.items():
             if key not in excluded_fields:
                 form_data[key] = value
         # If the following user data keys are empty, do not include them in the

@@ -8,10 +8,8 @@ import tarfile
 import tempfile
 import uuid
 from ssl import SSLError
-
-import six
-from six.moves.urllib.error import URLError
-from six.moves.urllib.request import urlopen
+from urllib.error import URLError
+from urllib.request import urlopen
 
 import bioblend
 import bioblend.galaxy.objects.galaxy_instance as galaxy_instance
@@ -170,7 +168,7 @@ class TestWorkflow(unittest.TestCase):
 
     def test_dag(self):
         inv_dag = {}
-        for h, tails in six.iteritems(self.wf.dag):
+        for h, tails in self.wf.dag.items():
             for t in tails:
                 inv_dag.setdefault(str(t), set()).add(h)
         self.assertEqual(self.wf.inv_dag, inv_dag)
@@ -180,13 +178,13 @@ class TestWorkflow(unittest.TestCase):
         self.assertEqual(tails, set.union(*self.wf.dag.values()))
         ids = self.wf.sorted_step_ids()
         self.assertEqual(set(ids), heads | tails)
-        for h, tails in six.iteritems(self.wf.dag):
+        for h, tails in self.wf.dag.items():
             for t in tails:
                 self.assertLess(ids.index(h), ids.index(t))
 
     def test_steps(self):
         steps = SAMPLE_WF_DICT['steps']
-        for sid, s in six.iteritems(self.wf.steps):
+        for sid, s in self.wf.steps.items():
             self.assertIsInstance(s, wrappers.Step)
             self.assertEqual(s.id, sid)
             self.assertIn(sid, steps)
@@ -214,7 +212,7 @@ class TestWorkflow(unittest.TestCase):
         # OR
         # {'571': {'id': 'b', 'src': 'ld'}, '572': {'id': 'a', 'src': 'ld'}}
         self.assertEqual(set(input_map), set(['571', '572']))
-        for d in six.itervalues(input_map):
+        for d in input_map.values():
             self.assertEqual(set(d), set(['id', 'src']))
             self.assertEqual(d['src'], 'ld')
             self.assertIn(d['id'], 'ab')
@@ -271,7 +269,7 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
             wf_dump = json.load(f)
         wf_info = self.gi.gi.workflows.import_workflow_dict(wf_dump)
         wf_dict = self.gi.gi.workflows.show_workflow(wf_info['id'])
-        for id_, step in six.iteritems(wf_dict['steps']):
+        for id_, step in wf_dict['steps'].items():
             if step['type'] == 'tool':
                 for k in 'tool_inputs', 'tool_version':
                     wf_dict['steps'][id_][k] = None
@@ -292,7 +290,7 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
         # Galaxy appends additional text to imported workflow names
         self.assertTrue(wf.name.startswith('paste_columns'))
         self.assertEqual(len(wf.steps), 3)
-        for step_id, step in six.iteritems(wf.steps):
+        for step_id, step in wf.steps.items():
             self.assertIsInstance(step, wrappers.Step)
             self.assertEqual(step_id, step.id)
             self.assertIsInstance(step.tool_inputs, dict)
