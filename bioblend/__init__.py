@@ -1,7 +1,10 @@
 import logging
 import os
 
-from bioblend.config import BioBlendConfigLocations, Config
+from bioblend.config import (
+    BioBlendConfigLocations,
+    Config,
+)
 
 # Current version of the library
 __version__ = '0.13.0'

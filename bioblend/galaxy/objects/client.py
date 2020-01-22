@@ -6,9 +6,7 @@ via their handles in :class:`~.galaxy_instance.GalaxyInstance`.
 """
 import abc
 import json
-
-import six
-from six.moves.collections_abc import (
+from collections.abc import (
     Mapping,
     Sequence,
 )
@@ -17,8 +15,7 @@ import bioblend
 from . import wrappers
 
 
-@six.add_metaclass(abc.ABCMeta)
-class ObjClient(object):
+class ObjClient(object, metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def __init__(self, obj_gi):
@@ -322,8 +319,8 @@ class ObjWorkflowClient(ObjClient):
         """
         for id_ in self._select_ids(id_=id_, name=name):
             res = self.gi.workflows.delete_workflow(id_)
-            if not isinstance(res, six.string_types):
-                self._error('delete_workflow: unexpected reply: %r' % (res,))
+            if not isinstance(res, str):
+                self._error('delete_workflow: unexpected reply: %r' % res)
 
 
 class ObjToolClient(ObjClient):

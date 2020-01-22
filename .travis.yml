@@ -12,7 +12,7 @@ stages:
 
 env:
   - TOX_ENV=py35 GALAXY_VERSION=dev
-  - TOX_ENV=py27 GALAXY_VERSION=dev
+  - TOX_ENV=py35 GALAXY_VERSION=release_20.01
   - TOX_ENV=py35 GALAXY_VERSION=release_19.09
   - TOX_ENV=py35 GALAXY_VERSION=release_19.05
   - TOX_ENV=py35 GALAXY_VERSION=release_19.01
@@ -68,7 +68,7 @@ matrix:
       os: osx
       # No version of Python is available via virtualenv on OS X workers, see https://github.com/travis-ci/travis-ci/issues/2312
       language: generic
-      env: TOX_ENV=py27 GALAXY_VERSION=dev
+      env: TOX_ENV=py37 GALAXY_VERSION=dev
       before_install:
         # PostgreSQL on OSX is not started, see https://github.com/travis-ci/travis-ci/issues/1875
         - rm -rf /usr/local/var/postgres

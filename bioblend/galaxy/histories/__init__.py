@@ -7,8 +7,6 @@ import re
 import sys
 import time
 
-import six
-
 import bioblend
 from bioblend import ConnectionError
 from bioblend.galaxy.client import Client
@@ -242,7 +240,7 @@ class HistoryClient(Client):
         :rtype: list
         :return: List of dictionaries
         """
-        if isinstance(name_filter, six.string_types):
+        if isinstance(name_filter, str):
             name_filter = re.compile(name_filter + '$')
         return [self.show_dataset(history_id, h['id'])
                 for h in self.show_history(history_id, contents=True)
@@ -565,7 +563,7 @@ class HistoryClient(Client):
         state['state'] = history['state']
         if history.get('state_details') is not None:
             state['state_details'] = history['state_details']
-            total_complete = sum(six.itervalues(history['state_details']))
+            total_complete = sum(history['state_details'].values())
             if total_complete > 0:
                 state['percent_complete'] = 100 * history['state_details']['ok'] / total_complete
             else:

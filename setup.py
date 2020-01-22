@@ -4,8 +4,8 @@ import re
 
 from setuptools import find_packages, setup
 
-# Cannot use "from bioblend import get_version" because that would try to import
-# the six package which may not be installed yet.
+# It should be possible to use "from bioblend import get_version", but this may
+# try to import some not-yet-installed libraries.
 reg = re.compile(r'__version__\s*=\s*(.+)')
 with open(os.path.join('bioblend', '__init__.py')) as f:
     for line in f:
@@ -22,12 +22,12 @@ setup(
     author="Enis Afgan",
     author_email="afgane@gmail.com",
     url="https://bioblend.readthedocs.io/",
+    python_requires='>=3.5',
     install_requires=[
         'boto>=2.9.7',
         'pyyaml',
         'requests>=2.20.0',
         'requests-toolbelt>=0.5.1,!=0.9.0',
-        'six>=1.13.0'
     ],
     packages=find_packages(exclude=['tests']),
     package_data={'bioblend': ['_tests/data/*']},
@@ -46,8 +46,6 @@ setup(
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
-        "Programming Language :: Python :: 2",
-        "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",

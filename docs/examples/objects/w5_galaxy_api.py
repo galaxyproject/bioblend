@@ -3,8 +3,7 @@ from __future__ import absolute_import, print_function
 import json
 import os
 import sys
-
-from six.moves.urllib.parse import urljoin
+from urllib.parse import urljoin
 
 # This example, provided for comparison with w5_metagenomics.py,
 # contains the code required to run the metagenomics workflow

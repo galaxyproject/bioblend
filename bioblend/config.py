@@ -1,6 +1,5 @@
+import configparser
 import os
-
-from six.moves import configparser
 
 BioBlendConfigPath = '/etc/bioblend.cfg'
 BioBlendConfigLocations = [BioBlendConfigPath]

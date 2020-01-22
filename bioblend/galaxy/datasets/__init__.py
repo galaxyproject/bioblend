@@ -5,9 +5,8 @@ import logging
 import os
 import shlex
 import time
-
-from six.moves.urllib.parse import urljoin
-from six.moves.urllib.request import urlopen
+from urllib.parse import urljoin
+from urllib.request import urlopen
 
 import bioblend
 from bioblend.galaxy.client import Client

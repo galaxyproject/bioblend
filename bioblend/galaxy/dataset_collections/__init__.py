@@ -1,14 +1,10 @@
-import six
-
-
 class HasElements(object):
 
     def __init__(self, name, type="list", elements=[]):
         self.name = name
         self.type = type
         if isinstance(elements, dict):
-            self.elements = [dict(name=key, id=value, src="hda")
-                             for key, value in six.itervalues(elements)]
+            self.elements = [dict(name=key, id=value, src="hda") for key, value in elements.values()]
         elif elements:
             self.elements = elements
 

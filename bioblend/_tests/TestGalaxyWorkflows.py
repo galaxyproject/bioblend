@@ -4,8 +4,6 @@ import shutil
 import tempfile
 import time
 
-from six.moves import range
-
 from . import GalaxyTestBase, test_util
 
 

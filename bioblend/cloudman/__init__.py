@@ -4,10 +4,9 @@ API for interacting with a CloudMan instance.
 import functools
 import json
 import time
+from urllib.parse import urlparse
 
 import requests
-from six.moves import range
-from six.moves.urllib.parse import urlparse
 
 import bioblend
 from bioblend.cloudman.launch import CloudManLauncher
