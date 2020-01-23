@@ -12,7 +12,7 @@ Installation
 
 Stable releases of BioBlend are best installed via ``pip`` from PyPI::
 
-    $ python -m pip install bioblend
+    $ python3 -m pip install bioblend
 
 Alternatively, you may install the most current source code from our `Git repository`_,
 or fork the project on Github. To install from source, do the following::
@@ -21,7 +21,7 @@ or fork the project on Github. To install from source, do the following::
     $ git clone https://github.com/galaxyproject/bioblend.git
     # Install the library
     $ cd bioblend
-    $ python setup.py install
+    $ python3 setup.py install
 
 After installing the library, you will be able to simply import it into your
 Python environment with ``import bioblend``. For details on the available functionality,
@@ -29,14 +29,14 @@ see the `API documentation`_.
 
 BioBlend requires a number of Python libraries. These libraries are installed
 automatically when BioBlend itself is installed, regardless whether it is installed
-via PyPi_ or by running ``python setup.py install`` command. The current list of
+via PyPi_ or by running ``python3 setup.py install`` command. The current list of
 required libraries is always available from `setup.py`_ in the source code
 repository.
 
 If you also want to run tests locally, some extra libraries are required. To
 install them, run::
 
-    $ python setup.py test
+    $ python3 setup.py test
 
 Usage
 =====

@@ -1,7 +1,7 @@
 """
 This example retrieves details of all the Data Libraries available to us and lists information on them.
 
-Usage: python list_data_libraries.py <galaxy-url> <galaxy-API-key>
+Usage: python3 list_data_libraries.py <galaxy-url> <galaxy-API-key>
 """
 from __future__ import print_function
 
@@ -10,7 +10,7 @@ import sys
 from bioblend.galaxy import GalaxyInstance
 
 if len(sys.argv) != 3:
-    print("Usage: python list_data_libraries.py <galaxy-url> <galaxy-API-key>")
+    print("Usage: python3 list_data_libraries.py <galaxy-url> <galaxy-API-key>")
     sys.exit(1)
 galaxy_url = sys.argv[1]
 galaxy_key = sys.argv[2]

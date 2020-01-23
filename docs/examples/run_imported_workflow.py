@@ -9,7 +9,7 @@ Also note that a Galaxy Workflow will only run without modification if it finds 
 installed on the Galaxy instance. This is to ensure reproducibility.
 In this case we expect Tophat wrapper 1.5.0 and Cufflinks wrapper 0.0.5.
 
-Usage: python run_imported_workflow.py <galaxy-url> <galaxy-API-key>
+Usage: python3 run_imported_workflow.py <galaxy-url> <galaxy-API-key>
 """
 from __future__ import print_function
 
@@ -34,7 +34,7 @@ library_name = 'Imported data for API demo'
 output_history_name = 'Output from API demo'
 
 if len(sys.argv) != 3:
-    print("Usage: python run_imported_workflow.py <galaxy-url> <galaxy-API-key>")
+    print("Usage: python3 run_imported_workflow.py <galaxy-url> <galaxy-API-key>")
     sys.exit(1)
 galaxy_url = sys.argv[1]
 galaxy_key = sys.argv[2]

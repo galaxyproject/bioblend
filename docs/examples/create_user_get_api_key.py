@@ -2,7 +2,7 @@
 This example creates a new user and prints her API key. It is also used to
 initialize a Galaxy server in Continuous Integration testing of BioBlend.
 
-Usage: python create_user_get_api_key.py <Galaxy_URL> <Galaxy_API_key> <new_username> <new_user_email> <new_password>
+Usage: python3 create_user_get_api_key.py <Galaxy_URL> <Galaxy_API_key> <new_username> <new_user_email> <new_password>
 """
 from __future__ import print_function
 
@@ -11,7 +11,7 @@ import sys
 import bioblend.galaxy
 
 if len(sys.argv) != 6:
-    print("Usage: python create_user_get_api_key.py <Galaxy_URL> <Galaxy_API_key> <new_username> <new_user_email> <new_password>")
+    print("Usage: python3 create_user_get_api_key.py <Galaxy_URL> <Galaxy_API_key> <new_username> <new_user_email> <new_password>")
     sys.exit(1)
 galaxy_url = sys.argv[1]
 galaxy_api_key = sys.argv[2]
