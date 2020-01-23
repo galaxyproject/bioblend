@@ -22,6 +22,7 @@ bioblend.set_stream_logger('test', level='INFO')
 socket.setdefaulttimeout(10.0)
 SAMPLE_FN = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
 SAMPLE_WF_COLL_FN = test_util.get_abspath(os.path.join('data', 'paste_columns_collections.ga'))
+SAMPLE_WF_PARAMETER_INPUT_FN = test_util.get_abspath(os.path.join('data', 'workflow_with_parameter_input.ga'))
 FOO_DATA = 'foo\nbar\n'
 FOO_DATA_2 = 'foo2\nbar2\n'
 SAMPLE_WF_DICT = {
@@ -254,6 +255,11 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
             wf = self.gi.workflows.import_new(f.read())
         self._check_and_del_workflow(wf)
 
+    @test_util.skip_unless_galaxy('release_19.01')
+    def test_workflow_parameter_input(self):
+        with open(SAMPLE_WF_PARAMETER_INPUT_FN) as f:
+            self.gi.workflows.import_new(f.read())
+
     def test_workflow_from_dict(self):
         with open(SAMPLE_FN) as f:
             wf = self.gi.workflows.import_new(json.load(f))
@@ -302,7 +308,7 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
                 self.assertIsNone(step.tool_id)
                 self.assertIsNone(step.tool_version)
                 self.assertEqual(step.input_steps, {})
-        wf_ids = set(_.id for _ in self.gi.workflows.list())
+        wf_ids = {_.id for _ in self.gi.workflows.list()}
         self.assertIn(wf.id, wf_ids)
         if check_is_public:
             self.assertTrue(wf.published)
@@ -831,8 +837,6 @@ def suite():
 
 
 if __name__ == '__main__':
-    # By default, run all tests.  To run specific tests, do the following:
-    #   python -m unittest <module>.<class>.<test_method>
     tests = suite()
     RUNNER = unittest.TextTestRunner(verbosity=2)
     RUNNER.run(tests)

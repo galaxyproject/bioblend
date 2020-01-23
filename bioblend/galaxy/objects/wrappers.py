@@ -154,8 +154,9 @@ class Step(Wrapper):
     Abstract base class for workflow steps.
 
     Steps are the main building blocks of a Galaxy workflow. A step can be: an
-    input (type 'data_collection_input` or 'data_input`), a computational tool
-    (type 'tool`) or a pause (type 'pause`).
+    input (type ``data_collection_input``, ``data_input`` or
+    ``parameter_input``), a computational tool (type ``tool``), a subworkflow
+    (type ``subworkflow``) or a pause (type ``pause``).
     """
     BASE_ATTRS = Wrapper.BASE_ATTRS + (
         'input_steps', 'tool_id', 'tool_inputs', 'tool_version', 'type'
@@ -167,8 +168,7 @@ class Step(Wrapper):
             stype = step_dict['type']
         except KeyError:
             raise ValueError('not a step dict')
-        if stype not in set(['data_collection_input', 'data_input', 'pause',
-                             'tool']):
+        if stype not in {'data_collection_input', 'data_input', 'parameter_input', 'pause', 'subworkflow', 'tool'}:
             raise ValueError('Unknown step type: %r' % stype)
         if self.type == 'tool' and self.tool_inputs:
             for k, v in self.tool_inputs.items():
@@ -226,8 +226,9 @@ class Workflow(Wrapper):
         object.__setattr__(self, 'dag', dag)
         object.__setattr__(self, 'inv_dag', inv_dag)
         object.__setattr__(self, 'source_ids', heads - tails)
-        assert set(self.inputs) == self.data_collection_input_ids | self.data_input_ids, \
-            "inputs is %r, while data_collection_input_ids is %r and data_input_ids is %r" % (self.inputs, self.data_collection_input_ids, self.data_input_ids)
+        assert set(self.inputs) == self.data_collection_input_ids | self.data_input_ids | self.parameter_input_ids, \
+            "inputs is %r, while data_collection_input_ids is %r, data_input_ids is %r and parameter_input_ids is %r" % (
+                self.inputs, self.data_collection_input_ids, self.data_input_ids, self.parameter_input_ids)
         object.__setattr__(self, 'sink_ids', tails - heads)
         object.__setattr__(self, 'missing_ids', missing_ids)
 
@@ -246,11 +247,11 @@ class Workflow(Wrapper):
         For instance, a workflow with a single tool *c*, two inputs
         *a, b* and three outputs *d, e, f* is represented by (direct)::
 
-          {'a': {'c'}, 'b': {'c'}, 'c': set(['d', 'e', 'f'])}
+          {'a': {'c'}, 'b': {'c'}, 'c': {'d', 'e', 'f'}}
 
         and by (inverse)::
 
-          {'c': set(['a', 'b']), 'd': {'c'}, 'e': {'c'}, 'f': {'c'}}
+          {'c': {'a', 'b'}, 'd': {'c'}, 'e': {'c'}, 'f': {'c'}}
         """
         dag, inv_dag = {}, {}
         for s in self.steps.values():
@@ -282,24 +283,28 @@ class Workflow(Wrapper):
         """
         Return the ids of data input steps for this workflow.
         """
-        return set(id_ for id_, s in self.steps.items()
-                   if s.type == 'data_input')
+        return {id_ for id_, s in self.steps.items() if s.type == 'data_input'}
 
     @property
     def data_collection_input_ids(self):
         """
         Return the ids of data collection input steps for this workflow.
         """
-        return set(id_ for id_, s in self.steps.items()
-                   if s.type == 'data_collection_input')
+        return {id_ for id_, s in self.steps.items() if s.type == 'data_collection_input'}
+
+    @property
+    def parameter_input_ids(self):
+        """
+        Return the ids of parameter input steps for this workflow.
+        """
+        return {id_ for id_, s in self.steps.items() if s.type == 'parameter_input'}
 
     @property
     def tool_ids(self):
         """
         Return the ids of tool steps for this workflow.
         """
-        return set(id_ for id_, s in self.steps.items()
-                   if s.type == 'tool')
+        return {id_ for id_, s in self.steps.items() if s.type == 'tool'}
 
     @property
     def input_labels(self):

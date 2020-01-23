@@ -10,9 +10,7 @@ from . import client
 
 
 # dataset states corresponding to a 'pending' condition
-_PENDING_DS_STATES = set(
-    ["new", "upload", "queued", "running", "setting_metadata"]
-)
+_PENDING_DS_STATES = {"new", "upload", "queued", "running", "setting_metadata"}
 
 
 def _get_error_info(hda):
