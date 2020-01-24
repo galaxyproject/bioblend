@@ -141,7 +141,7 @@ class ToolShedRepositoryClient(Client):
         :rtype: list
         :return: List of changeset revision hash strings from oldest to newest
         """
-        url = '/'.join([self.url, 'get_ordered_installable_revisions'])
+        url = self.url + '/get_ordered_installable_revisions'
         params = {
             'name': name,
             'owner': owner
@@ -222,7 +222,7 @@ class ToolShedRepositoryClient(Client):
                           u'type': u'package',
                           u'version': u'0.1.18'}}]}]
         """
-        url = '/'.join([self.url, 'get_repository_revision_install_info'])
+        url = self.url + '/get_repository_revision_install_info'
         params = {
             'name': name,
             'owner': owner,
@@ -306,7 +306,7 @@ class ToolShedRepositoryClient(Client):
         """
         # Not using '_make_url' or '_get' to create url since the module id used
         # to create url is not the same as needed for this method
-        url = '/'.join([self.gi.url, 'repository_revisions'])
+        url = self.gi.url + '/repository_revisions'
         params = {}
         if downloadable:
             params['downloadable'] = True
@@ -361,7 +361,7 @@ class ToolShedRepositoryClient(Client):
         # Not using '_make_url' or '_get' to create url since the module id used
         # to create url is not the same as needed for this method
         # since metadata_id has to be defined, easy to create the url here
-        url = '/'.join([self.gi.url, 'repository_revisions', metadata_id])
+        url = '/'.join((self.gi.url, 'repository_revisions', metadata_id))
         return self._get(url=url)
 
     def update_repository(self, id, tar_ball_path, commit_message=None):
@@ -389,7 +389,7 @@ class ToolShedRepositoryClient(Client):
 
         .. versionadded:: 0.5.2
         """
-        url = '/'.join([self.gi._make_url(self, id), 'changeset_revision'])
+        url = self.gi._make_url(self, id) + '/changeset_revision'
         payload = {
             'file': attach_file(tar_ball_path)
         }

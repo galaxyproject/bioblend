@@ -63,8 +63,5 @@ class DatatypesClient(Client):
              u'galaxy.datatypes.sequence:Lav',
              u'galaxy.datatypes.sequence:csFasta']
         """
-
-        url = self.gi._make_url(self)
-        url = '/'.join([url, "sniffers"])
-
+        url = self.gi._make_url(self) + '/sniffers'
         return self._get(url=url)

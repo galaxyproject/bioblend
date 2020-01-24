@@ -207,5 +207,5 @@ class QuotaClient(Client):
 
             "Undeleted 1 quotas: Testing-B"
         """
-        url = '/'.join([self.gi._make_url(self), 'deleted', quota_id, 'undelete'])
+        url = self.gi._make_url(self, quota_id, deleted=True) + '/undelete'
         return self._post(url=url, payload={'id': quota_id})

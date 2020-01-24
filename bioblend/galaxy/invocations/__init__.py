@@ -73,7 +73,7 @@ class InvocationClient(Client):
              u'uuid': u'c8aa2b1c-801a-11e5-a9e5-8ca98228593c',
              u'workflow_id': u'03501d7626bd192f'}
         """
-        url = self._invocation_url(invocation_id)
+        url = self.gi._make_url(self, invocation_id)
         return self._get(url=url)
 
     def cancel_invocation(self, invocation_id):
@@ -86,7 +86,7 @@ class InvocationClient(Client):
         :rtype: dict
         :return: The workflow invocation being cancelled
         """
-        url = self._invocation_url(invocation_id)
+        url = self.gi._make_url(self, invocation_id)
         return self._delete(url=url)
 
     def show_invocation_step(self, invocation_id, step_id):
@@ -157,7 +157,7 @@ class InvocationClient(Client):
              'id': 'a799d38679e985db',
              'populated_state': 'ok'}
         """
-        url = _join(self._invocation_url(invocation_id), "jobs_summary")
+        url = self.gi._make_url(self, invocation_id) + '/jobs_summary'
         return self._get(url=url)
 
     def get_invocation_report(self, invocation_id):
@@ -178,20 +178,11 @@ class InvocationClient(Client):
              'render_format': 'markdown',
              'workflows': {'f2db41e1fa331b3e': {'name': 'Example workflow'}}}
         """
-        url = _join(self._invocation_url(invocation_id), "report")
+        url = self.gi._make_url(self, invocation_id) + '/report'
         return self._get(url=url)
 
     def _invocation_step_url(self, invocation_id, step_id):
-        return _join(self._invocation_url(invocation_id), "steps", step_id)
-
-    def _invocation_url(self, invocation_id):
-        url = self.gi._make_url(self)
-        url = _join(url, invocation_id)
-        return url
-
-
-def _join(*args):
-    return "/".join(args)
+        return '/'.join((self.gi._make_url(self, invocation_id), "steps", step_id))
 
 
 __all__ = ('InvocationClient',)

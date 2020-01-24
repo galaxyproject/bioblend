@@ -66,13 +66,13 @@ class GalaxyClient(object):
         :param contents: If ``True``, include 'contents' in the URL, after the module ID:
                          ``<base_url>/api/libraries/<encoded_library_id>/contents``
         """
-        c_url = '/'.join([self.url, module.module])
+        c_url = '/'.join((self.url, module.module))
         if deleted is True:
-            c_url = '/'.join([c_url, 'deleted'])
+            c_url = c_url + '/deleted'
         if module_id is not None:
-            c_url = '/'.join([c_url, module_id])
+            c_url = '/'.join((c_url, module_id))
             if contents is True:
-                c_url = '/'.join([c_url, 'contents'])
+                c_url = c_url + '/contents'
         return c_url
 
     def make_get_request(self, url, **kwargs):

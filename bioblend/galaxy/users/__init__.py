@@ -132,8 +132,7 @@ class UserClient(Client):
         :rtype: dict
         :return: a dictionary containing information about the current user
         """
-        url = self.gi._make_url(self, None)
-        url = '/'.join([url, 'current'])
+        url = self.gi._make_url(self) + '/current'
         return self._get(url=url)
 
     def create_user_apikey(self, user_id):
@@ -146,12 +145,9 @@ class UserClient(Client):
         :rtype: str
         :return: the API key for the user
         """
-
-        url = self.gi._make_url(self, None)
-        url = '/'.join([url, user_id, 'api_key'])
+        url = self.gi._make_url(self, user_id) + '/api_key'
         payload = {}
         payload['user_id'] = user_id
-
         return self._post(payload, url=url)
 
     def delete_user(self, user_id, purge=False):
@@ -188,8 +184,5 @@ class UserClient(Client):
         :rtype: str
         :return: the API key for the user
         """
-
-        url = self.gi._make_url(self, None)
-        url = '/'.join([url, user_id, 'api_key', 'inputs'])
-
+        url = self.gi._make_url(self, user_id) + '/api_key/inputs'
         return self._get(url=url)['inputs'][0]['value']

@@ -76,7 +76,6 @@ class Client(object):
         'workflows' | 'libraries' | 'histories' | ...``
         """
         self.gi = galaxy_instance
-        self.url = '/'.join([self.gi.url, self.module])
 
     def _get(self, id=None, deleted=False, contents=None, url=None,
              params=None, json=True):

@@ -124,8 +124,7 @@ class WorkflowClient(Client):
         """
         payload = {'workflow': workflow_dict, 'publish': publish}
 
-        url = self.gi._make_url(self)
-        url = _join(url, "upload")
+        url = self.gi._make_url(self) + "/upload"
         return self._post(url=url, payload=payload)
 
     def import_workflow_json(self, workflow_json):
@@ -210,8 +209,7 @@ class WorkflowClient(Client):
         if version is not None:
             params['version'] = version
 
-        url = self.gi._make_url(self)
-        url = _join(url, "download", workflow_id)
+        url = '/'.join((self.gi._make_url(self), 'download', workflow_id))
         return self._get(url=url, params=params)
 
     def export_workflow_json(self, workflow_id):
@@ -582,8 +580,7 @@ class WorkflowClient(Client):
             payload['allow_tool_state_corrections'] = allow_tool_state_corrections
         if inputs_by is not None:
             payload['inputs_by'] = inputs_by
-        url = self.gi._make_url(self)
-        url = _join(url, workflow_id, "invocations")
+        url = self._invocations_url(workflow_id)
         return self._post(payload, url=url)
 
     def show_invocation(self, workflow_id, invocation_id):
@@ -750,22 +747,13 @@ class WorkflowClient(Client):
         return self._delete(id=workflow_id)
 
     def _invocation_step_url(self, workflow_id, invocation_id, step_id):
-        return _join(self._invocation_url(workflow_id, invocation_id), "steps", step_id)
+        return '/'.join((self._invocation_url(workflow_id, invocation_id), "steps", step_id))
 
     def _invocation_url(self, workflow_id, invocation_id):
-        return _join(self._invocations_url(workflow_id), invocation_id)
+        return '/'.join((self._invocations_url(workflow_id), invocation_id))
 
     def _invocations_url(self, workflow_id):
-        return _join(self._workflow_url(workflow_id), "invocations")
-
-    def _workflow_url(self, workflow_id):
-        url = self.gi._make_url(self)
-        url = _join(url, workflow_id)
-        return url
-
-
-def _join(*args):
-    return "/".join(args)
+        return '/'.join((self.gi._make_url(self, workflow_id), 'invocations'))
 
 
 __all__ = ('WorkflowClient',)

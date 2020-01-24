@@ -414,7 +414,7 @@ class CloudManInstance(GenericVMInstance):
         Returns the URL for accessing this instance of CloudMan.
         """
         if self.url:
-            return '/'.join([self.url, 'cloud'])
+            return self.url + '/cloud'
         return None
 
     @staticmethod
@@ -719,7 +719,7 @@ class CloudManInstance(GenericVMInstance):
         particularly useful when terminating a cluster as it may terminate
         before sending a response.
         """
-        req_url = '/'.join([self.cloudman_url, 'root', url])
+        req_url = '/'.join((self.cloudman_url, 'root', url))
         r = requests.get(req_url, params=parameters, auth=("", self.password), timeout=timeout)
         try:
             json = r.json()

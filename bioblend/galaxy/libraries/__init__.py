@@ -66,8 +66,7 @@ class LibraryClient(Client):
         """
         Get details about a given library item.
         """
-        url = self.gi._make_url(self, library_id, contents=True)
-        url = '/'.join([url, item_id])
+        url = '/'.join((self.gi._make_url(self, library_id, contents=True), item_id))
         return self._get(url=url)
 
     def delete_library_dataset(self, library_id, dataset_id, purged=False):
@@ -92,9 +91,7 @@ class LibraryClient(Client):
             {u'deleted': True,
              u'id': u'60e680a037f41974'}
         """
-        url = self.gi._make_url(self, library_id, contents=True)
-        # Append the dataset_id to the base history contents URL
-        url = '/'.join([url, dataset_id])
+        url = '/'.join((self.gi._make_url(self, library_id, contents=True), dataset_id))
         return self._delete(payload={'purged': purged}, url=url)
 
     def update_library_dataset(self, dataset_id, **kwds):
@@ -123,7 +120,7 @@ class LibraryClient(Client):
         :rtype: dict
         :return: details of the updated dataset
         """
-        url = '/'.join([self.gi._make_url(self), 'datasets', dataset_id])
+        url = '/'.join((self.gi._make_url(self), 'datasets', dataset_id))
         return self._patch(payload=kwds, url=url)
 
     def show_dataset(self, library_id, dataset_id):
@@ -634,7 +631,7 @@ class LibraryClient(Client):
         :rtype: dict
         :return: dictionary with all applicable permissions' values
         """
-        url = '/'.join([self.gi._make_url(self, library_id), 'permissions'])
+        url = self.gi._make_url(self, library_id) + '/permissions'
         return self._get(url=url)
 
     def get_dataset_permissions(self, dataset_id):
@@ -647,7 +644,7 @@ class LibraryClient(Client):
         :rtype: dict
         :return: dictionary with all applicable permissions' values
         """
-        url = '/'.join([self.gi.url, 'libraries/datasets', dataset_id, 'permissions'])
+        url = '/'.join((self.gi.url, 'libraries/datasets', dataset_id, 'permissions'))
         return self._get(url=url)
 
     def set_library_permissions(self, library_id, access_in=None,
@@ -683,7 +680,7 @@ class LibraryClient(Client):
             payload['LIBRARY_ADD_in'] = add_in
         if manage_in:
             payload['LIBRARY_MANAGE_in'] = manage_in
-        url = '/'.join([self.gi._make_url(self, library_id), 'permissions'])
+        url = self.gi._make_url(self, library_id) + '/permissions'
         return self._post(payload, url=url)
 
     def set_dataset_permissions(self, dataset_id, access_in=None,
@@ -716,5 +713,5 @@ class LibraryClient(Client):
             payload['manage_ids[]'] = manage_in
         # we need here to define an action
         payload['action'] = 'set_permissions'
-        url = '/'.join([self.gi.url, 'libraries/datasets', dataset_id, 'permissions'])
+        url = '/'.join((self.gi.url, 'libraries/datasets', dataset_id, 'permissions'))
         return self._post(payload, url=url)
