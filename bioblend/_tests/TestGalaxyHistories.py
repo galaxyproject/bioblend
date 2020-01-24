@@ -11,7 +11,7 @@ from . import GalaxyTestBase, test_util
 class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
 
     def setUp(self):
-        super(TestGalaxyHistories, self).setUp()
+        super().setUp()
         self.default_history_name = "buildbot - automated test"
         self.history = self.gi.histories.create_history(name=self.default_history_name)
 

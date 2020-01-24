@@ -13,9 +13,6 @@ from . import GalaxyTestBase, test_util
 
 class TestGalaxyTools(GalaxyTestBase.GalaxyTestBase):
 
-    def setUp(self):
-        super(TestGalaxyTools, self).setUp()
-
     def test_get_tools(self):
         # Test requires target Galaxy is configured with at least one tool.
         tools = self.gi.tools.get_tools()

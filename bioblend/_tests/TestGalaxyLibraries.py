@@ -10,7 +10,7 @@ FOO_DATA = 'foo\nbar\n'
 class TestGalaxyLibraries(GalaxyTestBase.GalaxyTestBase):
 
     def setUp(self):
-        super(TestGalaxyLibraries, self).setUp()
+        super().setUp()
         self.name = 'automated test library'
         self.library = self.gi.libraries.create_library(self.name, description='automated test', synopsis='automated test synopsis')
 

@@ -46,7 +46,7 @@ class ToolShedInstance(GalaxyClient):
         :param verify: Whether to verify the server's TLS certificate
         :type verify: bool
         """
-        super(ToolShedInstance, self).__init__(url, key, email, password, verify=verify)
+        super().__init__(url, key, email, password, verify=verify)
         self.categories = categories.ToolShedCategoryClient(self)
         self.repositories = repositories.ToolShedRepositoryClient(self)
         self.tools = tools.ToolShedToolClient(self)

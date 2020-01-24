@@ -10,7 +10,7 @@ from bioblend.galaxy.client import Client
 class WorkflowClient(Client):
     def __init__(self, galaxy_instance):
         self.module = 'workflows'
-        super(WorkflowClient, self).__init__(galaxy_instance)
+        super().__init__(galaxy_instance)
 
     # the 'deleted' option is not available for workflows
     def get_workflows(self, workflow_id=None, name=None, published=False):

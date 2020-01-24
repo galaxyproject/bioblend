@@ -15,7 +15,7 @@ class LibraryClient(Client):
 
     def __init__(self, galaxy_instance):
         self.module = 'libraries'
-        super(LibraryClient, self).__init__(galaxy_instance)
+        super().__init__(galaxy_instance)
 
     def create_library(self, name, description=None, synopsis=None):
         """

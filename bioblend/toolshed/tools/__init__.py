@@ -8,7 +8,7 @@ class ToolShedToolClient(Client):
 
     def __init__(self, toolshed_instance):
         self.module = 'tools'
-        super(ToolShedToolClient, self).__init__(toolshed_instance)
+        super().__init__(toolshed_instance)
 
     def search_tools(self, q, page=1, page_size=10):
         """

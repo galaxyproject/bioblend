@@ -101,11 +101,11 @@ class MockWrapper(wrappers.Wrapper):
     BASE_ATTRS = frozenset(['a', 'b'])
 
     def __init__(self, *args, **kwargs):
-        super(MockWrapper, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     @property
     def gi_module(self):
-        return super(MockWrapper, self).gi_module()
+        return super().gi_module()
 
 
 class TestWrapper(unittest.TestCase):
@@ -420,7 +420,7 @@ class TestLibrary(GalaxyObjectsTestBase):
     DS_URL = 'https://tools.ietf.org/rfc/rfc1866.txt'
 
     def setUp(self):
-        super(TestLibrary, self).setUp()
+        super().setUp()
         self.lib = self.gi.libraries.create('test_%s' % uuid.uuid4().hex)
 
     def tearDown(self):
@@ -508,7 +508,7 @@ class TestLibrary(GalaxyObjectsTestBase):
 class TestLDContents(GalaxyObjectsTestBase):
 
     def setUp(self):
-        super(TestLDContents, self).setUp()
+        super().setUp()
         self.lib = self.gi.libraries.create('test_%s' % uuid.uuid4().hex)
         self.ds = self.lib.upload_data(FOO_DATA)
         self.ds.wait()
@@ -554,7 +554,7 @@ class TestLDContents(GalaxyObjectsTestBase):
 class TestHistory(GalaxyObjectsTestBase):
 
     def setUp(self):
-        super(TestHistory, self).setUp()
+        super().setUp()
         self.hist = self.gi.histories.create('test_%s' % uuid.uuid4().hex)
 
     def tearDown(self):
@@ -670,7 +670,7 @@ class TestHistory(GalaxyObjectsTestBase):
 class TestHDAContents(GalaxyObjectsTestBase):
 
     def setUp(self):
-        super(TestHDAContents, self).setUp()
+        super().setUp()
         self.hist = self.gi.histories.create('test_%s' % uuid.uuid4().hex)
         self.ds = self.hist.paste_content(FOO_DATA)
         self.ds.wait()
@@ -721,7 +721,7 @@ class TestHDAContents(GalaxyObjectsTestBase):
 class TestRunWorkflow(GalaxyObjectsTestBase):
 
     def setUp(self):
-        super(TestRunWorkflow, self).setUp()
+        super().setUp()
         self.lib = self.gi.libraries.create('test_%s' % uuid.uuid4().hex)
         with open(SAMPLE_FN) as f:
             self.wf = self.gi.workflows.import_new(f.read())
@@ -772,7 +772,7 @@ class TestRunWorkflow(GalaxyObjectsTestBase):
 class TestRunDatasetCollectionWorkflow(GalaxyObjectsTestBase):
 
     def setUp(self):
-        super(TestRunDatasetCollectionWorkflow, self).setUp()
+        super().setUp()
         with open(SAMPLE_WF_COLL_FN) as f:
             self.wf = self.gi.workflows.import_new(f.read())
         self.hist = self.gi.histories.create('test_%s' % uuid.uuid4().hex)
@@ -804,9 +804,6 @@ class TestRunDatasetCollectionWorkflow(GalaxyObjectsTestBase):
 
 
 class TestJob(GalaxyObjectsTestBase):
-
-    def setUp(self):
-        super(TestJob, self).setUp()
 
     def test_get(self):
         job_prevs = self.gi.jobs.get_previews()

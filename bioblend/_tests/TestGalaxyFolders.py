@@ -6,7 +6,7 @@ FOO_DATA = 'foo\nbar\n'
 class TestGalaxyFolders(GalaxyTestBase.GalaxyTestBase):
 
     def setUp(self):
-        super(TestGalaxyFolders, self).setUp()
+        super().setUp()
         self.name = 'automated test folder'
         self.library = self.gi.libraries.create_library(self.name, description='automated test', synopsis='automated test synopsis')
         self.folder = self.gi.folders.create_folder(self.library['root_folder_id'], self.name,

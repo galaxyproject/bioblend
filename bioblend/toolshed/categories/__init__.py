@@ -8,7 +8,7 @@ class ToolShedCategoryClient(Client):
 
     def __init__(self, toolshed_instance):
         self.module = 'categories'
-        super(ToolShedCategoryClient, self).__init__(toolshed_instance)
+        super().__init__(toolshed_instance)
 
     def get_categories(self, deleted=False):
         """

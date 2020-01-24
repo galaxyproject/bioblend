@@ -358,9 +358,9 @@ class CloudManInstance(GenericVMInstance):
         """
         self.initialized = False
         if kwargs.get('launch_result', None) is not None:  # Used internally by the launch_instance method
-            super(CloudManInstance, self).__init__(kwargs['launcher'], kwargs['launch_result'])
+            super().__init__(kwargs['launcher'], kwargs['launch_result'])
         else:
-            super(CloudManInstance, self).__init__(None, None)
+            super().__init__(None, None)
         self.config = kwargs.pop('cloudman_config', None)
         if not self.config:
             self.password = password
@@ -382,7 +382,7 @@ class CloudManInstance(GenericVMInstance):
         self._set_url(host_name)
 
     def _init_instance(self, hostname):
-        super(CloudManInstance, self)._init_instance(hostname)
+        super()._init_instance(hostname)
         if self.config.cluster_type:
             self.initialize(self.config.cluster_type, galaxy_data_option=self.config.galaxy_data_option, initial_storage_size=self.config.initial_storage_size)
 
@@ -397,7 +397,7 @@ class CloudManInstance(GenericVMInstance):
                 url = "http://" + url
             # Parse the corrected URL again to extract the hostname
             parse_result = urlparse(url)
-            super(CloudManInstance, self)._update_host_name(parse_result.hostname)
+            super()._update_host_name(parse_result.hostname)
         self.url = url
 
     @property

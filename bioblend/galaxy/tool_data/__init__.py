@@ -8,7 +8,7 @@ class ToolDataClient(Client):
 
     def __init__(self, galaxy_instance):
         self.module = 'tool_data'
-        super(ToolDataClient, self).__init__(galaxy_instance)
+        super().__init__(galaxy_instance)
 
     def get_data_tables(self):
         """

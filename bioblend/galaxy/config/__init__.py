@@ -9,7 +9,7 @@ class ConfigClient(Client):
 
     def __init__(self, galaxy_instance):
         self.module = 'configuration'
-        super(ConfigClient, self).__init__(galaxy_instance)
+        super().__init__(galaxy_instance)
 
     def get_config(self):
         """

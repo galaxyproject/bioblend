@@ -8,7 +8,7 @@ class DatatypesClient(Client):
 
     def __init__(self, galaxy_instance):
         self.module = 'datatypes'
-        super(DatatypesClient, self).__init__(galaxy_instance)
+        super().__init__(galaxy_instance)
 
     def get_datatypes(self, extension_only=False, upload_only=False):
         """

@@ -8,7 +8,7 @@ class VisualClient(Client):
 
     def __init__(self, galaxy_instance):
         self.module = 'visualizations'
-        super(VisualClient, self).__init__(galaxy_instance)
+        super().__init__(galaxy_instance)
 
     def get_visualizations(self):
         """

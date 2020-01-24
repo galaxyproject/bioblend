@@ -8,7 +8,7 @@ class JobsClient(Client):
 
     def __init__(self, galaxy_instance):
         self.module = 'jobs'
-        super(JobsClient, self).__init__(galaxy_instance)
+        super().__init__(galaxy_instance)
 
     def get_jobs(self):
         """

@@ -19,7 +19,7 @@ class HistoryClient(Client):
 
     def __init__(self, galaxy_instance):
         self.module = 'histories'
-        super(HistoryClient, self).__init__(galaxy_instance)
+        super().__init__(galaxy_instance)
 
     def create_history(self, name=None):
         """

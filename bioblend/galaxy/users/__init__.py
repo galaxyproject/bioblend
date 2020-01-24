@@ -10,7 +10,7 @@ class UserClient(Client):
 
     def __init__(self, galaxy_instance):
         self.module = 'users'
-        super(UserClient, self).__init__(galaxy_instance)
+        super().__init__(galaxy_instance)
 
     def get_users(self, deleted=False, f_email=None, f_name=None, f_any=None):
         """

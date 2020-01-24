@@ -8,7 +8,7 @@ class QuotaClient(Client):
 
     def __init__(self, galaxy_instance):
         self.module = 'quotas'
-        super(QuotaClient, self).__init__(galaxy_instance)
+        super().__init__(galaxy_instance)
 
     def get_quotas(self, deleted=False):
         """

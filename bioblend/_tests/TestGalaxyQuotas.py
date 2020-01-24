@@ -6,7 +6,7 @@ from . import GalaxyTestBase
 class TestGalaxyQuotas(GalaxyTestBase.GalaxyTestBase):
 
     def setUp(self):
-        super(TestGalaxyQuotas, self).setUp()
+        super().setUp()
         # Quota names must be unique, and they're impossible to delete
         # without accessing the database.
         self.quota_name = 'BioBlend-Test-Quota-%s' % uuid.uuid4().hex

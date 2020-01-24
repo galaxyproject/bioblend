@@ -11,7 +11,7 @@ class TestCloudmanServices(CloudmanTestBase.CloudmanTestBase):
 
     @classmethod
     def setUpClass(cls):
-        super(TestCloudmanServices, cls).setUpClass()
+        super().setUpClass()
         cls.cfg = CloudManConfig(cls.access_key, cls.secret_key, cls.cluster_name, cls.ami_id, cls.instance_type, cls.password, cloud_metadata=cls.cloud_metadata)
         cls.cmi = CloudManInstance.launch_instance(cls.cfg)
 

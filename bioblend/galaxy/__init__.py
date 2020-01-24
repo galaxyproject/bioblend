@@ -50,7 +50,7 @@ class GalaxyInstance(GalaxyClient):
         :param verify: Whether to verify the server's TLS certificate
         :type verify: bool
         """
-        super(GalaxyInstance, self).__init__(url, key, email, password, verify=verify)
+        super().__init__(url, key, email, password, verify=verify)
         self.libraries = libraries.LibraryClient(self)
         self.histories = histories.HistoryClient(self)
         self.workflows = workflows.WorkflowClient(self)

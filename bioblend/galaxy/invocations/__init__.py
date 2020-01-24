@@ -8,7 +8,7 @@ from bioblend.galaxy.client import Client
 class InvocationClient(Client):
     def __init__(self, galaxy_instance):
         self.module = 'invocations'
-        super(InvocationClient, self).__init__(galaxy_instance)
+        super().__init__(galaxy_instance)
 
     def get_invocations(self):
         """

@@ -10,7 +10,7 @@ from . import (
 class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
 
     def setUp(self):
-        super(TestGalaxyDatasets, self).setUp()
+        super().setUp()
         self.history_id = self.gi.histories.create_history(name='TestShowDataset')['id']
         self.dataset_contents = "line 1\nline 2\rline 3\r\nline 4"
         self.dataset_id = self._test_dataset(self.history_id, contents=self.dataset_contents)

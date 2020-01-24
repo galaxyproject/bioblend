@@ -11,7 +11,7 @@ class ToolClient(Client):
 
     def __init__(self, galaxy_instance):
         self.module = 'tools'
-        super(ToolClient, self).__init__(galaxy_instance)
+        super().__init__(galaxy_instance)
 
     def get_tools(self, tool_id=None, name=None, trackster=None):
         """

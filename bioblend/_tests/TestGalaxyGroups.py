@@ -9,7 +9,7 @@ from . import GalaxyTestBase
 class TestGalaxyGroups(GalaxyTestBase.GalaxyTestBase):
 
     def setUp(self):
-        super(TestGalaxyGroups, self).setUp()
+        super().setUp()
         self.name = 'test_%s' % uuid.uuid4().hex
         self.group = self.gi.groups.create_group(self.name)[0]
 

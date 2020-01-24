@@ -8,7 +8,7 @@ class GroupsClient(Client):
 
     def __init__(self, galaxy_instance):
         self.module = 'groups'
-        super(GroupsClient, self).__init__(galaxy_instance)
+        super().__init__(galaxy_instance)
 
     def get_groups(self):
         """

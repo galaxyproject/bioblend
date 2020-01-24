@@ -8,7 +8,7 @@ class FTPFilesClient(Client):
 
     def __init__(self, galaxy_instance):
         self.module = 'ftp_files'
-        super(FTPFilesClient, self).__init__(galaxy_instance)
+        super().__init__(galaxy_instance)
 
     def get_ftp_files(self, deleted=False):
         """

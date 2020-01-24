@@ -101,7 +101,7 @@ class ObjLibraryClient(ObjDatasetContainerClient):
     """
 
     def __init__(self, obj_gi):
-        super(ObjLibraryClient, self).__init__(obj_gi)
+        super().__init__(obj_gi)
 
     def create(self, name, description=None, synopsis=None):
         """
@@ -169,7 +169,7 @@ class ObjHistoryClient(ObjDatasetContainerClient):
     """
 
     def __init__(self, obj_gi):
-        super(ObjHistoryClient, self).__init__(obj_gi)
+        super().__init__(obj_gi)
 
     def create(self, name=None):
         """
@@ -235,7 +235,7 @@ class ObjWorkflowClient(ObjClient):
     """
 
     def __init__(self, obj_gi):
-        super(ObjWorkflowClient, self).__init__(obj_gi)
+        super().__init__(obj_gi)
 
     def import_new(self, src, publish=False):
         """
@@ -329,7 +329,7 @@ class ObjToolClient(ObjClient):
     """
 
     def __init__(self, obj_gi):
-        super(ObjToolClient, self).__init__(obj_gi)
+        super().__init__(obj_gi)
 
     def get(self, id_, io_details=False, link_details=False):
         """
@@ -397,7 +397,7 @@ class ObjJobClient(ObjClient):
     """
 
     def __init__(self, obj_gi):
-        super(ObjJobClient, self).__init__(obj_gi)
+        super().__init__(obj_gi)
 
     def get(self, id_, full_details=False):
         """

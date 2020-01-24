@@ -9,7 +9,7 @@ class ToolShedRepositoryClient(Client):
 
     def __init__(self, toolshed_instance):
         self.module = 'repositories'
-        super(ToolShedRepositoryClient, self).__init__(toolshed_instance)
+        super().__init__(toolshed_instance)
 
     def get_repositories(self):
         """

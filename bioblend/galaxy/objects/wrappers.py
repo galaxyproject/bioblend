@@ -163,7 +163,7 @@ class Step(Wrapper):
     )
 
     def __init__(self, step_dict, parent):
-        super(Step, self).__init__(step_dict, parent=parent, gi=parent.gi)
+        super().__init__(step_dict, parent=parent, gi=parent.gi)
         try:
             stype = step_dict['type']
         except KeyError:
@@ -198,7 +198,7 @@ class Workflow(Wrapper):
     POLLING_INTERVAL = 10  # for output state monitoring
 
     def __init__(self, wf_dict, gi=None):
-        super(Workflow, self).__init__(wf_dict, gi=gi)
+        super().__init__(wf_dict, gi=gi)
         missing_ids = []
         if gi:
             tools_list_by_id = [t.id for t in gi.tools.get_previews()]
@@ -505,7 +505,7 @@ class Dataset(Wrapper, metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def __init__(self, ds_dict, container, gi=None):
-        super(Dataset, self).__init__(ds_dict, gi=gi)
+        super().__init__(ds_dict, gi=gi)
         object.__setattr__(self, 'container', container)
 
     @property
@@ -613,8 +613,7 @@ class HistoryDatasetAssociation(Dataset):
     SRC = 'hda'
 
     def __init__(self, ds_dict, container, gi=None):
-        super(HistoryDatasetAssociation, self).__init__(
-            ds_dict, container, gi=gi)
+        super().__init__(ds_dict, container, gi=gi)
 
     @property
     def gi_module(self):
@@ -684,7 +683,7 @@ class DatasetCollection(Wrapper, metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def __init__(self, dsc_dict, container, gi=None):
-        super(DatasetCollection, self).__init__(dsc_dict, gi=gi)
+        super().__init__(dsc_dict, gi=gi)
         object.__setattr__(self, 'container', container)
 
     def refresh(self):
@@ -707,8 +706,7 @@ class HistoryDatasetCollectionAssociation(DatasetCollection):
     SRC = 'hdca'
 
     def __init__(self, dsc_dict, container, gi=None):
-        super(HistoryDatasetCollectionAssociation, self).__init__(
-            dsc_dict, container, gi=gi)
+        super().__init__(dsc_dict, container, gi=gi)
 
     @property
     def gi_module(self):
@@ -729,7 +727,7 @@ class LibRelatedDataset(Dataset):
     """
 
     def __init__(self, ds_dict, container, gi=None):
-        super(LibRelatedDataset, self).__init__(ds_dict, container, gi=gi)
+        super().__init__(ds_dict, container, gi=gi)
 
     @property
     def gi_module(self):
@@ -793,7 +791,7 @@ class ContentInfo(Wrapper, metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def __init__(self, info_dict, gi=None):
-        super(ContentInfo, self).__init__(info_dict, gi=gi)
+        super().__init__(info_dict, gi=gi)
 
 
 class LibraryContentInfo(ContentInfo):
@@ -802,7 +800,7 @@ class LibraryContentInfo(ContentInfo):
     ``/api/libraries/<ID>/contents`` from Galaxy.
     """
     def __init__(self, info_dict, gi=None):
-        super(LibraryContentInfo, self).__init__(info_dict, gi=gi)
+        super().__init__(info_dict, gi=gi)
 
     @property
     def gi_module(self):
@@ -817,7 +815,7 @@ class HistoryContentInfo(ContentInfo):
     BASE_ATTRS = ContentInfo.BASE_ATTRS + ('deleted', 'state', 'visible')
 
     def __init__(self, info_dict, gi=None):
-        super(HistoryContentInfo, self).__init__(info_dict, gi=gi)
+        super().__init__(info_dict, gi=gi)
 
     @property
     def gi_module(self):
@@ -836,7 +834,7 @@ class DatasetContainer(Wrapper, metaclass=abc.ABCMeta):
         :type content_infos: list of :class:`ContentInfo`
         :param content_infos: info objects for the container's contents
         """
-        super(DatasetContainer, self).__init__(c_dict, gi=gi)
+        super().__init__(c_dict, gi=gi)
         if content_infos is None:
             content_infos = []
         object.__setattr__(self, 'content_infos', content_infos)
@@ -924,8 +922,7 @@ class History(DatasetContainer):
     API_MODULE = 'histories'
 
     def __init__(self, hist_dict, content_infos=None, gi=None):
-        super(History, self).__init__(
-            hist_dict, content_infos=content_infos, gi=gi)
+        super().__init__(hist_dict, content_infos=content_infos, gi=gi)
 
     @property
     def gi_module(self):
@@ -1112,8 +1109,7 @@ class Library(DatasetContainer):
     API_MODULE = 'libraries'
 
     def __init__(self, lib_dict, content_infos=None, gi=None):
-        super(Library, self).__init__(
-            lib_dict, content_infos=content_infos, gi=gi)
+        super().__init__(lib_dict, content_infos=content_infos, gi=gi)
 
     @property
     def gi_module(self):
@@ -1300,7 +1296,7 @@ class Folder(Wrapper):
     BASE_ATTRS = Wrapper.BASE_ATTRS + ('description', 'deleted', 'item_count')
 
     def __init__(self, f_dict, container, gi=None):
-        super(Folder, self).__init__(f_dict, gi=gi)
+        super().__init__(f_dict, gi=gi)
         object.__setattr__(self, 'container', container)
 
     @property
@@ -1359,7 +1355,7 @@ class Tool(Wrapper):
     POLLING_INTERVAL = 10  # for output state monitoring
 
     def __init__(self, t_dict, gi=None):
-        super(Tool, self).__init__(t_dict, gi=gi)
+        super().__init__(t_dict, gi=gi)
 
     @property
     def gi_module(self):
@@ -1413,7 +1409,7 @@ class Job(Wrapper):
     BASE_ATTRS = ('id', 'state')
 
     def __init__(self, j_dict, gi=None):
-        super(Job, self).__init__(j_dict, gi=gi)
+        super().__init__(j_dict, gi=gi)
 
     @property
     def gi_module(self):
@@ -1431,7 +1427,7 @@ class Preview(Wrapper, metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def __init__(self, pw_dict, gi=None):
-        super(Preview, self).__init__(pw_dict, gi=gi)
+        super().__init__(pw_dict, gi=gi)
 
 
 class LibraryPreview(Preview):
@@ -1442,7 +1438,7 @@ class LibraryPreview(Preview):
     ``/api/libraries`` from Galaxy.
     """
     def __init__(self, pw_dict, gi=None):
-        super(LibraryPreview, self).__init__(pw_dict, gi=gi)
+        super().__init__(pw_dict, gi=gi)
 
     @property
     def gi_module(self):
@@ -1459,7 +1455,7 @@ class HistoryPreview(Preview):
     BASE_ATTRS = Preview.BASE_ATTRS + ('tags',)
 
     def __init__(self, pw_dict, gi=None):
-        super(HistoryPreview, self).__init__(pw_dict, gi=gi)
+        super().__init__(pw_dict, gi=gi)
 
     @property
     def gi_module(self):
@@ -1476,7 +1472,7 @@ class WorkflowPreview(Preview):
     BASE_ATTRS = Preview.BASE_ATTRS + ('published', 'tags')
 
     def __init__(self, pw_dict, gi=None):
-        super(WorkflowPreview, self).__init__(pw_dict, gi=gi)
+        super().__init__(pw_dict, gi=gi)
 
     @property
     def gi_module(self):
@@ -1493,7 +1489,7 @@ class JobPreview(Preview):
     BASE_ATTRS = ('id', 'state')
 
     def __init__(self, pw_dict, gi=None):
-        super(JobPreview, self).__init__(pw_dict, gi=gi)
+        super().__init__(pw_dict, gi=gi)
 
     @property
     def gi_module(self):

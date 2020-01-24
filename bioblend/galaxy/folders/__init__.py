@@ -8,7 +8,7 @@ class FoldersClient(Client):
 
     def __init__(self, galaxy_instance):
         self.module = 'folders'
-        super(FoldersClient, self).__init__(galaxy_instance)
+        super().__init__(galaxy_instance)
 
     def create_folder(self, parent_folder_id, name, description=None):
         """

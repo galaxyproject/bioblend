@@ -46,7 +46,7 @@ class SimpleElement(object):
 class HistoryDatasetElement(SimpleElement):
 
     def __init__(self, name, id):
-        super(HistoryDatasetElement, self).__init__(dict(
+        super().__init__(dict(
             name=name,
             src="hda",
             id=id,
@@ -56,7 +56,7 @@ class HistoryDatasetElement(SimpleElement):
 class HistoryDatasetCollectionElement(SimpleElement):
 
     def __init__(self, name, id):
-        super(HistoryDatasetCollectionElement, self).__init__(dict(
+        super().__init__(dict(
             name=name,
             src="hdca",
             id=id,
@@ -66,7 +66,7 @@ class HistoryDatasetCollectionElement(SimpleElement):
 class LibraryDatasetElement(SimpleElement):
 
     def __init__(self, name, id):
-        super(LibraryDatasetElement, self).__init__(dict(
+        super().__init__(dict(
             name=name,
             src="ldda",
             id=id,

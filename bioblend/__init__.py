@@ -96,7 +96,7 @@ class ConnectionError(Exception):
     @see: body attribute to see the content of the http response
     """
     def __init__(self, message, body=None, status_code=None):
-        super(ConnectionError, self).__init__(message)
+        super().__init__(message)
         self.body = body
         self.status_code = status_code
 

@@ -60,7 +60,7 @@ class DatasetParam(Param):
     def __init__(self, value, src="hda"):
         if not isinstance(value, dict):
             value = dict(src=src, id=value)
-        super(DatasetParam, self).__init__(value)
+        super().__init__(value)
 
 
 inputs = InputsBuilder

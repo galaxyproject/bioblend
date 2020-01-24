@@ -8,7 +8,7 @@ class ToolShedClient(Client):
 
     def __init__(self, galaxy_instance):
         self.module = 'tool_shed_repositories'
-        super(ToolShedClient, self).__init__(galaxy_instance)
+        super().__init__(galaxy_instance)
 
     def get_repositories(self):
         """

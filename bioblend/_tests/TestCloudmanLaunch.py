@@ -10,7 +10,7 @@ from . import CloudmanTestBase, test_util
 class TestCloudmanLaunch(CloudmanTestBase.CloudmanTestBase):
 
     def setUp(self):
-        super(TestCloudmanLaunch, self).setUp()
+        super().setUp()
 
     def test_validate_valid_config(self):
         """
