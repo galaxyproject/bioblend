@@ -36,7 +36,7 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
         try:
             downloaded_dataset = self.gi.datasets.download_dataset(
                 self.dataset_id, file_path=tempdir,
-                maxwait=GalaxyTestBase.BIOBLEND_TEST_JOB_TIMEOUT)
+                maxwait=GalaxyTestBase.BIOBLEND_TEST_JOB_TIMEOUT * 2)
             self.assertTrue(downloaded_dataset.startswith(tempdir))
             with open(downloaded_dataset, 'rb') as f:
                 self.assertEqual(f.read(), expected_contents)
