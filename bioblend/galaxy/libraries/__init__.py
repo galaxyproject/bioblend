@@ -66,7 +66,7 @@ class LibraryClient(Client):
         """
         Get details about a given library item.
         """
-        url = '/'.join((self.gi._make_url(self, library_id, contents=True), item_id))
+        url = '/'.join((self._make_url(library_id, contents=True), item_id))
         return self._get(url=url)
 
     def delete_library_dataset(self, library_id, dataset_id, purged=False):
@@ -91,7 +91,7 @@ class LibraryClient(Client):
             {u'deleted': True,
              u'id': u'60e680a037f41974'}
         """
-        url = '/'.join((self.gi._make_url(self, library_id, contents=True), dataset_id))
+        url = '/'.join((self._make_url(library_id, contents=True), dataset_id))
         return self._delete(payload={'purged': purged}, url=url)
 
     def update_library_dataset(self, dataset_id, **kwds):
@@ -120,7 +120,7 @@ class LibraryClient(Client):
         :rtype: dict
         :return: details of the updated dataset
         """
-        url = '/'.join((self.gi._make_url(self), 'datasets', dataset_id))
+        url = '/'.join((self._make_url(), 'datasets', dataset_id))
         return self._patch(payload=kwds, url=url)
 
     def show_dataset(self, library_id, dataset_id):
@@ -631,7 +631,7 @@ class LibraryClient(Client):
         :rtype: dict
         :return: dictionary with all applicable permissions' values
         """
-        url = self.gi._make_url(self, library_id) + '/permissions'
+        url = self._make_url(library_id) + '/permissions'
         return self._get(url=url)
 
     def get_dataset_permissions(self, dataset_id):
@@ -680,7 +680,7 @@ class LibraryClient(Client):
             payload['LIBRARY_ADD_in'] = add_in
         if manage_in:
             payload['LIBRARY_MANAGE_in'] = manage_in
-        url = self.gi._make_url(self, library_id) + '/permissions'
+        url = self._make_url(library_id) + '/permissions'
         return self._post(payload, url=url)
 
     def set_dataset_permissions(self, dataset_id, access_in=None,

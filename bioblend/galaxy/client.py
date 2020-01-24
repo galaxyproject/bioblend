@@ -77,6 +77,30 @@ class Client(object):
         """
         self.gi = galaxy_instance
 
+    def _make_url(self, module_id=None, deleted=False, contents=False):
+        """
+        Compose a URL based on the provided arguments.
+
+        :type module_id: str
+        :param module_id: The encoded ID for a specific module (eg, library ID)
+
+        :type deleted: bool
+        :param deleted: If ``True``, include ``deleted`` in the URL, after the module
+                        name (eg, ``<base_url>/api/libraries/deleted``)
+
+        :type contents: bool
+        :param contents: If ``True``, include 'contents' in the URL, after the module ID:
+                         ``<base_url>/api/libraries/<encoded_library_id>/contents``
+        """
+        c_url = '/'.join((self.gi.url, self.module))
+        if deleted is True:
+            c_url = c_url + '/deleted'
+        if module_id is not None:
+            c_url = '/'.join((c_url, module_id))
+            if contents is True:
+                c_url = c_url + '/contents'
+        return c_url
+
     def _get(self, id=None, deleted=False, contents=None, url=None,
              params=None, json=True):
         """
@@ -93,8 +117,7 @@ class Client(object):
           the response object
         """
         if not url:
-            url = self.gi._make_url(self, module_id=id, deleted=deleted,
-                                    contents=contents)
+            url = self._make_url(module_id=id, deleted=deleted, contents=contents)
         attempts_left = self.max_get_retries()
         retry_delay = self.get_retry_delay()
         bioblend.log.debug("GET - attempts left: %s; retry delay: %s",
@@ -145,8 +168,7 @@ class Client(object):
         :return: The decoded response.
         """
         if not url:
-            url = self.gi._make_url(self, module_id=id, deleted=deleted,
-                                    contents=contents)
+            url = self._make_url(module_id=id, deleted=deleted, contents=contents)
         return self.gi.make_post_request(url, payload=payload,
                                          files_attached=files_attached)
 
@@ -160,7 +182,7 @@ class Client(object):
         :return: The decoded response.
         """
         if not url:
-            url = self.gi._make_url(self, module_id=id)
+            url = self._make_url(module_id=id)
         return self.gi.make_put_request(url, payload=payload, params=params)
 
     def _patch(self, payload, id=None, url=None, params=None):
@@ -173,7 +195,7 @@ class Client(object):
         :return: The decoded response.
         """
         if not url:
-            url = self.gi._make_url(self, module_id=id)
+            url = self._make_url(module_id=id)
         return self.gi.make_patch_request(url, payload=payload, params=params)
 
     def _delete(self, payload=None, id=None, deleted=False, contents=None, url=None, params=None):
@@ -186,8 +208,7 @@ class Client(object):
         :return: The decoded response.
         """
         if not url:
-            url = self.gi._make_url(self, module_id=id, deleted=deleted,
-                                    contents=contents)
+            url = self._make_url(module_id=id, deleted=deleted, contents=contents)
         r = self.gi.make_delete_request(url, payload=payload, params=params)
         if r.status_code == 200:
             return r.json()

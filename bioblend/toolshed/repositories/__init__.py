@@ -389,7 +389,7 @@ class ToolShedRepositoryClient(Client):
 
         .. versionadded:: 0.5.2
         """
-        url = self.gi._make_url(self, id) + '/changeset_revision'
+        url = self._make_url(id) + '/changeset_revision'
         payload = {
             'file': attach_file(tar_ball_path)
         }

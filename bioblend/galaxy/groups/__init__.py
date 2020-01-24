@@ -117,7 +117,7 @@ class GroupsClient(Client):
         :rtype: list of dicts
         :return: List of group users' info
         """
-        url = self.gi._make_url(self, group_id) + '/users'
+        url = self._make_url(group_id) + '/users'
         return self._get(url=url)
 
     def get_group_roles(self, group_id):
@@ -130,7 +130,7 @@ class GroupsClient(Client):
         :rtype: list of dicts
         :return: List of group roles' info
         """
-        url = self.gi._make_url(self, group_id) + '/roles'
+        url = self._make_url(group_id) + '/roles'
         return self._get(url=url)
 
     def add_group_user(self, group_id, user_id):
@@ -146,7 +146,7 @@ class GroupsClient(Client):
         :rtype: dict
         :return: Added group user's info
         """
-        url = '/'.join((self.gi._make_url(self, group_id), 'users', user_id))
+        url = '/'.join((self._make_url(group_id), 'users', user_id))
         return self._put(payload={}, url=url)
 
     def add_group_role(self, group_id, role_id):
@@ -162,7 +162,7 @@ class GroupsClient(Client):
         :rtype: dict
         :return: Added group role's info
         """
-        url = '/'.join((self.gi._make_url(self, group_id), 'roles', role_id))
+        url = '/'.join((self._make_url(group_id), 'roles', role_id))
         return self._put(payload={}, url=url)
 
     def delete_group_user(self, group_id, user_id):
@@ -178,7 +178,7 @@ class GroupsClient(Client):
         :rtype: dict
         :return: The user which was removed
         """
-        url = '/'.join((self.gi._make_url(self, group_id), 'users', user_id))
+        url = '/'.join((self._make_url(group_id), 'users', user_id))
         return self._delete(url=url)
 
     def delete_group_role(self, group_id, role_id):
@@ -194,5 +194,5 @@ class GroupsClient(Client):
         :rtype: dict
         :return: The role which was removed
         """
-        url = '/'.join((self.gi._make_url(self, group_id), 'roles', role_id))
+        url = '/'.join((self._make_url(group_id), 'roles', role_id))
         return self._delete(url=url)

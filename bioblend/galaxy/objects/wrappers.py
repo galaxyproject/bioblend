@@ -622,8 +622,7 @@ class HistoryDatasetAssociation(Dataset):
 
     @property
     def _stream_url(self):
-        base_url = self.gi.gi._make_url(
-            self.gi.gi.histories, module_id=self.container.id, contents=True)
+        base_url = self.gi.gi.histories._make_url(module_id=self.container.id, contents=True)
         return "%s/%s/display" % (base_url, self.id)
 
     def update(self, **kwds):
@@ -738,7 +737,7 @@ class LibRelatedDataset(Dataset):
 
     @property
     def _stream_url(self):
-        base_url = self.gi.gi._make_url(self.gi.gi.libraries)
+        base_url = self.gi.gi.libraries._make_url()
         return "%s/datasets/download/uncompressed" % base_url
 
 

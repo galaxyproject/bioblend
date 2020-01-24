@@ -100,7 +100,7 @@ class FoldersClient(Client):
         :rtype: dict
         :return: dictionary including details of the folder
         """
-        url = self.gi._make_url(self, folder_id) + '/permissions'
+        url = self._make_url(folder_id) + '/permissions'
         return self._get(url=url)
 
     def set_permissions(self, folder_id, action='set_permissions', add_ids=None, manage_ids=None, modify_ids=None):
@@ -125,7 +125,7 @@ class FoldersClient(Client):
         :rtype: dict
         :return: dictionary including details of the folder
         """
-        url = self.gi._make_url(self, folder_id) + '/permissions'
+        url = self._make_url(folder_id) + '/permissions'
         payload = {'action': action}
         if add_ids:
             payload['add_ids[]'] = add_ids

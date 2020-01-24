@@ -124,7 +124,7 @@ class WorkflowClient(Client):
         """
         payload = {'workflow': workflow_dict, 'publish': publish}
 
-        url = self.gi._make_url(self) + "/upload"
+        url = self._make_url() + "/upload"
         return self._post(url=url, payload=payload)
 
     def import_workflow_json(self, workflow_json):
@@ -189,7 +189,7 @@ class WorkflowClient(Client):
              u'url': u'/api/workflows/ee0e2b4b696d9092'}
         """
         payload = {'shared_workflow_id': workflow_id}
-        url = self.gi._make_url(self)
+        url = self._make_url()
         return self._post(url=url, payload=payload)
 
     def export_workflow_dict(self, workflow_id, version=None):
@@ -209,7 +209,7 @@ class WorkflowClient(Client):
         if version is not None:
             params['version'] = version
 
-        url = '/'.join((self.gi._make_url(self), 'download', workflow_id))
+        url = '/'.join((self._make_url(), 'download', workflow_id))
         return self._get(url=url, params=params)
 
     def export_workflow_json(self, workflow_id):
@@ -753,7 +753,7 @@ class WorkflowClient(Client):
         return '/'.join((self._invocations_url(workflow_id), invocation_id))
 
     def _invocations_url(self, workflow_id):
-        return '/'.join((self.gi._make_url(self, workflow_id), 'invocations'))
+        return '/'.join((self._make_url(workflow_id), 'invocations'))
 
 
 __all__ = ('WorkflowClient',)

@@ -109,7 +109,7 @@ class JobsClient(Client):
         """
 
         payload = job_info
-        url = self.gi._make_url(self) + '/search'
+        url = self._make_url() + '/search'
         return self._post(url=url, payload=payload)
 
     def get_metrics(self, job_id):
@@ -129,5 +129,5 @@ class JobsClient(Client):
           ``expose_potentially_sensitive_job_metrics`` option set to ``true`` in
           the ``config/galaxy.yml`` configuration file.
         """
-        url = self.gi._make_url(self, module_id=job_id) + '/metrics'
+        url = self._make_url(module_id=job_id) + '/metrics'
         return self._get(url=url)

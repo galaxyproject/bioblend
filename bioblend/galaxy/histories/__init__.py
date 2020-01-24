@@ -163,7 +163,7 @@ class HistoryClient(Client):
             ``deleted`` attribute of the dataset to ``True``, see
             https://github.com/galaxyproject/galaxy/issues/3548
         """
-        url = '/'.join((self.gi._make_url(self, history_id, contents=True), dataset_id))
+        url = '/'.join((self._make_url(history_id, contents=True), dataset_id))
         payload = {}
         if purge is True:
             payload['purge'] = purge
@@ -182,7 +182,7 @@ class HistoryClient(Client):
         :rtype: None
         :return: None
         """
-        url = '/'.join((self.gi._make_url(self, history_id, contents=True), 'dataset_collections', dataset_collection_id))
+        url = '/'.join((self._make_url(history_id, contents=True), 'dataset_collections', dataset_collection_id))
         self._delete(url=url)
 
     def show_dataset(self, history_id, dataset_id):
@@ -198,7 +198,7 @@ class HistoryClient(Client):
         :rtype: dict
         :return: Information about the dataset
         """
-        url = '/'.join((self.gi._make_url(self, history_id, contents=True), dataset_id))
+        url = '/'.join((self._make_url(history_id, contents=True), dataset_id))
         return self._get(url=url)
 
     def show_dataset_collection(self, history_id, dataset_collection_id):
@@ -214,7 +214,7 @@ class HistoryClient(Client):
         :rtype: dict
         :return: Information about the dataset collection
         """
-        url = '/'.join((self.gi._make_url(self, history_id, contents=True), 'dataset_collections', dataset_collection_id))
+        url = '/'.join((self._make_url(history_id, contents=True), 'dataset_collections', dataset_collection_id))
         return self._get(url=url)
 
     def show_matching_datasets(self, history_id, name_filter=None):
@@ -283,7 +283,7 @@ class HistoryClient(Client):
                 "uuid": null
             }
         """
-        url = '/'.join((self.gi._make_url(self, history_id, contents=True), dataset_id, 'provenance'))
+        url = '/'.join((self._make_url(history_id, contents=True), dataset_id, 'provenance'))
         return self._get(url=url)
 
     def update_history(self, history_id, **kwds):
@@ -357,7 +357,7 @@ class HistoryClient(Client):
             The return value was changed in BioBlend v0.8.0, previously it was
             the status code (type int).
         """
-        url = '/'.join((self.gi._make_url(self, history_id, contents=True), dataset_id))
+        url = '/'.join((self._make_url(history_id, contents=True), dataset_id))
         return self._put(payload=kwds, url=url)
 
     def update_dataset_collection(self, history_id, dataset_collection_id, **kwds):
@@ -388,7 +388,7 @@ class HistoryClient(Client):
             The return value was changed in BioBlend v0.8.0, previously it was
             the status code (type int).
         """
-        url = '/'.join((self.gi._make_url(self, history_id, contents=True), 'dataset_collections', dataset_collection_id))
+        url = '/'.join((self._make_url(history_id, contents=True), 'dataset_collections', dataset_collection_id))
         return self._put(payload=kwds, url=url)
 
     def create_history_tag(self, history_id, tag):
@@ -412,7 +412,7 @@ class HistoryClient(Client):
         """
         # empty payload since we are adding the new tag using the url
         payload = {}
-        url = '/'.join((self.gi._make_url(self, history_id), 'tags', tag))
+        url = '/'.join((self._make_url(history_id), 'tags', tag))
         return self._post(payload, url=url)
 
     def upload_dataset_from_library(self, history_id, lib_dataset_id):
@@ -524,7 +524,7 @@ class HistoryClient(Client):
         :rtype: str
         :return: 'OK' if it was deleted
         """
-        url = self.gi._make_url(self, history_id, deleted=True) + '/undelete'
+        url = self._make_url(history_id, deleted=True) + '/undelete'
         return self._post(payload={}, url=url)
 
     def get_status(self, history_id):
@@ -566,7 +566,7 @@ class HistoryClient(Client):
         :rtype: dict
         :return: History representation
         """
-        url = self.gi._make_url(self) + '/most_recently_used'
+        url = self._make_url() + '/most_recently_used'
         return self._get(url=url)
 
     def export_history(self, history_id, gzip=True, include_hidden=False,
@@ -605,7 +605,7 @@ class HistoryClient(Client):
             'include_hidden': include_hidden,
             'include_deleted': include_deleted,
         }
-        url = '%s/exports' % self.gi._make_url(self, history_id)
+        url = '%s/exports' % self._make_url(history_id)
         if wait and maxwait is None:
             maxwait = sys.maxsize
         time_left = maxwait
@@ -651,7 +651,7 @@ class HistoryClient(Client):
         :return: None
         """
         url = '%s/exports/%s' % (
-            self.gi._make_url(self, module_id=history_id), jeha_id)
+            self._make_url(module_id=history_id), jeha_id)
         r = self.gi.make_get_request(url, stream=True)
         r.raise_for_status()
         for chunk in r.iter_content(chunk_size):
@@ -680,5 +680,5 @@ class HistoryClient(Client):
             'type': 'dataset'
         }
 
-        url = self.gi._make_url(self, history_id, contents=True)
+        url = self._make_url(history_id, contents=True)
         return self._post(payload=payload, url=url)

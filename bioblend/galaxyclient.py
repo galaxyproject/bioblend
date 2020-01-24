@@ -46,35 +46,6 @@ class GalaxyClient(object):
         self.verify = verify
         self.timeout = timeout
 
-    def _make_url(self, module, module_id=None, deleted=False, contents=False):
-        """
-        Compose a URL based on the provided arguments.
-
-        :type module: :class:`~.galaxy.Client` subclass
-        :param module: The base module for which to make the URL. For
-          example: an object of class LibraryClient, WorkflowClient,
-          InvocationClient, HistoryClient, ToolShedClient
-
-        :type module_id: str
-        :param module_id: The encoded ID for a specific module (eg, library ID)
-
-        :type deleted: bool
-        :param deleted: If ``True``, include ``deleted`` in the URL, after the module
-                        name (eg, ``<base_url>/api/libraries/deleted``)
-
-        :type contents: bool
-        :param contents: If ``True``, include 'contents' in the URL, after the module ID:
-                         ``<base_url>/api/libraries/<encoded_library_id>/contents``
-        """
-        c_url = '/'.join((self.url, module.module))
-        if deleted is True:
-            c_url = c_url + '/deleted'
-        if module_id is not None:
-            c_url = '/'.join((c_url, module_id))
-            if contents is True:
-                c_url = c_url + '/contents'
-        return c_url
-
     def make_get_request(self, url, **kwargs):
         """
         Make a GET request using the provided ``url``.
