@@ -6,11 +6,8 @@ import time
 
 import bioblend
 import bioblend.galaxy
+from bioblend.galaxy.datasets import TERMINAL_STATES
 from . import client
-
-
-# dataset states corresponding to a 'pending' condition
-_PENDING_DS_STATES = {"new", "upload", "queued", "running", "setting_metadata"}
 
 
 def _get_error_info(hda):
@@ -80,14 +77,16 @@ class GalaxyInstance(object):
             pending = []
             for ds in ds_list:
                 ds.refresh()
-                self.log.info('{0.id}: {0.state}'.format(ds))
                 if break_on_error and ds.state == 'error':
                     raise RuntimeError(_get_error_info(ds))
-                if ds.state in _PENDING_DS_STATES:
+                if not ds.state:
+                    self.log.warning("Dataset %s has an empty state", ds.id)
+                elif ds.state not in TERMINAL_STATES:
+                    self.log.info("Dataset {0.id} is in non-terminal state {0.state}".format(ds))
                     pending.append(ds)
             return pending
 
-        self.log.info('waiting for datasets')
+        self.log.info('Waiting for datasets')
         while datasets:
             datasets = poll(datasets)
             time.sleep(polling_interval)

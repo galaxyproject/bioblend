@@ -5,7 +5,10 @@ import logging
 import time
 
 from bioblend.galaxy.client import Client
-from bioblend.galaxy.datasets import DatasetTimeoutException, terminal_states
+from bioblend.galaxy.datasets import (
+    DatasetTimeoutException,
+    TERMINAL_STATES,
+)
 from bioblend.util import attach_file
 
 log = logging.getLogger(__name__)
@@ -170,14 +173,14 @@ class LibraryClient(Client):
         while True:
             dataset = self.show_dataset(library_id, dataset_id)
             state = dataset['state']
-            if state in terminal_states:
+            if state in TERMINAL_STATES:
                 return dataset
             time_left -= interval
             if time_left > 0:
-                log.warning("Waiting for library %s dataset %s to complete. Will wait %i more s", library_id, dataset_id, time_left)
+                log.warning("Dataset %s in library %s is in non-terminal state %s. Will wait %i more s", dataset_id, library_id, state, time_left)
                 time.sleep(min(time_left, interval))
             else:
-                raise DatasetTimeoutException("Waited too long for library %s dataset %s to complete" % (library_id, dataset_id))
+                raise DatasetTimeoutException("Waited too long for dataset %s in library %s to complete" % (dataset_id, library_id))
 
     def show_folder(self, library_id, folder_id):
         """

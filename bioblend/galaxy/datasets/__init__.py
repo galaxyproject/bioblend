@@ -12,7 +12,8 @@ from bioblend.galaxy.client import Client
 
 log = logging.getLogger(__name__)
 
-terminal_states = ('ok', 'empty', 'error', 'discarded', 'failed_metadata')
+TERMINAL_STATES = {'ok', 'empty', 'error', 'discarded', 'failed_metadata'}
+# Non-terminal states are: 'new', 'upload', 'queued', 'running', 'paused', 'setting_metadata'
 
 
 class DatasetClient(Client):
@@ -97,7 +98,7 @@ class DatasetClient(Client):
 
         if file_path is None:
             if 'content-length' in r.headers and len(r.content) != int(r.headers['content-length']):
-                log.warning("Transferred content size does not match content-length header (%s != %s)" % (len(r.content), r.headers['content-length']))
+                log.warning("Transferred content size does not match content-length header (%s != %s)", len(r.content), r.headers['content-length'])
             return r.content
         else:
             if use_default_filename:
@@ -136,11 +137,11 @@ class DatasetClient(Client):
         while True:
             dataset = self.show_dataset(dataset_id)
             state = dataset['state']
-            if state in terminal_states:
+            if state in TERMINAL_STATES:
                 return dataset
             time_left -= interval
             if time_left > 0:
-                log.warning("Waiting for dataset %s to complete. Will wait %i more s" % (dataset_id, time_left))
+                log.warning("Dataset %s is in non-terminal state %s. Will wait %i more s", dataset_id, state, time_left)
                 time.sleep(min(time_left, interval))
             else:
                 raise DatasetTimeoutException("Waited too long for dataset %s to complete" % dataset_id)

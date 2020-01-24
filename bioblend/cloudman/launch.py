@@ -154,9 +154,8 @@ class CloudManLauncher(object):
                 try:
                     sn = self.vpc_conn.get_all_subnets(subnet_id)[0]
                     vpc_id = sn.vpc_id
-                except (EC2ResponseError, IndexError) as e:
-                    bioblend.log.exception("Trouble fetching subnet %s: %s" %
-                                           (subnet_id, e))
+                except (EC2ResponseError, IndexError):
+                    bioblend.log.exception("Trouble fetching subnet %s", subnet_id)
             cmsg = self.create_cm_security_group(sg, vpc_id=vpc_id)
             ret['error'] = cmsg['error']
             if ret['error']:
@@ -223,9 +222,7 @@ class CloudManLauncher(object):
         else:
             if rs:
                 try:
-                    bioblend.log.info(
-                        "Launched an instance with ID %s" %
-                        rs.instances[0].id)
+                    bioblend.log.info("Launched an instance with ID %s", rs.instances[0].id)
                     ret['instance_id'] = rs.instances[0].id
                     ret['instance_ip'] = rs.instances[0].ip_address
                 except EC2ResponseError as e:
@@ -291,12 +288,11 @@ class CloudManLauncher(object):
         for sg in sgs:
             if sg.name == sg_name:
                 cmsg = sg
-                bioblend.log.debug("Security group '%s' already exists; will "
-                                   "add authorizations next." % sg_name)
+                bioblend.log.debug("Security group '%s' already exists; will add authorizations next.", sg_name)
                 break
         # If it does not exist, create security group
         if cmsg is None:
-            bioblend.log.debug("Creating Security Group %s" % sg_name)
+            bioblend.log.debug("Creating Security Group %s", sg_name)
             try:
                 cmsg = self.ec2_conn.create_security_group(sg_name, 'A security '
                                                            'group for CloudMan',
@@ -322,9 +318,7 @@ class CloudManLauncher(object):
                             to_port=port[1],
                             cidr_ip='0.0.0.0/0')
                     else:
-                        bioblend.log.debug(
-                            "Rule (%s:%s) already exists in the SG" %
-                            (port[0], port[1]))
+                        bioblend.log.debug("Rule (%s:%s) already exists in the SG", port[0], port[1])
                 except EC2ResponseError as e:
                     err_msg = "A problem adding security group authorizations: {0} " \
                               "(code {1}; status {2})" \
@@ -374,9 +368,7 @@ class CloudManLauncher(object):
                               .format(e.message, e.error_code, e.status)
                     bioblend.log.exception(err_msg)
                     progress['err_msg'] = err_msg
-            bioblend.log.info(
-                "Done configuring '%s' security group" %
-                cmsg.name)
+            bioblend.log.info("Done configuring '%s' security group", cmsg.name)
         else:
             bioblend.log.warning(
                 "Did not create security group '{0}'".format(sg_name))
@@ -428,9 +420,7 @@ class CloudManLauncher(object):
             return progress
         for akp in kps:
             if akp.name == key_name:
-                bioblend.log.info(
-                    "Key pair '%s' already exists; reusing it." %
-                    key_name)
+                bioblend.log.info("Key pair '%s' already exists; reusing it.", key_name)
                 progress['name'] = akp.name
                 return progress
         try:
@@ -441,7 +431,7 @@ class CloudManLauncher(object):
             bioblend.log.exception(err_msg)
             progress['error'] = err_msg
             return progress
-        bioblend.log.info("Created key pair '%s'" % kp.name)
+        bioblend.log.info("Created key pair '%s'", kp.name)
         progress['name'] = kp.name
         progress['material'] = kp.material
         return progress
@@ -450,11 +440,9 @@ class CloudManLauncher(object):
         try:
             bioblend.log.debug("Allocating a new floating IP address.")
             address = ec2_conn.allocate_address()
-        except EC2ResponseError as e:
-            bioblend.log.exception("Exception allocating a new floating IP "
-                                   "address: %s" % e)
-        bioblend.log.info("Associating floating IP %s to instance %s" %
-                          (address.public_ip, instance.id))
+        except EC2ResponseError:
+            bioblend.log.exception("Exception allocating a new floating IP address")
+        bioblend.log.info("Associating floating IP %s to instance %s", address.public_ip, instance.id)
         ec2_conn.associate_address(instance_id=instance.id,
                                    public_ip=address.public_ip)
 
@@ -562,8 +550,7 @@ class CloudManLauncher(object):
             except S3ResponseError:
                 # This can fail for a number of reasons for non-us and/or
                 # CNAME'd buckets but it is not a terminal error
-                bioblend.log.warning("Problem fetching persistent_data.yaml "
-                                     "from bucket %s" % bucket)
+                bioblend.log.warning("Problem fetching persistent_data.yaml from bucket %s", bucket)
                 continue
             if pd:
                 # We are dealing with a CloudMan bucket
@@ -737,9 +724,7 @@ class CloudManLauncher(object):
         if vol:
             return vol[0].zone
         else:
-            bioblend.log.error(
-                "Requested placement of a volume '%s' that does not exist." %
-                vol_id)
+            bioblend.log.error("Requested placement of a volume '%s' that does not exist.", vol_id)
             return None
 
     def _find_placement(self, cluster_name, cluster=None):

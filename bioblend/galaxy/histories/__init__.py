@@ -617,7 +617,7 @@ class HistoryClient(Client):
                     if maxwait is not None:
                         time_left -= 1
                     if time_left > 0:
-                        log.warning("Waiting for the export of history %s to complete. Will wait %i more s" % (history_id, time_left))
+                        log.warning("Waiting for the export of history %s to complete. Will wait %i more s", history_id, time_left)
                         time.sleep(1)
                     else:
                         return ''
