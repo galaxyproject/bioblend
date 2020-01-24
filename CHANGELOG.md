@@ -4,6 +4,9 @@
   15.01. Added support for Python 3.8. Added support for Galaxy releases 19.09
   and 20.01.
 
+* Removed deprecated ``show_stderr()`` and ``show_stdout`` methods of
+  ``DatasetClient``.
+
 ### BioBlend v0.13.0 - 2019-08-09
 
 * Dropped support for Python 3.4. Added support for Galaxy releases 19.01 and

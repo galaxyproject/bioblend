@@ -6,7 +6,6 @@ import os
 import shlex
 import time
 from urllib.parse import urljoin
-from urllib.request import urlopen
 
 import bioblend
 from bioblend.galaxy.client import Client
@@ -145,34 +144,6 @@ class DatasetClient(Client):
                 time.sleep(min(time_left, interval))
             else:
                 raise DatasetTimeoutException("Waited too long for dataset %s to complete" % dataset_id)
-
-    def show_stderr(self, dataset_id):
-        """
-        Get the stderr output of a dataset.
-
-        .. deprecated:: 0.9.0
-           Use :meth:`~bioblend.galaxy.jobs.JobsClient.show_job` with
-           ``full_details=True`` instead.
-
-        :type dataset_id: str
-        :param dataset_id: Encoded dataset ID
-        """
-        res = urlopen(self.url[:-len("/api/datasets/") + 1] + "/datasets/" + dataset_id + "/stderr")
-        return res.read()
-
-    def show_stdout(self, dataset_id):
-        """
-        Get the stdout output of a dataset.
-
-        .. deprecated:: 0.9.0
-           Use :meth:`~bioblend.galaxy.jobs.JobsClient.show_job` with
-           ``full_details=True`` instead.
-
-        :type dataset_id: str
-        :param dataset_id: Encoded dataset ID
-        """
-        res = urlopen(self.url[:-len("/api/datasets/") + 1] + "/datasets/" + dataset_id + "/stdout")
-        return res.read()
 
 
 class DatasetStateException(Exception):

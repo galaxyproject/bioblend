@@ -49,11 +49,3 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
             self.assertEqual(download_filename, f.name)
             f.flush()
             self.assertEqual(f.read(), expected_contents)
-
-    def test_show_stderr(self):
-        stderr = self.gi.datasets.show_stderr(self.dataset_id)
-        self.assertIsNotNone(stderr)
-
-    def test_show_stdout(self):
-        stdout = self.gi.datasets.show_stdout(self.dataset_id)
-        self.assertIsNotNone(stdout)
