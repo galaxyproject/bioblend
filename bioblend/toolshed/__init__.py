@@ -21,6 +21,7 @@ class ToolShedInstance(GalaxyClient):
         password: Optional[str] = None,
         *,
         verify: bool = True,
+        user_agent: Optional[str] = None,
     ) -> None:
         """
         A base representation of a connection to a ToolShed instance, identified
@@ -61,7 +62,7 @@ class ToolShedInstance(GalaxyClient):
         :param verify: Whether to verify the server's TLS certificate
         :type verify: bool
         """
-        super().__init__(url, key=key, email=email, password=password, verify=verify)
+        super().__init__(url, key=key, email=email, password=password, verify=verify, user_agent=user_agent)
         self.categories = categories.ToolShedCategoryClient(self)
         self.repositories = repositories.ToolShedRepositoryClient(self)
         self.tools = tools.ToolShedToolClient(self)

@@ -42,6 +42,7 @@ class GalaxyClient:
         *,
         verify: bool = True,
         timeout: Optional[float] = None,
+        user_agent: Optional[str] = None,
     ) -> None:
         """
         :param verify: Whether to verify the server's TLS certificate
@@ -81,6 +82,8 @@ class GalaxyClient:
             self.email = email
             self.password = password
         self.json_headers: Dict[str, Union[str, bytes, None]] = {"Content-Type": "application/json"}
+        if user_agent:
+            self.json_headers["User-Agent"] = user_agent
         # json_headers needs to be set before key can be defined, otherwise authentication with email/password causes an error
         self.json_headers["x-api-key"] = self.key
         # Number of attempts before giving up on a GET request.
