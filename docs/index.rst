@@ -14,14 +14,10 @@ Stable releases of BioBlend are best installed via ``pip`` from PyPI::
 
     $ python3 -m pip install bioblend
 
-Alternatively, you may install the most current source code from our `Git repository`_,
-or fork the project on Github. To install from source, do the following::
+Alternatively, the most current source code from our `Git repository`_ can be
+installed with:
 
-    # Clone the repository to a local directory
-    $ git clone https://github.com/galaxyproject/bioblend.git
-    # Install the library
-    $ cd bioblend
-    $ python3 setup.py install
+    $ python3 -m pip install git+https://github.com/galaxyproject/bioblend
 
 After installing the library, you will be able to simply import it into your
 Python environment with ``import bioblend``. For details on the available functionality,
@@ -123,7 +119,7 @@ These configuration files can be used to specify access keys, for example.
 
 Testing
 =======
-If you'd like to do more than just a mock test, you'll want to point
+If you would like to do more than just a mock test, you need to point
 BioBlend to an instance of Galaxy. Do so by exporting the following
 two variables::
 
@@ -138,8 +134,8 @@ The unit tests, stored in the ``tests`` folder, can be run using
 Getting help
 ============
 
-If you've run into issues, found a bug, or can't seem to find an answer to
-your question regarding the use and functionality of BioBlend, please use
+If you have run into issues, found a bug, or can't seem to find an answer to
+your question regarding the use and functionality of BioBlend, please use the
 `Github Issues <https://github.com/galaxyproject/bioblend/issues>`_ page to ask your
 question.
 

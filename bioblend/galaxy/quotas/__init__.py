@@ -21,14 +21,14 @@ class QuotaClient(Client):
         :return: A list of dicts with details on individual quotas.
           For example::
 
-            [{u'id': u'0604c8a56abe9a50',
-              u'model_class': u'Quota',
-              u'name': u'test ',
-              u'url': u'/api/quotas/0604c8a56abe9a50'},
-             {u'id': u'1ee267091d0190af',
-              u'model_class': u'Quota',
-              u'name': u'workshop',
-              u'url': u'/api/quotas/1ee267091d0190af'}]
+            [{'id': '0604c8a56abe9a50',
+              'model_class': 'Quota',
+              'name': 'test ',
+              'url': '/api/quotas/0604c8a56abe9a50'},
+             {'id': '1ee267091d0190af',
+              'model_class': 'Quota',
+              'name': 'workshop',
+              'url': '/api/quotas/1ee267091d0190af'}]
         """
         return self._get(deleted=deleted)
 
@@ -46,16 +46,16 @@ class QuotaClient(Client):
         :return: A description of quota.
           For example::
 
-            {u'bytes': 107374182400,
-             u'default': [],
-             u'description': u'just testing',
-             u'display_amount': u'100.0 GB',
-             u'groups': [],
-             u'id': u'0604c8a56abe9a50',
-             u'model_class': u'Quota',
-             u'name': u'test ',
-             u'operation': u'=',
-             u'users': []}
+            {'bytes': 107374182400,
+             'default': [],
+             'description': 'just testing',
+             'display_amount': '100.0 GB',
+             'groups': [],
+             'id': '0604c8a56abe9a50',
+             'model_class': 'Quota',
+             'name': 'test ',
+             'operation': '=',
+             'users': []}
         """
         return self._get(id=quota_id, deleted=deleted)
 
@@ -91,11 +91,11 @@ class QuotaClient(Client):
         :return: A description of quota.
           For example::
 
-            {u'url': '/galaxy/api/quotas/386f14984287a0f7',
-             u'model_class': 'Quota',
-             u'message': "Quota 'Testing' has been created with 1 associated users and 0 associated groups.",
-             u'id': '386f14984287a0f7',
-             u'name': 'Testing'}
+            {'url': '/galaxy/api/quotas/386f14984287a0f7',
+             'model_class': 'Quota',
+             'message': "Quota 'Testing' has been created with 1 associated users and 0 associated groups.",
+             'id': '386f14984287a0f7',
+             'name': 'Testing'}
         """
         payload = {
             'name': name,

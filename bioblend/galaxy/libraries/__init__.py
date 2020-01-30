@@ -91,8 +91,8 @@ class LibraryClient(Client):
           has been deleted.
           For example::
 
-            {u'deleted': True,
-             u'id': u'60e680a037f41974'}
+            {'deleted': True,
+             'id': '60e680a037f41974'}
         """
         url = '/'.join((self._make_url(library_id, contents=True), dataset_id))
         return self._delete(payload={'purged': purged}, url=url)

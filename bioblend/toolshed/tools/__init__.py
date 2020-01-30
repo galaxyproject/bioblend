@@ -27,24 +27,24 @@ class ToolShedToolClient(Client):
         :return: dictionary containing search hits as well as metadata for the
           search. For example::
 
-            {u'hits': [{u'matched_terms': [],
-               u'score': 3.0,
-               u'tool': {u'description': u'convert between various FASTQ quality formats',
-                u'id': u'69819b84d55f521efda001e0926e7233',
-                u'name': u'FASTQ Groomer',
-                u'repo_name': None,
-                u'repo_owner_username': u'devteam'}},
-              {u'matched_terms': [],
-               u'score': 3.0,
-               u'tool': {u'description': u'converts a bam file to fastq files.',
-                u'id': u'521e282770fd94537daff87adad2551b',
-                u'name': u'Defuse BamFastq',
-                u'repo_name': None,
-                u'repo_owner_username': u'jjohnson'}}],
-             u'hostname': u'https://testtoolshed.g2.bx.psu.edu/',
-             u'page': u'1',
-             u'page_size': u'2',
-             u'total_results': u'118'}
+            {'hits': [{'matched_terms': [],
+               'score': 3.0,
+               'tool': {'description': 'convert between various FASTQ quality formats',
+                'id': '69819b84d55f521efda001e0926e7233',
+                'name': 'FASTQ Groomer',
+                'repo_name': None,
+                'repo_owner_username': 'devteam'}},
+              {'matched_terms': [],
+               'score': 3.0,
+               'tool': {'description': 'converts a bam file to fastq files.',
+                'id': '521e282770fd94537daff87adad2551b',
+                'name': 'Defuse BamFastq',
+                'repo_name': None,
+                'repo_owner_username': 'jjohnson'}}],
+             'hostname': 'https://testtoolshed.g2.bx.psu.edu/',
+             'page': '1',
+             'page_size': '2',
+             'total_results': '118'}
         """
         params = dict(q=q, page=page, page_size=page_size)
         return self._get(params=params)

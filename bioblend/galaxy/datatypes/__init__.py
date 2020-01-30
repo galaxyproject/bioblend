@@ -24,16 +24,16 @@ class DatatypesClient(Client):
         :return: A list of datatype names.
           For example::
 
-            [u'snpmatrix',
-             u'snptest',
-             u'tabular',
-             u'taxonomy',
-             u'twobit',
-             u'txt',
-             u'vcf',
-             u'wig',
-             u'xgmml',
-             u'xml']
+            ['snpmatrix',
+             'snptest',
+             'tabular',
+             'taxonomy',
+             'twobit',
+             'txt',
+             'vcf',
+             'wig',
+             'xgmml',
+             'xml']
         """
 
         params = {}
@@ -53,15 +53,15 @@ class DatatypesClient(Client):
         :return: A list of sniffer names.
           For example::
 
-            [u'galaxy.datatypes.tabular:Vcf',
-             u'galaxy.datatypes.binary:TwoBit',
-             u'galaxy.datatypes.binary:Bam',
-             u'galaxy.datatypes.binary:Sff',
-             u'galaxy.datatypes.xml:Phyloxml',
-             u'galaxy.datatypes.xml:GenericXml',
-             u'galaxy.datatypes.sequence:Maf',
-             u'galaxy.datatypes.sequence:Lav',
-             u'galaxy.datatypes.sequence:csFasta']
+            ['galaxy.datatypes.tabular:Vcf',
+             'galaxy.datatypes.binary:TwoBit',
+             'galaxy.datatypes.binary:Bam',
+             'galaxy.datatypes.binary:Sff',
+             'galaxy.datatypes.xml:Phyloxml',
+             'galaxy.datatypes.xml:GenericXml',
+             'galaxy.datatypes.sequence:Maf',
+             'galaxy.datatypes.sequence:Lav',
+             'galaxy.datatypes.sequence:csFasta']
         """
         url = self._make_url() + '/sniffers'
         return self._get(url=url)

@@ -34,9 +34,9 @@ class WorkflowClient(Client):
         :return: A list of workflow dicts.
                  For example::
 
-                   [{u'id': u'92c56938c2f9b315',
-                     u'name': u'Simple',
-                     u'url': u'/api/workflows/92c56938c2f9b315'}]
+                   [{'id': '92c56938c2f9b315',
+                     'name': 'Simple',
+                     'url': '/api/workflows/92c56938c2f9b315'}]
 
         """
         if workflow_id is not None and name is not None:
@@ -66,10 +66,10 @@ class WorkflowClient(Client):
         :return: A description of the workflow and its inputs.
           For example::
 
-            {u'id': u'92c56938c2f9b315',
-             u'inputs': {u'23': {u'label': u'Input Dataset', u'value': u''}},
-             u'name': u'Simple',
-             u'url': u'/api/workflows/92c56938c2f9b315'}
+            {'id': '92c56938c2f9b315',
+             'inputs': {'23': {'label': 'Input Dataset', 'value': ''}},
+             'name': 'Simple',
+             'url': '/api/workflows/92c56938c2f9b315'}
         """
         params = {}
         if version is not None:
@@ -111,16 +111,16 @@ class WorkflowClient(Client):
         :return: Information about the imported workflow.
           For example::
 
-            {u'name': 'Training: 16S rRNA sequencing with mothur: main tutorial',
-             u'tags': [],
-             u'deleted': false,
-             u'latest_workflow_uuid': '368c6165-ccbe-4945-8a3c-d27982206d66',
-             u'url': '/api/workflows/94bac0a90086bdcf',
-             u'number_of_steps': 44,
-             u'published': false,
-             u'owner': 'jane-doe',
-             u'model_class': 'StoredWorkflow',
-             u'id': '94bac0a90086bdcf'}
+            {'name': 'Training: 16S rRNA sequencing with mothur: main tutorial',
+             'tags': [],
+             'deleted': false,
+             'latest_workflow_uuid': '368c6165-ccbe-4945-8a3c-d27982206d66',
+             'url': '/api/workflows/94bac0a90086bdcf',
+             'number_of_steps': 44,
+             'published': false,
+             'owner': 'jane-doe',
+             'model_class': 'StoredWorkflow',
+             'id': '94bac0a90086bdcf'}
         """
         payload = {'workflow': workflow_dict, 'publish': publish}
 
@@ -153,16 +153,16 @@ class WorkflowClient(Client):
         :return: Information about the imported workflow.
           For example::
 
-            {u'name': 'Training: 16S rRNA sequencing with mothur: main tutorial',
-             u'tags': [],
-             u'deleted': false,
-             u'latest_workflow_uuid': '368c6165-ccbe-4945-8a3c-d27982206d66',
-             u'url': '/api/workflows/94bac0a90086bdcf',
-             u'number_of_steps': 44,
-             u'published': false,
-             u'owner': 'jane-doe',
-             u'model_class': 'StoredWorkflow',
-             u'id': '94bac0a90086bdcf'}
+            {'name': 'Training: 16S rRNA sequencing with mothur: main tutorial',
+             'tags': [],
+             'deleted': false,
+             'latest_workflow_uuid': '368c6165-ccbe-4945-8a3c-d27982206d66',
+             'url': '/api/workflows/94bac0a90086bdcf',
+             'number_of_steps': 44,
+             'published': false,
+             'owner': 'jane-doe',
+             'model_class': 'StoredWorkflow',
+             'id': '94bac0a90086bdcf'}
 
         """
         with open(file_local_path, 'r') as fp:
@@ -181,12 +181,12 @@ class WorkflowClient(Client):
         :return: A description of the workflow.
           For example::
 
-            {u'id': u'ee0e2b4b696d9092',
-             u'model_class': u'StoredWorkflow',
-             u'name': u'Super workflow that solves everything!',
-             u'published': False,
-             u'tags': [],
-             u'url': u'/api/workflows/ee0e2b4b696d9092'}
+            {'id': 'ee0e2b4b696d9092',
+             'model_class': 'StoredWorkflow',
+             'name': 'Super workflow that solves everything!',
+             'published': False,
+             'tags': [],
+             'url': '/api/workflows/ee0e2b4b696d9092'}
         """
         payload = {'shared_workflow_id': workflow_id}
         url = self._make_url()
@@ -321,8 +321,8 @@ class WorkflowClient(Client):
         :return: A dict containing the history ID where the outputs are placed
           as well as output dataset IDs. For example::
 
-            {u'history': u'64177123325c9cfd',
-             u'outputs': [u'aa4d3084af404259']}
+            {'history': '64177123325c9cfd',
+             'outputs': ['aa4d3084af404259']}
 
         The ``params`` dict should be specified as follows::
 
@@ -352,9 +352,9 @@ class WorkflowClient(Client):
         post-job actions (PJAs) to their runtime values. For
         instance, if the final step has a PJA like the following::
 
-          {u'RenameDatasetActionout_file1': {u'action_arguments': {u'newname': u'${output}'},
-            u'action_type': u'RenameDatasetAction',
-            u'output_name': u'out_file1'}}
+          {'RenameDatasetActionout_file1': {'action_arguments': {'newname': '${output}'},
+            'action_type': 'RenameDatasetAction',
+            'output_name': 'out_file1'}}
 
         then the following renames the output dataset to 'foo'::
 
@@ -454,36 +454,36 @@ class WorkflowClient(Client):
         :return: A dict containing the workflow invocation describing the
           scheduling of the workflow. For example::
 
-            {u'history_id': u'2f94e8ae9edff68a',
-             u'id': u'df7a1f0c02a5b08e',
-             u'inputs': {u'0': {u'id': u'a7db2fac67043c7e',
-               u'src': u'hda',
-               u'uuid': u'7932ffe0-2340-4952-8857-dbaa50f1f46a'}},
-             u'model_class': u'WorkflowInvocation',
-             u'state': u'ready',
-             u'steps': [{u'action': None,
-               u'id': u'd413a19dec13d11e',
-               u'job_id': None,
-               u'model_class': u'WorkflowInvocationStep',
-               u'order_index': 0,
-               u'state': None,
-               u'update_time': u'2015-10-31T22:00:26',
-               u'workflow_step_id': u'cbbbf59e8f08c98c',
-               u'workflow_step_label': None,
-               u'workflow_step_uuid': u'b81250fd-3278-4e6a-b269-56a1f01ef485'},
-              {u'action': None,
-               u'id': u'2f94e8ae9edff68a',
-               u'job_id': u'e89067bb68bee7a0',
-               u'model_class': u'WorkflowInvocationStep',
-               u'order_index': 1,
-               u'state': u'new',
-               u'update_time': u'2015-10-31T22:00:26',
-               u'workflow_step_id': u'964b37715ec9bd22',
-               u'workflow_step_label': None,
-               u'workflow_step_uuid': u'e62440b8-e911-408b-b124-e05435d3125e'}],
-             u'update_time': u'2015-10-31T22:00:26',
-             u'uuid': u'c8aa2b1c-801a-11e5-a9e5-8ca98228593c',
-             u'workflow_id': u'03501d7626bd192f'}
+            {'history_id': '2f94e8ae9edff68a',
+             'id': 'df7a1f0c02a5b08e',
+             'inputs': {'0': {'id': 'a7db2fac67043c7e',
+               'src': 'hda',
+               'uuid': '7932ffe0-2340-4952-8857-dbaa50f1f46a'}},
+             'model_class': 'WorkflowInvocation',
+             'state': 'ready',
+             'steps': [{'action': None,
+               'id': 'd413a19dec13d11e',
+               'job_id': None,
+               'model_class': 'WorkflowInvocationStep',
+               'order_index': 0,
+               'state': None,
+               'update_time': '2015-10-31T22:00:26',
+               'workflow_step_id': 'cbbbf59e8f08c98c',
+               'workflow_step_label': None,
+               'workflow_step_uuid': 'b81250fd-3278-4e6a-b269-56a1f01ef485'},
+              {'action': None,
+               'id': '2f94e8ae9edff68a',
+               'job_id': 'e89067bb68bee7a0',
+               'model_class': 'WorkflowInvocationStep',
+               'order_index': 1,
+               'state': 'new',
+               'update_time': '2015-10-31T22:00:26',
+               'workflow_step_id': '964b37715ec9bd22',
+               'workflow_step_label': None,
+               'workflow_step_uuid': 'e62440b8-e911-408b-b124-e05435d3125e'}],
+             'update_time': '2015-10-31T22:00:26',
+             'uuid': 'c8aa2b1c-801a-11e5-a9e5-8ca98228593c',
+             'workflow_id': '03501d7626bd192f'}
 
         The ``params`` dict should be specified as follows::
 
@@ -541,9 +541,9 @@ class WorkflowClient(Client):
         post-job actions (PJAs) to their runtime values. For
         instance, if the final step has a PJA like the following::
 
-          {u'RenameDatasetActionout_file1': {u'action_arguments': {u'newname': u'${output}'},
-            u'action_type': u'RenameDatasetAction',
-            u'output_name': u'out_file1'}}
+          {'RenameDatasetActionout_file1': {'action_arguments': {'newname': '${output}'},
+            'action_type': 'RenameDatasetAction',
+            'output_name': 'out_file1'}}
 
         then the following renames the output dataset to 'foo'::
 
@@ -600,36 +600,36 @@ class WorkflowClient(Client):
         :return: The workflow invocation.
           For example::
 
-            {u'history_id': u'2f94e8ae9edff68a',
-             u'id': u'df7a1f0c02a5b08e',
-             u'inputs': {u'0': {u'id': u'a7db2fac67043c7e',
-               u'src': u'hda',
-               u'uuid': u'7932ffe0-2340-4952-8857-dbaa50f1f46a'}},
-             u'model_class': u'WorkflowInvocation',
-             u'state': u'ready',
-             u'steps': [{u'action': None,
-               u'id': u'd413a19dec13d11e',
-               u'job_id': None,
-               u'model_class': u'WorkflowInvocationStep',
-               u'order_index': 0,
-               u'state': None,
-               u'update_time': u'2015-10-31T22:00:26',
-               u'workflow_step_id': u'cbbbf59e8f08c98c',
-               u'workflow_step_label': None,
-               u'workflow_step_uuid': u'b81250fd-3278-4e6a-b269-56a1f01ef485'},
-              {u'action': None,
-               u'id': u'2f94e8ae9edff68a',
-               u'job_id': u'e89067bb68bee7a0',
-               u'model_class': u'WorkflowInvocationStep',
-               u'order_index': 1,
-               u'state': u'new',
-               u'update_time': u'2015-10-31T22:00:26',
-               u'workflow_step_id': u'964b37715ec9bd22',
-               u'workflow_step_label': None,
-               u'workflow_step_uuid': u'e62440b8-e911-408b-b124-e05435d3125e'}],
-             u'update_time': u'2015-10-31T22:00:26',
-             u'uuid': u'c8aa2b1c-801a-11e5-a9e5-8ca98228593c',
-             u'workflow_id': u'03501d7626bd192f'}
+            {'history_id': '2f94e8ae9edff68a',
+             'id': 'df7a1f0c02a5b08e',
+             'inputs': {'0': {'id': 'a7db2fac67043c7e',
+               'src': 'hda',
+               'uuid': '7932ffe0-2340-4952-8857-dbaa50f1f46a'}},
+             'model_class': 'WorkflowInvocation',
+             'state': 'ready',
+             'steps': [{'action': None,
+               'id': 'd413a19dec13d11e',
+               'job_id': None,
+               'model_class': 'WorkflowInvocationStep',
+               'order_index': 0,
+               'state': None,
+               'update_time': '2015-10-31T22:00:26',
+               'workflow_step_id': 'cbbbf59e8f08c98c',
+               'workflow_step_label': None,
+               'workflow_step_uuid': 'b81250fd-3278-4e6a-b269-56a1f01ef485'},
+              {'action': None,
+               'id': '2f94e8ae9edff68a',
+               'job_id': 'e89067bb68bee7a0',
+               'model_class': 'WorkflowInvocationStep',
+               'order_index': 1,
+               'state': 'new',
+               'update_time': '2015-10-31T22:00:26',
+               'workflow_step_id': '964b37715ec9bd22',
+               'workflow_step_label': None,
+               'workflow_step_uuid': 'e62440b8-e911-408b-b124-e05435d3125e'}],
+             'update_time': '2015-10-31T22:00:26',
+             'uuid': 'c8aa2b1c-801a-11e5-a9e5-8ca98228593c',
+             'workflow_id': '03501d7626bd192f'}
         """
         url = self._invocation_url(workflow_id, invocation_id)
         return self._get(url=url)
@@ -646,13 +646,13 @@ class WorkflowClient(Client):
         :return: A list of workflow invocations.
           For example::
 
-            [{u'history_id': u'2f94e8ae9edff68a',
-              u'id': u'df7a1f0c02a5b08e',
-              u'model_class': u'WorkflowInvocation',
-              u'state': u'new',
-              u'update_time': u'2015-10-31T22:00:22',
-              u'uuid': u'c8aa2b1c-801a-11e5-a9e5-8ca98228593c',
-              u'workflow_id': u'03501d7626bd192f'}]
+            [{'history_id': '2f94e8ae9edff68a',
+              'id': 'df7a1f0c02a5b08e',
+              'model_class': 'WorkflowInvocation',
+              'state': 'new',
+              'update_time': '2015-10-31T22:00:22',
+              'uuid': 'c8aa2b1c-801a-11e5-a9e5-8ca98228593c',
+              'workflow_id': '03501d7626bd192f'}]
         """
         url = self._invocations_url(workflow_id)
         return self._get(url=url)
@@ -690,16 +690,16 @@ class WorkflowClient(Client):
         :return: The workflow invocation step.
           For example::
 
-            {u'action': None,
-             u'id': u'63cd3858d057a6d1',
-             u'job_id': None,
-             u'model_class': u'WorkflowInvocationStep',
-             u'order_index': 2,
-             u'state': None,
-             u'update_time': u'2015-10-31T22:11:14',
-             u'workflow_step_id': u'52e496b945151ee8',
-             u'workflow_step_label': None,
-             u'workflow_step_uuid': u'4060554c-1dd5-4287-9040-8b4f281cf9dc'}
+            {'action': None,
+             'id': '63cd3858d057a6d1',
+             'job_id': None,
+             'model_class': 'WorkflowInvocationStep',
+             'order_index': 2,
+             'state': None,
+             'update_time': '2015-10-31T22:11:14',
+             'workflow_step_id': '52e496b945151ee8',
+             'workflow_step_label': None,
+             'workflow_step_uuid': '4060554c-1dd5-4287-9040-8b4f281cf9dc'}
         """
         url = self._invocation_step_url(workflow_id, invocation_id, step_id)
         return self._get(url=url)

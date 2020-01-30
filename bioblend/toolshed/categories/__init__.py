@@ -23,12 +23,12 @@ class ToolShedCategoryClient(Client):
           repository categories present in the Tool Shed.
           For example::
 
-            [{u'deleted': False,
-              u'description': u'Tools for manipulating data',
-              u'id': u'175812cd7caaf439',
-              u'model_class': u'Category',
-              u'name': u'Text Manipulation',
-              u'url': u'/api/categories/175812cd7caaf439'}]
+            [{'deleted': False,
+              'description': 'Tools for manipulating data',
+              'id': '175812cd7caaf439',
+              'model_class': 'Category',
+              'name': 'Text Manipulation',
+              'url': '/api/categories/175812cd7caaf439'}]
 
         .. versionadded:: 0.5.2
         """

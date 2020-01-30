@@ -515,7 +515,7 @@ class CloudManInstance(GenericVMInstance):
         """
         Get the ``cluster type`` for this CloudMan instance. See the
         CloudMan docs about the available types. Returns a dictionary,
-        for example: ``{u'cluster_type': u'Test'}``.
+        for example: ``{'cluster_type': 'Test'}``.
         """
         cluster_type = self._make_get_request("cluster_type")
         if cluster_type['cluster_type']:

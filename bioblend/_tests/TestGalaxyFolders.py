@@ -43,7 +43,7 @@ class TestGalaxyFolders(GalaxyTestBase.GalaxyTestBase):
 
     @test_util.skip_unless_galaxy("release_16.01")
     def test_get_set_permissions(self):
-        empty_permission = {u'add_library_item_role_list': [], u'modify_folder_role_list': [], u'manage_folder_role_list': []}
+        empty_permission = {'add_library_item_role_list': [], 'modify_folder_role_list': [], 'manage_folder_role_list': []}
         # They should be empty to start with
         self.assertEqual(
             self.gi.folders.get_permissions(self.folder['id'], scope='current'),

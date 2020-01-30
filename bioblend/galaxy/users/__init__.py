@@ -45,9 +45,9 @@ class UserClient(Client):
         :return: a list of dicts with user details.
                  For example::
 
-                   [{u'email': u'a_user@example.com',
-                     u'id': u'dda47097d9189f15',
-                     u'url': u'/api/users/dda47097d9189f15'}]
+                   [{'email': 'a_user@example.com',
+                     'id': 'dda47097d9189f15',
+                     'url': '/api/users/dda47097d9189f15'}]
 
         """
         params = {}

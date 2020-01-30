@@ -66,14 +66,14 @@ instance to boot and CloudMan start. To check on the status of the machine,
 
     >>> cmi.get_machine_status()
     {'error': '',
-     'instance_state': u'pending',
+     'instance_state': 'pending',
      'placement': '',
      'public_ip': ''}
     >>> cmi.get_machine_status()
     {'error': '',
-     'instance_state': u'running',
-     'placement': u'melbourne-qh2',
-     'public_ip': u'115.146.86.29'}
+     'instance_state': 'running',
+     'placement': 'melbourne-qh2',
+     'public_ip': '115.146.86.29'}
 
 Once the instance is ready, although it may still take a few moments for CloudMan
 to start, it is possible to start interacting with the application.
@@ -96,37 +96,37 @@ available :ref:`cloudman-instance-api` API::
     False
     >>> cmi.initialize('SGE')
     >>> cmi.get_status()
-    {u'all_fs': [],
-     u'app_status': u'yellow',
-     u'autoscaling': {u'as_max': u'N/A',
-     u'as_min': u'N/A',
-     u'use_autoscaling': False},
-     u'cluster_status': u'STARTING',
-     u'data_status': u'green',
-     u'disk_usage': {u'pct': u'0%', u'total': u'0', u'used': u'0'},
-     u'dns': u'#',
-     u'instance_status': {u'available': u'0', u'idle': u'0', u'requested': u'0'},
-     u'snapshot': {u'progress': u'None', u'status': u'None'}}
+    {'all_fs': [],
+     'app_status': 'yellow',
+     'autoscaling': {'as_max': 'N/A',
+     'as_min': 'N/A',
+     'use_autoscaling': False},
+     'cluster_status': 'STARTING',
+     'data_status': 'green',
+     'disk_usage': {'pct': '0%', 'total': '0', 'used': '0'},
+     'dns': '#',
+     'instance_status': {'available': '0', 'idle': '0', 'requested': '0'},
+     'snapshot': {'progress': 'None', 'status': 'None'}}
     >>> cmi.get_cluster_size()
     1
     >>> cmi.get_nodes()
-    [{u'id': u'i-00006016',
-      u'instance_type': u'm1.medium',
-      u'ld': u'0.0 0.025 0.065',
-      u'public_ip': u'115.146.86.29',
-      u'time_in_state': u'2268'}]
+    [{'id': 'i-00006016',
+      'instance_type': 'm1.medium',
+      'ld': '0.0 0.025 0.065',
+      'public_ip': '115.146.86.29',
+      'time_in_state': '2268'}]
     >>> cmi.add_nodes(2)
-    {u'all_fs': [],
-     u'app_status': u'green',
-     u'autoscaling': {u'as_max': u'N/A',
-      u'as_min': u'N/A',
-      u'use_autoscaling': False},
-     u'cluster_status': u'READY',
-     u'data_status': u'green',
-     u'disk_usage': {u'pct': u'0%', u'total': u'0', u'used': u'0'},
-     u'dns': u'#',
-     u'instance_status': {u'available': u'0', u'idle': u'0', u'requested': u'2'},
-     u'snapshot': {u'progress': u'None', u'status': u'None'}}
+    {'all_fs': [],
+     'app_status': 'green',
+     'autoscaling': {'as_max': 'N/A',
+      'as_min': 'N/A',
+      'use_autoscaling': False},
+     'cluster_status': 'READY',
+     'data_status': 'green',
+     'disk_usage': {'pct': '0%', 'total': '0', 'used': '0'},
+     'dns': '#',
+     'instance_status': {'available': '0', 'idle': '0', 'requested': '2'},
+     'snapshot': {'progress': 'None', 'status': 'None'}}
     >>> cmi.get_cluster_size()
     3
 
