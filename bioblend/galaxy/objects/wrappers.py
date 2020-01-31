@@ -184,7 +184,15 @@ class Workflow(Wrapper):
     results from an input dataset.
     """
     BASE_ATTRS = Wrapper.BASE_ATTRS + (
-        'deleted', 'inputs', 'owner', 'published', 'steps', 'tags'
+        'deleted',
+        'inputs',
+        'latest_workflow_uuid',
+        'number_of_steps',
+        'owner',
+        'published',
+        'show_in_tool_panel',
+        'steps',
+        'tags',
     )
     POLLING_INTERVAL = 10  # for output state monitoring
 
