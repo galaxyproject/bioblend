@@ -619,13 +619,25 @@ class WorkflowClient(Client):
         url = self._invocation_url(workflow_id, invocation_id)
         return self._get(url=url)
 
-    def get_invocations(self, workflow_id):
+    def get_invocations(self, workflow_id, history_id=None, user_id=None, include_terminal=True, limit=None, view='collection', step_details=False):
         """
         Get a list containing all the workflow invocations corresponding to the
         specified workflow.
 
         :type workflow_id: str
         :param workflow_id: Encoded workflow ID
+        :type history_id: str
+        :param history_id: Encoded history ID
+        :type user_id: str
+        :param user_id: TODO
+        :type include_terminal: bool
+        :param include_terminal: TODO
+        :type limit: int
+        :param limit: TODO
+        :type view: str
+        :param view: TODO
+        :type step_details: bool
+        :param step_details: include step details
 
         :rtype: list
         :return: A list of workflow invocations.
@@ -640,7 +652,14 @@ class WorkflowClient(Client):
               'workflow_id': '03501d7626bd192f'}]
         """
         url = self._invocations_url(workflow_id)
-        return self._get(url=url)
+        params = {'include_terminal': include_terminal, 'view': view, 'step_details': step_details}
+        if history_id:
+            params['history_id'] = history_id
+        if user_id:
+            params['user_id'] = user_id
+        if limit:
+            params['limit'] = limit
+        return self._get(url=url, params=params)
 
     def cancel_invocation(self, workflow_id, invocation_id):
         """
