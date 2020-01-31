@@ -68,9 +68,9 @@ class TestGalaxyUsers(GalaxyTestBase.GalaxyTestBase):
         # this test only on a disposable Galaxy instance!
         if self.gi.config.get_config()['use_remote_user']:
             self.skipTest('This Galaxy instance is not configured to use local users')
-        new_user_email = 'newuser@example.com'
-        user = self.gi.users.create_local_user('newuser', new_user_email, 'secret')
-        self.assertEqual(user['username'], 'newuser')
+        new_user_email = 'newuser2@example.com'
+        user = self.gi.users.create_local_user('newuser2', new_user_email, 'secret')
+        self.assertEqual(user['username'], 'newuser2')
         self.assertEqual(user['email'], new_user_email)
 
         updated_user_email = 'updateduser@example.com'
