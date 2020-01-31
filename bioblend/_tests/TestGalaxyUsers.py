@@ -61,3 +61,25 @@ class TestGalaxyUsers(GalaxyTestBase.GalaxyTestBase):
         self.assertIsNotNone(user['email'])
         self.assertIsNotNone(user['nice_total_disk_usage'])
         self.assertIsNotNone(user['total_disk_usage'])
+
+    def test_update_user(self):
+        # WARNING: only admins can create users!
+        # WARNING: Users cannot be purged through the Galaxy API, so execute
+        # this test only on a disposable Galaxy instance!
+        if self.gi.config.get_config()['use_remote_user']:
+            self.skipTest('This Galaxy instance is not configured to use local users')
+        new_user_email = 'newuser@example.com'
+        user = self.gi.users.create_local_user('newuser', new_user_email, 'secret')
+        self.assertEqual(user['username'], 'newuser')
+        self.assertEqual(user['email'], new_user_email)
+
+        updated_user_email = 'updateduser@example.com'
+        updated_username = 'udpateduser'
+        user = self.gi.users.udpate_user(user['id'], username=updated_username, email=updated_user_email)
+        self.assertEqual(user['username'], updated_username)
+        self.assertEqual(user['email'], updated_user_email)
+
+        if self.gi.config.get_config()['allow_user_deletion']:
+            deleted_user = self.gi.users.delete_user(user['id'])
+            self.assertEqual(deleted_user['email'], new_user_email)
+            self.assertTrue(deleted_user['deleted'])
