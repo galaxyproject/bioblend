@@ -34,13 +34,14 @@ class ToolDataClient(Client):
         :return: A description of the given data table and its content.
           For example::
 
-            {"columns": ["value", "dbkey", "name", "path"],
-             "fields": [["test id",
-               "test",
-               "test name",
-               "/opt/galaxy-dist/tool-data/test/seq/test id.fa"]],
-             "model_class": "TabularToolDataTable",
-             "name": "all_fasta"}
+            {'columns': ['value', 'dbkey', 'name', 'path'],
+             'fields': [['test id',
+                         'test',
+                         'test name',
+                         '/opt/galaxy-dist/tool-data/test/seq/test id.fa']],
+             'model_class': 'TabularToolDataTable',
+             'name': 'all_fasta'}
+
         """
         return self._get(id=data_table_id)
 
