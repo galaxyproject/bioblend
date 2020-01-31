@@ -43,8 +43,7 @@ class ConfigClient(Client):
 
         :rtype: dict
         :return: Version of the Galaxy instance
-
-        For example::
+          For example::
 
             {'extra': {}, 'version_major': '17.01'}
         """

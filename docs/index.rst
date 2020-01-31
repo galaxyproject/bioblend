@@ -15,7 +15,7 @@ Stable releases of BioBlend are best installed via ``pip`` from PyPI::
     $ python3 -m pip install bioblend
 
 Alternatively, the most current source code from our `Git repository`_ can be
-installed with:
+installed with::
 
     $ python3 -m pip install git+https://github.com/galaxyproject/bioblend
 

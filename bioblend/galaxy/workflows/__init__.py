@@ -353,8 +353,8 @@ class WorkflowClient(Client):
         instance, if the final step has a PJA like the following::
 
           {'RenameDatasetActionout_file1': {'action_arguments': {'newname': '${output}'},
-            'action_type': 'RenameDatasetAction',
-            'output_name': 'out_file1'}}
+                                            'action_type': 'RenameDatasetAction',
+                                            'output_name': 'out_file1'}}
 
         then the following renames the output dataset to 'foo'::
 
@@ -457,30 +457,30 @@ class WorkflowClient(Client):
             {'history_id': '2f94e8ae9edff68a',
              'id': 'df7a1f0c02a5b08e',
              'inputs': {'0': {'id': 'a7db2fac67043c7e',
-               'src': 'hda',
-               'uuid': '7932ffe0-2340-4952-8857-dbaa50f1f46a'}},
+                              'src': 'hda',
+                              'uuid': '7932ffe0-2340-4952-8857-dbaa50f1f46a'}},
              'model_class': 'WorkflowInvocation',
              'state': 'ready',
              'steps': [{'action': None,
-               'id': 'd413a19dec13d11e',
-               'job_id': None,
-               'model_class': 'WorkflowInvocationStep',
-               'order_index': 0,
-               'state': None,
-               'update_time': '2015-10-31T22:00:26',
-               'workflow_step_id': 'cbbbf59e8f08c98c',
-               'workflow_step_label': None,
-               'workflow_step_uuid': 'b81250fd-3278-4e6a-b269-56a1f01ef485'},
-              {'action': None,
-               'id': '2f94e8ae9edff68a',
-               'job_id': 'e89067bb68bee7a0',
-               'model_class': 'WorkflowInvocationStep',
-               'order_index': 1,
-               'state': 'new',
-               'update_time': '2015-10-31T22:00:26',
-               'workflow_step_id': '964b37715ec9bd22',
-               'workflow_step_label': None,
-               'workflow_step_uuid': 'e62440b8-e911-408b-b124-e05435d3125e'}],
+                        'id': 'd413a19dec13d11e',
+                        'job_id': None,
+                        'model_class': 'WorkflowInvocationStep',
+                        'order_index': 0,
+                        'state': None,
+                        'update_time': '2015-10-31T22:00:26',
+                        'workflow_step_id': 'cbbbf59e8f08c98c',
+                        'workflow_step_label': None,
+                        'workflow_step_uuid': 'b81250fd-3278-4e6a-b269-56a1f01ef485'},
+                       {'action': None,
+                        'id': '2f94e8ae9edff68a',
+                        'job_id': 'e89067bb68bee7a0',
+                        'model_class': 'WorkflowInvocationStep',
+                        'order_index': 1,
+                        'state': 'new',
+                        'update_time': '2015-10-31T22:00:26',
+                        'workflow_step_id': '964b37715ec9bd22',
+                        'workflow_step_label': None,
+                        'workflow_step_uuid': 'e62440b8-e911-408b-b124-e05435d3125e'}],
              'update_time': '2015-10-31T22:00:26',
              'uuid': 'c8aa2b1c-801a-11e5-a9e5-8ca98228593c',
              'workflow_id': '03501d7626bd192f'}
@@ -514,23 +514,21 @@ class WorkflowClient(Client):
         the repeat index starting at 0. For example, if the tool XML contains::
 
           <repeat name="cutoff" title="Parameters used to filter cells" min="1">
-            <param name="name" type="text" value="n_genes" label="Name of param...">
-              <option value="n_genes">n_genes</option>
-              <option value="n_counts">n_counts</option>
-            </param>
-            <param name="min" type="float" value="0" min="0" label="Min value"/>
+              <param name="name" type="text" value="n_genes" label="Name of param...">
+                  <option value="n_genes">n_genes</option>
+                  <option value="n_counts">n_counts</option>
+              </param>
+              <param name="min" type="float" min="0" value="0" label="Min value"/>
           </repeat>
 
         then the PARAM_DICT should be something like::
 
-          {
-            ...
-            "cutoff_0|name": "n_genes",
-            "cutoff_0|min": "2",
-            "cutoff_1|name": "n_counts",
-            "cutoff_1|min": "4",
-            ...
-          }
+          {...
+           "cutoff_0|name": "n_genes",
+           "cutoff_0|min": "2",
+           "cutoff_1|name": "n_counts",
+           "cutoff_1|min": "4",
+           ...}
 
         At the time of this writing, it is not possible to change the number of
         times the contained parameters are repeated. Therefore, the parameter
@@ -542,8 +540,8 @@ class WorkflowClient(Client):
         instance, if the final step has a PJA like the following::
 
           {'RenameDatasetActionout_file1': {'action_arguments': {'newname': '${output}'},
-            'action_type': 'RenameDatasetAction',
-            'output_name': 'out_file1'}}
+                                            'action_type': 'RenameDatasetAction',
+                                            'output_name': 'out_file1'}}
 
         then the following renames the output dataset to 'foo'::
 
@@ -603,30 +601,30 @@ class WorkflowClient(Client):
             {'history_id': '2f94e8ae9edff68a',
              'id': 'df7a1f0c02a5b08e',
              'inputs': {'0': {'id': 'a7db2fac67043c7e',
-               'src': 'hda',
-               'uuid': '7932ffe0-2340-4952-8857-dbaa50f1f46a'}},
+                              'src': 'hda',
+                              'uuid': '7932ffe0-2340-4952-8857-dbaa50f1f46a'}},
              'model_class': 'WorkflowInvocation',
              'state': 'ready',
              'steps': [{'action': None,
-               'id': 'd413a19dec13d11e',
-               'job_id': None,
-               'model_class': 'WorkflowInvocationStep',
-               'order_index': 0,
-               'state': None,
-               'update_time': '2015-10-31T22:00:26',
-               'workflow_step_id': 'cbbbf59e8f08c98c',
-               'workflow_step_label': None,
-               'workflow_step_uuid': 'b81250fd-3278-4e6a-b269-56a1f01ef485'},
-              {'action': None,
-               'id': '2f94e8ae9edff68a',
-               'job_id': 'e89067bb68bee7a0',
-               'model_class': 'WorkflowInvocationStep',
-               'order_index': 1,
-               'state': 'new',
-               'update_time': '2015-10-31T22:00:26',
-               'workflow_step_id': '964b37715ec9bd22',
-               'workflow_step_label': None,
-               'workflow_step_uuid': 'e62440b8-e911-408b-b124-e05435d3125e'}],
+                        'id': 'd413a19dec13d11e',
+                        'job_id': None,
+                        'model_class': 'WorkflowInvocationStep',
+                        'order_index': 0,
+                        'state': None,
+                        'update_time': '2015-10-31T22:00:26',
+                        'workflow_step_id': 'cbbbf59e8f08c98c',
+                        'workflow_step_label': None,
+                        'workflow_step_uuid': 'b81250fd-3278-4e6a-b269-56a1f01ef485'},
+                       {'action': None,
+                        'id': '2f94e8ae9edff68a',
+                        'job_id': 'e89067bb68bee7a0',
+                        'model_class': 'WorkflowInvocationStep',
+                        'order_index': 1,
+                        'state': 'new',
+                        'update_time': '2015-10-31T22:00:26',
+                        'workflow_step_id': '964b37715ec9bd22',
+                        'workflow_step_label': None,
+                        'workflow_step_uuid': 'e62440b8-e911-408b-b124-e05435d3125e'}],
              'update_time': '2015-10-31T22:00:26',
              'uuid': 'c8aa2b1c-801a-11e5-a9e5-8ca98228593c',
              'workflow_id': '03501d7626bd192f'}
