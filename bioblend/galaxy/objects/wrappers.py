@@ -184,7 +184,7 @@ class Workflow(Wrapper):
     results from an input dataset.
     """
     BASE_ATTRS = Wrapper.BASE_ATTRS + (
-        'deleted', 'inputs', 'published', 'steps', 'tags', 'owner', 'number_of_steps', 'show_in_tool_panel', 'latest_workflow_uuid'
+        'deleted', 'inputs', 'published', 'steps', 'tags', 'owner', 'latest_workflow_uuid'
     )
     POLLING_INTERVAL = 10  # for output state monitoring
 
@@ -1453,7 +1453,7 @@ class WorkflowPreview(Preview):
     Instances of this class wrap dictionaries obtained by getting
     ``/api/workflows`` from Galaxy.
     """
-    BASE_ATTRS = Preview.BASE_ATTRS + ('published', 'tags')
+    BASE_ATTRS = Preview.BASE_ATTRS + ('published', 'tags', 'number_of_steps', 'show_in_tool_panel')
 
     def __init__(self, pw_dict, gi=None):
         super().__init__(pw_dict, gi=gi)
