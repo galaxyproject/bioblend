@@ -77,11 +77,9 @@ class TestGalaxyUsers(GalaxyTestBase.GalaxyTestBase):
         updated_username = 'updateduser'
         user_id = user['id']
         user = self.gi.users.update_user(user_id, username=updated_username, email=updated_user_email)
-        user = self.gi.users.show_user(current_user)
+        user = self.gi.users.show_user(user_id)
         self.assertEqual(user['username'], updated_username)
         self.assertEqual(user['email'], updated_user_email)
 
         if self.gi.config.get_config()['allow_user_deletion']:
-            deleted_user = self.gi.users.delete_user(user['id'])
-            self.assertEqual(deleted_user['email'], new_user_email)
-            self.assertTrue(deleted_user['deleted'])
+            self.gi.users.delete_user(user['id'])
