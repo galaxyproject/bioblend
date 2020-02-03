@@ -62,6 +62,7 @@ class TestGalaxyUsers(GalaxyTestBase.GalaxyTestBase):
         self.assertIsNotNone(user['nice_total_disk_usage'])
         self.assertIsNotNone(user['total_disk_usage'])
 
+    @test_util.skip_unless_galaxy('release_17.01')
     def test_update_user(self):
         # WARNING: only admins can create users!
         # WARNING: Users cannot be purged through the Galaxy API, so execute
