@@ -74,8 +74,8 @@ class TestGalaxyUsers(GalaxyTestBase.GalaxyTestBase):
         self.assertEqual(user['email'], new_user_email)
 
         updated_user_email = 'updateduser@example.com'
-        updated_username = 'udpateduser'
-        user = self.gi.users.udpate_user(user['id'], username=updated_username, email=updated_user_email)
+        updated_username = 'updateduser'
+        user = self.gi.users.update_user(user['id'], username=updated_username, email=updated_user_email)
         self.assertEqual(user['username'], updated_username)
         self.assertEqual(user['email'], updated_user_email)
 
