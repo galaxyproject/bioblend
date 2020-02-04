@@ -186,3 +186,23 @@ class UserClient(Client):
         """
         url = self._make_url(user_id) + '/api_key/inputs'
         return self._get(url=url)['inputs'][0]['value']
+
+    def update_user(self, user_id, **kwds):
+        """
+        Update user information. Some of the attributes that can be
+        modified are documented below.
+
+        :type user_id: str
+        :param user_id: encoded user ID
+
+        :type username: str
+        :param username: Replace user name with the given string
+
+        :type email: str
+        :param email: Replace user email with the given string
+
+        :rtype: dict
+        :return: details of the updated user
+        """
+        url = self._make_url(user_id) + '/information/inputs'
+        return self._put(url=url, payload=kwds, id=user_id)
