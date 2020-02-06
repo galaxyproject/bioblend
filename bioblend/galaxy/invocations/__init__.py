@@ -10,9 +10,23 @@ class InvocationClient(Client):
         self.module = 'invocations'
         super().__init__(galaxy_instance)
 
-    def get_invocations(self):
+    def get_invocations(self, history_id=None, user_id=None, include_terminal=True, limit=None, view='collection', step_details=False):
         """
-        Get a list containing all workflow invocations.
+        Get a list containing all the workflow invocations corresponding to the
+        specified workflow.
+
+        :type history_id: str
+        :param history_id: Encoded history ID
+        :type user_id: str
+        :param user_id: TODO
+        :type include_terminal: bool
+        :param include_terminal: TODO
+        :type limit: int
+        :param limit: TODO
+        :type view: str
+        :param view: TODO
+        :type step_details: bool
+        :param step_details: include step details
 
         :rtype: list
         :return: A list of workflow invocations.
@@ -26,7 +40,14 @@ class InvocationClient(Client):
               'uuid': 'c8aa2b1c-801a-11e5-a9e5-8ca98228593c',
               'workflow_id': '03501d7626bd192f'}]
         """
-        return self._get()
+        params = {'include_terminal': include_terminal, 'view': view, 'step_details': step_details}
+        if history_id:
+            params['history_id'] = history_id
+        if user_id:
+            params['user_id'] = user_id
+        if limit:
+            params['limit'] = limit
+        return self._get(params=params)
 
     def show_invocation(self, invocation_id):
         """
