@@ -82,6 +82,9 @@ matrix:
 
     - stage: deploy
       python: '3.6'
+      env:
+        - TWINE_USERNAME=__token__
+        # TWINE_PASSWORD environment variable is saved in Travis CI Settings
       before_install: {}
       install:
         - python3 -m pip install --upgrade pip setuptools
