@@ -141,7 +141,7 @@ class ToolShedRepositoryClient(Client):
         :rtype: list
         :return: List of changeset revision hash strings from oldest to newest
         """
-        url = self.gi.url + '/repositories/get_ordered_installable_revisions'
+        url = self._make_url() + '/get_ordered_installable_revisions'
         params = {
             'name': name,
             'owner': owner
