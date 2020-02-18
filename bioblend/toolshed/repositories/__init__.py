@@ -222,7 +222,7 @@ class ToolShedRepositoryClient(Client):
                                                  'type': 'package',
                                                  'version': '0.1.18'}}]}]
         """
-        url = self.gi.url + '/repositories/get_repository_revision_install_info'
+        url = self._make_url() + '/get_repository_revision_install_info'
         params = {
             'name': name,
             'owner': owner,
