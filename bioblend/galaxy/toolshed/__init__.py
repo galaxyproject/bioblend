@@ -141,8 +141,7 @@ class ToolShedClient(Client):
         elif new_tool_panel_section_label:
             payload['new_tool_panel_section_label'] = new_tool_panel_section_label
 
-        url = "%s%s" % (self.gi.url, '/tool_shed_repositories/new/install_repository_revision')
-
+        url = self._make_url() + '/new/install_repository_revision'
         return self._post(url=url, payload=payload)
 
     def uninstall_repository_revision(self, name, owner, changeset_revision,

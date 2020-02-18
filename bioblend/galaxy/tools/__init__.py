@@ -78,7 +78,7 @@ class ToolClient(Client):
         :rtype: dict
         :return: Tool requirement status
         """
-        url = "%s/tools/%s/install_dependencies" % (self.gi.url, tool_id)
+        url = self._make_url(tool_id) + '/install_dependencies'
         return self._post(payload={}, url=url)
 
     def show_tool(self, tool_id, io_details=False, link_details=False):

@@ -64,7 +64,7 @@ class ToolDataClient(Client):
              'model_class': 'TabularToolDataTable',
              'name': 'all_fasta'}
         """
-        url = "%s/tool_data/%s/reload" % (self.gi.url, data_table_id)
+        url = self._make_url(data_table_id) + '/reload'
         return self._get(url=url)
 
     def delete_data_table(self, data_table_id, values):
