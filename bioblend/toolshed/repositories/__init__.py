@@ -141,7 +141,7 @@ class ToolShedRepositoryClient(Client):
         :rtype: list
         :return: List of changeset revision hash strings from oldest to newest
         """
-        url = self.url + '/get_ordered_installable_revisions'
+        url = self.gi.url + '/repositories/get_ordered_installable_revisions'
         params = {
             'name': name,
             'owner': owner
@@ -222,7 +222,7 @@ class ToolShedRepositoryClient(Client):
                                                  'type': 'package',
                                                  'version': '0.1.18'}}]}]
         """
-        url = self.url + '/get_repository_revision_install_info'
+        url = self.gi.url + '/repositories/get_repository_revision_install_info'
         params = {
             'name': name,
             'owner': owner,
