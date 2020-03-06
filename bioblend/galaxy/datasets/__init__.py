@@ -139,7 +139,7 @@ class DatasetClient(Client):
         :rtype: list
         :return: Return a list of dataset dicts.
         """
-        url = urljoin(self.gi._make_url(self), '?limit={}&offset={}'.format(limit, offset))
+        url = urljoin(self._make_url(), '?limit={}&offset={}'.format(limit, offset))
         return self._get(url=url)
 
     def _block_until_dataset_terminal(self, dataset_id, maxwait=12000, interval=3):
