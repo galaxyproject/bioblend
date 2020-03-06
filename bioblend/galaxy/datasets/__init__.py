@@ -125,6 +125,23 @@ class DatasetClient(Client):
             # Return location file was saved to
             return file_local_path
 
+    def get_datasets(self, limit=500, offset=0):
+        """
+        Provide a list of all datasets. Note this may be very large, so ``limit`` and ``offset``
+        parameters may be specified.
+
+        :type limit: int
+        :param limit: Maximum number of datasets to return.
+
+        :type offset: int
+        :param offset: Return datasets starting from this specified position. For example
+                       if limit is set to 100 and offset to 200, datasets 200 - 300 will be returned
+        :rtype: list
+        :return: Return a list of dataset dicts.
+        """
+        url = urljoin(self.gi._make_url(self), '?limit={}&offset={}'.format(limit, offset))
+        return self._get(url=url)
+
     def _block_until_dataset_terminal(self, dataset_id, maxwait=12000, interval=3):
         """
         Wait until the dataset state is terminal ('ok', 'empty', 'error',
