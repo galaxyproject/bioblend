@@ -50,6 +50,7 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
             f.flush()
             self.assertEqual(f.read(), expected_contents)
 
+    @test_util.skip_unless_galaxy('release_19.05')
     def test_get_datasets(self):
         datasets = self.gi.datasets.get_datasets()
         dataset_ids = [dataset['id'] for dataset in datasets]

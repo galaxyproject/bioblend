@@ -134,8 +134,8 @@ class DatasetClient(Client):
         :param limit: Maximum number of datasets to return.
 
         :type offset: int
-        :param offset: Return datasets starting from this specified position. For example
-                       if limit is set to 100 and offset to 200, datasets 200 - 300 will be returned
+        :param offset: Return datasets starting from this specified position. For example,
+                       if ``limit`` is set to 100 and ``offset`` to 200, datasets 200 - 300 will be returned.
         :rtype: list
         :return: Return a list of dataset dicts.
         """
