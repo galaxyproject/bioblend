@@ -66,7 +66,7 @@ matrix:
             - python3.6-dev
     - stage: test
       os: osx
-      # No version of Python is available via language: on OS X workers, see https://github.com/travis-ci/travis-ci/issues/2312
+      # Selection of Python version is not available via language: on OS X workers, see https://github.com/travis-ci/travis-ci/issues/2312
       language: generic
       env: TOX_ENV=py37 GALAXY_VERSION=dev
       before_install:
@@ -75,10 +75,6 @@ matrix:
         - initdb /usr/local/var/postgres
         - pg_ctl -D /usr/local/var/postgres start
         - createuser -s postgres
-        # virtualenv has not been installed on OS X workers any more since xcode9.4 became the default image, see https://github.com/travis-ci/travis-ci/issues/9966
-        - python3 -m pip install --upgrade virtualenv
-        - virtualenv -p python3 .venv
-        - . .venv/bin/activate
 
     - stage: deploy
       python: '3.6'
@@ -100,8 +96,8 @@ before_install:
   - sudo rm -f /etc/boto.cfg
 
 install:
-  # Here Python is v 2.7 for lint and 3 for test stage
-  - python -m pip install "tox>=1.8.0"
+  # Need virtualenv 20.0.14 for https://github.com/pypa/virtualenv/pull/1749
+  - python -m pip install 'tox>=1.8.0' 'virtualenv>=20.0.14'
 
 before_script:
   # Create a PostgreSQL database for Galaxy. The default SQLite3 database makes test fail randomly because of "database locked" error.
