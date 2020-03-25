@@ -127,20 +127,25 @@ class DatasetClient(Client):
 
     def get_datasets(self, limit=500, offset=0):
         """
-        Provide a list of all datasets. Note this may be very large, so ``limit`` and ``offset``
-        parameters may be specified.
+        Provide a list of all datasets. Since this may be very large, ``limit``
+        and ``offset`` parameters should be used to speficy the desired range.
 
         :type limit: int
         :param limit: Maximum number of datasets to return.
 
         :type offset: int
-        :param offset: Return datasets starting from this specified position. For example,
-                       if ``limit`` is set to 100 and ``offset`` to 200, datasets 200 - 300 will be returned.
+        :param offset: Return datasets starting from this specified position.
+          For example, if ``limit`` is set to 100 and ``offset`` to 200,
+          datasets 200-299 will be returned.
+
         :rtype: list
         :return: Return a list of dataset dicts.
         """
-        url = urljoin(self._make_url(), '?limit={}&offset={}'.format(limit, offset))
-        return self._get(url=url)
+        params = {
+            'limit': limit,
+            'offset': offset,
+        }
+        return self._get(params=params)
 
     def _block_until_dataset_terminal(self, dataset_id, maxwait=12000, interval=3):
         """
