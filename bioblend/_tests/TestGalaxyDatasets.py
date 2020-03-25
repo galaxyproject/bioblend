@@ -49,3 +49,11 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
             self.assertEqual(download_filename, f.name)
             f.flush()
             self.assertEqual(f.read(), expected_contents)
+
+    @test_util.skip_unless_galaxy('release_19.05')
+    def test_get_datasets(self):
+        datasets = self.gi.datasets.get_datasets()
+        dataset_ids = [dataset['id'] for dataset in datasets]
+        assert self.dataset_id in dataset_ids
+        datasets = self.gi.datasets.get_datasets(limit=0)
+        assert datasets == []
