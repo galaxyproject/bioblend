@@ -1,4 +1,4 @@
-from . import GalaxyTestBase, test_util
+from . import GalaxyTestBase
 
 FOO_DATA = 'foo\nbar\n'
 
@@ -27,21 +27,17 @@ class TestGalaxyFolders(GalaxyTestBase.GalaxyTestBase):
         f2 = self.gi.folders.show_folder(self.folder['id'], contents=True)
         self.assertIn('folder_contents', f2)
         self.assertIn('metadata', f2)
-        # 'folder_name' key of metadata dict was added in release_16.01
-        if 'folder_name' in f2['metadata']:
-            self.assertEqual(self.name, f2['metadata']['folder_name'])
+        self.assertEqual(self.name, f2['metadata']['folder_name'])
 
     def test_delete_folder(self):
         self.sub_folder = self.gi.folders.create_folder(self.folder['id'], self.name)
         self.gi.folders.delete_folder(self.sub_folder['id'])
 
-    @test_util.skip_unless_galaxy("release_15.10")
     def test_update_folder(self):
         self.folder = self.gi.folders.update_folder(self.folder['id'], 'new-name', 'new-description')
         self.assertEqual(self.folder['name'], 'new-name')
         self.assertEqual(self.folder['description'], 'new-description')
 
-    @test_util.skip_unless_galaxy("release_16.01")
     def test_get_set_permissions(self):
         empty_permission = {'add_library_item_role_list': [], 'modify_folder_role_list': [], 'manage_folder_role_list': []}
         # They should be empty to start with

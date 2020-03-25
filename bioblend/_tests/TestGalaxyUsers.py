@@ -2,7 +2,7 @@
 Tests the functionality of the Blend CloudMan API. These tests require working
 credentials to supported cloud infrastructure.
 """
-from . import GalaxyTestBase, test_util
+from . import GalaxyTestBase
 
 
 class TestGalaxyUsers(GalaxyTestBase.GalaxyTestBase):
@@ -23,7 +23,6 @@ class TestGalaxyUsers(GalaxyTestBase.GalaxyTestBase):
 #        self.assertEqual(user['nice_total_disk_usage'], current_user['nice_total_disk_usage'])
 #        self.assertEqual(user['total_disk_usage'], current_user['total_disk_usage'])
 
-    @test_util.skip_unless_galaxy('release_16.01')
     def test_create_remote_user(self):
         # WARNING: only admins can create users!
         # WARNING: Users cannot be purged through the Galaxy API, so execute
@@ -38,7 +37,6 @@ class TestGalaxyUsers(GalaxyTestBase.GalaxyTestBase):
             self.assertEqual(deleted_user['email'], new_user_email)
             self.assertTrue(deleted_user['deleted'])
 
-    @test_util.skip_unless_galaxy('release_16.01')
     def test_create_local_user(self):
         # WARNING: only admins can create users!
         # WARNING: Users cannot be purged through the Galaxy API, so execute
@@ -62,7 +60,6 @@ class TestGalaxyUsers(GalaxyTestBase.GalaxyTestBase):
         self.assertIsNotNone(user['nice_total_disk_usage'])
         self.assertIsNotNone(user['total_disk_usage'])
 
-    @test_util.skip_unless_galaxy('release_17.01')
     def test_update_user(self):
         # WARNING: only admins can create users!
         # WARNING: Users cannot be purged through the Galaxy API, so execute

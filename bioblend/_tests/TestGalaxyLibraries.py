@@ -84,7 +84,6 @@ class TestGalaxyLibraries(GalaxyTestBase.GalaxyTestBase):
         dataset_id = self._test_dataset(history['id'])
         self.gi.libraries.copy_from_dataset(self.library['id'], dataset_id, message='Copied from dataset')
 
-    @test_util.skip_unless_galaxy('release_17.09')
     def test_update_dataset(self):
         library_id = self.library["id"]
         dataset1 = self.gi.libraries.upload_file_contents(library_id, FOO_DATA)
@@ -102,7 +101,6 @@ class TestGalaxyLibraries(GalaxyTestBase.GalaxyTestBase):
         self.assertEqual(set(_[1] for _ in ret['add_library_item_role_list']), set(user_id_list_new))
         self.assertEqual(set(_[1] for _ in ret['manage_library_role_list']), set(user_id_list_new))
 
-    @test_util.skip_unless_galaxy('release_16.04')
     def test_dataset_permissions(self):
         current_user = self.gi.users.get_current_user()
         user_id_list_new = [current_user['id']]

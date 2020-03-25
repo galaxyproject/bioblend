@@ -1,4 +1,4 @@
-dist: xenial
+dist: bionic
 language: python
 python: "2.7"
 services:
@@ -11,32 +11,23 @@ stages:
     if: tag IS present
 
 env:
-  - TOX_ENV=py35 GALAXY_VERSION=dev
-  - TOX_ENV=py35 GALAXY_VERSION=release_20.01
-  - TOX_ENV=py35 GALAXY_VERSION=release_19.09
-  - TOX_ENV=py35 GALAXY_VERSION=release_19.05
-  - TOX_ENV=py35 GALAXY_VERSION=release_19.01
-  - TOX_ENV=py35 GALAXY_VERSION=release_18.09
-  - TOX_ENV=py35 GALAXY_VERSION=release_18.05
-  - TOX_ENV=py35 GALAXY_VERSION=release_18.01
-  - TOX_ENV=py35 GALAXY_VERSION=release_17.09
-  - TOX_ENV=py35 GALAXY_VERSION=release_17.05
-  - TOX_ENV=py35 GALAXY_VERSION=release_17.01
-  - TOX_ENV=py35 GALAXY_VERSION=release_16.10
-  - TOX_ENV=py35 GALAXY_VERSION=release_16.07
-  - TOX_ENV=py35 GALAXY_VERSION=release_16.04
-  - TOX_ENV=py35 GALAXY_VERSION=release_16.01
-  - TOX_ENV=py35 GALAXY_VERSION=release_15.10
-  - TOX_ENV=py35 GALAXY_VERSION=release_15.07
-  - TOX_ENV=py35 GALAXY_VERSION=release_15.05
-  - TOX_ENV=py35 GALAXY_VERSION=release_15.03
+  - TOX_ENV=py36 GALAXY_VERSION=dev
+  - TOX_ENV=py36 GALAXY_VERSION=release_20.01
+  - TOX_ENV=py36 GALAXY_VERSION=release_19.09
+  - TOX_ENV=py36 GALAXY_VERSION=release_19.05
+  - TOX_ENV=py36 GALAXY_VERSION=release_19.01
+  - TOX_ENV=py36 GALAXY_VERSION=release_18.09
+  - TOX_ENV=py36 GALAXY_VERSION=release_18.05
+  - TOX_ENV=py36 GALAXY_VERSION=release_18.01
+  - TOX_ENV=py36 GALAXY_VERSION=release_17.09
 
 matrix:
   include:
     - stage: lint
+      env: []
       python: '3.5'
-      before_install: {}
-      before_script: {}
+      before_install: []
+      before_script: []
       script: tox -e flake8
 
     - stage: test
@@ -47,7 +38,6 @@ matrix:
             - deadsnakes
           packages:
             - python3.8-dev
-            - python3.8-distutils
     - stage: test
       env: TOX_ENV=py37 GALAXY_VERSION=dev
       addons:
@@ -57,13 +47,13 @@ matrix:
           packages:
             - python3.7-dev
     - stage: test
-      env: TOX_ENV=py36 GALAXY_VERSION=dev
+      env: TOX_ENV=py35 GALAXY_VERSION=dev
       addons:
         apt:
           sources:
             - deadsnakes
           packages:
-            - python3.6-dev
+            - python3.5-dev
     - stage: test
       os: osx
       # Selection of Python version is not available via language: on OS X workers, see https://github.com/travis-ci/travis-ci/issues/2312
@@ -77,15 +67,15 @@ matrix:
         - createuser -s postgres
 
     - stage: deploy
-      python: '3.6'
+      python: '3.7'
       env:
         - TWINE_USERNAME=__token__
         # TWINE_PASSWORD environment variable is saved in Travis CI Settings
-      before_install: {}
+      before_install: []
       install:
         - python3 -m pip install --upgrade pip setuptools
         - python3 -m pip install --upgrade twine wheel
-      before_script: {}
+      before_script: []
       script:
         - python3 setup.py sdist bdist_wheel
         - twine check dist/*
@@ -115,10 +105,10 @@ before_script:
   - export BIOBLEND_GALAXY_USER_EMAIL=${USER}@localhost.localdomain
   - DATABASE_CONNECTION=postgresql://postgres:@localhost/galaxy-travis
   - eval "echo \"$(cat "${TRAVIS_BUILD_DIR}/tests/template_galaxy.ini")\"" > "$GALAXY_CONFIG_FILE"
-  # Update kombu requirement (and its dependency amqp) to a version compatible with Python 2.7.11, see https://github.com/celery/kombu/pull/540
+  # Update psycopg2 requirement to a version compatible with glibc 2.26 for Galaxy releases 16.01-18.01, see https://github.com/psycopg/psycopg2-wheels/issues/2
   - |
-    if [ -f eggs.ini ]; then
-      sed -i.bak -e 's/^kombu = .*$/kombu = 3.0.30/' -e 's/^amqp = .*$/amqp = 1.4.8/' eggs.ini;
+    if [ -f lib/galaxy/dependencies/conditional-requirements.txt ]; then
+      sed -i.bak -e 's/psycopg2==2.6.1/psycopg2==2.7.3.1/' lib/galaxy/dependencies/conditional-requirements.txt
     fi
   # Start Galaxy and wait for successful server start
   - export GALAXY_SKIP_CLIENT_BUILD=1

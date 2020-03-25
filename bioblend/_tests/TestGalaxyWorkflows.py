@@ -9,7 +9,6 @@ from . import GalaxyTestBase, test_util
 
 class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
 
-    @test_util.skip_unless_galaxy('release_15.03')
     @test_util.skip_unless_tool("cat1")
     @test_util.skip_unless_tool("cat")
     def test_workflow_scheduling(self):
@@ -59,7 +58,6 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         invocation = self.gi.workflows.show_invocation(workflow_id, invocation_id)
         self.assertEqual(invocation["state"], "scheduled")
 
-    @test_util.skip_unless_galaxy('release_15.03')
     @test_util.skip_unless_tool("cat1")
     @test_util.skip_unless_tool("cat")
     def test_cancelling_workflow_scheduling(self):
@@ -94,9 +92,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
         imported_wf = self.gi.workflows.import_workflow_from_local_path(path)
         self.assertIsInstance(imported_wf, dict)
-        # Galaxy up to release_17.05 adds ' (imported from API)' to the
-        # imported workflow name
-        self.assertIn(imported_wf['name'], ('paste_columns', 'paste_columns (imported from API)'))
+        self.assertEqual(imported_wf['name'], 'paste_columns')
         self.assertTrue(imported_wf['url'].startswith('/api/workflows/'))
         self.assertFalse(imported_wf['deleted'])
         self.assertFalse(imported_wf['published'])
@@ -127,9 +123,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
             wf_dict = json.load(f)
         imported_wf = self.gi.workflows.import_workflow_dict(wf_dict)
         self.assertIsInstance(imported_wf, dict)
-        # Galaxy up to release_17.05 adds ' (imported from API)' to the
-        # imported workflow name
-        self.assertIn(imported_wf['name'], ('paste_columns', 'paste_columns (imported from API)'))
+        self.assertEqual(imported_wf['name'], 'paste_columns')
         self.assertTrue(imported_wf['url'].startswith('/api/workflows/'))
         self.assertFalse(imported_wf['deleted'])
         self.assertFalse(imported_wf['published'])
@@ -200,7 +194,6 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         with self.assertRaises(Exception):
             self.gi.workflows.run_workflow(wf['id'], None)
 
-    @test_util.skip_unless_galaxy('release_15.03')
     def test_invoke_workflow(self):
         path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
         wf = self.gi.workflows.import_workflow_from_local_path(path)

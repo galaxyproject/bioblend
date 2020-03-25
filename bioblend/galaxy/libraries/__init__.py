@@ -542,8 +542,7 @@ class LibraryClient(Client):
 
         .. note::
           For this method to work, the Galaxy instance must have the
-          ``allow_path_paste`` (``allow_library_path_paste`` in Galaxy
-          ``release_17.05`` and earlier) option set to ``true`` in the
+          ``allow_path_paste`` option set to ``true`` in the
           ``config/galaxy.yml`` configuration file.
 
         :type library_id: str
