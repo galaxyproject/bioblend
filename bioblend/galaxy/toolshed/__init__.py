@@ -113,7 +113,6 @@ class ToolShedClient(Client):
         :type install_resolver_dependencies: bool
         :param install_resolver_dependencies: Whether or not to automatically
                                                 install resolver dependencies (e.g. conda).
-                                                This parameter is silently ignored in Galaxy ``release_16.04`` and earlier.
 
         :type tool_panel_section_id: str
         :param tool_panel_section_id: The ID of the Galaxy tool panel section

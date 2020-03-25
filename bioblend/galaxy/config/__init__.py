@@ -39,7 +39,6 @@ class ConfigClient(Client):
     def get_version(self):
         """
         Get the current version of the Galaxy instance.
-        This functionality is available since Galaxy ``release_15.03``.
 
         :rtype: dict
         :return: Version of the Galaxy instance

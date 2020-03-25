@@ -120,13 +120,11 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
         self.assertTrue(dataset["deleted"])
         self.assertFalse(dataset['purged'])
 
-    @test_util.skip_unless_galaxy("release_17.05")
     def test_purge_dataset(self):
         history_id = self.history["id"]
         dataset1_id = self._test_dataset(history_id)
         self.gi.histories.delete_dataset(history_id, dataset1_id, purge=True)
         dataset = self.gi.histories.show_dataset(history_id, dataset1_id)
-        # Galaxy from release_15.03 to release_17.01 wrongly reports dataset["deleted"] as False, see https://github.com/galaxyproject/galaxy/issues/3548
         self.assertTrue(dataset["deleted"])
         self.assertTrue(dataset['purged'])
 

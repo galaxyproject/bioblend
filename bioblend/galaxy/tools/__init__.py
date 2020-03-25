@@ -69,8 +69,7 @@ class ToolClient(Client):
         """
         Install dependencies for a given tool via a resolver.
         This works only for Conda currently.
-        This functionality is available since Galaxy release_16.10
-        and is available only to Galaxy admins.
+        This functionality is available only to Galaxy admins.
 
         :type tool_id: str
         :param tool_id: id of the requested tool

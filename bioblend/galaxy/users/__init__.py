@@ -31,15 +31,13 @@ class UserClient(Client):
         :param f_name: filter for user names. The filter will be active for
             non-admin users only if the Galaxy instance has the
             ``expose_user_name`` option set to ``true`` in the
-            ``config/galaxy.yml`` configuration file. This parameter is silently
-            ignored in Galaxy ``release_15.10`` and earlier.
+            ``config/galaxy.yml`` configuration file.
 
         :type f_any: str
         :param f_any: filter for user email or name. Each filter will be active
             for non-admin users only if the Galaxy instance has the
             corresponding ``expose_user_*`` option set to ``true`` in the
-            ``config/galaxy.yml`` configuration file. This parameter is silently
-            ignored in Galaxy ``release_15.10`` and earlier.
+            ``config/galaxy.yml`` configuration file.
 
         :rtype: list
         :return: a list of dicts with user details.
@@ -176,7 +174,6 @@ class UserClient(Client):
     def get_user_apikey(self, user_id):
         """
         Get the current API key for a given user.
-        This functionality is available since Galaxy ``release_17.01``.
 
         :type user_id: str
         :param user_id: encoded user ID

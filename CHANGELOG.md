@@ -1,7 +1,7 @@
 ### BioBlend v0.14.0 - unreleased
 
-* Dropped support Python 2.7. Dropped support for Galaxy releases 14.10 and
-  15.01. Added support for Python 3.8. Added support for Galaxy releases 19.09
+* Dropped support Python 2.7. Dropped support for Galaxy releases 14.10-17.05.
+  Added support for Python 3.8. Added support for Galaxy releases 19.09
   and 20.01.
 
 * Removed deprecated ``show_stderr()`` and ``show_stdout`` methods of

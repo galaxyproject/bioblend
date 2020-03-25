@@ -170,15 +170,6 @@ class Step(Wrapper):
             raise ValueError('not a step dict')
         if stype not in {'data_collection_input', 'data_input', 'parameter_input', 'pause', 'subworkflow', 'tool'}:
             raise ValueError('Unknown step type: %r' % stype)
-        if self.type == 'tool' and self.tool_inputs:
-            for k, v in self.tool_inputs.items():
-                # In Galaxy before release_17.05, v is a JSON-encoded string
-                if not isinstance(v, str):
-                    break
-                try:
-                    self.tool_inputs[k] = json.loads(v)
-                except ValueError:
-                    break
 
     @property
     def gi_module(self):
@@ -661,12 +652,6 @@ class HistoryDatasetAssociation(Dataset):
             For the purge option to work, the Galaxy instance must have the
             ``allow_user_dataset_purge`` option set to ``true`` in the
             ``config/galaxy.yml`` configuration file.
-
-        .. warning::
-            If you purge a dataset which has not been previously deleted,
-            Galaxy from release_15.03 to release_17.01 does not set the
-            ``deleted`` attribute of the dataset to ``True``, see
-            https://github.com/galaxyproject/galaxy/issues/3548
         """
         self.gi.gi.histories.delete_dataset(self.container.id, self.id, purge=purge)
         self.container.refresh()
@@ -1195,8 +1180,7 @@ class Library(DatasetContainer):
 
         .. note::
           For this method to work, the Galaxy instance must have the
-          ``allow_path_paste`` (``allow_library_path_paste`` in Galaxy
-          ``release_17.05`` and earlier) option set to ``true`` in the
+          ``allow_path_paste`` option set to ``true`` in the
           ``config/galaxy.yml`` configuration file.
 
         :type paths: str or :class:`~collections.abc.Iterable` of str

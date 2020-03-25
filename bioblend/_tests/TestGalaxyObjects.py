@@ -539,7 +539,6 @@ class TestLDContents(GalaxyObjectsTestBase):
         # by the API at the moment
         # self.assertTrue(self.ds.deleted)
 
-    @test_util.skip_unless_galaxy('release_17.09')
     def test_dataset_update(self):
         new_name = 'test_%s' % uuid.uuid4().hex
         new_misc_info = 'Annotation for %s' % new_name
@@ -710,10 +709,8 @@ class TestHDAContents(GalaxyObjectsTestBase):
         self.assertTrue(self.ds.deleted)
         self.assertFalse(self.ds.purged)
 
-    @test_util.skip_unless_galaxy("release_17.05")
     def test_dataset_purge(self):
         self.ds.delete(purge=True)
-        # Galaxy from release_15.03 to release_17.01 wrongly reports ds.deleted as False, see https://github.com/galaxyproject/galaxy/issues/3548
         self.assertTrue(self.ds.deleted)
         self.assertTrue(self.ds.purged)
 
