@@ -129,3 +129,32 @@ class JobsClient(Client):
         """
         url = self._make_url(module_id=job_id) + '/metrics'
         return self._get(url=url)
+
+    def report_error(self, job_id, dataset_id, message, email=None):
+        """
+        Report an error for a given job and dataset.
+
+        :type job_id: str
+        :param job_id: job ID
+
+        :type dataset_id: str
+        :param dataset_id: Dataset ID
+
+        :type message: str
+        :param message: Error message
+
+        :type email: str
+        :param email: Email to submit error report to
+
+        :rtype: dict
+        :return: dict containing job error reply
+        """
+        payload = {
+            "message": message,
+            "dataset_id": dataset_id,
+        }
+        if email is not None:
+            payload["email"] = email
+
+        url = self._make_url(module_id=job_id) + '/error'
+        return self._post(url=url, payload=payload)
