@@ -22,6 +22,11 @@ setup(
     author="Enis Afgan",
     author_email="afgane@gmail.com",
     url="https://bioblend.readthedocs.io/",
+    project_urls={
+        "Bug Tracker": "https://github.com/galaxyproject/bioblend/issues",
+        "Documentation": "https://bioblend.readthedocs.io/",
+        "Source Code": "https://github.com/galaxyproject/bioblend",
+    },
     python_requires='>=3.5',
     install_requires=[
         'boto>=2.9.7',
