@@ -31,7 +31,10 @@ class GalaxyInstance(GalaxyClient):
                     http://127.0.0.1:8080 . If a Galaxy instance is served under
                     a prefix (e.g., http://127.0.0.1:8080/galaxy/), supply the
                     entire URL including the prefix (note that the prefix must
-                    end with a slash).
+                    end with a slash). If a Galaxy instance has HTTP Basic
+                    authentication with username and password, then the
+                    credentials should be included in the URL, e.g.
+                    http://user:pass@host:port/galaxy/
 
         :type key: str
         :param key: User's API key for the given instance of Galaxy, obtained
