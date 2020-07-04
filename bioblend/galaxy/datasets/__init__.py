@@ -128,7 +128,7 @@ class DatasetClient(Client):
     def get_datasets(self, limit=500, offset=0):
         """
         Provide a list of all datasets. Since this may be very large, ``limit``
-        and ``offset`` parameters should be used to speficy the desired range.
+        and ``offset`` parameters should be used to specify the desired range.
 
         :type limit: int
         :param limit: Maximum number of datasets to return.

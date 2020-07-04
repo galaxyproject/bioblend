@@ -13,12 +13,14 @@ with open(os.path.join('bioblend', '__init__.py')) as f:
         if m:
             version = ast.literal_eval(m.group(1))
             break
+with open('README.rst') as f:
+    long_description = f.read()
 
 setup(
     name="bioblend",
     version=version,
     description="CloudMan and Galaxy API library",
-    long_description=open('README.rst').read(),
+    long_description=long_description,
     author="Enis Afgan",
     author_email="afgane@gmail.com",
     url="https://bioblend.readthedocs.io/",

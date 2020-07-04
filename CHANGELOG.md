@@ -4,8 +4,64 @@
   Added support for Python 3.8. Added support for Galaxy releases 19.09, 20.01
   and 20.05.
 
+* Added a new ``invocations`` attribute to ``GalaxyInstance`` objects, which is
+  an instance of the new ``InvocationClient`` class. This new module can be used
+  to get all workflow invocations, show or cancel an invocation, show or pause
+  an invocation step, get a summary or a report for an invocation (thanks to
+  [Simon Bray](https://github.com/simonbray)).
+
+* Added ``get_datasets()`` method to ``DatasetClient`` (thanks to
+  [Simon Bray](https://github.com/simonbray)).
+
+* Added ``import_history()`` method to ``HistoryClient`` (thanks to
+  [David Christiany](https://github.com/davidchristiany) and
+  [Marius van den Beek](https://github.com/mvdbeek)).
+
+* Added ``copy_dataset()`` method to ``HistoryClient`` (thanks to
+  [Simon Bray](https://github.com/simonbray)).
+
+* Added ``get_metrics()`` method to ``JobsClient`` (thanks to
+  [Andreas Skorczyk](https://github.com/AndreasSko)).
+
+* Added ``report_error()`` method to ``JobsClient`` (thanks to
+  [Peter Selten](https://github.com/selten)).
+
+* Added ``get_dataset_permissions()`` and ``set_dataset_permissions()`` methods
+  to ``LibraryClient`` (thanks to
+  [Frederic Sapet](https://github.com/FredericBGA)).
+
+* Added ``update_user()`` method to ``UserClient`` (thanks to
+  [Anthony Bretaudeau](https://github.com/abretaud)).
+
+* Added ``update_workflow()`` method to ``WorkflowClient``.
+
+* Added ``tags`` parameter to ``upload_file_from_url()``,
+  ``upload_file_contents()``, ``upload_file_from_local_path()``,
+  ``upload_file_from_server()`` and ``upload_from_galaxy_filesystem()`` methods
+  of ``LibraryClient`` (thanks to
+  [Anthony Bretaudeau](https://github.com/abretaud)).
+
+* Changed the default for the ``tag_using_filenames`` parameter of
+  ``upload_file_from_server()`` and ``upload_from_galaxy_filesystem()`` methods
+  of ``LibraryClient`` from ``True`` to ``False`` (thanks to
+  [Anthony Bretaudeau](https://github.com/abretaud)).
+
+* Added ``version`` parameter to ``show_workflow()`` and
+  ``export_workflow_dict()`` methods of ``WorkflowClient``.
+
+* Added ``inputs_by`` option to ``invoke_workflow()`` method of
+  ``WorkflowClient`` (thanks to
+  [Marius van den Beek](https://github.com/mvdbeek)).
+
 * Removed deprecated ``show_stderr()`` and ``show_stdout`` methods of
   ``DatasetClient``.
+
+* BioBlend.objects: Allowed workflow steps of type ``parameter_input`` and
+  ``subworkflow``. Added ``parameter_input_ids`` property to ``Workflow``
+  objects (reported by [Nolan Woods](https://github.com/innovate-invent)).
+
+* Moved internal ``_make_url()`` method from ``GalaxyClient`` to ``Client``
+  class.
 
 ### BioBlend v0.13.0 - 2019-08-09
 
@@ -40,7 +96,7 @@
 
 * Improvements to tests and documentation (thanks to
   [Helena Rasche](https://github.com/erasche),
-  [selten](https://github.com/selten) and
+  [Peter Selten](https://github.com/selten) and
   [Pablo Moreno](https://github.com/pcm32)).
 
 ### BioBlend v0.12.0 - 2018-12-17
@@ -49,11 +105,12 @@
   18.09.
 
 * Added ``update_library_dataset()`` method to ``LibraryClient`` (thanks to
-  Anthony Bretaudeau).
+  [Anthony Bretaudeau](https://github.com/abretaud)).
 
 * Added ``preserve_dirs`` and ``tag_using_filenames`` parameters to
   ``upload_file_from_server()`` and ``upload_from_galaxy_filesystem()`` methods
-  of ``LibraryClient`` (thanks to Anthony Bretaudeau).
+  of ``LibraryClient`` (thanks to
+  [Anthony Bretaudeau](https://github.com/abretaud)).
 
 * Removed deprecated ``wait_for_completion`` parameter of
   ``DatasetClient.download_dataset()`` method.
@@ -65,7 +122,7 @@
   ``HistoryDatasetAssociation`` objects.
 
 * BioBlend.objects: added ``update()`` method to ``LibraryDataset`` (thanks to
-  Anthony Bretaudeau).
+  [Anthony Bretaudeau](https://github.com/abretaud)).
 
 * Run tests with pytest instead of nose
 
@@ -297,7 +354,8 @@
   Rossano Atzeni).
 
 * BioBlend.objects: added check to verify that all tools in a workflow are
-  installed on the Galaxy instance (thanks to Gianmauro Cuccuru).
+  installed on the Galaxy instance (thanks to
+  [Gianmauro Cuccuru](https://github.com/gmauro)).
 
 * Removed several deprecated parameters: see commits [19e168f](https://github.com/galaxyproject/bioblend/commit/19e168f5342f4c791d37694d7039a85f2669df71)
   and [442ae98](https://github.com/galaxyproject/bioblend/commit/442ae98037be7455d57be15542553dc848d99431).
@@ -322,10 +380,11 @@
   [Helena Rasche](https://github.com/erasche)).
 
 * Added Galaxy clients for the tool data tables, the roles, and library
-  folders (thanks to Anthony Bretaudeau).
+  folders (thanks to [Anthony Bretaudeau](https://github.com/abretaud)).
 
 * Added method to get the standard error and standard output for the
-  job corresponding to a Galaxy dataset (thanks to Anthony Bretaudeau).
+  job corresponding to a Galaxy dataset (thanks to
+  [Anthony Bretaudeau](https://github.com/abretaud)).
 
 * Added ``get_state()`` method to ``JobsClient``.
 
@@ -365,7 +424,7 @@
   of libraries and histories.
 
 * BioBlend.objects: added ``state`` and ``state_details`` attributes to
- ``History`` objects (thanks to Gianmauro Cuccuru).
+ ``History`` objects (thanks to [Gianmauro Cuccuru](https://github.com/gmauro)).
 
 * BioBlend.objects: renamed ``upload_dataset()`` method to ``upload_file()``
   for ``History`` objects.
@@ -415,7 +474,7 @@
 
 * Added export/download history
 
-* GalaxyClient: changed ``make_put_request`` to return whole ``requests``
+* GalaxyClient: changed ``make_put_request()`` to return whole ``requests``
   response object
 
 * Added Tool wrapper to *BioBlend.objects* plus methods to list tools and get
@@ -423,8 +482,7 @@
 
 * Added ``show_tool()`` method to ``ToolClient`` class
 
-* Added ``name``, ``in_panel`` and
-  ``trackster`` filters to ``get_tools()``
+* Added ``name``, ``in_panel`` and ``trackster`` filters to ``get_tools()``
 
 * Added ``upload_dataset()`` method to ``History`` class.
 
