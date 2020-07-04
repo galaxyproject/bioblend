@@ -585,25 +585,29 @@ class HistoryClient(Client):
         :return: ``jeha_id`` of the export, or empty if ``wait`` is ``False``
           and the export is not ready.
         """
+        if maxwait is not None:
+            assert maxwait >= 0
+        else:
+            if wait:
+                maxwait = sys.maxsize
+            else:
+                maxwait = 0
         params = {
             'gzip': gzip,
             'include_hidden': include_hidden,
             'include_deleted': include_deleted,
         }
         url = '%s/exports' % self._make_url(history_id)
-        if wait and maxwait is None:
-            maxwait = sys.maxsize
         time_left = maxwait
         while True:
             try:
                 r = self._put(payload={}, url=url, params=params)
             except ConnectionError as e:
                 if e.status_code == 202:  # export is not ready
-                    if maxwait is not None:
-                        time_left -= 1
                     if time_left > 0:
                         log.warning("Waiting for the export of history %s to complete. Will wait %i more s", history_id, time_left)
                         time.sleep(1)
+                        time_left -= 1
                     else:
                         return ''
                 else:

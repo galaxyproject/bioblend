@@ -161,10 +161,10 @@ class DatasetClient(Client):
             state = dataset['state']
             if state in TERMINAL_STATES:
                 return dataset
-            time_left -= interval
             if time_left > 0:
                 log.warning("Dataset %s is in non-terminal state %s. Will wait %i more s", dataset_id, state, time_left)
                 time.sleep(min(time_left, interval))
+                time_left -= interval
             else:
                 raise DatasetTimeoutException("Waited too long for dataset %s to complete" % dataset_id)
 

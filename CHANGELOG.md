@@ -60,6 +60,9 @@
   ``subworkflow``. Added ``parameter_input_ids`` property to ``Workflow``
   objects (reported by [Nolan Woods](https://github.com/innovate-invent)).
 
+* Fixed ``HistoryClient.export_history(..., wait=False, maxwait=None)``
+  (reported by [David Christiany](https://github.com/davidchristiany)).
+
 * Moved internal ``_make_url()`` method from ``GalaxyClient`` to ``Client``
   class.
 
