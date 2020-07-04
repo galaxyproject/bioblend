@@ -57,7 +57,7 @@ ld = ld[0]
 
 # Select the blastn step
 
-ws = [_ for _ in iw_details['steps'].itervalues()
+ws = [_ for _ in iw_details['steps'].values()
       if _['tool_id'] and 'blastn' in _['tool_id']]
 assert len(ws) == 1
 ws = ws[0]
@@ -66,7 +66,7 @@ tool_id = ws['tool_id']
 # Get (a copy of) the parameters dict for the selected step
 
 ws_parameters = ws['tool_inputs'].copy()
-for k, v in ws_parameters.iteritems():
+for k, v in ws_parameters.items():
     ws_parameters[k] = json.loads(v)
 
 # Run the workflow on a new history with the selected dataset

@@ -34,7 +34,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
             invocation = self.gi.workflows.show_invocation(workflow_id, invocation_id)
             return dict((s["order_index"], s) for s in invocation["steps"])
 
-        for i in range(20):
+        for _ in range(20):
             if 2 in invocation_steps_by_order_index():
                 break
             time.sleep(.5)
@@ -48,7 +48,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
             self.gi.workflows.show_invocation_step(workflow_id, invocation_id, pause_step["id"])["action"])
         self.gi.workflows.run_invocation_step_action(workflow_id, invocation_id, pause_step["id"], action=True)
         self.assertTrue(self.gi.workflows.show_invocation_step(workflow_id, invocation_id, pause_step["id"])["action"])
-        for i in range(20):
+        for _ in range(20):
             invocation = self.gi.workflows.show_invocation(workflow_id, invocation_id)
             if invocation["state"] == "scheduled":
                 break

@@ -1,6 +1,6 @@
 class HasElements(object):
 
-    def __init__(self, name, type="list", elements=[]):
+    def __init__(self, name, type="list", elements=None):
         self.name = name
         self.type = type
         if isinstance(elements, dict):

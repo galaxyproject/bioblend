@@ -117,7 +117,7 @@ class CloudManLauncher(object):
 
     def launch(self, cluster_name, image_id, instance_type, password,
                kernel_id=None, ramdisk_id=None, key_name='cloudman_key_pair',
-               security_groups=['CloudMan'], placement='', subnet_id=None,
+               security_groups=None, placement='', subnet_id=None,
                ebs_optimized=False, **kwargs):
         """
         Check all the prerequisites (key pair and security groups) for
@@ -139,6 +139,8 @@ class CloudManLauncher(object):
         ``instance_id`` containing the ID of a started instance, and
         ``error`` containing an error message if there was one.
         """
+        if security_groups is None:
+            security_groups = ['CloudMan']
         ret = {'sg_names': [],
                'sg_ids': [],
                'kp_name': '',
@@ -215,7 +217,7 @@ class CloudManLauncher(object):
             ret['rs'] = rs
         except EC2ResponseError as e:
             err_msg = "Problem launching an instance: {0} (code {1}; status {2})" \
-                      .format(e.message, e.error_code, e.status)
+                      .format(str(e), e.error_code, e.status)
             bioblend.log.exception(err_msg)
             ret['error'] = err_msg
             return ret
@@ -228,7 +230,7 @@ class CloudManLauncher(object):
                 except EC2ResponseError as e:
                     err_msg = "Problem with the launched instance object: {0} " \
                               "(code {1}; status {2})" \
-                              .format(e.message, e.error_code, e.status)
+                              .format(str(e), e.error_code, e.status)
                     bioblend.log.exception(err_msg)
                     ret['error'] = err_msg
             else:
@@ -281,7 +283,7 @@ class CloudManLauncher(object):
             err_msg = ("Problem getting security groups. This could indicate a "
                        "problem with your account credentials or permissions: "
                        "{0} (code {1}; status {2})"
-                       .format(e.message, e.error_code, e.status))
+                       .format(str(e), e.error_code, e.status))
             bioblend.log.exception(err_msg)
             progress['error'] = err_msg
             return progress
@@ -300,7 +302,7 @@ class CloudManLauncher(object):
             except EC2ResponseError as e:
                 err_msg = "Problem creating security group '{0}': {1} (code {2}; " \
                           "status {3})" \
-                          .format(sg_name, e.message, e.error_code, e.status)
+                          .format(sg_name, str(e), e.error_code, e.status)
                 bioblend.log.exception(err_msg)
                 progress['error'] = err_msg
         if cmsg:
@@ -322,7 +324,7 @@ class CloudManLauncher(object):
                 except EC2ResponseError as e:
                     err_msg = "A problem adding security group authorizations: {0} " \
                               "(code {1}; status {2})" \
-                              .format(e.message, e.error_code, e.status)
+                              .format(str(e), e.error_code, e.status)
                     bioblend.log.exception(err_msg)
                     progress['error'] = err_msg
             # Add ICMP (i.e., ping) rule required by HTCondor
@@ -340,7 +342,7 @@ class CloudManLauncher(object):
             except EC2ResponseError as e:
                 err_msg = "A problem with security ICMP rule authorization: {0} " \
                           "(code {1}; status {2})" \
-                          .format(e.message, e.error_code, e.status)
+                          .format(str(e), e.error_code, e.status)
                 bioblend.log.exception(err_msg)
                 progress['err_msg'] = err_msg
             # Add rule that allows communication between instances in the same
@@ -365,7 +367,7 @@ class CloudManLauncher(object):
                 except EC2ResponseError as e:
                     err_msg = "A problem with security group group " \
                               "authorization: {0} (code {1}; status {2})" \
-                              .format(e.message, e.error_code, e.status)
+                              .format(str(e), e.error_code, e.status)
                     bioblend.log.exception(err_msg)
                     progress['err_msg'] = err_msg
             bioblend.log.info("Done configuring '%s' security group", cmsg.name)
@@ -414,7 +416,7 @@ class CloudManLauncher(object):
             kps = self.ec2_conn.get_all_key_pairs()
         except EC2ResponseError as e:
             err_msg = "Problem getting key pairs: {0} (code {1}; status {2})" \
-                      .format(e.message, e.error_code, e.status)
+                      .format(str(e), e.error_code, e.status)
             bioblend.log.exception(err_msg)
             progress['error'] = err_msg
             return progress
@@ -427,7 +429,7 @@ class CloudManLauncher(object):
             kp = self.ec2_conn.create_key_pair(key_name)
         except EC2ResponseError as e:
             err_msg = "Problem creating key pair '{0}': {1} (code {2}; status {3})" \
-                      .format(key_name, e.message, e.error_code, e.status)
+                      .format(key_name, str(e), e.error_code, e.status)
             bioblend.log.exception(err_msg)
             progress['error'] = err_msg
             return progress

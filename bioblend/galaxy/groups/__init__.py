@@ -49,7 +49,7 @@ class GroupsClient(Client):
         """
         return self._get(id=group_id)
 
-    def create_group(self, group_name, user_ids=[], role_ids=[]):
+    def create_group(self, group_name, user_ids=None, role_ids=None):
         """
         Create a new group.
 
@@ -71,6 +71,10 @@ class GroupsClient(Client):
               'name': 'My Group Name',
               'url': '/api/groups/7c9636938c3e83bf'}]
         """
+        if user_ids is None:
+            user_ids = []
+        if role_ids is None:
+            role_ids = []
         payload = {
             'name': group_name,
             'user_ids': user_ids,
@@ -78,7 +82,7 @@ class GroupsClient(Client):
         }
         return self._post(payload)
 
-    def update_group(self, group_id, group_name=None, user_ids=[], role_ids=[]):
+    def update_group(self, group_id, group_name=None, user_ids=None, role_ids=None):
         """
         Update a group.
 
@@ -100,6 +104,10 @@ class GroupsClient(Client):
         :rtype: None
         :return: None
         """
+        if user_ids is None:
+            user_ids = []
+        if role_ids is None:
+            role_ids = []
         payload = {
             'name': group_name,
             'user_ids': user_ids,

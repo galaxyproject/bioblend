@@ -53,7 +53,7 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
             invocation = self.gi.invocations.show_invocation(invocation_id)
             return dict((s["order_index"], s) for s in invocation["steps"])
 
-        for i in range(20):
+        for _ in range(20):
             if 2 in invocation_steps_by_order_index():
                 break
             time.sleep(.5)
@@ -64,7 +64,7 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
             self.gi.invocations.show_invocation_step(invocation_id, pause_step["id"])["action"])
         self.gi.invocations.run_invocation_step_action(invocation_id, pause_step["id"], action=True)
         self.assertTrue(self.gi.invocations.show_invocation_step(invocation_id, pause_step["id"])["action"])
-        for i in range(20):
+        for _ in range(20):
             invocation = self.gi.invocations.show_invocation(invocation_id)
             if invocation["state"] == "scheduled":
                 break

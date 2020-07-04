@@ -73,7 +73,7 @@ class CloudManConfig(object):
                  galaxy_data_option='',
                  initial_storage_size=10,
                  key_name='cloudman_key_pair',
-                 security_groups=['CloudMan'],
+                 security_groups=None,
                  placement='',
                  kernel_id=None,
                  ramdisk_id=None,
@@ -160,6 +160,8 @@ class CloudManConfig(object):
                                  extra parameters to the ``CloudManInstance.launch_instance``
                                  method.
         """
+        if security_groups is None:
+            security_groups = ['CloudMan']
         self.set_connection_parameters(access_key, secret_key, cloud_metadata)
         self.set_pre_launch_parameters(
             cluster_name, image_id, instance_type,
@@ -176,8 +178,9 @@ class CloudManConfig(object):
     def set_pre_launch_parameters(
             self, cluster_name, image_id, instance_type, password,
             kernel_id=None, ramdisk_id=None, key_name='cloudman_key_pair',
-            security_groups=['CloudMan'], placement='',
-            block_until_ready=False):
+            security_groups=None, placement='', block_until_ready=False):
+        if security_groups is None:
+            security_groups = ['CloudMan']
         self.cluster_name = cluster_name
         self.image_id = image_id
         self.instance_type = instance_type
@@ -711,7 +714,7 @@ class CloudManInstance(GenericVMInstance):
                                         timeout=15)
         return result
 
-    def _make_get_request(self, url, parameters={}, timeout=None):
+    def _make_get_request(self, url, parameters=None, timeout=None):
         """
         Private function that makes a GET request to the nominated ``url``,
         with the provided GET ``parameters``. Optionally, set the ``timeout``
@@ -719,6 +722,8 @@ class CloudManInstance(GenericVMInstance):
         particularly useful when terminating a cluster as it may terminate
         before sending a response.
         """
+        if parameters is None:
+            parameters = {}
         req_url = '/'.join((self.cloudman_url, 'root', url))
         r = requests.get(req_url, params=parameters, auth=("", self.password), timeout=timeout)
         try:
