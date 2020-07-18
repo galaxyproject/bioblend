@@ -14,7 +14,7 @@ GalaxyInstance
 .. _libraries-api:
 
 Config
---------
+------
 
 .. automodule:: bioblend.galaxy.config
 
@@ -71,6 +71,13 @@ Histories
 ---------
 
 .. automodule:: bioblend.galaxy.histories
+
+-----
+
+Invocations
+-----------
+
+.. automodule:: bioblend.galaxy.invocations
 
 -----
 
@@ -131,7 +138,7 @@ Users
 -----
 
 Visual
---------
+------
 
 .. automodule:: bioblend.galaxy.visual
 
