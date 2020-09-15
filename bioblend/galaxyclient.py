@@ -121,6 +121,9 @@ class GalaxyClient(object):
         r = requests.post(url, data=payload, headers=headers,
                           verify=self.verify, params=post_params,
                           timeout=self.timeout)
+        if r.request.method != 'POST':
+            raise ConnectionError("POST request was unsuccessful. Check the URL is specified with https://",
+                    body='%s...' % r.text[:200], status_code=r.status_code)
         if r.status_code == 200:
             try:
                 return r.json()
