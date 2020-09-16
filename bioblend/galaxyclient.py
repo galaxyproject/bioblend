@@ -71,6 +71,7 @@ class GalaxyClient(object):
         kwargs.setdefault('verify', self.verify)
         kwargs.setdefault('timeout', self.timeout)
         r = requests.get(url, **kwargs)
+        self._check_request_method(r, 'GET')
         return r
 
     def make_post_request(self, url, payload, params=None, files_attached=False):
@@ -121,9 +122,8 @@ class GalaxyClient(object):
         r = requests.post(url, data=payload, headers=headers,
                           verify=self.verify, params=post_params,
                           timeout=self.timeout)
-        if r.request.method != 'POST':
-            raise ConnectionError("POST request was unsuccessful. Check the URL is specified with https://",
-                    body='%s...' % r.text[:200], status_code=r.status_code)
+
+        self._check_request_method(r, 'POST')
         if r.status_code == 200:
             try:
                 return r.json()
@@ -159,6 +159,7 @@ class GalaxyClient(object):
         headers = self.json_headers
         r = requests.delete(url, verify=self.verify, data=payload, params=params,
                             headers=headers, timeout=self.timeout)
+        self._check_request_method(r, 'DELETE')
         return r
 
     def make_put_request(self, url, payload=None, params=None):
@@ -179,6 +180,7 @@ class GalaxyClient(object):
         headers = self.json_headers
         r = requests.put(url, data=payload, params=params, headers=headers,
                          verify=self.verify, timeout=self.timeout)
+        self._check_request_method(r, 'PUT')
         if r.status_code == 200:
             try:
                 return r.json()
@@ -207,6 +209,7 @@ class GalaxyClient(object):
         headers = self.json_headers
         r = requests.patch(url, data=payload, params=params, headers=headers,
                            verify=self.verify, timeout=self.timeout)
+        self._check_request_method(r, 'PATCH')
         if r.status_code == 200:
             try:
                 return r.json()
@@ -240,3 +243,11 @@ class GalaxyClient(object):
     @property
     def default_params(self):
         return {'key': self.key}
+
+    def _check_request_method(self, r, expected_method):
+        if r.request.method != expected_method:
+            raise ConnectionError("A {} request should have been made, but for some reason a {} request was made "
+                                  "instead. Check the URL is specified with https://. Contents of the GET request "
+                                  "were".format(expected_method, r.request.method), body='%s...' % r.text[:200],
+                                  status_code=r.status_code)
+        return
