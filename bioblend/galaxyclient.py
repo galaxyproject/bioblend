@@ -247,7 +247,7 @@ class GalaxyClient(object):
     def _check_request_method(self, r, expected_method):
         if r.request.method != expected_method:
             raise ConnectionError("A {} request should have been made, but for some reason a {} request was made "
-                                  "instead. Check the URL is specified with https://. Contents of the GET request "
+                                  "instead. Check the URL is specified with https://. Contents of the request "
                                   "were".format(expected_method, r.request.method), body='%s...' % r.text[:200],
                                   status_code=r.status_code)
         return
