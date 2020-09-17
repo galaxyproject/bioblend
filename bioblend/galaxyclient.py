@@ -70,8 +70,7 @@ class GalaxyClient(object):
         kwargs['params'] = params
         kwargs.setdefault('verify', self.verify)
         kwargs.setdefault('timeout', self.timeout)
-        r = requests.get(url, **kwargs)
-        self._check_request_method(r, 'GET')
+        r = requests.get(url, allow_redirects=False, **kwargs)
         return r
 
     def make_post_request(self, url, payload, params=None, files_attached=False):
@@ -121,9 +120,7 @@ class GalaxyClient(object):
 
         r = requests.post(url, data=payload, headers=headers,
                           verify=self.verify, params=post_params,
-                          timeout=self.timeout)
-
-        self._check_request_method(r, 'POST')
+                          timeout=self.timeout, allow_redirects=False)
         if r.status_code == 200:
             try:
                 return r.json()
@@ -158,8 +155,7 @@ class GalaxyClient(object):
             payload = json.dumps(payload)
         headers = self.json_headers
         r = requests.delete(url, verify=self.verify, data=payload, params=params,
-                            headers=headers, timeout=self.timeout)
-        self._check_request_method(r, 'DELETE')
+                            headers=headers, timeout=self.timeout, allow_redirects=False)
         return r
 
     def make_put_request(self, url, payload=None, params=None):
@@ -179,8 +175,7 @@ class GalaxyClient(object):
         payload = json.dumps(payload)
         headers = self.json_headers
         r = requests.put(url, data=payload, params=params, headers=headers,
-                         verify=self.verify, timeout=self.timeout)
-        self._check_request_method(r, 'PUT')
+                         verify=self.verify, timeout=self.timeout, allow_redirects=False)
         if r.status_code == 200:
             try:
                 return r.json()
@@ -208,8 +203,7 @@ class GalaxyClient(object):
         payload = json.dumps(payload)
         headers = self.json_headers
         r = requests.patch(url, data=payload, params=params, headers=headers,
-                           verify=self.verify, timeout=self.timeout)
-        self._check_request_method(r, 'PATCH')
+                           verify=self.verify, timeout=self.timeout, allow_redirects=False)
         if r.status_code == 200:
             try:
                 return r.json()
@@ -243,11 +237,3 @@ class GalaxyClient(object):
     @property
     def default_params(self):
         return {'key': self.key}
-
-    def _check_request_method(self, r, expected_method):
-        if r.request.method != expected_method:
-            raise ConnectionError("A {} request should have been made, but for some reason a {} request was made "
-                                  "instead. Check the URL is specified with https://. Contents of the request "
-                                  "were".format(expected_method, r.request.method), body='%s...' % r.text[:200],
-                                  status_code=r.status_code)
-        return
