@@ -120,7 +120,7 @@ class GalaxyClient(object):
 
         r = requests.post(url, data=payload, headers=headers,
                           verify=self.verify, params=post_params,
-                          timeout=self.timeout)
+                          timeout=self.timeout, allow_redirects=False)
         if r.status_code == 200:
             try:
                 return r.json()
@@ -155,7 +155,7 @@ class GalaxyClient(object):
             payload = json.dumps(payload)
         headers = self.json_headers
         r = requests.delete(url, verify=self.verify, data=payload, params=params,
-                            headers=headers, timeout=self.timeout)
+                            headers=headers, timeout=self.timeout, allow_redirects=False)
         return r
 
     def make_put_request(self, url, payload=None, params=None):
@@ -175,7 +175,7 @@ class GalaxyClient(object):
         payload = json.dumps(payload)
         headers = self.json_headers
         r = requests.put(url, data=payload, params=params, headers=headers,
-                         verify=self.verify, timeout=self.timeout)
+                         verify=self.verify, timeout=self.timeout, allow_redirects=False)
         if r.status_code == 200:
             try:
                 return r.json()
@@ -203,7 +203,7 @@ class GalaxyClient(object):
         payload = json.dumps(payload)
         headers = self.json_headers
         r = requests.patch(url, data=payload, params=params, headers=headers,
-                           verify=self.verify, timeout=self.timeout)
+                           verify=self.verify, timeout=self.timeout, allow_redirects=False)
         if r.status_code == 200:
             try:
                 return r.json()
