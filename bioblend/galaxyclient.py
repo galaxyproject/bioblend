@@ -70,7 +70,7 @@ class GalaxyClient(object):
         kwargs['params'] = params
         kwargs.setdefault('verify', self.verify)
         kwargs.setdefault('timeout', self.timeout)
-        r = requests.get(url, allow_redirects=False, **kwargs)
+        r = requests.get(url, **kwargs)
         return r
 
     def make_post_request(self, url, payload, params=None, files_attached=False):
