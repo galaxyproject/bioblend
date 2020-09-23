@@ -318,10 +318,17 @@ class HistoryClient(Client):
         :param history_id: Encoded history ID
 
         :type dataset_id: str
-        :param dataset_id: Id of the dataset
+        :param dataset_id: ID of the dataset
 
         :type name: str
         :param name: Replace history dataset name with the given string
+
+        :type datatype: str
+        :param datatype: Replace the datatype of the history dataset with the
+          given string. The string must be a valid Galaxy datatype, both the
+          current and the target datatypes must allow datatype changes, and the
+          dataset must not be in use as input or output of a running job
+          (including uploads), otherwise an error will be raised.
 
         :type genome_build: str
         :param genome_build: Replace history dataset genome build (dbkey)
