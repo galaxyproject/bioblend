@@ -12,6 +12,7 @@ stages:
 
 env:
   - TOX_ENV=py36 GALAXY_VERSION=dev
+  - TOX_ENV=py36 GALAXY_VERSION=release_20.09
   - TOX_ENV=py36 GALAXY_VERSION=release_20.05
   - TOX_ENV=py36 GALAXY_VERSION=release_20.01
   - TOX_ENV=py36 GALAXY_VERSION=release_19.09

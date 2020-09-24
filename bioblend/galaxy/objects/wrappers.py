@@ -1436,7 +1436,7 @@ class HistoryPreview(Preview):
     Instances of this class wrap dictionaries obtained by getting
     ``/api/histories`` from Galaxy.
     """
-    BASE_ATTRS = Preview.BASE_ATTRS + ('tags',)
+    BASE_ATTRS = Preview.BASE_ATTRS + ('annotation', 'published', 'purged', 'tags',)
 
     def __init__(self, pw_dict, gi=None):
         super().__init__(pw_dict, gi=gi)

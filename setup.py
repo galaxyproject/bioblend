@@ -19,7 +19,7 @@ with open('README.rst') as f:
 setup(
     name="bioblend",
     version=version,
-    description="CloudMan and Galaxy API library",
+    description="Galaxy and CloudMan API library",
     long_description=long_description,
     author="Enis Afgan",
     author_email="afgane@gmail.com",
@@ -49,7 +49,7 @@ setup(
     license='MIT',
     platforms="Posix; MacOS X; Windows",
     classifiers=[
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
@@ -58,6 +58,6 @@ setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
-        "Topic :: Scientific/Engineering",
+        "Topic :: Scientific/Engineering :: Bio-Informatics",
     ]
 )
