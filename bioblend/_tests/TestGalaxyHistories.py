@@ -195,5 +195,16 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
         self._wait_and_verify_dataset(copied_dataset['id'], expected_contents)
         self.gi.histories.delete_history(self.history_id2, purge=True)
 
+    @test_util.skip_unless_galaxy('release_20.09')
+    def test_update_dataset_datatype(self):
+        history_id = self.history["id"]
+        dataset1_id = self._test_dataset(history_id)
+        self._wait_and_verify_dataset(dataset1_id, b'1\t2\t3\n')
+        original_hda = self.gi.datasets.show_dataset(dataset1_id)
+        assert original_hda['extension'] == 'bed'
+        self.gi.histories.update_dataset(history_id, dataset1_id, datatype='tabular')
+        updated_hda = self.gi.datasets.show_dataset(dataset1_id)
+        assert updated_hda['extension'] == 'tabular'
+
     def tearDown(self):
         self.gi.histories.delete_history(self.history['id'], purge=True)
