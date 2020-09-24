@@ -39,7 +39,7 @@ do
     h) show_help
        exit;;
     c) c_val=1;;
-    g) g_val=$(get_abs_dirname "$OPTARG");;
+    g) GALAXY_DIR=$(get_abs_dirname "$OPTARG");;
     e) e_val=$OPTARG;;
     p) GALAXY_PORT=$OPTARG;;
     t) t_val=$OPTARG;;
@@ -47,7 +47,7 @@ do
   esac
 done
 
-if [ -z "$g_val" ]; then
+if [ -z "$GALAXY_DIR" ]; then
   echo "Error: missing -g value."
   show_help
   exit 1
@@ -64,7 +64,7 @@ python3 setup.py install
 python3 -m pip install --upgrade "tox>=1.8.0"
 
 # Setup Galaxy
-cd "${g_val}"
+cd "${GALAXY_DIR}"
 if [ -n "${r_val}" ]; then
     # Update repository (may change the sample files or the list of eggs)
     git fetch
@@ -114,7 +114,7 @@ exit_code=$?
 deactivate
 
 # Stop Galaxy
-cd "${g_val}"
+cd "${GALAXY_DIR}"
 GALAXY_RUN_ALL=1 "${BIOBLEND_DIR}/run_galaxy.sh" --daemon stop
 # Remove temporary directory if -c is specified or if all tests passed
 if [ -n "${c_val}" ] || [ $exit_code -eq 0 ]; then
