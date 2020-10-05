@@ -1,5 +1,3 @@
-from __future__ import absolute_import, print_function
-
 import json
 import os
 import sys
@@ -37,7 +35,7 @@ w = w[0]
 
 data = {'workflow_id': w['id']}
 iw = common.post(API_KEY, '%s/workflows/import' % API_URL, data)
-iw_details = common.get(API_KEY, '%s/workflows/%s' % (API_URL, iw['id']))
+iw_details = common.get(API_KEY, '{}/workflows/{}'.format(API_URL, iw['id']))
 
 # Select the "Orione SupMat" library
 
@@ -50,7 +48,7 @@ l = l[0]
 # Select the "/Metagenomics/MetagenomicsDataset.fq" dataset
 
 ds_name = '/Metagenomics/MetagenomicsDataset.fq'
-contents = common.get(API_KEY, '%s/libraries/%s/contents' % (API_URL, l['id']))
+contents = common.get(API_KEY, '{}/libraries/{}/contents'.format(API_URL, l['id']))
 ld = [_ for _ in contents if _['type'] == 'file' and _['name'] == ds_name]
 assert len(ld) == 1
 ld = ld[0]
@@ -84,5 +82,5 @@ data['ds_map'] = {input_step_id: {'src': 'ld', 'id': ld['id']}}
 data['history'] = history_name
 r_dict = common.post(API_KEY, '%s/workflows' % API_URL, data)
 
-print('Running workflow: %s [%s]' % (iw['name'], iw['id']))
-print('Output history: %s [%s]' % (history_name, r_dict['history']))
+print('Running workflow: {} [{}]'.format(iw['name'], iw['id']))
+print('Output history: {} [{}]'.format(history_name, r_dict['history']))

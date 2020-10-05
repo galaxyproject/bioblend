@@ -101,4 +101,4 @@ class ConnectionError(Exception):
         self.status_code = status_code
 
     def __str__(self):
-        return "{0}: {1}".format(self.args[0], self.body)
+        return "{}: {}".format(self.args[0], self.body)

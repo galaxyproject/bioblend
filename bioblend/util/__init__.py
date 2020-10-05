@@ -2,7 +2,7 @@ import os
 from collections import namedtuple
 
 
-class Bunch(object):
+class Bunch:
     """
     A convenience class to allow dict keys to be represented as object fields.
 

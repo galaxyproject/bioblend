@@ -12,7 +12,6 @@ Usage::
 Example:
 python start_cloudman.py "cluster bioblend" pwd SGE m1.small ami-00000032 <access_key> <secret_key>
 """
-from __future__ import print_function
 
 import sys
 
@@ -49,7 +48,7 @@ def start_cloudman(name, pwd, cm_type, inst_type, ami, ak, sk):
         cloudman_type=cm_type, initial_storage_size=2, placement='melbourne-np')
     print("Configured an instance; waiting to launch and boot...")
     cmi = CloudManInstance.launch_instance(cmc)
-    print("Done! CloudMan IP is {0}".format(cmi.cloudman_url))
+    print(f"Done! CloudMan IP is {cmi.cloudman_url}")
     return cmc, cmi
 
 

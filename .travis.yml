@@ -27,7 +27,7 @@ matrix:
   include:
     - stage: lint
       env: []
-      python: '3.5'
+      python: '3.6'
       before_install: []
       before_script: []
       script: tox -e flake8
@@ -48,14 +48,6 @@ matrix:
             - deadsnakes
           packages:
             - python3.7-dev
-    - stage: test
-      env: TOX_ENV=py35 GALAXY_VERSION=dev
-      addons:
-        apt:
-          sources:
-            - deadsnakes
-          packages:
-            - python3.5-dev
     - stage: test
       os: osx
       # Selection of Python version is not available via language: on OS X workers, see https://github.com/travis-ci/travis-ci/issues/2312

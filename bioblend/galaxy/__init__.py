@@ -96,4 +96,4 @@ class GalaxyInstance(GalaxyClient):
         """
         A nicer representation of this GalaxyInstance object
         """
-        return "GalaxyInstance object for Galaxy at {0}".format(self.base_url)
+        return f"GalaxyInstance object for Galaxy at {self.base_url}"

@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 import os
 import sys
 
@@ -42,15 +40,15 @@ input_labels = [
     'Left/Forward FASTQ Reads',
     'Right/Reverse FASTQ Reads',
 ]
-input_map = dict((label, h.import_dataset(get_one(l.get_datasets(name=name))))
-                 for name, label in zip(ds_names, input_labels))
+input_map = {label: h.import_dataset(get_one(l.get_datasets(name=name)))
+             for name, label in zip(ds_names, input_labels)}
 
 # Set the "hash_length" parameter to different values for the 3 "velveth" steps
 
 lengths = {'19', '23', '29'}
 ws_ids = iw.tool_labels_to_ids['velveth']
 assert len(ws_ids) == len(lengths)
-params = dict((id_, {'hash_length': v}) for id_, v in zip(ws_ids, lengths))
+params = {id_: {'hash_length': v} for id_, v in zip(ws_ids, lengths)}
 
 # Set the "ins_length" runtime parameter to the same value for the 3
 # "velvetg" steps
@@ -74,5 +72,5 @@ params[
 outputs, out_hist = iw.run(input_map, h, params=params)
 assert out_hist.name == history_name
 
-print('Running workflow: %s [%s]' % (iw.name, iw.id))
-print('Output history: %s [%s]' % (out_hist.name, out_hist.id))
+print(f'Running workflow: {iw.name} [{iw.id}]')
+print(f'Output history: {out_hist.name} [{out_hist.id}]')

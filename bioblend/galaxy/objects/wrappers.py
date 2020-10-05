@@ -41,7 +41,7 @@ __all__ = (
 )
 
 
-class Wrapper(object, metaclass=abc.ABCMeta):
+class Wrapper(metaclass=abc.ABCMeta):
     """
     Abstract base class for Galaxy entity wrappers.
 
@@ -146,7 +146,7 @@ class Wrapper(object, metaclass=abc.ABCMeta):
             self.touch()
 
     def __repr__(self):
-        return "%s(%r)" % (self.__class__.__name__, self.wrapped)
+        return f"{self.__class__.__name__}({self.wrapped!r})"
 
 
 class Step(Wrapper):
@@ -218,7 +218,7 @@ class Workflow(Wrapper):
         object.__setattr__(self, 'inv_dag', inv_dag)
         object.__setattr__(self, 'source_ids', heads - tails)
         assert set(self.inputs) == self.data_collection_input_ids | self.data_input_ids | self.parameter_input_ids, \
-            "inputs is %r, while data_collection_input_ids is %r, data_input_ids is %r and parameter_input_ids is %r" % (
+            "inputs is {!r}, while data_collection_input_ids is {!r}, data_input_ids is {!r} and parameter_input_ids is {!r}".format(
                 self.inputs, self.data_collection_input_ids, self.data_input_ids, self.parameter_input_ids)
         object.__setattr__(self, 'sink_ids', tails - heads)
         object.__setattr__(self, 'missing_ids', missing_ids)
@@ -258,7 +258,7 @@ class Workflow(Wrapper):
         """
         ids = []
         source_ids = self.source_ids.copy()
-        inv_dag = dict((k, v.copy()) for k, v in self.inv_dag.items())
+        inv_dag = {k: v.copy() for k, v in self.inv_dag.items()}
         while source_ids:
             head = source_ids.pop()
             ids.append(head)
@@ -428,7 +428,7 @@ class Workflow(Wrapper):
             raise RuntimeError('workflow is not mapped to a Galaxy object')
         if not self.is_runnable:
             raise RuntimeError('workflow has missing tools: %s' % ', '.join(
-                '%s[%s]' % (self.steps[_].tool_id, _)
+                '{}[{}]'.format(self.steps[_].tool_id, _)
                 for _ in self.missing_ids))
         kwargs = {
             'dataset_map': self.convert_input_map(input_map or {}),
@@ -613,7 +613,7 @@ class HistoryDatasetAssociation(Dataset):
     @property
     def _stream_url(self):
         base_url = self.gi.gi.histories._make_url(module_id=self.container.id, contents=True)
-        return "%s/%s/display" % (base_url, self.id)
+        return f"{base_url}/{self.id}/display"
 
     def update(self, **kwds):
         """

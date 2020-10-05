@@ -32,7 +32,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
 
         def invocation_steps_by_order_index():
             invocation = self.gi.workflows.show_invocation(workflow_id, invocation_id)
-            return dict((s["order_index"], s) for s in invocation["steps"])
+            return {s["order_index"]: s for s in invocation["steps"]}
 
         for _ in range(20):
             if 2 in invocation_steps_by_order_index():
@@ -104,7 +104,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
             dir_contents = os.listdir(export_dir)
             self.assertEqual(len(dir_contents), 1)
             export_path = os.path.join(export_dir, dir_contents[0])
-            with open(export_path, 'r') as f:
+            with open(export_path) as f:
                 exported_wf_dict = json.load(f)
         finally:
             shutil.rmtree(export_dir)
@@ -119,7 +119,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
 
     def test_import_export_workflow_dict(self):
         path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
-        with open(path, 'r') as f:
+        with open(path) as f:
             wf_dict = json.load(f)
         imported_wf = self.gi.workflows.import_workflow_dict(wf_dict)
         self.assertIsInstance(imported_wf, dict)
@@ -132,7 +132,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
 
     def test_import_publish_workflow_dict(self):
         path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
-        with open(path, 'r') as f:
+        with open(path) as f:
             wf_dict = json.load(f)
         imported_wf = self.gi.workflows.import_workflow_dict(wf_dict, publish=True)
         self.assertIsInstance(imported_wf, dict)

@@ -77,7 +77,7 @@ class DatasetClient(Client):
         """
         dataset = self._block_until_dataset_terminal(dataset_id, maxwait=maxwait)
         if not dataset['state'] == 'ok':
-            raise DatasetStateException("Dataset state is not 'ok'. Dataset id: %s, current state: %s" % (dataset_id, dataset['state']))
+            raise DatasetStateException("Dataset state is not 'ok'. Dataset id: {}, current state: {}".format(dataset_id, dataset['state']))
 
         file_ext = dataset.get('file_ext')
         # Resort to 'data' when Galaxy returns an empty or temporary extension

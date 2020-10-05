@@ -20,7 +20,7 @@ def _get_error_info(hda):
     return msg
 
 
-class GalaxyInstance(object):
+class GalaxyInstance:
     """
     A representation of an instance of Galaxy, identified by a URL and
     a user's API key.

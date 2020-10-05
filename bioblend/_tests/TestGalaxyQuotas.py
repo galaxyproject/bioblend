@@ -37,7 +37,7 @@ class TestGalaxyQuotas(GalaxyTestBase.GalaxyTestBase):
             description='asdf', default='registered', operation='-',
             amount='.01 TB'
         )
-        self.assertIn("""Quota '%s' has been renamed to '%s-new'""" % (self.quota_name, self.quota_name), response)
+        self.assertIn(f"""Quota '{self.quota_name}' has been renamed to '{self.quota_name}-new'""", response)
 
         quota = self.gi.quotas.show_quota(self.quota['id'])
         self.assertEqual(quota['name'], self.quota_name + '-new')

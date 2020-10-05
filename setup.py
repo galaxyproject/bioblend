@@ -29,7 +29,7 @@ setup(
         "Documentation": "https://bioblend.readthedocs.io/",
         "Source Code": "https://github.com/galaxyproject/bioblend",
     },
-    python_requires='>=3.5',
+    python_requires='>=3.6',
     install_requires=[
         'boto>=2.9.7',
         'pyyaml',
@@ -54,7 +54,6 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",

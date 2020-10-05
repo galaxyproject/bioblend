@@ -161,11 +161,11 @@ class TestWorkflow(unittest.TestCase):
         self.assertEqual(self.wf.published, False)
         self.assertEqual(self.wf.tags, [])
         self.assertEqual(
-            self.wf.input_labels_to_ids, {'Input Dataset': set(['571', '572'])})
-        self.assertEqual(self.wf.tool_labels_to_ids, {'Paste1': set(['573'])})
-        self.assertEqual(self.wf.data_input_ids, set(['571', '572']))
-        self.assertEqual(self.wf.source_ids, set(['571', '572']))
-        self.assertEqual(self.wf.sink_ids, set(['573']))
+            self.wf.input_labels_to_ids, {'Input Dataset': {'571', '572'}})
+        self.assertEqual(self.wf.tool_labels_to_ids, {'Paste1': {'573'}})
+        self.assertEqual(self.wf.data_input_ids, {'571', '572'})
+        self.assertEqual(self.wf.source_ids, {'571', '572'})
+        self.assertEqual(self.wf.sink_ids, {'573'})
 
     def test_dag(self):
         inv_dag = {}
@@ -190,8 +190,8 @@ class TestWorkflow(unittest.TestCase):
             self.assertEqual(s.id, sid)
             self.assertIn(sid, steps)
             self.assertIs(s.parent, self.wf)
-        self.assertEqual(self.wf.data_input_ids, set(['571', '572']))
-        self.assertEqual(self.wf.tool_ids, set(['573']))
+        self.assertEqual(self.wf.data_input_ids, {'571', '572'})
+        self.assertEqual(self.wf.tool_ids, {'573'})
 
     def test_taint(self):
         self.assertFalse(self.wf.is_modified)
@@ -199,22 +199,22 @@ class TestWorkflow(unittest.TestCase):
         self.assertTrue(self.wf.is_modified)
 
     def test_input_map(self):
-        class DummyLD(object):
+        class DummyLD:
             SRC = 'ld'
 
             def __init__(self, id_):
                 self.id = id_
 
         label = 'Input Dataset'
-        self.assertEqual(self.wf.input_labels, set([label]))
+        self.assertEqual(self.wf.input_labels, {label})
         input_map = self.wf.convert_input_map(
             {label: [DummyLD('a'), DummyLD('b')]})
         # {'571': {'id': 'a', 'src': 'ld'}, '572': {'id': 'b', 'src': 'ld'}}
         # OR
         # {'571': {'id': 'b', 'src': 'ld'}, '572': {'id': 'a', 'src': 'ld'}}
-        self.assertEqual(set(input_map), set(['571', '572']))
+        self.assertEqual(set(input_map), {'571', '572'})
         for d in input_map.values():
-            self.assertEqual(set(d), set(['id', 'src']))
+            self.assertEqual(set(d), {'id', 'src'})
             self.assertEqual(d['src'], 'ld')
             self.assertIn(d['id'], 'ab')
 
@@ -318,9 +318,9 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
     #   * we can't publish a wf from the API
     #   * we can't directly get another user's wf
     def test_workflow_from_shared(self):
-        all_prevs = dict(
-            (_.id, _) for _ in self.gi.workflows.get_previews(published=True)
-        )
+        all_prevs = {
+            _.id: _ for _ in self.gi.workflows.get_previews(published=True)
+        }
         pub_only_ids = set(all_prevs).difference(
             _.id for _ in self.gi.workflows.get_previews())
         if pub_only_ids:
@@ -368,7 +368,7 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
             obj_type)
 
         def ids(seq):
-            return set(_.id for _ in seq)
+            return {_.id for _ in seq}
 
         names = ['test_%s' % uuid.uuid4().hex for _ in range(2)]
         objs = []
@@ -445,7 +445,7 @@ class TestLibrary(GalaxyObjectsTestBase):
 
     def _check_datasets(self, dss):
         self.assertEqual(len(dss), len(self.lib.dataset_ids))
-        self.assertEqual(set(_.id for _ in dss), set(self.lib.dataset_ids))
+        self.assertEqual({_.id for _ in dss}, set(self.lib.dataset_ids))
         for ds in dss:
             self.assertIs(ds.container, self.lib)
 
@@ -498,7 +498,7 @@ class TestLibrary(GalaxyObjectsTestBase):
         dss, _ = upload_from_fs(self.lib, bnames)
         retrieved = self.lib.get_datasets()
         self.assertEqual(len(dss), len(retrieved))
-        self.assertEqual(set(_.id for _ in dss), set(_.id for _ in retrieved))
+        self.assertEqual({_.id for _ in dss}, {_.id for _ in retrieved})
         name = '/%s' % bnames[0]
         selected = self.lib.get_datasets(name=name)
         self.assertEqual(len(selected), 1)
@@ -608,7 +608,7 @@ class TestHistory(GalaxyObjectsTestBase):
         lib.delete()
         retrieved = self.hist.get_datasets()
         self.assertEqual(len(hdas), len(retrieved))
-        self.assertEqual(set(_.id for _ in hdas), set(_.id for _ in retrieved))
+        self.assertEqual({_.id for _ in hdas}, {_.id for _ in retrieved})
         selected = self.hist.get_datasets(name=bnames[0])
         self.assertEqual(len(selected), 1)
         self.assertEqual(selected[0].name, bnames[0])

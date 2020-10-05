@@ -165,7 +165,7 @@ class WorkflowClient(Client):
              'id': '94bac0a90086bdcf'}
 
         """
-        with open(file_local_path, 'r') as fp:
+        with open(file_local_path) as fp:
             workflow_json = json.load(fp)
 
         return self.import_workflow_dict(workflow_json, publish)
@@ -381,7 +381,7 @@ class WorkflowClient(Client):
             payload['replacement_params'] = replacement_params
 
         if history_id:
-            payload['history'] = 'hist_id={0}'.format(history_id)
+            payload['history'] = f'hist_id={history_id}'
         elif history_name:
             payload['history'] = history_name
         if import_inputs_to_history is False:
@@ -569,7 +569,7 @@ class WorkflowClient(Client):
             payload['replacement_params'] = replacement_params
 
         if history_id:
-            payload['history'] = 'hist_id={0}'.format(history_id)
+            payload['history'] = f'hist_id={history_id}'
         elif history_name:
             payload['history'] = history_name
         if import_inputs_to_history is False:

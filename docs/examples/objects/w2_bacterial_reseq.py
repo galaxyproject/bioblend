@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 import os
 import sys
 
@@ -44,8 +42,8 @@ input_labels = [
     'Reverse Reads',
     'Reference Genome',
 ]
-input_map = dict((label, h.import_dataset(get_one(l.get_datasets(name=name))))
-                 for name, label in zip(ds_names, input_labels))
+input_map = {label: h.import_dataset(get_one(l.get_datasets(name=name)))
+             for name, label in zip(ds_names, input_labels)}
 
 # Set custom parameters for the "check_contigs" and "sspace" tools
 
@@ -59,5 +57,5 @@ params = {
 outputs, out_hist = iw.run(input_map, h, params=params)
 assert out_hist.name == history_name
 
-print('Running workflow: %s [%s]' % (iw.name, iw.id))
-print('Output history: %s [%s]' % (out_hist.name, out_hist.id))
+print(f'Running workflow: {iw.name} [{iw.id}]')
+print(f'Output history: {out_hist.name} [{out_hist.id}]')

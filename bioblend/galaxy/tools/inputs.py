@@ -1,4 +1,4 @@
-class InputsBuilder(object):
+class InputsBuilder:
     """
     """
 
@@ -25,15 +25,14 @@ class InputsBuilder(object):
 
     def flat_iter(self, prefix=None):
         for key, value in self._input_dict.items():
-            effective_key = key if prefix is None else "%s|%s" % (prefix, key)
+            effective_key = key if prefix is None else f"{prefix}|{key}"
             if hasattr(value, "flat_iter"):
-                for flattened_key, flattened_value in value.flat_iter(effective_key):
-                    yield flattened_key, flattened_value
+                yield from value.flat_iter(effective_key)
             else:
                 yield effective_key, value
 
 
-class RepeatBuilder(object):
+class RepeatBuilder:
 
     def __init__(self):
         self._instances = []
@@ -45,11 +44,10 @@ class RepeatBuilder(object):
     def flat_iter(self, prefix=None):
         for index, instance in enumerate(self._instances):
             index_prefix = "%s_%d" % (prefix, index)
-            for key, value in instance.flat_iter(index_prefix):
-                yield key, value
+            yield from instance.flat_iter(index_prefix)
 
 
-class Param(object):
+class Param:
 
     def __init__(self, value):
         self.value = value

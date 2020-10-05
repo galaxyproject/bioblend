@@ -3,7 +3,6 @@ This example retrieves details of all the Histories in our Galaxy account and li
 
 Usage: python list_histories.py <Galaxy_URL> <Galaxy_API_key>
 """
-from __future__ import print_function
 
 import sys
 
@@ -31,4 +30,4 @@ if len(histories) == 0:
 else:
     print("\nHistories:")
     for hist in histories:
-        print("{0} ({1}) : {2}".format(hist.name, hist.wrapped['nice_size'], hist.id))
+        print("{} ({}) : {}".format(hist.name, hist.wrapped['nice_size'], hist.id))

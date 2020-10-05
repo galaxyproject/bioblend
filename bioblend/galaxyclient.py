@@ -19,7 +19,7 @@ from bioblend import ConnectionError
 from bioblend.util import FileStream
 
 
-class GalaxyClient(object):
+class GalaxyClient:
 
     def __init__(self, url, key=None, email=None, password=None, verify=True, timeout=None):
         """
@@ -217,7 +217,7 @@ class GalaxyClient(object):
     @property
     def key(self):
         if not self._key and self.email is not None and self.password is not None:
-            unencoded_credentials = "%s:%s" % (self.email, self.password)
+            unencoded_credentials = f"{self.email}:{self.password}"
             authorization = base64.b64encode(unencoded_credentials.encode())
             headers = self.json_headers.copy()
             headers["Authorization"] = authorization

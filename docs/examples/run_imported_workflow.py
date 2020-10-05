@@ -11,7 +11,6 @@ In this case we expect Tophat wrapper 1.5.0 and Cufflinks wrapper 0.0.5.
 
 Usage: python3 run_imported_workflow.py <galaxy-url> <galaxy-API-key>
 """
-from __future__ import print_function
 
 import sys
 
@@ -84,7 +83,7 @@ input2 = gi.workflows.get_workflow_inputs(workflow, label='Input fastq readpair-
 # For each input we need to build a datamap dict with 'src' set to 'ld', as we stored our data in a Galaxy Library
 
 for (data1, data2) in dataset_ids:
-    print("Initiating workflow run on files %s, %s" % (filenames[data1], filenames[data2]))
+    print("Initiating workflow run on files {}, {}".format(filenames[data1], filenames[data2]))
     datamap = dict()
     datamap[input1] = {'src': 'ld', 'id': data1}
     datamap[input2] = {'src': 'ld', 'id': data2}

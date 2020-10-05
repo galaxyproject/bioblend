@@ -3,7 +3,6 @@ This example retrieves details of all the Data Libraries available to us and lis
 
 Usage: python3 list_data_libraries.py <galaxy-url> <galaxy-API-key>
 """
-from __future__ import print_function
 
 import sys
 
@@ -28,4 +27,4 @@ if len(libraries) == 0:
 else:
     print("\nData Libraries:")
     for lib_dict in libraries:
-        print("{0} : {1}".format(lib_dict['name'], lib_dict['id']))
+        print("{} : {}".format(lib_dict['name'], lib_dict['id']))

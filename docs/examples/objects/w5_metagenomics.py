@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 import os
 import sys
 
@@ -55,5 +53,5 @@ params[tool_id]['db_opts']['database'] = '16SMicrobial-20131106'
 outputs, out_hist = iw.run(input_map, h, params=params)
 assert out_hist.name == history_name
 
-print('Running workflow: %s [%s]' % (iw.name, iw.id))
-print('Output history: %s [%s]' % (out_hist.name, out_hist.id))
+print(f'Running workflow: {iw.name} [{iw.id}]')
+print(f'Output history: {out_hist.name} [{out_hist.id}]')

@@ -180,7 +180,7 @@ class LibraryClient(Client):
                 time.sleep(min(time_left, interval))
                 time_left -= interval
             else:
-                raise DatasetTimeoutException("Waited too long for dataset %s in library %s to complete" % (dataset_id, library_id))
+                raise DatasetTimeoutException(f"Waited too long for dataset {dataset_id} in library {library_id} to complete")
 
     def show_folder(self, library_id, folder_id):
         """

@@ -3,7 +3,6 @@ This example retrieves details of all the Workflows in our Galaxy account and li
 
 Usage: python list_workflows.py <Galaxy_URL> <Galaxy_API_key>
 """
-from __future__ import print_function
 
 import sys
 
@@ -28,4 +27,4 @@ if len(workflows) == 0:
 else:
     print("\nWorkflows:")
     for wf in workflows:
-        print("{0} : {1}".format(wf.name, wf.id))
+        print(f"{wf.name} : {wf.id}")

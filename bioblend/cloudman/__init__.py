@@ -59,7 +59,7 @@ class VMLaunchException(Exception):
         return repr(self.value)
 
 
-class CloudManConfig(object):
+class CloudManConfig:
 
     def __init__(self,
                  access_key=None,
@@ -237,16 +237,16 @@ class CloudManConfig(object):
         elif self.password is None:
             return "Password must not be null"
         elif self.cluster_type not in [None, 'Test', 'Data', 'Galaxy', 'Shared_cluster']:
-            return "Unrecognized cluster type ({0})".format(self.cluster_type)
+            return f"Unrecognized cluster type ({self.cluster_type})"
         elif self.galaxy_data_option not in [None, '', 'custom-size', 'transient']:
-            return "Unrecognized galaxy data option ({0})".format(self.galaxy_data_option)
+            return f"Unrecognized galaxy data option ({self.galaxy_data_option})"
         elif self.key_name is None:
             return "Key-pair name must not be null"
         else:
             return None
 
 
-class GenericVMInstance(object):
+class GenericVMInstance:
 
     def __init__(self, launcher, launch_result):
         """
@@ -336,11 +336,11 @@ class GenericVMInstance(object):
                 self._init_instance(status['public_ip'])
                 return
             elif status['error'] != '':
-                msg = "Error launching an instance: {0}".format(status['error'])
+                msg = "Error launching an instance: {}".format(status['error'])
                 bioblend.log.error(msg)
                 raise VMLaunchException(msg)
             else:
-                bioblend.log.warning("Instance not ready yet (it's in state '{0}'); waiting another {1} seconds..."
+                bioblend.log.warning("Instance not ready yet (it's in state '{}'); waiting another {} seconds..."
                                      .format(status['instance_state'], time_left))
                 time.sleep(vm_ready_check_interval)
 
@@ -373,7 +373,7 @@ class CloudManInstance(GenericVMInstance):
 
     def __repr__(self):
         if self.cloudman_url:
-            return "CloudMan instance at {0}".format(self.cloudman_url)
+            return f"CloudMan instance at {self.cloudman_url}"
         else:
             return "Waiting for this CloudMan instance to start..."
 
@@ -432,7 +432,7 @@ class CloudManInstance(GenericVMInstance):
         validation_result = cfg.validate()
         if validation_result is not None:
             raise VMLaunchException(
-                "Invalid CloudMan configuration provided: {0}"
+                "Invalid CloudMan configuration provided: {}"
                 .format(validation_result))
         launcher = CloudManLauncher(cfg.access_key, cfg.secret_key, cfg.cloud_metadata)
         result = launcher.launch(
@@ -440,7 +440,7 @@ class CloudManInstance(GenericVMInstance):
             cfg.kernel_id, cfg.ramdisk_id, cfg.key_name, cfg.security_groups,
             cfg.placement, **cfg.kwargs)
         if result['error'] is not None:
-            raise VMLaunchException("Error launching cloudman instance: {0}".format(result['error']))
+            raise VMLaunchException("Error launching cloudman instance: {}".format(result['error']))
         instance = CloudManInstance(None, None, launcher=launcher,
                                     launch_result=result, cloudman_config=cfg)
         if cfg.block_until_ready and cfg.cluster_type:

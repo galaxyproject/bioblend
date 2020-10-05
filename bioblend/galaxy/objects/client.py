@@ -15,7 +15,7 @@ import bioblend
 from . import wrappers
 
 
-class ObjClient(object, metaclass=abc.ABCMeta):
+class ObjClient(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def __init__(self, obj_gi):
@@ -76,7 +76,7 @@ class ObjClient(object, metaclass=abc.ABCMeta):
         try:
             return reply[0]
         except (TypeError, IndexError):
-            self._error('%s: unexpected reply: %r' % (meth_name, reply))
+            self._error(f'{meth_name}: unexpected reply: {reply!r}')
 
 
 class ObjDatasetContainerClient(ObjClient):
@@ -90,7 +90,7 @@ class ObjDatasetContainerClient(ObjClient):
         cdict['id'] = id_  # overwrite unencoded id
         c_infos = show_f(id_, contents=True)
         if not isinstance(c_infos, Sequence):
-            self._error('%s: unexpected reply: %r' % (show_fname, c_infos))
+            self._error(f'{show_fname}: unexpected reply: {c_infos!r}')
         c_infos = [ctype.CONTENT_INFO_TYPE(_) for _ in c_infos]
         return ctype(cdict, content_infos=c_infos, gi=self.obj_gi)
 
@@ -160,7 +160,7 @@ class ObjLibraryClient(ObjDatasetContainerClient):
         for id_ in self._select_ids(id_=id_, name=name):
             res = self.gi.libraries.delete_library(id_)
             if not isinstance(res, Mapping):
-                self._error('delete_library: unexpected reply: %r' % (res,))
+                self._error(f'delete_library: unexpected reply: {res!r}')
 
 
 class ObjHistoryClient(ObjDatasetContainerClient):
@@ -226,7 +226,7 @@ class ObjHistoryClient(ObjDatasetContainerClient):
         for id_ in self._select_ids(id_=id_, name=name):
             res = self.gi.histories.delete_history(id_, purge=purge)
             if not isinstance(res, Mapping):
-                self._error('delete_history: unexpected reply: %r' % (res,))
+                self._error(f'delete_history: unexpected reply: {res!r}')
 
 
 class ObjWorkflowClient(ObjClient):
@@ -259,7 +259,7 @@ class ObjWorkflowClient(ObjClient):
             try:
                 wf_dict = json.loads(src)
             except (TypeError, ValueError):
-                self._error('src not supported: %r' % (src,))
+                self._error(f'src not supported: {src!r}')
         wf_info = self.gi.workflows.import_workflow_dict(wf_dict, publish)
         return self.get(wf_info['id'])
 

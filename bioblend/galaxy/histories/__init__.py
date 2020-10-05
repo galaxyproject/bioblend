@@ -646,7 +646,7 @@ class HistoryClient(Client):
         :rtype: None
         :return: None
         """
-        url = '%s/exports/%s' % (
+        url = '{}/exports/{}'.format(
             self._make_url(module_id=history_id), jeha_id)
         r = self.gi.make_get_request(url, stream=True)
         r.raise_for_status()

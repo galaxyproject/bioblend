@@ -16,7 +16,7 @@ import bioblend
 from bioblend import ConnectionError  # noqa: I202
 
 
-class Client(object):
+class Client:
 
     # Class variables that configure GET request retries.  Note that since these
     # are class variables their values are shared by all Client instances --
@@ -140,9 +140,9 @@ class Client(object):
                         try:
                             return r.json()
                         except ValueError:
-                            msg = "GET: invalid JSON : %r" % (r.content,)
+                            msg = f"GET: invalid JSON : {r.content!r}"
                 else:
-                    msg = "GET: error %s: %r" % (r.status_code, r.content)
+                    msg = f"GET: error {r.status_code}: {r.content!r}"
             msg = "%s, %d attempts left" % (msg, attempts_left)
             if attempts_left <= 0:
                 bioblend.log.error(msg)

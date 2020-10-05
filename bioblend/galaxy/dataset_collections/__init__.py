@@ -1,4 +1,4 @@
-class HasElements(object):
+class HasElements:
 
     def __init__(self, name, type="list", elements=None):
         self.name = name
@@ -34,7 +34,7 @@ class CollectionElement(HasElements):
         )
 
 
-class SimpleElement(object):
+class SimpleElement:
 
     def __init__(self, value):
         self.value = value

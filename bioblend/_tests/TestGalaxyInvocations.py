@@ -51,7 +51,7 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
 
         def invocation_steps_by_order_index():
             invocation = self.gi.invocations.show_invocation(invocation_id)
-            return dict((s["order_index"], s) for s in invocation["steps"])
+            return {s["order_index"]: s for s in invocation["steps"]}
 
         for _ in range(20):
             if 2 in invocation_steps_by_order_index():

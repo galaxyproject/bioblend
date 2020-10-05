@@ -65,7 +65,7 @@ def instance_types(cloud_name='generic'):
     return instance_list
 
 
-class CloudManLauncher(object):
+class CloudManLauncher:
 
     def __init__(self, access_key, secret_key, cloud=None):
         """
@@ -112,7 +112,7 @@ class CloudManLauncher(object):
                                 socket.gaierror, http_client.BadStatusLine)
 
     def __repr__(self):
-        return "Cloud: {0}; acct ID: {1}".format(
+        return "Cloud: {}; acct ID: {}".format(
             self.cloud.name, self.access_key)
 
     def launch(self, cluster_name, image_id, instance_type, password,
@@ -216,7 +216,7 @@ class CloudManLauncher(object):
                                              ebs_optimized=ebs_optimized)
             ret['rs'] = rs
         except EC2ResponseError as e:
-            err_msg = "Problem launching an instance: {0} (code {1}; status {2})" \
+            err_msg = "Problem launching an instance: {} (code {}; status {})" \
                       .format(str(e), e.error_code, e.status)
             bioblend.log.exception(err_msg)
             ret['error'] = err_msg
@@ -228,8 +228,8 @@ class CloudManLauncher(object):
                     ret['instance_id'] = rs.instances[0].id
                     ret['instance_ip'] = rs.instances[0].ip_address
                 except EC2ResponseError as e:
-                    err_msg = "Problem with the launched instance object: {0} " \
-                              "(code {1}; status {2})" \
+                    err_msg = "Problem with the launched instance object: {} " \
+                              "(code {}; status {})" \
                               .format(str(e), e.error_code, e.status)
                     bioblend.log.exception(err_msg)
                     ret['error'] = err_msg
@@ -282,7 +282,7 @@ class CloudManLauncher(object):
         except EC2ResponseError as e:
             err_msg = ("Problem getting security groups. This could indicate a "
                        "problem with your account credentials or permissions: "
-                       "{0} (code {1}; status {2})"
+                       "{} (code {}; status {})"
                        .format(str(e), e.error_code, e.status))
             bioblend.log.exception(err_msg)
             progress['error'] = err_msg
@@ -300,8 +300,8 @@ class CloudManLauncher(object):
                                                            'group for CloudMan',
                                                            vpc_id=vpc_id)
             except EC2ResponseError as e:
-                err_msg = "Problem creating security group '{0}': {1} (code {2}; " \
-                          "status {3})" \
+                err_msg = "Problem creating security group '{}': {} (code {}; " \
+                          "status {})" \
                           .format(sg_name, str(e), e.error_code, e.status)
                 bioblend.log.exception(err_msg)
                 progress['error'] = err_msg
@@ -322,8 +322,8 @@ class CloudManLauncher(object):
                     else:
                         bioblend.log.debug("Rule (%s:%s) already exists in the SG", port[0], port[1])
                 except EC2ResponseError as e:
-                    err_msg = "A problem adding security group authorizations: {0} " \
-                              "(code {1}; status {2})" \
+                    err_msg = "A problem adding security group authorizations: {} " \
+                              "(code {}; status {})" \
                               .format(str(e), e.error_code, e.status)
                     bioblend.log.exception(err_msg)
                     progress['error'] = err_msg
@@ -338,10 +338,10 @@ class CloudManLauncher(object):
                         cidr_ip='0.0.0.0/0')
                 else:
                     bioblend.log.debug(
-                        "ICMP rule already exists in {0} SG.".format(sg_name))
+                        f"ICMP rule already exists in {sg_name} SG.")
             except EC2ResponseError as e:
-                err_msg = "A problem with security ICMP rule authorization: {0} " \
-                          "(code {1}; status {2})" \
+                err_msg = "A problem with security ICMP rule authorization: {} " \
+                          "(code {}; status {})" \
                           .format(str(e), e.error_code, e.status)
                 bioblend.log.exception(err_msg)
                 progress['err_msg'] = err_msg
@@ -366,14 +366,14 @@ class CloudManLauncher(object):
                         to_port=65535)
                 except EC2ResponseError as e:
                     err_msg = "A problem with security group group " \
-                              "authorization: {0} (code {1}; status {2})" \
+                              "authorization: {} (code {}; status {})" \
                               .format(str(e), e.error_code, e.status)
                     bioblend.log.exception(err_msg)
                     progress['err_msg'] = err_msg
             bioblend.log.info("Done configuring '%s' security group", cmsg.name)
         else:
             bioblend.log.warning(
-                "Did not create security group '{0}'".format(sg_name))
+                f"Did not create security group '{sg_name}'")
         return progress
 
     def rule_exists(
@@ -415,7 +415,7 @@ class CloudManLauncher(object):
         try:
             kps = self.ec2_conn.get_all_key_pairs()
         except EC2ResponseError as e:
-            err_msg = "Problem getting key pairs: {0} (code {1}; status {2})" \
+            err_msg = "Problem getting key pairs: {} (code {}; status {})" \
                       .format(str(e), e.error_code, e.status)
             bioblend.log.exception(err_msg)
             progress['error'] = err_msg
@@ -428,7 +428,7 @@ class CloudManLauncher(object):
         try:
             kp = self.ec2_conn.create_key_pair(key_name)
         except EC2ResponseError as e:
-            err_msg = "Problem creating key pair '{0}': {1} (code {2}; status {3})" \
+            err_msg = "Problem creating key pair '{}': {} (code {}; status {})" \
                       .format(key_name, str(e), e.error_code, e.status)
             bioblend.log.exception(err_msg)
             progress['error'] = err_msg
@@ -494,7 +494,7 @@ class CloudManLauncher(object):
                     # attempt auto allocation of floating IP
                     if rs[0].instances[0].private_ip_address and not public_ip:
                         self.assign_floating_ip(ec2_conn, rs[0].instances[0])
-                    cm_url = "http://{dns}/cloud".format(dns=public_ip)
+                    cm_url = f"http://{public_ip}/cloud"
                     # Wait until the CloudMan URL is accessible to return the
                     # data
                     if self._checkURL(cm_url) is True:
@@ -505,7 +505,7 @@ class CloudManLauncher(object):
                 else:
                     state['instance_state'] = inst_state
         except Exception as e:
-            err = "Problem updating instance '%s' state: %s" % (instance_id, e)
+            err = f"Problem updating instance '{instance_id}' state: {e}"
             bioblend.log.error(err)
             state['error'] = err
         return state
@@ -720,7 +720,7 @@ class CloudManLauncher(object):
         try:
             vol = self.ec2_conn.get_all_volumes(volume_ids=[vol_id])
         except EC2ResponseError as ec2e:
-            bioblend.log.error("EC2ResponseError querying for volume {0}: {1}"
+            bioblend.log.error("EC2ResponseError querying for volume {}: {}"
                                .format(vol_id, ec2e))
             vol = None
         if vol:
@@ -772,13 +772,13 @@ class CloudManLauncher(object):
                         break
             except Exception as exc:
                 response['error'] = ("Exception while finding placement for "
-                                     "cluster '{0}'. This can indicate malformed "
+                                     "cluster '{}'. This can indicate malformed "
                                      "instance data. Or that this method is "
-                                     "broken: {1}".format(cluster_name, exc))
+                                     "broken: {}".format(cluster_name, exc))
                 bioblend.log.error(response['error'])
                 response['placement'] = None
         else:
-            bioblend.log.debug("Insufficient info about cluster {0} to get placement."
+            bioblend.log.debug("Insufficient info about cluster {} to get placement."
                                .format(cluster_name))
         return response
 
@@ -838,7 +838,7 @@ class CloudManLauncher(object):
                 zones = [back_compatible_zone] + \
                     [z for z in zones if z != back_compatible_zone]
             if len(zones) == 0:
-                response['error'] = ("Did not find availabilty zone for {0}"
+                response['error'] = ("Did not find availabilty zone for {}"
                                      .format(instance_type))
                 bioblend.log.error(response['error'])
                 zones.append(back_compatible_zone)

@@ -5,11 +5,7 @@ that BioBlend is integrated with CloudMan correctly. They only ensure that
 if you refactor the BioBlend CloudMan API code, that it will maintain its
 current behaviour.
 """
-try:
-    from unittest.mock import MagicMock
-except ImportError:
-    # Python < 3.3
-    from mock import MagicMock
+from unittest.mock import MagicMock
 
 from bioblend import cloudman
 from .test_util import unittest

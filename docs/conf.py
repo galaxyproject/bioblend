@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 # BioBlend documentation build configuration file, created by
 # sphinx-quickstart on Wed Jun  6 11:51:19 2012.
 #
