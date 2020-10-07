@@ -65,6 +65,43 @@ class ToolClient(Client):
         params['trackster'] = trackster
         return self._get(params=params)
 
+    def requirements(self, tool_id):
+        """
+        Return the resolver status for a specific tool id.
+        This functionality is available only to Galaxy admins.
+
+        :type tool_id: str
+        :param tool_id: id of the requested tool
+
+        :rtype: list
+        :return: List containing a resolver status dict for each tool
+        requirement.  For example,
+        tool_client.requirements(
+            'toolshed.g2.bx.psu.edu/repos/devteam/ncbi_blast_plus/ncbi_blastp_wrapper/2.10.1+galaxy0'
+        )
+        would return something like
+
+        [{'cacheable': False,
+          'dependency_resolver': {'auto_init': True,
+                                  'auto_install': False,
+                                  'can_uninstall_dependencies': True,
+                                  'ensure_channels': 'iuc,conda-forge,bioconda,defaults',
+                                  'model_class': 'CondaDependencyResolver',
+                                  'prefix': '/mnt/galaxy/tool_dependencies/_conda',
+                                  'resolver_type': 'conda',
+                                  'resolves_simple_dependencies': True,
+                                  'use_local': False,
+                                  'versionless': False},
+          'dependency_type': 'conda',
+          'environment_path': '/mnt/galaxy/tool_dependencies/_conda/envs/__blast@2.10.1',
+          'exact': True,
+          'model_class': 'MergedCondaDependency',
+          'name': 'blast',
+          'version': '2.10.1'}]
+        """
+        url = self._make_url(tool_id) + '/requirements'
+        return self._get(url=url)
+
     def install_dependencies(self, tool_id):
         """
         Install dependencies for a given tool via a resolver.
