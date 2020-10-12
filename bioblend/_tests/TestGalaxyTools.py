@@ -134,6 +134,14 @@ class TestGalaxyTools(GalaxyTestBase.GalaxyTestBase):
         installed_dependencies = self.gi.tools.install_dependencies('CONVERTER_fasta_to_bowtie_color_index')
         self.assertTrue(any(True for d in installed_dependencies if d.get('name') == 'bowtie' and d.get('dependency_type') == 'conda'), "installed_dependencies is %s" % installed_dependencies)
 
+    @test_util.skip_unless_tool('CONVERTER_fasta_to_bowtie_color_index')
+    def test_tool_requirements(self):
+        tool_requirements = self.gi.tools.requirements('CONVERTER_fasta_to_bowtie_color_index')
+        self.assertTrue(
+            any(True for tr in tool_requirements if {'dependency_type', 'version'} <= set(tr.keys()) and tr.get('name') == 'bowtie'),
+            'tool_requirements is %s' % tool_requirements
+        )
+
     def _wait_for_and_verify_upload(self, tool_output, file_name, fn, expected_dbkey="?"):
         self.assertEqual(len(tool_output["outputs"]), 1)
         output = tool_output['outputs'][0]
