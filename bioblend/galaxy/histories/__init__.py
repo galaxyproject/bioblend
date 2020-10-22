@@ -86,7 +86,7 @@ class HistoryClient(Client):
         params = {}
         if published is not None:
             params.setdefault('q', []).append('published')
-            params.setdefault('qv', []).append(True)
+            params.setdefault('qv', []).append(published)
         histories = self._get(deleted=deleted, params=params)
         if history_id is not None:
             history = next((_ for _ in histories if _['id'] == history_id), None)
