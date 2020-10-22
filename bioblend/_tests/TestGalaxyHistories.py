@@ -33,11 +33,19 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
         self.assertEqual(updated_hist['name'], new_name)
         self.assertEqual(updated_hist['annotation'], new_annotation)
         self.assertEqual(updated_hist['tags'], new_tags)
+
+    def test_publish_history(self):
+        # Verify that searching for published histories does not return the test history
+        published_histories = self.gi.histories.get_histories(published=True)
+        self.assertFalse(any(h['id'] == self.history['id'] for h in published_histories))
         updated_hist = self.gi.histories.update_history(self.history['id'], published=True)
         if 'id' not in updated_hist:
             updated_hist = self.gi.histories.show_history(self.history['id'])
         self.assertEqual(self.history['id'], updated_hist['id'])
         self.assertTrue(updated_hist['published'])
+        # Verify that searching for published histories now returns the test history
+        published_histories = self.gi.histories.get_histories(published=True)
+        self.assertTrue(any(h['id'] == self.history['id'] for h in published_histories))
 
     def test_get_histories(self):
         # Make sure there's at least one value - the one we created
@@ -49,8 +57,8 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
         self.assertEqual(new_history['name'], self.default_history_name)
 
         # Check whether id is present, when searched by name
-        new_history = self.gi.histories.get_histories(name=self.default_history_name)
-        self.assertTrue(any(d['id'] == self.history['id'] for d in new_history))
+        histories = self.gi.histories.get_histories(name=self.default_history_name)
+        self.assertTrue(any(h['id'] == self.history['id'] for h in histories))
 
         # TODO: check whether deleted history is returned correctly
         # At the moment, get_histories() returns only not-deleted histories

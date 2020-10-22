@@ -52,7 +52,7 @@ class HistoryClient(Client):
 
         return self._post(payload=payload, files_attached=file_path is not None)
 
-    def get_histories(self, history_id=None, name=None, deleted=False):
+    def get_histories(self, history_id=None, name=None, deleted=False, published=None):
         """
         Get all histories or filter the specific one(s) via the provided
         ``name`` or ``history_id``. Provide only one argument, ``name`` or
@@ -71,6 +71,11 @@ class HistoryClient(Client):
         :param deleted: whether to filter for the deleted histories (``True``)
           or for the non-deleted ones (``False``)
 
+        :type published: bool or None
+        :param published: whether to filter for the published histories
+          (``True``) or for the non-published ones (``False``). If not set, no
+          filtering is applied.
+
         :rtype: list
         :return: Return a list of history element dicts. If more than one
                  history matches the given ``name``, return the list of all the
@@ -78,7 +83,11 @@ class HistoryClient(Client):
         """
         if history_id is not None and name is not None:
             raise ValueError('Provide only one argument between name or history_id, but not both')
-        histories = self._get(deleted=deleted)
+        params = {}
+        if published is not None:
+            params.setdefault('q', []).append('published')
+            params.setdefault('qv', []).append(True)
+        histories = self._get(deleted=deleted, params=params)
         if history_id is not None:
             history = next((_ for _ in histories if _['id'] == history_id), None)
             histories = [history] if history is not None else []
