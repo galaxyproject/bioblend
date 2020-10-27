@@ -33,6 +33,15 @@ matrix:
       script: tox -e flake8
 
     - stage: test
+      env: TOX_ENV=py39 GALAXY_VERSION=dev
+      addons:
+        apt:
+          sources:
+            - deadsnakes
+          packages:
+            - python3.9-dev
+            - python3.9-distutils
+    - stage: test
       env: TOX_ENV=py38 GALAXY_VERSION=dev
       addons:
         apt:

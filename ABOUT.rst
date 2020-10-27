@@ -3,7 +3,7 @@ interacting with `Galaxy`_ and `CloudMan`_  APIs.
 
 BioBlend is supported and tested on:
 
-- Python 3.6, 3.7 and 3.8
+- Python 3.6, 3.7, 3.8 and 3.9
 - Galaxy release_17.09 and later.
 
 BioBlend's goal is to make it easier to script and automate the running of
