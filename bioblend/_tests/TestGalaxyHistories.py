@@ -5,6 +5,7 @@ import shutil
 import tarfile
 import tempfile
 
+import bioblend.galaxy
 from . import GalaxyTestBase, test_util
 
 
@@ -45,6 +46,10 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
         self.assertTrue(updated_hist['published'])
         # Verify that searching for published histories now returns the test history
         published_histories = self.gi.histories.get_histories(published=True)
+        self.assertTrue(any(h['id'] == self.history['id'] for h in published_histories))
+        # Verify that get_published_histories as an anonymous user also returns the test history
+        anonymous_gi = bioblend.galaxy.GalaxyInstance(url=self.gi.base_url, key=None)
+        published_histories = anonymous_gi.histories.get_published_histories()
         self.assertTrue(any(h['id'] == self.history['id'] for h in published_histories))
 
     def test_get_histories(self):
