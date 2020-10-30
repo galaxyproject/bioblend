@@ -51,6 +51,9 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
         anonymous_gi = bioblend.galaxy.GalaxyInstance(url=self.gi.base_url, key=None)
         published_histories = anonymous_gi.histories.get_published_histories()
         self.assertTrue(any(h['id'] == self.history['id'] for h in published_histories))
+        history_from_slug = anonymous_gi.histories.get_published_histories(slug=updated_hist['slug'])
+        self.assertTrue(len(history_from_slug) == 1)
+        self.assertEqual(self.history['id'], history_from_slug[0]['id'])
 
     def test_get_histories(self):
         # Make sure there's at least one value - the one we created

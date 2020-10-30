@@ -54,7 +54,7 @@ class HistoryClient(Client):
 
         return self._post(payload=payload, files_attached=file_path is not None)
 
-    def _get_histories(self, history_id=None, name=None, deleted=False, filter_user_published=None, get_all_published=False):
+    def _get_histories(self, history_id=None, name=None, deleted=False, filter_user_published=None, get_all_published=False, slug=None):
         """
         Hidden method to be used by both get_histories() and get_published_histories()
         """
@@ -65,6 +65,9 @@ class HistoryClient(Client):
         if filter_user_published is not None:
             params.setdefault('q', []).append('published')
             params.setdefault('qv', []).append(filter_user_published)
+        if slug is not None:
+            params.setdefault('q', []).append('slug')
+            params.setdefault('qv', []).append(slug)
 
         url = '/'.join((self._make_url(), 'published')) if get_all_published else None
         histories = self._get(url=url, deleted=deleted, params=params)
@@ -76,7 +79,7 @@ class HistoryClient(Client):
             histories = [_ for _ in histories if _['name'] == name]
         return histories
 
-    def get_histories(self, history_id=None, name=None, deleted=False, published=None):
+    def get_histories(self, history_id=None, name=None, deleted=False, published=None, slug=None):
         """
         Get all histories or filter the specific one(s) via the provided
         ``name`` or ``history_id``. Provide only one argument, ``name`` or
@@ -102,15 +105,18 @@ class HistoryClient(Client):
           own histories; to access all histories published by any user, use the
           ``get_published_histories`` method.
 
+        :type slug: str
+        :param slug: History slug to filter on
+
         :rtype: list
         :return: Return a list of history element dicts. If more than one
                  history matches the given ``name``, return the list of all the
                  histories with the given name
         """
-        histories = self._get_histories(history_id=history_id, name=name, deleted=deleted, filter_user_published=published, get_all_published=False)
+        histories = self._get_histories(history_id=history_id, name=name, deleted=deleted, filter_user_published=published, get_all_published=False, slug=slug)
         return histories
 
-    def get_published_histories(self, history_id=None, name=None):
+    def get_published_histories(self, history_id=None, name=None, slug=None):
         """
         Get all published histories (by any user) or filter the specific one(s)
         via the provided ``name`` or ``history_id``. Provide only one argument,
@@ -122,12 +128,15 @@ class HistoryClient(Client):
         :type name: str
         :param name: Name of history to filter on
 
+        :type slug: str
+        :param slug: History slug to filter on
+
         :rtype: list
         :return: Return a list of history element dicts. If more than one
                  history matches the given ``name``, return the list of all the
                  histories with the given name
         """
-        histories = self._get_histories(history_id=history_id, name=name, deleted=False, filter_user_published=None, get_all_published=True)
+        histories = self._get_histories(history_id=history_id, name=name, deleted=False, filter_user_published=None, get_all_published=True, slug=slug)
         return histories
 
     def show_history(self, history_id, contents=False, deleted=None, visible=None, details=None, types=None):
