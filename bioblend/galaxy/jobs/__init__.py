@@ -72,7 +72,7 @@ class JobsClient(Client):
 
     def build_for_rerun(self, job_id):
         """
-        Get details of a given job of the current user.
+        Get details of a given job that can be used to rerun the corresponding tool.
 
         :type job_id: str
         :param job_id: job ID
@@ -84,14 +84,13 @@ class JobsClient(Client):
         url = '/'.join((self._make_url(job_id), 'build_for_rerun'))
         return self._get(url=url)
 
-    def remap_job(self, job_id):
+    def rerun_and_remap_job(self, job_id):
         """
-        Rerun a failed job, remapping outputs so that the failed dataset is replaced
-        with the new output.
+        Rerun a failed job, remapping outputs so that the failed datasets are
+        replaced with the new outputs.
 
-        This is a convenience bioblend method which combines two API calls - the first
-        to get the input parameters for the job, the second to rerun it.
-
+        If other tools were waiting for this job to finish successfully, this
+        will resume those tools using the new outputs of this tool run.
         :type job_id: str
         :param job_id: job ID
 
