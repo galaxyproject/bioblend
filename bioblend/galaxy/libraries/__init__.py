@@ -303,7 +303,7 @@ class LibraryClient(Client):
             libraries = [_ for _ in libraries if _['name'] == name]
         return libraries
 
-    def show_library(self, library_id, contents=False):
+    def show_library(self, library_id, contents=False, **kwd):
         """
         Get information about a library.
 
@@ -314,10 +314,32 @@ class LibraryClient(Client):
         :param contents: whether to get contents of the library (rather
           than just the library details)
 
+        :type folder_id: str
+        :param folder_id: (optional) When ``contents=True``, only return information for one specific folder.
+
+        :type types: list
+        :param types: (optional) When ``contents=True``, filter for history content types.
+          If set to ``['dataset']``, return only datasets. If set to
+          ``['folder']``,  return only folder. If not set, no filtering is applied.
+
         :rtype: dict
         :return: details of the given library
         """
-        return self._get(id=library_id, contents=contents)
+
+        # Allow passing in type or types - for continuity rest of methods
+        # take in type - but this one can be passed multiple types and
+        # type=dataset,dataset_collection is a bit silly.
+        types = kwd.get('type', kwd.get('types', None)) or []
+        if not types:
+            types = ['dataset', "folder"]  # ToDo: should be extended to dataset_collection at some point
+
+        params = {}
+        params['types'] = types
+        if kwd.get('folder_id'):
+            params['folder_id'] = kwd['folder_id']
+
+        return self._get(id=library_id, contents=contents, params=params)
+
 
     def _do_upload(self, library_id, **keywords):
         """
