@@ -340,7 +340,6 @@ class LibraryClient(Client):
 
         return self._get(id=library_id, contents=contents, params=params)
 
-
     def _do_upload(self, library_id, **keywords):
         """
         Set up the POST request and do the actual data upload to a data library.
