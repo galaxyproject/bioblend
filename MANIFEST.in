@@ -5,4 +5,4 @@ graft docs
 
 global-exclude *.swp *.pyc .gitignore
 
-include *.rst
+include *.rst CITATION LICENSE
