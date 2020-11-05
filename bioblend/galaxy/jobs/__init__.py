@@ -96,7 +96,8 @@ class JobsClient(Client):
 
         :rtype: dict
         :return: Information about outputs and the rerun job
-
+        .. note::
+          Only possible for Galaxy 20.09 and later.
         """
         job_rerun_params = self.build_for_rerun(job_id)
         job_inputs = job_rerun_params['state_inputs']
