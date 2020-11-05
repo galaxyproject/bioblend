@@ -6,6 +6,7 @@ import os
 import re
 import sys
 import time
+import webbrowser
 
 import bioblend
 from bioblend import ConnectionError
@@ -687,3 +688,19 @@ class HistoryClient(Client):
 
         url = self._make_url(history_id, contents=True)
         return self._post(payload=payload, url=url)
+
+    def switch_to_history(self, history_id):
+        """
+        Opens a new tab in the default browser and switches to the history
+        corresponding to the history ID provided.
+
+        :type history_id: str
+        :param history_id: history ID to switch to
+
+        :rtype: None
+        :return: `None`
+        """
+
+        url = ''.join((self.gi.base_url.strip('/'), '/history/switch_to_history?hist_id=', history_id))
+        webbrowser.open_new_tab(url)
+        return None
