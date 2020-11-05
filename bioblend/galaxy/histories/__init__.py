@@ -670,7 +670,7 @@ class HistoryClient(Client):
         :param history_id: history ID to which the dataset should be copied
 
         :type history_content_id: str
-        :param history_content_id: dataset or dataset_collection ID
+        :param history_content_id: dataset or dataset collection ID
 
         :type source: str
         :param source: Source of the dataset to be copied: 'hda' (the default),
