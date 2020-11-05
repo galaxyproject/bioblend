@@ -662,27 +662,28 @@ class HistoryClient(Client):
         for chunk in r.iter_content(chunk_size):
             outf.write(chunk)
 
-    def copy_dataset(self, history_id, dataset_id, source='hda'):
+    def copy_dataset(self, history_id, history_content_id, source='hda'):
         """
         Copy a dataset to a history.
 
         :type history_id: str
         :param history_id: history ID to which the dataset should be copied
 
-        :type dataset_id: str
-        :param dataset_id: dataset ID
+        :type history_content_id: str
+        :param history_content_id: dataset or dataset_collection ID
 
         :type source: str
-        :param source: Source of the dataset to be copied: 'hda' (the default), 'library' or 'library_folder'
+        :param source: Source of the dataset to be copied: 'hda' (the default),
+          'hdca' (for a collection), 'library' or 'library_folder'.
 
         :rtype: dict
         :return: Information about the copied dataset
         """
 
         payload = {
-            'content': dataset_id,
+            'content': history_content_id,
             'source': source,
-            'type': 'dataset'
+            'type': 'dataset' if source != 'hdca' else 'dataset_collection',
         }
 
         url = self._make_url(history_id, contents=True)
