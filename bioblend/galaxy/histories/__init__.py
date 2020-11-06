@@ -689,18 +689,23 @@ class HistoryClient(Client):
         url = self._make_url(history_id, contents=True)
         return self._post(payload=payload, url=url)
 
-    def switch_to_history(self, history_id):
+    def open_history(self, history_id):
         """
-        Opens a new tab in the default browser and switches to the history
-        corresponding to the history ID provided.
+        Open Galaxy in a new tab of the default web browser and switch to the
+        specified history.
 
         :type history_id: str
-        :param history_id: history ID to switch to
+        :param history_id: ID of the history to switch to
 
         :rtype: None
         :return: `None`
+
+        .. warning::
+          After opening the specified history, all previously opened Galaxy tabs
+          in the browser session will have the current history changed to this
+          one, even if the interface still shows another history. Refreshing
+          any such tab is recommended.
         """
 
-        url = ''.join((self.gi.base_url.strip('/'), '/history/switch_to_history?hist_id=', history_id))
+        url = urljoin(self.gi.base_url, f"history/switch_to_history?hist_id={history_id}")
         webbrowser.open_new_tab(url)
-        return None
