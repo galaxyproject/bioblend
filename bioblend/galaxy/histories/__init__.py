@@ -680,7 +680,6 @@ class HistoryClient(Client):
         """
         return self.copy_content(history_id, dataset_id, source)
 
-
     def copy_content(self, history_id, content_id, source='hda'):
         """
         Copy existing content (e.g. a dataset) to a history.
