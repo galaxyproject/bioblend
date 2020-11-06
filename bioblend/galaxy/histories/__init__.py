@@ -680,11 +680,32 @@ class HistoryClient(Client):
         :rtype: dict
         :return: Information about the copied dataset
         """
+        return self.copy_content(history_id, dataset_id, source)
+
+    def copy_content(self, history_id, content_id, source='hda'):
+        """
+        Copy existing content (e.g. a dataset) to a history.
+
+        :type history_id: str
+        :param history_id: ID of the history to which the content should be copied
+
+        :type content_id: str
+        :param content_id: ID of the content to copy
+
+        :type source: str
+        :param source: Source of the content to be copied: 'hda' (for a history
+          dataset, the default), 'hdca' (for a dataset collection), 'library'
+          (for a library dataset) or 'library_folder' (for all datasets in a
+          library folder).
+
+        :rtype: dict
+        :return: Information about the copied content
+        """
 
         payload = {
-            'content': dataset_id,
+            'content': content_id,
             'source': source,
-            'type': 'dataset'
+            'type': 'dataset' if source != 'hdca' else 'dataset_collection',
         }
 
         url = self._make_url(history_id, contents=True)
