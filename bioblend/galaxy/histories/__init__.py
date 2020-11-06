@@ -685,7 +685,7 @@ class HistoryClient(Client):
         Copy existing content (e.g. a dataset) to a history.
 
         :type history_id: str
-        :param history_id: history ID to which the content should be copied
+        :param history_id: ID of the history to which the content should be copied
 
         :type content_id: str
         :param content_id: ID of the content to copy
