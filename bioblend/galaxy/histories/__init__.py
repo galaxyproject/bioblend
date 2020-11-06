@@ -698,8 +698,8 @@ class HistoryClient(Client):
         :type history_id: str
         :param history_id: ID of the history to switch to
 
-        :rtype: None
-        :return: `None`
+        :rtype: NoneType
+        :return: ``None``
 
         .. warning::
           After opening the specified history, all previously opened Galaxy tabs
