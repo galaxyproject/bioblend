@@ -7,6 +7,7 @@ import re
 import sys
 import time
 import webbrowser
+from urllib.parse import urljoin
 
 import bioblend
 from bioblend import ConnectionError
