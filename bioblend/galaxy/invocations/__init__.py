@@ -171,10 +171,10 @@ class InvocationClient(Client):
         :return: The invocation report.
           For example::
 
-            {'markdown': '\n# Workflow Execution Summary of Example workflow\n\n
-             ## Workflow Inputs\n\n\n## Workflow Outputs\n\n\n
-             ## Workflow\n```galaxy\n
-             workflow_display(workflow_id=f2db41e1fa331b3e)\n```\n',
+            {'markdown': '\\n# Workflow Execution Summary of Example workflow\\n\\n
+             ## Workflow Inputs\\n\\n\\n## Workflow Outputs\\n\\n\\n
+             ## Workflow\\n```galaxy\\n
+             workflow_display(workflow_id=f2db41e1fa331b3e)\\n```\\n',
              'render_format': 'markdown',
              'workflows': {'f2db41e1fa331b3e': {'name': 'Example workflow'}}}
         """
