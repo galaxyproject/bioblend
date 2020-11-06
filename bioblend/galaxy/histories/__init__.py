@@ -662,26 +662,47 @@ class HistoryClient(Client):
         for chunk in r.iter_content(chunk_size):
             outf.write(chunk)
 
-    def copy_dataset(self, history_id, history_content_id, source='hda'):
+    def copy_dataset(self, history_id, dataset_id, source='hda'):
         """
         Copy a dataset to a history.
 
         :type history_id: str
         :param history_id: history ID to which the dataset should be copied
 
-        :type history_content_id: str
-        :param history_content_id: dataset or dataset collection ID
+        :type dataset_id: str
+        :param dataset_id: dataset ID
 
         :type source: str
-        :param source: Source of the dataset to be copied: 'hda' (the default),
-          'hdca' (for a collection), 'library' or 'library_folder'.
+        :param source: Source of the dataset to be copied: 'hda' (the default), 'library' or 'library_folder'
 
         :rtype: dict
         :return: Information about the copied dataset
         """
+        return self.copy_content(history_id, dataset_id, source)
+
+
+    def copy_content(self, history_id, content_id, source='hda'):
+        """
+        Copy existing content (e.g. a dataset) to a history.
+
+        :type history_id: str
+        :param history_id: history ID to which the content should be copied
+
+        :type content_id: str
+        :param content_id: ID of the content to copy
+
+        :type source: str
+        :param source: Source of the content to be copied: 'hda' (for a history
+          dataset, the default), 'hdca' (for a dataset collection), 'library'
+          (for a library dataset) or 'library_folder' (for all datasets in a
+          library folder).
+
+        :rtype: dict
+        :return: Information about the copied content
+        """
 
         payload = {
-            'content': history_content_id,
+            'content': content_id,
             'source': source,
             'type': 'dataset' if source != 'hdca' else 'dataset_collection',
         }
