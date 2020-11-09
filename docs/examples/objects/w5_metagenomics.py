@@ -1,3 +1,4 @@
+import json
 import os
 import sys
 
@@ -48,7 +49,7 @@ ws_parameters = ws.tool_inputs.copy()
 # Run the workflow on a new history with the selected dataset
 # as input, setting the BLAST db to "16SMicrobial-20131106"
 
-params = {tool_id: {'db_opts': ws_parameters['db_opts']}}
+params = {tool_id: {'db_opts': json.loads(ws_parameters['db_opts'])}}
 params[tool_id]['db_opts']['database'] = '16SMicrobial-20131106'
 outputs, out_hist = iw.run(input_map, h, params=params)
 assert out_hist.name == history_name
