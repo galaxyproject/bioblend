@@ -84,28 +84,45 @@ class JobsClient(Client):
         url = '/'.join((self._make_url(job_id), 'build_for_rerun'))
         return self._get(url=url)
 
-    def rerun_and_remap_job(self, job_id):
+    def rerun_job(self, job_id, remap=False, tool_inputs_update=None, history_id=None):
         """
-        Rerun a failed job, remapping outputs so that the failed datasets are
-        replaced with the new outputs.
+        Rerun a job.
 
-        If other tools were waiting for this job to finish successfully, this
-        will resume those tools using the new outputs of this tool run.
         :type job_id: str
         :param job_id: job ID
+
+        :type remap: bool
+        :param remap: when ``True``, the job output(s) will be remapped onto the dataset(s)
+          created by the original job; if other jobs were waiting for this job to finish
+          successfully, they will be resumed using the new outputs of this tool run. When
+          ``False``, new job output(s) will be created. Note that if Galaxy does not permit
+          remapping for the job in question, specifying ``True`` will result in an error.
+
+        :type tool_inputs_update: dict
+        :param tool_inputs_update: dictionary specifying any changes which should be
+          made to tool parameters for the rerun job.
+
+        :type history_id: str
+        :param history_id: ID of the history in which the job should be executed; if
+          not specified, the same history will be used as the original job run.
 
         :rtype: dict
         :return: Information about outputs and the rerun job
         .. note::
-          Only possible for Galaxy 20.09 and later.
+          This method can only be used with Galaxy ``release_20.09`` or later.
         """
         job_rerun_params = self.build_for_rerun(job_id)
         job_inputs = job_rerun_params['state_inputs']
-        job_inputs['rerun_remap_job_id'] = job_id
 
+        if remap:
+            job_inputs['rerun_remap_job_id'] = job_id
+
+        if tool_inputs_update:
+            for input_param, input_value in tool_inputs_update.items():
+                job_inputs[input_param] = input_value
         url = '/'.join((self.gi.url, 'tools'))
         payload = {
-            "history_id": job_rerun_params['history_id'],
+            "history_id": history_id if history_id else job_rerun_params['history_id'],
             "tool_id": job_rerun_params['id'],
             "inputs": job_inputs
         }
