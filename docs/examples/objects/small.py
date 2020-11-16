@@ -3,7 +3,7 @@ import sys
 import tempfile
 
 from bioblend.galaxy.objects import GalaxyInstance
-from .common import get_one
+from common import get_one  # noqa:I100,I201
 
 # This is a "toy" example that should run much faster
 # (once the cluster's resource manager allows it to run) than the

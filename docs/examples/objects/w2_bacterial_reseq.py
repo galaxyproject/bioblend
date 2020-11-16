@@ -2,7 +2,7 @@ import os
 import sys
 
 from bioblend.galaxy.objects import GalaxyInstance
-from .common import get_one
+from common import get_one  # noqa:I100,I201
 
 URL = 'https://orione.crs4.it'
 API_KEY = os.getenv('GALAXY_API_KEY', 'YOUR_API_KEY')
