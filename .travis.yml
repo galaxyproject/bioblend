@@ -5,7 +5,6 @@ services:
   - postgresql
 
 stages:
-  - lint
   - test
   - name: deploy
     if: tag IS present
@@ -25,12 +24,6 @@ env:
 
 matrix:
   include:
-    - stage: lint
-      env: []
-      python: '3.6'
-      before_install: []
-      before_script: []
-      script: tox -e flake8
 
     - stage: test
       env: TOX_ENV=py39 GALAXY_VERSION=dev
