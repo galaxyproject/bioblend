@@ -53,7 +53,7 @@ jobs:
       - name: Set up Python for BioBlend
         uses: actions/setup-python@v2
         with:
-          python-version: ${{ steps.get-python-version.outputs.python_version }}
+          python-version: 3.6
       - name: install
         run: |
           python -m pip install 'tox>=1.8.0' 'virtualenv>=20.0.14'
