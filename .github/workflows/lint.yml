@@ -1,13 +1,16 @@
+name: Lint
 on: [push, pull_request]
-name: lint
 jobs:
-  Lint:
+  lint:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.6']
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v2
       with:
-        python-version: 3.6
+        python-version: ${{ matrix.python-version }}
     - name: Install tox
       run: python -m pip install 'tox>=1.8.0'
     - name: Lint
