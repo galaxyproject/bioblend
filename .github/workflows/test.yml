@@ -66,8 +66,6 @@ jobs:
         run: |
           sudo apt update && sudo apt install python2.7 virtualenv -y
           export GALAXY_VERSION=${{ matrix.galaxy_version }}
-          virtualenv -p /usr/bin/python2 .venv
-          source .venv/bin/activate
           createdb -U postgres galaxy-travis
           wget https://github.com/galaxyproject/galaxy/archive/${{ matrix.galaxy_version }}.tar.gz
           tar xvzf ${{ matrix.galaxy_version }}.tar.gz | tail
