@@ -81,8 +81,6 @@ jobs:
           fi
           export GALAXY_SKIP_CLIENT_BUILD=1
           GALAXY_RUN_ALL=1 "${{ github.workspace }}/run_galaxy.sh" --daemon --wait
-
-          deactivate
           export BIOBLEND_GALAXY_URL=http://localhost:8080
           cd ${{ github.workspace }}
           tox -e ${{ matrix.tox_env }}
