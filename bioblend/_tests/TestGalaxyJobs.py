@@ -5,15 +5,16 @@ from . import (
 
 
 class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
-
+    @test_util.skip_unless_galaxy('release_21.01')
     @test_util.skip_unless_tool("random_lines1")
     def test_run_and_rerun_random_lines(self):
         history_id = self.gi.histories.create_history(name="test_run_random_lines history")["id"]
         dataset_id = self._test_dataset(history_id, contents="line 1\nline 2\rline 3\r\nline 4")
         tool_inputs = {'num_lines': '1',
                        'input': {'src': 'hda', 'id': dataset_id},
-                       'seed_source|seed_source_selector': 'set_seed',
-                       'seed_source|seed': 'asdf'}
+                       'seed_source': {'seed_source_selector': 'set_seed',
+                                       'seed': 'asdf'}
+                       }
         original_output = self.gi.tools.run_tool(
             history_id=history_id,
             tool_id="random_lines1",

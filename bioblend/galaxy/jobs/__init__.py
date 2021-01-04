@@ -70,7 +70,7 @@ class JobsClient(Client):
 
         return self._get(id=job_id, params=params)
 
-    def build_for_rerun(self, job_id):
+    def _build_for_rerun(self, job_id):
         """
         Get details of a given job that can be used to rerun the corresponding tool.
 
@@ -111,10 +111,11 @@ class JobsClient(Client):
         .. note::
           This method can only be used with Galaxy ``release_20.09`` or later.
         """
-        job_rerun_params = self.build_for_rerun(job_id)
+        job_rerun_params = self._build_for_rerun(job_id)
         job_inputs = job_rerun_params['state_inputs']
 
         if remap:
+            assert job_inputs['job_remap'], 'remap was set to True, but this job is not remappable.'
             job_inputs['rerun_remap_job_id'] = job_id
 
         if tool_inputs_update:

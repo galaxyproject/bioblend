@@ -134,7 +134,7 @@ class ToolClient(Client):
         params['link_details'] = link_details
         return self._get(id=tool_id, params=params)
 
-    def run_tool(self, history_id, tool_id, tool_inputs):
+    def run_tool(self, history_id, tool_id, tool_inputs, input_format='21.01'):
         """
         Runs tool specified by ``tool_id`` in history indicated
         by ``history_id`` with inputs from ``dict`` ``tool_inputs``.
@@ -148,6 +148,12 @@ class ToolClient(Client):
         :type tool_inputs: dict
         :param tool_inputs: dictionary of input datasets and parameters
           for the tool (see below)
+
+        :type input_format:  string
+        :param input_format: input format for the payload. Possible values are the
+          default 'legacy' (where inputs nested inside conditionals
+          or repeats are identified with e.g. '<conditional_name>|<input_name>')
+          or '21.01' (where inputs inside conditionals or repeats are nested elements).
 
         :rtype: dict
         :return: Information about outputs and job
@@ -201,6 +207,7 @@ class ToolClient(Client):
         payload = {}
         payload["history_id"] = history_id
         payload["tool_id"] = tool_id
+        payload["input_format"] = input_format
         try:
             payload["inputs"] = tool_inputs.to_dict()
         except AttributeError:
