@@ -18,7 +18,8 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
         original_output = self.gi.tools.run_tool(
             history_id=history_id,
             tool_id="random_lines1",
-            tool_inputs=tool_inputs
+            tool_inputs=tool_inputs,
+            input_format='21.01'
         )
         original_output_content = self.gi.datasets.download_dataset(original_output['outputs'][0]['id'])
         rerun_output = self.gi.jobs.rerun_job(original_output['jobs'][0]['id'])
