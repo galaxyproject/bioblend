@@ -98,20 +98,27 @@ class ToolClient(Client):
         url = self._make_url(tool_id) + '/requirements'
         return self._get(url=url)
 
-    def install_dependencies(self, tool_id):
+    def install_dependencies(self, tool_id, resolver="conda"):
         """
         Install dependencies for a given tool via a resolver.
-        This works only for Conda currently.
+        This works for Conda by default. Set resolver to "container_resolvers"
+        to install the container-based dependency.
         This functionality is available only to Galaxy admins.
 
         :type tool_id: str
         :param tool_id: id of the requested tool
+        :type resolver: str
+        :param resolver: resolver to use, either conda (default) or container_resolvers
 
         :rtype: dict
         :return: Tool requirement status
         """
-        url = self._make_url(tool_id) + '/install_dependencies'
-        return self._post(payload={}, url=url)
+        if resolver == "conda":
+            url = self._make_url(tool_id) + '/install_dependencies'
+            return self._post(payload={}, url=url)
+        elif resolver == "container_resolvers":
+            url = '/'.join((self.gi.url, "container_resolvers", "toolbox", "install"))
+            return self._post(payload={"tool_ids": [tool_id]}, url=url)
 
     def show_tool(self, tool_id, io_details=False, link_details=False):
         """
