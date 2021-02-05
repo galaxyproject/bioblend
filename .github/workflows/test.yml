@@ -50,21 +50,41 @@ jobs:
             galaxy_version: dev
     steps:
       - uses: actions/checkout@v2
+      - name: Calculate Python version for BioBlend from tox_env
+        id: get_bioblend_python_version
+        run: echo "::set-output name=bioblend_python_version::$(echo "${{ matrix.tox_env }}" | sed -e 's/^py\([0-9]\)\([0-9]\+\)/\1.\2/')"
       - name: Set up Python for BioBlend
         uses: actions/setup-python@v2
         with:
-          python-version: 3.6
-          
-      - name: Set up Python for BioBlend
-        uses: actions/setup-python@v2
-        with:
-          python-version: 2.7
-
-      - name: install
+          python-version: ${{ steps.get_bioblend_python_version.outputs.bioblend_python_version }}
+      - name: Determine Python version for Galaxy
+        id: get_galaxy_python_version
         run: |
-          python -m pip install 'tox>=1.8.0' 'virtualenv>=20.0.14'
-
-      - name: prepare ${{ matrix.galaxy_version }}
+          case ${{ matrix.galaxy_version }} in
+            release_17.09 | release_18.0* | release_19.0* )
+              galaxy_python_version=2.7
+              ;;
+            release_20.0* )
+              galaxy_python_version=3.5
+              ;;
+            release_21.0* | dev )
+              galaxy_python_version=3.6
+              ;;
+          esac
+          echo "::set-output name=galaxy_python_version::$galaxy_python_version"
+      - name: Set up Python for Galaxy
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ steps.get_galaxy_python_version.outputs.galaxy_python_version }}
+      - name: Cache pip dir
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: pip-cache-${{ matrix.tox_env }}-${{ matrix.galaxy_version }}
+      - name: Install tox
+        run: |
+          python3 -m pip install 'tox>=1.8.0' 'virtualenv>=20.0.14'
+      - name: Run tests
         env:
           PGPASSWORD: postgres
           PGPORT: 5432
@@ -89,13 +109,6 @@ jobs:
           export BIOBLEND_GALAXY_URL=http://localhost:8080
           cd ${{ github.workspace }}
           tox -e ${{ matrix.tox_env }}
-
-      - name: Cache pip dir
-        uses: actions/cache@v2
-        with:
-          path: ~/.cache/pip
-          key: pip-cache-${{ matrix.tox_env }}-${{ matrix.galaxy_version }}
-
       - name: The job has failed
         if: ${{ failure() }}
         run: |
