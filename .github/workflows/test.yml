@@ -47,9 +47,11 @@ jobs:
           - os: ubuntu-latest
             tox_env: py37
             galaxy_version: dev
-          - os: macos-latest
-            tox_env: py36
-            galaxy_version: dev
+          # Cannot test on macOS because service containers are not supported
+          # yet: https://github.community/t/github-actions-services-available-on-others-vms/16916
+          # - os: macos-latest
+          #   tox_env: py36
+          #   galaxy_version: dev
     steps:
       - uses: actions/checkout@v2
       - name: Calculate Python version for BioBlend from tox_env
