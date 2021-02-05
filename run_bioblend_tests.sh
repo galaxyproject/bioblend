@@ -92,11 +92,8 @@ export BIOBLEND_GALAXY_MASTER_API_KEY=$(LC_ALL=C tr -dc A-Za-z0-9 < /dev/urandom
 export BIOBLEND_GALAXY_USER_EMAIL="${USER}@localhost.localdomain"
 DATABASE_CONNECTION="sqlite:///$TEMP_DIR/universe.sqlite?isolation_level=IMMEDIATE"
 eval "echo \"$(cat "${BIOBLEND_DIR}/tests/template_galaxy.ini")\"" > "$GALAXY_CONFIG_FILE"
-# Update kombu requirement (and its dependency amqp) to a version compatible with Python 2.7.11, see https://github.com/celery/kombu/pull/540
-if [ -f eggs.ini ]; then
-  sed -i.bak -e 's/^kombu = .*$/kombu = 3.0.30/' -e 's/^amqp = .*$/amqp = 1.4.8/' eggs.ini
-fi
-
+# Update psycopg2 requirement to a version compatible with glibc 2.26 for Galaxy releases 16.01-18.01, see https://github.com/psycopg/psycopg2-wheels/issues/2
+sed -i.bak -e 's/psycopg2==2.6.1/psycopg2==2.7.3.1/' lib/galaxy/dependencies/conditional-requirements.txt
 # Start Galaxy and wait for successful server start
 export GALAXY_SKIP_CLIENT_BUILD=1
 GALAXY_RUN_ALL=1 "${BIOBLEND_DIR}/run_galaxy.sh" --daemon --wait

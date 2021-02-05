@@ -90,24 +90,28 @@ jobs:
           PGPORT: 5432
           PGHOST: localhost
         run: |
-          export GALAXY_VERSION=${{ matrix.galaxy_version }}
-          createdb -U postgres galaxy-travis
+          # Create a PostgreSQL database for Galaxy. The default SQLite3 database makes test fail randomly because of "database locked" error.
+          createdb -U postgres galaxy
+          # Install Galaxy
           wget https://github.com/galaxyproject/galaxy/archive/${{ matrix.galaxy_version }}.tar.gz
           tar xvzf ${{ matrix.galaxy_version }}.tar.gz | tail
           cd galaxy-${{ matrix.galaxy_version }}
           export GALAXY_DIR=$PWD
+          export GALAXY_VERSION=${{ matrix.galaxy_version }}
+          # Export GALAXY_CONFIG_FILE environment variable to be used by run_galaxy.sh
           export GALAXY_CONFIG_FILE=config/galaxy.ini
+          # Export BIOBLEND_ environment variables to be used in BioBlend tests
           export BIOBLEND_GALAXY_MASTER_API_KEY=$(LC_ALL=C tr -dc A-Za-z0-9 < /dev/urandom | head -c 32)
           export BIOBLEND_GALAXY_USER_EMAIL=${USER}@localhost.localdomain
-          export DATABASE_CONNECTION=postgresql://postgres:@localhost/galaxy-travis
+          export DATABASE_CONNECTION=postgresql://postgres:@localhost/galaxy
           eval "echo \"$(cat "${{ github.workspace }}/tests/template_galaxy.ini")\"" > "$GALAXY_CONFIG_FILE"
-          if [ -f lib/galaxy/dependencies/conditional-requirements.txt ]; then
-             sed -i.bak -e 's/psycopg2==2.6.1/psycopg2==2.7.3.1/' lib/galaxy/dependencies/conditional-requirements.txt
-          fi
+          # Update psycopg2 requirement to a version compatible with glibc 2.26 for Galaxy releases 16.01-18.01, see https://github.com/psycopg/psycopg2-wheels/issues/2
+          sed -i.bak -e 's/psycopg2==2.6.1/psycopg2==2.7.3.1/' lib/galaxy/dependencies/conditional-requirements.txt
+          # Start Galaxy and wait for successful server start
           export GALAXY_SKIP_CLIENT_BUILD=1
           GALAXY_RUN_ALL=1 "${{ github.workspace }}/run_galaxy.sh" --daemon --wait
           export BIOBLEND_GALAXY_URL=http://localhost:8080
-          cd ${{ github.workspace }}
+          cd "${{ github.workspace }}"
           tox -e ${{ matrix.tox_env }}
       - name: The job has failed
         if: ${{ failure() }}
