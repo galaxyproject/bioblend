@@ -13,7 +13,7 @@ class TestGalaxyRoles(GalaxyTestBase.GalaxyTestBase):
         super().setUp()
         self.name = 'test_%s' % uuid.uuid4().hex
         self.description = 'automated test role'
-        self.role = self.gi.roles.create_role(self.name, self.description)[0]
+        self.role = self.gi.roles.create_role(self.name, self.description)
 
     def tearDown(self):
         # As of 2017/07/26, deleting a role is not possible through the API

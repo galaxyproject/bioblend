@@ -2,6 +2,8 @@
 
 * Dropped support for Python 3.5. Added support for Python 3.8. Added support
   for Galaxy release 20.09.
+* Changed the return value of ``RolesClient.create_role()`` method from a
+  1-element list containing a dict to a dict.
 
 ### BioBlend v0.14.0 - 2020-07-04
 
