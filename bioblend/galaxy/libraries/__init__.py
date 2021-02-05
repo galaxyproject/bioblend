@@ -515,9 +515,8 @@ class LibraryClient(Client):
         :param tag_using_filenames: Indicate whether to generate dataset tags
           from filenames.
 
-          .. warning::
-            The default was changed from ``True`` to ``False`` in BioBlend
-            v0.14.0.
+          .. versionchanged:: 0.14.0
+            Changed the default from ``True`` to ``False``.
 
         :type tags: list
         :param tags: A list of tags to add to the datasets
@@ -577,9 +576,8 @@ class LibraryClient(Client):
         :param tag_using_filenames: Indicate whether to generate dataset tags
           from filenames.
 
-          .. warning::
-            The default was changed from ``True`` to ``False`` in BioBlend
-            v0.14.0.
+          .. versionchanged:: 0.14.0
+            Changed the default from ``True`` to ``False``.
 
         :type tags: list
         :param tags: A list of tags to add to the datasets
