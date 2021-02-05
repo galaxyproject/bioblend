@@ -10,10 +10,6 @@
    :alt: Join the chat at https://gitter.im/galaxyproject/bioblend
    :target: https://gitter.im/galaxyproject/bioblend?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 
-.. image:: https://travis-ci.org/galaxyproject/bioblend.png
-    :target: https://travis-ci.org/galaxyproject/bioblend
-    :alt: Build Status
-
 
 BioBlend is a Python library for interacting with `Galaxy`_ and  `CloudMan`_
 APIs.
