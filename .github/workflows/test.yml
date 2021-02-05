@@ -4,10 +4,10 @@ jobs:
   test:
     runs-on: ${{ matrix.os }}
     services:
-      # Label used to access the service container
       postgres:
-        # Docker Hub image
-        image: postgres
+        # Use PostgreSQL 11 to workaround https://github.com/sqlalchemy/sqlalchemy/issues/4919
+        # for Galaxy 18.05, 18.09 and 19.01
+        image: postgres:11
         # Provide the password for postgres
         env:
           POSTGRES_PASSWORD: postgres
