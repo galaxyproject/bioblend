@@ -1,5 +1,5 @@
+name: Tests
 on: [push, pull_request]
-name: tests
 jobs:
   test:
     runs-on: ${{ matrix.os }}
@@ -24,17 +24,19 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         tox_env: [py36]
-        galaxy_version: [dev,
-                         release_20.09,
-                         release_20.05,
-                         release_20.01,
-                         release_19.09,
-                         release_19.05,
-                         release_19.01,
-                         release_18.09,
-                         release_18.05,
-                         release_18.01,
-                         release_17.09]
+        galaxy_version:
+          - dev
+          - release_21.01
+          - release_20.09
+          - release_20.05
+          - release_20.01
+          - release_19.09
+          - release_19.05
+          - release_19.01
+          - release_18.09
+          - release_18.05
+          - release_18.01
+          - release_17.09
         include:
           - os: ubuntu-latest
             tox_env: py39
