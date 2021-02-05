@@ -314,9 +314,8 @@ class HistoryClient(Client):
         :rtype: dict
         :return: details of the updated history
 
-        .. warning::
-            The return value was changed in BioBlend v0.8.0, previously it was
-            the status code (type int).
+        .. versionchanged:: 0.8.0
+            Changed the return value from the status code (type int) to a dict.
         """
         return self._put(payload=kwds, id=history_id)
 
@@ -356,9 +355,8 @@ class HistoryClient(Client):
         :rtype: dict
         :return: details of the updated dataset
 
-        .. warning::
-            The return value was changed in BioBlend v0.8.0, previously it was
-            the status code (type int).
+        .. versionchanged:: 0.8.0
+            Changed the return value from the status code (type int) to a dict.
         """
         url = '/'.join((self._make_url(history_id, contents=True), dataset_id))
         return self._put(payload=kwds, url=url)
@@ -387,9 +385,8 @@ class HistoryClient(Client):
         :rtype: dict
         :return: the updated dataset collection attributes
 
-        .. warning::
-            The return value was changed in BioBlend v0.8.0, previously it was
-            the status code (type int).
+        .. versionchanged:: 0.8.0
+            Changed the return value from the status code (type int) to a dict.
         """
         url = '/'.join((self._make_url(history_id, contents=True), 'dataset_collections', dataset_collection_id))
         return self._put(payload=kwds, url=url)
