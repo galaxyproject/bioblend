@@ -54,6 +54,17 @@ In practice, it makes it possible to do things like this:
     just manipulate CloudMan clusters or to script the interactions
     with an instance of Galaxy running on your laptop.
 
+About the library name
+~~~~~~~~~~~~~~~~~~~~~~
+
+The library was originally called just `Blend` but we 
+`renamed it <https://github.com/galaxyproject/bioblend/commit/d01bd083c74ad6d890272f5a71bfa214d4d5279c>`_ 
+to reflect more of its domain and a make it bit more unique so it can be easier to find. 
+The name was intended to be short and easily pronounceable. In its original 
+implementation, the goal was to provide a lot more support for CloudMan 
+and other integration capabilities, allowing them to be *blended* together
+via code. `BioBlend` fit the bill.
+
 .. References/hyperlinks used above
 .. _CloudMan: https://galaxyproject.org/cloudman/
 .. _Galaxy: https://galaxyproject.org/

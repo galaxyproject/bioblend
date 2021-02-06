@@ -6,6 +6,8 @@ import os
 import re
 import sys
 import time
+import webbrowser
+from urllib.parse import urljoin
 
 import bioblend
 from bioblend import ConnectionError
@@ -312,9 +314,8 @@ class HistoryClient(Client):
         :rtype: dict
         :return: details of the updated history
 
-        .. warning::
-            The return value was changed in BioBlend v0.8.0, previously it was
-            the status code (type int).
+        .. versionchanged:: 0.8.0
+            Changed the return value from the status code (type int) to a dict.
         """
         return self._put(payload=kwds, id=history_id)
 
@@ -354,9 +355,8 @@ class HistoryClient(Client):
         :rtype: dict
         :return: details of the updated dataset
 
-        .. warning::
-            The return value was changed in BioBlend v0.8.0, previously it was
-            the status code (type int).
+        .. versionchanged:: 0.8.0
+            Changed the return value from the status code (type int) to a dict.
         """
         url = '/'.join((self._make_url(history_id, contents=True), dataset_id))
         return self._put(payload=kwds, url=url)
@@ -385,9 +385,8 @@ class HistoryClient(Client):
         :rtype: dict
         :return: the updated dataset collection attributes
 
-        .. warning::
-            The return value was changed in BioBlend v0.8.0, previously it was
-            the status code (type int).
+        .. versionchanged:: 0.8.0
+            Changed the return value from the status code (type int) to a dict.
         """
         url = '/'.join((self._make_url(history_id, contents=True), 'dataset_collections', dataset_collection_id))
         return self._put(payload=kwds, url=url)
@@ -678,12 +677,54 @@ class HistoryClient(Client):
         :rtype: dict
         :return: Information about the copied dataset
         """
+        return self.copy_content(history_id, dataset_id, source)
+
+    def copy_content(self, history_id, content_id, source='hda'):
+        """
+        Copy existing content (e.g. a dataset) to a history.
+
+        :type history_id: str
+        :param history_id: ID of the history to which the content should be copied
+
+        :type content_id: str
+        :param content_id: ID of the content to copy
+
+        :type source: str
+        :param source: Source of the content to be copied: 'hda' (for a history
+          dataset, the default), 'hdca' (for a dataset collection), 'library'
+          (for a library dataset) or 'library_folder' (for all datasets in a
+          library folder).
+
+        :rtype: dict
+        :return: Information about the copied content
+        """
 
         payload = {
-            'content': dataset_id,
+            'content': content_id,
             'source': source,
-            'type': 'dataset'
+            'type': 'dataset' if source != 'hdca' else 'dataset_collection',
         }
 
         url = self._make_url(history_id, contents=True)
         return self._post(payload=payload, url=url)
+
+    def open_history(self, history_id):
+        """
+        Open Galaxy in a new tab of the default web browser and switch to the
+        specified history.
+
+        :type history_id: str
+        :param history_id: ID of the history to switch to
+
+        :rtype: NoneType
+        :return: ``None``
+
+        .. warning::
+          After opening the specified history, all previously opened Galaxy tabs
+          in the browser session will have the current history changed to this
+          one, even if the interface still shows another history. Refreshing
+          any such tab is recommended.
+        """
+
+        url = urljoin(self.gi.base_url, f"history/switch_to_history?hist_id={history_id}")
+        webbrowser.open_new_tab(url)

@@ -34,6 +34,7 @@ SAMPLE_WF_DICT = {
     },
     'model_class': 'StoredWorkflow',
     'name': 'paste_columns',
+    'owner': 'user_foo',
     'published': False,
     'steps': {
         '571': {
@@ -158,6 +159,7 @@ class TestWorkflow(unittest.TestCase):
         self.assertEqual(self.wf.id, '9005c5112febe774')
         self.assertEqual(self.wf.name, 'paste_columns')
         self.assertEqual(self.wf.deleted, False)
+        self.assertEqual(self.wf.owner, 'user_foo')
         self.assertEqual(self.wf.published, False)
         self.assertEqual(self.wf.tags, [])
         self.assertEqual(
@@ -295,6 +297,7 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
     def _check_and_del_workflow(self, wf, check_is_public=False):
         # Galaxy appends additional text to imported workflow names
         self.assertTrue(wf.name.startswith('paste_columns'))
+        self.assertEqual(type(wf.owner), str)
         self.assertEqual(len(wf.steps), 3)
         for step_id, step in wf.steps.items():
             self.assertIsInstance(step, wrappers.Step)

@@ -1,0 +1,40 @@
+If you use BioBlend in your published work, please cite the following article:
+
+- Clare Sloggett, Nuwan Goonasekera, Enis Afgan "BioBlend: automating pipeline
+  analyses within Galaxy and CloudMan"
+  Bioinformatics (2013) 29(13):1685-1686 doi:10.1093/bioinformatics/btt199
+
+BibTeX format:
+
+@article{10.1093/bioinformatics/btt199,
+  author = {Sloggett, Clare and Goonasekera, Nuwan and Afgan, Enis},
+  doi = {10.1093/bioinformatics/btt199},
+  journal = {Bioinformatics},
+  number = {13},
+  pages = {1685-1686},
+  title = {{BioBlend: automating pipeline analyses within Galaxy and CloudMan}},
+  url = {https://doi.org/10.1093/bioinformatics/btt199},
+  volume = {29},
+  year = {2013},
+}
+
+If you use BioBlend.objects in your published work, please cite the following
+article:
+
+- Simone Leo, Luca Pireddu, Gianmauro Cuccuru, Luca Lianas, Nicola Soranzo, Enis
+  Afgan, Gianluigi Zanetti "BioBlend.objects: metacomputing with Galaxy"
+  Bioinformatics (2014) 30(19):2816-2817 doi:10.1093/bioinformatics/btu386
+
+BibTeX format:
+
+@article{10.1093/bioinformatics/btu386,
+  author = {Leo, Simone and Pireddu, Luca and Cuccuru, Gianmauro and Lianas, Luca and Soranzo, Nicola and Afgan, Enis and Zanetti, Gianluigi},
+  doi = {10.1093/bioinformatics/btu386},
+  journal = {Bioinformatics},
+  number = {19},
+  pages = {2816-2817},
+  title = {{BioBlend.objects: metacomputing with Galaxy}},
+  url = {https://doi.org/10.1093/bioinformatics/btu386},
+  volume = {30},
+  year = {2014},
+}

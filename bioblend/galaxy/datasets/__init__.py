@@ -5,6 +5,7 @@ import logging
 import os
 import shlex
 import time
+import warnings
 from urllib.parse import urljoin
 
 import bioblend
@@ -44,10 +45,10 @@ class DatasetClient(Client):
         return self._get(id=dataset_id, deleted=deleted, params=params)
 
     def download_dataset(self, dataset_id, file_path=None, use_default_filename=True,
-                         maxwait=12000):
+                         require_ok_state=True, maxwait=12000):
         """
         Download a dataset to file or in memory. If the dataset state is not
-        'ok', a ``DatasetStateException`` will be thrown.
+        'ok', a ``DatasetStateException`` will be thrown, unless ``require_ok_state=False``.
 
         :type dataset_id: str
         :param dataset_id: Encoded dataset ID
@@ -66,6 +67,10 @@ class DatasetClient(Client):
                                  If ``False``, ``file_path`` is assumed to
                                  contain the full file path including the filename.
 
+        :type require_ok_state: bool
+        :param require_ok_state: If ``False``, datasets will be downloaded even if not in an 'ok' state,
+                                 issuing a ``DatasetStateWarning`` rather than raising a ``DatasetStateException``.
+
         :type maxwait: float
         :param maxwait: Total time (in seconds) to wait for the dataset state to
           become terminal. If the dataset state is not terminal within this
@@ -77,7 +82,11 @@ class DatasetClient(Client):
         """
         dataset = self._block_until_dataset_terminal(dataset_id, maxwait=maxwait)
         if not dataset['state'] == 'ok':
-            raise DatasetStateException("Dataset state is not 'ok'. Dataset id: {}, current state: {}".format(dataset_id, dataset['state']))
+            message = "Dataset state is not 'ok'. Dataset id: {}, current state: {}".format(dataset_id, dataset['state'])
+            if require_ok_state:
+                raise DatasetStateException(message)
+            else:
+                warnings.warn(message, DatasetStateWarning)
 
         file_ext = dataset.get('file_ext')
         # Resort to 'data' when Galaxy returns an empty or temporary extension
@@ -170,6 +179,10 @@ class DatasetClient(Client):
 
 
 class DatasetStateException(Exception):
+    pass
+
+
+class DatasetStateWarning(Warning):
     pass
 
 

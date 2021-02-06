@@ -37,7 +37,7 @@ class RolesClient(Client):
         :param role_id: Encoded role ID
 
         :rtype: dict
-        :return: A description of role
+        :return: Details of the given role.
           For example::
 
             {"description": "Private Role for Foo",
@@ -65,16 +65,19 @@ class RolesClient(Client):
         :type group_ids: list
         :param group_ids: A list of encoded group IDs to add to the new role
 
-        :rtype: list
-        :return: A (size 1) list with newly created role
-          details, like::
+        :rtype: dict
+        :return: Details of the newly created role.
+          For example::
 
-            [{'description': 'desc',
-              'url': '/api/roles/ebfb8f50c6abde6d',
-              'model_class': 'Role',
-              'type': 'admin',
-              'id': 'ebfb8f50c6abde6d',
-              'name': 'Foo'}]
+            {'description': 'desc',
+             'url': '/api/roles/ebfb8f50c6abde6d',
+             'model_class': 'Role',
+             'type': 'admin',
+             'id': 'ebfb8f50c6abde6d',
+             'name': 'Foo'}
+
+        .. versionchanged:: 0.15.0
+            Changed the return value from a 1-element list to a dict.
         """
         if user_ids is None:
             user_ids = []
@@ -86,4 +89,8 @@ class RolesClient(Client):
             'user_ids': user_ids,
             'group_ids': group_ids
         }
-        return self._post(payload)
+        ret = self._post(payload)
+        if isinstance(ret, list):
+            # Galaxy release_20.09 and earlier returned a 1-element list
+            ret = ret[0]
+        return ret
