@@ -115,7 +115,8 @@ class JobsClient(Client):
         job_inputs = job_rerun_params['state_inputs']
 
         if remap:
-            assert job_inputs['job_remap'], 'remap was set to True, but this job is not remappable.'
+            if not job_inputs['job_remap']:
+                raise ValueError('remap was set to True, but this job is not remappable.')
             job_inputs['rerun_remap_job_id'] = job_id
 
         if tool_inputs_update:

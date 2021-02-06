@@ -134,7 +134,7 @@ class ToolClient(Client):
         params['link_details'] = link_details
         return self._get(id=tool_id, params=params)
 
-    def run_tool(self, history_id, tool_id, tool_inputs, input_format='21.01'):
+    def run_tool(self, history_id, tool_id, tool_inputs, input_format='legacy'):
         """
         Runs tool specified by ``tool_id`` in history indicated
         by ``history_id`` with inputs from ``dict`` ``tool_inputs``.
