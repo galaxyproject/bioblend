@@ -41,6 +41,7 @@ class HistoryClient(Client):
     def import_history(self, file_path=None, url=None):
         """
         Import a history from an archive on disk or a URL.
+
         :type file_path: str
         :param file_path: Path to exported history archive on disk.
         :type url: str
@@ -60,8 +61,12 @@ class HistoryClient(Client):
         """
         if history_id is not None and name is not None:
             raise ValueError('Provide only one argument between name or history_id, but not both')
+        assert not (filter_user_published is not None and get_all_published)
 
         params = {}
+        if deleted:
+            params.setdefault('q', []).append('deleted')
+            params.setdefault('qv', []).append(deleted)
         if filter_user_published is not None:
             params.setdefault('q', []).append('published')
             params.setdefault('qv', []).append(filter_user_published)
@@ -70,7 +75,7 @@ class HistoryClient(Client):
             params.setdefault('qv', []).append(slug)
 
         url = '/'.join((self._make_url(), 'published')) if get_all_published else None
-        histories = self._get(url=url, deleted=deleted, params=params)
+        histories = self._get(url=url, params=params)
 
         if history_id is not None:
             history = next((_ for _ in histories if _['id'] == history_id), None)
@@ -113,10 +118,9 @@ class HistoryClient(Client):
                  history matches the given ``name``, return the list of all the
                  histories with the given name
         """
-        histories = self._get_histories(history_id=history_id, name=name, deleted=deleted, filter_user_published=published, get_all_published=False, slug=slug)
-        return histories
+        return self._get_histories(history_id=history_id, name=name, deleted=deleted, filter_user_published=published, get_all_published=False, slug=slug)
 
-    def get_published_histories(self, history_id=None, name=None, slug=None):
+    def get_published_histories(self, history_id=None, name=None, deleted=False, slug=None):
         """
         Get all published histories (by any user) or filter the specific one(s)
         via the provided ``name`` or ``history_id``. Provide only one argument,
@@ -128,6 +132,10 @@ class HistoryClient(Client):
         :type name: str
         :param name: Name of history to filter on
 
+        :type deleted: bool
+        :param deleted: whether to filter for the deleted histories (``True``)
+          or for the non-deleted ones (``False``)
+
         :type slug: str
         :param slug: History slug to filter on
 
@@ -136,8 +144,7 @@ class HistoryClient(Client):
                  history matches the given ``name``, return the list of all the
                  histories with the given name
         """
-        histories = self._get_histories(history_id=history_id, name=name, deleted=False, filter_user_published=None, get_all_published=True, slug=slug)
-        return histories
+        return self._get_histories(history_id=history_id, name=name, deleted=deleted, filter_user_published=None, get_all_published=True, slug=slug)
 
     def show_history(self, history_id, contents=False, deleted=None, visible=None, details=None, types=None):
         """
