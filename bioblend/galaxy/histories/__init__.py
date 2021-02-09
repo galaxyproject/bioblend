@@ -86,15 +86,15 @@ class HistoryClient(Client):
 
     def get_histories(self, history_id=None, name=None, deleted=False, published=None, slug=None):
         """
-        Get all histories or filter the specific one(s) via the provided
-        ``name`` or ``history_id``. Provide only one argument, ``name`` or
-        ``history_id``, but not both.
-
-        If ``deleted`` is set to ``True``, return histories that have been
-        deleted.
+        Get all histories or filter the specific one(s) by ``name`` or other
+        arguments.
 
         :type history_id: str
         :param history_id: Encoded history ID to filter on
+
+          .. deprecated:: 0.15.0
+             To get details of a history for which you know the ID, use the much
+             more efficient :meth:`show_history` instead.
 
         :type name: str
         :param name: Name of history to filter on
@@ -114,20 +114,14 @@ class HistoryClient(Client):
         :param slug: History slug to filter on
 
         :rtype: list
-        :return: Return a list of history element dicts. If more than one
-                 history matches the given ``name``, return the list of all the
-                 histories with the given name
+        :return: List of history dicts.
         """
         return self._get_histories(history_id=history_id, name=name, deleted=deleted, filter_user_published=published, get_all_published=False, slug=slug)
 
-    def get_published_histories(self, history_id=None, name=None, deleted=False, slug=None):
+    def get_published_histories(self, name=None, deleted=False, slug=None):
         """
         Get all published histories (by any user) or filter the specific one(s)
-        via the provided ``name`` or ``history_id``. Provide only one argument,
-        ``name`` or ``history_id``, but not both.
-
-        :type history_id: str
-        :param history_id: Encoded history ID to filter on
+        by ``name`` or other arguments.
 
         :type name: str
         :param name: Name of history to filter on
@@ -140,11 +134,9 @@ class HistoryClient(Client):
         :param slug: History slug to filter on
 
         :rtype: list
-        :return: Return a list of history element dicts. If more than one
-                 history matches the given ``name``, return the list of all the
-                 histories with the given name
+        :return: List of history dicts.
         """
-        return self._get_histories(history_id=history_id, name=name, deleted=deleted, filter_user_published=None, get_all_published=True, slug=slug)
+        return self._get_histories(name=name, deleted=deleted, filter_user_published=None, get_all_published=True, slug=slug)
 
     def show_history(self, history_id, contents=False, deleted=None, visible=None, details=None, types=None):
         """
