@@ -1,7 +1,13 @@
 name: Tests
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+  schedule:
+    # Run at midnight UTC every Tuesday
+    - cron: '0 0 * * 2'
 jobs:
   test:
+    if: github.event_name != 'schedule' || github.repository_owner == 'galaxyproject'
     runs-on: ${{ matrix.os }}
     services:
       postgres:
