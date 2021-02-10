@@ -126,9 +126,9 @@ class JobsClient(Client):
         payload = {
             "history_id": history_id if history_id else job_rerun_params['history_id'],
             "tool_id": job_rerun_params['id'],
-            "inputs": job_inputs
+            "inputs": job_inputs,
+            "input_format": '21.01'
         }
-
         return self._post(url=url, payload=payload)
 
     def get_state(self, job_id):
