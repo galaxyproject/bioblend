@@ -2,7 +2,6 @@
 Contains possible interactions with the Galaxy Histories
 """
 import logging
-import os
 import re
 import sys
 import time
@@ -513,22 +512,6 @@ class HistoryClient(Client):
         )
         return self._post(payload, id=history_id, contents=True)
 
-    def download_dataset(self, history_id, dataset_id, file_path,
-                         use_default_filename=True):
-        """
-        .. deprecated:: 0.8.0
-           Use :meth:`~bioblend.galaxy.datasets.DatasetClient.download_dataset`
-           instead.
-        """
-        meta = self.show_dataset(history_id, dataset_id)
-        if use_default_filename:
-            file_local_path = os.path.join(file_path, meta['name'])
-        else:
-            file_local_path = file_path
-        return self.gi.datasets.download_dataset(dataset_id,
-                                                 file_path=file_local_path,
-                                                 use_default_filename=False)
-
     def delete_history(self, history_id, purge=False):
         """
         Delete a history.
@@ -592,13 +575,6 @@ class HistoryClient(Client):
             else:
                 state['percent_complete'] = 0
         return state
-
-    def get_current_history(self):
-        """
-        .. deprecated:: 0.5.2
-           Use :meth:`get_most_recently_used_history` instead.
-        """
-        return self.get_most_recently_used_history()
 
     def get_most_recently_used_history(self):
         """

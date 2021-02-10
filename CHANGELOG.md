@@ -1,11 +1,48 @@
-### BioBlend v - unreleased
+### BioBlend v0.15.0 - 2021-02-10
 
 * Dropped support for Python 3.5. Added support for Python 3.9. Added support
   for Galaxy releases 20.09 and 21.01.
+
 * Changed the return value of ``RolesClient.create_role()`` method from a
   1-element list containing a dict to a dict.
+
+* Removed deprecated ``download_dataset()`` and ``get_current_history``
+  methods of ``HistoryClient``.
+
+* Removed deprecated ``export_workflow_json()`` and ``import_workflow_json``
+  methods of ``WorkflowClient``.
+
+* Added ``copy_content()``, ``get_published_histories()`` and ``open_history()``
+  methods to ``HistoryClient``.
+
+* Added ``rerun_job()`` method to ``JobsClient``.
+
+* Added ``requirements()`` method to ``ToolClient`` (thanks to
+  [cat-bro](https://github.com/cat-bro)).
+
+* Added ``published`` and ``slug`` parameters to
+  ``HistoryClient.get_histories()``.
+
+* Added ``require_state_ok`` parameter to ``DatasetClient.download_dataset()``.
+
+* Added ``input_format`` parameter to ``ToolClient.run_tool()``.
+
+* Deprecated ``history_id`` parameter of ``HistoryClient.get_histories()``
+  method.
+
+* BioBlend.objects: Added ``owner`` property to all objects. Added
+  ``annotation``, ``published`` and ``purged`` properties to ``HistoryPreview``
+  objects.
+
+* Fixed issue where specifying the Galaxy URL with "http://" instead of
+  "https://" when creating a ``GalaxyInstance`` made the subsequent non-GET
+  requests to silently fail.
+
 * Moved the Continuous Integration (CI) from TravisCI to GitHub workflows
   (thanks to [Oleg Zharkov](https://github.com/OlegZharkov)).
+
+* Improvements to tests and documentation (thanks to
+  [Gianmauro Cuccuru](https://github.com/gmauro)).
 
 ### BioBlend v0.14.0 - 2020-07-04
 
