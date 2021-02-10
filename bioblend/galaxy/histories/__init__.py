@@ -41,6 +41,7 @@ class HistoryClient(Client):
     def import_history(self, file_path=None, url=None):
         """
         Import a history from an archive on disk or a URL.
+
         :type file_path: str
         :param file_path: Path to exported history archive on disk.
         :type url: str
@@ -54,17 +55,46 @@ class HistoryClient(Client):
 
         return self._post(payload=payload, files_attached=file_path is not None)
 
-    def get_histories(self, history_id=None, name=None, deleted=False, published=None):
+    def _get_histories(self, history_id=None, name=None, deleted=False, filter_user_published=None, get_all_published=False, slug=None):
         """
-        Get all histories or filter the specific one(s) via the provided
-        ``name`` or ``history_id``. Provide only one argument, ``name`` or
-        ``history_id``, but not both.
+        Hidden method to be used by both get_histories() and get_published_histories()
+        """
+        if history_id is not None and name is not None:
+            raise ValueError('Provide only one argument between name or history_id, but not both')
+        assert not (filter_user_published is not None and get_all_published)
 
-        If ``deleted`` is set to ``True``, return histories that have been
-        deleted.
+        params = {}
+        if deleted:
+            params.setdefault('q', []).append('deleted')
+            params.setdefault('qv', []).append(deleted)
+        if filter_user_published is not None:
+            params.setdefault('q', []).append('published')
+            params.setdefault('qv', []).append(filter_user_published)
+        if slug is not None:
+            params.setdefault('q', []).append('slug')
+            params.setdefault('qv', []).append(slug)
+
+        url = '/'.join((self._make_url(), 'published')) if get_all_published else None
+        histories = self._get(url=url, params=params)
+
+        if history_id is not None:
+            history = next((_ for _ in histories if _['id'] == history_id), None)
+            histories = [history] if history is not None else []
+        elif name is not None:
+            histories = [_ for _ in histories if _['name'] == name]
+        return histories
+
+    def get_histories(self, history_id=None, name=None, deleted=False, published=None, slug=None):
+        """
+        Get all histories or filter the specific one(s) by ``name`` or other
+        arguments.
 
         :type history_id: str
         :param history_id: Encoded history ID to filter on
+
+          .. deprecated:: 0.15.0
+             To get details of a history for which you know the ID, use the much
+             more efficient :meth:`show_history` instead.
 
         :type name: str
         :param name: Name of history to filter on
@@ -76,26 +106,37 @@ class HistoryClient(Client):
         :type published: bool or None
         :param published: whether to filter for the published histories
           (``True``) or for the non-published ones (``False``). If not set, no
-          filtering is applied.
+          filtering is applied. Note the filtering is only applied to the user's
+          own histories; to access all histories published by any user, use the
+          ``get_published_histories`` method.
+
+        :type slug: str
+        :param slug: History slug to filter on
 
         :rtype: list
-        :return: Return a list of history element dicts. If more than one
-                 history matches the given ``name``, return the list of all the
-                 histories with the given name
+        :return: List of history dicts.
         """
-        if history_id is not None and name is not None:
-            raise ValueError('Provide only one argument between name or history_id, but not both')
-        params = {}
-        if published is not None:
-            params.setdefault('q', []).append('published')
-            params.setdefault('qv', []).append(published)
-        histories = self._get(deleted=deleted, params=params)
-        if history_id is not None:
-            history = next((_ for _ in histories if _['id'] == history_id), None)
-            histories = [history] if history is not None else []
-        elif name is not None:
-            histories = [_ for _ in histories if _['name'] == name]
-        return histories
+        return self._get_histories(history_id=history_id, name=name, deleted=deleted, filter_user_published=published, get_all_published=False, slug=slug)
+
+    def get_published_histories(self, name=None, deleted=False, slug=None):
+        """
+        Get all published histories (by any user) or filter the specific one(s)
+        by ``name`` or other arguments.
+
+        :type name: str
+        :param name: Name of history to filter on
+
+        :type deleted: bool
+        :param deleted: whether to filter for the deleted histories (``True``)
+          or for the non-deleted ones (``False``)
+
+        :type slug: str
+        :param slug: History slug to filter on
+
+        :rtype: list
+        :return: List of history dicts.
+        """
+        return self._get_histories(name=name, deleted=deleted, filter_user_published=None, get_all_published=True, slug=slug)
 
     def show_history(self, history_id, contents=False, deleted=None, visible=None, details=None, types=None):
         """
