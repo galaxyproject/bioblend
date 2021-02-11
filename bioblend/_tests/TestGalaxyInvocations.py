@@ -46,6 +46,9 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
         self.assertEqual(len(step_jobs_summary), 1)
         self.assertEqual(step_jobs_summary[0]['populated_state'], 'ok')
 
+        biocompute_object = self.gi.invocations.get_invocation_biocompute_object(invocation2['id'])
+        self.assertEqual(len(biocompute_object['description_domain']['pipeline_steps']), 1)
+
     @test_util.skip_unless_galaxy('release_19.09')
     @test_util.skip_unless_tool("cat1")
     @test_util.skip_unless_tool("cat")
