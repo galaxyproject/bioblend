@@ -160,6 +160,37 @@ class InvocationClient(Client):
         url = self._make_url(invocation_id) + '/jobs_summary'
         return self._get(url=url)
 
+    def get_invocation_step_jobs_summary(self, invocation_id):
+        """
+        Get a summary of an invocation, stating the number of jobs which
+        succeed, which are paused and which have errored.
+
+        :type invocation_id: str
+        :param invocation_id: Encoded workflow invocation ID
+
+        :rtype: dict[]
+        :return: The invocation step jobs summary.
+          For example::
+            [
+                {'populated_state': 'ok',
+                 'states': {'ok': 1},
+                 'model': 'Job',
+                 'id': 'e85a3be143d5905b'},
+
+                {'populated_state': 'ok',
+                 'states': {'running': 1},
+                 'model': 'Job',
+                 'id': 'c9468fdb6dc5c5f1'}
+
+                {'populated_state': 'ok',
+                 'states': {'new': 1},
+                 'model': 'Job',
+                 'id': '2a56795cad3c7db3'}
+            ]
+        """
+        url = self._make_url(invocation_id) + '/step_jobs_summary'
+        return self._get(url=url)
+
     def get_invocation_report(self, invocation_id):
         """
         Get a Markdown report for an invocation.
