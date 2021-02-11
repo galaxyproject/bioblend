@@ -34,6 +34,18 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
         assert summary['states'] == {}
         assert report['workflows'] == {workflow['id']: {'name': 'paste_columns'}}
 
+        invocation2 = self.gi.workflows.invoke_workflow(
+            workflow['id'],
+            inputs={'Input 1': dataset, 'Input 2': dataset},
+            history_id=history_id,
+            inputs_by='name',
+        )
+
+        time.sleep(1)
+        step_jobs_summary = self.gi.invocations.get_invocation_step_jobs_summary(invocation2['id'])
+        self.assertEqual(len(step_jobs_summary), 1)
+        self.assertEqual(step_jobs_summary[0]['populated_state'], 'ok')
+
     @test_util.skip_unless_galaxy('release_19.09')
     @test_util.skip_unless_tool("cat1")
     @test_util.skip_unless_tool("cat")
