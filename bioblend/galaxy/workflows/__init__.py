@@ -253,6 +253,9 @@ class WorkflowClient(Client):
         :type tags: list of str
         :param tags: Replace workflow tags with the given list
 
+        :type published: bool
+        :param published: Whether the workflow should be published or unpublished
+
         :rtype: dict
         :return: Dictionary representing the updated workflow
         """

@@ -169,6 +169,16 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         updated_wf = self.gi.workflows.update_workflow(wf['id'], name=new_name)
         self.assertEqual(updated_wf['name'], new_name)
 
+    @test_util.skip_unless_galaxy('release_21.01')
+    def test_update_workflow_published(self):
+        path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
+        wf = self.gi.workflows.import_workflow_from_local_path(path)
+        self.assertFalse(wf['published'])
+        updated_wf = self.gi.workflows.update_workflow(wf['id'], published=True)
+        self.assertTrue(updated_wf['published'])
+        updated_wf = self.gi.workflows.update_workflow(wf['id'], published=False)
+        self.assertFalse(updated_wf['published'])
+
     @test_util.skip_unless_galaxy('release_19.09')  # due to Galaxy bug fixed in https://github.com/galaxyproject/galaxy/pull/9014
     def test_show_workflow_versions(self):
         path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
