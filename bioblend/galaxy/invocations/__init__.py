@@ -212,6 +212,19 @@ class InvocationClient(Client):
         url = self._make_url(invocation_id) + '/report'
         return self._get(url=url)
 
+    def get_invocation_biocompute_object(self, invocation_id):
+        """
+        Get a BioCompute object for an invocation.
+
+        :type invocation_id: str
+        :param invocation_id: Encoded workflow invocation ID
+
+        :rtype: dict
+        :return: The BioCompute object
+        """
+        url = self._make_url(invocation_id) + '/biocompute/download'
+        return self._get(url=url)
+
     def _invocation_step_url(self, invocation_id, step_id):
         return '/'.join((self._make_url(invocation_id), "steps", step_id))
 
