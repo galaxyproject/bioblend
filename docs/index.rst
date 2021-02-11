@@ -158,4 +158,4 @@ Indices and tables
 .. References/hyperlinks used above
 .. _Git repository: https://github.com/galaxyproject/bioblend
 .. _PyPi: https://pypi.org/project/bioblend/
-.. _setup.py: https://github.com/galaxyproject/bioblend/blob/master/setup.py
+.. _setup.py: https://github.com/galaxyproject/bioblend/blob/main/setup.py
