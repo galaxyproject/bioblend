@@ -41,7 +41,7 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
             inputs_by='name',
         )
 
-        time.sleep(1)
+        time.sleep(5)
         step_jobs_summary = self.gi.invocations.get_invocation_step_jobs_summary(invocation2['id'])
         self.assertEqual(len(step_jobs_summary), 1)
         self.assertEqual(step_jobs_summary[0]['populated_state'], 'ok')
