@@ -79,9 +79,9 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
                 break
 
             time.sleep(.5)
-
-        invocation = self.gi.invocations.show_invocation(invocation_id)
-        self.assertEqual(invocation["state"], "scheduled")
+        else:
+            invocation = self.gi.invocations.show_invocation(invocation_id)
+            self.assertEqual(invocation["state"], "scheduled")
 
     def _invoke_workflow(self):
         path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
