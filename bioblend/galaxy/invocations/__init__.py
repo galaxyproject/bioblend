@@ -220,7 +220,7 @@ class InvocationClient(Client):
             try:
                 return self._get(url=url, json=False)
             except Exception as e:
-                raise e
+                raise Exception(f"Failed to get the PDF report, the necessary dependencies may not be installed on the Galaxy server: {e}")
 
     def get_invocation_biocompute_object(self, invocation_id):
         """
