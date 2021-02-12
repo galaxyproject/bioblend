@@ -191,14 +191,17 @@ class InvocationClient(Client):
         url = self._make_url(invocation_id) + '/step_jobs_summary'
         return self._get(url=url)
 
-    def get_invocation_report(self, invocation_id):
+    def get_invocation_report(self, invocation_id, format='markdown'):
         """
-        Get a Markdown report for an invocation.
+        Get a Markdown or PDF report for an invocation.
 
         :type invocation_id: str
         :param invocation_id: Encoded workflow invocation ID
 
-        :rtype: dict
+        :type format: str
+        :param format: The format of the report, can be 'markdown' or 'pdf'
+
+        :rtype: dict or bytes
         :return: The invocation report.
           For example::
 
@@ -209,21 +212,15 @@ class InvocationClient(Client):
              'render_format': 'markdown',
              'workflows': {'f2db41e1fa331b3e': {'name': 'Example workflow'}}}
         """
-        url = self._make_url(invocation_id) + '/report'
-        return self._get(url=url)
-
-    def get_invocation_report_pdf(self, invocation_id):
-        """
-        Get a PDF report for an invocation.
-
-        :type invocation_id: str
-        :param invocation_id: Encoded workflow invocation ID
-
-        :rtype: bytes
-        :return: The invocation report.
-        """
-        url = self._make_url(invocation_id) + '/report.pdf'
-        return self._get(url=url, json=False)
+        if format == 'markdown':
+            url = self._make_url(invocation_id) + '/report'
+            return self._get(url=url)
+        elif format == 'pdf':
+            url = self._make_url(invocation_id) + '/report.pdf'
+            try:
+                return self._get(url=url, json=False)
+            except Exception as e:
+                raise e
 
     def get_invocation_biocompute_object(self, invocation_id):
         """
