@@ -226,11 +226,10 @@ class InvocationClient(Client):
         url = self._make_url(invocation_id) + '/report.pdf'
         r = self.gi.make_get_request(url, stream=True)
         if not r.ok:
-            raise Exception(f"Failed to get the PDF report, the necessary dependencies may not be installed on the Galaxy server: {e}")
+            raise Exception("Failed to get the PDF report, the necessary dependencies may not be installed on the Galaxy server.")
         with open(file_path, 'wb') as outf:
             for chunk in r.iter_content(chunk_size):
                 outf.write(chunk)
-           
 
     def get_invocation_biocompute_object(self, invocation_id):
         """
