@@ -169,7 +169,7 @@ class InvocationClient(Client):
         :type invocation_id: str
         :param invocation_id: Encoded workflow invocation ID
 
-        :rtype: dict[]
+        :rtype: list of dicts
         :return: The invocation step jobs summary.
           For example::
             [
