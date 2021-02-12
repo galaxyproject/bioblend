@@ -2,8 +2,8 @@
 Contains possible interactions with the Galaxy workflow invocations
 """
 
-from bioblend.galaxy.client import Client
 from bioblend import CHUNK_SIZE
+from bioblend.galaxy.client import Client
 
 
 class InvocationClient(Client):
