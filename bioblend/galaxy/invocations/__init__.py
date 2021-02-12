@@ -192,7 +192,7 @@ class InvocationClient(Client):
         url = self._make_url(invocation_id) + '/step_jobs_summary'
         return self._get(url=url)
 
-    def get_invocation_report(self, invocation_id, format='markdown'):
+    def get_invocation_report(self, invocation_id):
         """
         Get a Markdown report for an invocation.
 
