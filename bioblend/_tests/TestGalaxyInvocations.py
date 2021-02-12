@@ -66,8 +66,15 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
         )
         invocation_id = invocation["id"]
 
-        steps = self._wait_invocation(invocation_id)
+        def invocation_steps_by_order_index():
+            invocation = self.gi.invocations.show_invocation(invocation_id)
+            return {s["order_index"]: s for s in invocation["steps"]}
 
+        for _ in range(20):
+            if 2 in invocation_steps_by_order_index():
+                break
+            time.sleep(.5)
+        steps = invocation_steps_by_order_index()
         pause_step = steps[2]
         self.assertIsNone(
             self.gi.invocations.show_invocation_step(invocation_id, pause_step["id"])["action"])
