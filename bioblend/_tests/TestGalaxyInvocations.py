@@ -29,7 +29,7 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
         report = self.gi.invocations.get_invocation_report(invocation_id)
         assert report['workflows'] == {workflow_id: {'name': 'paste_columns'}}
         try:
-            self.gi.invocations.get_invocation_report_pdf(invocation_id)
+            self.gi.invocations.get_invocation_report_pdf(invocation_id, 'report.pdf')
         except Exception:
             # This can fail if dependencies as weasyprint are not installed on the Galaxy server
             pass

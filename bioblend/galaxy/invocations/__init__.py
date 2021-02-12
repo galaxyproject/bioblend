@@ -3,6 +3,7 @@ Contains possible interactions with the Galaxy workflow invocations
 """
 
 from bioblend.galaxy.client import Client
+from bioblend import CHUNK_SIZE
 
 
 class InvocationClient(Client):
@@ -215,19 +216,26 @@ class InvocationClient(Client):
         url = self._make_url(invocation_id) + '/report'
         return self._get(url=url)
 
-    def get_invocation_report_pdf(self, invocation_id):
+    def get_invocation_report_pdf(self, invocation_id, file_path, chunk_size=CHUNK_SIZE):
         """
         Get a PDF report for an invocation.
 
         :type invocation_id: str
         :param invocation_id: Encoded workflow invocation ID
 
+        :type file_path: str
+        :param file_path: Path to save the file under
+
         :rtype: bytes
         :return: The invocation report.
         """
         url = self._make_url(invocation_id) + '/report.pdf'
         try:
-            return self._get(url=url, json=False)
+            r = self.gi.make_get_request(url, stream=True, json=False)
+            r.raise_for_status()
+            with open(file_path, 'wb') as outf:
+                for chunk in r.iter_content(chunk_size):
+                    outf.write(chunk)
         except Exception as e:
             raise Exception(f"Failed to get the PDF report, the necessary dependencies may not be installed on the Galaxy server: {e}")
 
