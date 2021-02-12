@@ -163,8 +163,8 @@ class InvocationClient(Client):
 
     def get_invocation_step_jobs_summary(self, invocation_id):
         """
-        Get a summary of an invocation, stating the number of jobs which
-        succeed, which are paused and which have errored.
+        Get a detailed summary of an invocation, listing all jobs with
+        their job IDs and current states.
 
         :type invocation_id: str
         :param invocation_id: Encoded workflow invocation ID
@@ -221,17 +221,16 @@ class InvocationClient(Client):
         :param invocation_id: Encoded workflow invocation ID
 
         :type file_path: str
-        :param file_path: Path to save the file under
+        :param file_path: Path to save the report
         """
         url = self._make_url(invocation_id) + '/report.pdf'
-        try:
-            r = self.gi.make_get_request(url, stream=True)
-            r.raise_for_status()
-            with open(file_path, 'wb') as outf:
-                for chunk in r.iter_content(chunk_size):
-                    outf.write(chunk)
-        except Exception as e:
+        r = self.gi.make_get_request(url, stream=True)
+        if not r.ok:
             raise Exception(f"Failed to get the PDF report, the necessary dependencies may not be installed on the Galaxy server: {e}")
+        with open(file_path, 'wb') as outf:
+            for chunk in r.iter_content(chunk_size):
+                outf.write(chunk)
+           
 
     def get_invocation_biocompute_object(self, invocation_id):
         """
