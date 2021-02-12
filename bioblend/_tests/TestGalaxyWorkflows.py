@@ -217,3 +217,19 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
             inputs_by='name',
         )
         assert invoke_response['state'] == 'new', invoke_response
+
+    def test_create_workflow_from_history(self):
+        path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
+        wf = self.gi.workflows.import_workflow_from_local_path(path)
+        history_id = self.gi.histories.create_history(name="test_wf_invocation")['id']
+        dataset1_id = self._test_dataset(history_id)
+        dataset = {'src': 'hda', 'id': dataset1_id}
+        invoke_response = self.gi.workflows.invoke_workflow(
+            wf['id'],
+            inputs={'Input 1': dataset, 'Input 2': dataset},
+            history_id=history_id,
+            inputs_by='name',
+        )
+        self.gi.workflows.cancel_invocation(wf['id'], invoke_response['id'])
+        wf2 = self.gi.workflows.create_workflow_from_history(history_id, 'My new workflow!')
+        self.assertEqual(wf2['name'], 'My new workflow!')
