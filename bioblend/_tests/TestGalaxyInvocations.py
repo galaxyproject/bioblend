@@ -20,6 +20,7 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
         summary = self.gi.invocations.get_invocation_summary(invocation_id)
         assert summary['states'] == {}
 
+    @test_util.skip_unless_galaxy('release_19.09')
     def test_get_invocation_report(self):
         invocation = self._invoke_workflow()
 
