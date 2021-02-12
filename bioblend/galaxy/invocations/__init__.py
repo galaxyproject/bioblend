@@ -199,9 +199,6 @@ class InvocationClient(Client):
         :type invocation_id: str
         :param invocation_id: Encoded workflow invocation ID
 
-        :type format: str
-        :param format: The format of the report, can be 'markdown' or 'pdf'
-
         :rtype: dict
         :return: The invocation report.
           For example::
