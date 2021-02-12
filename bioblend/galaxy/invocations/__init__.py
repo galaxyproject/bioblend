@@ -212,6 +212,19 @@ class InvocationClient(Client):
         url = self._make_url(invocation_id) + '/report'
         return self._get(url=url)
 
+    def get_invocation_report_pdf(self, invocation_id):
+        """
+        Get a PDF report for an invocation.
+
+        :type invocation_id: str
+        :param invocation_id: Encoded workflow invocation ID
+
+        :rtype: bytes
+        :return: The invocation report.
+        """
+        url = self._make_url(invocation_id) + '/report.pdf'
+        return self._get(url=url, json=False)
+
     def get_invocation_biocompute_object(self, invocation_id):
         """
         Get a BioCompute object for an invocation.
