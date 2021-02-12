@@ -235,7 +235,7 @@ class InvocationClient(Client):
         :rtype: dict
         :return: The BioCompute object
         """
-        url = self._make_url(invocation_id) + '/biocompute/download'
+        url = self._make_url(invocation_id) + '/biocompute'
         return self._get(url=url)
 
     def _invocation_step_url(self, invocation_id, step_id):
