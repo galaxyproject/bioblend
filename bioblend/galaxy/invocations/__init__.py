@@ -225,9 +225,6 @@ class InvocationClient(Client):
 
         :type file_path: str
         :param file_path: Path to save the file under
-
-        :rtype: bytes
-        :return: The invocation report.
         """
         url = self._make_url(invocation_id) + '/report.pdf'
         try:
