@@ -80,15 +80,7 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
             self.gi.invocations.show_invocation_step(invocation_id, pause_step["id"])["action"])
         self.gi.invocations.run_invocation_step_action(invocation_id, pause_step["id"], action=True)
         self.assertTrue(self.gi.invocations.show_invocation_step(invocation_id, pause_step["id"])["action"])
-        for _ in range(20):
-            invocation = self.gi.invocations.show_invocation(invocation_id)
-            if invocation["state"] == "scheduled":
-                break
-
-            time.sleep(.5)
-        else:
-            invocation = self.gi.invocations.show_invocation(invocation_id)
-            self.assertEqual(invocation["state"], "scheduled")
+        self._wait_invocation(invocation_id)
 
     def _invoke_workflow(self):
         path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
