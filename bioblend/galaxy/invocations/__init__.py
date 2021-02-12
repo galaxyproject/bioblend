@@ -231,7 +231,7 @@ class InvocationClient(Client):
         """
         url = self._make_url(invocation_id) + '/report.pdf'
         try:
-            r = self.gi.make_get_request(url, stream=True, json=False)
+            r = self.gi.make_get_request(url, stream=True)
             r.raise_for_status()
             with open(file_path, 'wb') as outf:
                 for chunk in r.iter_content(chunk_size):
