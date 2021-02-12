@@ -730,6 +730,40 @@ class WorkflowClient(Client):
         """
         return self._delete(id=workflow_id)
 
+    def create_workflow_from_history(self, history_id, workflow_name,
+                                     job_ids=[], dataset_ids=[], dataset_collection_ids=[]):
+        """
+        Create a workflow from a history_id.
+
+        :type history_id: str
+        :param workflow_id: Encoded history ID
+
+        :type   workflow_name: str
+        :param  workflow_name: Name of the workflow to create when extracting a workflow from history
+
+        :type   job_ids: list
+        :param  job_ids: Optional list of jobs to include when extracting a workflow from history
+
+        :type   dataset_ids: list
+        :param  dataset_ids: Optional list of HDA "hid"s corresponding to workflow inputs
+                             when extracting a workflow from history
+
+        :type   dataset_collection_ids: list
+        :param  dataset_collection_ids: Optional list of HDCA "hid"s corresponding to workflow inputs
+                                        when extracting a workflow from history
+
+        :rtype: dict
+        :return: A description of the created workflow
+        """
+        payload = {
+            "from_history_id": history_id,
+            "job_ids": job_ids,
+            "dataset_ids": dataset_ids,
+            "dataset_collection_ids": dataset_collection_ids,
+            "workflow_name": workflow_name
+        }
+        return self._post(payload=payload)
+
     def _invocation_step_url(self, workflow_id, invocation_id, step_id):
         return '/'.join((self._invocation_url(workflow_id, invocation_id), "steps", step_id))
 
