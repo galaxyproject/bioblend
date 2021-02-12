@@ -6,19 +6,8 @@ from . import GalaxyTestBase, test_util
 
 class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
     @test_util.skip_unless_galaxy('release_19.09')
-    def test_invocation(self):
-        path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
-        workflow = self.gi.workflows.import_workflow_from_local_path(path)
-        history_id = self.gi.histories.create_history(name="TestWorkflowState")["id"]
-        dataset1_id = self._test_dataset(history_id)
-        dataset = {'src': 'hda', 'id': dataset1_id}
-
-        invocation = self.gi.workflows.invoke_workflow(
-            workflow['id'],
-            inputs={'Input 1': dataset, 'Input 2': dataset},
-            history_id=history_id,
-            inputs_by='name',
-        )
+    def test_cancel_invocation(self):
+        invocation = self._invoke_workflow()
 
         invocation_id = invocation["id"]
         invocations = self.gi.invocations.get_invocations()
@@ -29,25 +18,33 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
         self.assertEqual(invocation['state'], 'cancelled')
 
         summary = self.gi.invocations.get_invocation_summary(invocation_id)
-        report = self.gi.invocations.get_invocation_report(invocation_id)
-
         assert summary['states'] == {}
-        assert report['workflows'] == {workflow['id']: {'name': 'paste_columns'}}
 
-        invocation2 = self.gi.workflows.invoke_workflow(
-            workflow['id'],
-            inputs={'Input 1': dataset, 'Input 2': dataset},
-            history_id=history_id,
-            inputs_by='name',
-        )
+    def test_get_invocation_report(self):
+        invocation = self._invoke_workflow()
 
-        time.sleep(5)
-        step_jobs_summary = self.gi.invocations.get_invocation_step_jobs_summary(invocation2['id'])
+        invocation_id = invocation['id']
+        workflow_id = invocation['workflow_id']
+        report = self.gi.invocations.get_invocation_report(invocation_id)
+        assert report['workflows'] == {workflow_id: {'name': 'paste_columns'}}
+        with self.assertRaises(Exception):
+            self.gi.invocations.get_invocation_report(invocation_id, format='pdf')
+
+    @test_util.skip_unless_galaxy('release_20.09')
+    def test_get_invocation_biocompute_object(self):
+        invocation = self._invoke_workflow()
+
+        time.sleep(3)
+        biocompute_object = self.gi.invocations.get_invocation_biocompute_object(invocation['id'])
+        self.assertEqual(len(biocompute_object['description_domain']['pipeline_steps']), 1)
+
+    def test_get_invocation_step_jobs_summary(self):
+        invocation = self._invoke_workflow()
+
+        time.sleep(3)
+        step_jobs_summary = self.gi.invocations.get_invocation_step_jobs_summary(invocation['id'])
         self.assertEqual(len(step_jobs_summary), 1)
         self.assertEqual(step_jobs_summary[0]['populated_state'], 'ok')
-
-        biocompute_object = self.gi.invocations.get_invocation_biocompute_object(invocation2['id'])
-        self.assertEqual(len(biocompute_object['description_domain']['pipeline_steps']), 1)
 
     @test_util.skip_unless_galaxy('release_19.09')
     @test_util.skip_unless_tool("cat1")
@@ -88,3 +85,17 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
 
         invocation = self.gi.invocations.show_invocation(invocation_id)
         self.assertEqual(invocation["state"], "scheduled")
+
+    def _invoke_workflow(self):
+        path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
+        workflow = self.gi.workflows.import_workflow_from_local_path(path)
+        history_id = self.gi.histories.create_history(name="TestWorkflowState")["id"]
+        dataset1_id = self._test_dataset(history_id)
+        dataset = {'src': 'hda', 'id': dataset1_id}
+
+        return self.gi.workflows.invoke_workflow(
+            workflow['id'],
+            inputs={'Input 1': dataset, 'Input 2': dataset},
+            history_id=history_id,
+            inputs_by='name',
+        )
