@@ -730,6 +730,18 @@ class WorkflowClient(Client):
         """
         return self._delete(id=workflow_id)
 
+    def refactor_workflow(self, workflow_id, actions, dry_run=False):
+        """
+        Refactor workflow
+        """
+        payload = {
+            'actions': actions,
+            'style': 'editor',
+            'dry_run': dry_run,
+        }
+        url = '/'.join((self._make_url(workflow_id), 'refactor'))
+        return self._put(payload=payload, url=url)
+
     def create_workflow_from_history(self, history_id, workflow_name,
                                      job_ids=[], dataset_ids=[], dataset_collection_ids=[]):
         """
@@ -785,6 +797,7 @@ class WorkflowClient(Client):
 
     def _invocations_url(self, workflow_id):
         return '/'.join((self._make_url(workflow_id), 'invocations'))
+
 
 
 __all__ = ('WorkflowClient',)
