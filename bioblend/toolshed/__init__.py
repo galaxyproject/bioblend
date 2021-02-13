@@ -6,7 +6,7 @@ from bioblend.toolshed import categories, repositories, tools
 
 
 class ToolShedInstance(GalaxyClient):
-    def __init__(self, url, key=None, email=None, password=None, verify=True):
+    def __init__(self, url, key=None, email=None, password=None, verify=True, user_agent=None):
         """
         A base representation of a connection to a ToolShed instance, identified
         by the ToolShed URL and user credentials.
@@ -46,7 +46,7 @@ class ToolShedInstance(GalaxyClient):
         :param verify: Whether to verify the server's TLS certificate
         :type verify: bool
         """
-        super().__init__(url, key, email, password, verify=verify)
+        super().__init__(url, key, email, password, verify=verify, user_agent=user_agent)
         self.categories = categories.ToolShedCategoryClient(self)
         self.repositories = repositories.ToolShedRepositoryClient(self)
         self.tools = tools.ToolShedToolClient(self)

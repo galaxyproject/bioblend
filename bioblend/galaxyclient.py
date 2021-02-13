@@ -21,7 +21,7 @@ from bioblend.util import FileStream
 
 class GalaxyClient:
 
-    def __init__(self, url, key=None, email=None, password=None, verify=True, timeout=None):
+    def __init__(self, url, key=None, email=None, password=None, verify=True, timeout=None, user_agent=None):
         """
         :param verify: Whether to verify the server's TLS certificate
         :type verify: bool
@@ -42,7 +42,12 @@ class GalaxyClient:
             self._key = None
             self.email = email
             self.password = password
+        self.user_agent = user_agent
         self.json_headers = {'Content-Type': 'application/json'}
+        self.non_json_headers = {}
+        if self.user_agent:
+            self.json_headers['User-Agent'] = self.user_agent
+            self.non_json_headers = {'User-Agent': self.user_agent}
         self.verify = verify
         self.timeout = timeout
 
@@ -70,6 +75,9 @@ class GalaxyClient:
         kwargs['params'] = params
         kwargs.setdefault('verify', self.verify)
         kwargs.setdefault('timeout', self.timeout)
+        if self.non_json_headers:
+            kwargs.setdefault('headers', {})
+            kwargs['headers'].update(self.non_json_headers)
         r = requests.get(url, **kwargs)
         return r
 

@@ -11,7 +11,7 @@ from bioblend.galaxyclient import GalaxyClient
 
 
 class GalaxyInstance(GalaxyClient):
-    def __init__(self, url, key=None, email=None, password=None, verify=True):
+    def __init__(self, url, key=None, email=None, password=None, verify=True, user_agent=None):
         """
         A base representation of a connection to a Galaxy instance, identified
         by the server URL and user credentials.
@@ -53,7 +53,7 @@ class GalaxyInstance(GalaxyClient):
         :param verify: Whether to verify the server's TLS certificate
         :type verify: bool
         """
-        super().__init__(url, key, email, password, verify=verify)
+        super().__init__(url, key, email, password, verify=verify, user_agent=user_agent)
         self.libraries = libraries.LibraryClient(self)
         self.histories = histories.HistoryClient(self)
         self.workflows = workflows.WorkflowClient(self)
