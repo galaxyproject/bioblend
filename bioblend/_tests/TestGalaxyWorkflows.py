@@ -215,7 +215,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         self.gi.workflows.cancel_invocation(wf_id, invoke_response['id'])
         wf2 = self.gi.workflows.create_workflow_from_history(history_id, 'My new workflow!')
         self.assertEqual(wf2['name'], 'My new workflow!')
-    
+
     def test_show_versions(self):
         invoke_response = self._invoke_workflow()
         wf_id = invoke_response['workflow_id']
@@ -226,7 +226,23 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         self.assertTrue('version' in version)
         self.assertTrue('update_time' in version)
         self.assertTrue('steps' in version)
-    
+
+    def test_refactor_workflow(self):
+        actions = [
+            {"action_type": "add_input", "type": "data", "label": "foo"},
+            {"action_type": "update_step_label", "label": "bar", "step": {"label": "foo"}},
+        ]
+        invoke_response = self._invoke_workflow()
+        wf_id = invoke_response['workflow_id']
+        response = self.gi.workflows.refactor_workflow(wf_id, actions, dry_run=True)
+        self.assertEqual(len(response), 3)
+        self.assertTrue('action_executions' in response)
+        self.assertTrue('workflow' in response)
+        self.assertTrue('dry_run' in response)
+        self.assertEqual(len(response['action_executions']), 2)
+        self.assertEqual(response['workflow']['steps']['0']['label'], 'bar')
+        self.assertEqual(response['dry_run'], True)
+
     def _invoke_workflow(self):
         path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
         wf = self.gi.workflows.import_workflow_from_local_path(path)
