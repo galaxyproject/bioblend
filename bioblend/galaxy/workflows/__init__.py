@@ -763,6 +763,19 @@ class WorkflowClient(Client):
             "workflow_name": workflow_name
         }
         return self._post(payload=payload)
+    
+    def show_versions(self, workflow_id):
+        """
+        Get versions for a workflow_id.
+
+        :type workflow_id: str
+        :param workflow_id: Encoded workflow ID
+
+        :rtype: list of dicts
+        :return: List of versions for this workflow ID
+        """
+        url = self._make_url(workflow_id) + '/versions'
+        return self._get(url=url)
 
     def _invocation_step_url(self, workflow_id, invocation_id, step_id):
         return '/'.join((self._invocation_url(workflow_id, invocation_id), "steps", step_id))
