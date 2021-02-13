@@ -225,7 +225,7 @@ class InvocationClient(Client):
         """
         url = self._make_url(invocation_id) + '/report.pdf'
         r = self.gi.make_get_request(url, stream=True)
-        if not r.ok:
+        if r.status_code != 200:
             raise Exception("Failed to get the PDF report, the necessary dependencies may not be installed on the Galaxy server.")
         with open(file_path, 'wb') as outf:
             for chunk in r.iter_content(chunk_size):
