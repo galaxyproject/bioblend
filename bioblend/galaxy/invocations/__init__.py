@@ -21,12 +21,15 @@ class InvocationClient(Client):
         self.module = 'invocations'
         super().__init__(galaxy_instance)
 
-    def get_invocations(self, history_id=None, user_id=None,
+    def get_invocations(self, workflow_id=None, history_id=None, user_id=None,
                         include_terminal=True, limit=None, view='collection',
                         step_details=False):
         """
         Get a list containing all the workflow invocations corresponding to the
         specified workflow.
+
+        :type workflow_id: str
+        :param workflow_id: Encoded workflow ID to restrict the query.
 
         :type history_id: str
         :param history_id: Encoded history ID to restrict the query.
@@ -63,6 +66,8 @@ class InvocationClient(Client):
             'view': view,
             'step_details': step_details
         }
+        if workflow_id:
+            params['workflow_id'] = workflow_id
         if history_id:
             params['history_id'] = history_id
         if user_id:
