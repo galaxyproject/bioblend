@@ -42,7 +42,10 @@ class GalaxyClient:
             self._key = None
             self.email = email
             self.password = password
-        self.json_headers = {'Content-Type': 'application/json'}
+        self.json_headers = {
+            'Content-Type': 'application/json',
+            'x-api-key': key
+        }
         self.verify = verify
         self.timeout = timeout
 
@@ -68,7 +71,6 @@ class GalaxyClient:
             params.pop('key', None)
         kwargs['params'] = params
         headers = self.json_headers.copy()
-        headers['x-api-key'] = self.key
         kwargs.setdefault('verify', self.verify)
         kwargs.setdefault('timeout', self.timeout)
         r = requests.get(url, headers=headers, **kwargs)
