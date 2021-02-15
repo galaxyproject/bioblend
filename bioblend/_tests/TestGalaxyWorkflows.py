@@ -234,6 +234,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         ]
         invoke_response = self._invoke_workflow()
         wf_id = invoke_response['workflow_id']
+        self._wait_invocation(invoke_response['id'])
         response = self.gi.workflows.refactor_workflow(wf_id, actions, dry_run=True)
         self.assertEqual(len(response), 3)
         self.assertTrue('action_executions' in response)
@@ -255,3 +256,13 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
             history_id=history_id,
             inputs_by='name',
         )
+
+    def _wait_invocation(self, invocation_id):
+        for _ in range(20):
+            invocation = self.gi.invocations.show_invocation(invocation_id)
+            if invocation["state"] == "scheduled":
+                break
+            time.sleep(.5)
+        else:
+            invocation = self.gi.invocations.show_invocation(invocation_id)
+            self.assertEqual(invocation["state"], "scheduled")
