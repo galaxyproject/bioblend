@@ -71,7 +71,7 @@ class GalaxyClient:
         headers['x-api-key'] = self.key
         kwargs.setdefault('verify', self.verify)
         kwargs.setdefault('timeout', self.timeout)
-        r = requests.get(url, **kwargs)
+        r = requests.get(url, headers=headers, **kwargs)
         return r
 
     def make_post_request(self, url, payload, params=None, files_attached=False):
