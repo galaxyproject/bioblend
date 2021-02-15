@@ -42,7 +42,10 @@ class GalaxyClient:
             self._key = None
             self.email = email
             self.password = password
-        self.json_headers = {'Content-Type': 'application/json'}
+        self.json_headers = {
+            'Content-Type': 'application/json',
+            'x-api-key': self.key,
+        }
         self.verify = verify
         self.timeout = timeout
 
@@ -62,15 +65,10 @@ class GalaxyClient:
         :rtype: requests.Response
         :return: the response object.
         """
-        params = kwargs.get('params')
-        if params is not None and params.get('key', False) is False:
-            params['key'] = self.key
-        else:
-            params = self.default_params
-        kwargs['params'] = params
+        headers = self.json_headers
         kwargs.setdefault('verify', self.verify)
         kwargs.setdefault('timeout', self.timeout)
-        r = requests.get(url, **kwargs)
+        r = requests.get(url, headers=headers, **kwargs)
         return r
 
     def make_post_request(self, url, payload, params=None, files_attached=False):
@@ -98,21 +96,17 @@ class GalaxyClient:
                     d[k] = json.dumps(v)
             return d
 
-        if params is not None and params.get('key', False) is False:
-            params['key'] = self.key
-        else:
-            params = self.default_params
-
         # Compute data, headers, params arguments for request.post,
         # leveraging the requests-toolbelt library if any files have
         # been attached.
         if files_attached:
             payload = my_dumps(payload)
-            payload.update(params)
+            if params:
+                payload.update(params)
             payload = MultipartEncoder(fields=payload)
             headers = self.json_headers.copy()
             headers['Content-Type'] = payload.content_type
-            post_params = {}
+            post_params = None
         else:
             payload = json.dumps(payload)
             headers = self.json_headers
@@ -147,10 +141,6 @@ class GalaxyClient:
         :rtype: requests.Response
         :return: the response object.
         """
-        if params is not None and params.get('key', False) is False:
-            params['key'] = self.key
-        else:
-            params = self.default_params
         if payload is not None:
             payload = json.dumps(payload)
         headers = self.json_headers
@@ -167,11 +157,6 @@ class GalaxyClient:
 
         :return: The decoded response.
         """
-        if params is not None and params.get('key', False) is False:
-            params['key'] = self.key
-        else:
-            params = self.default_params
-
         payload = json.dumps(payload)
         headers = self.json_headers
         r = requests.put(url, data=payload, params=params, headers=headers,
@@ -195,11 +180,6 @@ class GalaxyClient:
 
         :return: The decoded response.
         """
-        if params is not None and params.get('key', False) is False:
-            params['key'] = self.key
-        else:
-            params = self.default_params
-
         payload = json.dumps(payload)
         headers = self.json_headers
         r = requests.patch(url, data=payload, params=params, headers=headers,
@@ -233,7 +213,3 @@ class GalaxyClient:
                 response = json.loads(response)
             self._key = response["api_key"]
         return self._key
-
-    @property
-    def default_params(self):
-        return {'key': self.key}
