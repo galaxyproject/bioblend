@@ -63,11 +63,12 @@ class GalaxyClient:
         :return: the response object.
         """
         params = kwargs.get('params')
-        if params is not None and params.get('key', False) is False:
-            params['key'] = self.key
-        else:
-            params = self.default_params
+        if params is not None:
+            # remove 'key' if present, use header 'x-api-key' instead
+            params.pop('key', None)
         kwargs['params'] = params
+        headers = self.json_headers.copy()
+        headers['x-api-key'] = self.key
         kwargs.setdefault('verify', self.verify)
         kwargs.setdefault('timeout', self.timeout)
         r = requests.get(url, **kwargs)
