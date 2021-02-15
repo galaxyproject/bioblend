@@ -2,6 +2,7 @@
 Contains possible interactions with the Galaxy workflow invocations
 """
 
+from bioblend import CHUNK_SIZE
 from bioblend.galaxy.client import Client
 
 
@@ -160,6 +161,37 @@ class InvocationClient(Client):
         url = self._make_url(invocation_id) + '/jobs_summary'
         return self._get(url=url)
 
+    def get_invocation_step_jobs_summary(self, invocation_id):
+        """
+        Get a detailed summary of an invocation, listing all jobs with
+        their job IDs and current states.
+
+        :type invocation_id: str
+        :param invocation_id: Encoded workflow invocation ID
+
+        :rtype: list of dicts
+        :return: The invocation step jobs summary.
+          For example::
+            [
+                {'populated_state': 'ok',
+                 'states': {'ok': 1},
+                 'model': 'Job',
+                 'id': 'e85a3be143d5905b'},
+
+                {'populated_state': 'ok',
+                 'states': {'running': 1},
+                 'model': 'Job',
+                 'id': 'c9468fdb6dc5c5f1'}
+
+                {'populated_state': 'ok',
+                 'states': {'new': 1},
+                 'model': 'Job',
+                 'id': '2a56795cad3c7db3'}
+            ]
+        """
+        url = self._make_url(invocation_id) + '/step_jobs_summary'
+        return self._get(url=url)
+
     def get_invocation_report(self, invocation_id):
         """
         Get a Markdown report for an invocation.
@@ -179,6 +211,37 @@ class InvocationClient(Client):
              'workflows': {'f2db41e1fa331b3e': {'name': 'Example workflow'}}}
         """
         url = self._make_url(invocation_id) + '/report'
+        return self._get(url=url)
+
+    def get_invocation_report_pdf(self, invocation_id, file_path, chunk_size=CHUNK_SIZE):
+        """
+        Get a PDF report for an invocation.
+
+        :type invocation_id: str
+        :param invocation_id: Encoded workflow invocation ID
+
+        :type file_path: str
+        :param file_path: Path to save the report
+        """
+        url = self._make_url(invocation_id) + '/report.pdf'
+        r = self.gi.make_get_request(url, stream=True)
+        if r.status_code != 200:
+            raise Exception("Failed to get the PDF report, the necessary dependencies may not be installed on the Galaxy server.")
+        with open(file_path, 'wb') as outf:
+            for chunk in r.iter_content(chunk_size):
+                outf.write(chunk)
+
+    def get_invocation_biocompute_object(self, invocation_id):
+        """
+        Get a BioCompute object for an invocation.
+
+        :type invocation_id: str
+        :param invocation_id: Encoded workflow invocation ID
+
+        :rtype: dict
+        :return: The BioCompute object
+        """
+        url = self._make_url(invocation_id) + '/biocompute'
         return self._get(url=url)
 
     def _invocation_step_url(self, invocation_id, step_id):
