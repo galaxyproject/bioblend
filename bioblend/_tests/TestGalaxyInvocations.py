@@ -17,6 +17,68 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
         invocation = self.gi.invocations.show_invocation(invocation_id)
         self.assertEqual(invocation['state'], 'cancelled')
 
+    @test_util.skip_unless_galaxy('dev')
+    def test_get_invocations(self):
+        user1 = self.gi.users.create_local_user('user1', 'email1@email.test', 'password1')
+        user2 = self.gi.users.create_local_user('user2', 'email2@email.test', 'password2')
+        key1 = self.gi.users.create_user_apikey(user1['id'])
+        key2 = self.gi.users.create_user_apikey(user2['id'])
+        adminkey = self.gi._key
+
+        path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
+        workflow = self.gi.workflows.import_workflow_from_local_path(path, publish=True)
+        dataset = {'src': 'hda', 'id': None}
+
+        self.gi._key = key1
+        hist1 = self.gi.histories.create_history('hist1')
+        hist2 = self.gi.histories.create_history('hist2')
+        dataset_id = self._test_dataset(hist1['id'])
+        dataset['id'] = dataset_id
+        invoc1 = self.gi.workflows.invoke_workflow(workflow['id'], history_id=hist1['id'],
+                                                   inputs={'Input 1': dataset, 'Input 2': dataset},
+                                                   inputs_by='name')
+        dataset_id = self._test_dataset(hist2['id'])
+        dataset['id'] = dataset_id
+        invoc2 = self.gi.workflows.invoke_workflow(workflow['id'], history_id=hist2['id'],
+                                                   inputs={'Input 1': dataset, 'Input 2': dataset},
+                                                   inputs_by='name')
+
+        self.gi._key = key2
+        hist3 = self.gi.histories.create_history('hist3')
+        dataset_id = self._test_dataset(hist3['id'])
+        dataset['id'] = dataset_id
+        invoc3 = self.gi.workflows.invoke_workflow(workflow['id'], history_id=hist3['id'],
+                                                   inputs={'Input 1': dataset, 'Input 2': dataset},
+                                                   inputs_by='name')
+
+        self.gi._key = adminkey
+        self.assertEqual(invoc1['workflow_id'], invoc2['workflow_id'])
+        self.assertEqual(invoc2['workflow_id'], invoc3['workflow_id'])
+
+        all_invocs = self.gi.invocations.get_invocations(workflow['id'])
+        user1_invocs = self.gi.invocations.get_invocations(workflow['id'], user_id=user1['id'])
+        user2_invocs = self.gi.invocations.get_invocations(workflow['id'], user_id=user2['id'])
+        self.assertEqual(len(all_invocs), 3)
+        self.assertEqual(len(user1_invocs), 2)
+        self.assertEqual(len(user2_invocs), 1)
+        self.assertEqual(set(invoc['id'] for invoc in user1_invocs),
+                         set([invoc1['id'], invoc2['id']]))
+
+        hist1_invocs = self.gi.invocations.get_invocations(workflow['id'], history_id=hist1['id'])
+        hist1_user1_invocs = self.gi.invocations.get_invocations(workflow['id'], history_id=hist1['id'],
+                                                                 user_id=user1['id'])
+        hist1_user2_invocs = self.gi.invocations.get_invocations(workflow['id'], history_id=hist1['id'],
+                                                                 user_id=user2['id'])
+        self.assertEqual(len(hist1_invocs), 1)
+        self.assertEqual(len(hist1_user1_invocs), 1)
+        self.assertEqual(len(hist1_user2_invocs), 0)
+
+        limit_invocs = self.gi.invocations.get_invocations(workflow['id'], limit=2)
+        self.assertEqual(len(limit_invocs), 2)
+
+        self.gi.users.delete_user(user1['id'])
+        self.gi.users.delete_user(user2['id'])
+
     @test_util.skip_unless_galaxy('release_19.09')
     def test_get_invocation_report(self):
         invocation = self._invoke_workflow()
