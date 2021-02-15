@@ -17,7 +17,7 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
         invocation = self.gi.invocations.show_invocation(invocation_id)
         self.assertEqual(invocation['state'], 'cancelled')
 
-    @test_util.skip_unless_galaxy('release_18.09')
+    @test_util.skip_unless_galaxy('release_20.01')
     def test_get_invocations(self):
         user1 = self.gi.users.create_local_user('user1', 'email1@email.test', 'password1')
         user2 = self.gi.users.create_local_user('user2', 'email2@email.test', 'password2')
