@@ -793,7 +793,7 @@ class WorkflowClient(Client):
 
     def show_versions(self, workflow_id):
         """
-        Get versions for a workflow_id.
+        Get versions for a workflow.
 
         :type workflow_id: str
         :param workflow_id: Encoded workflow ID
