@@ -4,6 +4,7 @@ import bioblend
 import bioblend.galaxy
 from . import test_util
 from .test_util import unittest
+import time
 
 bioblend.set_stream_logger('test', level='INFO')
 
@@ -25,3 +26,13 @@ class GalaxyTestBase(unittest.TestCase):
     def _wait_and_verify_dataset(self, dataset_id, expected_contents, timeout_seconds=BIOBLEND_TEST_JOB_TIMEOUT):
         dataset_contents = self.gi.datasets.download_dataset(dataset_id, maxwait=timeout_seconds)
         self.assertEqual(dataset_contents, expected_contents)
+
+    def _wait_invocation(self, invocation_id):
+        for _ in range(20):
+            invocation = self.gi.invocations.show_invocation(invocation_id)
+            if invocation["state"] == "scheduled":
+                break
+            time.sleep(.5)
+        else:
+            invocation = self.gi.invocations.show_invocation(invocation_id)
+            self.assertEqual(invocation["state"], "scheduled")

@@ -95,13 +95,3 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
             history_id=history_id,
             inputs_by='name',
         )
-
-    def _wait_invocation(self, invocation_id):
-        for _ in range(20):
-            invocation = self.gi.invocations.show_invocation(invocation_id)
-            if invocation["state"] == "scheduled":
-                break
-            time.sleep(.5)
-        else:
-            invocation = self.gi.invocations.show_invocation(invocation_id)
-            self.assertEqual(invocation["state"], "scheduled")
