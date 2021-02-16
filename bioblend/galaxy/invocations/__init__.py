@@ -76,7 +76,7 @@ class InvocationClient(Client):
             params['history_id'] = history_id
         if user_id:
             params['user_id'] = user_id
-        if limit:
+        if limit is not None:
             params['limit'] = limit
         return self._get(params=params)
 
