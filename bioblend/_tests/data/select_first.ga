@@ -1,0 +1,162 @@
+{
+    "a_galaxy_workflow": "true",
+    "annotation": "",
+    "format-version": "0.1",
+    "name": "Select first",
+    "steps": {
+        "0": {
+            "annotation": "",
+            "content_id": null,
+            "errors": null,
+            "id": 0,
+            "input_connections": {},
+            "inputs": [],
+            "label": null,
+            "name": "Input dataset",
+            "outputs": [],
+            "position": {
+                "bottom": 358.8000030517578,
+                "height": 61.80000305175781,
+                "left": 539.5,
+                "right": 739.5,
+                "top": 297,
+                "width": 200,
+                "x": 539.5,
+                "y": 297
+            },
+            "tool_id": null,
+            "tool_state": "{\"optional\": false}",
+            "tool_version": null,
+            "type": "data_input",
+            "uuid": "8d9e7e74-721a-4fe6-8e7f-f7f85707fbcb",
+            "workflow_outputs": []
+        },
+        "1": {
+            "annotation": "",
+            "content_id": null,
+            "errors": null,
+            "id": 1,
+            "input_connections": {},
+            "inputs": [],
+            "label": null,
+            "name": "Input parameter",
+            "outputs": [],
+            "position": {
+                "bottom": 497.8000030517578,
+                "height": 61.80000305175781,
+                "left": 489.5,
+                "right": 689.5,
+                "top": 436,
+                "width": 200,
+                "x": 489.5,
+                "y": 436
+            },
+            "tool_id": null,
+            "tool_state": "{\"parameter_type\": \"integer\", \"optional\": false}",
+            "tool_version": null,
+            "type": "parameter_input",
+            "uuid": "fbb896b8-5406-4ee2-b4e6-bcfc26a9f57b",
+            "workflow_outputs": []
+        },
+        "2": {
+            "annotation": "",
+            "content_id": "Show beginning1",
+            "errors": null,
+            "id": 2,
+            "input_connections": {
+                "input": {
+                    "id": 0,
+                    "output_name": "output"
+                },
+                "lineNum": {
+                    "id": 1,
+                    "output_name": "output"
+                }
+            },
+            "inputs": [],
+            "label": null,
+            "name": "Select first",
+            "outputs": [
+                {
+                    "name": "out_file1",
+                    "type": "input"
+                }
+            ],
+            "position": {
+                "bottom": 477.6000061035156,
+                "height": 123.60000610351562,
+                "left": 831.5,
+                "right": 1031.5,
+                "top": 354,
+                "width": 200,
+                "x": 831.5,
+                "y": 354
+            },
+            "post_job_actions": {},
+            "tool_id": "Show beginning1",
+            "tool_state": "{\"input\": {\"__class__\": \"ConnectedValue\"}, \"lineNum\": {\"__class__\": \"ConnectedValue\"}, \"__page__\": null, \"__rerun_remap_job_id__\": null}",
+            "tool_version": "1.0.0",
+            "type": "tool",
+            "uuid": "ebe5983a-70bb-4ee0-b218-92026dcd1282",
+            "workflow_outputs": [
+                {
+                    "label": null,
+                    "output_name": "out_file1",
+                    "uuid": "061dee45-c5e4-4348-8849-571b01b0e803"
+                }
+            ]
+        },
+        "3": {
+            "annotation": "",
+            "content_id": "Show beginning1",
+            "errors": null,
+            "id": 3,
+            "input_connections": {
+                "input": {
+                    "id": 2,
+                    "output_name": "out_file1"
+                }
+            },
+            "inputs": [
+                {
+                    "description": "runtime parameter for tool Select first",
+                    "name": "input"
+                }
+            ],
+            "label": null,
+            "name": "Select first",
+            "outputs": [
+                {
+                    "name": "out_file1",
+                    "type": "input"
+                }
+            ],
+            "position": {
+                "bottom": 459.1999969482422,
+                "height": 93.19999694824219,
+                "left": 1093.5,
+                "right": 1293.5,
+                "top": 366,
+                "width": 200,
+                "x": 1093.5,
+                "y": 366
+            },
+            "post_job_actions": {},
+            "tool_id": "Show beginning1",
+            "tool_state": "{\"input\": {\"__class__\": \"RuntimeValue\"}, \"lineNum\": \"1\", \"__page__\": null, \"__rerun_remap_job_id__\": null}",
+            "tool_version": "1.0.0",
+            "type": "tool",
+            "uuid": "93dc4bc2-d4d3-4549-b2f9-c209e21c7892",
+            "workflow_outputs": [
+                {
+                    "label": null,
+                    "output_name": "out_file1",
+                    "uuid": "3c6ffdfc-a1ee-462e-b245-54990e1a03e7"
+                }
+            ]
+        }
+    },
+    "tags": [],
+    "uuid": "193ba4bd-ad2d-4591-ab51-88048a07a193",
+    "version": 2
+}
