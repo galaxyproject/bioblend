@@ -1,3 +1,13 @@
+### BioBlend v - unreleased
+
+* Pass the API key for all requests as the ``x-api-key`` header instead of as a
+  parameter (thanks to [rikeshi](https://github.com/rikeshi)).
+* Added ``get_invocation_biocompute_object``, ``get_invocation_report_pdf``,
+  ``get_invocation_step_jobs_summary`` methods to ``InvocationClient`` (thanks
+  to [rikeshi](https://github.com/rikeshi)).
+* Improvements to tests and documentation (thanks to
+  [rikeshi](https://github.com/rikeshi)).
+
 ### BioBlend v0.15.0 - 2021-02-10
 
 * Dropped support for Python 3.5. Added support for Python 3.9. Added support
@@ -30,7 +40,7 @@
 * Deprecated ``history_id`` parameter of ``HistoryClient.get_histories()``
   method.
 
-* BioBlend.objects: Added ``owner`` property to all objects. Added
+* BioBlend.objects: Added ``owner`` property to ``Workflow`` objects. Added
   ``annotation``, ``published`` and ``purged`` properties to ``HistoryPreview``
   objects.
 
