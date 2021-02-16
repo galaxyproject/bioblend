@@ -39,7 +39,10 @@ class InvocationClient(Client):
                         your own user ID if your are not an admin user.
 
         :type limit: int
--       :param limit: Maximum number of invocations in the query result.
+        :param limit: Maximum number of invocations in the query result.
+
+        :type include_terminal: bool
+        :param include_terminal: Whether to include terminal states.
 
         :type view: str
         :param view: Level of detail to return per invocation, either
