@@ -738,7 +738,21 @@ class WorkflowClient(Client):
         :param workflow_id: Encoded workflow ID
 
         :type actions: list of dicts
-        :param actions: Actions to use for refactoring the workflow
+        :param actions: Actions to use for refactoring the workflow. The following
+                        actions are supported: update_step_label, update_step_position,
+                        update_output_label, update_name, update_annotation,
+                        update_license, update_creator, update_report, add_step,
+                        add_input, disconnect, connect, fill_defaults, fill_step_defaults,
+                        extract_input, extract_legacy_parameter,
+                        remove_unlabeled_workflow_outputs,
+                        upgrade_subworkflow, upgrade_tool.
+                        
+          An example value for the ``actions`` argument might be::
+
+            actions = [
+                {"action_type": "add_input", "type": "data", "label": "foo"},
+                {"action_type": "update_step_label", "label": "bar", "step": {"label": "foo"}},
+            ]
 
         :type dry_run: bool
         :param dry_run: When true, perform a dry run where the existing
@@ -767,11 +781,11 @@ class WorkflowClient(Client):
         :param  job_ids: Optional list of jobs to include when extracting a workflow from history
 
         :type   dataset_ids: list
-        :param  dataset_ids: Optional list of HDA "hid"s corresponding to workflow inputs
+        :param  dataset_hids: Optional list of dataset hids corresponding to workflow inputs
                              when extracting a workflow from history
 
         :type   dataset_collection_ids: list
-        :param  dataset_collection_ids: Optional list of HDCA "hid"s corresponding to workflow inputs
+        :param  dataset_collection_hids: Optional list of dataset collection hids corresponding to workflow inputs
                                         when extracting a workflow from history
 
         :rtype: dict
