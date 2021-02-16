@@ -85,13 +85,11 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
 
         # check remapped outputs
         new_history_contents = self.gi.histories.show_history(new_history_id, contents=True)
-        self.assertEqual(new_history_contents[0]['state'], 'error')  # from first run
-        self.assertEqual(new_history_contents[0]['hid'], 1)
-        self.assertEqual(new_history_contents[1]['state'], 'ok')  # from new run
-        self.assertEqual(new_history_contents[1]['hid'], 1)
-        self.assertEqual(new_history_contents[2]['state'], 'ok')  # child dataset
-        self.assertEqual(new_history_contents[2]['hid'], 2)
-        self.assertEqual(new_history_contents[2]['id'], history_contents[1]['id'])
+        self.assertEqual(new_history_contents[-2]['state'], 'ok')  # from new run
+        self.assertEqual(new_history_contents[-2]['hid'], 1)
+        self.assertEqual(new_history_contents[-1]['state'], 'ok')  # child dataset
+        self.assertEqual(new_history_contents[-1]['hid'], 2)
+        self.assertEqual(new_history_contents[-1]['id'], history_contents[1]['id'])
         self.assertEqual(len(new_history_contents), 3)
 
     def _wait_job(self, job_id):
