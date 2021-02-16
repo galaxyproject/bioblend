@@ -746,7 +746,7 @@ class WorkflowClient(Client):
                         extract_input, extract_legacy_parameter,
                         remove_unlabeled_workflow_outputs,
                         upgrade_subworkflow, upgrade_tool.
-                        
+
           An example value for the ``actions`` argument might be::
 
             actions = [
