@@ -234,6 +234,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         self.assertTrue('steps' in wf2)
         self.assertEqual(len(wf1['steps']), len(wf2['steps']))
 
+    @test_util.skip_unless_galaxy('release_18.09')
     def test_show_versions(self):
         invoke_response = self._invoke_workflow()
         wf_id = invoke_response['workflow_id']
@@ -245,6 +246,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         self.assertTrue('update_time' in version)
         self.assertTrue('steps' in version)
 
+    @test_util.skip_unless_galaxy('release_21.01')
     def test_refactor_workflow(self):
         actions = [
             {"action_type": "add_input", "type": "data", "label": "foo"},
