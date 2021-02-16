@@ -42,7 +42,7 @@ class InvocationClient(Client):
         :param include_terminal: Whether to include terminal states.
 
         :type limit: int
-        :param limit: Maximum number of invocations in the query result.
+        :param limit: Maximum number of invocations to return - if specified, the most recent invocations will be returned.
 
         :type view: str
         :param view: Level of detail to return per invocation, either
