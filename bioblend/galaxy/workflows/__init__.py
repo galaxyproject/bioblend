@@ -730,7 +730,7 @@ class WorkflowClient(Client):
         """
         return self._delete(id=workflow_id)
 
-    def refactor_workflow(self, workflow_id, actions, style='export', dry_run=False):
+    def refactor_workflow(self, workflow_id, actions, dry_run=False):
         """
         Refactor workflow with given actions.
 
@@ -740,10 +740,6 @@ class WorkflowClient(Client):
         :type actions: list of dicts
         :param actions: Actions to use for refactoring the workflow
 
-        :type style: str
-        :param style: Export style used for JSON-ification of the workflow.
-                      Can be 'export', 'instance' or 'editor'.
-
         :type dry_run: bool
         :param dry_run: When true, perform a dry run where the existing
                         workflow is preserved. A new workflow is
@@ -751,7 +747,6 @@ class WorkflowClient(Client):
         """
         payload = {
             'actions': actions,
-            'style': style,
             'dry_run': dry_run,
         }
         url = '/'.join((self._make_url(workflow_id), 'refactor'))
