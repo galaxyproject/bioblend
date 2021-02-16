@@ -38,11 +38,11 @@ class InvocationClient(Client):
         :param user_id: Encoded user ID to filter on. This must be
                         your own user ID if your are not an admin user.
 
-        :type limit: int
-        :param limit: Maximum number of invocations in the query result.
-
         :type include_terminal: bool
         :param include_terminal: Whether to include terminal states.
+
+        :type limit: int
+        :param limit: Maximum number of invocations in the query result.
 
         :type view: str
         :param view: Level of detail to return per invocation, either
