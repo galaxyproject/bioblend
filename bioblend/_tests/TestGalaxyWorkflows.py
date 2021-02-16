@@ -222,14 +222,12 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         )
         self._wait_invocation(invoc1['id'])
         wf1 = self.gi.workflows.show_workflow(wf1['id'])
-        history_id = invoc1['history_id']
-        datasets = self.gi.datasets.get_datasets()
-        dataset_ids = [dataset['id'] for dataset in datasets]
-        # jobs = self.gi.jobs.get_jobs()
-        # job_ids = [job['id'] for job in jobs if job['history_id'] == history_id]
-        wf2 = self.gi.workflows.create_workflow_from_history(history_id, 'My new workflow!',
-                                                             dataset_ids=dataset_ids)
-        # , job_ids=job_ids)
+        dataset_hids = [1, 2]
+        jobs = self.gi.jobs.get_jobs()
+        job_ids = [job['id'] for job in jobs if job['history_id'] == history_id and job['tool_id'] != 'upload1']
+        time.sleep(20)
+        wf2 = self.gi.workflows.create_workflow_from_history(history_id=history_id, workflow_name='My new workflow!',
+                                                             job_ids=job_ids, dataset_hids=dataset_hids)
         wf2 = self.gi.workflows.show_workflow(wf2['id'])
         self.assertEqual(wf2['name'], 'My new workflow!')
         self.assertTrue('steps' in wf1)

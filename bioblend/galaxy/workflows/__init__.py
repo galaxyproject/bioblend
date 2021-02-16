@@ -767,7 +767,7 @@ class WorkflowClient(Client):
         return self._put(payload=payload, url=url)
 
     def create_workflow_from_history(self, history_id, workflow_name,
-                                     job_ids=None, dataset_ids=None, dataset_collection_ids=None):
+                                     job_ids=None, dataset_hids=None, dataset_collection_hids=None):
         """
         Create a workflow from a history_id.
 
@@ -794,8 +794,8 @@ class WorkflowClient(Client):
         payload = {
             "from_history_id": history_id,
             "job_ids": job_ids if job_ids else [],
-            "dataset_ids": dataset_ids if job_ids else [],
-            "dataset_collection_ids": dataset_collection_ids if dataset_collection_ids else [],
+            "dataset_ids": dataset_hids if dataset_hids else [],
+            "dataset_collection_ids": dataset_collection_hids if dataset_collection_hids else [],
             "workflow_name": workflow_name
         }
         return self._post(payload=payload)
