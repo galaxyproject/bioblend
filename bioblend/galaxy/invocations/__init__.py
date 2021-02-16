@@ -29,13 +29,13 @@ class InvocationClient(Client):
         specified workflow.
 
         :type workflow_id: str
-        :param workflow_id: Encoded workflow ID to restrict the query.
+        :param workflow_id: Encoded workflow ID to filter on
 
         :type history_id: str
-        :param history_id: Encoded history ID to restrict the query.
+        :param history_id: Encoded history ID to filter on
 
         :type user_id: str
-        :param user_id: Encoded user ID to restrict the query. This must be
+        :param user_id: Encoded user ID to filter on. This must be
                         your own user ID if your are not an admin user.
 
         :type limit: int
