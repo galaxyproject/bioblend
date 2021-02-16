@@ -209,12 +209,32 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         assert invoke_response['state'] == 'new', invoke_response
 
     def test_create_workflow_from_history(self):
-        invoke_response = self._invoke_workflow()
-        wf_id = invoke_response['workflow_id']
-        history_id = invoke_response['history_id']
-        self.gi.workflows.cancel_invocation(wf_id, invoke_response['id'])
-        wf2 = self.gi.workflows.create_workflow_from_history(history_id, 'My new workflow!')
+        path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
+        wf1 = self.gi.workflows.import_workflow_from_local_path(path)
+        history_id = self.gi.histories.create_history(name="test_wf")['id']
+        dataset_id = self._test_dataset(history_id)
+        dataset = {'src': 'hda', 'id': dataset_id}
+        invoc1 = self.gi.workflows.invoke_workflow(
+            wf1['id'],
+            inputs={'Input 1': dataset, 'Input 2': dataset},
+            history_id=history_id,
+            inputs_by='name',
+        )
+        self._wait_invocation(invoc1['id'])
+        wf1 = self.gi.workflows.show_workflow(wf1['id'])
+        history_id = invoc1['history_id']
+        datasets = self.gi.datasets.get_datasets()
+        dataset_ids = [dataset['id'] for dataset in datasets]
+        # jobs = self.gi.jobs.get_jobs()
+        # job_ids = [job['id'] for job in jobs if job['history_id'] == history_id]
+        wf2 = self.gi.workflows.create_workflow_from_history(history_id, 'My new workflow!',
+                                                             dataset_ids=dataset_ids)
+        # , job_ids=job_ids)
+        wf2 = self.gi.workflows.show_workflow(wf2['id'])
         self.assertEqual(wf2['name'], 'My new workflow!')
+        self.assertTrue('steps' in wf1)
+        self.assertTrue('steps' in wf2)
+        self.assertEqual(len(wf1['steps']), len(wf2['steps']))
 
     def test_show_versions(self):
         invoke_response = self._invoke_workflow()

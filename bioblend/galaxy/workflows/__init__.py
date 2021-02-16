@@ -758,7 +758,7 @@ class WorkflowClient(Client):
         Create a workflow from a history_id.
 
         :type history_id: str
-        :param workflow_id: Encoded history ID
+        :param history_id: Encoded history ID
 
         :type   workflow_name: str
         :param  workflow_name: Name of the workflow to create when extracting a workflow from history
