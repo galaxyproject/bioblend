@@ -27,11 +27,16 @@ class GalaxyTestBase(unittest.TestCase):
         dataset_contents = self.gi.datasets.download_dataset(dataset_id, maxwait=timeout_seconds)
         self.assertEqual(dataset_contents, expected_contents)
 
-    def _wait_invocation(self, invocation_id):
+    def _wait_invocation(self, invocation_id, wait_steps=False):
         for _ in range(20):
             invocation = self.gi.invocations.show_invocation(invocation_id)
             if invocation["state"] == "scheduled":
-                break
+                if wait_steps:
+                    for step in invocation["steps"]:
+                        if step["state"] == "scheduled":
+                            break
+                else:
+                    break
             time.sleep(.5)
         else:
             invocation = self.gi.invocations.show_invocation(invocation_id)

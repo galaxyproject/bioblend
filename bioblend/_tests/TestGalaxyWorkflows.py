@@ -220,12 +220,11 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
             history_id=history_id,
             inputs_by='name',
         )
-        self._wait_invocation(invoc1['id'])
+        self._wait_invocation(invoc1['id'], wait_steps=True)
         wf1 = self.gi.workflows.show_workflow(wf1['id'])
         dataset_hids = [1, 2]
         jobs = self.gi.jobs.get_jobs()
         job_ids = [job['id'] for job in jobs if job['history_id'] == history_id and job['tool_id'] != 'upload1']
-        time.sleep(20)
         wf2 = self.gi.workflows.create_workflow_from_history(history_id=history_id, workflow_name='My new workflow!',
                                                              job_ids=job_ids, dataset_hids=dataset_hids)
         wf2 = self.gi.workflows.show_workflow(wf2['id'])
