@@ -222,7 +222,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         )
         self._wait_invocation(invoc1, wait_steps=True)
         wf1 = self.gi.workflows.show_workflow(wf1['id'])
-        dataset_hids = [1,2]
+        dataset_hids = [1, 2]
         datasets = self.gi.histories.show_history(history_id, contents=True)
         job_ids = [self.gi.datasets.show_dataset(datasets[-1]['id'])['creating_job']]
         wf2 = self.gi.workflows.create_workflow_from_history(history_id=history_id, workflow_name='My new workflow!',
