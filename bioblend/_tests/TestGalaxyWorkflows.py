@@ -237,7 +237,6 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
     def test_show_versions(self):
         invoke_response = self._invoke_workflow()
         wf_id = invoke_response['workflow_id']
-        self.gi.workflows.cancel_invocation(wf_id, invoke_response['id'])
         versions = self.gi.workflows.show_versions(wf_id)
         self.assertEqual(len(versions), 1)
         version = versions[0]
