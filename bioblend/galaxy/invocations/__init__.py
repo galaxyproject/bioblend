@@ -5,6 +5,9 @@ Contains possible interactions with the Galaxy workflow invocations
 from bioblend import CHUNK_SIZE
 from bioblend.galaxy.client import Client
 
+INVOCATION_TERMINAL_STATES = {'cancelled', 'failed', 'scheduled'}
+# Invocation non-terminal states are: 'new', 'ready'
+
 
 class InvocationClient(Client):
     def __init__(self, galaxy_instance):
