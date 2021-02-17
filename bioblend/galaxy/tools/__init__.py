@@ -15,18 +15,18 @@ class ToolClient(Client):
 
     def get_tools(self, tool_id=None, name=None, trackster=None):
         """
-        Get all tools or filter the specific one(s) via the provided ``name``
-        or ``tool_id``. Provide only one argument, ``name`` or ``tool_id``,
-        but not both.
-
-        If ``name`` is set and multiple names match the given name, all the
-        tools matching the argument will be returned.
+        Get all tools, or select a subset by specifying optional arguments for
+        filtering (e.g. a tool name).
 
         :type tool_id: str
         :param tool_id: id of the requested tool
 
+          .. deprecated:: 0.16.0
+             To get details of a tool for which you know the ID, use the much
+             more efficient :meth:`show_tool` instead.
+
         :type name: str
-        :param name: name of the requested tool(s)
+        :param name: Tool name to filter on.
 
         :type trackster: bool
         :param trackster: whether to return only tools that are compatible with

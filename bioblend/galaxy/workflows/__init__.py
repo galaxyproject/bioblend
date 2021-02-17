@@ -15,17 +15,18 @@ class WorkflowClient(Client):
     # the 'deleted' option is not available for workflows
     def get_workflows(self, workflow_id=None, name=None, published=False):
         """
-        Get all workflows or filter the specific one(s) via the provided ``name``
-        or ``workflow_id``. Provide only one argument, ``name`` or ``workflow_id``,
-        but not both.
+        Get all workflows, or select a subset by specifying optional arguments
+        for filtering (e.g. a workflow name).
 
         :type workflow_id: str
-        :param workflow_id: Encoded workflow ID (incompatible with ``name``)
+        :param workflow_id: Encoded workflow ID
+
+          .. deprecated:: 0.16.0
+             To get details of a workflow for which you know the ID, use the
+             much more efficient :meth:`show_workflow` instead.
 
         :type name: str
-        :param name: Filter by name of workflow (incompatible with
-          ``workflow_id``). If multiple names match the given name, all the
-          workflows matching the argument will be returned.
+        :param name: Workflow name to filter on.
 
         :type published: bool
         :param published: if ``True``, return also published workflows
