@@ -1,10 +1,10 @@
 import os
+import time
 
 import bioblend
 import bioblend.galaxy
 from . import test_util
 from .test_util import unittest
-import time
 
 bioblend.set_stream_logger('test', level='INFO')
 
