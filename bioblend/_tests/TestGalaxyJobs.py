@@ -40,12 +40,12 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
             input_format='21.01'
         )
         original_job_id = original_output['jobs'][0]['id']
-        self._wait_job(original_job_id)
         build_for_rerun = self.gi.jobs._build_for_rerun(original_job_id)
         self.assertEqual(build_for_rerun['state_inputs']['seed_source']['seed'], 'asdf')
 
         rerun_output = self.gi.jobs.rerun_job(original_job_id)
         rerun_job_id = rerun_output['jobs'][0]['id']
+        self._wait_job(original_job_id)
         original_output_content = self.gi.datasets.download_dataset(original_output['outputs'][0]['id'])
         self._wait_job(rerun_job_id)
         rerun_output_content = self.gi.datasets.download_dataset(rerun_output['outputs'][0]['id'])
