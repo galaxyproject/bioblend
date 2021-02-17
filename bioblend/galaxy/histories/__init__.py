@@ -85,8 +85,8 @@ class HistoryClient(Client):
 
     def get_histories(self, history_id=None, name=None, deleted=False, published=None, slug=None):
         """
-        Get all histories or filter the specific one(s) by ``name`` or other
-        arguments.
+        Get all histories, or select a subset by specifying optional arguments
+        for filtering (e.g. a history name).
 
         :type history_id: str
         :param history_id: Encoded history ID to filter on
@@ -96,7 +96,7 @@ class HistoryClient(Client):
              more efficient :meth:`show_history` instead.
 
         :type name: str
-        :param name: Name of history to filter on
+        :param name: History name to filter on.
 
         :type deleted: bool
         :param deleted: whether to filter for the deleted histories (``True``)
@@ -119,11 +119,11 @@ class HistoryClient(Client):
 
     def get_published_histories(self, name=None, deleted=False, slug=None):
         """
-        Get all published histories (by any user) or filter the specific one(s)
-        by ``name`` or other arguments.
+        Get all published histories (by any user), or select a subset by
+        specifying optional arguments for filtering (e.g. a history name).
 
         :type name: str
-        :param name: Name of history to filter on
+        :param name: History name to filter on.
 
         :type deleted: bool
         :param deleted: whether to filter for the deleted histories (``True``)
