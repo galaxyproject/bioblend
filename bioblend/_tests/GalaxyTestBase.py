@@ -27,17 +27,22 @@ class GalaxyTestBase(unittest.TestCase):
         dataset_contents = self.gi.datasets.download_dataset(dataset_id, maxwait=timeout_seconds)
         self.assertEqual(dataset_contents, expected_contents)
 
-    def _wait_invocation(self, invocation_id, wait_steps=False):
+    def _wait_invocation(self, invocation, wait_steps=False):
+        galaxy_version = os.environ.get('GALAXY_VERSION', None)
+        is_newer = galaxy_version is None or galaxy_version >= 'release_20.01'
+        show_invocation = self.gi.invocations.show_invocation if is_newer else self.gi.workflows.show_invocation
+        args = [invocation['id']] if is_newer else [invocation['id'], invocation['workflow_id']]
         for _ in range(20):
-            invocation = self.gi.invocations.show_invocation(invocation_id)
+            invocation = show_invocation(*args)
             if invocation["state"] == "scheduled":
                 if wait_steps:
-                    for step in invocation["steps"]:
-                        if step["state"] == "scheduled":
-                            break
+                    if "steps" in invocation:
+                        for step in invocation["steps"]:
+                            if step["state"] == "scheduled":
+                                break
                 else:
                     break
             time.sleep(.5)
         else:
-            invocation = self.gi.invocations.show_invocation(invocation_id)
+            invocation = show_invocation(*args)
             self.assertEqual(invocation["state"], "scheduled")

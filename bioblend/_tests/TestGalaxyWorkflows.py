@@ -220,7 +220,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
             history_id=history_id,
             inputs_by='name',
         )
-        self._wait_invocation(invoc1['id'], wait_steps=True)
+        self._wait_invocation(invoc1, wait_steps=True)
         wf1 = self.gi.workflows.show_workflow(wf1['id'])
         dataset_hids = [1, 2]
         jobs = self.gi.jobs.get_jobs()
@@ -253,7 +253,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         ]
         invoke_response = self._invoke_workflow()
         wf_id = invoke_response['workflow_id']
-        self._wait_invocation(invoke_response['id'])
+        self._wait_invocation(invoke_response)
         response = self.gi.workflows.refactor_workflow(wf_id, actions, dry_run=True)
         self.assertEqual(len(response), 3)
         self.assertTrue('action_executions' in response)

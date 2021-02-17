@@ -38,7 +38,7 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
     def test_get_invocation_biocompute_object(self):
         invocation = self._invoke_workflow()
 
-        self._wait_invocation(invocation['id'])
+        self._wait_invocation(invocation)
         biocompute_object = self.gi.invocations.get_invocation_biocompute_object(invocation['id'])
         self.assertEqual(len(biocompute_object['description_domain']['pipeline_steps']), 1)
 
@@ -46,7 +46,7 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
     def test_get_invocation_step_jobs_summary(self):
         invocation = self._invoke_workflow()
 
-        self._wait_invocation(invocation['id'])
+        self._wait_invocation(invocation)
         step_jobs_summary = self.gi.invocations.get_invocation_step_jobs_summary(invocation['id'])
         self.assertEqual(len(step_jobs_summary), 1)
         self.assertEqual(step_jobs_summary[0]['populated_state'], 'ok')
@@ -80,7 +80,7 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
             self.gi.invocations.show_invocation_step(invocation_id, pause_step["id"])["action"])
         self.gi.invocations.run_invocation_step_action(invocation_id, pause_step["id"], action=True)
         self.assertTrue(self.gi.invocations.show_invocation_step(invocation_id, pause_step["id"])["action"])
-        self._wait_invocation(invocation_id)
+        self._wait_invocation(invocation)
 
     def _invoke_workflow(self):
         path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
