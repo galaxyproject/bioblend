@@ -83,16 +83,12 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
         for job_id in jobs_to_complete:
             self._wait_job(job_id)
 
-        # check remapped outputs
-        new_history_contents = self.gi.histories.show_history(new_history_id, contents=True)
-        self.assertEqual(new_history_contents[0]['state'], 'error')  # from first run
-        self.assertEqual(new_history_contents[0]['hid'], 1)
-        self.assertEqual(new_history_contents[1]['state'], 'ok')  # from new run
-        self.assertEqual(new_history_contents[1]['hid'], 1)
-        self.assertEqual(new_history_contents[2]['state'], 'ok')  # child dataset
-        self.assertEqual(new_history_contents[2]['hid'], 2)
-        self.assertEqual(new_history_contents[2]['id'], history_contents[1]['id'])
-        self.assertEqual(len(new_history_contents), 3)
+        # check if workflow output has completed
+        workflow_output = [dataset for dataset in self.gi.histories.show_history(new_history_id, contents=True) if dataset['name'] == 'paste_output'][0]
+        self.assertEqual(workflow_output['state'], 'ok')
+        self.assertEqual(workflow_output['hid'], 2)
+        self.assertEqual(workflow_output['id'], history_contents[1]['id'])
+        self._wait_and_verify_dataset(workflow_output['id'], b'line 1\tline 1\n')
 
     def _wait_job(self, job_id):
         for _ in range(120):

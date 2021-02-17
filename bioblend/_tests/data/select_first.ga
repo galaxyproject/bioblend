@@ -14,16 +14,6 @@
             "label": null,
             "name": "Input dataset",
             "outputs": [],
-            "position": {
-                "bottom": 358.8000030517578,
-                "height": 61.80000305175781,
-                "left": 539.5,
-                "right": 739.5,
-                "top": 297,
-                "width": 200,
-                "x": 539.5,
-                "y": 297
-            },
             "tool_id": null,
             "tool_state": "{\"optional\": false}",
             "tool_version": null,
@@ -41,16 +31,6 @@
             "label": null,
             "name": "Input parameter",
             "outputs": [],
-            "position": {
-                "bottom": 497.8000030517578,
-                "height": 61.80000305175781,
-                "left": 489.5,
-                "right": 689.5,
-                "top": 436,
-                "width": 200,
-                "x": 489.5,
-                "y": 436
-            },
             "tool_id": null,
             "tool_state": "{\"parameter_type\": \"integer\", \"optional\": false}",
             "tool_version": null,
@@ -82,16 +62,6 @@
                     "type": "input"
                 }
             ],
-            "position": {
-                "bottom": 477.6000061035156,
-                "height": 123.60000610351562,
-                "left": 831.5,
-                "right": 1031.5,
-                "top": 354,
-                "width": 200,
-                "x": 831.5,
-                "y": 354
-            },
             "post_job_actions": {},
             "tool_id": "Show beginning1",
             "tool_state": "{\"input\": {\"__class__\": \"ConnectedValue\"}, \"lineNum\": {\"__class__\": \"ConnectedValue\"}, \"__page__\": null, \"__rerun_remap_job_id__\": null}",
@@ -102,61 +72,67 @@
                 {
                     "label": null,
                     "output_name": "out_file1",
-                    "uuid": "061dee45-c5e4-4348-8849-571b01b0e803"
+                    "uuid": "435362b3-636b-4ad9-8346-0fe6d21c8dc5"
                 }
             ]
         },
         "3": {
             "annotation": "",
-            "content_id": "Show beginning1",
+            "content_id": "Paste1",
             "errors": null,
             "id": 3,
             "input_connections": {
-                "input": {
+                "input1": {
+                    "id": 2,
+                    "output_name": "out_file1"
+                },
+                "input2": {
                     "id": 2,
                     "output_name": "out_file1"
                 }
             },
             "inputs": [
                 {
-                    "description": "runtime parameter for tool Select first",
-                    "name": "input"
+                    "description": "runtime parameter for tool Paste",
+                    "name": "input1"
+                },
+                {
+                    "description": "runtime parameter for tool Paste",
+                    "name": "input2"
                 }
             ],
             "label": null,
-            "name": "Select first",
+            "name": "Paste",
             "outputs": [
                 {
                     "name": "out_file1",
                     "type": "input"
                 }
             ],
-            "position": {
-                "bottom": 459.1999969482422,
-                "height": 93.19999694824219,
-                "left": 1093.5,
-                "right": 1293.5,
-                "top": 366,
-                "width": 200,
-                "x": 1093.5,
-                "y": 366
+            "post_job_actions": {
+                "RenameDatasetActionout_file1": {
+                    "action_arguments": {
+                        "newname": "paste_output"
+                    },
+                    "action_type": "RenameDatasetAction",
+                    "output_name": "out_file1"
+                }
             },
-            "post_job_actions": {},
-            "tool_id": "Show beginning1",
-            "tool_state": "{\"input\": {\"__class__\": \"RuntimeValue\"}, \"lineNum\": \"1\", \"__page__\": null, \"__rerun_remap_job_id__\": null}",
+            "tool_id": "Paste1",
+            "tool_state": "{\"delimiter\": \"T\", \"input1\": {\"__class__\": \"RuntimeValue\"}, \"input2\": {\"__class__\": \"RuntimeValue\"}, \"__page__\": null, \"__rerun_remap_job_id__\": null}",
             "tool_version": "1.0.0",
             "type": "tool",
-            "uuid": "93dc4bc2-d4d3-4549-b2f9-c209e21c7892",
+            "uuid": "41d799a6-bde2-46cb-a206-caa7621151a6",
             "workflow_outputs": [
                 {
                     "label": null,
                     "output_name": "out_file1",
-                    "uuid": "3c6ffdfc-a1ee-462e-b245-54990e1a03e7"
+                    "uuid": "cdaf754c-8275-4244-b9a9-666abc24c2c6"
                 }
             ]
         }
     },
     "tags": [],
-    "uuid": "193ba4bd-ad2d-4591-ab51-88048a07a193",
-    "version": 2
+    "uuid": "ec97af03-495c-42dc-9f33-3aa11219d416",
+    "version": 1
 }
