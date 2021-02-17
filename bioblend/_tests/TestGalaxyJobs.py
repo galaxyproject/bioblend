@@ -10,7 +10,7 @@ from . import (
 class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
     def setUp(self):
         super().setUp()
-        self.history_id = self.gi.histories.create_history(name='TestJobRerun')['id']
+        self.history_id = self.gi.histories.create_history(name='TestGalaxyJobs')['id']
         self.dataset_contents = "line 1\nline 2\rline 3\r\nline 4"
         self.dataset_id = self._test_dataset(self.history_id, contents=self.dataset_contents)
 
@@ -45,8 +45,10 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
         self.assertEqual(build_for_rerun['state_inputs']['seed_source']['seed'], 'asdf')
 
         rerun_output = self.gi.jobs.rerun_job(original_job_id)
-        rerun_output_content = self.gi.datasets.download_dataset(rerun_output['outputs'][0]['id'])
+        rerun_job_id = rerun_output['jobs'][0]['id']
         original_output_content = self.gi.datasets.download_dataset(original_output['outputs'][0]['id'])
+        self._wait_job(rerun_job_id)
+        rerun_output_content = self.gi.datasets.download_dataset(rerun_output['outputs'][0]['id'])
         self.assertEqual(rerun_output_content, original_output_content)
 
     @test_util.skip_unless_galaxy('release_21.01')
