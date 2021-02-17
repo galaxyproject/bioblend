@@ -31,7 +31,7 @@ class GalaxyTestBase(unittest.TestCase):
         galaxy_version = os.environ.get('GALAXY_VERSION', None)
         is_newer = galaxy_version is None or galaxy_version >= 'release_19.09'
         show_invocation = self.gi.invocations.show_invocation if is_newer else self.gi.workflows.show_invocation
-        args = [invocation['id']] if is_newer else [invocation['id'], invocation['workflow_id']]
+        args = [invocation['id']] if is_newer else [invocation['workflow_id'], invocation['id']]
         for _ in range(20):
             invocation = show_invocation(*args)
             if invocation["state"] == "scheduled":
