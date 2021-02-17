@@ -25,7 +25,7 @@ class InvocationClient(Client):
                         include_terminal=True, limit=None, view='collection',
                         step_details=False):
         """
-        Get all workflow invocations, or select a subset by specifying optional 
+        Get all workflow invocations, or select a subset by specifying optional
         arguments for filtering (e.g. a workflow ID).
 
         :type workflow_id: str
@@ -42,7 +42,7 @@ class InvocationClient(Client):
         :param include_terminal: Whether to include terminal states.
 
         :type limit: int
-        :param limit: Maximum number of invocations to return - if specified, 
+        :param limit: Maximum number of invocations to return - if specified,
                       the most recent invocations will be returned.
 
         :type view: str
