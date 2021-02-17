@@ -780,11 +780,11 @@ class WorkflowClient(Client):
         :type   job_ids: list
         :param  job_ids: Optional list of jobs to include when extracting a workflow from history
 
-        :type   dataset_ids: list
+        :type   dataset_hids: list
         :param  dataset_hids: Optional list of dataset hids corresponding to workflow inputs
                              when extracting a workflow from history
 
-        :type   dataset_collection_ids: list
+        :type   dataset_collection_hids: list
         :param  dataset_collection_hids: Optional list of dataset collection hids corresponding to workflow inputs
                                         when extracting a workflow from history
 
