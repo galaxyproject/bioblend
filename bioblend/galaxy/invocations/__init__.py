@@ -262,16 +262,12 @@ class InvocationClient(Client):
                                 after this timeout, an InvocationNotScheduledException
                                 is raised.
         """
-        galaxy_version = os.environ.get('GALAXY_VERSION', None)
-        is_newer = galaxy_version == 'dev' or galaxy_version >= 'release_19.09'
-        show_invocation = self.gi.invocations.show_invocation if is_newer else self.gi.workflows.show_invocation
-        args = [invocation['id']] if is_newer else [invocation['workflow_id'], invocation['id']]
         for _ in range(timeout_seconds * 2):
-            invocation = show_invocation(*args)
+            invocation = self.gi.workflows.show_invocation(invocation['workflow_id'], invocation['id'])
             if invocation['state'] in INVOCATION_TERMINAL_STATES:
                 break
             time.sleep(.5)
-        invocation = show_invocation(*args)
+        invocation = self.gi.workflows.show_invocation(invocation['workflow_id'], invocation['id'])
         if invocation["state"] != 'scheduled':
             raise InvocationNotScheduledException(f"Invocation with ID {invocation['id']} was not scheduled after {timeout_seconds} seconds.")
 
