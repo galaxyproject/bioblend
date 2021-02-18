@@ -108,7 +108,3 @@ def skip_unless_tool(tool_id):
 
 def get_abspath(path):
     return os.path.abspath(os.path.join(os.path.dirname(__file__), path))
-
-
-def get_galaxy_version():
-    return os.environ.get('GALAXY_VERSION', None)
