@@ -235,8 +235,8 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         self.assertEqual(wf2['name'], new_workflow_name)
         self.assertEqual(len(wf1['steps']), len(wf2['steps']))
         for i in range(len(wf1['steps'])):
-            self.assertEqual(wf1['steps'][str(i)]['type'], wf2['steps']['i']['type'])
-            self.assertEqual(wf1['steps'][str(i)]['tool_id'], wf2['steps']['i']['tool_id'])
+            self.assertEqual(wf1['steps'][str(i)]['type'], wf2['steps'][str(i)]['type'])
+            self.assertEqual(wf1['steps'][str(i)]['tool_id'], wf2['steps'][str(i)]['tool_id'])
 
     @test_util.skip_unless_galaxy('release_18.09')
     def test_show_versions(self):
