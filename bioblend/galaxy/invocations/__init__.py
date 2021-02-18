@@ -2,7 +2,6 @@
 Contains possible interactions with the Galaxy workflow invocations
 """
 
-import os
 import time
 
 from bioblend import CHUNK_SIZE
