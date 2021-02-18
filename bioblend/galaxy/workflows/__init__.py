@@ -759,6 +759,9 @@ class WorkflowClient(Client):
         :param dry_run: When true, perform a dry run where the existing
                         workflow is preserved. A new workflow is
                         allocated instead.
+
+        :rtype: dict
+        :return: Dictionary containing the action executions and the refactor workflow.
         """
         payload = {
             'actions': actions,
