@@ -762,7 +762,8 @@ class WorkflowClient(Client):
                         on the Galaxy server.
 
         :rtype: dict
-        :return: Dictionary containing the action executions and the refactor workflow.
+        :return: Dictionary containing logged messages for the executed actions
+                 and the refactored workflow.
         """
         payload = {
             'actions': actions,
