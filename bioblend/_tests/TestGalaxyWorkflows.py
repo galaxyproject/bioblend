@@ -214,17 +214,25 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         history_id = self.gi.histories.create_history(name="test_wf")['id']
         dataset_id = self._test_dataset(history_id)
         dataset = {'src': 'hda', 'id': dataset_id}
-        invoc1 = self.gi.workflows.invoke_workflow(
+
+        self.gi.workflows.invoke_workflow(
             wf1['id'],
             inputs={'Input 1': dataset, 'Input 2': dataset},
             history_id=history_id,
             inputs_by='name',
         )
-        self._wait_invocation(invoc1, wait_steps=True)
+
+        for _ in range(20):
+            job = sorted(self.gi.jobs.get_jobs(), key=lambda x: x['create_time'], reverse=True)[0]
+            if job['state'] == 'ok':
+                break
+            time.sleep(.5)
+
         wf1 = self.gi.workflows.show_workflow(wf1['id'])
-        dataset_hids = [1, 2]
         datasets = self.gi.histories.show_history(history_id, contents=True)
-        job_ids = [self.gi.datasets.show_dataset(datasets[-1]['id'])['creating_job']]
+        dataset_hids = [dataset['hid'] for dataset in datasets]
+        job_ids = [self.gi.datasets.show_dataset(dataset['id'])['creating_job'] for dataset in datasets]
+        job_ids = sorted(job_ids, reverse=True)[:1]
         wf2 = self.gi.workflows.create_workflow_from_history(history_id=history_id, workflow_name='My new workflow!',
                                                              job_ids=job_ids, dataset_hids=dataset_hids)
         wf2 = self.gi.workflows.show_workflow(wf2['id'])
