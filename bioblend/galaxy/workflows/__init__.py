@@ -757,8 +757,9 @@ class WorkflowClient(Client):
 
         :type dry_run: bool
         :param dry_run: When true, perform a dry run where the existing
-                        workflow is preserved. A new workflow is
-                        allocated instead.
+                        workflow is preserved. The refactored workflow
+                        is returned in the output of the method, but not saved
+                        on the Galaxy server.
 
         :rtype: dict
         :return: Dictionary containing the action executions and the refactor workflow.
