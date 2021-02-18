@@ -215,15 +215,18 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         dataset_id = self._test_dataset(history_id)
         dataset = {'src': 'hda', 'id': dataset_id}
 
+        _job = sorted(self.gi.jobs.get_jobs(), key=lambda x: x['create_time'], reverse=True)[0]
+
         self.gi.workflows.invoke_workflow(
             wf1['id'],
             inputs={'Input 1': dataset, 'Input 2': dataset},
             history_id=history_id,
             inputs_by='name',
         )
+
         for _ in range(20):
             job = sorted(self.gi.jobs.get_jobs(), key=lambda x: x['create_time'], reverse=True)[0]
-            if job['state'] == 'ok':
+            if job['id'] != _job['id'] and job['state'] == 'ok':
                 break
             time.sleep(.5)
 
