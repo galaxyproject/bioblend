@@ -224,9 +224,13 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
             inputs_by='name',
         )
 
+        time.sleep(5)
+        job = sorted(self.gi.jobs.get_jobs(), key=lambda x: x['create_time'], reverse=True)[0]
+
         for _ in range(20):
-            job = sorted(self.gi.jobs.get_jobs(), key=lambda x: x['create_time'], reverse=True)[0]
-            if job['id'] != _job['id'] and job['state'] == 'ok':
+            # job = sorted(self.gi.jobs.get_jobs(), key=lambda x: x['create_time'], reverse=True)[0]
+            [_job] = [_j for _j in self.gi.jobs.get_jobs() if _j['id'] == job['id']]
+            if _job['id'] == job['id'] and _job['state'] == 'ok':
                 break
             time.sleep(.5)
 
