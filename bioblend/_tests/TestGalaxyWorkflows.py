@@ -221,7 +221,6 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
             history_id=history_id,
             inputs_by='name',
         )
-
         for _ in range(20):
             job = sorted(self.gi.jobs.get_jobs(), key=lambda x: x['create_time'], reverse=True)[0]
             if job['state'] == 'ok':
@@ -231,8 +230,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         wf1 = self.gi.workflows.show_workflow(wf1['id'])
         datasets = self.gi.histories.show_history(history_id, contents=True)
         dataset_hids = [dataset['hid'] for dataset in datasets]
-        job_ids = [self.gi.datasets.show_dataset(dataset['id'])['creating_job'] for dataset in datasets]
-        job_ids = sorted(job_ids, reverse=True)[:1]
+        job_ids = [job['id']]
         wf2 = self.gi.workflows.create_workflow_from_history(history_id=history_id, workflow_name='My new workflow!',
                                                              job_ids=job_ids, dataset_hids=dataset_hids)
         wf2 = self.gi.workflows.show_workflow(wf2['id'])
