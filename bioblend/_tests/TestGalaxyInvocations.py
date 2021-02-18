@@ -17,9 +17,6 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
         invocation = self.gi.invocations.show_invocation(invocation_id)
         self.assertEqual(invocation['state'], 'cancelled')
 
-        summary = self.gi.invocations.get_invocation_summary(invocation_id)
-        assert summary['states'] == {}
-
     @test_util.skip_unless_galaxy('release_19.09')
     def test_get_invocation_report(self):
         invocation = self._invoke_workflow()
@@ -43,10 +40,11 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
         self.assertEqual(len(biocompute_object['description_domain']['pipeline_steps']), 1)
 
     @test_util.skip_unless_galaxy('release_19.09')
-    def test_get_invocation_step_jobs_summary(self):
+    def test_get_invocation_jobs_summary(self):
         invocation = self._invoke_workflow()
-
         self.gi.invocations.wait_for_invocation(invocation)
+        jobs_summary = self.gi.invocations.get_invocation_summary(invocation['id'])
+        self.assertEqual(jobs_summary['populated_state'], 'ok')
         step_jobs_summary = self.gi.invocations.get_invocation_step_jobs_summary(invocation['id'])
         self.assertEqual(len(step_jobs_summary), 1)
         self.assertEqual(step_jobs_summary[0]['populated_state'], 'ok')
