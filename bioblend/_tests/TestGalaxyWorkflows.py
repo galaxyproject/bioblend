@@ -226,7 +226,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         job_ids = [job['id']]
         new_workflow_name = 'My new workflow!'
         wf2 = self.gi.workflows.create_workflow_from_history(
-            history_id=history_id,
+            history_id=invocation['history_id'],
             workflow_name=new_workflow_name,
             job_ids=job_ids,
             dataset_hids=dataset_hids,
