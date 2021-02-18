@@ -266,9 +266,9 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
             {"action_type": "add_input", "type": "data", "label": "foo"},
             {"action_type": "update_step_label", "label": "bar", "step": {"label": "foo"}},
         ]
-        invoke_response = self._invoke_workflow()
-        wf_id = invoke_response['workflow_id']
-        self._wait_invocation(invoke_response)
+        invocation = self._invoke_workflow()
+        wf_id = invocation['workflow_id']
+        self.gi.invocations.wait_for_invocation(invocation)
         response = self.gi.workflows.refactor_workflow(wf_id, actions, dry_run=True)
         self.assertEqual(len(response), 3)
         self.assertTrue('action_executions' in response)

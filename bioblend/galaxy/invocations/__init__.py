@@ -2,6 +2,9 @@
 Contains possible interactions with the Galaxy workflow invocations
 """
 
+import os
+import time
+
 from bioblend import CHUNK_SIZE
 from bioblend.galaxy.client import Client
 
@@ -247,8 +250,37 @@ class InvocationClient(Client):
         url = self._make_url(invocation_id) + '/biocompute'
         return self._get(url=url)
 
+    def wait_for_invocation(self, invocation, timeout_seconds=10):
+        """
+        Wait for an invocation to be scheduled.
+
+        :type invocation: dict
+        :param invocation: Invocation to wait for.
+
+        :type timeout_seconds: int
+        :param timeout_seconds: Timeout in seconds. If the invocation is not scheduled
+                                after this timeout, an InvocationNotScheduledException
+                                is raised.
+        """
+        galaxy_version = os.environ.get('GALAXY_VERSION', None)
+        is_newer = galaxy_version == 'dev' or galaxy_version >= 'release_19.09'
+        show_invocation = self.gi.invocations.show_invocation if is_newer else self.gi.workflows.show_invocation
+        args = [invocation['id']] if is_newer else [invocation['workflow_id'], invocation['id']]
+        for _ in range(timeout_seconds * 2):
+            invocation = show_invocation(*args)
+            if invocation['state'] in INVOCATION_TERMINAL_STATES:
+                break
+            time.sleep(.5)
+        invocation = show_invocation(*args)
+        if invocation["state"] != 'scheduled':
+            raise InvocationNotScheduledException(f"Invocation with ID {invocation['id']} was not scheduled after {timeout_seconds} seconds.")
+
     def _invocation_step_url(self, invocation_id, step_id):
         return '/'.join((self._make_url(invocation_id), "steps", step_id))
+
+
+class InvocationNotScheduledException(Exception):
+    pass
 
 
 __all__ = ('InvocationClient',)
