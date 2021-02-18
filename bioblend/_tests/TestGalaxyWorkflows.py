@@ -221,7 +221,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
             time.sleep(.5)
 
         wf1 = self.gi.workflows.show_workflow(invocation['workflow_id'])
-        datasets = self.gi.histories.show_history(history_id, contents=True)
+        datasets = self.gi.histories.show_history(invocation['history_id'], contents=True)
         dataset_hids = [dataset['hid'] for dataset in datasets]
         job_ids = [job['id']]
         new_workflow_name = 'My new workflow!'
@@ -235,8 +235,8 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         self.assertEqual(wf2['name'], new_workflow_name)
         self.assertEqual(len(wf1['steps']), len(wf2['steps']))
         for i in range(len(wf1['steps'])):
-            self.assertEqual(wf1['steps']['i']['type'], wf2['steps']['i']['type'])
-            self.assertEqual(wf1['steps']['i']['tool_id'], wf2['steps']['i']['tool_id'])
+            self.assertEqual(wf1['steps'][str(i)]['type'], wf2['steps']['i']['type'])
+            self.assertEqual(wf1['steps'][str(i)]['tool_id'], wf2['steps']['i']['tool_id'])
 
     @test_util.skip_unless_galaxy('release_18.09')
     def test_show_versions(self):
