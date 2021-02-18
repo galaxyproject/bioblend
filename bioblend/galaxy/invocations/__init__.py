@@ -268,7 +268,10 @@ class InvocationClient(Client):
             time.sleep(.5)
         invocation = self.gi.workflows.show_invocation(invocation['workflow_id'], invocation['id'])
         if invocation["state"] != 'scheduled':
-            raise InvocationNotScheduledException(f"Invocation with ID {invocation['id']} was not scheduled after {timeout_seconds} seconds.")
+            raise InvocationNotScheduledException(" ".join([
+                f"Invocation with ID {invocation['id']} was not scheduled after {timeout_seconds} seconds.",
+                f"Invocation state: {invocation['state']}."
+            ]))
 
     def _invocation_step_url(self, invocation_id, step_id):
         return '/'.join((self._make_url(invocation_id), "steps", step_id))
