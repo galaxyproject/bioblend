@@ -253,8 +253,8 @@ class InvocationClient(Client):
         """
         Wait for an invocation to be scheduled.
 
-        :type invocation: str
-        :param invocation: Invocation ID to wait for.
+        :type invocation_id: str
+        :param invocation_id: Invocation ID to wait for.
 
         :type timeout_seconds: int
         :param timeout_seconds: Timeout in seconds. If the invocation is not scheduled
