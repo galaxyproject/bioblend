@@ -772,19 +772,19 @@ class WorkflowClient(Client):
         url = '/'.join((self._make_url(workflow_id), 'refactor'))
         return self._put(payload=payload, url=url)
 
-    def create_workflow_from_history(self, history_id, workflow_name,
-                                     job_ids=None, dataset_hids=None, dataset_collection_hids=None):
+    def extract_workflow_from_history(self, history_id, workflow_name,
+                                      job_ids=None, dataset_hids=None, dataset_collection_hids=None):
         """
-        Create a workflow from a history_id.
+        Extract a workflow from a history.
 
         :type history_id: str
         :param history_id: Encoded history ID
 
         :type   workflow_name: str
-        :param  workflow_name: Name of the workflow to create when extracting a workflow from history
+        :param  workflow_name: Name of the workflow to create
 
         :type   job_ids: list
-        :param  job_ids: Optional list of jobs to include when extracting a workflow from history
+        :param  job_ids: Optional list of job IDs to filter the jobs to extract from the history
 
         :type   dataset_hids: list
         :param  dataset_hids: Optional list of dataset hids corresponding to workflow inputs
@@ -814,7 +814,7 @@ class WorkflowClient(Client):
         :param workflow_id: Encoded workflow ID
 
         :rtype: list of dicts
-        :return: List of versions for this workflow ID
+        :return: Ordered list of version descriptions for this workflow
         """
         url = self._make_url(workflow_id) + '/versions'
         return self._get(url=url)

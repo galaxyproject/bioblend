@@ -260,6 +260,9 @@ class InvocationClient(Client):
         :param timeout_seconds: Timeout in seconds. If the invocation is not scheduled
                                 after this timeout, an InvocationNotScheduledException
                                 is raised.
+
+        :rtype: dict
+        :return: Details of the workflow invocation.
         """
         for _ in range(timeout_seconds * 2):
             invocation = self.gi.invocations.show_invocation(invocation_id)
@@ -272,6 +275,7 @@ class InvocationClient(Client):
                 f"Invocation with ID {invocation['id']} was not scheduled after {timeout_seconds} seconds.",
                 f"Invocation state: {invocation['state']}."
             ]))
+        return invocation
 
     def _invocation_step_url(self, invocation_id, step_id):
         return '/'.join((self._make_url(invocation_id), "steps", step_id))

@@ -208,7 +208,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         invocation = self._invoke_workflow()
         assert invocation['state'] == 'new', invocation
 
-    def test_create_workflow_from_history(self):
+    def test_extract_workflow_from_history(self):
         invocation = self._invoke_workflow()
 
         time.sleep(5)
@@ -225,7 +225,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         dataset_hids = [dataset['hid'] for dataset in datasets]
         job_ids = [job['id']]
         new_workflow_name = 'My new workflow!'
-        wf2 = self.gi.workflows.create_workflow_from_history(
+        wf2 = self.gi.workflows.extract_workflow_from_history(
             history_id=invocation['history_id'],
             workflow_name=new_workflow_name,
             job_ids=job_ids,
