@@ -249,12 +249,12 @@ class InvocationClient(Client):
         url = self._make_url(invocation_id) + '/biocompute'
         return self._get(url=url)
 
-    def wait_for_invocation(self, invocation, timeout_seconds=10):
+    def wait_for_invocation(self, invocation_id, timeout_seconds=10):
         """
         Wait for an invocation to be scheduled.
 
-        :type invocation: dict
-        :param invocation: Invocation to wait for.
+        :type invocation: str
+        :param invocation: Invocation ID to wait for.
 
         :type timeout_seconds: int
         :param timeout_seconds: Timeout in seconds. If the invocation is not scheduled
@@ -262,11 +262,11 @@ class InvocationClient(Client):
                                 is raised.
         """
         for _ in range(timeout_seconds * 2):
-            invocation = self.gi.workflows.show_invocation(invocation['workflow_id'], invocation['id'])
+            invocation = self.gi.invocations.show_invocation(invocation_id)
             if invocation['state'] in INVOCATION_TERMINAL_STATES:
                 break
             time.sleep(.5)
-        invocation = self.gi.workflows.show_invocation(invocation['workflow_id'], invocation['id'])
+        invocation = self.gi.invocations.show_invocation(invocation_id)
         if invocation["state"] != 'scheduled':
             raise InvocationNotScheduledException(" ".join([
                 f"Invocation with ID {invocation['id']} was not scheduled after {timeout_seconds} seconds.",
