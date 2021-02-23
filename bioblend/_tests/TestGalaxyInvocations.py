@@ -1,6 +1,7 @@
 import os
 import time
 
+from bioblend import galaxy
 from . import GalaxyTestBase, test_util
 
 
@@ -23,37 +24,35 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
         user2 = self.gi.users.create_local_user('user2', 'email2@email.test', 'password2')
         key1 = self.gi.users.create_user_apikey(user1['id'])
         key2 = self.gi.users.create_user_apikey(user2['id'])
-        adminkey = self.gi._key
+        user1_gi = galaxy.GalaxyInstance(url=self.gi.base_url, key=key1)
+        user2_gi = galaxy.GalaxyInstance(url=self.gi.base_url, key=key2)
 
         path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
         workflow = self.gi.workflows.import_workflow_from_local_path(path, publish=True)
         dataset = {'src': 'hda', 'id': None}
 
-        self.gi._key = key1
-        hist1 = self.gi.histories.create_history('hist1')
-        hist2 = self.gi.histories.create_history('hist2')
+        hist1 = user1_gi.histories.create_history('hist1')
+        hist2 = user1_gi.histories.create_history('hist2')
         dataset_id = self._test_dataset(hist1['id'])
         dataset['id'] = dataset_id
-        invoc1 = self.gi.workflows.invoke_workflow(workflow['id'], history_id=hist1['id'],
-                                                   inputs={'Input 1': dataset, 'Input 2': dataset},
-                                                   inputs_by='name')
+        invoc1 = user1_gi.workflows.invoke_workflow(workflow['id'], history_id=hist1['id'],
+                                                    inputs={'Input 1': dataset, 'Input 2': dataset},
+                                                    inputs_by='name')
         dataset_id = self._test_dataset(hist2['id'])
         dataset['id'] = dataset_id
-        invoc2 = self.gi.workflows.invoke_workflow(workflow['id'], history_id=hist2['id'],
-                                                   inputs={'Input 1': dataset, 'Input 2': dataset},
-                                                   inputs_by='name')
+        invoc2 = user1_gi.workflows.invoke_workflow(workflow['id'], history_id=hist2['id'],
+                                                    inputs={'Input 1': dataset, 'Input 2': dataset},
+                                                    inputs_by='name')
 
-        self.gi._key = key2
-        hist3 = self.gi.histories.create_history('hist3')
+        hist3 = user2_gi.histories.create_history('hist3')
         dataset_id = self._test_dataset(hist3['id'])
         dataset['id'] = dataset_id
-        invoc3 = self.gi.workflows.invoke_workflow(workflow['id'], history_id=hist3['id'],
-                                                   inputs={'Input 1': dataset, 'Input 2': dataset},
-                                                   inputs_by='name')
+        invoc3 = user2_gi.workflows.invoke_workflow(workflow['id'], history_id=hist3['id'],
+                                                    inputs={'Input 1': dataset, 'Input 2': dataset},
+                                                    inputs_by='name')
 
         time.sleep(20)
 
-        self.gi._key = adminkey
         self.assertEqual(invoc1['workflow_id'], invoc2['workflow_id'])
         self.assertEqual(invoc2['workflow_id'], invoc3['workflow_id'])
 
