@@ -745,7 +745,7 @@ class WorkflowClient(Client):
                         update_license, update_creator, update_report, add_step,
                         add_input, disconnect, connect, fill_defaults, fill_step_defaults,
                         extract_input, extract_legacy_parameter,
-                        remove_unlabeled_workflow_outputs,
+                        remove_unlabeled_workflow_outputs, upgrade_all_steps,
                         upgrade_subworkflow, upgrade_tool.
 
           An example value for the ``actions`` argument might be::
