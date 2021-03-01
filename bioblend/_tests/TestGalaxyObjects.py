@@ -6,6 +6,7 @@ import socket
 import sys
 import tarfile
 import tempfile
+import unittest
 import uuid
 from ssl import SSLError
 from urllib.error import URLError
@@ -16,7 +17,6 @@ import bioblend.galaxy.objects.galaxy_instance as galaxy_instance
 import bioblend.galaxy.objects.wrappers as wrappers
 from bioblend.galaxy import dataset_collections
 from . import test_util
-from .test_util import unittest
 
 bioblend.set_stream_logger('test', level='INFO')
 socket.setdefaulttimeout(10.0)

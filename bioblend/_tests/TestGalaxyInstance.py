@@ -2,11 +2,11 @@
 Tests on the GalaxyInstance object itself.
 """
 import time
+import unittest
 
 from bioblend import ConnectionError
 from bioblend.galaxy import GalaxyInstance
 from bioblend.galaxy.client import Client
-from .test_util import unittest
 
 
 class TestGalaxyInstance(unittest.TestCase):

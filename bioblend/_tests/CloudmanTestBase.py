@@ -3,10 +3,10 @@ Tests the functionality of the Blend CloudMan API. These tests require working
 credentials to supported cloud infrastructure.
 """
 import os
+import unittest
 
 from bioblend.util import Bunch
 from . import test_util
-from .test_util import unittest
 
 
 class CloudmanTestBase(unittest.TestCase):
