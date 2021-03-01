@@ -208,22 +208,21 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         invocation = self._invoke_workflow()
         assert invocation['state'] == 'new', invocation
 
+    @test_util.skip_unless_galaxy('release_19.09')
     def test_extract_workflow_from_history(self):
         invocation = self._invoke_workflow()
-
-        time.sleep(5)
-        job = sorted(self.gi.jobs.get_jobs(), key=lambda x: x['create_time'], reverse=True)[0]
-
-        for _ in range(20):
-            [_job] = [_j for _j in self.gi.jobs.get_jobs() if _j['id'] == job['id']]
-            if _job['id'] == job['id'] and _job['state'] == 'ok':
-                break
-            time.sleep(.5)
-
+        invocation = self.gi.invocations.wait_for_invocation(invocation['id'])
         wf1 = self.gi.workflows.show_workflow(invocation['workflow_id'])
         datasets = self.gi.histories.show_history(invocation['history_id'], contents=True)
         dataset_hids = [dataset['hid'] for dataset in datasets]
-        job_ids = [job['id']]
+        job_ids = [step['job_id'] for step in invocation['steps'] if step['job_id']]
+
+        for _ in range(20):
+            job = sorted(self.gi.jobs.get_jobs(), key=lambda x: x['create_time'])[-1]
+            if job['state'] == 'ok':
+                break
+            time.sleep(.5)
+
         new_workflow_name = 'My new workflow!'
         wf2 = self.gi.workflows.extract_workflow_from_history(
             history_id=invocation['history_id'],
