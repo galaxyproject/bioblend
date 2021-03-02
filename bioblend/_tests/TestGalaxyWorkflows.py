@@ -205,15 +205,73 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
             self.gi.workflows.run_workflow(wf['id'], None)
 
     def test_invoke_workflow(self):
+        invocation = self._invoke_workflow()
+        assert invocation['state'] == 'new', invocation
+
+    @test_util.skip_unless_galaxy('release_19.09')
+    def test_extract_workflow_from_history(self):
+        invocation = self._invoke_workflow()
+        invocation = self.gi.invocations.wait_for_invocation(invocation['id'])
+        wf1 = self.gi.workflows.show_workflow(invocation['workflow_id'])
+        datasets = self.gi.histories.show_history(invocation['history_id'], contents=True)
+        dataset_hids = [dataset['hid'] for dataset in datasets]
+        job_ids = [step['job_id'] for step in invocation['steps'] if step['job_id']]
+
+        sorted_job_ids = sorted(job_ids)
+        for job_id in sorted_job_ids:
+            self.gi.jobs.wait_for_job(job_id)
+
+        new_workflow_name = 'My new workflow!'
+        wf2 = self.gi.workflows.extract_workflow_from_history(
+            history_id=invocation['history_id'],
+            workflow_name=new_workflow_name,
+            job_ids=job_ids,
+            dataset_hids=dataset_hids,
+        )
+        wf2 = self.gi.workflows.show_workflow(wf2['id'])
+        self.assertEqual(wf2['name'], new_workflow_name)
+        self.assertEqual(len(wf1['steps']), len(wf2['steps']))
+        for i in range(len(wf1['steps'])):
+            self.assertEqual(wf1['steps'][str(i)]['type'], wf2['steps'][str(i)]['type'])
+            self.assertEqual(wf1['steps'][str(i)]['tool_id'], wf2['steps'][str(i)]['tool_id'])
+
+    @test_util.skip_unless_galaxy('release_18.09')
+    def test_show_versions(self):
+        path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
+        wf = self.gi.workflows.import_workflow_from_local_path(path)
+        versions = self.gi.workflows.show_versions(wf['id'])
+        self.assertEqual(len(versions), 1)
+        version = versions[0]
+        self.assertEqual(version['version'], 0)
+        self.assertTrue('update_time' in version)
+        self.assertTrue('steps' in version)
+
+    @test_util.skip_unless_galaxy('release_21.01')
+    def test_refactor_workflow(self):
+        actions = [
+            {"action_type": "add_input", "type": "data", "label": "foo"},
+            {"action_type": "update_step_label", "label": "bar", "step": {"label": "foo"}},
+        ]
+        path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
+        wf = self.gi.workflows.import_workflow_from_local_path(path)
+        response = self.gi.workflows.refactor_workflow(wf['id'], actions, dry_run=True)
+        self.assertEqual(len(response), 3)
+        self.assertTrue('action_executions' in response)
+        self.assertTrue('workflow' in response)
+        self.assertTrue('dry_run' in response)
+        self.assertEqual(len(response['action_executions']), 2)
+        self.assertEqual(response['workflow']['steps']['0']['label'], 'bar')
+        self.assertEqual(response['dry_run'], True)
+
+    def _invoke_workflow(self):
         path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
         wf = self.gi.workflows.import_workflow_from_local_path(path)
         history_id = self.gi.histories.create_history(name="test_wf_invocation")['id']
         dataset1_id = self._test_dataset(history_id)
         dataset = {'src': 'hda', 'id': dataset1_id}
-        invoke_response = self.gi.workflows.invoke_workflow(
+        return self.gi.workflows.invoke_workflow(
             wf['id'],
             inputs={'Input 1': dataset, 'Input 2': dataset},
             history_id=history_id,
             inputs_by='name',
         )
-        assert invoke_response['state'] == 'new', invoke_response

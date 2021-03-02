@@ -17,9 +17,6 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
         invocation = self.gi.invocations.show_invocation(invocation_id)
         self.assertEqual(invocation['state'], 'cancelled')
 
-        summary = self.gi.invocations.get_invocation_summary(invocation_id)
-        assert summary['states'] == {}
-
     @test_util.skip_unless_galaxy('release_19.09')
     def test_get_invocation_report(self):
         invocation = self._invoke_workflow()
@@ -38,15 +35,16 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
     def test_get_invocation_biocompute_object(self):
         invocation = self._invoke_workflow()
 
-        self._wait_invocation(invocation['id'])
+        self.gi.invocations.wait_for_invocation(invocation['id'])
         biocompute_object = self.gi.invocations.get_invocation_biocompute_object(invocation['id'])
         self.assertEqual(len(biocompute_object['description_domain']['pipeline_steps']), 1)
 
     @test_util.skip_unless_galaxy('release_19.09')
-    def test_get_invocation_step_jobs_summary(self):
+    def test_get_invocation_jobs_summary(self):
         invocation = self._invoke_workflow()
-
-        self._wait_invocation(invocation['id'])
+        self.gi.invocations.wait_for_invocation(invocation['id'])
+        jobs_summary = self.gi.invocations.get_invocation_summary(invocation['id'])
+        self.assertEqual(jobs_summary['populated_state'], 'ok')
         step_jobs_summary = self.gi.invocations.get_invocation_step_jobs_summary(invocation['id'])
         self.assertEqual(len(step_jobs_summary), 1)
         self.assertEqual(step_jobs_summary[0]['populated_state'], 'ok')
@@ -80,7 +78,7 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
             self.gi.invocations.show_invocation_step(invocation_id, pause_step["id"])["action"])
         self.gi.invocations.run_invocation_step_action(invocation_id, pause_step["id"], action=True)
         self.assertTrue(self.gi.invocations.show_invocation_step(invocation_id, pause_step["id"])["action"])
-        self._wait_invocation(invocation_id)
+        self.gi.invocations.wait_for_invocation(invocation['id'])
 
     def _invoke_workflow(self):
         path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
@@ -95,13 +93,3 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
             history_id=history_id,
             inputs_by='name',
         )
-
-    def _wait_invocation(self, invocation_id):
-        for _ in range(20):
-            invocation = self.gi.invocations.show_invocation(invocation_id)
-            if invocation["state"] == "scheduled":
-                break
-            time.sleep(.5)
-        else:
-            invocation = self.gi.invocations.show_invocation(invocation_id)
-            self.assertEqual(invocation["state"], "scheduled")
