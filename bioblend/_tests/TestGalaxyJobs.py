@@ -1,4 +1,5 @@
 import os
+from operator import itemgetter
 
 from bioblend import TimeoutException
 from bioblend.galaxy.tools.inputs import (
@@ -75,10 +76,11 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
         }
         invocation_id = self.gi.workflows.invoke_workflow(wf['id'], inputs=wf_inputs, history_id=self.history_id)['id']
         invocation = self.gi.invocations.wait_for_invocation(invocation_id)
-        job_ids = [step['job_id'] for step in invocation['steps'] if step['job_id']]
-        for job_id in job_ids:
+        job_steps = [step for step in invocation['steps'] if step['job_id']]
+        job_steps.sort(key=itemgetter('order_index'))
+        for step in job_steps:
             try:
-                self.gi.jobs.wait_for_job(job_id, maxwait=30)
+                self.gi.jobs.wait_for_job(step['job_id'], maxwait=30)
             except TimeoutException:
                 # The first job should error, not time out
                 raise
