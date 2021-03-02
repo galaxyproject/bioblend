@@ -69,7 +69,6 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
         jobs = user2_gi.jobs.get_jobs(history_id=history_id2)
         self.assertEqual(len(jobs), 1)
         jobs = self.gi.jobs.get_jobs(user_details=True)
-        self.assertEqual(len(jobs), 4)
         self.assertEqual(len([x for x in jobs if x['history_id'] == history_id1]), 3)
         self.assertEqual(len([x for x in jobs if x['history_id'] == history_id2]), 1)
 
