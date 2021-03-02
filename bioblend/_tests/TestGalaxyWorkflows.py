@@ -217,11 +217,9 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         dataset_hids = [dataset['hid'] for dataset in datasets]
         job_ids = [step['job_id'] for step in invocation['steps'] if step['job_id']]
 
-        for _ in range(20):
-            job = sorted(self.gi.jobs.get_jobs(), key=lambda x: x['create_time'])[-1]
-            if job['state'] == 'ok':
-                break
-            time.sleep(.5)
+        sorted_job_ids = sorted(job_ids)
+        for job_id in sorted_job_ids:
+            self.gi.jobs.wait_for_job(job_id)
 
         new_workflow_name = 'My new workflow!'
         wf2 = self.gi.workflows.extract_workflow_from_history(

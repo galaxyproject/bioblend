@@ -102,3 +102,7 @@ class ConnectionError(Exception):
 
     def __str__(self):
         return "{}: {}".format(self.args[0], self.body)
+
+
+class TimeoutException(Exception):
+    pass

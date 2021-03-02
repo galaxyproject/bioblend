@@ -9,6 +9,7 @@ import warnings
 from urllib.parse import urljoin
 
 import bioblend
+from bioblend import TimeoutException
 from bioblend.galaxy.client import Client
 
 log = logging.getLogger(__name__)
@@ -186,5 +187,5 @@ class DatasetStateWarning(Warning):
     pass
 
 
-class DatasetTimeoutException(Exception):
+class DatasetTimeoutException(TimeoutException):
     pass
