@@ -1,5 +1,4 @@
 import os
-import time
 
 from . import (
     GalaxyTestBase,
@@ -45,9 +44,9 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
 
         rerun_output = self.gi.jobs.rerun_job(original_job_id)
         rerun_job_id = rerun_output['jobs'][0]['id']
-        self._wait_job(original_job_id)
+        self.gi.jobs.wait_for_job(original_job_id)
         original_output_content = self.gi.datasets.download_dataset(original_output['outputs'][0]['id'])
-        self._wait_job(rerun_job_id)
+        self.gi.jobs.wait_for_job(rerun_job_id)
         rerun_output_content = self.gi.datasets.download_dataset(rerun_output['outputs'][0]['id'])
         self.assertEqual(rerun_output_content, original_output_content)
 
@@ -60,41 +59,37 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
             "0": {'src': 'hda', 'id': self.dataset_id},
             "1": "-1",
         }
-        inv = self.gi.workflows.invoke_workflow(wf['id'], wf_inputs)
-        for _ in range(120):
-            inv = self.gi.invocations.show_invocation(inv['id'])
-            if inv['steps']:
-                for step in inv['steps']:
-                    if step['job_id']:
-                        self._wait_job(step['job_id'])
-                break
-            time.sleep(.5)
-        new_history_id = inv['history_id']
-        history_contents = self.gi.histories.show_history(new_history_id, contents=True)
-        self.assertEqual(len(history_contents), 2)
-        self.assertEqual(history_contents[0]['state'], 'error')
-        self.assertEqual(history_contents[1]['state'], 'paused')
+        inv = self.gi.workflows.invoke_workflow(wf['id'], inputs=wf_inputs, history_id=self.history_id)
+        self.gi.invocations.wait_for_invocation(inv['id'])
+        inv = self.gi.invocations.show_invocation(inv['id'])
+        for step in inv['steps']:
+            if step['job_id']:
+                try:
+                    self.gi.jobs.wait_for_job(step['job_id'], maxwait=30)
+                except Exception:  # errored and paused jobs raise an error
+                    pass
+
+        history_contents = self.gi.histories.show_history(self.history_id, contents=True)
+        self.assertEqual(len(history_contents), 3)
+        self.assertEqual(history_contents[1]['state'], 'error')
+        self.assertEqual(history_contents[2]['state'], 'paused')
 
         # now rerun and remap with correct input param
-        job_id = self.gi.datasets.show_dataset(history_contents[0]['id'])['creating_job']
+        job_id = self.gi.datasets.show_dataset(history_contents[1]['id'])['creating_job']
         tool_inputs_update = {
             'lineNum': '1'
         }
         self.gi.jobs.rerun_job(job_id, remap=True, tool_inputs_update=tool_inputs_update)
-        jobs_to_complete = [job['id'] for job in self.gi.jobs.get_jobs() if job['history_id'] == new_history_id]
+        jobs_to_complete = [job['id'] for job in self.gi.jobs.get_jobs() if job['history_id'] == self.history_id and job['id']]
         for job_id in jobs_to_complete:
-            self._wait_job(job_id)
+            try:
+                self.gi.jobs.wait_for_job(job_id, maxwait=30)
+            except Exception:  # errored and paused jobs raise an error
+                pass
 
         # check if workflow output has completed
-        workflow_output = [dataset for dataset in self.gi.histories.show_history(new_history_id, contents=True) if dataset['name'] == 'paste_output'][0]
+        workflow_output = [dataset for dataset in self.gi.histories.show_history(self.history_id, contents=True) if dataset['name'] == 'paste_output'][0]
         self.assertEqual(workflow_output['state'], 'ok')
-        self.assertEqual(workflow_output['hid'], 2)
-        self.assertEqual(workflow_output['id'], history_contents[1]['id'])
+        self.assertEqual(workflow_output['hid'], 3)
+        self.assertEqual(workflow_output['id'], history_contents[2]['id'])
         self._wait_and_verify_dataset(workflow_output['id'], b'line 1\tline 1\n')
-
-    def _wait_job(self, job_id):
-        for _ in range(120):
-            job_state = self.gi.jobs.show_job(job_id)['state']
-            if job_state in ['ok', 'error']:
-                break
-            time.sleep(.5)
