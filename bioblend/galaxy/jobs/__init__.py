@@ -21,7 +21,7 @@ class JobsClient(Client):
         super().__init__(galaxy_instance)
 
     def get_jobs(self, state=None, tool_id=None, user_details=None,
-                 date_range_min=None, date_range_max=None,
+                 limit=500, offset=0, date_range_min=None, date_range_max=None,
                  history_id=None, workflow_id=None, invocation_id=None):
         """
         Get the list of jobs of the current user.
@@ -40,6 +40,14 @@ class JobsClient(Client):
         :type user_details: boolean
         :param user_details: If true, and requestor is an admin, will return
                              external job id and user email.
+
+        :type limit: int
+        :param limit: Maximum number of jobs to return.
+
+        :type offset: int
+        :param offset: Return jobs starting from this specified position.
+                       For example, if ``limit`` is set to 100 and ``offset`` to 200,
+                       jobs 200-299 will be returned.
 
         :type date_range_min: string '2014-01-01'
         :param date_range_min: Limit the listing of jobs to those updated on
@@ -80,7 +88,10 @@ class JobsClient(Client):
               'tool_id': 'upload1',
               'update_time': '2014-03-01T16:05:39.558458'}]
         """
-        params = {}
+        params = {
+            limit: limit,
+            offset: offset
+        }
         if state:
             params['state'] = state
         if tool_id:
