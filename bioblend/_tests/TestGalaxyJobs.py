@@ -1,7 +1,7 @@
 import os
 from datetime import datetime, timedelta
-from bioblend import galaxy
 
+from bioblend import galaxy
 from . import (
     GalaxyTestBase,
     test_util
