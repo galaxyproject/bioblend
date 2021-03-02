@@ -81,7 +81,7 @@ class DatasetClient(Client):
         :return: If a ``file_path`` argument is not provided, returns a dict containing the file content.
                  Otherwise returns nothing.
         """
-        dataset = self._block_until_dataset_terminal(dataset_id, maxwait=maxwait)
+        dataset = self.wait_for_dataset(dataset_id, maxwait=maxwait, check=False)
         if not dataset['state'] == 'ok':
             message = "Dataset state is not 'ok'. Dataset id: {}, current state: {}".format(dataset_id, dataset['state'])
             if require_ok_state:
@@ -157,10 +157,26 @@ class DatasetClient(Client):
         }
         return self._get(params=params)
 
-    def _block_until_dataset_terminal(self, dataset_id, maxwait=12000, interval=3):
+    def wait_for_dataset(self, dataset_id, maxwait=12000, interval=3, check=True):
         """
-        Wait until the dataset state is terminal ('ok', 'empty', 'error',
-        'discarded' or 'failed_metadata').
+        Wait until a dataset is in a terminal state.
+
+        :type dataset_id: str
+        :param dataset_id: dataset ID
+
+        :type maxwait: float
+        :param maxwait: Total time (in seconds) to wait for the dataset state to
+          become terminal. If the dataset state is not terminal within this
+          time, a ``DatasetTimeoutException`` will be raised.
+
+        :type interval: float
+        :param interval: Time (in seconds) to wait between 2 consecutive checks.
+
+        :type check: bool
+        :param check: Whether to check if the dataset terminal state is 'ok'.
+
+        :rtype: dict
+        :return: Details of the given dataset.
         """
         assert maxwait >= 0
         assert interval > 0
@@ -170,13 +186,15 @@ class DatasetClient(Client):
             dataset = self.show_dataset(dataset_id)
             state = dataset['state']
             if state in TERMINAL_STATES:
+                if check and state != 'ok':
+                    raise Exception(f"Dataset {dataset_id} is in terminal state {state}")
                 return dataset
             if time_left > 0:
-                log.warning("Dataset %s is in non-terminal state %s. Will wait %i more s", dataset_id, state, time_left)
+                log.warning(f"Dataset {dataset_id} is in non-terminal state {state}. Will wait {time_left} more s")
                 time.sleep(min(time_left, interval))
                 time_left -= interval
             else:
-                raise DatasetTimeoutException("Waited too long for dataset %s to complete" % dataset_id)
+                raise DatasetTimeoutException(f"Dataset {dataset_id} is still in non-terminal state {state} after {maxwait} s")
 
 
 class DatasetStateException(Exception):

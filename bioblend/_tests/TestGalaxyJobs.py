@@ -1,5 +1,6 @@
 import os
 
+from bioblend import TimeoutException
 from bioblend.galaxy.tools.inputs import (
     dataset,
     inputs,
@@ -72,15 +73,19 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
             "0": {'src': 'hda', 'id': self.dataset_id},
             "1": "-1",
         }
-        inv = self.gi.workflows.invoke_workflow(wf['id'], inputs=wf_inputs, history_id=self.history_id)
-        self.gi.invocations.wait_for_invocation(inv['id'])
-        inv = self.gi.invocations.show_invocation(inv['id'])
-        for step in inv['steps']:
-            if step['job_id']:
-                try:
-                    self.gi.jobs.wait_for_job(step['job_id'], maxwait=30)
-                except Exception:  # errored and paused jobs raise an error
-                    pass
+        invocation_id = self.gi.workflows.invoke_workflow(wf['id'], inputs=wf_inputs, history_id=self.history_id)['id']
+        invocation = self.gi.invocations.wait_for_invocation(invocation_id)
+        job_ids = [step['job_id'] for step in invocation['steps'] if step['job_id']]
+        for job_id in job_ids:
+            try:
+                self.gi.jobs.wait_for_job(job_id, maxwait=30)
+            except TimeoutException:
+                # The first job should error, not time out
+                raise
+            except Exception:
+                break
+        else:
+            raise Exception("The first job should have failed")
 
         history_contents = self.gi.histories.show_history(self.history_id, contents=True)
         self.assertEqual(len(history_contents), 3)
@@ -93,16 +98,10 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
             'lineNum': '1'
         }
         self.gi.jobs.rerun_job(job_id, remap=True, tool_inputs_update=tool_inputs_update)
-        jobs_to_complete = [job['id'] for job in self.gi.jobs.get_jobs() if job['history_id'] == self.history_id and job['id']]
-        for job_id in jobs_to_complete:
-            try:
-                self.gi.jobs.wait_for_job(job_id, maxwait=30)
-            except Exception:  # errored and paused jobs raise an error
-                pass
 
-        # check if workflow output has completed
-        workflow_output = [dataset for dataset in self.gi.histories.show_history(self.history_id, contents=True) if dataset['name'] == 'paste_output'][0]
-        self.assertEqual(workflow_output['state'], 'ok')
-        self.assertEqual(workflow_output['hid'], 3)
-        self.assertEqual(workflow_output['id'], history_contents[2]['id'])
-        self._wait_and_verify_dataset(workflow_output['id'], b'line 1\tline 1\n')
+        # Wait for the last dataset in the history to be unpaused and complete
+        last_dataset = self.gi.histories.show_history(self.history_id, contents=True)[-1]
+        self.gi.datasets.wait_for_dataset(last_dataset['id'])
+        self.assertEqual(last_dataset['hid'], 3)
+        self.assertEqual(last_dataset['id'], history_contents[2]['id'])
+        self._wait_and_verify_dataset(last_dataset['id'], b'line 1\tline 1\n')
