@@ -1,9 +1,19 @@
 """
 Contains possible interactions with the Galaxy workflow invocations
 """
+import logging
+import time
 
-from bioblend import CHUNK_SIZE
+from bioblend import (
+    CHUNK_SIZE,
+    TimeoutException,
+)
 from bioblend.galaxy.client import Client
+
+log = logging.getLogger(__name__)
+
+INVOCATION_TERMINAL_STATES = {'cancelled', 'failed', 'scheduled'}
+# Invocation non-terminal states are: 'new', 'ready'
 
 
 class InvocationClient(Client):
@@ -243,6 +253,46 @@ class InvocationClient(Client):
         """
         url = self._make_url(invocation_id) + '/biocompute'
         return self._get(url=url)
+
+    def wait_for_invocation(self, invocation_id, maxwait=12000, interval=3, check=True):
+        """
+        Wait until an invocation is in a terminal state.
+
+        :type invocation_id: str
+        :param invocation_id: Invocation ID to wait for.
+
+        :type maxwait: float
+        :param maxwait: Total time (in seconds) to wait for the invocation state
+          to become terminal. If the invocation state is not terminal within
+          this time, a ``TimeoutException`` will be raised.
+
+        :type interval: float
+        :param interval: Time (in seconds) to wait between 2 consecutive checks.
+
+        :type check: bool
+        :param check: Whether to check if the invocation terminal state is
+          'scheduled'.
+
+        :rtype: dict
+        :return: Details of the workflow invocation.
+        """
+        assert maxwait >= 0
+        assert interval > 0
+
+        time_left = maxwait
+        while True:
+            invocation = self.gi.invocations.show_invocation(invocation_id)
+            state = invocation['state']
+            if state in INVOCATION_TERMINAL_STATES:
+                if check and state != 'scheduled':
+                    raise Exception(f"Invocation {invocation_id} is in terminal state {state}")
+                return invocation
+            if time_left > 0:
+                log.info(f"Invocation {invocation_id} is in non-terminal state {state}. Will wait {time_left} more s")
+                time.sleep(min(time_left, interval))
+                time_left -= interval
+            else:
+                raise TimeoutException(f"Invocation {invocation_id} is still in non-terminal state {state} after {maxwait} s")
 
     def _invocation_step_url(self, invocation_id, step_id):
         return '/'.join((self._make_url(invocation_id), "steps", step_id))

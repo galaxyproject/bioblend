@@ -1,7 +1,17 @@
 """
 Contains possible interactions with the Galaxy Jobs
 """
+import logging
+import time
+
+from bioblend import TimeoutException
 from bioblend.galaxy.client import Client
+
+log = logging.getLogger(__name__)
+
+JOB_TERMINAL_STATES = {'deleted', 'error', 'ok'}
+# Job non-terminal states are: 'deleted_new', 'failed', 'new', 'paused',
+# 'queued', 'resubmitted', 'running', 'upload', 'waiting'
 
 
 class JobsClient(Client):
@@ -219,3 +229,42 @@ class JobsClient(Client):
 
         url = self._make_url(module_id=job_id) + '/error'
         return self._post(url=url, payload=payload)
+
+    def wait_for_job(self, job_id, maxwait=12000, interval=3, check=True):
+        """
+        Wait until a job is in a terminal state.
+
+        :type job_id: str
+        :param job_id: job ID
+
+        :type maxwait: float
+        :param maxwait: Total time (in seconds) to wait for the job state to
+          become terminal. If the job state is not terminal within this time, a
+          ``TimeoutException`` will be raised.
+
+        :type interval: float
+        :param interval: Time (in seconds) to wait between 2 consecutive checks.
+
+        :type check: bool
+        :param check: Whether to check if the job terminal state is 'ok'.
+
+        :rtype: dict
+        :return: Details of the given job.
+        """
+        assert maxwait >= 0
+        assert interval > 0
+
+        time_left = maxwait
+        while True:
+            job = self.gi.jobs.show_job(job_id)
+            state = job['state']
+            if state in JOB_TERMINAL_STATES:
+                if check and state != 'ok':
+                    raise Exception(f"Job {job_id} is in terminal state {state}")
+                return job
+            if time_left > 0:
+                log.info(f"Job {job_id} is in non-terminal state {state}. Will wait {time_left} more s")
+                time.sleep(min(time_left, interval))
+                time_left -= interval
+            else:
+                raise TimeoutException(f"Job {job_id} is still in non-terminal state {state} after {maxwait} s")

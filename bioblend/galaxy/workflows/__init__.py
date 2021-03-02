@@ -15,17 +15,18 @@ class WorkflowClient(Client):
     # the 'deleted' option is not available for workflows
     def get_workflows(self, workflow_id=None, name=None, published=False):
         """
-        Get all workflows or filter the specific one(s) via the provided ``name``
-        or ``workflow_id``. Provide only one argument, ``name`` or ``workflow_id``,
-        but not both.
+        Get all workflows, or select a subset by specifying optional arguments
+        for filtering (e.g. a workflow name).
 
         :type workflow_id: str
-        :param workflow_id: Encoded workflow ID (incompatible with ``name``)
+        :param workflow_id: Encoded workflow ID
+
+          .. deprecated:: 0.16.0
+             To get details of a workflow for which you know the ID, use the
+             much more efficient :meth:`show_workflow` instead.
 
         :type name: str
-        :param name: Filter by name of workflow (incompatible with
-          ``workflow_id``). If multiple names match the given name, all the
-          workflows matching the argument will be returned.
+        :param name: Workflow name to filter on.
 
         :type published: bool
         :param published: if ``True``, return also published workflows
@@ -729,6 +730,94 @@ class WorkflowClient(Client):
             will be permanently deleted.
         """
         return self._delete(id=workflow_id)
+
+    def refactor_workflow(self, workflow_id, actions, dry_run=False):
+        """
+        Refactor workflow with given actions.
+
+        :type workflow_id: str
+        :param workflow_id: Encoded workflow ID
+
+        :type actions: list of dicts
+        :param actions: Actions to use for refactoring the workflow. The following
+                        actions are supported: update_step_label, update_step_position,
+                        update_output_label, update_name, update_annotation,
+                        update_license, update_creator, update_report, add_step,
+                        add_input, disconnect, connect, fill_defaults, fill_step_defaults,
+                        extract_input, extract_legacy_parameter,
+                        remove_unlabeled_workflow_outputs, upgrade_all_steps,
+                        upgrade_subworkflow, upgrade_tool.
+
+          An example value for the ``actions`` argument might be::
+
+            actions = [
+                {"action_type": "add_input", "type": "data", "label": "foo"},
+                {"action_type": "update_step_label", "label": "bar", "step": {"label": "foo"}},
+            ]
+
+        :type dry_run: bool
+        :param dry_run: When true, perform a dry run where the existing
+                        workflow is preserved. The refactored workflow
+                        is returned in the output of the method, but not saved
+                        on the Galaxy server.
+
+        :rtype: dict
+        :return: Dictionary containing logged messages for the executed actions
+                 and the refactored workflow.
+        """
+        payload = {
+            'actions': actions,
+            'dry_run': dry_run,
+        }
+        url = '/'.join((self._make_url(workflow_id), 'refactor'))
+        return self._put(payload=payload, url=url)
+
+    def extract_workflow_from_history(self, history_id, workflow_name,
+                                      job_ids=None, dataset_hids=None, dataset_collection_hids=None):
+        """
+        Extract a workflow from a history.
+
+        :type history_id: str
+        :param history_id: Encoded history ID
+
+        :type   workflow_name: str
+        :param  workflow_name: Name of the workflow to create
+
+        :type   job_ids: list
+        :param  job_ids: Optional list of job IDs to filter the jobs to extract from the history
+
+        :type   dataset_hids: list
+        :param  dataset_hids: Optional list of dataset hids corresponding to workflow inputs
+                             when extracting a workflow from history
+
+        :type   dataset_collection_hids: list
+        :param  dataset_collection_hids: Optional list of dataset collection hids corresponding to workflow inputs
+                                        when extracting a workflow from history
+
+        :rtype: dict
+        :return: A description of the created workflow
+        """
+        payload = {
+            "from_history_id": history_id,
+            "job_ids": job_ids if job_ids else [],
+            "dataset_ids": dataset_hids if dataset_hids else [],
+            "dataset_collection_ids": dataset_collection_hids if dataset_collection_hids else [],
+            "workflow_name": workflow_name
+        }
+        return self._post(payload=payload)
+
+    def show_versions(self, workflow_id):
+        """
+        Get versions for a workflow.
+
+        :type workflow_id: str
+        :param workflow_id: Encoded workflow ID
+
+        :rtype: list of dicts
+        :return: Ordered list of version descriptions for this workflow
+        """
+        url = self._make_url(workflow_id) + '/versions'
+        return self._get(url=url)
 
     def _invocation_step_url(self, workflow_id, invocation_id, step_id):
         return '/'.join((self._invocation_url(workflow_id, invocation_id), "steps", step_id))

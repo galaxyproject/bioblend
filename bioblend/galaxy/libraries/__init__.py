@@ -242,9 +242,8 @@ class LibraryClient(Client):
 
     def get_folders(self, library_id, folder_id=None, name=None):
         """
-        Get all the folders or filter specific one(s) via the provided ``name``
-        or ``folder_id`` in data library with id ``library_id``. Provide only
-        one argument: ``name`` or ``folder_id``, but not both.
+        Get all the folders in a library, or select a subset by specifying a
+        folder name for filtering.
 
         :type library_id: str
         :param library_id: library id to use
@@ -252,8 +251,12 @@ class LibraryClient(Client):
         :type folder_id: str
         :param folder_id: filter for folder by folder id
 
+          .. deprecated:: 0.16.0
+             To get details of a folder for which you know the ID, use the much
+             more efficient :meth:`show_folder` instead.
+
         :type name: str
-        :param name: filter for folder by name. For ``name`` specify the full
+        :param name: Folder name to filter on. For ``name`` specify the full
                      path of the folder starting from the library's root
                      folder, e.g. ``/subfolder/subsubfolder``.
 
@@ -274,16 +277,18 @@ class LibraryClient(Client):
 
     def get_libraries(self, library_id=None, name=None, deleted=False):
         """
-        Get all the libraries or filter for specific one(s) via the provided
-        name or ID. Provide only one argument: ``name`` or ``library_id``, but
-        not both.
+        Get all libraries, or select a subset by specifying optional arguments
+        for filtering (e.g. a library name).
 
         :type library_id: str
         :param library_id: filter for library by library id
 
+          .. deprecated:: 0.16.0
+             To get details of a library for which you know the ID, use the much
+             more efficient :meth:`show_library` instead.
+
         :type name: str
-        :param name: If ``name`` is set and multiple names match the given name,
-          all the libraries matching the argument will be returned
+        :param name: Library name to filter on.
 
         :type deleted: bool
         :param deleted: If ``False`` (the default), return only non-deleted
