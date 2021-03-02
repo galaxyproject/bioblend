@@ -20,9 +20,46 @@ class JobsClient(Client):
         self.module = 'jobs'
         super().__init__(galaxy_instance)
 
-    def get_jobs(self):
+    def get_jobs(self, state=None, tool_id=None, user_details=None,
+                 date_range_min=None, date_range_max=None,
+                 history_id=None, workflow_id=None, invocation_id=None):
         """
         Get the list of jobs of the current user.
+
+        If the user is an admin and user_details is True, then this will
+        get jobs for all galaxy users based on filtering.
+
+        :type state: string or list
+        :param state: Limit listing of jobs to those that match one of the
+                      included states. If none, all are returned.
+
+        :type tool_id: string or list
+        :param tool_id: Limit listing of jobs to those that match one of the
+                        included tool_ids. If none, all are returned.
+
+        :type user_details: boolean
+        :param user_details: If true, and requestor is an admin, will return
+                             external job id and user email.
+
+        :type date_range_min: string '2014-01-01'
+        :param date_range_min: Limit the listing of jobs to those updated on
+                               or after this date.
+
+        :type date_range_max: string '2014-12-31'
+        :param date_range_max: Limit the listing of jobs to those updated on
+                               or before this date.
+
+        :type history_id: string
+        :param history_id: Limit listing of jobs to those that match the
+                           history_id. If none, all are returned.
+
+        :type workflow_id: string
+        :param workflow_id: Limit listing of jobs to those that match the
+                           workflow_id. If none, all are returned.
+
+        :type invocation_id: string
+        :param invocation_id: Limit listing of jobs to those that match the
+                           invocation_id. If none, all are returned.
 
         :rtype: list
         :return: list of dictionaries containing summary job information.
@@ -43,7 +80,24 @@ class JobsClient(Client):
               'tool_id': 'upload1',
               'update_time': '2014-03-01T16:05:39.558458'}]
         """
-        return self._get()
+        params = {}
+        if state:
+            params['state'] = state
+        if tool_id:
+            params['tool_id'] = tool_id
+        if user_details:
+            params['user_details'] = user_details
+        if date_range_min:
+            params['date_range_min'] = date_range_min
+        if date_range_max:
+            params['date_range_max'] = date_range_max
+        if history_id:
+            params['history_id'] = history_id
+        if workflow_id:
+            params['workflow_id'] = workflow_id
+        if invocation_id:
+            params['invocation_id'] = invocation_id
+        return self._get(params=params)
 
     def show_job(self, job_id, full_details=False):
         """
