@@ -1,5 +1,9 @@
 import os
 
+from bioblend.galaxy.tools.inputs import (
+    dataset,
+    inputs,
+)
 from . import (
     GalaxyTestBase,
     test_util
@@ -16,6 +20,20 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
     def tearDown(self):
         pass
         self.gi.histories.delete_history(self.history_id, purge=True)
+
+    @test_util.skip_unless_tool("cat1")
+    def test_wait_for_job(self):
+        tool_inputs = inputs().set(
+            "input1", dataset(self.dataset_id)
+        )
+        tool_output = self.gi.tools.run_tool(
+            history_id=self.history_id,
+            tool_id="cat1",
+            tool_inputs=tool_inputs
+        )
+        job_id = tool_output['jobs'][0]['id']
+        job = self.gi.jobs.wait_for_job(job_id)
+        self.assertEqual(job['state'], 'ok')
 
     @test_util.skip_unless_galaxy('release_21.01')
     @test_util.skip_unless_tool("random_lines1")
@@ -39,14 +57,9 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
             input_format='21.01'
         )
         original_job_id = original_output['jobs'][0]['id']
-        build_for_rerun = self.gi.jobs._build_for_rerun(original_job_id)
-        self.assertEqual(build_for_rerun['state_inputs']['seed_source']['seed'], 'asdf')
 
         rerun_output = self.gi.jobs.rerun_job(original_job_id)
-        rerun_job_id = rerun_output['jobs'][0]['id']
-        self.gi.jobs.wait_for_job(original_job_id)
         original_output_content = self.gi.datasets.download_dataset(original_output['outputs'][0]['id'])
-        self.gi.jobs.wait_for_job(rerun_job_id)
         rerun_output_content = self.gi.datasets.download_dataset(rerun_output['outputs'][0]['id'])
         self.assertEqual(rerun_output_content, original_output_content)
 

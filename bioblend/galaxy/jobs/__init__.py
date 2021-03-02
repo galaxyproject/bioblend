@@ -256,7 +256,7 @@ class JobsClient(Client):
 
         time_left = maxwait
         while True:
-            job = self.gi.jobs.show_job(job_id)
+            job = self.show_job(job_id)
             state = job['state']
             if state in JOB_TERMINAL_STATES:
                 if check and state != 'ok':
