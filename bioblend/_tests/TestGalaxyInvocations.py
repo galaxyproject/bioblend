@@ -51,7 +51,9 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
                                                     inputs={'Input 1': dataset, 'Input 2': dataset},
                                                     inputs_by='name')
 
-        time.sleep(20)
+        self.gi.invocations.wait_for_invocation(invoc1['id'])
+        self.gi.invocations.wait_for_invocation(invoc2['id'])
+        self.gi.invocations.wait_for_invocation(invoc3['id'])
 
         self.assertEqual(invoc1['workflow_id'], invoc2['workflow_id'])
         self.assertEqual(invoc2['workflow_id'], invoc3['workflow_id'])
