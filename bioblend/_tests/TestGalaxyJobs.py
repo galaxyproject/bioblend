@@ -70,7 +70,7 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
         jobs = self.gi.jobs.get_jobs(tool_id='random_lines1', history_id=history_id, state='failed')
         self.assertEqual(len(jobs), 0)
         yesterday = datetime.today() - timedelta(days=1)
-        jobs = self.gi.jobs.get_jobs(date_range_max=yesterday.strftime('%Y-%m-%d'))
+        jobs = self.gi.jobs.get_jobs(date_range_max=yesterday.strftime('%Y-%m-%d'), history_id=history_id)
         self.assertEqual(len(jobs), 0)
         tomorrow = datetime.today() + timedelta(days=1)
         jobs = self.gi.jobs.get_jobs(date_range_min=tomorrow.strftime('%Y-%m-%d'))
