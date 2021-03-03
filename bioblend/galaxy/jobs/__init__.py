@@ -119,13 +119,13 @@ class JobsClient(Client):
         :rtype: dict
         :return: Information about outputs and the rerun job
         .. note::
-          This method can only be used with Galaxy ``release_20.09`` or later.
+          This method can only be used with Galaxy ``release_21.01`` or later.
         """
         job_rerun_params = self._build_for_rerun(job_id)
         job_inputs = job_rerun_params['state_inputs']
 
         if remap:
-            if not job_inputs['job_remap']:
+            if not job_rerun_params['job_remap']:
                 raise ValueError('remap was set to True, but this job is not remappable.')
             job_inputs['rerun_remap_job_id'] = job_id
 
@@ -256,7 +256,7 @@ class JobsClient(Client):
 
         time_left = maxwait
         while True:
-            job = self.gi.jobs.show_job(job_id)
+            job = self.show_job(job_id)
             state = job['state']
             if state in JOB_TERMINAL_STATES:
                 if check and state != 'ok':

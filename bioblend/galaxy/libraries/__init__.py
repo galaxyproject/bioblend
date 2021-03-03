@@ -176,7 +176,7 @@ class LibraryClient(Client):
             if state in TERMINAL_STATES:
                 return dataset
             if time_left > 0:
-                log.warning("Dataset %s in library %s is in non-terminal state %s. Will wait %i more s", dataset_id, library_id, state, time_left)
+                log.info("Dataset %s in library %s is in non-terminal state %s. Will wait %i more s", dataset_id, library_id, state, time_left)
                 time.sleep(min(time_left, interval))
                 time_left -= interval
             else:

@@ -637,7 +637,7 @@ class HistoryClient(Client):
             except ConnectionError as e:
                 if e.status_code == 202:  # export is not ready
                     if time_left > 0:
-                        log.warning("Waiting for the export of history %s to complete. Will wait %i more s", history_id, time_left)
+                        log.info("Waiting for the export of history %s to complete. Will wait %i more s", history_id, time_left)
                         time.sleep(1)
                         time_left -= 1
                     else:

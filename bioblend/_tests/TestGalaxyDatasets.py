@@ -57,3 +57,7 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
         assert self.dataset_id in dataset_ids
         datasets = self.gi.datasets.get_datasets(limit=0)
         assert datasets == []
+
+    def test_wait_for_dataset(self):
+        dataset = self.gi.datasets.wait_for_dataset(self.dataset_id)
+        self.assertEqual(dataset['state'], 'ok')
