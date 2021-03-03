@@ -20,7 +20,6 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
         self.dataset_id = self._test_dataset(self.history_id, contents=self.dataset_contents)
 
     def tearDown(self):
-        pass
         self.gi.histories.delete_history(self.history_id, purge=True)
 
     @test_util.skip_unless_tool("cat1")
@@ -80,7 +79,7 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
         job_steps.sort(key=itemgetter('order_index'))
         for step in job_steps:
             try:
-                self.gi.jobs.wait_for_job(step['job_id'], maxwait=30)
+                self.gi.jobs.wait_for_job(step['job_id'], maxwait=60)
             except TimeoutException:
                 # The first job should error, not time out
                 raise

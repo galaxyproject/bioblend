@@ -1,11 +1,20 @@
 import os
 import time
 
-from bioblend import galaxy
 from . import GalaxyTestBase, test_util
 
 
 class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
+    def setUp(self):
+        super().setUp()
+        path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
+        self.workflow_id = self.gi.workflows.import_workflow_from_local_path(path)['id']
+        self.history_id = self.gi.histories.create_history(name="TestGalaxyInvocations")["id"]
+        self.dataset_id = self._test_dataset(self.history_id)
+
+    def tearDown(self):
+        self.gi.histories.delete_history(self.history_id, purge=True)
+
     @test_util.skip_unless_galaxy('release_19.09')
     def test_cancel_invocation(self):
         invocation = self._invoke_workflow()
@@ -20,67 +29,50 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
 
     @test_util.skip_unless_galaxy('release_20.01')
     def test_get_invocations(self):
-        user1 = self.gi.users.create_local_user('user1', 'email1@email.test', 'password1')
-        user2 = self.gi.users.create_local_user('user2', 'email2@email.test', 'password2')
-        key1 = self.gi.users.create_user_apikey(user1['id'])
-        key2 = self.gi.users.create_user_apikey(user2['id'])
-        user1_gi = galaxy.GalaxyInstance(url=self.gi.base_url, key=key1)
-        user2_gi = galaxy.GalaxyInstance(url=self.gi.base_url, key=key2)
+        invoc1 = self._invoke_workflow()
 
+        # Run the first workflow on another history
+        dataset = {'src': 'hda', 'id': self.dataset_id}
+        hist2_id = self.gi.histories.create_history('hist2')['id']
+        invoc2 = self.gi.workflows.invoke_workflow(
+            self.workflow_id,
+            history_id=hist2_id,
+            inputs={'Input 1': dataset, 'Input 2': dataset},
+            inputs_by='name'
+        )
+
+        # Run another workflow on the 2nd history
         path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
-        workflow = self.gi.workflows.import_workflow_from_local_path(path, publish=True)
-        dataset = {'src': 'hda', 'id': None}
+        workflow2_id = self.gi.workflows.import_workflow_from_local_path(path)['id']
+        invoc3 = self.gi.workflows.invoke_workflow(
+            workflow2_id,
+            history_id=hist2_id,
+            inputs={'Input 1': dataset, 'Input 2': dataset},
+            inputs_by='name'
+        )
 
-        hist1 = user1_gi.histories.create_history('hist1')
-        hist2 = user1_gi.histories.create_history('hist2')
-        dataset_id = self._test_dataset(hist1['id'])
-        dataset['id'] = dataset_id
-        invoc1 = user1_gi.workflows.invoke_workflow(workflow['id'], history_id=hist1['id'],
-                                                    inputs={'Input 1': dataset, 'Input 2': dataset},
-                                                    inputs_by='name')
-        dataset_id = self._test_dataset(hist2['id'])
-        dataset['id'] = dataset_id
-        invoc2 = user1_gi.workflows.invoke_workflow(workflow['id'], history_id=hist2['id'],
-                                                    inputs={'Input 1': dataset, 'Input 2': dataset},
-                                                    inputs_by='name')
+        for invoc in (invoc1, invoc2, invoc3):
+            self.gi.invocations.wait_for_invocation(invoc['id'])
 
-        hist3 = user2_gi.histories.create_history('hist3')
-        dataset_id = self._test_dataset(hist3['id'])
-        dataset['id'] = dataset_id
-        invoc3 = user2_gi.workflows.invoke_workflow(workflow['id'], history_id=hist3['id'],
-                                                    inputs={'Input 1': dataset, 'Input 2': dataset},
-                                                    inputs_by='name')
+        # Test filtering by workflow ID
+        for wf_id, expected_invoc_num in {self.workflow_id: 2, workflow2_id: 1}.items():
+            invocs = self.gi.invocations.get_invocations(workflow_id=wf_id)
+            self.assertEqual(len(invocs), expected_invoc_num)
+            for invoc in invocs:
+                self.assertEqual(invoc['workflow_id'], wf_id)
 
-        self.gi.invocations.wait_for_invocation(invoc1['id'])
-        self.gi.invocations.wait_for_invocation(invoc2['id'])
-        self.gi.invocations.wait_for_invocation(invoc3['id'])
+        # Test filtering by history ID
+        for hist_id, expected_invoc_num in {self.history_id: 1, hist2_id: 2}.items():
+            invocs = self.gi.invocations.get_invocations(history_id=hist_id)
+            self.assertEqual(len(invocs), expected_invoc_num)
+            for invoc in invocs:
+                self.assertEqual(invoc['history_id'], hist_id)
 
-        self.assertEqual(invoc1['workflow_id'], invoc2['workflow_id'])
-        self.assertEqual(invoc2['workflow_id'], invoc3['workflow_id'])
-
-        all_invocs = self.gi.invocations.get_invocations(workflow['id'])
-        user1_invocs = self.gi.invocations.get_invocations(workflow['id'], user_id=user1['id'])
-        user2_invocs = self.gi.invocations.get_invocations(workflow['id'], user_id=user2['id'])
-        self.assertEqual(len(all_invocs), 3)
-        self.assertEqual(len(user1_invocs), 2)
-        self.assertEqual(len(user2_invocs), 1)
-        self.assertEqual(set(invoc['id'] for invoc in user1_invocs),
-                         set([invoc1['id'], invoc2['id']]))
-
-        hist1_invocs = self.gi.invocations.get_invocations(workflow['id'], history_id=hist1['id'])
-        hist1_user1_invocs = self.gi.invocations.get_invocations(workflow['id'], history_id=hist1['id'],
-                                                                 user_id=user1['id'])
-        hist1_user2_invocs = self.gi.invocations.get_invocations(workflow['id'], history_id=hist1['id'],
-                                                                 user_id=user2['id'])
-        self.assertEqual(len(hist1_invocs), 1)
-        self.assertEqual(len(hist1_user1_invocs), 1)
-        self.assertEqual(len(hist1_user2_invocs), 0)
-
-        limit_invocs = self.gi.invocations.get_invocations(workflow['id'], limit=2)
+        # Test limiting
+        limit_invocs = self.gi.invocations.get_invocations(limit=2)
         self.assertEqual(len(limit_invocs), 2)
 
-        self.gi.users.delete_user(user1['id'])
-        self.gi.users.delete_user(user2['id'])
+        self.gi.histories.delete_history(hist2_id, purge=True)
 
     @test_util.skip_unless_galaxy('release_19.09')
     def test_get_invocation_report(self):
@@ -120,12 +112,11 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
     def test_workflow_scheduling(self):
         path = test_util.get_abspath(os.path.join('data', 'test_workflow_pause.ga'))
         workflow = self.gi.workflows.import_workflow_from_local_path(path)
-        history_id = self.gi.histories.create_history(name="TestWorkflowState")["id"]
-        dataset1_id = self._test_dataset(history_id)
 
         invocation = self.gi.workflows.invoke_workflow(
             workflow["id"],
-            inputs={"0": {"src": "hda", "id": dataset1_id}},
+            inputs={"0": {"src": "hda", "id": self.dataset_id}},
+            history_id=self.history_id,
         )
         invocation_id = invocation["id"]
 
@@ -146,15 +137,11 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
         self.gi.invocations.wait_for_invocation(invocation['id'])
 
     def _invoke_workflow(self):
-        path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
-        workflow = self.gi.workflows.import_workflow_from_local_path(path)
-        history_id = self.gi.histories.create_history(name="TestWorkflowState")["id"]
-        dataset1_id = self._test_dataset(history_id)
-        dataset = {'src': 'hda', 'id': dataset1_id}
+        dataset = {'src': 'hda', 'id': self.dataset_id}
 
         return self.gi.workflows.invoke_workflow(
-            workflow['id'],
+            self.workflow_id,
             inputs={'Input 1': dataset, 'Input 2': dataset},
-            history_id=history_id,
+            history_id=self.history_id,
             inputs_by='name',
         )
