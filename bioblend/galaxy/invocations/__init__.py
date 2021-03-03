@@ -21,9 +21,37 @@ class InvocationClient(Client):
         self.module = 'invocations'
         super().__init__(galaxy_instance)
 
-    def get_invocations(self):
+    def get_invocations(self, workflow_id=None, history_id=None, user_id=None,
+                        include_terminal=True, limit=None, view='collection',
+                        step_details=False):
         """
-        Get a list containing all workflow invocations.
+        Get all workflow invocations, or select a subset by specifying optional
+        arguments for filtering (e.g. a workflow ID).
+
+        :type workflow_id: str
+        :param workflow_id: Encoded workflow ID to filter on
+
+        :type history_id: str
+        :param history_id: Encoded history ID to filter on
+
+        :type user_id: str
+        :param user_id: Encoded user ID to filter on. This must be
+                        your own user ID if your are not an admin user.
+
+        :type include_terminal: bool
+        :param include_terminal: Whether to include terminal states.
+
+        :type limit: int
+        :param limit: Maximum number of invocations to return - if specified,
+                      the most recent invocations will be returned.
+
+        :type view: str
+        :param view: Level of detail to return per invocation, either
+                     'element' or 'collection'.
+
+        :type step_details: bool
+        :param step_details: If 'view' is 'element', also include details
+                             on individual steps.
 
         :rtype: list
         :return: A list of workflow invocations.
@@ -37,7 +65,20 @@ class InvocationClient(Client):
               'uuid': 'c8aa2b1c-801a-11e5-a9e5-8ca98228593c',
               'workflow_id': '03501d7626bd192f'}]
         """
-        return self._get()
+        params = {
+            'include_terminal': include_terminal,
+            'view': view,
+            'step_details': step_details
+        }
+        if workflow_id:
+            params['workflow_id'] = workflow_id
+        if history_id:
+            params['history_id'] = history_id
+        if user_id:
+            params['user_id'] = user_id
+        if limit is not None:
+            params['limit'] = limit
+        return self._get(params=params)
 
     def show_invocation(self, invocation_id):
         """

@@ -624,6 +624,8 @@ class WorkflowClient(Client):
         Get a list containing all the workflow invocations corresponding to the
         specified workflow.
 
+        For more advanced filtering use InvocationClient.get_invocations().
+
         :type workflow_id: str
         :param workflow_id: Encoded workflow ID
 
