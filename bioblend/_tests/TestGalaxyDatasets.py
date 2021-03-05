@@ -54,9 +54,9 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
     def test_get_datasets(self):
         datasets = self.gi.datasets.get_datasets()
         dataset_ids = [dataset['id'] for dataset in datasets]
-        assert self.dataset_id in dataset_ids
+        self.assertIn(self.dataset_id, dataset_ids)
         datasets = self.gi.datasets.get_datasets(limit=0)
-        assert datasets == []
+        self.assertEqual(datasets, [])
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id)
         self.assertEqual(len(datasets), 1)
 
