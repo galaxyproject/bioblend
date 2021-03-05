@@ -23,37 +23,35 @@ class JobsClient(Client):
     def get_jobs(self, state=None, tool_id=None, user_details=False,
                  date_range_min=None, date_range_max=None, history_id=None):
         """
-        Get the list of jobs of the current user.
+        Get all jobs, or select a subset by specifying optional arguments for
+        filtering (e.g. a state).
 
-        If the user is an admin and user_details is True, then this will
-        get jobs for all galaxy users based on filtering.
+        If the user is an admin, this will return jobs for all the users,
+        otherwise only for the current user.
 
-        :type state: string or list
-        :param state: Limit listing of jobs to those that match one of the
-                      included states. If none, all are returned.
+        :type state: str or list of str
+        :param state: Job states to filter on.
 
-        :type tool_id: string or list
-        :param tool_id: Limit listing of jobs to those that match one of the
-                        included tool_ids. If none, all are returned.
+        :type tool_id: str or list of str
+        :param tool_id: Tool IDs to filter on.
 
-        :type user_details: boolean
-        :param user_details: If true, and requestor is an admin, will return
-                             external job id and user email.
+        :type user_details: bool
+        :param user_details: If ``True`` and the user is an admin, add the user
+          email to each returned job dictionary.
 
-        :type date_range_min: string '2014-01-01'
-        :param date_range_min: Limit the listing of jobs to those updated on
-                               or after this date.
+        :type date_range_min: str
+        :param date_range_min: Mininum job update date (in YYYY-MM-DD format) to
+          filter on.
 
-        :type date_range_max: string '2014-12-31'
-        :param date_range_max: Limit the listing of jobs to those updated on
-                               or before this date.
+        :type date_range_max: str
+        :param date_range_max: Maximum job update date (in YYYY-MM-DD format) to
+          filter on.
 
-        :type history_id: string
-        :param history_id: Limit listing of jobs to those that match the
-                           history_id. If none, all are returned.
+        :type history_id: str
+        :param history_id: Encoded history ID to filter on.
 
-        :rtype: list
-        :return: list of dictionaries containing summary job information.
+        :rtype: list of dict
+        :return: Summary information for each selected job.
           For example::
 
             [{'create_time': '2014-03-01T16:16:48.640550',
