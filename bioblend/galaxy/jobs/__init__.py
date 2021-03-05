@@ -20,12 +20,38 @@ class JobsClient(Client):
         self.module = 'jobs'
         super().__init__(galaxy_instance)
 
-    def get_jobs(self):
+    def get_jobs(self, state=None, tool_id=None, user_details=False,
+                 date_range_min=None, date_range_max=None, history_id=None):
         """
-        Get the list of jobs of the current user.
+        Get all jobs, or select a subset by specifying optional arguments for
+        filtering (e.g. a state).
 
-        :rtype: list
-        :return: list of dictionaries containing summary job information.
+        If the user is an admin, this will return jobs for all the users,
+        otherwise only for the current user.
+
+        :type state: str or list of str
+        :param state: Job states to filter on.
+
+        :type tool_id: str or list of str
+        :param tool_id: Tool IDs to filter on.
+
+        :type user_details: bool
+        :param user_details: If ``True`` and the user is an admin, add the user
+          email to each returned job dictionary.
+
+        :type date_range_min: str
+        :param date_range_min: Mininum job update date (in YYYY-MM-DD format) to
+          filter on.
+
+        :type date_range_max: str
+        :param date_range_max: Maximum job update date (in YYYY-MM-DD format) to
+          filter on.
+
+        :type history_id: str
+        :param history_id: Encoded history ID to filter on.
+
+        :rtype: list of dict
+        :return: Summary information for each selected job.
           For example::
 
             [{'create_time': '2014-03-01T16:16:48.640550',
@@ -43,7 +69,20 @@ class JobsClient(Client):
               'tool_id': 'upload1',
               'update_time': '2014-03-01T16:05:39.558458'}]
         """
-        return self._get()
+        params = {}
+        if state:
+            params['state'] = state
+        if tool_id:
+            params['tool_id'] = tool_id
+        if user_details:
+            params['user_details'] = user_details
+        if date_range_min:
+            params['date_range_min'] = date_range_min
+        if date_range_max:
+            params['date_range_max'] = date_range_max
+        if history_id:
+            params['history_id'] = history_id
+        return self._get(params=params)
 
     def show_job(self, job_id, full_details=False):
         """

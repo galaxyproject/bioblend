@@ -1,4 +1,5 @@
 import os
+from datetime import datetime, timedelta
 from operator import itemgetter
 
 from bioblend import TimeoutException
@@ -35,6 +36,45 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
         job_id = tool_output['jobs'][0]['id']
         job = self.gi.jobs.wait_for_job(job_id)
         self.assertEqual(job['state'], 'ok')
+
+    @test_util.skip_unless_tool("random_lines1")
+    def test_get_jobs(self):
+        tool_inputs = {
+            'num_lines': '1',
+            'input': {
+                'src': 'hda',
+                'id': self.dataset_id
+            },
+            'seed_source': {
+                'seed_source_selector': 'set_seed',
+                'seed': 'asdf'
+            }
+        }
+        self.gi.tools.run_tool(
+            history_id=self.history_id,
+            tool_id="random_lines1",
+            tool_inputs=tool_inputs,
+            input_format='21.01'
+        )
+        self.gi.tools.run_tool(
+            history_id=self.history_id,
+            tool_id="random_lines1",
+            tool_inputs=tool_inputs,
+            input_format='21.01'
+        )
+
+        jobs = self.gi.jobs.get_jobs(tool_id='random_lines1', history_id=self.history_id)
+        self.assertEqual(len(jobs), 2)
+        jobs = self.gi.jobs.get_jobs(history_id=self.history_id, state='failed')
+        self.assertEqual(len(jobs), 0)
+        yesterday = datetime.today() - timedelta(days=1)
+        jobs = self.gi.jobs.get_jobs(date_range_max=yesterday.strftime('%Y-%m-%d'), history_id=self.history_id)
+        self.assertEqual(len(jobs), 0)
+        tomorrow = datetime.today() + timedelta(days=1)
+        jobs = self.gi.jobs.get_jobs(date_range_min=tomorrow.strftime('%Y-%m-%d'))
+        self.assertEqual(len(jobs), 0)
+        jobs = self.gi.jobs.get_jobs(date_range_min=datetime.today().strftime('%Y-%m-%d'), history_id=self.history_id)
+        self.assertEqual(len(jobs), 3)
 
     @test_util.skip_unless_galaxy('release_21.01')
     @test_util.skip_unless_tool("random_lines1")
