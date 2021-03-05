@@ -137,20 +137,22 @@ class DatasetClient(Client):
 
     def get_datasets(self, limit=500, offset=0, history_id=None):
         """
-        Provide a list of all datasets. Since this may be very large, ``limit``
-        and ``offset`` parameters should be used to specify the desired range.
+        Get the latest datasets, or select another subset by specifying optional
+        arguments for filtering (e.g. a history id).
+
+        Since the number of datasets may be very large, ``limit`` and ``offset``
+        parameters should always be used to specify the desired range.
 
         :type limit: int
         :param limit: Maximum number of datasets to return.
 
         :type offset: int
         :param offset: Return datasets starting from this specified position.
-                       For example, if ``limit`` is set to 100 and ``offset`` to 200,
-                       datasets 200-299 will be returned.
+          For example, if ``limit`` is set to 100 and ``offset`` to 200,
+          datasets 200-299 will be returned.
 
         :type history_id: str
-        :param history_id: Limit listing of datasets to those that match the history_id.
-                           If None, all are returned.
+        :param history_id: Encoded history ID to filter on.
 
         :rtype: list
         :return: Return a list of dataset dicts.
