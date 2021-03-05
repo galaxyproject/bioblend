@@ -20,7 +20,7 @@ class JobsClient(Client):
         self.module = 'jobs'
         super().__init__(galaxy_instance)
 
-    def get_jobs(self, state=None, tool_id=None, user_details=None,
+    def get_jobs(self, state=None, tool_id=None, user_details=False,
                  date_range_min=None, date_range_max=None, history_id=None):
         """
         Get the list of jobs of the current user.
