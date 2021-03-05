@@ -150,7 +150,7 @@ class DatasetClient(Client):
 
         :type history_id: str
         :param history_id: Limit listing of datasets to those that match the history_id.
-                           If none, all are returned.
+                           If None, all are returned.
 
         :rtype: list
         :return: Return a list of dataset dicts.
