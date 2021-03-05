@@ -20,8 +20,9 @@ class JobsClient(Client):
         self.module = 'jobs'
         super().__init__(galaxy_instance)
 
-    def get_jobs(self, state=None, tool_id=None, user_details=False,
-                 date_range_min=None, date_range_max=None, history_id=None):
+    def get_jobs(self, state=None, tool_id=None, user_details=False, user_id=None,
+                 limit=500, offset=0, date_range_min=None, date_range_max=None,
+                 history_id=None, workflow_id=None, invocation_id=None):
         """
         Get all jobs, or select a subset by specifying optional arguments for
         filtering (e.g. a state).
@@ -39,6 +40,18 @@ class JobsClient(Client):
         :param user_details: If ``True`` and the user is an admin, add the user
           email to each returned job dictionary.
 
+        :type user_id: str
+        :param user_id: Encoded user ID to filter on. Only admin users can
+          access the jobs of other users.
+
+        :type limit: int
+        :param limit: Maximum number of jobs to return.
+
+        :type offset: int
+        :param offset: Return jobs starting from this specified position.
+          For example, if ``limit`` is set to 100 and ``offset`` to 200,
+          jobs 200-299 will be returned.
+
         :type date_range_min: str
         :param date_range_min: Mininum job update date (in YYYY-MM-DD format) to
           filter on.
@@ -48,7 +61,16 @@ class JobsClient(Client):
           filter on.
 
         :type history_id: str
-        :param history_id: Encoded history ID to filter on.
+        :param history_id: Limit listing of jobs to those that are associated
+          with the history_id. If None, jobs are returned for all histories.
+
+        :type workflow_id: string
+        :param workflow_id: Limit listing of jobs to those that are associated
+          with the workflow_id. If None, jobs are returned for all workflows.
+
+        :type invocation_id: string
+        :param invocation_id: Limit listing of jobs to those that are associated
+          with the invocation_id. If None, jobs are returned for all invocations.
 
         :rtype: list of dict
         :return: Summary information for each selected job.
@@ -69,19 +91,28 @@ class JobsClient(Client):
               'tool_id': 'upload1',
               'update_time': '2014-03-01T16:05:39.558458'}]
         """
-        params = {}
+        params = {
+            'limit': limit,
+            'offset': offset
+        }
         if state:
             params['state'] = state
         if tool_id:
             params['tool_id'] = tool_id
         if user_details:
             params['user_details'] = user_details
+        if user_id:
+            params['user_id'] = user_id
         if date_range_min:
             params['date_range_min'] = date_range_min
         if date_range_max:
             params['date_range_max'] = date_range_max
         if history_id:
             params['history_id'] = history_id
+        if workflow_id:
+            params['workflow_id'] = workflow_id
+        if invocation_id:
+            params['invocation_id'] = invocation_id
         return self._get(params=params)
 
     def show_job(self, job_id, full_details=False):
