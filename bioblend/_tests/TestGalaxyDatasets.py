@@ -59,10 +59,6 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
         assert datasets == []
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id)
         self.assertEqual(len(datasets), 1)
-        history_id_tmp = self.gi.histories.create_history(name='TmpHistory')['id']
-        datasets = self.gi.datasets.get_datasets(history_id=history_id_tmp)
-        self.assertEqual(len(datasets), 0)
-        self.gi.histories.delete_history(history_id_tmp, purge=True)
 
     def test_wait_for_dataset(self):
         dataset = self.gi.datasets.wait_for_dataset(self.dataset_id)
