@@ -135,7 +135,7 @@ class DatasetClient(Client):
             # Return location file was saved to
             return file_local_path
 
-    def get_datasets(self, limit=500, offset=0):
+    def get_datasets(self, limit=500, offset=0, history_id=None):
         """
         Provide a list of all datasets. Since this may be very large, ``limit``
         and ``offset`` parameters should be used to specify the desired range.
@@ -145,8 +145,12 @@ class DatasetClient(Client):
 
         :type offset: int
         :param offset: Return datasets starting from this specified position.
-          For example, if ``limit`` is set to 100 and ``offset`` to 200,
-          datasets 200-299 will be returned.
+                       For example, if ``limit`` is set to 100 and ``offset`` to 200,
+                       datasets 200-299 will be returned.
+
+        :type history_id: str
+        :param history_id: Limit listing of jobs to those that match the history_id.
+                           If none, all are returned.
 
         :rtype: list
         :return: Return a list of dataset dicts.
@@ -155,6 +159,8 @@ class DatasetClient(Client):
             'limit': limit,
             'offset': offset,
         }
+        if history_id:
+            params['history_id'] = history_id
         return self._get(params=params)
 
     def wait_for_dataset(self, dataset_id, maxwait=12000, interval=3, check=True):
