@@ -149,7 +149,7 @@ class DatasetClient(Client):
                        datasets 200-299 will be returned.
 
         :type history_id: str
-        :param history_id: Limit listing of jobs to those that match the history_id.
+        :param history_id: Limit listing of datasets to those that match the history_id.
                            If none, all are returned.
 
         :rtype: list
