@@ -21,8 +21,7 @@ class JobsClient(Client):
         super().__init__(galaxy_instance)
 
     def get_jobs(self, state=None, tool_id=None, user_details=None,
-                 limit=500, offset=0, date_range_min=None, date_range_max=None,
-                 history_id=None, workflow_id=None, invocation_id=None):
+                 date_range_min=None, date_range_max=None, history_id=None):
         """
         Get the list of jobs of the current user.
 
@@ -41,14 +40,6 @@ class JobsClient(Client):
         :param user_details: If true, and requestor is an admin, will return
                              external job id and user email.
 
-        :type limit: int
-        :param limit: Maximum number of jobs to return.
-
-        :type offset: int
-        :param offset: Return jobs starting from this specified position.
-                       For example, if ``limit`` is set to 100 and ``offset`` to 200,
-                       jobs 200-299 will be returned.
-
         :type date_range_min: string '2014-01-01'
         :param date_range_min: Limit the listing of jobs to those updated on
                                or after this date.
@@ -60,14 +51,6 @@ class JobsClient(Client):
         :type history_id: string
         :param history_id: Limit listing of jobs to those that match the
                            history_id. If none, all are returned.
-
-        :type workflow_id: string
-        :param workflow_id: Limit listing of jobs to those that match the
-                           workflow_id. If none, all are returned.
-
-        :type invocation_id: string
-        :param invocation_id: Limit listing of jobs to those that match the
-                           invocation_id. If none, all are returned.
 
         :rtype: list
         :return: list of dictionaries containing summary job information.
@@ -88,10 +71,7 @@ class JobsClient(Client):
               'tool_id': 'upload1',
               'update_time': '2014-03-01T16:05:39.558458'}]
         """
-        params = {
-            limit: limit,
-            offset: offset
-        }
+        params = {}
         if state:
             params['state'] = state
         if tool_id:
@@ -104,10 +84,6 @@ class JobsClient(Client):
             params['date_range_max'] = date_range_max
         if history_id:
             params['history_id'] = history_id
-        if workflow_id:
-            params['workflow_id'] = workflow_id
-        if invocation_id:
-            params['invocation_id'] = invocation_id
         return self._get(params=params)
 
     def show_job(self, job_id, full_details=False):
