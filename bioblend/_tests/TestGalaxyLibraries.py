@@ -22,22 +22,26 @@ class TestGalaxyLibraries(GalaxyTestBase.GalaxyTestBase):
         self.assertIsNotNone(self.library['id'])
 
     def test_get_libraries(self):
-        library_data = self.gi.libraries.get_libraries(library_id=self.library['id'])[0]
-        self.assertTrue(library_data['name'] == self.name)
+        libraries_with_name = self.gi.libraries.get_libraries(name=self.name)
+        self.assertEqual(len([l for l in libraries_with_name if l['id'] == self.library['id']]), 1)
+
         deleted_name = 'deleted test library'
-        deleted_library = self.gi.libraries.create_library(deleted_name, description='a deleted library', synopsis='automated test synopsis')
-        self.gi.libraries.delete_library(deleted_library['id'])
-        deleted_library_data = self.gi.libraries.get_libraries(library_id=deleted_library['id'], deleted=True)[0]
-        self.assertTrue(deleted_library_data['name'] == deleted_name)
+        deleted_library_id = self.gi.libraries.create_library(deleted_name, description='a deleted library', synopsis='automated test synopsis')['id']
+        self.gi.libraries.delete_library(deleted_library_id)
+        deleted_libraries_with_name = self.gi.libraries.get_libraries(name=deleted_name, deleted=True)
+        self.assertEqual(len([l for l in deleted_libraries_with_name if l['id'] == deleted_library_id]), 1)
+
         all_non_deleted_libraries = self.gi.libraries.get_libraries(deleted=False)
-        self.assertTrue(any(l['id'] == self.library['id'] for l in all_non_deleted_libraries))
-        self.assertFalse(any(l['id'] == deleted_library['id'] for l in all_non_deleted_libraries))
+        self.assertEqual(len([l for l in all_non_deleted_libraries if l['id'] == self.library['id']]), 1)
+        self.assertEqual([l for l in all_non_deleted_libraries if l['id'] == deleted_library_id], [])
+
         all_deleted_libraries = self.gi.libraries.get_libraries(deleted=True)
-        self.assertFalse(any(l['id'] == self.library['id'] for l in all_deleted_libraries))
-        self.assertTrue(any(l['id'] == deleted_library['id'] for l in all_deleted_libraries))
+        self.assertEqual([l for l in all_deleted_libraries if l['id'] == self.library['id']], [])
+        self.assertEqual(len([l for l in all_deleted_libraries if l['id'] == deleted_library_id]), 1)
+
         all_libraries = self.gi.libraries.get_libraries(deleted=None)
-        self.assertTrue(any(l['id'] == self.library['id'] for l in all_libraries))
-        self.assertTrue(any(l['id'] == deleted_library['id'] for l in all_libraries))
+        self.assertEqual(len([l for l in all_libraries if l['id'] == self.library['id']]), 1)
+        self.assertEqual(len([l for l in all_libraries if l['id'] == deleted_library_id]), 1)
 
     def test_show_library(self):
         library_data = self.gi.libraries.show_library(self.library['id'])

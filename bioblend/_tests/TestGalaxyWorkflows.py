@@ -16,15 +16,20 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         workflow = self.gi.workflows.import_workflow_from_local_path(path)
         workflow_id = workflow["id"]
         history_id = self.gi.histories.create_history(name="TestWorkflowState")["id"]
-        dataset1_id = self._test_dataset(history_id)
 
         invocations = self.gi.workflows.get_invocations(workflow_id)
         self.assertEqual(len(invocations), 0)
 
+        # Try invalid invocation (no input)
+        with self.assertRaises(Exception):
+            self.gi.workflows.invoke_workflow(workflow['id'])
+
+        dataset1_id = self._test_dataset(history_id)
         invocation = self.gi.workflows.invoke_workflow(
             workflow["id"],
             inputs={"0": {"src": "hda", "id": dataset1_id}},
         )
+        self.assertEqual(invocation['state'], 'new')
         invocation_id = invocation["id"]
         invocations = self.gi.workflows.get_invocations(workflow_id)
         self.assertEqual(len(invocations), 1)
@@ -141,15 +146,14 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
 
     def test_get_workflows(self):
         path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
-        wf = self.gi.workflows.import_workflow_from_local_path(path)
+        workflow = self.gi.workflows.import_workflow_from_local_path(path)
         all_wfs = self.gi.workflows.get_workflows()
         self.assertGreater(len(all_wfs), 0)
-        wf_data = self.gi.workflows.get_workflows(workflow_id=wf['id'])[0]
-        self.assertEqual(wf['id'], wf_data['id'])
-        self.assertEqual(wf['name'], wf_data['name'])
-        self.assertEqual(wf['url'], wf_data['url'])
-        wf_data_list = self.gi.workflows.get_workflows(name=wf['name'])
-        self.assertTrue(any(_['id'] == wf['id'] for _ in wf_data_list))
+        wfs_with_name = self.gi.workflows.get_workflows(name=workflow['name'])
+        wf_list = [w for w in wfs_with_name if w['id'] == workflow['id']]
+        self.assertEqual(len(wf_list), 1)
+        wf_data = wf_list[0]
+        self.assertEqual(wf_data['url'], workflow['url'])
 
     def test_show_workflow(self):
         path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
@@ -197,21 +201,20 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         self.assertEqual(updated_wf['name'], new_name)
         self.assertEqual(updated_wf['version'], 1)
 
-    def test_run_workflow(self):
-        path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
-        wf = self.gi.workflows.import_workflow_from_local_path(path)
-        # Try invalid run of workflow
-        with self.assertRaises(Exception):
-            self.gi.workflows.run_workflow(wf['id'], None)
-
-    def test_invoke_workflow(self):
-        invocation = self._invoke_workflow()
-        assert invocation['state'] == 'new', invocation
-
     @test_util.skip_unless_galaxy('release_19.09')
     def test_extract_workflow_from_history(self):
-        invocation = self._invoke_workflow()
-        invocation = self.gi.invocations.wait_for_invocation(invocation['id'])
+        path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
+        wf = self.gi.workflows.import_workflow_from_local_path(path)
+        history_id = self.gi.histories.create_history(name="test_wf_invocation")['id']
+        dataset1_id = self._test_dataset(history_id)
+        dataset = {'src': 'hda', 'id': dataset1_id}
+        invocation_id = self.gi.workflows.invoke_workflow(
+            wf['id'],
+            inputs={'Input 1': dataset, 'Input 2': dataset},
+            history_id=history_id,
+            inputs_by='name',
+        )['id']
+        invocation = self.gi.invocations.wait_for_invocation(invocation_id)
         wf1 = self.gi.workflows.show_workflow(invocation['workflow_id'])
         datasets = self.gi.histories.show_history(invocation['history_id'], contents=True)
         dataset_hids = [dataset['hid'] for dataset in datasets]
@@ -261,16 +264,3 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         self.assertEqual(len(response['action_executions']), 2)
         self.assertEqual(response['workflow']['steps']['0']['label'], 'bar')
         self.assertEqual(response['dry_run'], True)
-
-    def _invoke_workflow(self):
-        path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
-        wf = self.gi.workflows.import_workflow_from_local_path(path)
-        history_id = self.gi.histories.create_history(name="test_wf_invocation")['id']
-        dataset1_id = self._test_dataset(history_id)
-        dataset = {'src': 'hda', 'id': dataset1_id}
-        return self.gi.workflows.invoke_workflow(
-            wf['id'],
-            inputs={'Input 1': dataset, 'Input 2': dataset},
-            history_id=history_id,
-            inputs_by='name',
-        )
