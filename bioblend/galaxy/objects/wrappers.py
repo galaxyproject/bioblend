@@ -505,15 +505,6 @@ class Dataset(Wrapper, metaclass=abc.ABCMeta):
         super().__init__(ds_dict, gi=gi)
         object.__setattr__(self, 'container', container)
 
-    @property
-    def container_id(self):
-        """
-        Deprecated property.
-
-        Id of the dataset container. Use :attr:`.container.id` instead.
-        """
-        return self.container.id
-
     @abc.abstractproperty
     def _stream_url(self):
         """
@@ -1316,15 +1307,6 @@ class Folder(Wrapper):
     @property
     def gi_module(self):
         return self.gi.libraries
-
-    @property
-    def container_id(self):
-        """
-        Deprecated property.
-
-        Id of the folder container. Use :attr:`.container.id` instead.
-        """
-        return self.container.id
 
     def refresh(self):
         """
