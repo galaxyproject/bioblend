@@ -113,7 +113,8 @@ class TestWrapper(unittest.TestCase):
 
     def setUp(self):
         self.d = {'a': 1, 'b': [2, 3], 'c': {'x': 4}}
-        self.assertRaises(TypeError, wrappers.Wrapper, self.d)
+        with self.assertRaises(TypeError):
+            wrappers.Wrapper(self.d)
         self.w = MockWrapper(self.d)
 
     def test_initialize(self):
@@ -125,8 +126,10 @@ class TestWrapper(unittest.TestCase):
         self.assertEqual(self.w.b[0], 222)
         self.assertEqual(self.d['a'], 1)
         self.assertEqual(self.d['b'][0], 2)
-        self.assertRaises(AttributeError, getattr, self.w, 'foo')
-        self.assertRaises(AttributeError, setattr, self.w, 'foo', 0)
+        with self.assertRaises(AttributeError):
+            self.w.foo
+        with self.assertRaises(AttributeError):
+            self.w.foo = 0
 
     def test_taint(self):
         self.assertFalse(self.w.is_modified)
@@ -147,7 +150,8 @@ class TestWrapper(unittest.TestCase):
         parent = MockWrapper({'a': 10})
         w = MockWrapper(self.d, parent=parent)
         self.assertIs(w.parent, parent)
-        self.assertRaises(AttributeError, setattr, w, 'parent', 0)
+        with self.assertRaises(AttributeError):
+            w.parent = 0
 
 
 class TestWorkflow(unittest.TestCase):
@@ -283,7 +287,8 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
                     wf_dict['steps'][id_][k] = None
         wf = wrappers.Workflow(wf_dict, gi=self.gi)
         self.assertFalse(wf.is_runnable)
-        self.assertRaises(RuntimeError, wf.run)
+        with self.assertRaises(RuntimeError):
+            wf.run()
         wf.delete()
 
     def test_workflow_export(self):
