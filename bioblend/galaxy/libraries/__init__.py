@@ -3,6 +3,7 @@ Contains possible interactions with the Galaxy Data Libraries
 """
 import logging
 import time
+import warnings
 
 from bioblend.galaxy.client import Client
 from bioblend.galaxy.datasets import (
@@ -263,6 +264,11 @@ class LibraryClient(Client):
         :rtype: list
         :return: list of dicts each containing basic information about a folder
         """
+        if folder_id is not None:
+            warnings.warn(
+                'The folder_id parameter is deprecated, use the show_folder() method to view details of a folder for which you know the ID.',
+                category=FutureWarning
+            )
         if folder_id is not None and name is not None:
             raise ValueError('Provide only one argument between name or folder_id, but not both')
         library_contents = self.show_library(library_id=library_id, contents=True)
@@ -298,6 +304,11 @@ class LibraryClient(Client):
         :rtype: list
         :return: list of dicts each containing basic information about a library
         """
+        if library_id is not None:
+            warnings.warn(
+                'The library_id parameter is deprecated, use the show_library() method to view details of a library for which you know the ID.',
+                category=FutureWarning
+            )
         if library_id is not None and name is not None:
             raise ValueError('Provide only one argument between name or library_id, but not both')
         libraries = self._get(params={"deleted": deleted})

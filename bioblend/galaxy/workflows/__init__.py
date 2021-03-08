@@ -3,6 +3,7 @@ Contains possible interactions with the Galaxy Workflows
 """
 import json
 import os
+import warnings
 
 from bioblend.galaxy.client import Client
 
@@ -40,6 +41,11 @@ class WorkflowClient(Client):
                      'url': '/api/workflows/92c56938c2f9b315'}]
 
         """
+        if workflow_id is not None:
+            warnings.warn(
+                'The workflow_id parameter is deprecated, use the show_workflow() method to view details of a workflow for which you know the ID.',
+                category=FutureWarning
+            )
         if workflow_id is not None and name is not None:
             raise ValueError('Provide only one argument between name or workflow_id, but not both')
         params = {}
@@ -357,6 +363,10 @@ class WorkflowClient(Client):
             :meth:`invoke_workflow`, which also features improved default
             behavior for dataset input handling.
         """
+        warnings.warn(
+            'The run_workflow() method is deprecated, use the invoke_workflow() method instead.',
+            category=FutureWarning
+        )
         payload = {'workflow_id': workflow_id}
         if dataset_map:
             payload['ds_map'] = dataset_map

@@ -1,6 +1,7 @@
 """
 Contains possible interaction dealing with Galaxy tools.
 """
+import warnings
 from os.path import basename
 
 from bioblend.galaxy.client import Client
@@ -37,6 +38,11 @@ class ToolClient(Client):
 
         .. seealso:: bioblend.galaxy.toolshed.get_repositories()
         """
+        if tool_id is not None:
+            warnings.warn(
+                'The tool_id parameter is deprecated, use the show_tool() method to view details of a tool for which you know the ID.',
+                category=FutureWarning
+            )
         if tool_id is not None and name is not None:
             raise ValueError('Provide only one argument between name or tool_id, but not both')
         tools = self._raw_get_tool(in_panel=False, trackster=trackster)
