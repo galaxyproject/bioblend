@@ -90,6 +90,10 @@ class JobsClient(Client):
               'state': 'ok',
               'tool_id': 'upload1',
               'update_time': '2014-03-01T16:05:39.558458'}]
+
+        .. note::
+          The following filtering options can only be used with Galaxy ``release_21.05`` or later:
+            user_id, limit, offset, workflow_id, invocation_id
         """
         params = {
             'limit': limit,
