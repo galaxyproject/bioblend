@@ -76,28 +76,38 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
         jobs = self.gi.jobs.get_jobs(date_range_min=tomorrow.strftime('%Y-%m-%d'))
         self.assertEqual(len(jobs), 0)
         jobs = self.gi.jobs.get_jobs(date_range_min=datetime.today().strftime('%Y-%m-%d'), history_id=self.history_id)
-        self.assertEqual(len(jobs), 3)
-        job_id_lim = jobs[1]['id']
-        jobs = self.gi.jobs.get_jobs(date_range_min=datetime.today().strftime('%Y-%m-%d'), history_id=self.history_id, limit=1, offset=1)
-        self.assertEqual(len(jobs), 1)
-        self.assertEqual(jobs[0]['id'], job_id_lim)
+        self.assertGreaterEqual(len(jobs), 3)
 
+    @test_util.skip_unless_galaxy('release_21.05')
+    def test_get_jobs_with_filtering(self):
         dataset = {'src': 'hda', 'id': self.dataset_id}
-        invocation = self.gi.workflows.invoke_workflow(
+        invocation1 = self.gi.workflows.invoke_workflow(
             self.workflow_id,
             inputs={'Input 1': dataset, 'Input 2': dataset},
             history_id=self.history_id,
             inputs_by='name',
         )
-        self.gi.invocations.wait_for_invocation(invocation['id'])
+        invocation2 = self.gi.workflows.invoke_workflow(
+            self.workflow_id,
+            inputs={'Input 1': dataset, 'Input 2': dataset},
+            history_id=self.history_id,
+            inputs_by='name',
+        )
+        self.gi.invocations.wait_for_invocation(invocation1['id'])
+        self.gi.invocations.wait_for_invocation(invocation2['id'])
 
-        jobs = self.gi.jobs.get_jobs(workflow_id=invocation['workflow_id'])
+        jobs = self.gi.jobs.get_jobs(history_id=self.history_id)
+        self.assertGreaterEqual(len(jobs), 2)
+        job_id_lim = jobs[1]['id']
+        jobs = self.gi.jobs.get_jobs(history_id=self.history_id, limit=1, offset=1)
         self.assertEqual(len(jobs), 1)
-        job_id_wf = jobs[0]['id']
-        jobs = self.gi.jobs.get_jobs(invocation_id=invocation['id'])
+        self.assertEqual(jobs[0]['id'], job_id_lim)
+        jobs = self.gi.jobs.get_jobs(invocation_id=invocation1['id'])
         self.assertEqual(len(jobs), 1)
         job_id_inv = jobs[0]['id']
-        self.assertEqual(job_id_wf, job_id_inv)
+        jobs = self.gi.jobs.get_jobs(workflow_id=invocation1['workflow_id'])
+        self.assertEqual(len(jobs), 2)
+        self.assertIn(job_id_inv, [job['id'] for job in jobs])
 
     @test_util.skip_unless_galaxy('release_21.01')
     @test_util.skip_unless_tool("random_lines1")
