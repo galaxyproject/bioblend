@@ -2,7 +2,7 @@
 """
 Test functions in bioblend.galaxy.tool_dependencies
 """
-from . import GalaxyTestBase
+from . import GalaxyTestBase, test_util
 
 
 class TestGalaxyToolDependencies(GalaxyTestBase.GalaxyTestBase):
