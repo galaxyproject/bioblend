@@ -14,7 +14,7 @@ class ToolDependenciesClient(Client):
         """
         GET /api/dependency_resolvers/toolbox
 
-        Summarize requirements across toolbox (for Tool Management grid). This is an experiemental
+        Summarize requirements across toolbox (for Tool Management grid). This is an experimental
         API particularly tied to the GUI - expect breaking changes until this notice is removed.
 
         :type index: int
