@@ -1,5 +1,5 @@
 """
-Contains possible interaction dealing with Galaxy dependency resolvers.
+Contains interactions dealing with Galaxy dependency resolvers.
 """
 from bioblend.galaxy.client import Client
 
@@ -14,6 +14,9 @@ class ToolDependenciesClient(Client):
         """
         Summarize requirements across toolbox (for Tool Management grid). This is an experimental
         API particularly tied to the GUI - expect breaking changes until this notice is removed.
+ 
+        This API endpoint is available on Galaxy version 20.01 or later.
+        This functionality is available only to Galaxy admins.
 
         :type index: int
         :param index: index of the dependency resolver

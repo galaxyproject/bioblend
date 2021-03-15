@@ -7,6 +7,7 @@ from . import GalaxyTestBase
 
 class TestGalaxyToolDependencies(GalaxyTestBase.GalaxyTestBase):
 
+    @test_util.skip_unless_galaxy('release_20.01')
     def test_summarize_toolbox(self):
         toolbox_summary = self.gi.tool_dependencies.summarize_toolbox()
         self.assertTrue(isinstance(toolbox_summary, list))
