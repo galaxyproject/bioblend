@@ -12,8 +12,6 @@ class ToolDependenciesClient(Client):
 
     def summarize_toolbox(self, index=None, tool_ids=None, resolver_type=None, include_containers=None, container_type=None, index_by=None):
         """
-        GET /api/dependency_resolvers/toolbox
-
         Summarize requirements across toolbox (for Tool Management grid). This is an experimental
         API particularly tied to the GUI - expect breaking changes until this notice is removed.
 
