@@ -15,7 +15,8 @@ class ToolDependenciesClient(Client):
         Summarize requirements across toolbox (for Tool Management grid).
 
         :type index: int
-        :param index: index of the dependency resolver
+        :param index: index of the dependency resolver with respect to
+            the dependency resolvers config file
 
         :type tool_ids: list
         :param tool_ids: tool_ids to return when index_by=tools
