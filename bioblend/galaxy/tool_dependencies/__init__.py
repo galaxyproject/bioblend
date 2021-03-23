@@ -10,19 +10,15 @@ class ToolDependenciesClient(Client):
         self.module = 'dependency_resolvers'
         super().__init__(galaxy_instance)
 
-    def summarize_toolbox(self, index=None, tool_ids=None, resolver_type=None, include_containers=None, container_type=None, index_by=None):
+    def summarize_toolbox(self, index=None, tool_ids=None, resolver_type=None, include_containers=False, container_type=None, index_by='requirements'):
         """
-        Summarize requirements across toolbox (for Tool Management grid). This is an experimental
-        API particularly tied to the GUI - expect breaking changes until this notice is removed.
-
-        This API endpoint is available on Galaxy version 20.01 or later.
-        This functionality is available only to Galaxy admins.
+        Summarize requirements across toolbox (for Tool Management grid).
 
         :type index: int
         :param index: index of the dependency resolver
 
         :type tool_ids: list
-        :param tool_ids: tool_ids to return when index_by=tool
+        :param tool_ids: tool_ids to return when index_by=tools
 
         :type resolver_type: str
         :param resolver_type: restrict to specified resolver type
@@ -34,7 +30,7 @@ class ToolDependenciesClient(Client):
         :param container_type: restrict to specified container type
 
         :type index_by: str
-        :param index_by: By default results are grouped by requirements.  Set to 'tool'
+        :param index_by: By default results are grouped by requirements.  Set to 'tools'
             to return one entry per tool.
 
         :rtype: list of dicts
@@ -63,21 +59,24 @@ class ToolDependenciesClient(Client):
                           'name': 'bx-python',
                           'version': '0.8.6'}],
               'tool_ids': ['vcf_to_maf_customtrack1']}]
+        .. note::
+          This method can only be used with Galaxy ``release_20.01`` or later and requires
+            the user to be an admin. It relies on an experimental API particularly tied to
+            the GUI and therefore is subject to breaking changes.
         """
-
-        params = {}
+        assert index_by in ['tools', 'requirements'], "index_by must be one of 'tools' or 'requirements'."
+        params = {
+            'include_containers': str(include_containers),
+            'index_by': index_by,
+        }
         if index:
             params['index'] = str(index)
         if tool_ids:
             params['tool_ids'] = ','.join(tool_ids)
         if resolver_type:
             params['resolver_type'] = resolver_type
-        if include_containers is not None:
-            params['include_containers'] = str(include_containers)
         if container_type:
             params['container_type'] = container_type
-        if index_by:
-            params['index_by'] = index_by
 
-        url = self._make_url() + '/toolbox'
+        url = '/'.join((self._make_url(), 'toolbox'))
         return self._get(url=url, params=params)
