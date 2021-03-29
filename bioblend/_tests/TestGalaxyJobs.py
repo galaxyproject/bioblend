@@ -146,3 +146,88 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
         self.assertEqual(last_dataset['hid'], 3)
         self.assertEqual(last_dataset['id'], history_contents[2]['id'])
         self._wait_and_verify_dataset(last_dataset['id'], b'line 1\tline 1\n')
+
+    @test_util.skip_unless_galaxy('release_21.05')
+    @test_util.skip_unless_tool("random_lines1")
+    def test_get_common_problems(self):
+        job_id, _ = self._run_tool()
+        response: dict = self.gi.jobs.get_common_problems(job_id)
+        self.assertEqual(response, {'has_duplicate_inputs': False, 'has_empty_inputs': True})
+
+    @test_util.skip_unless_galaxy('release_21.05')
+    @test_util.skip_unless_tool("random_lines1")
+    def test_get_inputs(self):
+        job_id, _ = self._run_tool()
+        response: dict = self.gi.jobs.get_inputs(job_id)
+        self.assertEqual(response, [{'name': 'input', 'dataset': {'src': 'hda', 'id': self.dataset_id}}])
+
+    @test_util.skip_unless_galaxy('release_21.05')
+    @test_util.skip_unless_tool("random_lines1")
+    def test_get_outputs(self):
+        job_id, output_id = self._run_tool()
+        response: dict = self.gi.jobs.get_outputs(job_id)
+        self.assertEqual(response, [{'name': 'out_file1', 'dataset': {'src': 'hda', 'id': output_id}}])
+
+    @test_util.skip_unless_galaxy('release_21.05')
+    @test_util.skip_unless_tool("random_lines1")
+    def test_resume_job(self):
+        job_id, output_id = self._run_tool()
+        response: dict = self.gi.jobs.resume_job(job_id)
+        self.assertEqual(response, [{'name': 'out_file1', 'dataset': {'src': 'hda', 'id': output_id}}])
+
+    @test_util.skip_unless_galaxy('release_21.05')
+    @test_util.skip_unless_tool("random_lines1")
+    def test_get_destination_params(self):
+        job_id, _ = self._run_tool()
+        response: dict = self.gi.jobs.get_destination_params(job_id)
+        self.assertEqual(response, {'Runner': None, 'Runner Job ID': None, 'Handler': 'main'})
+
+    @test_util.skip_unless_galaxy('release_21.05')
+    @test_util.skip_unless_tool("random_lines1")
+    def test_search_jobs(self):
+        tool_id = 'random_lines1'
+        job_id, _ = self._run_tool(tool_id=tool_id)
+        response: dict = self.gi.jobs.search_jobs({'tool_id': tool_id, 'inputs': self.gi.jobs.get_inputs(job_id)[0]})
+        self.assertEqual(response, [])
+
+    @test_util.skip_unless_galaxy('release_21.05')
+    @test_util.skip_unless_tool("random_lines1")
+    def test_report_error(self):
+        job_id, output_id = self._run_tool()
+        response: dict = self.gi.jobs.report_error(job_id, output_id, 'Test error')
+        # expected response when the Galaxy server does not have mail configured
+        self.assertEqual(response, {'messages': [['An error occurred sending the report by email: Mail is not configured for this Galaxy instance', 'danger']]})
+
+    @test_util.skip_unless_galaxy('release_21.05')
+    def test_show_job_lock(self):
+        status = self.gi.jobs.show_job_lock()
+        self.assertFalse(status)
+
+    @test_util.skip_unless_galaxy('release_21.05')
+    def test_update_job_lock(self):
+        status = self.gi.jobs.update_job_lock(active=True)
+        self.assertTrue(status)
+        status = self.gi.jobs.update_job_lock(active=False)
+        self.assertFalse(status)
+
+    def _run_tool(self, tool_id='random_lines1') -> (str, str):
+        tool_inputs = {
+            'num_lines': '1',
+            'input': {
+                'src': 'hda',
+                'id': self.dataset_id
+            },
+            'seed_source': {
+                'seed_source_selector': 'set_seed',
+                'seed': 'asdf'
+            }
+        }
+
+        output = self.gi.tools.run_tool(
+            history_id=self.history_id,
+            tool_id=tool_id,
+            tool_inputs=tool_inputs,
+            input_format='21.01'
+        )
+        print(output)
+        return output['jobs'][0]['id'], output['outputs'][0]['id']
