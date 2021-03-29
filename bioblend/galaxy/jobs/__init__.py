@@ -180,7 +180,7 @@ class JobsClient(Client):
         }
         return self._post(url=url, payload=payload)
 
-    def get_state(self, job_id):
+    def get_state(self, job_id: str) -> str:
         """
         Display the current state for a given job of the current user.
 
@@ -196,7 +196,7 @@ class JobsClient(Client):
         """
         return self.show_job(job_id).get('state', '')
 
-    def search_jobs(self, job_info):
+    def search_jobs(self, job_info: dict) -> list:
         """
         Return jobs for the current user based payload content.
 
@@ -220,7 +220,7 @@ class JobsClient(Client):
         url = self._make_url() + '/search'
         return self._post(url=url, payload=payload)
 
-    def get_metrics(self, job_id):
+    def get_metrics(self, job_id: str) -> list:
         """
         Return job metrics for a given job.
 
@@ -240,7 +240,7 @@ class JobsClient(Client):
         url = self._make_url(module_id=job_id) + '/metrics'
         return self._get(url=url)
 
-    def report_error(self, job_id, dataset_id, message, email=None):
+    def report_error(self, job_id: str, dataset_id: str, message: str, email=None) -> dict:
         """
         Report an error for a given job and dataset.
 
@@ -268,6 +268,97 @@ class JobsClient(Client):
 
         url = self._make_url(module_id=job_id) + '/error'
         return self._post(url=url, payload=payload)
+
+    def get_common_problems(self, job_id: str) -> dict:
+        """
+        Query inputs and jobs for common potential problems.
+
+        :type job_id: str
+        :param job_id: job ID
+
+        :rtype: dict
+        :return: dict containing potential problems
+        """
+        url: str = self._make_url(module_id=job_id) + '/common_problems'
+        return self._get(url=url)
+
+    def get_inputs(self, job_id: str) -> dict:
+        """
+        Get inputs for a specific job ID.
+
+        :type job_id: str
+        :param job_id: job ID
+
+        :rtype: dict
+        :return: dict containing inputs for this job ID
+        """
+        url: str = self._make_url(module_id=job_id) + '/inputs'
+        return self._get(url=url)
+
+    def get_outputs(self, job_id: str) -> dict:
+        """
+        Get outputs for a specific job ID.
+
+        :type job_id: str
+        :param job_id: job ID
+
+        :rtype: dict
+        :return: dict containing outputs for this job ID
+        """
+        url: str = self._make_url(module_id=job_id) + '/outputs'
+        return self._get(url=url)
+
+    def resume_job(self, job_id: str) -> dict:
+        """
+        Resume a job if it is paused.
+
+        :type job_id: str
+        :param job_id: job ID
+
+        :rtype: dict
+        :return: dict containing output dataset associations
+        """
+        payload = {}
+        url: str = self._make_url(module_id=job_id) + '/resume'
+        return self._put(url=url, payload=payload)
+
+    def get_destination_params(self, job_id: str) -> dict:
+        """
+        Get destination parameters for the specific job ID.
+
+        :type job_id: str
+        :param job_id: job ID
+
+        :rtype: dict
+        :return: dict containing destination params
+        """
+        url: str = self._make_url(module_id=job_id) + '/destination_params'
+        return self._get(url=url)
+
+    def show_job_lock(self) -> bool:
+        """
+        Show whether the job lock is active or not.
+
+        :rtype: bool
+        :return: boolean indication the status of the job lock
+        """
+        url: str = self.gi.url + '/job_lock'
+        response: dict = self._get(url=url)
+        return response['active']
+
+    def update_job_lock(self, active=False) -> dict:
+        """
+        Update the job lock status: active or inactive
+
+        :rtype: bool
+        :return: boolean indication the status of the job lock
+        """
+        payload = {
+            'active': active,
+        }
+        url: str = self.gi.url + '/job_lock'
+        response: dict = self._put(url=url, payload=payload)
+        return response['active']
 
     def wait_for_job(self, job_id, maxwait=12000, interval=3, check=True):
         """
