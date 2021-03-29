@@ -228,5 +228,4 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
             tool_inputs=tool_inputs,
             input_format='21.01'
         )
-        print(output)
         return output['jobs'][0]['id'], output['outputs'][0]['id']
