@@ -178,7 +178,9 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
     def test_get_destination_params(self):
         job_id, _ = self._run_tool()
         response: dict = self.gi.jobs.get_destination_params(job_id)
-        self.assertEqual(response, {'Runner': None, 'Runner Job ID': None, 'Handler': 'main'})
+        self.assertIn('Runner', response)
+        self.assertIn('Runner Job ID', response)
+        self.assertIn('Handler', response)
 
     @test_util.skip_unless_tool("random_lines1")
     def test_search_jobs(self):
