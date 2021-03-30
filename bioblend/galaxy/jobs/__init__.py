@@ -98,22 +98,22 @@ class JobsClient(Client):
         }
         if state:
             params['state'] = state
+        if history_id:
+            params['history_id'] = history_id
+        if invocation_id:
+            params['invocation_id'] = invocation_id
         if tool_id:
             params['tool_id'] = tool_id
-        if user_details:
-            params['user_details'] = user_details
+        if workflow_id:
+            params['workflow_id'] = workflow_id
         if user_id:
             params['user_id'] = user_id
         if date_range_min:
             params['date_range_min'] = date_range_min
         if date_range_max:
             params['date_range_max'] = date_range_max
-        if history_id:
-            params['history_id'] = history_id
-        if workflow_id:
-            params['workflow_id'] = workflow_id
-        if invocation_id:
-            params['invocation_id'] = invocation_id
+        if user_details:
+            params['user_details'] = user_details
         return self._get(params=params)
 
     def show_job(self, job_id, full_details=False):
