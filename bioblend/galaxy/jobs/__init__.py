@@ -20,9 +20,9 @@ class JobsClient(Client):
         self.module = 'jobs'
         super().__init__(galaxy_instance)
 
-    def get_jobs(self, state=None, tool_id=None, user_details=False, user_id=None,
-                 limit=500, offset=0, date_range_min=None, date_range_max=None,
-                 history_id=None, workflow_id=None, invocation_id=None):
+    def get_jobs(self, state=None, history_id=None, invocation_id=None, tool_id=None,
+                 workflow_id=None, user_id=None, date_range_min=None, date_range_max=None,
+                 limit=500, offset=0, user_details=False):
         """
         Get all jobs, or select a subset by specifying optional arguments for
         filtering (e.g. a state).
@@ -33,24 +33,21 @@ class JobsClient(Client):
         :type state: str or list of str
         :param state: Job states to filter on.
 
+        :type history_id: str
+        :param history_id: Encoded history ID to filter on.
+
+        :type invocation_id: string
+        :param invocation_id: Encoded workflow invocation ID to filter on.
+
         :type tool_id: str or list of str
         :param tool_id: Tool IDs to filter on.
 
-        :type user_details: bool
-        :param user_details: If ``True`` and the user is an admin, add the user
-          email to each returned job dictionary.
+        :type workflow_id: string
+        :param workflow_id: Encoded workflow ID to filter on.
 
         :type user_id: str
         :param user_id: Encoded user ID to filter on. Only admin users can
           access the jobs of other users.
-
-        :type limit: int
-        :param limit: Maximum number of jobs to return.
-
-        :type offset: int
-        :param offset: Return jobs starting from this specified position.
-          For example, if ``limit`` is set to 100 and ``offset`` to 200,
-          jobs 200-299 will be returned.
 
         :type date_range_min: str
         :param date_range_min: Mininum job update date (in YYYY-MM-DD format) to
@@ -60,14 +57,17 @@ class JobsClient(Client):
         :param date_range_max: Maximum job update date (in YYYY-MM-DD format) to
           filter on.
 
-        :type history_id: str
-        :param history_id: Encoded history ID to filter on.
+        :type limit: int
+        :param limit: Maximum number of jobs to return.
 
-        :type workflow_id: string
-        :param workflow_id: Encoded workflow ID to filter on.
+        :type offset: int
+        :param offset: Return jobs starting from this specified position.
+          For example, if ``limit`` is set to 100 and ``offset`` to 200,
+          jobs 200-299 will be returned.
 
-        :type invocation_id: string
-        :param invocation_id: Encoded workflow invocation ID to filter on.
+        :type user_details: bool
+        :param user_details: If ``True`` and the user is an admin, add the user
+          email to each returned job dictionary.
 
         :rtype: list of dict
         :return: Summary information for each selected job.
