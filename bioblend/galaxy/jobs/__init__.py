@@ -61,16 +61,13 @@ class JobsClient(Client):
           filter on.
 
         :type history_id: str
-        :param history_id: Limit listing of jobs to those that are associated
-          with the history_id. If None, jobs are returned for all histories.
+        :param history_id: Encoded history ID to filter on.
 
         :type workflow_id: string
-        :param workflow_id: Limit listing of jobs to those that are associated
-          with the workflow_id. If None, jobs are returned for all workflows.
+        :param workflow_id: Encoded workflow ID to filter on.
 
         :type invocation_id: string
-        :param invocation_id: Limit listing of jobs to those that are associated
-          with the invocation_id. If None, jobs are returned for all invocations.
+        :param invocation_id: Encoded workflow invocation ID to filter on.
 
         :rtype: list of dict
         :return: Summary information for each selected job.
