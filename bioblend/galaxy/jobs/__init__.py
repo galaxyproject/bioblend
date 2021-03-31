@@ -196,29 +196,28 @@ class JobsClient(Client):
         """
         return self.show_job(job_id).get('state', '')
 
-    def search_jobs(self, job_info: dict) -> list:
+    def search_jobs(self, tool_inputs: dict) -> list:
         """
-        Return jobs for the current user based payload content.
+        Return jobs matching input parameters specified in ``tool_inputs``.
 
-        :type job_info: dict
-        :param job_info: dictionary containing description of the requested job.
-          This is in the same format as a request to POST /api/tools would take
-          to initiate a job
+        :type tool_inputs: dict
+        :param tool_inputs: dictionary of input datasets and parameters, formatted in
+          the same way as the ``tool_inputs`` parameter of the ``gi.tools.run_tool()``
+          method.
 
         :rtype: list
         :return: list of dictionaries containing summary job information of
           the jobs that match the requested job run
 
         This method is designed to scan the list of previously run jobs and find
-        records of jobs that had the exact some input parameters and datasets.
-        This can be used to minimize the amount of repeated work, and simply
-        recycle the old results.
+        records of jobs with identical input parameters and datasets. This can
+        be used to minimize the amount of repeated work by simply recycling the
+        old results.
 
         """
 
-        payload = job_info
         url = self._make_url() + '/search'
-        return self._post(url=url, payload=payload)
+        return self._post(url=url, payload=tool_inputs)
 
     def get_metrics(self, job_id: str) -> list:
         """
@@ -242,7 +241,7 @@ class JobsClient(Client):
 
     def report_error(self, job_id: str, dataset_id: str, message: str, email=None) -> dict:
         """
-        Report an error for a given job and dataset.
+        Report an error for a given job and dataset to the server administrators.
 
         :type job_id: str
         :param job_id: job ID
@@ -254,7 +253,8 @@ class JobsClient(Client):
         :param message: Error message
 
         :type email: str
-        :param email: Email to submit error report to
+        :param email: Email for error report submission. If not specified, the email
+          associated with the Galaxy user account is used by default.
 
         :rtype: dict
         :return: dict containing job error reply
@@ -271,7 +271,8 @@ class JobsClient(Client):
 
     def get_common_problems(self, job_id: str) -> dict:
         """
-        Query inputs and jobs for common potential problems.
+        Query inputs and jobs for common potential problems that might
+        have resulted in job failure.
 
         :type job_id: str
         :param job_id: job ID
@@ -284,7 +285,7 @@ class JobsClient(Client):
 
     def get_inputs(self, job_id: str) -> dict:
         """
-        Get inputs for a specific job ID.
+        Get dataset inputs used by a specific job ID.
 
         :type job_id: str
         :param job_id: job ID
@@ -297,7 +298,7 @@ class JobsClient(Client):
 
     def get_outputs(self, job_id: str) -> dict:
         """
-        Get outputs for a specific job ID.
+        Get dataset outputs produced by a specific job ID.
 
         :type job_id: str
         :param job_id: job ID
@@ -318,13 +319,13 @@ class JobsClient(Client):
         :rtype: dict
         :return: dict containing output dataset associations
         """
-        payload = {}
         url: str = self._make_url(module_id=job_id) + '/resume'
-        return self._put(url=url, payload=payload)
+        return self._put(url=url, payload={})
 
     def get_destination_params(self, job_id: str) -> dict:
         """
-        Get destination parameters for the specific job ID.
+        Get destination parameters for the specific job ID, describing
+        the environment and location where the job is run.
 
         :type job_id: str
         :param job_id: job ID
@@ -337,10 +338,14 @@ class JobsClient(Client):
 
     def show_job_lock(self) -> bool:
         """
-        Show whether the job lock is active or not.
+        Show whether the job lock is active or not. If it is active,
+        no jobs will dispatch on the Galaxy server.
 
         :rtype: bool
         :return: boolean indication the status of the job lock
+
+        .. note::
+          This method can only be used by admin users.
         """
         url: str = self.gi.url + '/job_lock'
         response: dict = self._get(url=url)
@@ -348,10 +353,15 @@ class JobsClient(Client):
 
     def update_job_lock(self, active=False) -> dict:
         """
-        Update the job lock status: active or inactive
+        Update the job lock status by setting ``active`` to either
+        ``True`` or ``False``. If ``True``, all job dispatching will
+        be blocked.
 
         :rtype: bool
         :return: boolean indication the status of the job lock
+
+        .. note::
+          This method can only be used by admin users.
         """
         payload = {
             'active': active,
