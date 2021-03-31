@@ -128,9 +128,10 @@ class TestGalaxyDatasetCollections(GalaxyTestBase.GalaxyTestBase):
         self.gi.dataset_collections.wait_for_dataset_collection(dataset_collection1['id'])
         dataset_collection2 = self.gi.dataset_collections.show_dataset_collection(dataset_collection1['id'])
         self.assertEqual(dataset_collection1.keys(), dataset_collection2.keys())
-        for element1, element2 in zip(dataset_collection1['elements'], dataset_collection1['elements']):
+        for element1, element2 in zip(dataset_collection1['elements'], dataset_collection2['elements']):
             self.assertEqual(element1.keys(), element2.keys())
-            self.assertEqual(element1['object'].keys(), element2['object'].keys())
+            for key in element1['object'].keys():
+                self.assertIn(key, element2['object'].keys())
 
     def test_download_dataset_collection(self):
         # the actual download for each dataset in the collection is done by
@@ -156,6 +157,14 @@ class TestGalaxyDatasetCollections(GalaxyTestBase.GalaxyTestBase):
             self.assertTrue(os.path.getsize(file_path) > 0)
             with open(file_path) as f:
                 self.assertEqual(f.read(), expected_contents)
+
+    def test_wait_for_dataset_collection(self):
+        history_id = self.gi.histories.create_history(name="TestDatasetCollectionDownload")["id"]
+        dataset_collection1 = self._create_pair_in_history(history_id)
+        dataset_collection2 = self.gi.dataset_collections.wait_for_dataset_collection(dataset_collection1['id'])
+        for element1, element2 in zip(dataset_collection1['elements'], dataset_collection2['elements']):
+            self.assertEqual(element1['object']['state'], 'queued')
+            self.assertEqual(element2['object']['state'], 'ok')
 
     def _create_pair_in_history(self, history_id):
         dataset1_id = self._test_dataset(history_id)

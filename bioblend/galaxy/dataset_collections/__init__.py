@@ -186,7 +186,7 @@ class DatasetCollectionClient(Client):
             return [contents.decode('utf-8') for contents in collection_contents]
 
     def wait_for_dataset_collection(self, dataset_collection_id: str) -> dict:
-        dataset_collection = self.gi.dataset_collections.show_dataset_collection(dataset_collection_id)
+        dataset_collection: dict = self.gi.dataset_collections.show_dataset_collection(dataset_collection_id)
         for element in dataset_collection['elements']:
             self.gi.datasets.wait_for_dataset(element['object']['id'])
         return self.gi.dataset_collections.show_dataset_collection(dataset_collection_id)
