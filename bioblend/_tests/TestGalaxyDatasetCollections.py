@@ -1,3 +1,7 @@
+import os
+import tempfile
+from inspect import signature
+
 from bioblend.galaxy import dataset_collections
 from . import GalaxyTestBase
 
@@ -117,6 +121,41 @@ class TestGalaxyDatasetCollections(GalaxyTestBase.GalaxyTestBase):
         self.gi.histories.update_dataset_collection(history_id, history_dataset_collection["id"], visible=False)
         show_response = self.gi.histories.show_dataset_collection(history_id, history_dataset_collection["id"])
         self.assertFalse(show_response["visible"])
+
+    def test_show_dataset_collection(self):
+        history_id = self.gi.histories.create_history(name="TestDatasetCollectionDownload")["id"]
+        dataset_collection1 = self._create_pair_in_history(history_id)
+        self.gi.dataset_collections.wait_for_dataset_collection(dataset_collection1['id'])
+        dataset_collection2 = self.gi.dataset_collections.show_dataset_collection(dataset_collection1['id'])
+        self.assertEqual(dataset_collection1.keys(), dataset_collection2.keys())
+        for element1, element2 in zip(dataset_collection1['elements'], dataset_collection1['elements']):
+            self.assertEqual(element1.keys(), element2.keys())
+            self.assertEqual(element1['object'].keys(), element2['object'].keys())
+
+    def test_download_dataset_collection(self):
+        # the actual download for each dataset in the collection is done by
+        # DatasetClient.download_dataset and therefore not specifically tested here
+        history_id = self.gi.histories.create_history(name="TestDatasetCollectionDownload")["id"]
+        dataset_collection = self._create_pair_in_history(history_id)
+        # test download to object in memory
+        contents_list = self.gi.dataset_collections.download_dataset_collection(dataset_collection['id'])
+        # contents should match the contents of the test dataset created in self._create_pair_in_history, plus a newline
+        expected_contents = signature(self._test_dataset).parameters['contents'].default + '\n'
+        for contents in contents_list:
+            self.assertEqual(contents, expected_contents)
+        # test download to disk
+        tempdir = tempfile.mkdtemp(prefix='bioblend_test_dataset_collection_download_')
+        self.gi.dataset_collections.download_dataset_collection(dataset_collection['id'], dir_path=tempdir)
+        # get updated datasets_collection details, since updated 'file_ext' is needed for the correct file_path
+        dataset_collection = self.gi.dataset_collections.show_dataset_collection(dataset_collection['id'])
+        for i, element in enumerate(dataset_collection['elements']):
+            dataset = element['object']
+            # expected file_path where DatasetClient.download_dataset should have downloaded the data to
+            file_path = os.path.join(tempdir, dataset_collection['name'], f"Galaxy{i+1}-[{dataset['name'].replace(' ', '_')}].{dataset['file_ext']}")
+            self.assertTrue(os.path.isfile(file_path))
+            self.assertTrue(os.path.getsize(file_path) > 0)
+            with open(file_path) as f:
+                self.assertEqual(f.read(), expected_contents)
 
     def _create_pair_in_history(self, history_id):
         dataset1_id = self._test_dataset(history_id)
