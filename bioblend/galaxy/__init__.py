@@ -1,11 +1,11 @@
 """
 A base representation of an instance of Galaxy
 """
-from bioblend.galaxy import (config, datasets, datatypes, folders, forms,
-                             ftpfiles, genomes, groups, histories,
-                             invocations, jobs, libraries, quotas, roles,
-                             tool_data, tool_dependencies, tools, toolshed,
-                             users, visual, workflows)
+from bioblend.galaxy import (config, dataset_collections, datasets, datatypes,
+                             folders, forms, ftpfiles, genomes, groups,
+                             histories, invocations, jobs, libraries, quotas,
+                             roles, tool_data, tool_dependencies, tools,
+                             toolshed, users, visual, workflows)
 from bioblend.galaxy.client import Client
 from bioblend.galaxyclient import GalaxyClient
 
@@ -59,6 +59,7 @@ class GalaxyInstance(GalaxyClient):
         self.workflows = workflows.WorkflowClient(self)
         self.invocations = invocations.InvocationClient(self)
         self.datasets = datasets.DatasetClient(self)
+        self.dataset_collections = dataset_collections.DatasetCollectionClient(self)
         self.users = users.UserClient(self)
         self.genomes = genomes.GenomeClient(self)
         self.tools = tools.ToolClient(self)
