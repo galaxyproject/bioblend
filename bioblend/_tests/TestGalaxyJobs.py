@@ -133,6 +133,11 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
         self.assertEqual(history_contents[1]['state'], 'error')
         self.assertEqual(history_contents[2]['state'], 'paused')
 
+        # resume the paused step job
+        self.gi.jobs.resume_job(job_steps[-1]['job_id'])
+        history_contents_resumed = self.gi.histories.show_history(self.history_id, contents=True)
+        self.assertNotEqual(history_contents_resumed[2]['state'], 'paused')
+
         # now rerun and remap with correct input param
         job_id = self.gi.datasets.show_dataset(history_contents[1]['id'])['creating_job']
         tool_inputs_update = {
@@ -164,13 +169,6 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
     def test_get_outputs(self):
         job_id, output_id = self._run_tool()
         response: dict = self.gi.jobs.get_outputs(job_id)
-        self.assertEqual(response, [{'name': 'out_file1', 'dataset': {'src': 'hda', 'id': output_id}}])
-
-    @test_util.skip_unless_galaxy('release_18.09')
-    @test_util.skip_unless_tool("random_lines1")
-    def test_resume_job(self):
-        job_id, output_id = self._run_tool()
-        response: dict = self.gi.jobs.resume_job(job_id)
         self.assertEqual(response, [{'name': 'out_file1', 'dataset': {'src': 'hda', 'id': output_id}}])
 
     @test_util.skip_unless_galaxy('release_20.05')
