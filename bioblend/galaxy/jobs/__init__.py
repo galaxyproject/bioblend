@@ -214,6 +214,8 @@ class JobsClient(Client):
         be used to minimize the amount of repeated work by simply recycling the
         old results.
 
+        .. note::
+          This method is only available in Galaxy 18.01 or later.
         """
 
         url = self._make_url() + '/search'
@@ -258,6 +260,9 @@ class JobsClient(Client):
 
         :rtype: dict
         :return: dict containing job error reply
+
+        .. note::
+          This method is only available in Galaxy 20.01 or later.
         """
         payload = {
             "message": message,
@@ -279,6 +284,9 @@ class JobsClient(Client):
 
         :rtype: dict
         :return: dict containing potential problems
+
+        .. note::
+          This method is only available in Galaxy 19.05 or later.
         """
         url: str = self._make_url(module_id=job_id) + '/common_problems'
         return self._get(url=url)
@@ -318,6 +326,9 @@ class JobsClient(Client):
 
         :rtype: dict
         :return: dict containing output dataset associations
+
+        .. note::
+          This method is only available in Galaxy 18.09 or later.
         """
         url: str = self._make_url(module_id=job_id) + '/resume'
         return self._put(url=url, payload={})
@@ -332,6 +343,9 @@ class JobsClient(Client):
 
         :rtype: dict
         :return: dict containing destination params
+
+        .. note::
+          This method is only available in Galaxy 20.05 or later.
         """
         url: str = self._make_url(module_id=job_id) + '/destination_params'
         return self._get(url=url)
@@ -346,6 +360,9 @@ class JobsClient(Client):
 
         .. note::
           This method can only be used by admin users.
+
+        .. note::
+          This method is only available in Galaxy 20.05 or later.
         """
         url: str = self.gi.url + '/job_lock'
         response: dict = self._get(url=url)
@@ -362,6 +379,9 @@ class JobsClient(Client):
 
         .. note::
           This method can only be used by admin users.
+
+        .. note::
+          This method is only available in Galaxy 20.05 or later.
         """
         payload = {
             'active': active,
