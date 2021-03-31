@@ -196,12 +196,12 @@ class JobsClient(Client):
         """
         return self.show_job(job_id).get('state', '')
 
-    def search_jobs(self, tool_inputs: dict) -> list:
+    def search_jobs(self, job_info: dict) -> list:
         """
-        Return jobs matching input parameters specified in ``tool_inputs``.
+        Return jobs matching input parameters specified in ``job_info``.
 
-        :type tool_inputs: dict
-        :param tool_inputs: dictionary of input datasets and parameters, formatted in
+        :type job_info: dict
+        :param job_info: dictionary of input datasets and parameters, formatted in
           the same way as the ``tool_inputs`` parameter of the ``gi.tools.run_tool()``
           method.
 
@@ -219,7 +219,7 @@ class JobsClient(Client):
         """
 
         url = self._make_url() + '/search'
-        return self._post(url=url, payload=tool_inputs)
+        return self._post(url=url, payload=job_info)
 
     def get_metrics(self, job_id: str) -> list:
         """
