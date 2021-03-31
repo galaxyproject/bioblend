@@ -58,7 +58,7 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
     @test_util.skip_unless_galaxy('release_21.01')
     @test_util.skip_unless_tool("random_lines1")
     def test_run_and_rerun_random_lines(self):
-        original_output = self._run_tool()
+        original_output = self._run_tool(input_format='21.01')
         original_job_id = original_output['jobs'][0]['id']
 
         rerun_output = self.gi.jobs.rerun_job(original_job_id)
@@ -180,22 +180,27 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
         status = self.gi.jobs.update_job_lock(active=False)
         self.assertFalse(status)
 
-    def _run_tool(self, tool_id='random_lines1') -> dict:
+    def _run_tool(self, tool_id: str = 'random_lines1', input_format: str = 'legacy') -> dict:
         tool_inputs = {
             'num_lines': '1',
             'input': {
                 'src': 'hda',
                 'id': self.dataset_id
             },
+            # include both input formats so that either can be specified to run_tool()
+            # 21.01 format
             'seed_source': {
                 'seed_source_selector': 'set_seed',
                 'seed': 'asdf'
-            }
+            },
+            # legacy format
+            'seed_source|seed_source_selector': 'set_seed',
+            'seed_source|seed': 'asdf'
         }
 
         return self.gi.tools.run_tool(
             history_id=self.history_id,
             tool_id=tool_id,
             tool_inputs=tool_inputs,
-            input_format='21.01'
+            input_format=input_format
         )
