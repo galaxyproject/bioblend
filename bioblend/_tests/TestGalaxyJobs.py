@@ -143,6 +143,7 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
         self.assertIn('Runner Job ID', response)
         self.assertIn('Handler', response)
 
+    @test_util.skip_unless_galaxy('release_18.01')
     @test_util.skip_unless_tool("random_lines1")
     def test_search_jobs(self):
         tool_id = 'random_lines1'
