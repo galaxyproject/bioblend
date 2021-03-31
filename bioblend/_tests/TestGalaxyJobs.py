@@ -184,8 +184,17 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
     def test_search_jobs(self):
         tool_id = 'random_lines1'
         job_id, _ = self._run_tool(tool_id=tool_id)
-        response: dict = self.gi.jobs.search_jobs({'tool_id': tool_id, 'inputs': self.gi.jobs.get_inputs(job_id)[0]})
-        self.assertEqual(response, [])
+        inputs = {
+            'num_lines': '1',
+            'input': {
+                'src': 'hda',
+                'id': self.dataset_id
+            },
+            'seed_source|seed_source_selector': 'set_seed',
+            'seed_source|seed': 'asdf'
+        }
+        response: dict = self.gi.jobs.search_jobs({'tool_id': tool_id, 'inputs': inputs})
+        self.assertIn(job_id, [job['id'] for job in response])
 
     @test_util.skip_unless_galaxy('release_20.01')
     @test_util.skip_unless_tool("random_lines1")
