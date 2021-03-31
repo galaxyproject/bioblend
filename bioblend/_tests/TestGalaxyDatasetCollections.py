@@ -137,13 +137,13 @@ class TestGalaxyDatasetCollections(GalaxyTestBase.GalaxyTestBase):
         # DatasetClient.download_dataset and therefore not specifically tested here
         history_id = self.gi.histories.create_history(name="TestDatasetCollectionDownload")["id"]
         dataset_collection = self._create_pair_in_history(history_id)
-        # test download to object in memory
+        # test 1: download to object in memory
         contents_list = self.gi.dataset_collections.download_dataset_collection(dataset_collection['id'])
         # contents should match the contents of the test dataset created in self._create_pair_in_history, plus a newline
         expected_contents = signature(self._test_dataset).parameters['contents'].default + '\n'
         for contents in contents_list:
             self.assertEqual(contents, expected_contents)
-        # test download to disk
+        # test 2: download to disk
         tempdir = tempfile.mkdtemp(prefix='bioblend_test_dataset_collection_download_')
         self.gi.dataset_collections.download_dataset_collection(dataset_collection['id'], dir_path=tempdir)
         # get updated datasets_collection details, since updated 'file_ext' is needed for the correct file_path

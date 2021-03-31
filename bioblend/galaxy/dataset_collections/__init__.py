@@ -120,7 +120,7 @@ class DatasetCollectionClient(Client):
 
     def download_dataset_collection(self, dataset_collection_id: str, dir_path: Optional[str] = None,
                                     use_default_dirname: bool = True, require_ok_state: bool = True,
-                                    maxwait: float = 12000) -> Optional[list[str]]:
+                                    maxwait: float = 12000) -> Optional[list]:
         """
         Download a dataset collection to memory or to disk.
 
