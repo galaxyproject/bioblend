@@ -188,15 +188,18 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
                 'src': 'hda',
                 'id': self.dataset_id
             },
-            # include both input formats so that either can be specified to run_tool()
-            # 21.01 format
-            'seed_source': {
-                'seed_source_selector': 'set_seed',
-                'seed': 'asdf'
-            },
-            # legacy format
-            'seed_source|seed_source_selector': 'set_seed',
-            'seed_source|seed': 'asdf'
+            # use either the legacy or the 21.01 input format
+            **({
+                # 21.01 format
+                'seed_source': {
+                    'seed_source_selector': 'set_seed',
+                    'seed': 'asdf'
+                }
+            } if input_format == '21.01' else {
+                # legacy format
+                'seed_source|seed_source_selector': 'set_seed',
+                'seed_source|seed': 'asdf'
+            })
         }
 
         return self.gi.tools.run_tool(
