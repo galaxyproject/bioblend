@@ -146,8 +146,7 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
     @test_util.skip_unless_galaxy('release_18.01')
     @test_util.skip_unless_tool("random_lines1")
     def test_search_jobs(self):
-        tool_id = 'random_lines1'
-        job_id = self._run_tool(tool_id=tool_id)['jobs'][0]['id']
+        job_id = self._run_tool()['jobs'][0]['id']
         inputs = {
             'num_lines': '1',
             'input': {
@@ -157,7 +156,7 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
             'seed_source|seed_source_selector': 'set_seed',
             'seed_source|seed': 'asdf'
         }
-        response: dict = self.gi.jobs.search_jobs({'tool_id': tool_id, 'inputs': inputs})
+        response: dict = self.gi.jobs.search_jobs({'tool_id': 'random_lines1', 'inputs': inputs})
         self.assertIn(job_id, [job['id'] for job in response])
 
     @test_util.skip_unless_galaxy('release_20.01')
@@ -181,30 +180,31 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
         status = self.gi.jobs.update_job_lock(active=False)
         self.assertFalse(status)
 
-    def _run_tool(self, tool_id: str = 'random_lines1', input_format: str = 'legacy') -> dict:
+    def _run_tool(self, input_format: str = 'legacy') -> dict:
         tool_inputs = {
             'num_lines': '1',
             'input': {
                 'src': 'hda',
                 'id': self.dataset_id
             },
-            # use either the legacy or the 21.01 input format
-            **({
-                # 21.01 format
+        }
+        if input_format == '21.01':
+            tool_inputs.update({
                 'seed_source': {
                     'seed_source_selector': 'set_seed',
                     'seed': 'asdf'
                 }
-            } if input_format == '21.01' else {
-                # legacy format
+            })
+        else:
+            # legacy format
+            tool_inputs.update({
                 'seed_source|seed_source_selector': 'set_seed',
                 'seed_source|seed': 'asdf'
             })
-        }
 
         return self.gi.tools.run_tool(
             history_id=self.history_id,
-            tool_id=tool_id,
+            tool_id='random_lines1',
             tool_inputs=tool_inputs,
             input_format=input_format
         )
