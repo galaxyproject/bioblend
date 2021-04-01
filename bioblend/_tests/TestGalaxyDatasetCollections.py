@@ -125,7 +125,7 @@ class TestGalaxyDatasetCollections(GalaxyTestBase.GalaxyTestBase):
         self.assertFalse(show_response["visible"])
 
     def test_show_dataset_collection(self):
-        history_id = self.gi.histories.create_history(name="TestDatasetCollectionDownload")["id"]
+        history_id = self.gi.histories.create_history(name="TestDatasetCollectionShow")["id"]
         dataset_collection1 = self._create_pair_in_history(history_id)
         self.gi.dataset_collections.wait_for_dataset_collection(dataset_collection1['id'])
         dataset_collection2 = self.gi.dataset_collections.show_dataset_collection(dataset_collection1['id'])
@@ -146,7 +146,7 @@ class TestGalaxyDatasetCollections(GalaxyTestBase.GalaxyTestBase):
         self.assertTrue(os.path.getsize(file_path) > 0)
 
     def test_wait_for_dataset_collection(self):
-        history_id = self.gi.histories.create_history(name="TestDatasetCollectionDownload")["id"]
+        history_id = self.gi.histories.create_history(name="TestDatasetCollectionWait")["id"]
         dataset_collection1 = self._create_pair_in_history(history_id)
         dataset_collection2 = self.gi.dataset_collections.wait_for_dataset_collection(dataset_collection1['id'])
         for element1, element2 in zip(dataset_collection1['elements'], dataset_collection2['elements']):
