@@ -118,27 +118,27 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
     @test_util.skip_unless_tool("random_lines1")
     def test_get_common_problems(self):
         job_id = self._run_tool()['jobs'][0]['id']
-        response: dict = self.gi.jobs.get_common_problems(job_id)
+        response = self.gi.jobs.get_common_problems(job_id)
         self.assertEqual(response, {'has_duplicate_inputs': False, 'has_empty_inputs': True})
 
     @test_util.skip_unless_tool("random_lines1")
     def test_get_inputs(self):
         job_id = self._run_tool()['jobs'][0]['id']
-        response: dict = self.gi.jobs.get_inputs(job_id)
+        response = self.gi.jobs.get_inputs(job_id)
         self.assertEqual(response, [{'name': 'input', 'dataset': {'src': 'hda', 'id': self.dataset_id}}])
 
     @test_util.skip_unless_tool("random_lines1")
     def test_get_outputs(self):
         output = self._run_tool()
         job_id, output_id = output['jobs'][0]['id'], output['outputs'][0]['id']
-        response: dict = self.gi.jobs.get_outputs(job_id)
+        response = self.gi.jobs.get_outputs(job_id)
         self.assertEqual(response, [{'name': 'out_file1', 'dataset': {'src': 'hda', 'id': output_id}}])
 
     @test_util.skip_unless_galaxy('release_20.05')
     @test_util.skip_unless_tool("random_lines1")
     def test_get_destination_params(self):
         job_id = self._run_tool()['jobs'][0]['id']
-        response: dict = self.gi.jobs.get_destination_params(job_id)
+        response = self.gi.jobs.get_destination_params(job_id)
         self.assertIn('Runner', response)
         self.assertIn('Runner Job ID', response)
         self.assertIn('Handler', response)
@@ -156,7 +156,7 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
             'seed_source|seed_source_selector': 'set_seed',
             'seed_source|seed': 'asdf'
         }
-        response: dict = self.gi.jobs.search_jobs({'tool_id': 'random_lines1', 'inputs': inputs})
+        response = self.gi.jobs.search_jobs({'tool_id': 'random_lines1', 'inputs': inputs})
         self.assertIn(job_id, [job['id'] for job in response])
 
     @test_util.skip_unless_galaxy('release_20.01')
@@ -164,7 +164,7 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
     def test_report_error(self):
         output = self._run_tool()
         job_id, output_id = output['jobs'][0]['id'], output['outputs'][0]['id']
-        response: dict = self.gi.jobs.report_error(job_id, output_id, 'Test error')
+        response = self.gi.jobs.report_error(job_id, output_id, 'Test error')
         # expected response when the Galaxy server does not have mail configured
         self.assertEqual(response, {'messages': [['An error occurred sending the report by email: Mail is not configured for this Galaxy instance', 'danger']]})
 

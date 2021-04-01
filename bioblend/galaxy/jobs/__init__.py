@@ -205,9 +205,8 @@ class JobsClient(Client):
           the same way as the ``tool_inputs`` parameter of the ``gi.tools.run_tool()``
           method.
 
-        :rtype: list
-        :return: list of dictionaries containing summary job information of
-          the jobs that match the requested job run
+        :rtype: list of dicts
+        :return: Summary information for each matching job
 
         This method is designed to scan the list of previously run jobs and find
         records of jobs with identical input parameters and datasets. This can
@@ -215,7 +214,7 @@ class JobsClient(Client):
         old results.
 
         .. note::
-          This method only supports Galaxy 18.01 or later.
+          This method is only supported by Galaxy 18.01 or later.
         """
 
         url = self._make_url() + '/search'
@@ -241,7 +240,7 @@ class JobsClient(Client):
         url = self._make_url(module_id=job_id) + '/metrics'
         return self._get(url=url)
 
-    def report_error(self, job_id: str, dataset_id: str, message: str, email=None) -> dict:
+    def report_error(self, job_id: str, dataset_id: str, message: str, email: str = None) -> dict:
         """
         Report an error for a given job and dataset to the server administrators.
 
@@ -262,7 +261,7 @@ class JobsClient(Client):
         :return: dict containing job error reply
 
         .. note::
-          This method only supports Galaxy 20.01 or later.
+          This method is only supported by Galaxy 20.01 or later.
         """
         payload = {
             "message": message,
@@ -286,35 +285,35 @@ class JobsClient(Client):
         :return: dict containing potential problems
 
         .. note::
-          This method only supports Galaxy 19.05 or later.
+          This method is only supported by Galaxy 19.05 or later.
         """
-        url: str = self._make_url(module_id=job_id) + '/common_problems'
+        url = self._make_url(module_id=job_id) + '/common_problems'
         return self._get(url=url)
 
     def get_inputs(self, job_id: str) -> dict:
         """
-        Get dataset inputs used by a specific job ID.
+        Get dataset inputs used by a job.
 
         :type job_id: str
         :param job_id: job ID
 
-        :rtype: dict
-        :return: dict containing inputs for this job ID
+        :rtype: list of dicts
+        :return: Inputs for the given job
         """
-        url: str = self._make_url(module_id=job_id) + '/inputs'
+        url = self._make_url(module_id=job_id) + '/inputs'
         return self._get(url=url)
 
     def get_outputs(self, job_id: str) -> dict:
         """
-        Get dataset outputs produced by a specific job ID.
+        Get dataset outputs produced by a job.
 
         :type job_id: str
         :param job_id: job ID
 
-        :rtype: dict
-        :return: dict containing outputs for this job ID
+        :rtype: list of dicts
+        :return: Outputs of the given job
         """
-        url: str = self._make_url(module_id=job_id) + '/outputs'
+        url = self._make_url(module_id=job_id) + '/outputs'
         return self._get(url=url)
 
     def resume_job(self, job_id: str) -> dict:
@@ -328,26 +327,26 @@ class JobsClient(Client):
         :return: dict containing output dataset associations
 
         .. note::
-          This method only supports Galaxy 18.09 or later.
+          This method is only supported by Galaxy 18.09 or later.
         """
-        url: str = self._make_url(module_id=job_id) + '/resume'
+        url = self._make_url(module_id=job_id) + '/resume'
         return self._put(url=url, payload={})
 
     def get_destination_params(self, job_id: str) -> dict:
         """
-        Get destination parameters for the specific job ID, describing
+        Get destination parameters for a job, describing
         the environment and location where the job is run.
 
         :type job_id: str
         :param job_id: job ID
 
         :rtype: dict
-        :return: dict containing destination params
+        :return: Destination parameters for the given job
 
         .. note::
-          This method only supports Galaxy 20.05 or later.
+          This method is only supported by Galaxy 20.05 or later.
         """
-        url: str = self._make_url(module_id=job_id) + '/destination_params'
+        url = self._make_url(module_id=job_id) + '/destination_params'
         return self._get(url=url)
 
     def show_job_lock(self) -> bool:
@@ -356,38 +355,38 @@ class JobsClient(Client):
         no jobs will dispatch on the Galaxy server.
 
         :rtype: bool
-        :return: boolean indication the status of the job lock
+        :return: Status of the job lock
 
         .. note::
           This method can only be used by admin users.
 
         .. note::
-          This method only supports Galaxy 20.05 or later.
+          This method is only supported by Galaxy 20.05 or later.
         """
-        url: str = self.gi.url + '/job_lock'
-        response: dict = self._get(url=url)
+        url = self.gi.url + '/job_lock'
+        response = self._get(url=url)
         return response['active']
 
-    def update_job_lock(self, active=False) -> dict:
+    def update_job_lock(self, active=False) -> bool:
         """
         Update the job lock status by setting ``active`` to either
         ``True`` or ``False``. If ``True``, all job dispatching will
         be blocked.
 
         :rtype: bool
-        :return: boolean indication the status of the job lock
+        :return: Updated status of the job lock
 
         .. note::
           This method can only be used by admin users.
 
         .. note::
-          This method only supports Galaxy 20.05 or later.
+          This method is only supported by Galaxy 20.05 or later.
         """
         payload = {
             'active': active,
         }
-        url: str = self.gi.url + '/job_lock'
-        response: dict = self._put(url=url, payload=payload)
+        url = self.gi.url + '/job_lock'
+        response = self._put(url=url, payload=payload)
         return response['active']
 
     def wait_for_job(self, job_id, maxwait=12000, interval=3, check=True):
