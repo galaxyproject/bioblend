@@ -236,10 +236,14 @@ class JobsClient(Client):
         """
         Return jobs matching input parameters specified in ``job_info``.
 
-        :type job_info: dict
-        :param job_info: dictionary of input datasets and parameters, formatted in
-          the same way as the ``tool_inputs`` parameter of the ``gi.tools.run_tool()``
-          method.
+        :type tool_id: str
+        :param tool_id: only return jobs associated with this tool ID
+
+        :type inputs: dict
+        :param inputs: return only jobs that have matching inputs
+
+        :type state: str
+        :param state: only return jobs in this state
 
         :rtype: list of dicts
         :return: Summary information for each matching job
