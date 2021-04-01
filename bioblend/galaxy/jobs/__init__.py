@@ -197,7 +197,7 @@ class JobsClient(Client):
         """
         return self.show_job(job_id).get('state', '')
 
-    def search_jobs(self, tool_inputs: dict) -> List[dict]:
+    def search_jobs(self, job_info: dict) -> List[dict]:
         """
         Return jobs matching input parameters specified in ``job_info``.
 
