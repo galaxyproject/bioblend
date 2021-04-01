@@ -176,17 +176,14 @@ class DatasetCollectionClient(Client):
         while True:
             dataset_collection = self.gi.dataset_collections.show_dataset_collection(dataset_collection_id)
             states = [elem['object']['state'] for elem in dataset_collection['elements']]
-            count = 0
-            for i, state in enumerate(states):
-                if state in TERMINAL_STATES:
-                    if check and state != 'ok':
-                        raise Exception(f"Dataset {dataset_collection['elements']['object'][i]['id']} is in terminal state {state}")
-                    count += 1
-            proportion = count / len(states)
+            terminal_states = [state for state in states if state in TERMINAL_STATES]
+            if set(terminal_states) not in [{'ok'}, set()]:
+                raise Exception(f"Dataset collection {dataset_collection_id} contains elements in terminal states: {', '.join(set(terminal_states))}")
+            proportion = len(terminal_states) / len(states)
             if proportion >= proportion_complete:
                 return dataset_collection
             if time_left > 0:
-                log.info(f"The dataset collection {dataset_collection_id} has {count} out of {len(states)} datasets in a terminal state. Will wait {time_left} more s")
+                log.info(f"The dataset collection {dataset_collection_id} has {len(terminal_states)} out of {len(states)} datasets in a terminal state. Will wait {time_left} more s")
                 time.sleep(min(time_left, interval))
                 time_left -= interval
             else:
