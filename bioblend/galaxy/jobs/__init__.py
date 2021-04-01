@@ -3,6 +3,7 @@ Contains possible interactions with the Galaxy Jobs
 """
 import logging
 import time
+from typing import List
 
 from bioblend import TimeoutException
 from bioblend.galaxy.client import Client
@@ -196,7 +197,7 @@ class JobsClient(Client):
         """
         return self.show_job(job_id).get('state', '')
 
-    def search_jobs(self, job_info: dict) -> list:
+    def search_jobs(self, tool_inputs: dict) -> List[dict]:
         """
         Return jobs matching input parameters specified in ``job_info``.
 
@@ -220,7 +221,7 @@ class JobsClient(Client):
         url = self._make_url() + '/search'
         return self._post(url=url, payload=job_info)
 
-    def get_metrics(self, job_id: str) -> list:
+    def get_metrics(self, job_id: str) -> List[dict]:
         """
         Return job metrics for a given job.
 
@@ -290,7 +291,7 @@ class JobsClient(Client):
         url = self._make_url(module_id=job_id) + '/common_problems'
         return self._get(url=url)
 
-    def get_inputs(self, job_id: str) -> dict:
+    def get_inputs(self, job_id: str) -> List[dict]:
         """
         Get dataset inputs used by a job.
 
@@ -303,7 +304,7 @@ class JobsClient(Client):
         url = self._make_url(module_id=job_id) + '/inputs'
         return self._get(url=url)
 
-    def get_outputs(self, job_id: str) -> dict:
+    def get_outputs(self, job_id: str) -> List[dict]:
         """
         Get dataset outputs produced by a job.
 
