@@ -123,8 +123,7 @@ class DatasetCollectionClient(Client):
         url = self._make_url(module_id=dataset_collection_id)
         return self._get(url=url, params=params)
 
-    def download_dataset_collection(self, dataset_collection_id: str, file_path: str,
-                                    history_id: Optional[str] = None):
+    def download_dataset_collection(self, dataset_collection_id: str, file_path: str):
         """
         Download a history dataset collection as a tgz archive.
 
@@ -134,15 +133,11 @@ class DatasetCollectionClient(Client):
         :type file_path: str
         :param file_path: The path to which the archive will be downloaded
 
-        :type history_id: str
-        :param history_id: Encoded ID of the collection's history
-
         .. note::
           This method is only supported by Galaxy 18.01 or later.
         """
         url = self._make_url(module_id=dataset_collection_id) + '/download'
-        params = {'history_id': history_id} if history_id else None
-        r = self.gi.make_get_request(url, stream=True, params=params)
+        r = self.gi.make_get_request(url, stream=True)
         r.raise_for_status()
 
         with open(file_path, 'wb') as fp:
