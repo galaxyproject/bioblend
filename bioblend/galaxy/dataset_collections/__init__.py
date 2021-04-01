@@ -136,6 +136,9 @@ class DatasetCollectionClient(Client):
 
         :type history_id: str
         :param history_id: Encoded ID of the collection's history
+
+        .. note::
+          This method is only supported by Galaxy 18.01 or later.
         """
         url = self._make_url(module_id=dataset_collection_id) + '/download'
         params = {'history_id': history_id} if history_id else None
