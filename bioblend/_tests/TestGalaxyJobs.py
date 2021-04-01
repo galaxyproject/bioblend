@@ -55,6 +55,39 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
         jobs = self.gi.jobs.get_jobs(date_range_min=datetime.today().strftime('%Y-%m-%d'), history_id=self.history_id)
         self.assertEqual(len(jobs), 3)
 
+    @test_util.skip_unless_galaxy('release_21.05')
+    def test_get_jobs_with_filtering(self):
+        path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
+        workflow_id = self.gi.workflows.import_workflow_from_local_path(path)['id']
+        dataset = {'src': 'hda', 'id': self.dataset_id}
+        invocation1 = self.gi.workflows.invoke_workflow(
+            workflow_id,
+            inputs={'Input 1': dataset, 'Input 2': dataset},
+            history_id=self.history_id,
+            inputs_by='name',
+        )
+        invocation2 = self.gi.workflows.invoke_workflow(
+            workflow_id,
+            inputs={'Input 1': dataset, 'Input 2': dataset},
+            history_id=self.history_id,
+            inputs_by='name',
+        )
+        self.gi.invocations.wait_for_invocation(invocation1['id'])
+        self.gi.invocations.wait_for_invocation(invocation2['id'])
+
+        jobs = self.gi.jobs.get_jobs(history_id=self.history_id)
+        self.assertEqual(len(jobs), 3)
+        job1_id = jobs[1]['id']
+        jobs = self.gi.jobs.get_jobs(history_id=self.history_id, limit=1, offset=1)
+        self.assertEqual(len(jobs), 1)
+        self.assertEqual(jobs[0]['id'], job1_id)
+        jobs = self.gi.jobs.get_jobs(invocation_id=invocation1['id'])
+        self.assertEqual(len(jobs), 1)
+        job_id_inv = jobs[0]['id']
+        jobs = self.gi.jobs.get_jobs(workflow_id=workflow_id)
+        self.assertEqual(len(jobs), 2)
+        self.assertIn(job_id_inv, [job['id'] for job in jobs])
+
     @test_util.skip_unless_galaxy('release_21.01')
     @test_util.skip_unless_tool("random_lines1")
     def test_run_and_rerun_random_lines(self):

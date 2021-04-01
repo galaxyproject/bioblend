@@ -3,12 +3,15 @@ Setup and launch a CloudMan instance.
 """
 import datetime
 import socket
-from http.client import HTTPConnection
+from http.client import (
+    BadStatusLine,
+    HTTPConnection,
+    HTTPException,
+)
 from urllib.parse import urlparse
 
 import boto
 import yaml
-from boto.compat import http_client
 from boto.ec2.regioninfo import RegionInfo
 from boto.exception import EC2ResponseError, S3ResponseError
 from boto.s3.connection import OrdinaryCallingFormat, S3Connection, SubdomainCallingFormat
@@ -107,9 +110,13 @@ class CloudManLauncher:
             self.access_key,
             self.secret_key,
             self.cloud)
-        # Define exceptions from http_client that we want to catch and retry
-        self.http_exceptions = (http_client.HTTPException, socket.error,
-                                socket.gaierror, http_client.BadStatusLine)
+        # Define exceptions that we want to catch and retry
+        self.http_exceptions = (
+            HTTPException,
+            socket.error,
+            socket.gaierror,
+            BadStatusLine
+        )
 
     def __repr__(self):
         return "Cloud: {}; acct ID: {}".format(
