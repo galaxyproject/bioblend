@@ -1,6 +1,5 @@
 import os
 import tempfile
-from inspect import signature
 
 from bioblend.galaxy import dataset_collections
 from . import GalaxyTestBase
@@ -134,29 +133,13 @@ class TestGalaxyDatasetCollections(GalaxyTestBase.GalaxyTestBase):
                 self.assertIn(key, element2['object'].keys())
 
     def test_download_dataset_collection(self):
-        # the actual download for each dataset in the collection is done by
-        # DatasetClient.download_dataset and therefore not specifically tested here
         history_id = self.gi.histories.create_history(name="TestDatasetCollectionDownload")["id"]
         dataset_collection = self._create_pair_in_history(history_id)
-        # test 1: download to object in memory
-        contents_list = self.gi.dataset_collections.download_dataset_collection(dataset_collection['id'])
-        # contents should match the contents of the test dataset created in self._create_pair_in_history, plus a newline
-        expected_contents = signature(self._test_dataset).parameters['contents'].default + '\n'
-        for contents in contents_list:
-            self.assertEqual(contents, expected_contents)
-        # test 2: download to disk
         tempdir = tempfile.mkdtemp(prefix='bioblend_test_dataset_collection_download_')
-        self.gi.dataset_collections.download_dataset_collection(dataset_collection['id'], dir_path=tempdir)
-        # get updated datasets_collection details, since updated 'file_ext' is needed for the correct file_path
-        dataset_collection = self.gi.dataset_collections.show_dataset_collection(dataset_collection['id'])
-        for i, element in enumerate(dataset_collection['elements']):
-            dataset = element['object']
-            # expected file_path where DatasetClient.download_dataset should have downloaded the data to
-            file_path = os.path.join(tempdir, dataset_collection['name'], f"Galaxy{i+1}-[{dataset['name'].replace(' ', '_')}].{dataset['file_ext']}")
-            self.assertTrue(os.path.isfile(file_path))
-            self.assertTrue(os.path.getsize(file_path) > 0)
-            with open(file_path) as f:
-                self.assertEqual(f.read(), expected_contents)
+        file_path = os.path.join(tempdir, 'dataset_collection.tgz')
+        self.gi.dataset_collections.download_dataset_collection(dataset_collection['id'], file_path=file_path)
+        self.assertTrue(os.path.isfile(file_path))
+        self.assertTrue(os.path.getsize(file_path) > 0)
 
     def test_wait_for_dataset_collection(self):
         history_id = self.gi.histories.create_history(name="TestDatasetCollectionDownload")["id"]
@@ -165,7 +148,7 @@ class TestGalaxyDatasetCollections(GalaxyTestBase.GalaxyTestBase):
         self.assertEqual([elem['object']['state'] for elem in dataset_collection2['elements']].count('ok'), 0)
         dataset_collection3 = self.gi.dataset_collections.wait_for_dataset_collection(dataset_collection2['id'])
         for element1, element3 in zip(dataset_collection1['elements'], dataset_collection3['elements']):
-            self.assertEqual(element1['object']['state'], 'queued')
+            self.assertIn(element1['object']['state'], ['queued', 'running'])
             self.assertEqual(element3['object']['state'], 'ok')
 
     def _create_pair_in_history(self, history_id):
