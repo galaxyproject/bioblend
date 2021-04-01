@@ -217,6 +217,10 @@ class JobsClient(Client):
         be used to minimize the amount of repeated work by simply recycling the
         old results.
 
+        .. versionchanged:: 0.16.0
+          Replaced the ``job_info`` parameter with separate ``tool_id``,
+          ``inputs`` and ``state``.
+
         .. note::
           This method is only supported by Galaxy 18.01 or later.
         """
