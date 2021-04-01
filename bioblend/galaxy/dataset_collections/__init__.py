@@ -1,8 +1,11 @@
 import logging
 import os
+import time
 from typing import Optional
 
+from bioblend import TimeoutException
 from bioblend.galaxy.client import Client
+from bioblend.galaxy.datasets import TERMINAL_STATES
 
 log = logging.getLogger(__name__)
 
@@ -185,8 +188,53 @@ class DatasetCollectionClient(Client):
         if not dir_path:
             return [contents.decode('utf-8') for contents in collection_contents]
 
-    def wait_for_dataset_collection(self, dataset_collection_id: str) -> dict:
-        dataset_collection: dict = self.gi.dataset_collections.show_dataset_collection(dataset_collection_id)
-        for element in dataset_collection['elements']:
-            self.gi.datasets.wait_for_dataset(element['object']['id'])
-        return self.gi.dataset_collections.show_dataset_collection(dataset_collection_id)
+    def wait_for_dataset_collection(self, dataset_collection_id: str, maxwait: float = 12000,
+                                    interval: float = 3, proportion_complete: float = 1.0,
+                                    check: bool = True) -> dict:
+        """
+        Wait until a dataset is in a terminal state.
+
+        :type dataset_id: str
+        :param dataset_id: dataset ID
+
+        :type maxwait: float
+        :param maxwait: Total time (in seconds) to wait for the dataset state to
+          become terminal. If the dataset state is not terminal within this
+          time, a ``DatasetTimeoutException`` will be raised.
+
+        :type interval: float
+        :param interval: Time (in seconds) to wait between 2 consecutive checks.
+
+        :type check: bool
+        :param check: Whether to check if all datasets terminal states are 'ok'.
+
+        :rtype: dict
+        :return: Details of the given dataset collection.
+        """
+        assert maxwait >= 0
+        assert interval > 0
+        assert 0 <= proportion_complete <= 1
+
+        time_left = maxwait
+        while True:
+            dataset_collection = self.gi.dataset_collections.show_dataset_collection(dataset_collection_id)
+            states = [elem['object']['state'] for elem in dataset_collection['elements']]
+            count = 0
+            for i, state in enumerate(states):
+                if state in TERMINAL_STATES:
+                    if check and state != 'ok':
+                        raise Exception(f"Dataset {dataset_collection['elements']['object'][i]['id']} is in terminal state {state}")
+                    count += 1
+            proportion = count / len(states)
+            if proportion >= proportion_complete:
+                return dataset_collection
+            if time_left > 0:
+                log.info(f"The dataset collection {dataset_collection_id} has {count} out of {len(states)} datasets in a terminal state. Will wait {time_left} more s")
+                time.sleep(min(time_left, interval))
+                time_left -= interval
+            else:
+                raise DatasetCollectionTimeoutException(f"Less than {proportion_complete * 100}% of datasets in the dataset collection is in a terminal state after {maxwait} s")
+
+
+class DatasetCollectionTimeoutException(TimeoutException):
+    pass
