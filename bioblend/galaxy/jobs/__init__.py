@@ -234,7 +234,7 @@ class JobsClient(Client):
 
     def search_jobs(self, tool_id: str, inputs: dict, state: Optional[str] = None) -> List[dict]:
         """
-        Return jobs matching input parameters specified in ``job_info``.
+        Return jobs matching input parameters.
 
         :type tool_id: str
         :param tool_id: only return jobs associated with this tool ID
