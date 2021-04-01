@@ -120,7 +120,7 @@ class DatasetCollectionClient(Client):
             'id': dataset_collection_id,
             'instance_type': instance_type,
         }
-        url: str = self._make_url(module_id=dataset_collection_id)
+        url = self._make_url(module_id=dataset_collection_id)
         return self._get(url=url, params=params)
 
     def download_dataset_collection(self, dataset_collection_id: str, file_path: str,
