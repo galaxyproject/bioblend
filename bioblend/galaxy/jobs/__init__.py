@@ -3,7 +3,10 @@ Contains possible interactions with the Galaxy Jobs
 """
 import logging
 import time
-from typing import List
+from typing import (
+    List,
+    Optional,
+)
 
 from bioblend import TimeoutException
 from bioblend.galaxy.client import Client
@@ -197,7 +200,7 @@ class JobsClient(Client):
         """
         return self.show_job(job_id).get('state', '')
 
-    def search_jobs(self, job_info: dict) -> List[dict]:
+    def search_jobs(self, tool_id: str, inputs: dict, state: Optional[str] = None) -> List[dict]:
         """
         Return jobs matching input parameters specified in ``job_info``.
 
@@ -217,7 +220,12 @@ class JobsClient(Client):
         .. note::
           This method is only supported by Galaxy 18.01 or later.
         """
-
+        job_info = {
+            'tool_id': tool_id,
+            'inputs': inputs,
+        }
+        if state:
+            job_info['state'] = state
         url = self._make_url() + '/search'
         return self._post(url=url, payload=job_info)
 

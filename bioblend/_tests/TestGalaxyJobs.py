@@ -156,7 +156,7 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
             'seed_source|seed_source_selector': 'set_seed',
             'seed_source|seed': 'asdf'
         }
-        response = self.gi.jobs.search_jobs({'tool_id': 'random_lines1', 'inputs': inputs})
+        response = self.gi.jobs.search_jobs('random_lines1', inputs)
         self.assertIn(job_id, [job['id'] for job in response])
 
     @test_util.skip_unless_galaxy('release_20.01')
