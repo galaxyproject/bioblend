@@ -127,10 +127,10 @@ class TestGalaxyDatasetCollections(GalaxyTestBase.GalaxyTestBase):
     def test_show_dataset_collection(self):
         history_id = self.gi.histories.create_history(name="TestDatasetCollectionShow")["id"]
         dataset_collection1 = self._create_pair_in_history(history_id)
-        self.gi.dataset_collections.wait_for_dataset_collection(dataset_collection1['id'])
         dataset_collection2 = self.gi.dataset_collections.show_dataset_collection(dataset_collection1['id'])
         self.assertEqual(dataset_collection1.keys(), dataset_collection2.keys())
         for element1, element2 in zip(dataset_collection1['elements'], dataset_collection2['elements']):
+            self.assertEqual(element1['id'], element2['id'])
             self.assertEqual(element1.keys(), element2.keys())
             for key in element1['object'].keys():
                 self.assertIn(key, element2['object'].keys())
