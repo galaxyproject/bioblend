@@ -1,6 +1,5 @@
 import logging
 import time
-from typing import Optional
 
 from bioblend import (
     CHUNK_SIZE,
@@ -149,21 +148,33 @@ class DatasetCollectionClient(Client):
                                     interval: float = 3, proportion_complete: float = 1.0,
                                     check: bool = True) -> dict:
         """
-        Wait until a dataset is in a terminal state.
+        Wait until all or a specified proportion of datasets in a dataset
+        collection are in a terminal state.
 
-        :type dataset_id: str
-        :param dataset_id: dataset ID
+        :type dataset_collection_id: str
+        :param dataset_id: dataset collection ID
 
         :type maxwait: float
-        :param maxwait: Total time (in seconds) to wait for the dataset state to
-          become terminal. If the dataset state is not terminal within this
-          time, a ``DatasetTimeoutException`` will be raised.
+        :param maxwait: Total time (in seconds) to wait for the dataset
+          states in the dataset collection to become terminal. If not
+          all datasets are in a terminal state within this time, a
+          ``DatasetCollectionTimeoutException`` will be raised.
 
         :type interval: float
         :param interval: Time (in seconds) to wait between 2 consecutive checks.
 
+        :type proportion_complete: float
+        :param proportion_complete: Proportion of datasets in this collection
+          that have to be in a terminal state for this method to return. Must
+          be a number between 0 and 1. For example: If the dataset collection
+          contains 2 datasets, and proportion_complete=0.5 is specified, then
+          wait_for_dataset_collection will return as soon as 1 of the 2
+          datasets is in a terminal state.
+
         :type check: bool
-        :param check: Whether to check if all datasets terminal states are 'ok'.
+        :param check: Whether to check if all the terminal states of datasets
+          in the dataset collection are 'ok'. This will raise an Execption if
+          a dataset is in a terminal state other than 'ok'.
 
         :rtype: dict
         :return: Details of the given dataset collection.
