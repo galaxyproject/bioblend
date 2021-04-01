@@ -1,9 +1,11 @@
 import logging
-import os
 import time
 from typing import Optional
 
-from bioblend import TimeoutException
+from bioblend import (
+    CHUNK_SIZE,
+    TimeoutException,
+)
 from bioblend.galaxy.client import Client
 from bioblend.galaxy.datasets import TERMINAL_STATES
 
@@ -121,72 +123,29 @@ class DatasetCollectionClient(Client):
         url: str = self._make_url(module_id=dataset_collection_id)
         return self._get(url=url, params=params)
 
-    def download_dataset_collection(self, dataset_collection_id: str, dir_path: Optional[str] = None,
-                                    use_default_dirname: bool = True, require_ok_state: bool = True,
-                                    maxwait: float = 12000) -> Optional[list]:
+    def download_dataset_collection(self, dataset_collection_id: str, file_path: str,
+                                    history_id: Optional[str] = None):
         """
-        Download a dataset collection to memory or to disk.
-
-        When saving to memory, a list of dicts with be returned.
-        When saving to disk, a directory will be created containing the dataset collection.
-
-        If any dataset inside the collection does not have 'ok' states, a
-        ``DatasetStateException`` will be raised, unless ``require_ok_state=False``.
+        Download a history dataset collection as a tgz archive.
 
         :type dataset_collection_id: str
         :param dataset_collection_id: Encoded dataset collection ID
 
-        :type dir_path: str
-        :param dir_path: If this argument is no empty, the dataset will be streamed to disk
-          at that path (should be a directory if ``use_default_filename=True``).
-          If the file_path argument is not provided, the dataset content is loaded into memory
-          and returned by the method (Memory consumption may be heavy as the entire file
-          will be in memory).
+        :type file_path: str
+        :param file_path: The path to which the archive will be downloaded
 
-        :type use_default_dirname: bool
-        :param use_default_dirname: If ``True``, the export
-          directory will be named ``file_path/%s``,
-          where ``%s`` is the dataset collection name.
-          If ``False``, ``dir_path`` is assumed to
-          contain the full directory path including the directory name.
-
-        :type require_ok_state: bool
-        :param require_ok_state: If ``False``, datasets will be downloaded even if not in an 'ok' state,
-          issuing a ``DatasetStateWarning`` rather than raising a ``DatasetStateException``.
-
-        :type maxwait: float
-        :param maxwait: Total time (in seconds) to wait for the dataset state to
-          become terminal. If the dataset state is not terminal within this
-          time, a ``DatasetTimeoutException`` will be thrown.
-
-        :rtype: list of str
-        :return: If a ``dir_path`` argument is not provided, returns a list containing the dataset collection contents.
-          Otherwise returns nothing.
+        :type history_id: str
+        :param history_id: Encoded ID of the collection's history
         """
-        dataset_collection: dict = self.gi.dataset_collections.show_dataset_collection(dataset_collection_id)
+        url = self._make_url(module_id=dataset_collection_id) + '/download'
+        params = {'history_id': history_id} if history_id else None
+        r = self.gi.make_get_request(url, stream=True, params=params)
+        r.raise_for_status()
 
-        if dir_path:
-            dir_path: str = os.path.join(dir_path, dataset_collection['name'] if use_default_dirname else '')
-            try:
-                os.mkdir(dir_path)
-            except OSError:
-                log.error(f'OSError: failed to create directory ``{dir_path}``')
-            else:
-                log.debug(f'Successfully created dataset collection download directory at ``{dir_path}``.')
-
-        collection_contents: list = []
-        for element in dataset_collection['elements']:
-            dataset: dict = element['object']
-            dataset_contents: Optional[bytes] = self.gi.datasets.download_dataset(
-                dataset_id=dataset['id'],
-                file_path=dir_path,
-                require_ok_state=require_ok_state,
-                maxwait=maxwait
-            )
-            collection_contents.append(dataset_contents)
-
-        if not dir_path:
-            return [contents.decode('utf-8') for contents in collection_contents]
+        with open(file_path, 'wb') as fp:
+            for chunk in r.iter_content(chunk_size=CHUNK_SIZE):
+                if chunk:
+                    fp.write(chunk)
 
     def wait_for_dataset_collection(self, dataset_collection_id: str, maxwait: float = 12000,
                                     interval: float = 3, proportion_complete: float = 1.0,
