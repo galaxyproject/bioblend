@@ -39,29 +39,8 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
 
     @test_util.skip_unless_tool("random_lines1")
     def test_get_jobs(self):
-        tool_inputs = {
-            'num_lines': '1',
-            'input': {
-                'src': 'hda',
-                'id': self.dataset_id
-            },
-            'seed_source': {
-                'seed_source_selector': 'set_seed',
-                'seed': 'asdf'
-            }
-        }
-        self.gi.tools.run_tool(
-            history_id=self.history_id,
-            tool_id="random_lines1",
-            tool_inputs=tool_inputs,
-            input_format='21.01'
-        )
-        self.gi.tools.run_tool(
-            history_id=self.history_id,
-            tool_id="random_lines1",
-            tool_inputs=tool_inputs,
-            input_format='21.01'
-        )
+        self._run_tool()
+        self._run_tool()
 
         jobs = self.gi.jobs.get_jobs(tool_id='random_lines1', history_id=self.history_id)
         self.assertEqual(len(jobs), 2)
@@ -112,24 +91,7 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
     @test_util.skip_unless_galaxy('release_21.01')
     @test_util.skip_unless_tool("random_lines1")
     def test_run_and_rerun_random_lines(self):
-        tool_inputs = {
-            'num_lines': '1',
-            'input': {
-                'src': 'hda',
-                'id': self.dataset_id
-            },
-            'seed_source': {
-                'seed_source_selector': 'set_seed',
-                'seed': 'asdf'
-            }
-        }
-
-        original_output = self.gi.tools.run_tool(
-            history_id=self.history_id,
-            tool_id="random_lines1",
-            tool_inputs=tool_inputs,
-            input_format='21.01'
-        )
+        original_output = self._run_tool(input_format='21.01')
         original_job_id = original_output['jobs'][0]['id']
 
         rerun_output = self.gi.jobs.rerun_job(original_job_id)
@@ -166,6 +128,11 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
         self.assertEqual(history_contents[1]['state'], 'error')
         self.assertEqual(history_contents[2]['state'], 'paused')
 
+        # resume the paused step job
+        self.gi.jobs.resume_job(job_steps[-1]['job_id'])
+        history_contents_resumed = self.gi.histories.show_history(self.history_id, contents=True)
+        self.assertNotEqual(history_contents_resumed[2]['state'], 'paused')
+
         # now rerun and remap with correct input param
         job_id = self.gi.datasets.show_dataset(history_contents[1]['id'])['creating_job']
         tool_inputs_update = {
@@ -179,3 +146,98 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
         self.assertEqual(last_dataset['hid'], 3)
         self.assertEqual(last_dataset['id'], history_contents[2]['id'])
         self._wait_and_verify_dataset(last_dataset['id'], b'line 1\tline 1\n')
+
+    @test_util.skip_unless_galaxy('release_19.05')
+    @test_util.skip_unless_tool("random_lines1")
+    def test_get_common_problems(self):
+        job_id = self._run_tool()['jobs'][0]['id']
+        response = self.gi.jobs.get_common_problems(job_id)
+        self.assertEqual(response, {'has_duplicate_inputs': False, 'has_empty_inputs': True})
+
+    @test_util.skip_unless_tool("random_lines1")
+    def test_get_inputs(self):
+        job_id = self._run_tool()['jobs'][0]['id']
+        response = self.gi.jobs.get_inputs(job_id)
+        self.assertEqual(response, [{'name': 'input', 'dataset': {'src': 'hda', 'id': self.dataset_id}}])
+
+    @test_util.skip_unless_tool("random_lines1")
+    def test_get_outputs(self):
+        output = self._run_tool()
+        job_id, output_id = output['jobs'][0]['id'], output['outputs'][0]['id']
+        response = self.gi.jobs.get_outputs(job_id)
+        self.assertEqual(response, [{'name': 'out_file1', 'dataset': {'src': 'hda', 'id': output_id}}])
+
+    @test_util.skip_unless_galaxy('release_20.05')
+    @test_util.skip_unless_tool("random_lines1")
+    def test_get_destination_params(self):
+        job_id = self._run_tool()['jobs'][0]['id']
+        response = self.gi.jobs.get_destination_params(job_id)
+        self.assertIn('Runner', response)
+        self.assertIn('Runner Job ID', response)
+        self.assertIn('Handler', response)
+
+    @test_util.skip_unless_galaxy('release_18.01')
+    @test_util.skip_unless_tool("random_lines1")
+    def test_search_jobs(self):
+        job_id = self._run_tool()['jobs'][0]['id']
+        inputs = {
+            'num_lines': '1',
+            'input': {
+                'src': 'hda',
+                'id': self.dataset_id
+            },
+            'seed_source|seed_source_selector': 'set_seed',
+            'seed_source|seed': 'asdf'
+        }
+        response = self.gi.jobs.search_jobs('random_lines1', inputs)
+        self.assertIn(job_id, [job['id'] for job in response])
+
+    @test_util.skip_unless_galaxy('release_20.01')
+    @test_util.skip_unless_tool("random_lines1")
+    def test_report_error(self):
+        output = self._run_tool()
+        job_id, output_id = output['jobs'][0]['id'], output['outputs'][0]['id']
+        response = self.gi.jobs.report_error(job_id, output_id, 'Test error')
+        # expected response when the Galaxy server does not have mail configured
+        self.assertEqual(response, {'messages': [['An error occurred sending the report by email: Mail is not configured for this Galaxy instance', 'danger']]})
+
+    @test_util.skip_unless_galaxy('release_20.05')
+    def test_show_job_lock(self):
+        status = self.gi.jobs.show_job_lock()
+        self.assertFalse(status)
+
+    @test_util.skip_unless_galaxy('release_20.05')
+    def test_update_job_lock(self):
+        status = self.gi.jobs.update_job_lock(active=True)
+        self.assertTrue(status)
+        status = self.gi.jobs.update_job_lock(active=False)
+        self.assertFalse(status)
+
+    def _run_tool(self, input_format: str = 'legacy') -> dict:
+        tool_inputs = {
+            'num_lines': '1',
+            'input': {
+                'src': 'hda',
+                'id': self.dataset_id
+            },
+        }
+        if input_format == '21.01':
+            tool_inputs.update({
+                'seed_source': {
+                    'seed_source_selector': 'set_seed',
+                    'seed': 'asdf'
+                }
+            })
+        else:
+            # legacy format
+            tool_inputs.update({
+                'seed_source|seed_source_selector': 'set_seed',
+                'seed_source|seed': 'asdf'
+            })
+
+        return self.gi.tools.run_tool(
+            history_id=self.history_id,
+            tool_id='random_lines1',
+            tool_inputs=tool_inputs,
+            input_format=input_format
+        )
