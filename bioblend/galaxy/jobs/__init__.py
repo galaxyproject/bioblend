@@ -393,7 +393,8 @@ class JobsClient(Client):
         :return: Destination parameters for the given job
 
         .. note::
-          This method is only supported by Galaxy 20.05 or later.
+          This method is only supported by Galaxy 20.05 or later and requires
+          the user to be an admin.
         """
         url = self._make_url(module_id=job_id) + '/destination_params'
         return self._get(url=url)
@@ -407,10 +408,8 @@ class JobsClient(Client):
         :return: Status of the job lock
 
         .. note::
-          This method can only be used by admin users.
-
-        .. note::
-          This method is only supported by Galaxy 20.05 or later.
+          This method is only supported by Galaxy 20.05 or later and requires
+          the user to be an admin.
         """
         url = self.gi.url + '/job_lock'
         response = self._get(url=url)
@@ -426,10 +425,8 @@ class JobsClient(Client):
         :return: Updated status of the job lock
 
         .. note::
-          This method can only be used by admin users.
-
-        .. note::
-          This method is only supported by Galaxy 20.05 or later.
+          This method is only supported by Galaxy 20.05 or later and requires
+          the user to be an admin.
         """
         payload = {
             'active': active,
