@@ -99,7 +99,7 @@ def upload_from_fs(lib, bnames, **kwargs):
 
 
 class MockWrapper(wrappers.Wrapper):
-    BASE_ATTRS = frozenset(['a', 'b'])
+    BASE_ATTRS = ('a', 'b')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
