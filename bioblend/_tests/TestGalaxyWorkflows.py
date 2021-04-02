@@ -92,7 +92,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         self.assertEqual(invocation['state'], 'cancelled')
 
     def test_import_export_workflow_from_local_path(self):
-        with self.assertRaises(FileNotFoundError):
+        with self.assertRaises(ConnectionError):
             self.gi.workflows.import_workflow_from_local_path(None)
         path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
         imported_wf = self.gi.workflows.import_workflow_from_local_path(path)
