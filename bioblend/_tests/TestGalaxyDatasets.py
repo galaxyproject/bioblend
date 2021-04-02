@@ -1,6 +1,7 @@
 import shutil
 import tempfile
 
+from bioblend import ConnectionError
 from . import (
     GalaxyTestBase,
     test_util
@@ -27,7 +28,7 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
         self.gi.datasets.show_dataset(self.dataset_id)
 
     def test_download_dataset(self):
-        with self.assertRaises(ConnectionError):
+        with self.assertRaises(TypeError):
             self.gi.datasets.download_dataset(None)
         expected_contents = ("\n".join(self.dataset_contents.splitlines()) + "\n").encode()
         # download_dataset() with file_path=None is already tested in TestGalaxyTools.test_paste_content()

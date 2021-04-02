@@ -4,6 +4,7 @@ import shutil
 import tempfile
 import time
 
+from bioblend import ConnectionError
 from . import GalaxyTestBase, test_util
 
 
@@ -92,7 +93,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         self.assertEqual(invocation['state'], 'cancelled')
 
     def test_import_export_workflow_from_local_path(self):
-        with self.assertRaises(ConnectionError):
+        with self.assertRaises(TypeError):
             self.gi.workflows.import_workflow_from_local_path(None)
         path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
         imported_wf = self.gi.workflows.import_workflow_from_local_path(path)
@@ -101,7 +102,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         self.assertTrue(imported_wf['url'].startswith('/api/workflows/'))
         self.assertFalse(imported_wf['deleted'])
         self.assertFalse(imported_wf['published'])
-        with self.assertRaises(ConnectionError):
+        with self.assertRaises(TypeError):
             self.gi.workflows.export_workflow_to_local_path(None, None, None)
         export_dir = tempfile.mkdtemp(prefix='bioblend_test_')
         try:
