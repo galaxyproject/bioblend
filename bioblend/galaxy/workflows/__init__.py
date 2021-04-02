@@ -4,6 +4,7 @@ Contains possible interactions with the Galaxy Workflows
 import json
 import os
 import warnings
+from typing import Optional
 
 from bioblend.galaxy.client import Client
 
@@ -385,11 +386,11 @@ class WorkflowClient(Client):
             payload['no_add_to_history'] = True
         return self._post(payload)
 
-    def invoke_workflow(self, workflow_id, inputs=None, params=None,
-                        history_id=None, history_name=None,
-                        import_inputs_to_history=False, replacement_params=None,
-                        allow_tool_state_corrections=None, inputs_by=None,
-                        already_normalized=False):
+    def invoke_workflow(self, workflow_id: str, inputs: Optional[dict] = None,
+                        params: Optional[dict] = None, history_id: Optional[str] = None,
+                        history_name: Optional[str] = None, import_inputs_to_history: bool = False,
+                        replacement_params: Optional[dict] = None, allow_tool_state_corrections: bool = False,
+                        inputs_by: bool = False, already_normalized: bool = False) -> dict:
         """
         Invoke the workflow identified by ``workflow_id``. This will
         cause a workflow to be scheduled and return an object describing
@@ -570,11 +571,11 @@ class WorkflowClient(Client):
             payload['history'] = f'hist_id={history_id}'
         elif history_name:
             payload['history'] = history_name
-        if import_inputs_to_history is False:
+        if not import_inputs_to_history:
             payload['no_add_to_history'] = True
-        if allow_tool_state_corrections is not None:
+        if allow_tool_state_corrections:
             payload['allow_tool_state_corrections'] = allow_tool_state_corrections
-        if inputs_by is not None:
+        if inputs_by:
             payload['inputs_by'] = inputs_by
         if already_normalized:
             payload['already_normalized'] = already_normalized
