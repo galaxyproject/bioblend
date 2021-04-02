@@ -28,8 +28,9 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
         self.gi.datasets.show_dataset(self.dataset_id)
 
     def test_download_dataset(self):
-        with self.assertRaises(TypeError):
+        with self.assertRaises(Exception) as ctx:
             self.gi.datasets.download_dataset(None)
+        self.assertIn(ctx.exception.__class__, (TypeError, ConnectionError))
         expected_contents = ("\n".join(self.dataset_contents.splitlines()) + "\n").encode()
         # download_dataset() with file_path=None is already tested in TestGalaxyTools.test_paste_content()
         # self._wait_and_verify_dataset(self.dataset_id, expected_contents)
