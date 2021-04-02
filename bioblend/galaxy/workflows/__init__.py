@@ -388,7 +388,8 @@ class WorkflowClient(Client):
     def invoke_workflow(self, workflow_id, inputs=None, params=None,
                         history_id=None, history_name=None,
                         import_inputs_to_history=False, replacement_params=None,
-                        allow_tool_state_corrections=None, inputs_by=None):
+                        allow_tool_state_corrections=None, inputs_by=None,
+                        already_normalized=False):
         """
         Invoke the workflow identified by ``workflow_id``. This will
         cause a workflow to be scheduled and return an object describing
@@ -575,6 +576,8 @@ class WorkflowClient(Client):
             payload['allow_tool_state_corrections'] = allow_tool_state_corrections
         if inputs_by is not None:
             payload['inputs_by'] = inputs_by
+        if already_normalized:
+            payload['already_normalized'] = already_normalized
         url = self._invocations_url(workflow_id)
         return self._post(payload, url=url)
 
