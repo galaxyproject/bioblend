@@ -1,5 +1,8 @@
 import os
-from collections import namedtuple
+from typing import (
+    IO,
+    NamedTuple
+)
 
 
 class Bunch:
@@ -19,16 +22,12 @@ class Bunch:
         return str(self.__dict__)
 
 
-def _file_stream_close(self):
-    """
-    Close the open file descriptor associated with the FileStream
-    object.
-    """
-    self[1].close()
+class FileStream(NamedTuple):
+    name: str
+    fd: IO
 
-
-FileStream = namedtuple("FileStream", ["name", "fd"])
-FileStream.close = _file_stream_close
+    def close(self):
+        self.fd.close()
 
 
 def attach_file(path, name=None):

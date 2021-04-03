@@ -11,6 +11,7 @@ from collections.abc import (
     Mapping,
     Sequence,
 )
+from typing import Tuple
 
 import bioblend
 
@@ -54,7 +55,7 @@ class Wrapper(metaclass=abc.ABCMeta):
     Note that the wrapped dictionary is accessible via the ``wrapped``
     attribute.
     """
-    BASE_ATTRS = ('id', 'name')
+    BASE_ATTRS: Tuple[str, ...] = ('id', 'name')
 
     @abc.abstractmethod
     def __init__(self, wrapped, parent=None, gi=None):

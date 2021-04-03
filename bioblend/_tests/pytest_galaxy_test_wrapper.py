@@ -10,7 +10,7 @@ import sys
 try:
     import pytest
 except ImportError:
-    pytest = None
+    pytest = None  # type: ignore
 
 DIRECTORY = os.path.abspath(os.path.dirname(__file__))
 BIOBLEND_TEST_SUITE = os.environ.get("BIOBLEND_TEST_SUITE", "full")
@@ -26,6 +26,8 @@ quick_tests = [
 
 def main(args=None):
     """Entry point that delegates to pytest.main."""
+    if pytest is None:
+        raise Exception("pytest is required to use this script.")
     if args is None:
         args = sys.argv[1:]
     if len(args) < 2:
@@ -34,12 +36,6 @@ def main(args=None):
         else:
             for quick_test in quick_tests:
                 args.append(os.path.join(DIRECTORY, quick_test))
-    _pytest_main(args)
-
-
-def _pytest_main(args):
-    if pytest is None:
-        raise Exception("pytest is required to use this script.")
     sys.exit(pytest.main(args))
 
 
