@@ -11,7 +11,12 @@ from collections.abc import (
     Mapping,
     Sequence,
 )
-from typing import Tuple
+from typing import (
+    List,
+    Optional,
+    Tuple,
+    ModuleType
+)
 
 import bioblend
 
@@ -490,6 +495,66 @@ class Workflow(Wrapper):
         """
         self.gi.workflows.delete(id_=self.id)
         self.unmap()
+
+
+class Invocation(Wrapper):
+    """
+    Invocation of a workflow.
+    This causes the steps of a workflow to be executed in sequential order.
+    """
+    BASE_ATTRS = Wrapper.BASE_ATTRS + (
+        'workflow_id'
+        'history_id',
+        'inputs',
+        'state',
+        'steps',
+        'update_time',
+        'uuid',
+    )
+    POLLING_INTERVAL = 10  # for output state monitoring
+
+    def __init__(self, inv_dict: dict, gi: Optional[bioblend.GalaxyInstance] = None):
+        super().__init__(inv_dict, gi=gi)
+
+    @property
+    def gi_module(self) -> ModuleType:
+        return self.gi.invocations
+
+    def preview(self) -> List[dict]:
+        getf = self.gi.invocations.get_previews
+        try:
+            p = [_ for _ in getf(published=True) if _.id == self.id][0]
+        except IndexError:
+            raise ValueError('no object for id %s' % self.id)
+        return p
+
+    def cancel(self):
+        self.gi.invocations.cancel_invocation(self.id)
+
+    def show_step(self, step_id: str) -> dict:
+        return self.gi.invocations.show_invocation_step(self.id, step_id)
+
+    def run_step_action(self, step_id: str, action: str) -> dict:
+        return self.gi.invocations.run_invocation_step_action(self.id, step_id, action)
+
+    def summary(self) -> dict:
+        return self.gi.invocations.get_invocation_summary(self.id)
+
+    def step_jobs_summary(self) -> dict:
+        return self.gi.invocations.get_invocation_step_jobs_summary(self.id)
+
+    def report(self) -> dict:
+        return self.gi.invocations.get_invocation_report(self.id)
+
+    def save_report_pdf(self, file_path: str, chunk_size: int = bioblend.CHUNK_SIZE):
+        self.gi.invocations.get_invocation_report_pdf(self.id, file_path, chunk_size)
+
+    def biocompute_object(self) -> dict:
+        return self.gi.invocations.get_invocation_biocompute_object(self.id)
+
+    def wait_for(self, max_wait: float = 12000, interval: float = 3, check: bool = True):
+        inv_dict = self.gi.invocations.wait_for_invocation(self.id)
+        self.__init__(inv_dict, self.gi)
 
 
 class Dataset(Wrapper, metaclass=abc.ABCMeta):
