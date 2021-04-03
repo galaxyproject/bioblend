@@ -1,6 +1,7 @@
 import shutil
 import tempfile
 
+from bioblend import ConnectionError
 from . import (
     GalaxyTestBase,
     test_util
@@ -20,15 +21,16 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
 
     @test_util.skip_unless_galaxy('release_19.05')
     def test_show_nonexistent_dataset(self):
-        with self.assertRaises(Exception):
+        with self.assertRaises(ConnectionError):
             self.gi.datasets.show_dataset('nonexistent_id')
 
     def test_show_dataset(self):
         self.gi.datasets.show_dataset(self.dataset_id)
 
     def test_download_dataset(self):
-        with self.assertRaises(Exception):
+        with self.assertRaises(Exception) as ctx:
             self.gi.datasets.download_dataset(None)
+        self.assertIn(ctx.exception.__class__, (TypeError, ConnectionError))
         expected_contents = ("\n".join(self.dataset_contents.splitlines()) + "\n").encode()
         # download_dataset() with file_path=None is already tested in TestGalaxyTools.test_paste_content()
         # self._wait_and_verify_dataset(self.dataset_id, expected_contents)
