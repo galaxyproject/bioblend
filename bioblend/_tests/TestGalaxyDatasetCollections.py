@@ -147,11 +147,10 @@ class TestGalaxyDatasetCollections(GalaxyTestBase.GalaxyTestBase):
 
     def test_wait_for_dataset_collection(self):
         history_id = self.gi.histories.create_history(name="TestDatasetCollectionWait")["id"]
-        dataset_collection1 = self._create_pair_in_history(history_id)
-        dataset_collection2 = self.gi.dataset_collections.wait_for_dataset_collection(dataset_collection1['id'])
-        for element1, element2 in zip(dataset_collection1['elements'], dataset_collection2['elements']):
-            self.assertIn(element1['object']['state'], ['queued', 'running'])
-            self.assertEqual(element2['object']['state'], 'ok')
+        dataset_collection_id = self._create_pair_in_history(history_id)['id']
+        dataset_collection = self.gi.dataset_collections.wait_for_dataset_collection(dataset_collection_id)
+        for element in dataset_collection['elements']:
+            self.assertEqual(element['object']['state'], 'ok')
 
     def _create_pair_in_history(self, history_id):
         dataset1_id = self._test_dataset(history_id)
