@@ -65,7 +65,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         invocation = self.gi.workflows.show_invocation(workflow_id, invocation_id)
         self.assertEqual(invocation["state"], "scheduled")
 
-    @test_util.skip_unless_galaxy('release_20.05')
+    @test_util.skip_unless_galaxy('release_19.01')
     def test_invoke_workflow_parameters_normalized(self):
         path = test_util.get_abspath(os.path.join('data', 'paste_columns_subworkflow.ga'))
         workflow = self.gi.workflows.import_workflow_from_local_path(path)
