@@ -4,7 +4,11 @@ Contains possible interactions with the Galaxy Workflows
 import json
 import os
 import warnings
-from typing import Optional
+from typing import (
+    Dict,
+    Optional,
+    Union,
+)
 
 from bioblend.galaxy.client import Client
 
@@ -557,7 +561,7 @@ class WorkflowClient(Client):
           (which is stable across workflow imports) or the step UUID which is
           also stable.
         """
-        payload = {'workflow_id': workflow_id}
+        payload: Dict[str, Union[str, bool, dict]] = {'workflow_id': workflow_id}
         if inputs:
             payload['inputs'] = inputs
 
