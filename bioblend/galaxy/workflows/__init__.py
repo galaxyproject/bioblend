@@ -390,7 +390,7 @@ class WorkflowClient(Client):
                         params: Optional[dict] = None, history_id: Optional[str] = None,
                         history_name: Optional[str] = None, import_inputs_to_history: bool = False,
                         replacement_params: Optional[dict] = None, allow_tool_state_corrections: bool = False,
-                        inputs_by: Optional[str] = None, already_normalized: bool = False) -> dict:
+                        inputs_by: Optional[str] = None, parameters_normalized: bool = False) -> dict:
         """
         Invoke the workflow identified by ``workflow_id``. This will
         cause a workflow to be scheduled and return an object describing
@@ -577,8 +577,8 @@ class WorkflowClient(Client):
             payload['allow_tool_state_corrections'] = allow_tool_state_corrections
         if inputs_by is not None:
             payload['inputs_by'] = inputs_by
-        if already_normalized:
-            payload['already_normalized'] = already_normalized
+        if parameters_normalized:
+            payload['parameters_normalized'] = parameters_normalized
         url = self._invocations_url(workflow_id)
         return self._post(payload, url=url)
 
