@@ -5,6 +5,7 @@ import tempfile
 import time
 
 from bioblend import ConnectionError
+from bioblend.galaxy.invocations import INVOCATION_TERMINAL_STATES
 from . import GalaxyTestBase, test_util
 
 
@@ -63,6 +64,26 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
 
         invocation = self.gi.workflows.show_invocation(workflow_id, invocation_id)
         self.assertEqual(invocation["state"], "scheduled")
+
+    @test_util.skip_unless_galaxy('release_20.05')
+    def test_invoke_workflow_parameters_normalized(self):
+        path = test_util.get_abspath(os.path.join('data', 'paste_columns_subworkflow.ga'))
+        workflow = self.gi.workflows.import_workflow_from_local_path(path)
+        history_id = self.gi.histories.create_history(name="TestWorkflowInvokeParametersNormalized")["id"]
+        dataset_id = self._test_dataset(history_id)
+        with self.assertRaises(ConnectionError):
+            self.gi.workflows.invoke_workflow(
+                workflow['id'],
+                inputs={'0': {'src': 'hda', 'id': dataset_id}},
+                params={'1': {'1|2': 'comma'}}
+            )
+        invocation = self.gi.workflows.invoke_workflow(
+            workflow['id'],
+            inputs={'0': {'src': 'hda', 'id': dataset_id}},
+            params={'1': {'1|2': 'comma'}},
+            parameters_normalized=True
+        )
+        self.assertNotIn(invocation['state'], INVOCATION_TERMINAL_STATES)
 
     @test_util.skip_unless_tool("cat1")
     @test_util.skip_unless_tool("cat")
