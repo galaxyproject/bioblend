@@ -158,13 +158,13 @@ class TestGalaxyDatasetCollections(GalaxyTestBase.GalaxyTestBase):
                         self.assertEqual(expected_contents, f.read())
         elif archive_type == 'tgz':
             import tarfile
-            tar = tarfile.open(file_path)
-            tar.extractall()
-            for fname in os.listdir(extract_dir_path):
-                dataset_dir_path = os.path.join(extract_dir_path, fname)
-                file_path = os.path.join(dataset_dir_path, os.listdir(dataset_dir_path)[0])
-                with open(file_path) as f:
-                    self.assertEqual(expected_contents, f.read())
+            with tarfile.open(archive_path) as tar:
+                tar.extractall()
+                for fname in os.listdir(extract_dir_path):
+                    dataset_dir_path = os.path.join(extract_dir_path, fname)
+                    file_path = os.path.join(dataset_dir_path, os.listdir(dataset_dir_path)[0])
+                    with open(file_path) as f:
+                        self.assertEqual(expected_contents, f.read())
 
     def test_wait_for_dataset_collection(self):
         history_id = self.gi.histories.create_history(name="TestDatasetCollectionWait")["id"]

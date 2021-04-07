@@ -6,7 +6,6 @@ from bioblend import (
     TimeoutException,
 )
 from bioblend.galaxy.client import Client
-from bioblend.galaxy.config import ConfigClient
 from bioblend.galaxy.datasets import TERMINAL_STATES
 
 log = logging.getLogger(__name__)
