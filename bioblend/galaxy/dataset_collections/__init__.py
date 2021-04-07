@@ -6,6 +6,7 @@ from bioblend import (
     TimeoutException,
 )
 from bioblend.galaxy.client import Client
+from bioblend.galaxy.config import ConfigClient
 from bioblend.galaxy.datasets import TERMINAL_STATES
 
 log = logging.getLogger(__name__)
@@ -122,7 +123,7 @@ class DatasetCollectionClient(Client):
         url = self._make_url(module_id=dataset_collection_id)
         return self._get(url=url, params=params)
 
-    def download_dataset_collection(self, dataset_collection_id: str, file_path: str):
+    def download_dataset_collection(self, dataset_collection_id: str, file_path: str) -> dict:
         """
         Download a history dataset collection as a tgz archive.
 
@@ -139,10 +140,17 @@ class DatasetCollectionClient(Client):
         r = self.gi.make_get_request(url, stream=True)
         r.raise_for_status()
 
+        archive_type = 'zip' if self.gi.config.get_version()['version_major'] >= '21.01' else 'tgz'
+
         with open(file_path, 'wb') as fp:
             for chunk in r.iter_content(chunk_size=CHUNK_SIZE):
                 if chunk:
                     fp.write(chunk)
+
+        return {
+            'file_path': file_path,
+            'archive_type': archive_type
+        }
 
     def wait_for_dataset_collection(self, dataset_collection_id: str, maxwait: float = 12000,
                                     interval: float = 3, proportion_complete: float = 1.0,
