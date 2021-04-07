@@ -5,9 +5,9 @@ import json
 import os
 import warnings
 from typing import (
+    Any,
     Dict,
     Optional,
-    Union,
 )
 
 from bioblend.galaxy.client import Client
@@ -567,7 +567,7 @@ class WorkflowClient(Client):
           (which is stable across workflow imports) or the step UUID which is
           also stable.
         """
-        payload: Dict[str, Union[str, bool, dict]] = {'workflow_id': workflow_id}
+        payload: Dict[str, Any] = {'workflow_id': workflow_id}
         if inputs:
             payload['inputs'] = inputs
 
