@@ -453,6 +453,12 @@ class WorkflowClient(Client):
         :param inputs_by: Determines how inputs are referenced. Can be
           "step_index|step_uuid" (default), "step_index", "step_id", "step_uuid", or "name".
 
+        :type parameters_normalized: bool
+        :param parameters_normalized: Whether Galaxy should normalize ``params``
+          to ensure everything is referenced by a numeric step ID. Default is
+          ``True``, but when setting ``params`` for a subworkflow, ``False`` is
+          required.
+
         :rtype: dict
         :return: A dict containing the workflow invocation describing the
           scheduling of the workflow. For example::
