@@ -18,6 +18,7 @@ import bioblend.galaxy.objects.wrappers as wrappers
 from bioblend.galaxy import dataset_collections
 from . import test_util
 
+
 bioblend.set_stream_logger('test', level='INFO')
 socket.setdefaulttimeout(10.0)
 SAMPLE_FN = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
@@ -71,6 +72,48 @@ SAMPLE_WF_DICT = {
     },
     'tags': [],
     'url': '/api/workflows/9005c5112febe774',
+}
+SAMPLE_INV_DICT = {
+    'history_id': '2f94e8ae9edff68a',
+    'id': 'df7a1f0c02a5b08e',
+    'inputs': {
+        '0': {
+            'id': 'a7db2fac67043c7e',
+            'src': 'hda',
+            'uuid': '7932ffe0-2340-4952-8857-dbaa50f1f46a'
+        }
+    },
+    'model_class': 'WorkflowInvocation',
+    'state': 'ready',
+    'steps': [
+        {
+            'action': None,
+            'id': 'd413a19dec13d11e',
+            'job_id': None,
+            'model_class': 'WorkflowInvocationStep',
+            'order_index': 0,
+            'state': None,
+            'update_time': '2015-10-31T22:00:26',
+            'workflow_step_id': 'cbbbf59e8f08c98c',
+            'workflow_step_label': None,
+            'workflow_step_uuid': 'b81250fd-3278-4e6a-b269-56a1f01ef485'
+        },
+        {
+            'action': None,
+            'id': '2f94e8ae9edff68a',
+            'job_id': 'e89067bb68bee7a0',
+            'model_class': 'WorkflowInvocationStep',
+            'order_index': 1,
+            'state': 'new',
+            'update_time': '2015-10-31T22:00:26',
+            'workflow_step_id': '964b37715ec9bd22',
+            'workflow_step_label': None,
+            'workflow_step_uuid': 'e62440b8-e911-408b-b124-e05435d3125e'
+        }
+    ],
+    'update_time': '2015-10-31T22:00:26',
+    'uuid': 'c8aa2b1c-801a-11e5-a9e5-8ca98228593c',
+    'workflow_id': '03501d7626bd192f'
 }
 
 
@@ -232,6 +275,38 @@ class GalaxyObjectsTestBase(unittest.TestCase):
         galaxy_key = os.environ['BIOBLEND_GALAXY_API_KEY']
         galaxy_url = os.environ['BIOBLEND_GALAXY_URL']
         self.gi = galaxy_instance.GalaxyInstance(galaxy_url, galaxy_key)
+
+
+class TestInvocation(GalaxyObjectsTestBase):
+
+    def setUp(self):
+        super().setUp()
+        self.inv = wrappers.Invocation(SAMPLE_INV_DICT, self.gi)
+
+    def test_initialize(self):
+        self.assertEqual(self.inv.workflow_id, '03501d7626bd192f')
+        self.assertEqual(self.inv.history_id, '2f94e8ae9edff68a')
+        self.assertEqual(self.inv.id, 'df7a1f0c02a5b08e')
+        self.assertEqual(self.inv.state, 'ready')
+        self.assertEqual(self.inv.update_time, '2015-10-31T22:00:26')
+        self.assertEqual(self.inv.uuid, 'c8aa2b1c-801a-11e5-a9e5-8ca98228593c')
+
+    def test_steps(self):
+        for step, step_dict in zip(self.inv.steps, SAMPLE_INV_DICT['steps']):
+            self.assertIsInstance(step, wrappers.InvocationStep)
+            self.assertIs(step.parent, self.inv)
+            self.assertEqual(step.id, step_dict['id'])
+            self.assertEqual(step.job_id, step_dict['job_id'])
+            self.assertEqual(step.order_index, step_dict['order_index'])
+            self.assertEqual(step.state, step_dict['state'])
+            self.assertEqual(step.update_time, step_dict['update_time'])
+            self.assertEqual(step.workflow_step_id, step_dict['workflow_step_id'])
+            self.assertEqual(step.workflow_step_label, step_dict['workflow_step_label'])
+            self.assertEqual(step.workflow_step_uuid, step_dict['workflow_step_uuid'])
+
+    def test_inputs(self):
+        for i, input in enumerate(self.inv.inputs):
+            self.assertEqual(input, {**SAMPLE_INV_DICT['inputs'][str(i)], 'label': str(i)})
 
 
 class TestGalaxyInstance(GalaxyObjectsTestBase):
