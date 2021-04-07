@@ -67,17 +67,17 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
     @test_util.skip_unless_galaxy('release_19.01')
     def test_invoke_workflow_parameters_normalized(self):
         path = test_util.get_abspath(os.path.join('data', 'paste_columns_subworkflow.ga'))
-        workflow = self.gi.workflows.import_workflow_from_local_path(path)
+        workflow_id = self.gi.workflows.import_workflow_from_local_path(path)["id"]
         history_id = self.gi.histories.create_history(name="TestWorkflowInvokeParametersNormalized")["id"]
         dataset_id = self._test_dataset(history_id)
         with self.assertRaises(ConnectionError):
             self.gi.workflows.invoke_workflow(
-                workflow['id'],
+                workflow_id,
                 inputs={'0': {'src': 'hda', 'id': dataset_id}},
                 params={'1': {'1|2': 'comma'}}
             )
         self.gi.workflows.invoke_workflow(
-            workflow['id'],
+            workflow_id,
             inputs={'0': {'src': 'hda', 'id': dataset_id}},
             params={'1': {'1|2': 'comma'}},
             parameters_normalized=True

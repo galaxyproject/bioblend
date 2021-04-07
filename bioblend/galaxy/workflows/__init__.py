@@ -456,7 +456,7 @@ class WorkflowClient(Client):
         :type parameters_normalized: bool
         :param parameters_normalized: Whether Galaxy should normalize ``params``
           to ensure everything is referenced by a numeric step ID. Default is
-          ``True``, but when setting ``params`` for a subworkflow, ``False`` is
+          ``False``, but when setting ``params`` for a subworkflow, ``True`` is
           required.
 
         :rtype: dict
