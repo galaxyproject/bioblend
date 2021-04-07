@@ -4,6 +4,11 @@ Contains possible interactions with the Galaxy Workflows
 import json
 import os
 import warnings
+from typing import (
+    Any,
+    Dict,
+    Optional,
+)
 
 from bioblend.galaxy.client import Client
 
@@ -385,10 +390,11 @@ class WorkflowClient(Client):
             payload['no_add_to_history'] = True
         return self._post(payload)
 
-    def invoke_workflow(self, workflow_id, inputs=None, params=None,
-                        history_id=None, history_name=None,
-                        import_inputs_to_history=False, replacement_params=None,
-                        allow_tool_state_corrections=None, inputs_by=None):
+    def invoke_workflow(self, workflow_id: str, inputs: Optional[dict] = None,
+                        params: Optional[dict] = None, history_id: Optional[str] = None,
+                        history_name: Optional[str] = None, import_inputs_to_history: bool = False,
+                        replacement_params: Optional[dict] = None, allow_tool_state_corrections: bool = False,
+                        inputs_by: Optional[str] = None, parameters_normalized: bool = False) -> dict:
         """
         Invoke the workflow identified by ``workflow_id``. This will
         cause a workflow to be scheduled and return an object describing
@@ -446,6 +452,12 @@ class WorkflowClient(Client):
         :type inputs_by: str
         :param inputs_by: Determines how inputs are referenced. Can be
           "step_index|step_uuid" (default), "step_index", "step_id", "step_uuid", or "name".
+
+        :type parameters_normalized: bool
+        :param parameters_normalized: Whether Galaxy should normalize ``params``
+          to ensure everything is referenced by a numeric step ID. Default is
+          ``False``, but when setting ``params`` for a subworkflow, ``True`` is
+          required.
 
         :rtype: dict
         :return: A dict containing the workflow invocation describing the
@@ -555,7 +567,7 @@ class WorkflowClient(Client):
           (which is stable across workflow imports) or the step UUID which is
           also stable.
         """
-        payload = {'workflow_id': workflow_id}
+        payload: Dict[str, Any] = {'workflow_id': workflow_id}
         if inputs:
             payload['inputs'] = inputs
 
@@ -569,12 +581,14 @@ class WorkflowClient(Client):
             payload['history'] = f'hist_id={history_id}'
         elif history_name:
             payload['history'] = history_name
-        if import_inputs_to_history is False:
+        if not import_inputs_to_history:
             payload['no_add_to_history'] = True
-        if allow_tool_state_corrections is not None:
+        if allow_tool_state_corrections:
             payload['allow_tool_state_corrections'] = allow_tool_state_corrections
         if inputs_by is not None:
             payload['inputs_by'] = inputs_by
+        if parameters_normalized:
+            payload['parameters_normalized'] = parameters_normalized
         url = self._invocations_url(workflow_id)
         return self._post(payload, url=url)
 
