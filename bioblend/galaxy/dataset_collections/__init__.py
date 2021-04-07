@@ -148,7 +148,7 @@ class DatasetCollectionClient(Client):
                                     interval: float = 3, proportion_complete: float = 1.0,
                                     check: bool = True) -> dict:
         """
-        Wait until all or a specified proportion of datasets in a dataset
+        Wait until all or a specified proportion of elements of a dataset
         collection are in a terminal state.
 
         :type dataset_collection_id: str
@@ -161,19 +161,20 @@ class DatasetCollectionClient(Client):
           ``DatasetCollectionTimeoutException`` will be raised.
 
         :type interval: float
-        :param interval: Time (in seconds) to wait between 2 consecutive checks.
+        :param interval: Time (in seconds) to wait between two consecutive checks.
 
         :type proportion_complete: float
-        :param proportion_complete: Proportion of datasets in this collection
+        :param proportion_complete: Proportion of elements in this collection
           that have to be in a terminal state for this method to return. Must
-          be a number between 0 and 1. For example: If the dataset collection
-          contains 2 datasets, and proportion_complete=0.5 is specified, then
+          be a number between 0 and 1. For example: if the dataset collection
+          contains 2 elements, and proportion_complete=0.5 is specified, then
           wait_for_dataset_collection will return as soon as 1 of the 2
-          datasets is in a terminal state.
+          datasets is in a terminal state. Default is 1, i.e. all elements must
+          complete.
 
         :type check: bool
         :param check: Whether to check if all the terminal states of datasets
-          in the dataset collection are 'ok'. This will raise an Execption if
+          in the dataset collection are 'ok'. This will raise an Exception if
           a dataset is in a terminal state other than 'ok'.
 
         :rtype: dict
