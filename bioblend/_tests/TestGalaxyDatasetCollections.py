@@ -1,5 +1,7 @@
 import os
 import tempfile
+from inspect import signature
+from zipfile import ZipFile
 
 from bioblend.galaxy import dataset_collections
 from . import (
@@ -141,10 +143,18 @@ class TestGalaxyDatasetCollections(GalaxyTestBase.GalaxyTestBase):
         dataset_collection_id = self._create_pair_in_history(history_id)['id']
         self.gi.dataset_collections.wait_for_dataset_collection(dataset_collection_id)
         tempdir = tempfile.mkdtemp(prefix='bioblend_test_dataset_collection_download_')
-        file_path = os.path.join(tempdir, 'dataset_collection.tgz')
-        self.gi.dataset_collections.download_dataset_collection(dataset_collection_id, file_path=file_path)
-        self.assertTrue(os.path.isfile(file_path))
-        self.assertEqual(os.path.getsize(file_path), 310)
+        archive_path = os.path.join(tempdir, 'dataset_collection.tgz')
+        self.gi.dataset_collections.download_dataset_collection(dataset_collection_id, file_path=archive_path)
+        expected_contents = signature(self._test_dataset).parameters['contents'].default + '\n'
+        extract_dir_path = os.path.join(tempdir, 'extracted_files')
+        os.mkdir(extract_dir_path)
+        with ZipFile(archive_path) as archive:
+            archive.extractall(path=extract_dir_path)
+            for fname in os.listdir(extract_dir_path):
+                dataset_dir_path = os.path.join(extract_dir_path, fname)
+                file_path = os.path.join(dataset_dir_path, os.listdir(dataset_dir_path)[0])
+                with open(file_path) as f:
+                    self.assertEqual(expected_contents, f.read())
 
     def test_wait_for_dataset_collection(self):
         history_id = self.gi.histories.create_history(name="TestDatasetCollectionWait")["id"]
