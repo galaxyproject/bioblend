@@ -4,6 +4,8 @@
 A basic object-oriented interface for Galaxy entities.
 """
 
+from __future__ import annotations
+
 import abc
 import json
 from collections.abc import (
@@ -11,14 +13,15 @@ from collections.abc import (
     Mapping,
     Sequence,
 )
+from types import ModuleType
 from typing import (
+    Any,
     List,
-    Optional,
     Tuple,
-    ModuleType
 )
 
 import bioblend
+from bioblend.galaxy import GalaxyInstance
 
 
 __all__ = (
@@ -155,6 +158,16 @@ class Wrapper(metaclass=abc.ABCMeta):
         return f"{self.__class__.__name__}({self.wrapped!r})"
 
 
+class WrapperTyped(Wrapper):
+
+    BASE_ATTR = ('id')
+
+    def __init__(self, wrapped: dict, gi: GalaxyInstance, parent: Wrapper = None):
+        self.id: str
+        self.gi: GalaxyInstance
+        super().__init__(wrapped, parent=parent, gi=gi)
+
+
 class Step(Wrapper):
     """
     Abstract base class for workflow steps.
@@ -180,6 +193,28 @@ class Step(Wrapper):
     @property
     def gi_module(self):
         return self.gi.workflows
+
+
+class InvocationStep(WrapperTyped):
+    """
+    Abstract base class for invocation steps.
+    """
+    BASE_ATTRS = WrapperTyped.BASE_ATTRS + (
+        'job_id',
+        'order_index',
+        'state',
+        'update_time',
+        'workflow_step_id',
+        'workflow_step_label',
+        'workflow_step_uuid',
+    )
+
+    def __init__(self, step_dict: dict, parent: Invocation):
+        super().__init__(step_dict, parent=parent, gi=parent.gi)
+
+    @property
+    def gi_module(self) -> ModuleType:
+        return self.gi.invocations
 
 
 class Workflow(Wrapper):
@@ -497,13 +532,13 @@ class Workflow(Wrapper):
         self.unmap()
 
 
-class Invocation(Wrapper):
+class Invocation(WrapperTyped):
     """
     Invocation of a workflow.
     This causes the steps of a workflow to be executed in sequential order.
     """
-    BASE_ATTRS = Wrapper.BASE_ATTRS + (
-        'workflow_id'
+    BASE_ATTRS = WrapperTyped.BASE_ATTRS + (
+        'workflow_id',
         'history_id',
         'inputs',
         'state',
@@ -511,25 +546,25 @@ class Invocation(Wrapper):
         'update_time',
         'uuid',
     )
-    POLLING_INTERVAL = 10  # for output state monitoring
+    POLLING_INTERVAL: float = 3  # for output state monitoring
 
-    def __init__(self, inv_dict: dict, gi: Optional[bioblend.GalaxyInstance] = None):
+    def __init__(self, inv_dict: dict, gi: GalaxyInstance):
         super().__init__(inv_dict, gi=gi)
+        self.steps: List[Any] = [InvocationStep(step, self) for step in self.steps]
+        self.inputs: Any = [{**v, 'label': k} for k, v in self.inputs.items()]
 
-    @property
     def gi_module(self) -> ModuleType:
         return self.gi.invocations
 
-    def preview(self) -> List[dict]:
-        getf = self.gi.invocations.get_previews
-        try:
-            p = [_ for _ in getf(published=True) if _.id == self.id][0]
-        except IndexError:
-            raise ValueError('no object for id %s' % self.id)
-        return p
+    def get_previews(self) -> List[dict]:
+        return self.gi.invocations.get_invocations()
+
+    def sorted_step_ids(self) -> List[str]:
+        return [step.id for step in sorted(self.steps, key=lambda s: s.order_index)]
 
     def cancel(self):
-        self.gi.invocations.cancel_invocation(self.id)
+        inv_dict = self.gi.invocations.cancel_invocation(self.id)
+        super().__init__(inv_dict, gi=self.gi)
 
     def show_step(self, step_id: str) -> dict:
         return self.gi.invocations.show_invocation_step(self.id, step_id)
@@ -552,9 +587,9 @@ class Invocation(Wrapper):
     def biocompute_object(self) -> dict:
         return self.gi.invocations.get_invocation_biocompute_object(self.id)
 
-    def wait_for(self, max_wait: float = 12000, interval: float = 3, check: bool = True):
-        inv_dict = self.gi.invocations.wait_for_invocation(self.id)
-        self.__init__(inv_dict, self.gi)
+    def wait(self, max_wait: float = 12000, interval: float = POLLING_INTERVAL, check: bool = True):
+        inv_dict = self.gi.invocations.wait_for_invocation(self.id, interval=interval)
+        super().__init__(inv_dict, gi=self.gi)
 
 
 class Dataset(Wrapper, metaclass=abc.ABCMeta):
