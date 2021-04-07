@@ -6,6 +6,13 @@ import os
 import shlex
 import time
 import warnings
+from typing import (
+    Any,
+    Dict,
+    List,
+    Optional,
+    Union,
+)
 from urllib.parse import urljoin
 
 import bioblend
@@ -135,13 +142,69 @@ class DatasetClient(Client):
             # Return location file was saved to
             return file_local_path
 
-    def get_datasets(self, limit=500, offset=0, history_id=None):
+    def get_datasets(self, state: Optional[Union[str, List[str]]] = None, deleted: bool = False,
+                     history_id: Optional[str] = None, workflow_id: Optional[str] = None,
+                     job_id: Optional[str] = None, dataset_collection_id: Optional[str] = None,
+                     user_id: Optional[str] = None, create_time_min: Optional[str] = None,
+                     create_time_max: Optional[str] = None, update_time_min: Optional[str] = None,
+                     update_time_max: Optional[str] = None, file_size_min: Optional[int] = None,
+                     file_size_max: Optional[int] = None, limit: int = 500, offset: int = 0,
+                     user_details: bool = False) -> List[dict]:
         """
         Get the latest datasets, or select another subset by specifying optional
-        arguments for filtering (e.g. a history id).
+        arguments for filtering (e.g. a history ID).
 
         Since the number of datasets may be very large, ``limit`` and ``offset``
         parameters should always be used to specify the desired range.
+
+        If the user is an admin, this will return datasets for all the users,
+        otherwise only for the current user.
+
+        :type state: str or list of str
+        :param state: Dataset states to filter on.
+
+        :type deleted: bool
+        :param deleted: If ``True``, include deleted datasets in the result.
+
+        :type history_id: str
+        :param history_id: Encoded history ID to filter on.
+
+        :type workflow_id: string
+        :param workflow_id: Encoded workflow ID to filter on.
+
+        :type job_id: string
+        :param job_id: Encoded job ID to filter on.
+
+        :type dataset_collection_id: string
+        :param dataset_collection_id: Encoded dataset collection ID to filter on.
+
+        :type user_id: str
+        :param user_id: Encoded user ID to filter on. Only admin users can
+          access the datasets of other users.
+
+        :type create_time_min: str
+        :param create_time_min: Mininum dataset creation date (in YYYY-MM-DD format) to
+          filter on.
+
+        :type create_time_max: str
+        :param create_time_max: Maximum dataset creation date (in YYYY-MM-DD format) to
+          filter on.
+
+        :type update_time_min: str
+        :param update_time_min: Minimum dataset update date (in YYYY-MM-DD format) to
+          filter on.
+
+        :type update_time_max: str
+        :param update_time_max: Maximum dataset update date (in YYYY-MM-DD format) to
+          filter on.
+
+        :type file_size_min: int
+        :param file_size_min: Minimum size of the dataset's data file to filter on,
+          excluding metadata associated with the dataset.
+
+        :type file_size_max: int
+        :param file_size_max: Maximum size of the dataset's data file to filter on,
+          excluding metadata associated with the dataset.
 
         :type limit: int
         :param limit: Maximum number of datasets to return.
@@ -151,18 +214,45 @@ class DatasetClient(Client):
           For example, if ``limit`` is set to 100 and ``offset`` to 200,
           datasets 200-299 will be returned.
 
-        :type history_id: str
-        :param history_id: Encoded history ID to filter on.
+        :type user_details: bool
+        :param user_details: If ``True`` and the user is an admin, add the user
+          email to each returned dataset dictionary.
 
-        :rtype: list
-        :return: Return a list of dataset dicts.
+        .. note::
+          The following filtering options can only be used with Galaxy ``release_21.05`` or later:
+            workflow_id, invocation_id, job_id, dataset_collection_id, user_id,
+            date_range_min, date_range_max, user_details
         """
-        params = {
+        params: Dict[str, Any] = {
             'limit': limit,
             'offset': offset,
         }
+        if state:
+            params['state'] = state
         if history_id:
             params['history_id'] = history_id
+        if workflow_id:
+            params['workflow_id'] = workflow_id
+        if job_id:
+            params['job_id'] = job_id
+        if dataset_collection_id:
+            params['dataset_collection_id'] = dataset_collection_id
+        if user_id:
+            params['user_id'] = user_id
+        if create_time_min:
+            params['create_time_min'] = create_time_min
+        if create_time_max:
+            params['create_time_max'] = create_time_max
+        if update_time_min:
+            params['update_time_min'] = update_time_min
+        if update_time_max:
+            params['update_time_max'] = update_time_max
+        if file_size_min:
+            params['file_size_min'] = file_size_min
+        if file_size_max:
+            params['file_size_max'] = file_size_max
+        if user_details:
+            params['user_details'] = user_details
         return self._get(params=params)
 
     def wait_for_dataset(self, dataset_id, maxwait=12000, interval=3, check=True):
