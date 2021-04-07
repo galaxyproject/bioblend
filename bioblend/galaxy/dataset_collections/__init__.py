@@ -189,7 +189,8 @@ class DatasetCollectionClient(Client):
             states = [elem['object']['state'] for elem in dataset_collection['elements']]
             terminal_states = [state for state in states if state in TERMINAL_STATES]
             if set(terminal_states) not in [{'ok'}, set()]:
-                raise Exception(f"Dataset collection {dataset_collection_id} contains elements in terminal states: {', '.join(set(terminal_states))}")
+                raise Exception(f"Dataset collection {dataset_collection_id} contains elements in the "
+                                f"following non-ok terminal states: {', '.join(set(terminal_states) - {'ok'})}")
             proportion = len(terminal_states) / len(states)
             if proportion >= proportion_complete:
                 return dataset_collection
