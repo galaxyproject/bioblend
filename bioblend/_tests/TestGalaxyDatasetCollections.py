@@ -143,7 +143,7 @@ class TestGalaxyDatasetCollections(GalaxyTestBase.GalaxyTestBase):
         file_path = os.path.join(tempdir, 'dataset_collection.tgz')
         self.gi.dataset_collections.download_dataset_collection(dataset_collection['id'], file_path=file_path)
         self.assertTrue(os.path.isfile(file_path))
-        self.assertTrue(os.path.getsize(file_path) > 0)
+        self.assertEqual(os.path.getsize(file_path), 22)
 
     def test_wait_for_dataset_collection(self):
         history_id = self.gi.histories.create_history(name="TestDatasetCollectionWait")["id"]
