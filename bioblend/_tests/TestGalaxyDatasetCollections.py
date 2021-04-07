@@ -138,12 +138,13 @@ class TestGalaxyDatasetCollections(GalaxyTestBase.GalaxyTestBase):
     @test_util.skip_unless_galaxy('release_18.01')
     def test_download_dataset_collection(self):
         history_id = self.gi.histories.create_history(name="TestDatasetCollectionDownload")["id"]
-        dataset_collection = self._create_pair_in_history(history_id)
+        dataset_collection_id = self._create_pair_in_history(history_id)['id']
+        self.gi.dataset_collections.wait_for_dataset_collection(dataset_collection_id)
         tempdir = tempfile.mkdtemp(prefix='bioblend_test_dataset_collection_download_')
         file_path = os.path.join(tempdir, 'dataset_collection.tgz')
-        self.gi.dataset_collections.download_dataset_collection(dataset_collection['id'], file_path=file_path)
+        self.gi.dataset_collections.download_dataset_collection(dataset_collection_id, file_path=file_path)
         self.assertTrue(os.path.isfile(file_path))
-        self.assertIn(os.path.getsize(file_path), (22, 46))
+        self.assertEqual(os.path.getsize(file_path), 310)
 
     def test_wait_for_dataset_collection(self):
         history_id = self.gi.histories.create_history(name="TestDatasetCollectionWait")["id"]
