@@ -562,7 +562,7 @@ class Invocation(WrapperTyped):
 
     def cancel(self):
         inv_dict = self.gi.invocations.cancel_invocation(self.id)
-        super().__init__(inv_dict, gi=self.gi)
+        self.__init__(inv_dict, gi=self.gi)
 
     def show_step(self, step_id: str) -> dict:
         return self.gi.invocations.show_invocation_step(self.id, step_id)
@@ -585,9 +585,9 @@ class Invocation(WrapperTyped):
     def biocompute_object(self) -> dict:
         return self.gi.invocations.get_invocation_biocompute_object(self.id)
 
-    def wait(self, max_wait: float = 12000, interval: float = POLLING_INTERVAL, check: bool = True):
-        inv_dict = self.gi.invocations.wait_for_invocation(self.id, interval=interval)
-        super().__init__(inv_dict, gi=self.gi)
+    def wait(self, interval=POLLING_INTERVAL, check=True):
+        inv_dict = self.gi.invocations.wait_for_invocation(self.id, interval=interval, check=check)
+        self.__init__(inv_dict, gi=self.gi)
 
 
 class Dataset(Wrapper, metaclass=abc.ABCMeta):
