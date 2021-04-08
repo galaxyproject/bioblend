@@ -132,6 +132,9 @@ class DatasetCollectionClient(Client):
         :type file_path: str
         :param file_path: The path to which the archive will be downloaded
 
+        :rtype: dict
+        :return: Information about the downloaded archive.
+
         .. note::
           This method downloads a ``zip`` archive for Galaxy 21.01 and later.
           For earlier versions of Galaxy this method downloads a ``tgz`` archive.
