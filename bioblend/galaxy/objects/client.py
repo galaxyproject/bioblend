@@ -10,7 +10,6 @@ from collections.abc import (
     Mapping,
     Sequence,
 )
-# from typing import List
 
 import bioblend
 from . import wrappers
