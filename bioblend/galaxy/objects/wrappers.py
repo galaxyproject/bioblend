@@ -11,15 +11,9 @@ from collections.abc import (
     Mapping,
     Sequence,
 )
-from types import ModuleType
-from typing import (
-    Any,
-    List,
-    Tuple,
-)
+from typing import Tuple
 
 import bioblend
-from bioblend.galaxy import GalaxyInstance
 
 
 __all__ = (
@@ -156,16 +150,6 @@ class Wrapper(metaclass=abc.ABCMeta):
         return f"{self.__class__.__name__}({self.wrapped!r})"
 
 
-class WrapperTyped(Wrapper):
-
-    BASE_ATTR = ('id')
-
-    def __init__(self, wrapped: dict, gi: GalaxyInstance, parent: Wrapper = None):
-        self.id: str
-        self.gi: GalaxyInstance
-        super().__init__(wrapped, parent=parent, gi=gi)
-
-
 class Step(Wrapper):
     """
     Abstract base class for workflow steps.
@@ -193,11 +177,11 @@ class Step(Wrapper):
         return self.gi.workflows
 
 
-class InvocationStep(WrapperTyped):
+class InvocationStep(Wrapper):
     """
     Abstract base class for invocation steps.
     """
-    BASE_ATTRS = WrapperTyped.BASE_ATTRS + (
+    BASE_ATTRS = Wrapper.BASE_ATTRS + (
         'job_id',
         'order_index',
         'state',
@@ -207,11 +191,11 @@ class InvocationStep(WrapperTyped):
         'workflow_step_uuid',
     )
 
-    def __init__(self, step_dict: dict, parent: WrapperTyped):
+    def __init__(self, step_dict, parent):
         super().__init__(step_dict, parent=parent, gi=parent.gi)
 
     @property
-    def gi_module(self) -> ModuleType:
+    def gi_module(self):
         return self.gi.invocations
 
 
@@ -530,12 +514,12 @@ class Workflow(Wrapper):
         self.unmap()
 
 
-class Invocation(WrapperTyped):
+class Invocation(Wrapper):
     """
     Invocation of a workflow.
     This causes the steps of a workflow to be executed in sequential order.
     """
-    BASE_ATTRS = WrapperTyped.BASE_ATTRS + (
+    BASE_ATTRS = Wrapper.BASE_ATTRS + (
         'workflow_id',
         'history_id',
         'inputs',
@@ -546,15 +530,15 @@ class Invocation(WrapperTyped):
     )
     POLLING_INTERVAL = 3  # for output state monitoring
 
-    def __init__(self, inv_dict: dict, gi: GalaxyInstance):
+    def __init__(self, inv_dict, gi):
         super().__init__(inv_dict, gi=gi)
-        self.steps: List[Any] = [InvocationStep(step, self) for step in self.steps]
-        self.inputs: Any = [{**v, 'label': k} for k, v in self.inputs.items()]
+        self.steps = [InvocationStep(step, self) for step in self.steps]
+        self.inputs = [{**v, 'label': k} for k, v in self.inputs.items()]
 
-    def gi_module(self) -> ModuleType:
+    def gi_module(self):
         return self.gi.invocations
 
-    def sorted_step_ids(self) -> List[str]:
+    def sorted_step_ids(self):
         return [step.id for step in sorted(self.steps, key=lambda s: s.order_index)]
 
     def cancel(self):
