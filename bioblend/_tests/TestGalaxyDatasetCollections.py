@@ -141,30 +141,28 @@ class TestGalaxyDatasetCollections(GalaxyTestBase.GalaxyTestBase):
         history_id = self.gi.histories.create_history(name="TestDatasetCollectionDownload")["id"]
         dataset_collection_id = self._create_pair_in_history(history_id)['id']
         self.gi.dataset_collections.wait_for_dataset_collection(dataset_collection_id)
+
         tempdir = tempfile.mkdtemp(prefix='bioblend_test_dataset_collection_download_')
         archive_path = os.path.join(tempdir, 'dataset_collection')
         archive_type = self.gi.dataset_collections.download_dataset_collection(dataset_collection_id, file_path=archive_path)['archive_type']
         expected_contents = signature(self._test_dataset).parameters['contents'].default + '\n'
         extract_dir_path = os.path.join(tempdir, 'extracted_files')
         os.mkdir(extract_dir_path)
+
         if archive_type == 'zip':
             from zipfile import ZipFile
-            with ZipFile(archive_path) as archive:
-                archive.extractall(path=extract_dir_path)
-                for fname in os.listdir(extract_dir_path):
-                    dataset_dir_path = os.path.join(extract_dir_path, fname)
-                    file_path = os.path.join(dataset_dir_path, os.listdir(dataset_dir_path)[0])
-                    with open(file_path) as f:
-                        self.assertEqual(expected_contents, f.read())
+            archive = ZipFile(archive_path)
         elif archive_type == 'tgz':
             import tarfile
-            with tarfile.open(archive_path) as tar:
-                tar.extractall()
-                for fname in os.listdir(extract_dir_path):
-                    dataset_dir_path = os.path.join(extract_dir_path, fname)
-                    file_path = os.path.join(dataset_dir_path, os.listdir(dataset_dir_path)[0])
-                    with open(file_path) as f:
-                        self.assertEqual(expected_contents, f.read())
+            archive = tarfile.open(archive_path)
+
+        archive.extractall(extract_dir_path)
+        for fname in os.listdir(extract_dir_path):
+            dataset_dir_path = os.path.join(extract_dir_path, fname)
+            file_path = os.path.join(dataset_dir_path, os.listdir(dataset_dir_path)[0])
+            with open(file_path) as f:
+                self.assertEqual(expected_contents, f.read())
+        archive.close()
 
     def test_wait_for_dataset_collection(self):
         history_id = self.gi.histories.create_history(name="TestDatasetCollectionWait")["id"]
