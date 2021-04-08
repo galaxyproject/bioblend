@@ -10,6 +10,7 @@ from collections.abc import (
     Mapping,
     Sequence,
 )
+# from typing import List
 
 import bioblend
 from . import wrappers
@@ -321,6 +322,53 @@ class ObjWorkflowClient(ObjClient):
             res = self.gi.workflows.delete_workflow(id_)
             if not isinstance(res, str):
                 self._error('delete_workflow: unexpected reply: %r' % res)
+
+
+class ObjInvocationClient(ObjClient):
+    """
+    Interacts with Galaxy Invocations.
+    """
+    def __init__(self, obj_gi):
+        super().__init__(obj_gi)
+
+    def get(self, id: str) -> wrappers.Invocation:
+        inv_dict = self.gi.invocations.show_invocation(id)
+        return wrappers.Invocation(inv_dict, self.obj_gi)
+
+    def get_previews(self):
+        inv_list = self.gi.invocations.get_invocations()
+        return [wrappers.Invocation(inv_dict, self.obj_gi) for inv_dict in inv_list]
+
+    def list(self, include_terminal, view, step_details):
+        inv_dicts = self.gi.invocations.get_invocations()
+        return [self.get(inv_dict['id']) for inv_dict in inv_dicts]
+
+    def cancel(self, id: str) -> wrappers.Invocation:
+        inv_dict = self.gi.invocations.cancel_invocation(id)
+        return wrappers.Invocation(inv_dict, self.obj_gi)
+
+    def get_step(self, step_id: str) -> wrappers.InvocationStep:
+        inv_step_dict = self.gi.invocations.show_invocation_step(step_id, step_id)
+        return wrappers.InvocationStep(inv_step_dict, self.obj_gi)
+
+    def run_step_action(self, step_id: str, action: str) -> wrappers.InvocationStep:
+        inv_step_dict = self.gi.invocations.run_invocation_step_action(step_id, step_id, action)
+        return wrappers.InvocationStep(inv_step_dict, self.obj_gi)
+
+    def summary(self, id: str) -> dict:
+        return self.gi.invocations.get_invocation_summary(id)
+
+    def step_jobs_summary(self, step_id: str) -> dict:
+        return self.gi.invocations.get_invocation_step_jobs_summary(step_id)
+
+    def report(self, id: str) -> dict:
+        return self.gi.invocations.get_invocation_report(id)
+
+    def save_report_pdf(self, id: str, file_path: str, chunk_size: int = bioblend.CHUNK_SIZE):
+        self.gi.invocations.get_invocation_report_pdf(id, file_path, chunk_size)
+
+    def biocompute_object(self, id: str) -> dict:
+        return self.gi.invocations.get_invocation_biocompute_object(id)
 
 
 class ObjToolClient(ObjClient):
