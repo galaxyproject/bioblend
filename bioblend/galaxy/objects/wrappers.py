@@ -4,8 +4,6 @@
 A basic object-oriented interface for Galaxy entities.
 """
 
-from __future__ import annotations
-
 import abc
 import json
 from collections.abc import (
@@ -209,7 +207,7 @@ class InvocationStep(WrapperTyped):
         'workflow_step_uuid',
     )
 
-    def __init__(self, step_dict: dict, parent: Invocation):
+    def __init__(self, step_dict: dict, parent: WrapperTyped):
         super().__init__(step_dict, parent=parent, gi=parent.gi)
 
     @property
