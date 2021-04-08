@@ -1,11 +1,30 @@
 """
 A base representation of an instance of Galaxy
 """
-from bioblend.galaxy import (config, dataset_collections, datasets, datatypes,
-                             folders, forms, ftpfiles, genomes, groups,
-                             histories, invocations, jobs, libraries, quotas,
-                             roles, tool_data, tool_dependencies, tools,
-                             toolshed, users, visual, workflows)
+from bioblend.galaxy import (
+    config,
+    dataset_collections,
+    datasets,
+    datatypes,
+    folders,
+    forms,
+    ftpfiles,
+    genomes,
+    groups,
+    histories,
+    invocations,
+    jobs,
+    libraries,
+    quotas,
+    roles,
+    tool_data,
+    tool_dependencies,
+    tools,
+    toolshed,
+    users,
+    visual,
+    workflows,
+)
 from bioblend.galaxy.client import Client
 from bioblend.galaxyclient import GalaxyClient
 
