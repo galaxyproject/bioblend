@@ -544,7 +544,7 @@ class Invocation(WrapperTyped):
         'update_time',
         'uuid',
     )
-    POLLING_INTERVAL: float = 3  # for output state monitoring
+    POLLING_INTERVAL = 3  # for output state monitoring
 
     def __init__(self, inv_dict: dict, gi: GalaxyInstance):
         super().__init__(inv_dict, gi=gi)
@@ -554,36 +554,12 @@ class Invocation(WrapperTyped):
     def gi_module(self) -> ModuleType:
         return self.gi.invocations
 
-    def get_previews(self) -> List[dict]:
-        return self.gi.invocations.get_invocations()
-
     def sorted_step_ids(self) -> List[str]:
         return [step.id for step in sorted(self.steps, key=lambda s: s.order_index)]
 
     def cancel(self):
         inv_dict = self.gi.invocations.cancel_invocation(self.id)
         self.__init__(inv_dict, gi=self.gi)
-
-    def show_step(self, step_id: str) -> dict:
-        return self.gi.invocations.show_invocation_step(self.id, step_id)
-
-    def run_step_action(self, step_id: str, action: str) -> dict:
-        return self.gi.invocations.run_invocation_step_action(self.id, step_id, action)
-
-    def summary(self) -> dict:
-        return self.gi.invocations.get_invocation_summary(self.id)
-
-    def step_jobs_summary(self) -> dict:
-        return self.gi.invocations.get_invocation_step_jobs_summary(self.id)
-
-    def report(self) -> dict:
-        return self.gi.invocations.get_invocation_report(self.id)
-
-    def save_report_pdf(self, file_path: str, chunk_size: int = bioblend.CHUNK_SIZE):
-        self.gi.invocations.get_invocation_report_pdf(self.id, file_path, chunk_size)
-
-    def biocompute_object(self) -> dict:
-        return self.gi.invocations.get_invocation_biocompute_object(self.id)
 
     def wait(self, interval=POLLING_INTERVAL, check=True):
         inv_dict = self.gi.invocations.wait_for_invocation(self.id, interval=interval, check=check)
@@ -1555,6 +1531,30 @@ class WorkflowPreview(Preview):
     @property
     def gi_module(self):
         return self.gi.workflows
+
+
+class InvocationPreview(Preview):
+    """
+    Models Galaxy invocation 'previews'.
+
+    Instances of this class wrap dictionaries obtained by getting
+    ``/api/invocations`` from Galaxy.
+    """
+    BASE_ATTRS = Preview.BASE_ATTRS + (
+        'workflow_id',
+        'history_id',
+        'id',
+        'state',
+        'update_time',
+        'uuid',
+    )
+
+    def __init__(self, pw_dict, gi=None):
+        super().__init__(pw_dict, gi=gi)
+
+    @property
+    def gi_module(self):
+        return self.gi.invocations
 
 
 class JobPreview(Preview):
