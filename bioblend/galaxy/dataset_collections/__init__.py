@@ -124,7 +124,7 @@ class DatasetCollectionClient(Client):
 
     def download_dataset_collection(self, dataset_collection_id: str, file_path: str) -> dict:
         """
-        Download a history dataset collection as a tgz archive.
+        Download a history dataset collection as an archive.
 
         :type dataset_collection_id: str
         :param dataset_collection_id: Encoded dataset collection ID
@@ -133,6 +133,8 @@ class DatasetCollectionClient(Client):
         :param file_path: The path to which the archive will be downloaded
 
         .. note::
+          This method downloads a ``zip`` archive for Galaxy 21.01 and later.
+          For earlier versions of Galaxy this method downloads a ``tgz`` archive.
           This method is only supported by Galaxy 18.01 or later.
         """
         url = self._make_url(module_id=dataset_collection_id) + '/download'
