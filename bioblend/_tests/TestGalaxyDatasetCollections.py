@@ -1,6 +1,8 @@
 import os
+import tarfile
 import tempfile
 from inspect import signature
+from zipfile import ZipFile
 
 from bioblend.galaxy import dataset_collections
 from . import (
@@ -150,10 +152,8 @@ class TestGalaxyDatasetCollections(GalaxyTestBase.GalaxyTestBase):
         os.mkdir(extract_dir_path)
 
         if archive_type == 'zip':
-            from zipfile import ZipFile
             archive = ZipFile(archive_path)
         elif archive_type == 'tgz':
-            import tarfile
             archive = tarfile.open(archive_path)
 
         archive.extractall(extract_dir_path)
