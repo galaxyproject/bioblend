@@ -349,11 +349,13 @@ class TestInvocation(GalaxyObjectsTestBase):
         inv.cancel()
         self.assertEqual(inv.state, 'cancelled')
 
+    @test_util.skip_unless_galaxy('release_19.09')
     def test_wait(self):
         inv = self._obj_invoke_workflow()
         inv.wait()
         self.assertEqual(inv.state, 'scheduled')
 
+    @test_util.skip_unless_galaxy('release_19.09')
     def test_update(self):
         inv = self._obj_invoke_workflow()
         # use wait_for_invocation() directly, because inv.wait() will update inv automatically
