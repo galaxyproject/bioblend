@@ -277,6 +277,7 @@ class GalaxyObjectsTestBase(unittest.TestCase):
         self.gi = galaxy_instance.GalaxyInstance(galaxy_url, galaxy_key)
 
 
+@test_util.skip_unless_galaxy('release_19.09')
 class TestInvocation(GalaxyObjectsTestBase):
 
     @classmethod
@@ -343,19 +344,16 @@ class TestInvocation(GalaxyObjectsTestBase):
         self.assertEqual(steps[0].order_index, 0)
         self.assertListEqual(self.inv.sorted_steps_by(indices={2}), [])
 
-    @test_util.skip_unless_galaxy('release_19.09')
     def test_cancel(self):
         inv = self._obj_invoke_workflow()
         inv.cancel()
         self.assertEqual(inv.state, 'cancelled')
 
-    @test_util.skip_unless_galaxy('release_19.09')
     def test_wait(self):
         inv = self._obj_invoke_workflow()
         inv.wait()
         self.assertEqual(inv.state, 'scheduled')
 
-    @test_util.skip_unless_galaxy('release_19.09')
     def test_update(self):
         inv = self._obj_invoke_workflow()
         # use wait_for_invocation() directly, because inv.wait() will update inv automatically
@@ -364,7 +362,6 @@ class TestInvocation(GalaxyObjectsTestBase):
         inv.update()
         self.assertEqual(inv.state, 'scheduled')
 
-    @test_util.skip_unless_galaxy('release_19.09')
     def test_run_step_actions(self):
         invocation_id = self.gi.gi.workflows.invoke_workflow(
             self.workflow_pause_id,
@@ -382,14 +379,12 @@ class TestInvocation(GalaxyObjectsTestBase):
         inv.run_step_actions([inv.steps[2]], [True])
         self.assertEqual(inv.steps[2].action, True)
 
-    @test_util.skip_unless_galaxy('release_19.09')
     def test_summary(self):
         inv = self._obj_invoke_workflow()
         inv.wait()
         summary = inv.summary()
         self.assertEqual(summary['populated_state'], 'ok')
 
-    @test_util.skip_unless_galaxy('release_19.09')
     def test_step_jobs_summary(self):
         inv = self._obj_invoke_workflow()
         inv.wait()
@@ -397,13 +392,11 @@ class TestInvocation(GalaxyObjectsTestBase):
         self.assertEqual(len(step_jobs_summary), 1)
         self.assertEqual(step_jobs_summary[0]['populated_state'], 'ok')
 
-    @test_util.skip_unless_galaxy('release_19.09')
     def test_report(self):
         inv = self._obj_invoke_workflow()
         report = inv.report()
         assert report['workflows'] == {self.workflow_id: {'name': 'paste_columns'}}
 
-    @test_util.skip_unless_galaxy('release_19.09')
     def test_save_report_pdf(self):
         inv = self._obj_invoke_workflow()
         try:
@@ -430,18 +423,19 @@ class TestInvocation(GalaxyObjectsTestBase):
         return self.gi.invocations.get(invocation_id)
 
 
+@test_util.skip_unless_galaxy('release_19.09')
 class TestObjInvocationClient(GalaxyObjectsTestBase):
 
     @classmethod
     def setUpClass(cls):
         super().setUp(cls)
         path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
-        cls.workflow_id = cls.gi.gi.workflows.import_workflow_from_local_path(path)['id']
+        workflow_id = cls.gi.gi.workflows.import_workflow_from_local_path(path)['id']
         cls.history_id = cls.gi.gi.histories.create_history(name="TestGalaxyInvocations")["id"]
-        cls.dataset_id = cls.gi.gi.tools.paste_content('1\t2\t3', cls.history_id)["outputs"][0]["id"]
-        dataset = {'src': 'hda', 'id': cls.dataset_id}
+        dataset_id = cls.gi.gi.tools.paste_content('1\t2\t3', cls.history_id)["outputs"][0]["id"]
+        dataset = {'src': 'hda', 'id': dataset_id}
         invocation_id = cls.gi.gi.workflows.invoke_workflow(
-            cls.workflow_id,
+            workflow_id,
             inputs={'Input 1': dataset, 'Input 2': dataset},
             history_id=cls.history_id,
             inputs_by='name'
@@ -453,7 +447,6 @@ class TestObjInvocationClient(GalaxyObjectsTestBase):
     def tearDownClass(cls):
         cls.gi.gi.histories.delete_history(cls.history_id, purge=True)
 
-    @test_util.skip_unless_galaxy('release_19.09')
     def test_get(self):
         inv = self.gi.invocations.get(self.inv.id)
         self.assertEqual(self.inv.id, inv.id)
@@ -474,7 +467,6 @@ class TestObjInvocationClient(GalaxyObjectsTestBase):
         self.assertEqual(self.inv.update_time, inv_preview.update_time)
         self.assertEqual(self.inv.uuid, inv_preview.uuid)
 
-    @test_util.skip_unless_galaxy('release_19.09')
     def test_list(self):
         invs = self.gi.invocations.list()
         inv = next(filter(lambda i: i.id == self.inv.id, invs))
