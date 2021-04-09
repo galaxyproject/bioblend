@@ -330,17 +330,46 @@ class ObjInvocationClient(ObjClient):
     def __init__(self, obj_gi):
         super().__init__(obj_gi)
 
-    def get(self, id: str) -> wrappers.Invocation:
+    def get(self, id) -> wrappers.Invocation:
+        """
+        Get an invocation by ID.
+
+        :type id: str
+        :param id: invocation ID
+
+        :rtype: Invocation
+        :param: invocation object
+        """
         inv_dict = self.gi.invocations.show_invocation(id)
         return wrappers.Invocation(inv_dict, self.obj_gi)
 
     def get_previews(self):
-        inv_list = self.gi.invocations.get_invocations()
-        return [wrappers.Invocation(inv_dict, self.obj_gi) for inv_dict in inv_list]
+        """
+        Get previews of all invocations.
 
-    def list(self, include_terminal, view, step_details):
-        inv_dicts = self.gi.invocations.get_invocations()
-        return [self.get(inv_dict['id']) for inv_dict in inv_dicts]
+        :rtype: list of InvocationPreview
+        :param: previews of invocations
+        """
+        inv_list = self.gi.invocations.get_invocations()
+        return [wrappers.InvocationPreview(inv_dict, self.obj_gi) for inv_dict in inv_list]
+
+    def list(self, include_terminal=True):
+        """
+        Get full listing of invocations.
+        This can be slow!
+
+        :param include_terminal: bool
+        :param: whether to include invocations in terminal states
+
+        :rtype: list of Invocation
+        :param: invocation objects
+        """
+        inv_dict_list = self.gi.invocations.get_invocations(
+            include_terminal=include_terminal,
+            view='element',
+            step_details=True
+        )
+        return [wrappers.Invocation(inv_dict, self.obj_gi) for inv_dict in inv_dict_list]
 
 
 class ObjToolClient(ObjClient):
