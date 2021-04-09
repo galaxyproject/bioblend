@@ -528,9 +528,8 @@ class Invocation(Wrapper):
         'update_time',
         'uuid',
     )
-    POLLING_INTERVAL = 3  # for output state monitoring
 
-    def __init__(self, inv_dict, gi):
+    def __init__(self, inv_dict, gi=None):
         super().__init__(inv_dict, gi=gi)
         self.steps = [InvocationStep(step, self) for step in self.steps]
         self.inputs = [{**v, 'label': k} for k, v in self.inputs.items()]
@@ -539,29 +538,76 @@ class Invocation(Wrapper):
         return self.gi.invocations
 
     def sorted_step_ids(self):
+        """
+        Get the step IDs sorted based on this order index.
+
+        :rtype: list of str
+        :param: sorted step IDs
+        """
         return [step.id for step in sorted(self.steps, key=lambda step: step.order_index)]
 
     def step_states(self):
+        """
+        Get the set of step states for this invocation.
+
+        :rtype: set
+        :param: step states
+        """
         return set(step.state for step in self.steps)
 
     def number_of_steps(self):
+        """
+        Get the number of steps for this invocation.
+
+        :rtype: int
+        :param: number of steps
+        """
         return len(self.steps)
 
+    def sorted_steps_by(self, indices=None, states=None, step_ids=None):
+        """
+        Get steps for this invocation, or get a subset by specifying
+        optional parameters for filtering.
+
+        :rtype: list of InvocationStep
+        :param: invocation steps
+        """
+        steps = self.steps
+        if indices is not None:
+            steps = filter(lambda step: step.order_index in indices, steps)
+        if states is not None:
+            steps = filter(lambda step: step.state in states, steps)
+        if step_ids is not None:
+            steps = filter(lambda step: step.id in step_ids, steps)
+        return sorted(steps, key=lambda step: step.order_index)
+
     def cancel(self):
-        inv_dict = self.gi.invocations.cancel_invocation(self.id)
+        """
+        Cancel this invocation.
+
+        .. note::
+          On success, this method updates the Invocation object's internal variables.
+        """
+        inv_dict = self.gi.gi.invocations.cancel_invocation(self.id)
         self.__init__(inv_dict, gi=self.gi)
 
     def update(self):
+        """
+        Update this invocation with the latest information from the server.
+
+        .. note::
+          On success, this method updates the Invocation object's internal variables.
+        """
         inv_dict = self.gi.gi.invocations.show_invocation(self.id)
         self.__init__(inv_dict, gi=self.gi)
 
-    def get_sorted_steps_by(self, indices=(), states=(), ids=()):
-        steps = filter(lambda step: step.order_index in indices)
-        steps = filter(lambda step: step.state in states)
-        steps = filter(lambda step: step.id in ids)
-        return sorted(steps, key=lambda step: step.index)
-
     def run_step_actions(self, steps, actions):
+        """
+        Run actions for active steps of this invocation.
+
+        .. note::
+          On success, this method updates the Invocation object's internal step variables.
+        """
         if not len(steps) == len(actions):
             raise RuntimeError(f'Different number of ``steps`` ({len(steps)}) and ``actions`` ({len(actions)}) in ``{self}.run_step_actions()``')
         step_dict_list = [self.gi.gi.invocations.run_invocation_step_action(self.id, step.id, action) for step, action in zip(steps, actions)]
@@ -569,22 +615,61 @@ class Invocation(Wrapper):
             step.__init__(step_dict)
 
     def summary(self):
+        """
+        Get a summary for this invocation.
+
+        :rtype: dict
+        :param: invocation summary
+        """
         return self.gi.gi.invocations.get_invocation_summary(self.id)
 
     def step_jobs_summary(self):
+        """
+        Get a summary for this invocation's step jobs.
+
+        :rtype: list of dicts
+        :param: step job summaries
+        """
         return self.gi.gi.invocations.get_invocation_step_jobs_summary(self.id)
 
     def report(self):
+        """
+        Get a report for this invocation.
+
+        :rtype: dict
+        :param: invocation report
+        """
         return self.gi.gi.invocations.get_invocation_report(self.id)
 
     def save_report_pdf(self, file_path, chunk_size=bioblend.CHUNK_SIZE):
         self.gi.gi.invocations.get_invocation_report_pdf(self.id, file_path, chunk_size)
 
     def biocompute_object(self):
-        return self.gi.invocations.get_invocation_biocompute_object(self.id)
+        """
+        Get a BioCompute object for this invocation.
+
+        :rtype: dict
+        :param: BioCompute object
+        """
+        return self.gi.gi.invocations.get_invocation_biocompute_object(self.id)
 
     def wait(self, maxwait=12000, interval=3, check=True):
-        inv_dict = self.gi.invocations.wait_for_invocation(self.id, maxwait=maxwait, interval=interval, check=check)
+        """
+        Wait for this invocation to reach a terminal state.
+
+        :type maxwait: float
+        :param maxwait: upper limit on waiting time
+
+        :type interval: float
+        :param interval: polling interval in secconds
+
+        :type check: bool
+        :param check: if ``true``, raise an error if the terminal state is not 'scheduled'
+
+        .. note::
+          On success, this method updates the Invocation object's internal variables.
+        """
+        inv_dict = self.gi.gi.invocations.wait_for_invocation(self.id, maxwait=maxwait, interval=interval, check=check)
         self.__init__(inv_dict, gi=self.gi)
 
 
