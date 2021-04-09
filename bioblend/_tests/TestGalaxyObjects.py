@@ -451,6 +451,7 @@ class TestObjInvocationClient(GalaxyObjectsTestBase):
     def tearDownClass(cls):
         cls.gi.gi.histories.delete_history(cls.history_id, purge=True)
 
+    @test_util.skip_unless_galaxy('release_19.09')
     def test_get(self):
         inv = self.gi.invocations.get(self.inv.id)
         self.assertEqual(self.inv.id, inv.id)
@@ -471,6 +472,7 @@ class TestObjInvocationClient(GalaxyObjectsTestBase):
         self.assertEqual(self.inv.update_time, inv_preview.update_time)
         self.assertEqual(self.inv.uuid, inv_preview.uuid)
 
+    @test_util.skip_unless_galaxy('release_19.09')
     def test_list(self):
         invs = self.gi.invocations.list()
         inv = next(filter(lambda i: i.id == self.inv.id, invs))
