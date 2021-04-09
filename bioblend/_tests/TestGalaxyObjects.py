@@ -281,7 +281,18 @@ class TestInvocation(GalaxyObjectsTestBase):
 
     @classmethod
     def setUpClass(cls):
+        super().setUp(cls)
         cls.inv = wrappers.Invocation(SAMPLE_INV_DICT)
+        path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
+        path_pause = test_util.get_abspath(os.path.join('data', 'test_workflow_pause.ga'))
+        cls.workflow_id = cls.gi.gi.workflows.import_workflow_from_local_path(path)['id']
+        cls.workflow_pause_id = cls.gi.gi.workflows.import_workflow_from_local_path(path_pause)['id']
+        cls.history_id = cls.gi.gi.histories.create_history(name="TestInvocation")["id"]
+        cls.dataset_id = cls.gi.gi.tools.paste_content('1\t2\t3', cls.history_id)["outputs"][0]["id"]
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.gi.gi.histories.delete_history(cls.history_id, purge=True)
 
     def test_initialize(self):
         self.assertEqual(self.inv.workflow_id, '03501d7626bd192f')
@@ -332,6 +343,90 @@ class TestInvocation(GalaxyObjectsTestBase):
         self.assertEqual(steps[0].order_index, 0)
         self.assertListEqual(self.inv.sorted_steps_by(indices={2}), [])
 
+    @test_util.skip_unless_galaxy('release_19.09')
+    def test_cancel(self):
+        inv = self._obj_invoke_workflow()
+        inv.cancel()
+        self.assertEqual(inv.state, 'cancelled')
+
+    def test_wait(self):
+        inv = self._obj_invoke_workflow()
+        inv.wait()
+        self.assertEqual(inv.state, 'scheduled')
+
+    def test_update(self):
+        inv = self._obj_invoke_workflow()
+        # use wait_for_invocation() directly, because inv.wait() will update inv automatically
+        self.gi.gi.invocations.wait_for_invocation(inv.id)
+        self.assertEqual(inv.state, 'new')
+        inv.update()
+        self.assertEqual(inv.state, 'scheduled')
+
+    @test_util.skip_unless_galaxy('release_19.09')
+    def test_run_step_actions(self):
+        invocation_id = self.gi.gi.workflows.invoke_workflow(
+            self.workflow_pause_id,
+            inputs={"0": {"src": "hda", "id": self.dataset_id}},
+            history_id=self.history_id,
+        )['id']
+        inv = self.gi.invocations.get(invocation_id)
+        for _ in range(20):
+            with self.assertRaises(bioblend.TimeoutException):
+                inv.wait(maxwait=0.5, interval=0.5)
+            inv.update()
+            if len(inv.steps) >= 3:
+                break
+        self.assertEqual(inv.steps[2].action, None)
+        inv.run_step_actions([inv.steps[2]], [True])
+        self.assertEqual(inv.steps[2].action, True)
+
+    @test_util.skip_unless_galaxy('release_19.09')
+    def test_summary(self):
+        inv = self._obj_invoke_workflow()
+        inv.wait()
+        summary = inv.summary()
+        self.assertEqual(summary['populated_state'], 'ok')
+
+    @test_util.skip_unless_galaxy('release_19.09')
+    def test_step_jobs_summary(self):
+        inv = self._obj_invoke_workflow()
+        inv.wait()
+        step_jobs_summary = inv.step_jobs_summary()
+        self.assertEqual(len(step_jobs_summary), 1)
+        self.assertEqual(step_jobs_summary[0]['populated_state'], 'ok')
+
+    @test_util.skip_unless_galaxy('release_19.09')
+    def test_report(self):
+        inv = self._obj_invoke_workflow()
+        report = inv.report()
+        assert report['workflows'] == {self.workflow_id: {'name': 'paste_columns'}}
+
+    @test_util.skip_unless_galaxy('release_19.09')
+    def test_save_report_pdf(self):
+        inv = self._obj_invoke_workflow()
+        try:
+            inv.save_report_pdf('report.pdf')
+        except Exception:
+            # This can fail if dependencies as weasyprint are not installed on the Galaxy server
+            pass
+
+    @test_util.skip_unless_galaxy('release_20.09')
+    def test_biocompute_object(self):
+        inv = self._obj_invoke_workflow()
+        inv.wait()
+        biocompute_object = inv.biocompute_object()
+        self.assertEqual(len(biocompute_object['description_domain']['pipeline_steps']), 1)
+
+    def _obj_invoke_workflow(self):
+        dataset = {'src': 'hda', 'id': self.dataset_id}
+        invocation_id = self.gi.gi.workflows.invoke_workflow(
+            self.workflow_id,
+            inputs={'Input 1': dataset, 'Input 2': dataset},
+            history_id=self.history_id,
+            inputs_by='name'
+        )['id']
+        return self.gi.invocations.get(invocation_id)
+
 
 class TestObjInvocationClient(GalaxyObjectsTestBase):
 
@@ -343,14 +438,18 @@ class TestObjInvocationClient(GalaxyObjectsTestBase):
         cls.history_id = cls.gi.gi.histories.create_history(name="TestGalaxyInvocations")["id"]
         cls.dataset_id = cls.gi.gi.tools.paste_content('1\t2\t3', cls.history_id)["outputs"][0]["id"]
         dataset = {'src': 'hda', 'id': cls.dataset_id}
-        invocation = cls.gi.gi.workflows.invoke_workflow(
+        invocation_id = cls.gi.gi.workflows.invoke_workflow(
             cls.workflow_id,
             inputs={'Input 1': dataset, 'Input 2': dataset},
             history_id=cls.history_id,
-            inputs_by='name',
-        )
-        cls.inv = cls.gi.invocations.get(invocation['id'])
+            inputs_by='name'
+        )['id']
+        cls.inv = cls.gi.invocations.get(invocation_id)
         cls.inv.wait()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.gi.gi.histories.delete_history(cls.history_id, purge=True)
 
     def test_get(self):
         inv = self.gi.invocations.get(self.inv.id)
