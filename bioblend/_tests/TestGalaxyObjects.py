@@ -279,9 +279,9 @@ class GalaxyObjectsTestBase(unittest.TestCase):
 
 class TestInvocation(GalaxyObjectsTestBase):
 
-    def setUp(self):
-        super().setUp()
-        self.inv = wrappers.Invocation(SAMPLE_INV_DICT, self.gi)
+    @classmethod
+    def setUpClass(cls):
+        cls.inv = wrappers.Invocation(SAMPLE_INV_DICT)
 
     def test_initialize(self):
         self.assertEqual(self.inv.workflow_id, '03501d7626bd192f')
@@ -291,7 +291,7 @@ class TestInvocation(GalaxyObjectsTestBase):
         self.assertEqual(self.inv.update_time, '2015-10-31T22:00:26')
         self.assertEqual(self.inv.uuid, 'c8aa2b1c-801a-11e5-a9e5-8ca98228593c')
 
-    def test_steps(self):
+    def test_initialize_steps(self):
         for step, step_dict in zip(self.inv.steps, SAMPLE_INV_DICT['steps']):
             self.assertIsInstance(step, wrappers.InvocationStep)
             self.assertIs(step.parent, self.inv)
@@ -304,9 +304,83 @@ class TestInvocation(GalaxyObjectsTestBase):
             self.assertEqual(step.workflow_step_label, step_dict['workflow_step_label'])
             self.assertEqual(step.workflow_step_uuid, step_dict['workflow_step_uuid'])
 
-    def test_inputs(self):
+    def test_initialize_inputs(self):
         for i, input in enumerate(self.inv.inputs):
             self.assertEqual(input, {**SAMPLE_INV_DICT['inputs'][str(i)], 'label': str(i)})
+
+    def test_sorted_step_ids(self):
+        self.assertListEqual(self.inv.sorted_step_ids(), ['d413a19dec13d11e', '2f94e8ae9edff68a'])
+
+    def test_step_states(self):
+        self.assertSetEqual(self.inv.step_states(), {None, 'new'})
+
+    def test_number_of_steps(self):
+        self.assertEqual(self.inv.number_of_steps(), 2)
+
+    def test_sorted_steps_by(self):
+        self.assertEqual(len(self.inv.sorted_steps_by()), 2)
+        steps = self.inv.sorted_steps_by(step_ids={'2f94e8ae9edff68a'})
+        self.assertEqual(len(steps), 1)
+        self.assertEqual(steps[0].id, '2f94e8ae9edff68a')
+        self.assertListEqual(self.inv.sorted_steps_by(step_ids={'unmatched_id'}), [])
+        steps = self.inv.sorted_steps_by(states={'new'})
+        self.assertEqual(len(steps), 1)
+        self.assertEqual(steps[0].state, 'new')
+        self.assertListEqual(self.inv.sorted_steps_by(states={'unmatched_state'}), [])
+        steps = self.inv.sorted_steps_by(indices={0}, states={None, 'new'})
+        self.assertEqual(len(steps), 1)
+        self.assertEqual(steps[0].order_index, 0)
+        self.assertListEqual(self.inv.sorted_steps_by(indices={2}), [])
+
+
+class TestObjInvocationClient(GalaxyObjectsTestBase):
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUp(cls)
+        path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
+        cls.workflow_id = cls.gi.gi.workflows.import_workflow_from_local_path(path)['id']
+        cls.history_id = cls.gi.gi.histories.create_history(name="TestGalaxyInvocations")["id"]
+        cls.dataset_id = cls.gi.gi.tools.paste_content('1\t2\t3', cls.history_id)["outputs"][0]["id"]
+        dataset = {'src': 'hda', 'id': cls.dataset_id}
+        invocation = cls.gi.gi.workflows.invoke_workflow(
+            cls.workflow_id,
+            inputs={'Input 1': dataset, 'Input 2': dataset},
+            history_id=cls.history_id,
+            inputs_by='name',
+        )
+        cls.inv = cls.gi.invocations.get(invocation['id'])
+        cls.inv.wait()
+
+    def test_get(self):
+        inv = self.gi.invocations.get(self.inv.id)
+        self.assertEqual(self.inv.id, inv.id)
+        self.assertEqual(self.inv.workflow_id, inv.workflow_id)
+        self.assertEqual(self.inv.history_id, inv.history_id)
+        self.assertEqual(self.inv.state, inv.state)
+        self.assertEqual(self.inv.update_time, inv.update_time)
+        self.assertEqual(self.inv.uuid, inv.uuid)
+
+    def test_get_previews(self):
+        previews = self.gi.invocations.get_previews()
+        self.assertSetEqual({type(preview) for preview in previews}, {wrappers.InvocationPreview})
+        inv_preview = next(filter(lambda p: p.id == self.inv.id, previews))
+        self.assertEqual(self.inv.id, inv_preview.id)
+        self.assertEqual(self.inv.workflow_id, inv_preview.workflow_id)
+        self.assertEqual(self.inv.history_id, inv_preview.history_id)
+        self.assertEqual(self.inv.state, inv_preview.state)
+        self.assertEqual(self.inv.update_time, inv_preview.update_time)
+        self.assertEqual(self.inv.uuid, inv_preview.uuid)
+
+    def test_list(self):
+        invs = self.gi.invocations.list()
+        inv = next(filter(lambda i: i.id == self.inv.id, invs))
+        self.assertEqual(self.inv.id, inv.id)
+        self.assertEqual(self.inv.workflow_id, inv.workflow_id)
+        self.assertEqual(self.inv.history_id, inv.history_id)
+        self.assertEqual(self.inv.state, inv.state)
+        self.assertEqual(self.inv.update_time, inv.update_time)
+        self.assertEqual(self.inv.uuid, inv.uuid)
 
 
 class TestGalaxyInstance(GalaxyObjectsTestBase):
