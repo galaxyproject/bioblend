@@ -539,14 +539,52 @@ class Invocation(Wrapper):
         return self.gi.invocations
 
     def sorted_step_ids(self):
-        return [step.id for step in sorted(self.steps, key=lambda s: s.order_index)]
+        return [step.id for step in sorted(self.steps, key=lambda step: step.order_index)]
+
+    def step_states(self):
+        return set(step.state for step in self.steps)
+
+    def number_of_steps(self):
+        return len(self.steps)
 
     def cancel(self):
         inv_dict = self.gi.invocations.cancel_invocation(self.id)
         self.__init__(inv_dict, gi=self.gi)
 
-    def wait(self, interval=POLLING_INTERVAL, check=True):
-        inv_dict = self.gi.invocations.wait_for_invocation(self.id, interval=interval, check=check)
+    def update(self):
+        inv_dict = self.gi.gi.invocations.show_invocation(self.id)
+        self.__init__(inv_dict, gi=self.gi)
+
+    def get_sorted_steps_by(self, indices=(), states=(), ids=()):
+        steps = filter(lambda step: step.order_index in indices)
+        steps = filter(lambda step: step.state in states)
+        steps = filter(lambda step: step.id in ids)
+        return sorted(steps, key=lambda step: step.index)
+
+    def run_step_actions(self, steps, actions):
+        if not len(steps) == len(actions):
+            raise RuntimeError(f'Different number of ``steps`` ({len(steps)}) and ``actions`` ({len(actions)}) in ``{self}.run_step_actions()``')
+        step_dict_list = [self.gi.gi.invocations.run_invocation_step_action(self.id, step.id, action) for step, action in zip(steps, actions)]
+        for step, step_dict in zip(steps, step_dict_list):
+            step.__init__(step_dict)
+
+    def summary(self):
+        return self.gi.gi.invocations.get_invocation_summary(self.id)
+
+    def step_jobs_summary(self):
+        return self.gi.gi.invocations.get_invocation_step_jobs_summary(self.id)
+
+    def report(self):
+        return self.gi.gi.invocations.get_invocation_report(self.id)
+
+    def save_report_pdf(self, file_path, chunk_size=bioblend.CHUNK_SIZE):
+        self.gi.gi.invocations.get_invocation_report_pdf(self.id, file_path, chunk_size)
+
+    def biocompute_object(self):
+        return self.gi.invocations.get_invocation_biocompute_object(self.id)
+
+    def wait(self, maxwait=12000, interval=3, check=True):
+        inv_dict = self.gi.invocations.wait_for_invocation(self.id, maxwait=maxwait, interval=interval, check=check)
         self.__init__(inv_dict, gi=self.gi)
 
 
