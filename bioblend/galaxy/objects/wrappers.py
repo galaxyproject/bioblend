@@ -183,6 +183,7 @@ class InvocationStep(Wrapper):
     """
     BASE_ATTRS = Wrapper.BASE_ATTRS + (
         'job_id',
+        'action',
         'order_index',
         'state',
         'update_time',
@@ -612,7 +613,7 @@ class Invocation(Wrapper):
             raise RuntimeError(f'Different number of ``steps`` ({len(steps)}) and ``actions`` ({len(actions)}) in ``{self}.run_step_actions()``')
         step_dict_list = [self.gi.gi.invocations.run_invocation_step_action(self.id, step.id, action) for step, action in zip(steps, actions)]
         for step, step_dict in zip(steps, step_dict_list):
-            step.__init__(step_dict)
+            step.__init__(step_dict, parent=self)
 
     def summary(self):
         """
