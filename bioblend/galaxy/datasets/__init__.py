@@ -142,14 +142,26 @@ class DatasetClient(Client):
             # Return location file was saved to
             return file_local_path
 
-    def get_datasets(self, state: Optional[Union[str, List[str]]] = None, deleted: bool = False,
-                     history_id: Optional[str] = None, workflow_id: Optional[str] = None,
-                     job_id: Optional[str] = None, dataset_collection_id: Optional[str] = None,
-                     user_id: Optional[str] = None, create_time_min: Optional[str] = None,
-                     create_time_max: Optional[str] = None, update_time_min: Optional[str] = None,
-                     update_time_max: Optional[str] = None, file_size_min: Optional[int] = None,
-                     file_size_max: Optional[int] = None, limit: int = 500, offset: int = 0,
-                     user_details: bool = False) -> List[dict]:
+    def get_datasets(
+        self,
+        name: Optional[str] = None,
+        extension: Optional[str] = None,
+        state: Optional[Union[str, List[str]]] = None,
+        deleted: bool = False,
+        visible: bool = True,
+        id: Optional[List[str]] = None,
+        history_id: Optional[str] = None,
+        workflow_id: Optional[str] = None,
+        job_id: Optional[str] = None,
+        dataset_collection_id: Optional[str] = None,
+        user_id: Optional[str] = None,
+        create_time: Optional[Dict[str, str]] = None,
+        update_time: Optional[Dict[str, str]] = None,
+        file_size: Optional[Dict[str, int]] = None,
+        limit: int = 500,
+        offset: int = 0,
+        user_details: bool = False
+    ) -> List[dict]:
         """
         Get the latest datasets, or select another subset by specifying optional
         arguments for filtering (e.g. a history ID).
@@ -227,32 +239,41 @@ class DatasetClient(Client):
             'limit': limit,
             'offset': offset,
         }
-        if state:
-            params['state'] = state
         if history_id:
             params['history_id'] = history_id
-        if workflow_id:
-            params['workflow_id'] = workflow_id
-        if job_id:
-            params['job_id'] = job_id
-        if dataset_collection_id:
-            params['dataset_collection_id'] = dataset_collection_id
-        if user_id:
-            params['user_id'] = user_id
-        if create_time_min:
-            params['create_time_min'] = create_time_min
-        if create_time_max:
-            params['create_time_max'] = create_time_max
-        if update_time_min:
-            params['update_time_min'] = update_time_min
-        if update_time_max:
-            params['update_time_max'] = update_time_max
-        if file_size_min:
-            params['file_size_min'] = file_size_min
-        if file_size_max:
-            params['file_size_max'] = file_size_max
-        if user_details:
-            params['user_details'] = user_details
+
+        q: List[str] = []
+        qv: List[Any] = []
+
+        if name:
+            q.append('name-eq')
+            qv.append(name)
+        if state:
+            op, val = ('eq', state) if type(state) is str else ('in', ','.join(state))
+            q.append(f'state-{op}')
+            qv.append(val)
+        if extension:
+            op, val = ('eq', extension) if type(extension) is str else ('in', ','.join(extension))
+            q.append(f'extension-{op}')
+            qv.append(val)
+        if visible:
+            q.append('visible-eq')
+            qv.append(str(visible))
+        if id:
+            q.append('id-in')
+            qv.append(','.join(id))
+        if create_time:
+            for k, v in create_time.items():
+                q.append(f'create_time-{k}')
+                qv.append(v)
+        if update_time:
+            for k, v in update_time.items():
+                q.append(f'update_time-{k}')
+                qv.append(v)
+
+        params['q'] = q
+        params['qv'] = qv
+
         return self._get(params=params)
 
     def wait_for_dataset(self, dataset_id, maxwait=12000, interval=3, check=True):
