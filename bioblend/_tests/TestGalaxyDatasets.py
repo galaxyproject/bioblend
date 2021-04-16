@@ -1,7 +1,7 @@
 import shutil
 import tempfile
 
-from bioblend import ConnectionError
+from bioblend import ConnectionError, galaxy
 from . import (
     GalaxyTestBase,
     test_util
@@ -65,3 +65,28 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
     def test_wait_for_dataset(self):
         dataset = self.gi.datasets.wait_for_dataset(self.dataset_id)
         self.assertEqual(dataset['state'], 'ok')
+
+    @test_util.skip_unless_galaxy('release_19.05')
+    def test_dataset_permissions(self):
+        admin_user_id = self.gi.users.get_current_user()['id']
+        user_id = self.gi.users.create_local_user('newuser3', 'newuser3@example.com', 'secret')['id']
+        user_api_key = self.gi.users.create_user_apikey(user_id)
+        anonymous_gi = galaxy.GalaxyInstance(url=self.gi.base_url, key=None)
+        user_gi = galaxy.GalaxyInstance(url=self.gi.base_url, key=user_api_key)
+        sharing_role = self.gi.roles.create_role('sharing_role', 'sharing_role', [user_id, admin_user_id])['id']
+
+        self.gi.datasets.publish_dataset(self.dataset_id, published=False)
+        with self.assertRaises(ConnectionError):
+            anonymous_gi.datasets.show_dataset(self.dataset_id)
+        self.gi.datasets.publish_dataset(self.dataset_id, published=True)
+        # now dataset is public, i.e. accessible to anonymous users
+        self.assertEqual(anonymous_gi.datasets.show_dataset(self.dataset_id)['id'], self.dataset_id)
+        self.gi.datasets.publish_dataset(self.dataset_id, published=False)
+
+        with self.assertRaises(ConnectionError):
+            user_gi.datasets.show_dataset(self.dataset_id)
+        self.gi.datasets.update_permissions(self.dataset_id, access_ids=[sharing_role], manage_ids=[sharing_role])
+        self.assertEqual(user_gi.datasets.show_dataset(self.dataset_id)['id'], self.dataset_id)
+        # anonymous access now fails because sharing is only with the shared user role
+        with self.assertRaises(ConnectionError):
+            anonymous_gi.datasets.show_dataset(self.dataset_id)
