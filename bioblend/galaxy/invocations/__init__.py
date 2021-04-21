@@ -137,19 +137,30 @@ class InvocationClient(Client):
                          replacement_params: Optional[dict] = None, allow_tool_state_corrections: bool = False,
                          inputs_by: Optional[str] = None, parameters_normalized: bool = False):
         """
-        Rerun a workflow invocation.
+        Rerun a workflow invocation. For more extensive documentation of all
+        parameters, see the ``gi.workflows.invoke_workflow()`` method.
 
         :type invocation_id: str
         :param invocation_id: Encoded workflow invocation ID to be rerun
 
+        :type inputs_update: dict
+        :param inputs_update: If different datasets should be used to the original
+          invocation, this should contain a mapping of workflow inputs to the new
+          datasets and dataset collections.
+
+        :type params_update: dict
+        :param params_update: If different non-dataset tool parameters should be
+          used to the original invocation, this should contain a mapping of the
+          new parameter values.
+
         :type history_id: str
         :param history_id: The encoded history ID where to store the workflow
-          output. Alternatively, ``history_name`` may be specified to create a
+          outputs. Alternatively, ``history_name`` may be specified to create a
           new history.
 
         :type history_name: str
         :param history_name: Create a new history with the given name to store
-          the workflow output. If both ``history_id`` and ``history_name`` are
+          the workflow outputs. If both ``history_id`` and ``history_name`` are
           provided, ``history_name`` is ignored. If neither is specified, a new
           'Unnamed history' is created.
 
@@ -173,10 +184,10 @@ class InvocationClient(Client):
           "step_index|step_uuid" (default), "step_index", "step_id", "step_uuid", or "name".
 
         :type parameters_normalized: bool
-        :param parameters_normalized: Whether Galaxy should normalize ``params``
-          to ensure everything is referenced by a numeric step ID. Default is
-          ``False``, but when setting ``params`` for a subworkflow, ``True`` is
-          required.
+        :param parameters_normalized: Whether Galaxy should normalize the input
+          parameters to ensure everything is referenced by a numeric step ID.
+          Default is ``False``, but when setting parameters for a subworkflow,
+          ``True`` is required.
 
         :rtype: dict
         :return: A dict describing the new workflow invocation.
