@@ -567,7 +567,7 @@ class WorkflowClient(Client):
           (which is stable across workflow imports) or the step UUID which is
           also stable.
         """
-        payload: Dict[str, Any] = {'workflow_id': workflow_id}
+        payload: Dict[str, Any] = {}
         if inputs:
             payload['inputs'] = inputs
 
