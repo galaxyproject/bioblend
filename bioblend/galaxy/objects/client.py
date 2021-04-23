@@ -367,7 +367,7 @@ class ObjInvocationClient(ObjClient):
 
         :type user_id: str
         :param user_id: Encoded user ID to filter on. This must be
-                        your own user ID if your are not an admin user.
+                        your own user ID if you are not an admin user.
 
         :param include_terminal: bool
         :param: Whether to include invocations in terminal states

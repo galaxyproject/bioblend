@@ -635,8 +635,7 @@ class Invocation(Wrapper):
 
     def report(self):
         """
-        Get a a Markdown report for this invocation wrapped in a dictionary.
-        Access with ``report['markdown']``.
+        Get a dictionary containing a Markdown report for this invocation.
 
         :rtype: dict
         :param: invocation report
@@ -645,7 +644,7 @@ class Invocation(Wrapper):
 
     def save_report_pdf(self, file_path, chunk_size=bioblend.CHUNK_SIZE):
         """
-        Download and store a PDF report of this invocation to disk.
+        Download a PDF report for this invocation.
 
         :type file_path: str
         :param file_path: path to save the report
