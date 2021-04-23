@@ -3,15 +3,16 @@ Contains possible interaction dealing with Galaxy tools.
 """
 import warnings
 from os.path import basename
+from typing import List
 
 from bioblend.galaxy.client import Client
 from bioblend.util import attach_file
 
 
 class ToolClient(Client):
+    module = 'tools'
 
     def __init__(self, galaxy_instance):
-        self.module = 'tools'
         super().__init__(galaxy_instance)
 
     def get_tools(self, tool_id=None, name=None, trackster=None):
@@ -104,6 +105,19 @@ class ToolClient(Client):
         url = self._make_url(tool_id) + '/requirements'
         return self._get(url=url)
 
+    def get_citations(self, tool_id: str) -> List[dict]:
+        """
+        Get BibTeX citations for a given tool ID.
+
+        :type tool_id: str
+        :param tool_id: id of the requested tool
+
+        :rtype: list of dicts
+        :param: list containing the citations
+        """
+        url = self._make_url(tool_id) + '/citations'
+        return self._get(url=url)
+
     def install_dependencies(self, tool_id):
         """
         Install dependencies for a given tool via a resolver.
@@ -118,6 +132,21 @@ class ToolClient(Client):
         """
         url = self._make_url(tool_id) + '/install_dependencies'
         return self._post(payload={}, url=url)
+
+    def uninstall_dependencies(self, tool_id: str) -> dict:
+        """
+        Uninstall dependencies for a given tool via a resolver.
+        This works only for Conda currently.
+        This functionality is available only to Galaxy admins.
+
+        :type tool_id: str
+        :param tool_id: id of the requested tool
+
+        :rtype: dict
+        :return: Tool requirement status
+        """
+        url = self._make_url(tool_id) + '/dependencies'
+        return self._delete(payload={}, url=url)
 
     def show_tool(self, tool_id, io_details=False, link_details=False):
         """

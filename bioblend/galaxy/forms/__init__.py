@@ -5,9 +5,9 @@ from bioblend.galaxy.client import Client
 
 
 class FormsClient(Client):
+    module = 'forms'
 
     def __init__(self, galaxy_instance):
-        self.module = 'forms'
         super().__init__(galaxy_instance)
 
     def get_forms(self):

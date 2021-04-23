@@ -6,9 +6,9 @@ from bioblend.util import attach_file
 
 
 class ToolShedRepositoryClient(Client):
+    module = 'repositories'
 
     def __init__(self, toolshed_instance):
-        self.module = 'repositories'
         super().__init__(toolshed_instance)
 
     def get_repositories(self):

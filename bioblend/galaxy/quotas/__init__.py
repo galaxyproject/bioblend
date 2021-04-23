@@ -5,9 +5,9 @@ from bioblend.galaxy.client import Client
 
 
 class QuotaClient(Client):
+    module = 'quotas'
 
     def __init__(self, galaxy_instance):
-        self.module = 'quotas'
         super().__init__(galaxy_instance)
 
     def get_quotas(self, deleted=False):

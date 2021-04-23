@@ -5,9 +5,9 @@ from bioblend.galaxy.client import Client
 
 
 class GroupsClient(Client):
+    module = 'groups'
 
     def __init__(self, galaxy_instance):
-        self.module = 'groups'
         super().__init__(galaxy_instance)
 
     def get_groups(self):

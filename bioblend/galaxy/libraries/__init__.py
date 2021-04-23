@@ -16,9 +16,9 @@ log = logging.getLogger(__name__)
 
 
 class LibraryClient(Client):
+    module = 'libraries'
 
     def __init__(self, galaxy_instance):
-        self.module = 'libraries'
         super().__init__(galaxy_instance)
 
     def create_library(self, name, description=None, synopsis=None):

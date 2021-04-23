@@ -5,9 +5,9 @@ from bioblend.galaxy.client import Client
 
 
 class FoldersClient(Client):
+    module = 'folders'
 
     def __init__(self, galaxy_instance):
-        self.module = 'folders'
         super().__init__(galaxy_instance)
 
     def create_folder(self, parent_folder_id, name, description=None):

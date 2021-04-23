@@ -7,9 +7,9 @@ from bioblend.galaxy.client import Client
 
 
 class UserClient(Client):
+    module = 'users'
 
     def __init__(self, galaxy_instance):
-        self.module = 'users'
         super().__init__(galaxy_instance)
 
     def get_users(self, deleted=False, f_email=None, f_name=None, f_any=None):

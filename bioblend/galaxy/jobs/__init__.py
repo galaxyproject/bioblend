@@ -19,9 +19,9 @@ JOB_TERMINAL_STATES = {'deleted', 'error', 'ok'}
 
 
 class JobsClient(Client):
+    module = 'jobs'
 
     def __init__(self, galaxy_instance):
-        self.module = 'jobs'
         super().__init__(galaxy_instance)
 
     def get_jobs(self, state=None, history_id=None, invocation_id=None, tool_id=None,

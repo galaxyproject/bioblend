@@ -479,9 +479,7 @@ class Workflow(Wrapper):
         res = self.gi.gi.workflows.run_workflow(self.id, **kwargs)
         # res structure: {'history': HIST_ID, 'outputs': [CI_ID, CI_ID, ...]}
         out_hist = self.gi.histories.get(res['history'])
-        content_infos_dict = dict()
-        for ci in out_hist.content_infos:
-            content_infos_dict[ci.id] = ci
+        content_infos_dict = {ci.id: ci for ci in out_hist.content_infos}
         outputs = []
         for output_id in res['outputs']:
             if content_infos_dict[output_id].type == 'file':

@@ -18,9 +18,9 @@ log = logging.getLogger(__name__)
 
 
 class HistoryClient(Client):
+    module = 'histories'
 
     def __init__(self, galaxy_instance):
-        self.module = 'histories'
         super().__init__(galaxy_instance)
 
     def create_history(self, name=None):
