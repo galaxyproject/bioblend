@@ -468,6 +468,10 @@ class TestObjInvocationClient(GalaxyObjectsTestBase):
         self.assertEqual(self.inv.state, inv.state)
         self.assertEqual(self.inv.update_time, inv.update_time)
         self.assertEqual(self.inv.uuid, inv.uuid)
+        self.assertGreater(len(self.inv.steps), 0)
+        history_id = self.gi.gi.histories.create_history(name="TestGalaxyInvocationsList")["id"]
+        self.assertEqual(self.gi.invocations.list(history_id=history_id), [])
+        self.gi.gi.histories.delete_history(self.history_id, purge=True)
 
 
 class TestGalaxyInstance(GalaxyObjectsTestBase):

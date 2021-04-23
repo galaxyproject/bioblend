@@ -353,19 +353,38 @@ class ObjInvocationClient(ObjClient):
         inv_list = self.gi.invocations.get_invocations()
         return [wrappers.InvocationPreview(inv_dict, self.obj_gi) for inv_dict in inv_list]
 
-    def list(self, include_terminal=True):
+    def list(self, workflow_id=None, history_id=None, user_id=None,
+             include_terminal=True, limit=None):
         """
-        Get full listing of invocations.
-        This can be slow!
+        Get full listing of workflow invocations, or select a subset
+        by specifying optional arguments for filtering (e.g. a workflow ID).
+
+        :type workflow_id: str
+        :param workflow_id: Encoded workflow ID to filter on
+
+        :type history_id: str
+        :param history_id: Encoded history ID to filter on
+
+        :type user_id: str
+        :param user_id: Encoded user ID to filter on. This must be
+                        your own user ID if your are not an admin user.
 
         :param include_terminal: bool
-        :param: whether to include invocations in terminal states
+        :param: Whether to include invocations in terminal states
+
+        :type limit: int
+        :param limit: Maximum number of invocations to return - if specified,
+                      the most recent invocations will be returned.
 
         :rtype: list of Invocation
         :param: invocation objects
         """
         inv_dict_list = self.gi.invocations.get_invocations(
+            workflow_id=workflow_id,
+            history_id=history_id,
+            user_id=user_id,
             include_terminal=include_terminal,
+            limit=limit,
             view='element',
             step_details=True
         )
