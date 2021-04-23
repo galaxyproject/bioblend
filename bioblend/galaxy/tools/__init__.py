@@ -133,7 +133,7 @@ class ToolClient(Client):
         url = self._make_url(tool_id) + '/install_dependencies'
         return self._post(payload={}, url=url)
 
-    def uninstall_dependencies(self, tool_id: str):
+    def uninstall_dependencies(self, tool_id: str) -> dict:
         """
         Uninstall dependencies for a given tool via a resolver.
         This works only for Conda currently.
