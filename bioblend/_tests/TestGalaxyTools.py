@@ -142,6 +142,17 @@ class TestGalaxyTools(GalaxyTestBase.GalaxyTestBase):
             'tool_requirements is %s' % tool_requirements
         )
 
+    @test_util.skip_unless_tool('sra_source')
+    def test_get_citations(self):
+        citations = self.gi.tools.get_citations('sra_source')
+        self.assertEqual(len(citations), 2)
+        self.assertTrue('Blankenberg_2011' in citations[0]['content'])
+        self.assertTrue('Kent_2002' in citations[1]['content'])
+
+    def test_tool_dependency_uninstall(self):
+        status = self.gi.tools.uninstall_dependencies('CONVERTER_fasta_to_bowtie_color_index')
+        self.assertEqual(status[0]['model_class'], 'NullDependency')
+
     def _wait_for_and_verify_upload(self, tool_output, file_name, fn, expected_dbkey="?"):
         self.assertEqual(len(tool_output["outputs"]), 1)
         output = tool_output['outputs'][0]
