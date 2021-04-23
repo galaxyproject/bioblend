@@ -397,14 +397,6 @@ class TestInvocation(GalaxyObjectsTestBase):
         report = inv.report()
         assert report['workflows'] == {self.workflow_id: {'name': 'paste_columns'}}
 
-    def test_save_report_pdf(self):
-        inv = self._obj_invoke_workflow()
-        try:
-            inv.save_report_pdf('report.pdf')
-        except Exception:
-            # This can fail if dependencies as weasyprint are not installed on the Galaxy server
-            pass
-
     @test_util.skip_unless_galaxy('release_20.09')
     def test_biocompute_object(self):
         inv = self._obj_invoke_workflow()
