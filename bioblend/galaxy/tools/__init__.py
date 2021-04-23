@@ -112,7 +112,7 @@ class ToolClient(Client):
         :type tool_id: str
         :param tool_id: id of the requested tool
 
-        :rtype: list of dict
+        :rtype: list of dicts
         :param: list containing the citations
         """
         url = self._make_url(tool_id) + '/citations'
