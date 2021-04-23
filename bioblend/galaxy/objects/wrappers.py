@@ -635,7 +635,8 @@ class Invocation(Wrapper):
 
     def report(self):
         """
-        Get a report for this invocation.
+        Get a a Markdown report for this invocation wrapped in a dictionary.
+        Access with ``report['markdown']``.
 
         :rtype: dict
         :param: invocation report
@@ -643,6 +644,15 @@ class Invocation(Wrapper):
         return self.gi.gi.invocations.get_invocation_report(self.id)
 
     def save_report_pdf(self, file_path, chunk_size=bioblend.CHUNK_SIZE):
+        """
+        Download and store a PDF report of this invocation to disk.
+
+        :type file_path: str
+        :param file_path: path to save the report
+
+        :type chunk_size: int
+        :param chunk_size: chunk size in bytes for reading remote data
+        """
         self.gi.gi.invocations.get_invocation_report_pdf(self.id, file_path, chunk_size)
 
     def biocompute_object(self):
