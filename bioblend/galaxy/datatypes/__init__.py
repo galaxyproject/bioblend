@@ -5,9 +5,9 @@ from bioblend.galaxy.client import Client
 
 
 class DatatypesClient(Client):
+    module = 'datatypes'
 
     def __init__(self, galaxy_instance):
-        self.module = 'datatypes'
         super().__init__(galaxy_instance)
 
     def get_datatypes(self, extension_only=False, upload_only=False):

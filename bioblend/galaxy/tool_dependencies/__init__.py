@@ -5,9 +5,9 @@ from bioblend.galaxy.client import Client
 
 
 class ToolDependenciesClient(Client):
+    module = 'dependency_resolvers'
 
     def __init__(self, galaxy_instance):
-        self.module = 'dependency_resolvers'
         super().__init__(galaxy_instance)
 
     def summarize_toolbox(self, index=None, tool_ids=None, resolver_type=None, include_containers=False, container_type=None, index_by='requirements'):

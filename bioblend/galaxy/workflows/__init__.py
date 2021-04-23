@@ -14,8 +14,9 @@ from bioblend.galaxy.client import Client
 
 
 class WorkflowClient(Client):
+    module = 'workflows'
+
     def __init__(self, galaxy_instance):
-        self.module = 'workflows'
         super().__init__(galaxy_instance)
 
     # the 'deleted' option is not available for workflows

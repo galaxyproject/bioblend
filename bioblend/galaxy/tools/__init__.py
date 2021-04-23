@@ -9,9 +9,9 @@ from bioblend.util import attach_file
 
 
 class ToolClient(Client):
+    module = 'tools'
 
     def __init__(self, galaxy_instance):
-        self.module = 'tools'
         super().__init__(galaxy_instance)
 
     def get_tools(self, tool_id=None, name=None, trackster=None):

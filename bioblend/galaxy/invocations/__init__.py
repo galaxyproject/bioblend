@@ -20,8 +20,9 @@ INVOCATION_TERMINAL_STATES = {'cancelled', 'failed', 'scheduled'}
 
 
 class InvocationClient(Client):
+    module = 'invocations'
+
     def __init__(self, galaxy_instance):
-        self.module = 'invocations'
         super().__init__(galaxy_instance)
 
     def get_invocations(self, workflow_id=None, history_id=None, user_id=None,

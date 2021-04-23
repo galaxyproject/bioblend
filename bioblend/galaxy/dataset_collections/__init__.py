@@ -96,9 +96,9 @@ __all__ = (
 
 
 class DatasetCollectionClient(Client):
+    module = 'dataset_collections'
 
     def __init__(self, galaxy_instance):
-        self.module = 'dataset_collections'
         super().__init__(galaxy_instance)
 
     def show_dataset_collection(self, dataset_collection_id: str,

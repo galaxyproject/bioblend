@@ -24,8 +24,9 @@ TERMINAL_STATES = {'ok', 'empty', 'error', 'discarded', 'failed_metadata'}
 
 
 class DatasetClient(Client):
+    module = 'datasets'
+
     def __init__(self, galaxy_instance):
-        self.module = 'datasets'
         super().__init__(galaxy_instance)
 
     def show_dataset(self, dataset_id, deleted=False, hda_ldda='hda'):
