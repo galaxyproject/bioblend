@@ -249,11 +249,11 @@ class DatasetClient(Client):
             q.append('name-eq')
             qv.append(name)
         if state:
-            op, val = ('eq', state) if type(state) is str else ('in', ','.join(state))
+            op, val = self._param_to_filter(state)
             q.append(f'state-{op}')
             qv.append(val)
         if extension:
-            op, val = ('eq', extension) if type(extension) is str else ('in', ','.join(extension))
+            op, val = self._param_to_filter(extension)
             q.append(f'extension-{op}')
             qv.append(val)
         if visible:
@@ -275,6 +275,15 @@ class DatasetClient(Client):
         params['qv'] = qv
 
         return self._get(params=params)
+
+    def _param_to_filter(self, param):
+        if type(param) is str:
+            return 'eq', param
+        if type(param) is list:
+            if len(param) == 1:
+                return 'eq', param.pop()
+            return 'in', ','.join(param)
+        raise Exception("Filter param is not of type ``str`` or ``list``")
 
     def wait_for_dataset(self, dataset_id, maxwait=12000, interval=3, check=True):
         """
