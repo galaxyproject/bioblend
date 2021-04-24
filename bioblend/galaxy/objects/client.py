@@ -15,13 +15,19 @@ import bioblend
 from . import wrappers
 
 
-class ObjClient(metaclass=abc.ABCMeta):
+class ObjClient(abc.ABC):
 
-    @abc.abstractmethod
     def __init__(self, obj_gi):
         self.obj_gi = obj_gi
         self.gi = self.obj_gi.gi
         self.log = bioblend.log
+
+    @abc.abstractmethod
+    def get(self, id_, **kwargs):
+        """
+        Retrieve the object corresponding to the given id.
+        """
+        pass
 
     @abc.abstractmethod
     def get_previews(self, **kwargs):
@@ -234,9 +240,6 @@ class ObjWorkflowClient(ObjClient):
     Interacts with Galaxy workflows.
     """
 
-    def __init__(self, obj_gi):
-        super().__init__(obj_gi)
-
     def import_new(self, src, publish=False):
         """
         Imports a new workflow into Galaxy.
@@ -328,9 +331,6 @@ class ObjToolClient(ObjClient):
     Interacts with Galaxy tools.
     """
 
-    def __init__(self, obj_gi):
-        super().__init__(obj_gi)
-
     def get(self, id_, io_details=False, link_details=False):
         """
         Retrieve the tool corresponding to the given id.
@@ -395,9 +395,6 @@ class ObjJobClient(ObjClient):
     """
     Interacts with Galaxy jobs.
     """
-
-    def __init__(self, obj_gi):
-        super().__init__(obj_gi)
 
     def get(self, id_, full_details=False):
         """
