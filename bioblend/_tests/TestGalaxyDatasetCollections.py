@@ -1,5 +1,14 @@
+import os
+import tarfile
+import tempfile
+from inspect import signature
+from zipfile import ZipFile
+
 from bioblend.galaxy import dataset_collections
-from . import GalaxyTestBase
+from . import (
+    GalaxyTestBase,
+    test_util
+)
 
 
 class TestGalaxyDatasetCollections(GalaxyTestBase.GalaxyTestBase):
@@ -117,6 +126,50 @@ class TestGalaxyDatasetCollections(GalaxyTestBase.GalaxyTestBase):
         self.gi.histories.update_dataset_collection(history_id, history_dataset_collection["id"], visible=False)
         show_response = self.gi.histories.show_dataset_collection(history_id, history_dataset_collection["id"])
         self.assertFalse(show_response["visible"])
+
+    def test_show_dataset_collection(self):
+        history_id = self.gi.histories.create_history(name="TestDatasetCollectionShow")["id"]
+        dataset_collection1 = self._create_pair_in_history(history_id)
+        dataset_collection2 = self.gi.dataset_collections.show_dataset_collection(dataset_collection1['id'])
+        self.assertEqual(dataset_collection1.keys(), dataset_collection2.keys())
+        for element1, element2 in zip(dataset_collection1['elements'], dataset_collection2['elements']):
+            self.assertEqual(element1['id'], element2['id'])
+            self.assertEqual(element1.keys(), element2.keys())
+            for key in element1['object'].keys():
+                self.assertIn(key, element2['object'].keys())
+
+    @test_util.skip_unless_galaxy('release_18.01')
+    def test_download_dataset_collection(self):
+        history_id = self.gi.histories.create_history(name="TestDatasetCollectionDownload")["id"]
+        dataset_collection_id = self._create_pair_in_history(history_id)['id']
+        self.gi.dataset_collections.wait_for_dataset_collection(dataset_collection_id)
+
+        tempdir = tempfile.mkdtemp(prefix='bioblend_test_dataset_collection_download_')
+        archive_path = os.path.join(tempdir, 'dataset_collection')
+        archive_type = self.gi.dataset_collections.download_dataset_collection(dataset_collection_id, file_path=archive_path)['archive_type']
+        expected_contents = signature(self._test_dataset).parameters['contents'].default + '\n'
+        extract_dir_path = os.path.join(tempdir, 'extracted_files')
+        os.mkdir(extract_dir_path)
+
+        if archive_type == 'zip':
+            archive = ZipFile(archive_path)
+        elif archive_type == 'tgz':
+            archive = tarfile.open(archive_path)
+
+        archive.extractall(extract_dir_path)
+        for fname in os.listdir(extract_dir_path):
+            dataset_dir_path = os.path.join(extract_dir_path, fname)
+            file_path = os.path.join(dataset_dir_path, os.listdir(dataset_dir_path)[0])
+            with open(file_path) as f:
+                self.assertEqual(expected_contents, f.read())
+        archive.close()
+
+    def test_wait_for_dataset_collection(self):
+        history_id = self.gi.histories.create_history(name="TestDatasetCollectionWait")["id"]
+        dataset_collection_id = self._create_pair_in_history(history_id)['id']
+        dataset_collection = self.gi.dataset_collections.wait_for_dataset_collection(dataset_collection_id)
+        for element in dataset_collection['elements']:
+            self.assertEqual(element['object']['state'], 'ok')
 
     def _create_pair_in_history(self, history_id):
         dataset1_id = self._test_dataset(history_id)

@@ -26,8 +26,9 @@ TERMINAL_STATES = {'ok', 'empty', 'error', 'discarded', 'failed_metadata'}
 
 
 class DatasetClient(Client):
+    module = 'datasets'
+
     def __init__(self, galaxy_instance):
-        self.module = 'datasets'
         super().__init__(galaxy_instance)
 
     def show_dataset(self, dataset_id, deleted=False, hda_ldda='hda'):
@@ -284,6 +285,62 @@ class DatasetClient(Client):
                 return 'eq', param.pop()
             return 'in', ','.join(param)
         raise Exception("Filter param is not of type ``str`` or ``list``")
+
+    def publish_dataset(self, dataset_id: str, published: bool = False):
+        """
+        Make a dataset publicly available or private. For more fine-grained control (assigning different
+        permissions to specific roles), use the ``update_permissions()`` method.
+
+        :type dataset_id: str
+        :param dataset_id: dataset ID
+
+        :type published: bool
+        :param published: Whether to make the dataset published (``True``) or private (``False``).
+
+        :rtype: dict
+        :return: Current roles for all available permission types.
+        .. note::
+          This method can only be used with Galaxy ``release_19.05`` or later.
+        """
+        payload: Dict[str, Any] = {
+            'action': 'remove_restrictions' if published else 'make_private'
+        }
+        url = self._make_url(dataset_id) + '/permissions'
+        self.gi.datasets._put(url=url, payload=payload)
+
+    def update_permissions(self, dataset_id: str, access_ids: Optional[list] = None,
+                           manage_ids: Optional[list] = None, modify_ids: Optional[list] = None):
+        """
+        Set access, manage or modify permissions for a dataset to a list of roles.
+
+        :type dataset_id: str
+        :param dataset_id: dataset ID
+
+        :type access_ids: list
+        :param access_ids: role IDs which should have access permissions for the dataset.
+
+        :type manage_ids: list
+        :param manage_ids: role IDs which should have manage permissions for the dataset.
+
+        :type modify_ids: list
+        :param modify_ids: role IDs which should have modify permissions for the dataset.
+
+        :rtype: dict
+        :return: Current roles for all available permission types.
+        .. note::
+          This method can only be used with Galaxy ``release_19.05`` or later.
+        """
+        payload: Dict[str, Any] = {
+            'action': 'set_permissions'
+        }
+        if access_ids:
+            payload['access'] = access_ids
+        if manage_ids:
+            payload['manage'] = manage_ids
+        if modify_ids:
+            payload['modify'] = modify_ids
+        url = self._make_url(dataset_id) + '/permissions'
+        self.gi.datasets._put(url=url, payload=payload)
 
     def wait_for_dataset(self, dataset_id, maxwait=12000, interval=3, check=True):
         """

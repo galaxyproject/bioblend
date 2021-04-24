@@ -5,9 +5,9 @@ from bioblend.galaxy.client import Client
 
 
 class ToolShedToolClient(Client):
+    module = 'tools'
 
     def __init__(self, toolshed_instance):
-        self.module = 'tools'
         super().__init__(toolshed_instance)
 
     def search_tools(self, q, page=1, page_size=10):

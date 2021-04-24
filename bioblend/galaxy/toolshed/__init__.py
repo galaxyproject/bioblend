@@ -5,9 +5,9 @@ from bioblend.galaxy.client import Client
 
 
 class ToolShedClient(Client):
+    module = 'tool_shed_repositories'
 
     def __init__(self, galaxy_instance):
-        self.module = 'tool_shed_repositories'
         super().__init__(galaxy_instance)
 
     def get_repositories(self):
