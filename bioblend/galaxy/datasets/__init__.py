@@ -150,7 +150,6 @@ class DatasetClient(Client):
         state: Optional[Union[str, List[str]]] = None,
         deleted: bool = False,
         visible: bool = True,
-        id: Optional[List[str]] = None,
         history_id: Optional[str] = None,
         workflow_id: Optional[str] = None,
         job_id: Optional[str] = None,
@@ -260,9 +259,6 @@ class DatasetClient(Client):
         if visible:
             q.append('visible-eq')
             qv.append(str(visible))
-        if id:
-            q.append('id-in')
-            qv.append(','.join(id))
         if create_time:
             for k, v in create_time.items():
                 q.append(f'create_time-{k}')

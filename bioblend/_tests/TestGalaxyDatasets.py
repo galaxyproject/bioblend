@@ -130,16 +130,6 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
         self.assertEqual(len(datasets), 1)
         self.gi.histories.update_dataset(history_id=self.history_id, dataset_id=self.dataset_id, visible=True)
 
-    @test_util.skip_unless_galaxy('release_20.05')
-    def test_get_datasets_id(self):
-        datasets = self.gi.datasets.get_datasets(id=[self.dataset_id])
-        self.assertGreaterEqual(len(datasets), 1)
-        with self.assertRaises(ConnectionError):
-            self.gi.datasets.get_datasets(id=['nonexistent_id'])
-        # This does not seem to work, returns []
-        # datasets = self.gi.datasets.get_datasets(history_id=self.history_id, id=[self.dataset_id])
-        # self.assertEqual(len(datasets), 1)
-
     def test_wait_for_dataset(self):
         history_id = self.gi.histories.create_history(name='TestWaitForDataset')['id']
         dataset_contents = "line 1\nline 2\rline 3\r\nline 4"
