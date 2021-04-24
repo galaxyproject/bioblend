@@ -10,14 +10,17 @@ from . import (
 
 class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
 
-    def setUp(self):
-        super().setUp()
-        self.history_id = self.gi.histories.create_history(name='TestShowDataset')['id']
-        self.dataset_contents = "line 1\nline 2\rline 3\r\nline 4"
-        self.dataset_id = self._test_dataset(self.history_id, contents=self.dataset_contents)
+    @classmethod
+    def setUpClass(cls):
+        super().setUp(cls)
+        cls.history_id = cls.gi.histories.create_history(name='TestDataset')['id']
+        cls.dataset_contents = "line 1\nline 2\rline 3\r\nline 4"
+        cls.dataset_id = super()._test_dataset(cls, cls.history_id, contents=cls.dataset_contents)
+        cls.gi.datasets.wait_for_dataset(cls.dataset_id)
 
-    def tearDown(self):
-        self.gi.histories.delete_history(self.history_id, purge=True)
+    @classmethod
+    def tearDownClass(cls):
+        cls.gi.histories.delete_history(cls.history_id, purge=True)
 
     @test_util.skip_unless_galaxy('release_19.05')
     def test_show_nonexistent_dataset(self):
@@ -57,10 +60,16 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
         datasets = self.gi.datasets.get_datasets()
         dataset_ids = [dataset['id'] for dataset in datasets]
         self.assertIn(self.dataset_id, dataset_ids)
-        datasets = self.gi.datasets.get_datasets(limit=0)
-        self.assertEqual(datasets, [])
+
+    @test_util.skip_unless_galaxy('release_19.05')
+    def test_get_datasets_history(self):
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id)
         self.assertEqual(len(datasets), 1)
+
+    @test_util.skip_unless_galaxy('release_19.05')
+    def test_get_datasets_limit_offset(self):
+        datasets = self.gi.datasets.get_datasets(limit=0)
+        self.assertEqual(datasets, [])
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id, offset=1)
         self.assertEqual(datasets, [])
 
@@ -69,7 +78,9 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id, name='Wrong Name')
         self.assertEqual(datasets, [])
 
-        dataset = self.gi.datasets.wait_for_dataset(self.dataset_id)
+    @test_util.skip_unless_galaxy('release_21.05')
+    def test_get_datasets_time(self):
+        dataset = self.gi.datasets.show_dataset(self.dataset_id)
         ct = dataset['create_time']
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id, create_time={'gt': ct})
         self.assertEqual(datasets, [])
@@ -90,20 +101,28 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id, update_time={'le': ut})
         self.assertEqual(len(datasets), 1)
 
+    @test_util.skip_unless_galaxy('release_21.05')
+    def test_get_datasets_extension(self):
+        datasets = self.gi.datasets.get_datasets(history_id=self.history_id)
+        print(datasets)
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id, extension='txt')
         self.assertEqual(len(datasets), 1)
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id, extension='auto')
         self.assertEqual(datasets, [])
 
+    @test_util.skip_unless_galaxy('release_21.05')
+    def test_get_datasets_state(self):
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id, state='ok')
         self.assertEqual(len(datasets), 1)
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id, state='queued')
         self.assertEqual(datasets, [])
         with self.assertRaises(ConnectionError):
-            datasets = self.gi.datasets.get_datasets(history_id=self.history_id, state='invalid state name')
+            self.gi.datasets.get_datasets(history_id=self.history_id, state='nonexistent_state')
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id, state=['ok', 'queued'])
         self.assertEqual(len(datasets), 1)
 
+    @test_util.skip_unless_galaxy('release_21.05')
+    def test_get_datasets_visible(self):
         self.gi.histories.update_dataset(history_id=self.history_id, dataset_id=self.dataset_id, visible=False)
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id)
         self.assertEqual(datasets, [])
@@ -111,14 +130,22 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
         self.assertEqual(len(datasets), 1)
         self.gi.histories.update_dataset(history_id=self.history_id, dataset_id=self.dataset_id, visible=True)
 
+    @test_util.skip_unless_galaxy('release_21.05')
+    def test_get_datasets_id(self):
         datasets = self.gi.datasets.get_datasets(id=[self.dataset_id])
         self.assertGreaterEqual(len(datasets), 1)
-        datasets = self.gi.datasets.get_datasets(id=['invalid dataset id'])
+        datasets = self.gi.datasets.get_datasets(id=['nonexistent_id'])
         self.assertEqual(datasets, [])
         # This does not seem to work, returns []
         # datasets = self.gi.datasets.get_datasets(history_id=self.history_id, id=[self.dataset_id])
         # self.assertEqual(len(datasets), 1)
 
     def test_wait_for_dataset(self):
-        dataset = self.gi.datasets.wait_for_dataset(self.dataset_id)
+        history_id = self.gi.histories.create_history(name='TestWaitForDataset')['id']
+        dataset_contents = "line 1\nline 2\rline 3\r\nline 4"
+        dataset_id = self._test_dataset(history_id, contents=dataset_contents)
+
+        dataset = self.gi.datasets.wait_for_dataset(dataset_id)
         self.assertEqual(dataset['state'], 'ok')
+
+        self.gi.histories.delete_history(history_id, purge=True)
