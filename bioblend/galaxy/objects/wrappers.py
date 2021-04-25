@@ -568,6 +568,15 @@ class Invocation(Wrapper):
         Get steps for this invocation, or get a subset by specifying
         optional parameters for filtering.
 
+        :type indices: list of int
+        :param indices: return steps that have matching order_index
+
+        :type states: list of str
+        :param states: return steps that have matching states
+
+        :type step_ids: list of str
+        :param step_ids: return steps that have matching step_ids
+
         :rtype: list of InvocationStep
         :param: invocation steps
         """
@@ -603,6 +612,12 @@ class Invocation(Wrapper):
     def run_step_actions(self, steps, actions):
         """
         Run actions for active steps of this invocation.
+
+        :type steps: list of InvocationStep
+        :param steps: list of steps to run actions on
+
+        :type actions: list of str
+        :param actions: list of actions to run
 
         .. note::
           On success, this method updates the Invocation object's internal step variables.
