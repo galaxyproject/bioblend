@@ -10,6 +10,7 @@ from collections.abc import (
     Mapping,
     Sequence,
 )
+from typing import List
 
 import bioblend
 from . import wrappers
@@ -24,7 +25,7 @@ class ObjClient(metaclass=abc.ABCMeta):
         self.log = bioblend.log
 
     @abc.abstractmethod
-    def get_previews(self, **kwargs):
+    def get_previews(self) -> list:
         """
         Get a list of object previews.
 
@@ -39,7 +40,7 @@ class ObjClient(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def list(self, **kwargs):
+    def list(self) -> list:
         """
         Get a list of objects.
 
@@ -343,7 +344,7 @@ class ObjInvocationClient(ObjClient):
         inv_dict = self.gi.invocations.show_invocation(id)
         return wrappers.Invocation(inv_dict, self.obj_gi)
 
-    def get_previews(self):
+    def get_previews(self) -> List[wrappers.InvocationPreview]:
         """
         Get previews of all invocations.
 
@@ -353,8 +354,14 @@ class ObjInvocationClient(ObjClient):
         inv_list = self.gi.invocations.get_invocations()
         return [wrappers.InvocationPreview(inv_dict, self.obj_gi) for inv_dict in inv_list]
 
-    def list(self, workflow_id=None, history_id=None, user_id=None,
-             include_terminal=True, limit=None):
+    def list(
+        self,
+        workflow_id=None,
+        history_id=None,
+        user_id=None,
+        include_terminal=True,
+        limit=None
+    ) -> List[wrappers.Invocation]:
         """
         Get full listing of workflow invocations, or select a subset
         by specifying optional arguments for filtering (e.g. a workflow ID).

@@ -182,8 +182,8 @@ class InvocationStep(Wrapper):
     Abstract base class for invocation steps.
     """
     BASE_ATTRS = Wrapper.BASE_ATTRS + (
-        'job_id',
         'action',
+        'job_id',
         'order_index',
         'state',
         'update_time',
@@ -519,13 +519,13 @@ class Invocation(Wrapper):
     This causes the steps of a workflow to be executed in sequential order.
     """
     BASE_ATTRS = Wrapper.BASE_ATTRS + (
-        'workflow_id',
         'history_id',
         'inputs',
         'state',
         'steps',
         'update_time',
         'uuid',
+        'workflow_id',
     )
 
     def __init__(self, inv_dict, gi=None):
@@ -590,7 +590,7 @@ class Invocation(Wrapper):
         inv_dict = self.gi.gi.invocations.cancel_invocation(self.id)
         self.__init__(inv_dict, gi=self.gi)
 
-    def update(self):
+    def refresh(self):
         """
         Update this invocation with the latest information from the server.
 

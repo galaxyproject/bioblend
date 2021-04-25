@@ -354,12 +354,12 @@ class TestInvocation(GalaxyObjectsTestBase):
         inv.wait()
         self.assertEqual(inv.state, 'scheduled')
 
-    def test_update(self):
+    def test_refresh(self):
         inv = self._obj_invoke_workflow()
         # use wait_for_invocation() directly, because inv.wait() will update inv automatically
         self.gi.gi.invocations.wait_for_invocation(inv.id)
         self.assertEqual(inv.state, 'new')
-        inv.update()
+        inv.refresh()
         self.assertEqual(inv.state, 'scheduled')
 
     def test_run_step_actions(self):
@@ -372,7 +372,7 @@ class TestInvocation(GalaxyObjectsTestBase):
         for _ in range(20):
             with self.assertRaises(bioblend.TimeoutException):
                 inv.wait(maxwait=0.5, interval=0.5)
-            inv.update()
+            inv.refresh()
             if len(inv.steps) >= 3:
                 break
         self.assertEqual(inv.steps[2].action, None)
