@@ -50,6 +50,21 @@ def attach_file(path, name=None):
     return attachment
 
 
+def abstractclass(decorated_cls):
+    """
+    Decorator that marks a class as abstract even without any abstract method
+
+    Adapted from https://stackoverflow.com/a/49013561/4503125
+    """
+    def clsnew(cls, *args, **kwargs):
+        if cls is decorated_cls:
+            raise TypeError(f"Can't instantiate abstract class {decorated_cls.__name__}")
+        return super(decorated_cls, cls).__new__(cls)
+
+    decorated_cls.__new__ = clsnew
+    return decorated_cls
+
+
 __all__ = (
     'Bunch',
     'attach_file',

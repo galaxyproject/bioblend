@@ -13,9 +13,11 @@ from urllib.error import URLError
 from urllib.request import urlopen
 
 import bioblend
-import bioblend.galaxy.objects.galaxy_instance as galaxy_instance
-import bioblend.galaxy.objects.wrappers as wrappers
 from bioblend.galaxy import dataset_collections
+from bioblend.galaxy.objects import (
+    galaxy_instance,
+    wrappers,
+)
 from . import test_util
 
 
@@ -146,10 +148,6 @@ class MockWrapper(wrappers.Wrapper):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-    @property
-    def gi_module(self):
-        return super().gi_module()
 
 
 class TestWrapper(unittest.TestCase):
@@ -580,39 +578,34 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
             self.skipTest('no published workflows, manually publish a workflow to run this test')
 
     def test_get_libraries(self):
-        self._test_multi_get('library')
+        self._test_multi_get('libraries')
 
     def test_get_histories(self):
-        self._test_multi_get('history')
+        self._test_multi_get('histories')
 
     def test_get_workflows(self):
-        self._test_multi_get('workflow')
+        self._test_multi_get('workflows')
 
     def _normalized_functions(self, obj_type):
-        if obj_type == 'library':
+        if obj_type == 'libraries':
             create = self.gi.libraries.create
-            get_objs = self.gi.libraries.list
-            get_prevs = self.gi.libraries.get_previews
             del_kwargs = {}
-        elif obj_type == 'history':
+        elif obj_type == 'histories':
             create = self.gi.histories.create
-            get_objs = self.gi.histories.list
-            get_prevs = self.gi.histories.get_previews
             del_kwargs = {'purge': True}
-        elif obj_type == 'workflow':
+        elif obj_type == 'workflows':
             def create(name):
                 with open(SAMPLE_FN) as f:
                     d = json.load(f)
                 d['name'] = name
                 return self.gi.workflows.import_new(d)
 
-            get_objs = self.gi.workflows.list
-            get_prevs = self.gi.workflows.get_previews
             del_kwargs = {}
-        return create, get_objs, get_prevs, del_kwargs
+        return create, del_kwargs
 
     def _test_multi_get(self, obj_type):
-        create, get_objs, get_prevs, del_kwargs = self._normalized_functions(
+        obj_gi_client = getattr(self.gi, obj_type)
+        create, del_kwargs = self._normalized_functions(
             obj_type)
 
         def ids(seq):
@@ -622,18 +615,18 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
         objs = []
         try:
             objs = [create(_) for _ in names]
-            self.assertLessEqual(ids(objs), ids(get_objs()))
-            if obj_type != 'workflow':
-                filtered = get_objs(name=names[0])
+            self.assertLessEqual(ids(objs), ids(obj_gi_client.list()))
+            if obj_type != 'workflows':
+                filtered = obj_gi_client.list(name=names[0])
                 self.assertEqual(len(filtered), 1)
                 self.assertEqual(filtered[0].id, objs[0].id)
                 del_id = objs[-1].id
                 objs.pop().delete(**del_kwargs)
-                self.assertIn(del_id, ids(get_prevs(deleted=True)))
+                self.assertIn(del_id, ids(obj_gi_client.get_previews(deleted=True)))
             else:
                 # Galaxy appends info strings to imported workflow names
-                prev = get_prevs()[0]
-                filtered = get_objs(name=prev.name)
+                prev = obj_gi_client.get_previews()[0]
+                filtered = obj_gi_client.list(name=prev.name)
                 self.assertEqual(len(filtered), 1)
                 self.assertEqual(filtered[0].id, prev.id)
         finally:
@@ -641,25 +634,26 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
                 o.delete(**del_kwargs)
 
     def test_delete_libraries_by_name(self):
-        self._test_delete_by_name('library')
+        self._test_delete_by_name('libraries')
 
     def test_delete_histories_by_name(self):
-        self._test_delete_by_name('history')
+        self._test_delete_by_name('histories')
 
     def test_delete_workflows_by_name(self):
-        self._test_delete_by_name('workflow')
+        self._test_delete_by_name('workflows')
 
     def _test_delete_by_name(self, obj_type):
-        create, _, get_prevs, del_kwargs = self._normalized_functions(
+        obj_gi_client = getattr(self.gi, obj_type)
+        create, del_kwargs = self._normalized_functions(
             obj_type)
         name = 'test_%s' % uuid.uuid4().hex
-        objs = [create(name) for _ in range(2)]  # noqa: F812
+        objs = [create(name) for _ in range(2)]
         final_name = objs[0].name
-        prevs = [_ for _ in get_prevs(name=final_name) if not _.deleted]
+        prevs = [_ for _ in obj_gi_client.get_previews(name=final_name) if not _.deleted]
         self.assertEqual(len(prevs), len(objs))
         del_kwargs['name'] = final_name
-        objs[0].gi_module.delete(**del_kwargs)
-        prevs = [_ for _ in get_prevs(name=final_name) if not _.deleted]
+        obj_gi_client.delete(**del_kwargs)
+        prevs = [_ for _ in obj_gi_client.get_previews(name=final_name) if not _.deleted]
         self.assertEqual(len(prevs), 0)
 
 
