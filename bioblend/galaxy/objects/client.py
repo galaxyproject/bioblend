@@ -10,10 +10,7 @@ from collections.abc import (
     Mapping,
     Sequence,
 )
-from typing import (
-    Any,
-    List,
-)
+from typing import List
 
 import bioblend
 from . import wrappers
@@ -27,7 +24,7 @@ class ObjClient(abc.ABC):
         self.log = bioblend.log
 
     @abc.abstractmethod
-    def get(self, id_) -> Any:
+    def get(self, id_) -> wrappers.Wrapper:
         """
         Retrieve the object corresponding to the given id.
         """
