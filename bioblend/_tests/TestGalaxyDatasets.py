@@ -106,7 +106,7 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id)
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id, extension='txt')
         self.assertEqual(len(datasets), 1)
-        datasets = self.gi.datasets.get_datasets(history_id=self.history_id, extension='auto')
+        datasets = self.gi.datasets.get_datasets(history_id=self.history_id, extension='bam')
         self.assertEqual(datasets, [])
 
     @test_util.skip_unless_galaxy('release_20.05')
