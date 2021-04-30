@@ -396,7 +396,11 @@ class CloudManInstance(GenericVMInstance):
         if url:
             # Make sure the URL scheme is defined (otherwise requests will not work)
             if not url.lower().startswith('http'):
-                url = "http://" + url
+                # Check the config for use_ssl to see whether https scheme is required
+                if self.config.kwargs.get('use_ssl',False):
+                    url = "https://" + url
+                else:
+                    url = "http://" + url
             # Parse the corrected URL again to extract the hostname
             parse_result = urlparse(url)
             super()._update_host_name(parse_result.hostname)
@@ -724,7 +728,9 @@ class CloudManInstance(GenericVMInstance):
         if parameters is None:
             parameters = {}
         req_url = '/'.join((self.cloudman_url, 'root', url))
-        r = requests.get(req_url, params=parameters, auth=("", self.password), timeout=timeout)
+        # need to set the user "ubuntu" for auth, and indicate verify=False for HTTPS 
+        # connections to self-signed certificates
+        r = requests.get(req_url, params=parameters, auth=("ubuntu", self.password), timeout=timeout, verify=False)
         try:
             json = r.json()
             return json
