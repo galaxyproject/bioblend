@@ -524,7 +524,7 @@ class Workflow(Wrapper):
         :param params: A mapping of non-datasets tool parameters (see below)
 
         :type history: str
-        :param history_id: The history in which to store the workflow
+        :param history: The history in which to store the workflow
           output.
 
         :type import_inputs_to_history: bool

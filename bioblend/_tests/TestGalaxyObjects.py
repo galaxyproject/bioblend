@@ -282,14 +282,13 @@ class TestInvocation(GalaxyObjectsTestBase):
     def setUpClass(cls):
         super().setUp(cls)
         cls.inv = wrappers.Invocation(SAMPLE_INV_DICT)
-        path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
+        with open(SAMPLE_FN) as f:
+            cls.workflow = cls.gi.workflows.import_new(f.read())
         path_pause = test_util.get_abspath(os.path.join('data', 'test_workflow_pause.ga'))
-        workflow_id = cls.gi.gi.workflows.import_workflow_from_local_path(path)['id']
-        workflow_pause_id = cls.gi.gi.workflows.import_workflow_from_local_path(path_pause)['id']
-        cls.workflow = cls.gi.workflows.get(workflow_id)
-        cls.workflow_pause = cls.gi.workflows.get(workflow_pause_id)
+        with open(path_pause) as f:
+            cls.workflow_pause = cls.gi.workflows.import_new(f.read())
         cls.history = cls.gi.histories.create(name="TestInvocation")
-        cls.dataset_id = cls.gi.gi.tools.paste_content('1\t2\t3', cls.history.id)["outputs"][0]["id"]
+        cls.dataset_id = cls.history.paste_content('1\t2\t3').id
 
     @classmethod
     def tearDownClass(cls):
@@ -417,29 +416,27 @@ class TestObjInvocationClient(GalaxyObjectsTestBase):
     @classmethod
     def setUpClass(cls):
         super().setUp(cls)
-        path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
-        cls.workflow_id = cls.gi.gi.workflows.import_workflow_from_local_path(path)['id']
-        cls.history_id = cls.gi.gi.histories.create_history(name="TestGalaxyObjInvocationClient")["id"]
-        dataset_id = cls.gi.gi.tools.paste_content('1\t2\t3', cls.history_id)["outputs"][0]["id"]
+        with open(SAMPLE_FN) as f:
+            cls.workflow = cls.gi.workflows.import_new(f.read())
+        cls.history = cls.gi.histories.create(name="TestGalaxyObjInvocationClient")
+        dataset_id = cls.history.paste_content('1\t2\t3').id
         dataset = {'src': 'hda', 'id': dataset_id}
-        cls.invocation_id = cls.gi.gi.workflows.invoke_workflow(
-            cls.workflow_id,
+        cls.inv = cls.workflow.invoke(
             inputs={'Input 1': dataset, 'Input 2': dataset},
-            history_id=cls.history_id,
-            inputs_by='name'
-        )['id']
-        cls.inv = cls.gi.invocations.get(cls.invocation_id)
+            history=cls.history,
+            inputs_by='name',
+        )
         cls.inv.wait()
 
     @classmethod
     def tearDownClass(cls):
-        cls.gi.gi.histories.delete_history(cls.history_id, purge=True)
+        cls.history.delete(purge=True)
 
     def test_get(self):
         inv = self.gi.invocations.get(self.inv.id)
-        self.assertEqual(inv.id, self.invocation_id)
-        self.assertEqual(inv.workflow_id, self.workflow_id)
-        self.assertEqual(inv.history_id, self.history_id)
+        self.assertEqual(inv.id, self.inv.id)
+        self.assertEqual(inv.workflow_id, self.workflow.id)
+        self.assertEqual(inv.history_id, self.history.id)
         self.assertEqual(inv.state, 'scheduled')
         self.assertEqual(inv.update_time, self.inv.update_time)
         self.assertEqual(inv.uuid, self.inv.uuid)
@@ -447,20 +444,20 @@ class TestObjInvocationClient(GalaxyObjectsTestBase):
     def test_get_previews(self):
         previews = self.gi.invocations.get_previews()
         self.assertSetEqual({type(preview) for preview in previews}, {wrappers.InvocationPreview})
-        inv_preview = next(p for p in previews if p.id == self.invocation_id)
-        self.assertEqual(inv_preview.id, self.invocation_id)
-        self.assertEqual(inv_preview.workflow_id, self.workflow_id)
-        self.assertEqual(inv_preview.history_id, self.history_id)
+        inv_preview = next(p for p in previews if p.id == self.inv.id)
+        self.assertEqual(inv_preview.id, self.inv.id)
+        self.assertEqual(inv_preview.workflow_id, self.workflow.id)
+        self.assertEqual(inv_preview.history_id, self.history.id)
         self.assertEqual(inv_preview.state, 'scheduled')
         self.assertEqual(inv_preview.update_time, self.inv.update_time)
         self.assertEqual(inv_preview.uuid, self.inv.uuid)
 
     def test_list(self):
         invs = self.gi.invocations.list()
-        inv = next(i for i in invs if i.id == self.invocation_id)
-        self.assertEqual(inv.id, self.invocation_id)
-        self.assertEqual(inv.workflow_id, self.workflow_id)
-        self.assertEqual(inv.history_id, self.history_id)
+        inv = next(i for i in invs if i.id == self.inv.id)
+        self.assertEqual(inv.id, self.inv.id)
+        self.assertEqual(inv.workflow_id, self.workflow.id)
+        self.assertEqual(inv.history_id, self.history.id)
         self.assertEqual(inv.state, 'scheduled')
         self.assertEqual(inv.update_time, self.inv.update_time)
         self.assertEqual(inv.uuid, self.inv.uuid)
