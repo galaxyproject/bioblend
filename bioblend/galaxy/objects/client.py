@@ -367,7 +367,7 @@ class ObjInvocationClient(ObjClient):
           this workflow
 
         :type history: str
-        :param history_id: Include only invocations associated with
+        :param history: Include only invocations associated with
           this history
 
         :param include_terminal: bool
