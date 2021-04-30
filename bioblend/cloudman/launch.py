@@ -7,6 +7,7 @@ from http.client import (
     BadStatusLine,
     HTTPConnection,
     HTTPException,
+    HTTPSConnection,
 )
 from urllib.parse import urlparse
 
@@ -858,7 +859,12 @@ class CloudManLauncher:
         """
         try:
             p = urlparse(url)
-            h = HTTPConnection(p[1])
+            if p.scheme == 'http':
+                h = HTTPConnection(p[1])
+            elif p.scheme == 'https':
+                h = HTTPSConnection(p[1])
+            else:
+                raise RuntimeError("Unexpected url scheme: {}".format(p.scheme))
             h.putrequest('HEAD', p[2])
             h.endheaders()
             r = h.getresponse()
