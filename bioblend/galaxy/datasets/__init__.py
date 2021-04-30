@@ -146,21 +146,14 @@ class DatasetClient(Client):
     def get_datasets(
         self,
         name: Optional[str] = None,
-        extension: Optional[str] = None,
+        extension: Optional[Union[str, List[str]]] = None,
         state: Optional[Union[str, List[str]]] = None,
-        deleted: bool = False,
         visible: bool = True,
         history_id: Optional[str] = None,
-        workflow_id: Optional[str] = None,
-        job_id: Optional[str] = None,
-        dataset_collection_id: Optional[str] = None,
-        user_id: Optional[str] = None,
         create_time: Optional[Dict[str, str]] = None,
         update_time: Optional[Dict[str, str]] = None,
-        file_size: Optional[Dict[str, int]] = None,
         limit: int = 500,
         offset: int = 0,
-        user_details: bool = False
     ) -> List[dict]:
         """
         Get the latest datasets, or select another subset by specifying optional
@@ -172,51 +165,34 @@ class DatasetClient(Client):
         If the user is an admin, this will return datasets for all the users,
         otherwise only for the current user.
 
+        :type name: str
+        :param name: Dataset name to filter on.
+
+        :type extension: str or list of str
+        :param extension: Dataset extensions to filter on.
+
         :type state: str or list of str
         :param state: Dataset states to filter on.
 
-        :type deleted: bool
-        :param deleted: If ``True``, include deleted datasets in the result.
+        :type visible: bool
+        :param visible: If ``False``, include datasets marked as not ``visible``.
 
         :type history_id: str
         :param history_id: Encoded history ID to filter on.
 
-        :type workflow_id: string
-        :param workflow_id: Encoded workflow ID to filter on.
+        :type create_time: dict
+        :param create_time: Specify a create time range to filter on.
+          Must be a mapping from ``op`` to ``date``.
+          Valid options for ``op``: 'ge', 'gt', 'le', 'lt'
+          Example: {'gt': '2015-10-31T22:00:26',
+                    'le': '2018-04-29T05:03:41'}
 
-        :type job_id: string
-        :param job_id: Encoded job ID to filter on.
-
-        :type dataset_collection_id: string
-        :param dataset_collection_id: Encoded dataset collection ID to filter on.
-
-        :type user_id: str
-        :param user_id: Encoded user ID to filter on. Only admin users can
-          access the datasets of other users.
-
-        :type create_time_min: str
-        :param create_time_min: Mininum dataset creation date (in YYYY-MM-DD format) to
-          filter on.
-
-        :type create_time_max: str
-        :param create_time_max: Maximum dataset creation date (in YYYY-MM-DD format) to
-          filter on.
-
-        :type update_time_min: str
-        :param update_time_min: Minimum dataset update date (in YYYY-MM-DD format) to
-          filter on.
-
-        :type update_time_max: str
-        :param update_time_max: Maximum dataset update date (in YYYY-MM-DD format) to
-          filter on.
-
-        :type file_size_min: int
-        :param file_size_min: Minimum size of the dataset's data file to filter on,
-          excluding metadata associated with the dataset.
-
-        :type file_size_max: int
-        :param file_size_max: Maximum size of the dataset's data file to filter on,
-          excluding metadata associated with the dataset.
+        :type update_time: dict
+        :param update_time: Specify a update time range to filter on.
+          Must be a mapping from ``op`` to ``date``.
+          Valid options for ``op``: 'ge', 'gt', 'le', 'lt'
+          Example: {'gt': '2015-10-31T22:00:26',
+                    'le': '2018-04-29T05:03:41'}
 
         :type limit: int
         :param limit: Maximum number of datasets to return.
@@ -226,14 +202,8 @@ class DatasetClient(Client):
           For example, if ``limit`` is set to 100 and ``offset`` to 200,
           datasets 200-299 will be returned.
 
-        :type user_details: bool
-        :param user_details: If ``True`` and the user is an admin, add the user
-          email to each returned dataset dictionary.
-
-        .. note::
-          The following filtering options can only be used with Galaxy ``release_21.05`` or later:
-            workflow_id, invocation_id, job_id, dataset_collection_id, user_id,
-            date_range_min, date_range_max, user_details
+        :rtype: list
+        :param: A list of datasets
         """
         params: Dict[str, Any] = {
             'limit': limit,
