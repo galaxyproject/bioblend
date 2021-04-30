@@ -420,17 +420,17 @@ class TestObjInvocationClient(GalaxyObjectsTestBase):
     def setUpClass(cls):
         super().setUp(cls)
         path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
-        workflow_id = cls.gi.gi.workflows.import_workflow_from_local_path(path)['id']
-        cls.history_id = cls.gi.gi.histories.create_history(name="TestGalaxyInvocations")["id"]
+        cls.workflow_id = cls.gi.gi.workflows.import_workflow_from_local_path(path)['id']
+        cls.history_id = cls.gi.gi.histories.create_history(name="TestGalaxyObjInvocationClient")["id"]
         dataset_id = cls.gi.gi.tools.paste_content('1\t2\t3', cls.history_id)["outputs"][0]["id"]
         dataset = {'src': 'hda', 'id': dataset_id}
-        invocation_id = cls.gi.gi.workflows.invoke_workflow(
-            workflow_id,
+        cls.invocation_id = cls.gi.gi.workflows.invoke_workflow(
+            cls.workflow_id,
             inputs={'Input 1': dataset, 'Input 2': dataset},
             history_id=cls.history_id,
             inputs_by='name'
         )['id']
-        cls.inv = cls.gi.invocations.get(invocation_id)
+        cls.inv = cls.gi.invocations.get(cls.invocation_id)
         cls.inv.wait()
 
     @classmethod
@@ -439,37 +439,37 @@ class TestObjInvocationClient(GalaxyObjectsTestBase):
 
     def test_get(self):
         inv = self.gi.invocations.get(self.inv.id)
-        self.assertEqual(self.inv.id, inv.id)
-        self.assertEqual(self.inv.workflow_id, inv.workflow_id)
-        self.assertEqual(self.inv.history_id, inv.history_id)
-        self.assertEqual(self.inv.state, inv.state)
-        self.assertEqual(self.inv.update_time, inv.update_time)
-        self.assertEqual(self.inv.uuid, inv.uuid)
+        self.assertEqual(inv.id, self.invocation_id)
+        self.assertEqual(inv.workflow_id, self.workflow_id)
+        self.assertEqual(inv.history_id, self.history_id)
+        self.assertEqual(inv.state, 'scheduled')
+        self.assertEqual(inv.update_time, self.inv.update_time)
+        self.assertEqual(inv.uuid, self.inv.uuid)
 
     def test_get_previews(self):
         previews = self.gi.invocations.get_previews()
         self.assertSetEqual({type(preview) for preview in previews}, {wrappers.InvocationPreview})
-        inv_preview = next(filter(lambda p: p.id == self.inv.id, previews))
-        self.assertEqual(self.inv.id, inv_preview.id)
-        self.assertEqual(self.inv.workflow_id, inv_preview.workflow_id)
-        self.assertEqual(self.inv.history_id, inv_preview.history_id)
-        self.assertEqual(self.inv.state, inv_preview.state)
-        self.assertEqual(self.inv.update_time, inv_preview.update_time)
-        self.assertEqual(self.inv.uuid, inv_preview.uuid)
+        inv_preview = next(p for p in previews if p.id == self.invocation_id)
+        self.assertEqual(inv_preview.id, self.invocation_id)
+        self.assertEqual(inv_preview.workflow_id, self.workflow_id)
+        self.assertEqual(inv_preview.history_id, self.history_id)
+        self.assertEqual(inv_preview.state, 'scheduled')
+        self.assertEqual(inv_preview.update_time, self.inv.update_time)
+        self.assertEqual(inv_preview.uuid, self.inv.uuid)
 
     def test_list(self):
         invs = self.gi.invocations.list()
-        inv = next(filter(lambda i: i.id == self.inv.id, invs))
-        self.assertEqual(self.inv.id, inv.id)
-        self.assertEqual(self.inv.workflow_id, inv.workflow_id)
-        self.assertEqual(self.inv.history_id, inv.history_id)
-        self.assertEqual(self.inv.state, inv.state)
-        self.assertEqual(self.inv.update_time, inv.update_time)
-        self.assertEqual(self.inv.uuid, inv.uuid)
+        inv = next(i for i in invs if i.id == self.invocation_id)
+        self.assertEqual(inv.id, self.invocation_id)
+        self.assertEqual(inv.workflow_id, self.workflow_id)
+        self.assertEqual(inv.history_id, self.history_id)
+        self.assertEqual(inv.state, 'scheduled')
+        self.assertEqual(inv.update_time, self.inv.update_time)
+        self.assertEqual(inv.uuid, self.inv.uuid)
         self.assertGreater(len(self.inv.steps), 0)
-        history_id = self.gi.gi.histories.create_history(name="TestGalaxyInvocationsList")["id"]
-        self.assertEqual(self.gi.invocations.list(history_id=history_id), [])
-        self.gi.gi.histories.delete_history(history_id, purge=True)
+        history = self.gi.histories.create(name="TestGalaxyObjInvocationClientList")
+        self.assertEqual(self.gi.invocations.list(history=history), [])
+        history.delete(purge=True)
 
 
 class TestGalaxyInstance(GalaxyObjectsTestBase):
