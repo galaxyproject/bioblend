@@ -284,14 +284,16 @@ class TestInvocation(GalaxyObjectsTestBase):
         cls.inv = wrappers.Invocation(SAMPLE_INV_DICT)
         path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
         path_pause = test_util.get_abspath(os.path.join('data', 'test_workflow_pause.ga'))
-        cls.workflow_id = cls.gi.gi.workflows.import_workflow_from_local_path(path)['id']
-        cls.workflow_pause_id = cls.gi.gi.workflows.import_workflow_from_local_path(path_pause)['id']
-        cls.history_id = cls.gi.gi.histories.create_history(name="TestInvocation")["id"]
-        cls.dataset_id = cls.gi.gi.tools.paste_content('1\t2\t3', cls.history_id)["outputs"][0]["id"]
+        workflow_id = cls.gi.gi.workflows.import_workflow_from_local_path(path)['id']
+        workflow_pause_id = cls.gi.gi.workflows.import_workflow_from_local_path(path_pause)['id']
+        cls.workflow = cls.gi.workflows.get(workflow_id)
+        cls.workflow_pause = cls.gi.workflows.get(workflow_pause_id)
+        cls.history = cls.gi.histories.create(name="TestInvocation")
+        cls.dataset_id = cls.gi.gi.tools.paste_content('1\t2\t3', cls.history.id)["outputs"][0]["id"]
 
     @classmethod
     def tearDownClass(cls):
-        cls.gi.gi.histories.delete_history(cls.history_id, purge=True)
+        cls.history.delete(purge=True)
 
     def test_initialize(self):
         self.assertEqual(self.inv.workflow_id, '03501d7626bd192f')
@@ -361,12 +363,10 @@ class TestInvocation(GalaxyObjectsTestBase):
         self.assertEqual(inv.state, 'scheduled')
 
     def test_run_step_actions(self):
-        invocation_id = self.gi.gi.workflows.invoke_workflow(
-            self.workflow_pause_id,
+        inv = self.workflow_pause.invoke(
             inputs={"0": {"src": "hda", "id": self.dataset_id}},
-            history_id=self.history_id,
-        )['id']
-        inv = self.gi.invocations.get(invocation_id)
+            history=self.history,
+        )
         for _ in range(20):
             with self.assertRaises(bioblend.TimeoutException):
                 inv.wait(maxwait=0.5, interval=0.5)
@@ -393,7 +393,7 @@ class TestInvocation(GalaxyObjectsTestBase):
     def test_report(self):
         inv = self._obj_invoke_workflow()
         report = inv.report()
-        assert report['workflows'] == {self.workflow_id: {'name': 'paste_columns'}}
+        assert report['workflows'] == {self.workflow.id: {'name': 'paste_columns'}}
 
     @test_util.skip_unless_galaxy('release_20.09')
     def test_biocompute_object(self):
@@ -404,13 +404,11 @@ class TestInvocation(GalaxyObjectsTestBase):
 
     def _obj_invoke_workflow(self):
         dataset = {'src': 'hda', 'id': self.dataset_id}
-        invocation_id = self.gi.gi.workflows.invoke_workflow(
-            self.workflow_id,
+        return self.workflow.invoke(
             inputs={'Input 1': dataset, 'Input 2': dataset},
-            history_id=self.history_id,
-            inputs_by='name'
-        )['id']
-        return self.gi.invocations.get(invocation_id)
+            history=self.history,
+            inputs_by='name',
+        )
 
 
 @test_util.skip_unless_galaxy('release_19.09')
