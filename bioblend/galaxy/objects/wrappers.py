@@ -363,6 +363,9 @@ class Workflow(Wrapper):
         """
         Run the workflow in the current Galaxy instance.
 
+        .. deprecated:: 0.16.0
+           Use :meth:`invoke` instead.
+
         :type input_map: dict
         :param input_map: a mapping from workflow input labels to
           datasets, e.g.: ``dict(zip(workflow.input_labels,
