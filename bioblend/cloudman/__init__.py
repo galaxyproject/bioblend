@@ -397,7 +397,7 @@ class CloudManInstance(GenericVMInstance):
             # Make sure the URL scheme is defined (otherwise requests will not work)
             if not url.lower().startswith('http'):
                 # Check the config for use_ssl to see whether https scheme is required
-                if self.config.kwargs.get('use_ssl',False):
+                if self.config.kwargs.get('use_ssl', False):
                     url = "https://" + url
                 else:
                     url = "http://" + url
@@ -728,7 +728,7 @@ class CloudManInstance(GenericVMInstance):
         if parameters is None:
             parameters = {}
         req_url = '/'.join((self.cloudman_url, 'root', url))
-        # need to set the user "ubuntu" for auth, and indicate verify=False for HTTPS 
+        # need to set the user "ubuntu" for auth, and indicate verify=False for HTTPS
         # connections to self-signed certificates
         r = requests.get(req_url, params=parameters, auth=("ubuntu", self.password), timeout=timeout, verify=False)
         try:
