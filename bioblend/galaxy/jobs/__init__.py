@@ -289,24 +289,18 @@ class JobsClient(Client):
         url = self._make_url(module_id=job_id) + '/metrics'
         return self._get(url=url)
 
-    def cancel_job(self, job_id):
+    def cancel_job(self, job_id: str):
         """
-        creates a cancel request for a specified job
+        Cancel a job, deleting output datasets.
 
         :type job_id: str
         :param job_id: job ID
 
-        :rtype: requests.Response
-        :return: the response object.
-
-        .. note::
-         Calling ``get_state()`` to determine current job's state
-         if the state is not ok then make a delete_request
+        :rtype: bool
+        :return: ``True`` if the job was successfully cancelled, ``False`` if
+          it was already in a terminal state before the cancellation.
         """
-
-        if self.get_state(job_id) != "ok":
-            url = '/'.join((self._make_url(job_id), "/discarded"))
-            return self.gi.make_delete_request(url)
+        return self.gi._delete(job_id)
 
     def report_error(self, job_id: str, dataset_id: str, message: str, email: str = None) -> dict:
         """
