@@ -60,13 +60,9 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
         all_histories = self.gi.histories.get_histories()
         self.assertGreater(len(all_histories), 0)
 
-        # Check whether name is correct, when searched by id
-        new_history = self.gi.histories.get_histories(history_id=self.history['id'])[0]
-        self.assertEqual(new_history['name'], self.default_history_name)
-
         # Check whether id is present, when searched by name
         histories = self.gi.histories.get_histories(name=self.default_history_name)
-        self.assertTrue(any(h['id'] == self.history['id'] for h in histories))
+        self.assertEqual(len([h for h in histories if h['id'] == self.history['id']]), 1)
 
         # TODO: check whether deleted history is returned correctly
         # At the moment, get_histories() returns only not-deleted histories

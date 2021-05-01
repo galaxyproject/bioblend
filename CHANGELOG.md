@@ -1,5 +1,7 @@
 ### BioBlend v - unreleased
 
+* BioBlend.objects: Removed deprecated ``container_id`` property of ``Dataset``
+  and ``Folder`` objects.
 * Pass the API key for all requests as the ``x-api-key`` header instead of as a
   parameter (thanks to [rikeshi](https://github.com/rikeshi)).
 * Added ``get_invocation_biocompute_object``, ``get_invocation_report_pdf``,

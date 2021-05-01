@@ -11,15 +11,16 @@ from collections.abc import (
     Mapping,
     Sequence,
 )
+from typing import Tuple
 
 import bioblend
+from bioblend.util import abstractclass
 
 
 __all__ = (
     'Wrapper',
     'Step',
     'Workflow',
-    'ContentInfo',
     'LibraryContentInfo',
     'HistoryContentInfo',
     'DatasetContainer',
@@ -34,14 +35,14 @@ __all__ = (
     'LibraryDataset',
     'Tool',
     'Job',
-    'Preview',
     'LibraryPreview',
     'HistoryPreview',
     'WorkflowPreview',
 )
 
 
-class Wrapper(metaclass=abc.ABCMeta):
+@abstractclass
+class Wrapper:
     """
     Abstract base class for Galaxy entity wrappers.
 
@@ -54,9 +55,8 @@ class Wrapper(metaclass=abc.ABCMeta):
     Note that the wrapped dictionary is accessible via the ``wrapped``
     attribute.
     """
-    BASE_ATTRS = ('id', 'name')
+    BASE_ATTRS: Tuple[str, ...] = ('id', )
 
-    @abc.abstractmethod
     def __init__(self, wrapped, parent=None, gi=None):
         """
         :type wrapped: dict
@@ -81,13 +81,6 @@ class Wrapper(metaclass=abc.ABCMeta):
         object.__setattr__(self, '_cached_parent', parent)
         object.__setattr__(self, 'is_modified', False)
         object.__setattr__(self, 'gi', gi)
-
-    @abc.abstractproperty
-    def gi_module(self):
-        """
-        The GalaxyInstance module that deals with objects of this type.
-        """
-        pass
 
     @property
     def parent(self):
@@ -151,7 +144,7 @@ class Wrapper(metaclass=abc.ABCMeta):
 
 class Step(Wrapper):
     """
-    Abstract base class for workflow steps.
+    Workflow step.
 
     Steps are the main building blocks of a Galaxy workflow. A step can be: an
     input (type ``data_collection_input``, ``data_input`` or
@@ -159,7 +152,12 @@ class Step(Wrapper):
     (type ``subworkflow``) or a pause (type ``pause``).
     """
     BASE_ATTRS = Wrapper.BASE_ATTRS + (
-        'input_steps', 'tool_id', 'tool_inputs', 'tool_version', 'type'
+        'input_steps',
+        'name',
+        'tool_id',
+        'tool_inputs',
+        'tool_version',
+        'type',
     )
 
     def __init__(self, step_dict, parent):
@@ -171,10 +169,6 @@ class Step(Wrapper):
         if stype not in {'data_collection_input', 'data_input', 'parameter_input', 'pause', 'subworkflow', 'tool'}:
             raise ValueError('Unknown step type: %r' % stype)
 
-    @property
-    def gi_module(self):
-        return self.gi.workflows
-
 
 class Workflow(Wrapper):
     """
@@ -184,7 +178,14 @@ class Workflow(Wrapper):
     results from an input dataset.
     """
     BASE_ATTRS = Wrapper.BASE_ATTRS + (
-        'deleted', 'inputs', 'owner', 'published', 'steps', 'tags'
+        'deleted',
+        'inputs',
+        'latest_workflow_uuid',
+        'name',
+        'owner',
+        'published',
+        'steps',
+        'tags',
     )
     POLLING_INTERVAL = 10  # for output state monitoring
 
@@ -222,10 +223,6 @@ class Workflow(Wrapper):
                 self.inputs, self.data_collection_input_ids, self.data_input_ids, self.parameter_input_ids)
         object.__setattr__(self, 'sink_ids', tails - heads)
         object.__setattr__(self, 'missing_ids', missing_ids)
-
-    @property
-    def gi_module(self):
-        return self.gi.workflows
 
     def _get_dag(self):
         """
@@ -449,9 +446,7 @@ class Workflow(Wrapper):
         res = self.gi.gi.workflows.run_workflow(self.id, **kwargs)
         # res structure: {'history': HIST_ID, 'outputs': [CI_ID, CI_ID, ...]}
         out_hist = self.gi.histories.get(res['history'])
-        content_infos_dict = dict()
-        for ci in out_hist.content_infos:
-            content_infos_dict[ci.id] = ci
+        content_infos_dict = {ci.id: ci for ci in out_hist.content_infos}
         outputs = []
         for output_id in res['outputs']:
             if content_infos_dict[output_id].type == 'file':
@@ -490,25 +485,23 @@ class Dataset(Wrapper, metaclass=abc.ABCMeta):
     Abstract base class for Galaxy datasets.
     """
     BASE_ATTRS = Wrapper.BASE_ATTRS + (
-        'data_type', 'file_ext', 'file_name', 'file_size', 'genome_build', 'misc_info', 'state'
+        'data_type',
+        'file_ext',
+        'file_name',
+        'file_size',
+        'genome_build',
+        'misc_info',
+        'name',
+        'state',
     )
     POLLING_INTERVAL = 1  # for state monitoring
 
-    @abc.abstractmethod
     def __init__(self, ds_dict, container, gi=None):
         super().__init__(ds_dict, gi=gi)
         object.__setattr__(self, 'container', container)
 
     @property
-    def container_id(self):
-        """
-        Deprecated property.
-
-        Id of the dataset container. Use :attr:`.container.id` instead.
-        """
-        return self.container.id
-
-    @abc.abstractproperty
+    @abc.abstractmethod
     def _stream_url(self):
         """
         Return the URL to stream this dataset.
@@ -603,13 +596,6 @@ class HistoryDatasetAssociation(Dataset):
     BASE_ATTRS = Dataset.BASE_ATTRS + ('annotation', 'deleted', 'purged', 'tags', 'visible')
     SRC = 'hda'
 
-    def __init__(self, ds_dict, container, gi=None):
-        super().__init__(ds_dict, container, gi=gi)
-
-    @property
-    def gi_module(self):
-        return self.gi.histories
-
     @property
     def _stream_url(self):
         base_url = self.gi.gi.histories._make_url(module_id=self.container.id, contents=True)
@@ -663,10 +649,12 @@ class DatasetCollection(Wrapper, metaclass=abc.ABCMeta):
     Abstract base class for Galaxy dataset collections.
     """
     BASE_ATTRS = Wrapper.BASE_ATTRS + (
-        'state', 'deleted', 'collection_type'
+        'collection_type',
+        'deleted',
+        'name',
+        'state',
     )
 
-    @abc.abstractmethod
     def __init__(self, dsc_dict, container, gi=None):
         super().__init__(dsc_dict, gi=gi)
         object.__setattr__(self, 'container', container)
@@ -682,6 +670,10 @@ class DatasetCollection(Wrapper, metaclass=abc.ABCMeta):
         self.__init__(dsc_dict, self.container, self.gi)
         return self
 
+    @abc.abstractmethod
+    def delete(self):
+        pass
+
 
 class HistoryDatasetCollectionAssociation(DatasetCollection):
     """
@@ -689,13 +681,6 @@ class HistoryDatasetCollectionAssociation(DatasetCollection):
     """
     BASE_ATTRS = DatasetCollection.BASE_ATTRS + ('tags', 'visible', 'elements')
     SRC = 'hdca'
-
-    def __init__(self, dsc_dict, container, gi=None):
-        super().__init__(dsc_dict, container, gi=gi)
-
-    @property
-    def gi_module(self):
-        return self.gi.histories
 
     def delete(self):
         """
@@ -706,17 +691,11 @@ class HistoryDatasetCollectionAssociation(DatasetCollection):
         self.refresh()
 
 
+@abstractclass
 class LibRelatedDataset(Dataset):
     """
     Base class for LibraryDatasetDatasetAssociation and LibraryDataset classes.
     """
-
-    def __init__(self, ds_dict, container, gi=None):
-        super().__init__(ds_dict, container, gi=gi)
-
-    @property
-    def gi_module(self):
-        return self.gi.libraries
 
     @property
     def _stream_url(self):
@@ -767,16 +746,16 @@ class LibraryDataset(LibRelatedDataset):
         return self
 
 
-class ContentInfo(Wrapper, metaclass=abc.ABCMeta):
+@abstractclass
+class ContentInfo(Wrapper):
     """
     Instances of this class wrap dictionaries obtained by getting
     ``/api/{histories,libraries}/<ID>/contents`` from Galaxy.
     """
-    BASE_ATTRS = Wrapper.BASE_ATTRS + ('type',)
-
-    @abc.abstractmethod
-    def __init__(self, info_dict, gi=None):
-        super().__init__(info_dict, gi=gi)
+    BASE_ATTRS = Wrapper.BASE_ATTRS + (
+        'name',
+        'type',
+    )
 
 
 class LibraryContentInfo(ContentInfo):
@@ -784,12 +763,6 @@ class LibraryContentInfo(ContentInfo):
     Instances of this class wrap dictionaries obtained by getting
     ``/api/libraries/<ID>/contents`` from Galaxy.
     """
-    def __init__(self, info_dict, gi=None):
-        super().__init__(info_dict, gi=gi)
-
-    @property
-    def gi_module(self):
-        return self.gi.libraries
 
 
 class HistoryContentInfo(ContentInfo):
@@ -799,21 +772,16 @@ class HistoryContentInfo(ContentInfo):
     """
     BASE_ATTRS = ContentInfo.BASE_ATTRS + ('deleted', 'state', 'visible')
 
-    def __init__(self, info_dict, gi=None):
-        super().__init__(info_dict, gi=gi)
-
-    @property
-    def gi_module(self):
-        return self.gi.histories
-
 
 class DatasetContainer(Wrapper, metaclass=abc.ABCMeta):
     """
     Abstract base class for dataset containers (histories and libraries).
     """
-    BASE_ATTRS = Wrapper.BASE_ATTRS + ('deleted',)
+    BASE_ATTRS = Wrapper.BASE_ATTRS + (
+        'deleted',
+        'name',
+    )
 
-    @abc.abstractmethod
     def __init__(self, c_dict, content_infos=None, gi=None):
         """
         :type content_infos: list of :class:`ContentInfo`
@@ -823,6 +791,12 @@ class DatasetContainer(Wrapper, metaclass=abc.ABCMeta):
         if content_infos is None:
             content_infos = []
         object.__setattr__(self, 'content_infos', content_infos)
+        object.__setattr__(self, 'obj_gi_client', getattr(self.gi, self.API_MODULE))
+
+    @property
+    @abc.abstractmethod
+    def API_MODULE(self):
+        pass
 
     @property
     def dataset_ids(self):
@@ -832,7 +806,7 @@ class DatasetContainer(Wrapper, metaclass=abc.ABCMeta):
         return [_.id for _ in self.content_infos if _.type == 'file']
 
     def preview(self):
-        getf = self.gi_module.get_previews
+        getf = self.obj_gi_client.get_previews
         # self.state could be stale: check both regular and deleted containers
         try:
             p = [_ for _ in getf() if _.id == self.id][0]
@@ -849,7 +823,7 @@ class DatasetContainer(Wrapper, metaclass=abc.ABCMeta):
 
         Returns: self
         """
-        fresh = self.gi_module.get(self.id)
+        fresh = self.obj_gi_client.get(self.id)
         self.__init__(
             fresh.wrapped, content_infos=fresh.content_infos, gi=self.gi)
         return self
@@ -905,13 +879,6 @@ class History(DatasetContainer):
     DSC_TYPE = HistoryDatasetCollectionAssociation
     CONTENT_INFO_TYPE = HistoryContentInfo
     API_MODULE = 'histories'
-
-    def __init__(self, hist_dict, content_infos=None, gi=None):
-        super().__init__(hist_dict, content_infos=content_infos, gi=gi)
-
-    @property
-    def gi_module(self):
-        return self.gi.histories
 
     def update(self, **kwds):
         """
@@ -1093,13 +1060,6 @@ class Library(DatasetContainer):
     CONTENT_INFO_TYPE = LibraryContentInfo
     API_MODULE = 'libraries'
 
-    def __init__(self, lib_dict, content_infos=None, gi=None):
-        super().__init__(lib_dict, content_infos=content_infos, gi=gi)
-
-    @property
-    def gi_module(self):
-        return self.gi.libraries
-
     @property
     def folder_ids(self):
         """
@@ -1277,7 +1237,12 @@ class Folder(Wrapper):
     """
     Maps to a folder in a Galaxy library.
     """
-    BASE_ATTRS = Wrapper.BASE_ATTRS + ('description', 'deleted', 'item_count')
+    BASE_ATTRS = Wrapper.BASE_ATTRS + (
+        'deleted',
+        'description',
+        'item_count',
+        'name',
+    )
 
     def __init__(self, f_dict, container, gi=None):
         super().__init__(f_dict, gi=gi)
@@ -1307,19 +1272,6 @@ class Folder(Wrapper):
             return None
         return self.container.get_folder(parent_id)
 
-    @property
-    def gi_module(self):
-        return self.gi.libraries
-
-    @property
-    def container_id(self):
-        """
-        Deprecated property.
-
-        Id of the folder container. Use :attr:`.container.id` instead.
-        """
-        return self.container.id
-
     def refresh(self):
         """
         Re-fetch the attributes pertaining to this object.
@@ -1335,15 +1287,11 @@ class Tool(Wrapper):
     """
     Maps to a Galaxy tool.
     """
-    BASE_ATTRS = Wrapper.BASE_ATTRS + ('version',)
+    BASE_ATTRS = Wrapper.BASE_ATTRS + (
+        'name',
+        'version',
+    )
     POLLING_INTERVAL = 10  # for output state monitoring
-
-    def __init__(self, t_dict, gi=None):
-        super().__init__(t_dict, gi=gi)
-
-    @property
-    def gi_module(self):
-        return self.gi.tools
 
     def run(self, inputs, history, wait=False,
             polling_interval=POLLING_INTERVAL):
@@ -1390,91 +1338,68 @@ class Job(Wrapper):
     """
     Maps to a Galaxy job.
     """
-    BASE_ATTRS = ('id', 'state')
-
-    def __init__(self, j_dict, gi=None):
-        super().__init__(j_dict, gi=gi)
-
-    @property
-    def gi_module(self):
-        return self.gi.jobs
+    BASE_ATTRS = Wrapper.BASE_ATTRS + ('state',)
 
 
-class Preview(Wrapper, metaclass=abc.ABCMeta):
+@abstractclass
+class DatasetContainerPreview(Wrapper):
     """
-    Abstract base class for Galaxy entity 'previews'.
-
-    Classes derived from this one model the short summaries returned
-    by global getters such as ``/api/libraries``.
+    Abstract base class for dataset container (history and library) 'previews'.
     """
-    BASE_ATTRS = Wrapper.BASE_ATTRS + ('deleted',)
+    BASE_ATTRS = Wrapper.BASE_ATTRS + (
+        'deleted',
+        'name',
+    )
 
-    @abc.abstractmethod
-    def __init__(self, pw_dict, gi=None):
-        super().__init__(pw_dict, gi=gi)
 
-
-class LibraryPreview(Preview):
+class LibraryPreview(DatasetContainerPreview):
     """
     Models Galaxy library 'previews'.
 
     Instances of this class wrap dictionaries obtained by getting
     ``/api/libraries`` from Galaxy.
     """
-    def __init__(self, pw_dict, gi=None):
-        super().__init__(pw_dict, gi=gi)
-
-    @property
-    def gi_module(self):
-        return self.gi.libraries
 
 
-class HistoryPreview(Preview):
+class HistoryPreview(DatasetContainerPreview):
     """
     Models Galaxy history 'previews'.
 
     Instances of this class wrap dictionaries obtained by getting
     ``/api/histories`` from Galaxy.
     """
-    BASE_ATTRS = Preview.BASE_ATTRS + ('annotation', 'published', 'purged', 'tags',)
-
-    def __init__(self, pw_dict, gi=None):
-        super().__init__(pw_dict, gi=gi)
-
-    @property
-    def gi_module(self):
-        return self.gi.histories
+    BASE_ATTRS = DatasetContainerPreview.BASE_ATTRS + (
+        'annotation',
+        'published',
+        'purged',
+        'tags',
+    )
 
 
-class WorkflowPreview(Preview):
+class WorkflowPreview(Wrapper):
     """
     Models Galaxy workflow 'previews'.
 
     Instances of this class wrap dictionaries obtained by getting
     ``/api/workflows`` from Galaxy.
     """
-    BASE_ATTRS = Preview.BASE_ATTRS + ('published', 'tags')
+    BASE_ATTRS = Wrapper.BASE_ATTRS + (
+        'deleted',
+        'latest_workflow_uuid',
+        'name',
+        'number_of_steps',
+        'owner',
+        'published',
+        'show_in_tool_panel',
+        'tags',
+    )
 
-    def __init__(self, pw_dict, gi=None):
-        super().__init__(pw_dict, gi=gi)
 
-    @property
-    def gi_module(self):
-        return self.gi.workflows
-
-
-class JobPreview(Preview):
+class JobPreview(Wrapper):
     """
     Models Galaxy job 'previews'.
 
     Instances of this class wrap dictionaries obtained by getting
     ``/api/jobs`` from Galaxy.
     """
-    BASE_ATTRS = ('id', 'state')
-
-    def __init__(self, pw_dict, gi=None):
-        super().__init__(pw_dict, gi=gi)
-
-    @property
-    def gi_module(self):
-        return self.gi.jobs
+    BASE_ATTRS = Wrapper.BASE_ATTRS + ('state',)

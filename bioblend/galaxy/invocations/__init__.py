@@ -1,22 +1,61 @@
 """
 Contains possible interactions with the Galaxy workflow invocations
 """
+import logging
+import time
+from typing import (
+    Optional,
+)
 
-from bioblend import CHUNK_SIZE
+from bioblend import (
+    CHUNK_SIZE,
+    TimeoutException,
+)
 from bioblend.galaxy.client import Client
+
+log = logging.getLogger(__name__)
 
 INVOCATION_TERMINAL_STATES = {'cancelled', 'failed', 'scheduled'}
 # Invocation non-terminal states are: 'new', 'ready'
 
 
 class InvocationClient(Client):
+    module = 'invocations'
+
     def __init__(self, galaxy_instance):
-        self.module = 'invocations'
         super().__init__(galaxy_instance)
 
-    def get_invocations(self):
+    def get_invocations(self, workflow_id=None, history_id=None, user_id=None,
+                        include_terminal=True, limit=None, view='collection',
+                        step_details=False):
         """
-        Get a list containing all workflow invocations.
+        Get all workflow invocations, or select a subset by specifying optional
+        arguments for filtering (e.g. a workflow ID).
+
+        :type workflow_id: str
+        :param workflow_id: Encoded workflow ID to filter on
+
+        :type history_id: str
+        :param history_id: Encoded history ID to filter on
+
+        :type user_id: str
+        :param user_id: Encoded user ID to filter on. This must be
+                        your own user ID if your are not an admin user.
+
+        :type include_terminal: bool
+        :param include_terminal: Whether to include terminal states.
+
+        :type limit: int
+        :param limit: Maximum number of invocations to return - if specified,
+                      the most recent invocations will be returned.
+
+        :type view: str
+        :param view: Level of detail to return per invocation, either
+                     'element' or 'collection'.
+
+        :type step_details: bool
+        :param step_details: If 'view' is 'element', also include details
+                             on individual steps.
 
         :rtype: list
         :return: A list of workflow invocations.
@@ -30,7 +69,20 @@ class InvocationClient(Client):
               'uuid': 'c8aa2b1c-801a-11e5-a9e5-8ca98228593c',
               'workflow_id': '03501d7626bd192f'}]
         """
-        return self._get()
+        params = {
+            'include_terminal': include_terminal,
+            'view': view,
+            'step_details': step_details
+        }
+        if workflow_id:
+            params['workflow_id'] = workflow_id
+        if history_id:
+            params['history_id'] = history_id
+        if user_id:
+            params['user_id'] = user_id
+        if limit is not None:
+            params['limit'] = limit
+        return self._get(params=params)
 
     def show_invocation(self, invocation_id):
         """
@@ -79,6 +131,100 @@ class InvocationClient(Client):
         """
         url = self._make_url(invocation_id)
         return self._get(url=url)
+
+    def rerun_invocation(self, invocation_id: str, inputs_update: Optional[dict] = None,
+                         params_update: Optional[dict] = None, history_id: Optional[str] = None,
+                         history_name: Optional[str] = None, import_inputs_to_history: bool = False,
+                         replacement_params: Optional[dict] = None, allow_tool_state_corrections: bool = False,
+                         inputs_by: Optional[str] = None, parameters_normalized: bool = False):
+        """
+        Rerun a workflow invocation. For more extensive documentation of all
+        parameters, see the ``gi.workflows.invoke_workflow()`` method.
+
+        :type invocation_id: str
+        :param invocation_id: Encoded workflow invocation ID to be rerun
+
+        :type inputs_update: dict
+        :param inputs_update: If different datasets should be used to the original
+          invocation, this should contain a mapping of workflow inputs to the new
+          datasets and dataset collections.
+
+        :type params_update: dict
+        :param params_update: If different non-dataset tool parameters should be
+          used to the original invocation, this should contain a mapping of the
+          new parameter values.
+
+        :type history_id: str
+        :param history_id: The encoded history ID where to store the workflow
+          outputs. Alternatively, ``history_name`` may be specified to create a
+          new history.
+
+        :type history_name: str
+        :param history_name: Create a new history with the given name to store
+          the workflow outputs. If both ``history_id`` and ``history_name`` are
+          provided, ``history_name`` is ignored. If neither is specified, a new
+          'Unnamed history' is created.
+
+        :type import_inputs_to_history: bool
+        :param import_inputs_to_history: If ``True``, used workflow inputs will
+          be imported into the history. If ``False``, only workflow outputs will
+          be visible in the given history.
+
+        :type allow_tool_state_corrections: bool
+        :param allow_tool_state_corrections: If True, allow Galaxy to fill in
+          missing tool state when running workflows. This may be useful for
+          workflows using tools that have changed over time or for workflows
+          built outside of Galaxy with only a subset of inputs defined.
+
+        :type replacement_params: dict
+        :param replacement_params: pattern-based replacements for post-job
+          actions
+
+        :type inputs_by: str
+        :param inputs_by: Determines how inputs are referenced. Can be
+          "step_index|step_uuid" (default), "step_index", "step_id", "step_uuid", or "name".
+
+        :type parameters_normalized: bool
+        :param parameters_normalized: Whether Galaxy should normalize the input
+          parameters to ensure everything is referenced by a numeric step ID.
+          Default is ``False``, but when setting parameters for a subworkflow,
+          ``True`` is required.
+
+        :rtype: dict
+        :return: A dict describing the new workflow invocation.
+
+        .. note::
+          This method can only be used with Galaxy ``release_21.05`` or later.
+        """
+        invocation_details = self.show_invocation(invocation_id)
+        workflow_id = invocation_details['stored_workflow_id']
+        inputs = invocation_details['inputs']
+        params = invocation_details['input_step_parameters']
+        if inputs_update:
+            for inp, input_value in inputs_update.items():
+                inputs[inp] = input_value
+        if params_update:
+            for param, param_value in params_update.items():
+                params[param] = param_value
+        payload = {'inputs': inputs, 'params': params}
+
+        if replacement_params:
+            payload['replacement_params'] = replacement_params
+        if history_id:
+            payload['history'] = f'hist_id={history_id}'
+        elif history_name:
+            payload['history'] = history_name
+        if not import_inputs_to_history:
+            payload['no_add_to_history'] = True
+        if allow_tool_state_corrections:
+            payload['allow_tool_state_corrections'] = allow_tool_state_corrections
+        if inputs_by is not None:
+            payload['inputs_by'] = inputs_by
+        if parameters_normalized:
+            payload['parameters_normalized'] = parameters_normalized
+
+        url = '/'.join((self.gi.url, 'workflows', workflow_id, 'invocations'))
+        return self._post(payload, url=url)
 
     def cancel_invocation(self, invocation_id):
         """
@@ -246,6 +392,46 @@ class InvocationClient(Client):
         """
         url = self._make_url(invocation_id) + '/biocompute'
         return self._get(url=url)
+
+    def wait_for_invocation(self, invocation_id, maxwait=12000, interval=3, check=True):
+        """
+        Wait until an invocation is in a terminal state.
+
+        :type invocation_id: str
+        :param invocation_id: Invocation ID to wait for.
+
+        :type maxwait: float
+        :param maxwait: Total time (in seconds) to wait for the invocation state
+          to become terminal. If the invocation state is not terminal within
+          this time, a ``TimeoutException`` will be raised.
+
+        :type interval: float
+        :param interval: Time (in seconds) to wait between 2 consecutive checks.
+
+        :type check: bool
+        :param check: Whether to check if the invocation terminal state is
+          'scheduled'.
+
+        :rtype: dict
+        :return: Details of the workflow invocation.
+        """
+        assert maxwait >= 0
+        assert interval > 0
+
+        time_left = maxwait
+        while True:
+            invocation = self.gi.invocations.show_invocation(invocation_id)
+            state = invocation['state']
+            if state in INVOCATION_TERMINAL_STATES:
+                if check and state != 'scheduled':
+                    raise Exception(f"Invocation {invocation_id} is in terminal state {state}")
+                return invocation
+            if time_left > 0:
+                log.info(f"Invocation {invocation_id} is in non-terminal state {state}. Will wait {time_left} more s")
+                time.sleep(min(time_left, interval))
+                time_left -= interval
+            else:
+                raise TimeoutException(f"Invocation {invocation_id} is still in non-terminal state {state} after {maxwait} s")
 
     def _invocation_step_url(self, invocation_id, step_id):
         return '/'.join((self._make_url(invocation_id), "steps", step_id))

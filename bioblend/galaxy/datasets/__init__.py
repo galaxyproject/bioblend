@@ -6,9 +6,15 @@ import os
 import shlex
 import time
 import warnings
+from typing import (
+    Any,
+    Dict,
+    Optional,
+)
 from urllib.parse import urljoin
 
 import bioblend
+from bioblend import TimeoutException
 from bioblend.galaxy.client import Client
 
 log = logging.getLogger(__name__)
@@ -18,8 +24,9 @@ TERMINAL_STATES = {'ok', 'empty', 'error', 'discarded', 'failed_metadata'}
 
 
 class DatasetClient(Client):
+    module = 'datasets'
+
     def __init__(self, galaxy_instance):
-        self.module = 'datasets'
         super().__init__(galaxy_instance)
 
     def show_dataset(self, dataset_id, deleted=False, hda_ldda='hda'):
@@ -80,7 +87,7 @@ class DatasetClient(Client):
         :return: If a ``file_path`` argument is not provided, returns a dict containing the file content.
                  Otherwise returns nothing.
         """
-        dataset = self._block_until_dataset_terminal(dataset_id, maxwait=maxwait)
+        dataset = self.wait_for_dataset(dataset_id, maxwait=maxwait, check=False)
         if not dataset['state'] == 'ok':
             message = "Dataset state is not 'ok'. Dataset id: {}, current state: {}".format(dataset_id, dataset['state'])
             if require_ok_state:
@@ -134,10 +141,13 @@ class DatasetClient(Client):
             # Return location file was saved to
             return file_local_path
 
-    def get_datasets(self, limit=500, offset=0):
+    def get_datasets(self, limit=500, offset=0, history_id=None):
         """
-        Provide a list of all datasets. Since this may be very large, ``limit``
-        and ``offset`` parameters should be used to specify the desired range.
+        Get the latest datasets, or select another subset by specifying optional
+        arguments for filtering (e.g. a history id).
+
+        Since the number of datasets may be very large, ``limit`` and ``offset``
+        parameters should always be used to specify the desired range.
 
         :type limit: int
         :param limit: Maximum number of datasets to return.
@@ -147,6 +157,9 @@ class DatasetClient(Client):
           For example, if ``limit`` is set to 100 and ``offset`` to 200,
           datasets 200-299 will be returned.
 
+        :type history_id: str
+        :param history_id: Encoded history ID to filter on.
+
         :rtype: list
         :return: Return a list of dataset dicts.
         """
@@ -154,12 +167,86 @@ class DatasetClient(Client):
             'limit': limit,
             'offset': offset,
         }
+        if history_id:
+            params['history_id'] = history_id
         return self._get(params=params)
 
-    def _block_until_dataset_terminal(self, dataset_id, maxwait=12000, interval=3):
+    def publish_dataset(self, dataset_id: str, published: bool = False):
         """
-        Wait until the dataset state is terminal ('ok', 'empty', 'error',
-        'discarded' or 'failed_metadata').
+        Make a dataset publicly available or private. For more fine-grained control (assigning different
+        permissions to specific roles), use the ``update_permissions()`` method.
+
+        :type dataset_id: str
+        :param dataset_id: dataset ID
+
+        :type published: bool
+        :param published: Whether to make the dataset published (``True``) or private (``False``).
+
+        :rtype: dict
+        :return: Current roles for all available permission types.
+        .. note::
+          This method can only be used with Galaxy ``release_19.05`` or later.
+        """
+        payload: Dict[str, Any] = {
+            'action': 'remove_restrictions' if published else 'make_private'
+        }
+        url = self._make_url(dataset_id) + '/permissions'
+        self.gi.datasets._put(url=url, payload=payload)
+
+    def update_permissions(self, dataset_id: str, access_ids: Optional[list] = None,
+                           manage_ids: Optional[list] = None, modify_ids: Optional[list] = None):
+        """
+        Set access, manage or modify permissions for a dataset to a list of roles.
+
+        :type dataset_id: str
+        :param dataset_id: dataset ID
+
+        :type access_ids: list
+        :param access_ids: role IDs which should have access permissions for the dataset.
+
+        :type manage_ids: list
+        :param manage_ids: role IDs which should have manage permissions for the dataset.
+
+        :type modify_ids: list
+        :param modify_ids: role IDs which should have modify permissions for the dataset.
+
+        :rtype: dict
+        :return: Current roles for all available permission types.
+        .. note::
+          This method can only be used with Galaxy ``release_19.05`` or later.
+        """
+        payload: Dict[str, Any] = {
+            'action': 'set_permissions'
+        }
+        if access_ids:
+            payload['access'] = access_ids
+        if manage_ids:
+            payload['manage'] = manage_ids
+        if modify_ids:
+            payload['modify'] = modify_ids
+        url = self._make_url(dataset_id) + '/permissions'
+        self.gi.datasets._put(url=url, payload=payload)
+
+    def wait_for_dataset(self, dataset_id, maxwait=12000, interval=3, check=True):
+        """
+        Wait until a dataset is in a terminal state.
+
+        :type dataset_id: str
+        :param dataset_id: dataset ID
+
+        :type maxwait: float
+        :param maxwait: Total time (in seconds) to wait for the dataset state to
+          become terminal. If the dataset state is not terminal within this
+          time, a ``DatasetTimeoutException`` will be raised.
+
+        :type interval: float
+        :param interval: Time (in seconds) to wait between 2 consecutive checks.
+
+        :type check: bool
+        :param check: Whether to check if the dataset terminal state is 'ok'.
+
+        :rtype: dict
+        :return: Details of the given dataset.
         """
         assert maxwait >= 0
         assert interval > 0
@@ -169,13 +256,15 @@ class DatasetClient(Client):
             dataset = self.show_dataset(dataset_id)
             state = dataset['state']
             if state in TERMINAL_STATES:
+                if check and state != 'ok':
+                    raise Exception(f"Dataset {dataset_id} is in terminal state {state}")
                 return dataset
             if time_left > 0:
-                log.warning("Dataset %s is in non-terminal state %s. Will wait %i more s", dataset_id, state, time_left)
+                log.info(f"Dataset {dataset_id} is in non-terminal state {state}. Will wait {time_left} more s")
                 time.sleep(min(time_left, interval))
                 time_left -= interval
             else:
-                raise DatasetTimeoutException("Waited too long for dataset %s to complete" % dataset_id)
+                raise DatasetTimeoutException(f"Dataset {dataset_id} is still in non-terminal state {state} after {maxwait} s")
 
 
 class DatasetStateException(Exception):
@@ -186,5 +275,5 @@ class DatasetStateWarning(Warning):
     pass
 
 
-class DatasetTimeoutException(Exception):
+class DatasetTimeoutException(TimeoutException):
     pass

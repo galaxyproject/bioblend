@@ -1,5 +1,8 @@
 import os
-from collections import namedtuple
+from typing import (
+    IO,
+    NamedTuple
+)
 
 
 class Bunch:
@@ -19,16 +22,12 @@ class Bunch:
         return str(self.__dict__)
 
 
-def _file_stream_close(self):
-    """
-    Close the open file descriptor associated with the FileStream
-    object.
-    """
-    self[1].close()
+class FileStream(NamedTuple):
+    name: str
+    fd: IO
 
-
-FileStream = namedtuple("FileStream", ["name", "fd"])
-FileStream.close = _file_stream_close
+    def close(self):
+        self.fd.close()
 
 
 def attach_file(path, name=None):
@@ -49,6 +48,21 @@ def attach_file(path, name=None):
         name = os.path.basename(path)
     attachment = FileStream(name, open(path, "rb"))
     return attachment
+
+
+def abstractclass(decorated_cls):
+    """
+    Decorator that marks a class as abstract even without any abstract method
+
+    Adapted from https://stackoverflow.com/a/49013561/4503125
+    """
+    def clsnew(cls, *args, **kwargs):
+        if cls is decorated_cls:
+            raise TypeError(f"Can't instantiate abstract class {decorated_cls.__name__}")
+        return super(decorated_cls, cls).__new__(cls)
+
+    decorated_cls.__new__ = clsnew
+    return decorated_cls
 
 
 __all__ = (

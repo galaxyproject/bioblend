@@ -7,9 +7,9 @@ A base representation of an instance
 """
 import base64
 import json
+import logging
 from urllib.parse import (
     urljoin,
-    urlparse,
 )
 
 import requests
@@ -17,6 +17,8 @@ from requests_toolbelt import MultipartEncoder
 
 from bioblend import ConnectionError
 from bioblend.util import FileStream
+
+log = logging.getLogger(__name__)
 
 
 class GalaxyClient:
@@ -28,9 +30,22 @@ class GalaxyClient:
         :param timeout: Timeout for requests operations, set to None for no timeout (the default).
         :type timeout: float
         """
-        # Make sure the url scheme is defined (otherwise requests will not work)
-        if not urlparse(url).scheme:
-            url = "http://" + url
+        # Make sure the URL scheme is defined (otherwise requests will not work)
+        if not url.lower().startswith('http'):
+            found_scheme = None
+            # Try to guess the scheme, starting from the more secure
+            for scheme in ('https://', 'http://'):
+                log.warning(f"Missing scheme in url, trying with {scheme}")
+                try:
+                    r = requests.get(scheme + url)
+                    r.raise_for_status()
+                    found_scheme = scheme
+                    break
+                except Exception:
+                    pass
+            else:
+                raise ValueError(f"Missing scheme in url {url}")
+            url = found_scheme + url
         # All of Galaxy's and ToolShed's API's are rooted at <url>/api so make that the url
         self.base_url = url
         self.url = urljoin(url, 'api')

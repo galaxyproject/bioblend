@@ -5,9 +5,9 @@ from bioblend.galaxy.client import Client
 
 
 class VisualClient(Client):
+    module = 'visualizations'
 
     def __init__(self, galaxy_instance):
-        self.module = 'visualizations'
         super().__init__(galaxy_instance)
 
     def get_visualizations(self):

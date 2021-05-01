@@ -394,9 +394,8 @@ class CloudManInstance(GenericVMInstance):
         Keeps the CloudMan URL as well and the hostname in sync.
         """
         if url:
-            parse_result = urlparse(url)
             # Make sure the URL scheme is defined (otherwise requests will not work)
-            if not parse_result.scheme:
+            if not url.lower().startswith('http'):
                 url = "http://" + url
             # Parse the corrected URL again to extract the hostname
             parse_result = urlparse(url)

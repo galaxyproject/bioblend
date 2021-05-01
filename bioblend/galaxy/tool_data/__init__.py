@@ -5,9 +5,9 @@ from bioblend.galaxy.client import Client
 
 
 class ToolDataClient(Client):
+    module = 'tool_data'
 
     def __init__(self, galaxy_instance):
-        self.module = 'tool_data'
         super().__init__(galaxy_instance)
 
     def get_data_tables(self):

@@ -57,7 +57,7 @@ print("Importing data")
 # Import each pair of files, and track the resulting identifiers.
 
 dataset_ids = []
-filenames = dict()
+filenames = {}
 for (file1, file2) in import_file_pairs:
     dataset1 = gi.libraries.upload_file_from_url(library, file1, file_type='fastqsanger')
     dataset2 = gi.libraries.upload_file_from_url(library, file2, file_type='fastqsanger')
@@ -84,7 +84,8 @@ input2 = gi.workflows.get_workflow_inputs(workflow, label='Input fastq readpair-
 
 for (data1, data2) in dataset_ids:
     print("Initiating workflow run on files {}, {}".format(filenames[data1], filenames[data2]))
-    datamap = dict()
-    datamap[input1] = {'src': 'ld', 'id': data1}
-    datamap[input2] = {'src': 'ld', 'id': data2}
+    datamap = {
+        input1: {'src': 'ld', 'id': data1},
+        input2: {'src': 'ld', 'id': data2},
+    }
     result = gi.workflows.run_workflow(workflow, datamap, history_id=outputhist, import_inputs_to_history=True)

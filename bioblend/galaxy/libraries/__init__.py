@@ -3,6 +3,7 @@ Contains possible interactions with the Galaxy Data Libraries
 """
 import logging
 import time
+import warnings
 
 from bioblend.galaxy.client import Client
 from bioblend.galaxy.datasets import (
@@ -15,9 +16,9 @@ log = logging.getLogger(__name__)
 
 
 class LibraryClient(Client):
+    module = 'libraries'
 
     def __init__(self, galaxy_instance):
-        self.module = 'libraries'
         super().__init__(galaxy_instance)
 
     def create_library(self, name, description=None, synopsis=None):
@@ -176,7 +177,7 @@ class LibraryClient(Client):
             if state in TERMINAL_STATES:
                 return dataset
             if time_left > 0:
-                log.warning("Dataset %s in library %s is in non-terminal state %s. Will wait %i more s", dataset_id, library_id, state, time_left)
+                log.info("Dataset %s in library %s is in non-terminal state %s. Will wait %i more s", dataset_id, library_id, state, time_left)
                 time.sleep(min(time_left, interval))
                 time_left -= interval
             else:
@@ -263,6 +264,11 @@ class LibraryClient(Client):
         :rtype: list
         :return: list of dicts each containing basic information about a folder
         """
+        if folder_id is not None:
+            warnings.warn(
+                'The folder_id parameter is deprecated, use the show_folder() method to view details of a folder for which you know the ID.',
+                category=FutureWarning
+            )
         if folder_id is not None and name is not None:
             raise ValueError('Provide only one argument between name or folder_id, but not both')
         library_contents = self.show_library(library_id=library_id, contents=True)
@@ -298,6 +304,11 @@ class LibraryClient(Client):
         :rtype: list
         :return: list of dicts each containing basic information about a library
         """
+        if library_id is not None:
+            warnings.warn(
+                'The library_id parameter is deprecated, use the show_library() method to view details of a library for which you know the ID.',
+                category=FutureWarning
+            )
         if library_id is not None and name is not None:
             raise ValueError('Provide only one argument between name or library_id, but not both')
         libraries = self._get(params={"deleted": deleted})

@@ -5,6 +5,7 @@ import logging
 import re
 import sys
 import time
+import warnings
 import webbrowser
 from urllib.parse import urljoin
 
@@ -17,9 +18,9 @@ log = logging.getLogger(__name__)
 
 
 class HistoryClient(Client):
+    module = 'histories'
 
     def __init__(self, galaxy_instance):
-        self.module = 'histories'
         super().__init__(galaxy_instance)
 
     def create_history(self, name=None):
@@ -115,6 +116,11 @@ class HistoryClient(Client):
         :rtype: list
         :return: List of history dicts.
         """
+        if history_id is not None:
+            warnings.warn(
+                'The history_id parameter is deprecated, use the show_history() method to view details of a history for which you know the ID.',
+                category=FutureWarning
+            )
         return self._get_histories(history_id=history_id, name=name, deleted=deleted, filter_user_published=published, get_all_published=False, slug=slug)
 
     def get_published_histories(self, name=None, deleted=False, slug=None):
@@ -637,7 +643,7 @@ class HistoryClient(Client):
             except ConnectionError as e:
                 if e.status_code == 202:  # export is not ready
                     if time_left > 0:
-                        log.warning("Waiting for the export of history %s to complete. Will wait %i more s", history_id, time_left)
+                        log.info("Waiting for the export of history %s to complete. Will wait %i more s", history_id, time_left)
                         time.sleep(1)
                         time_left -= 1
                     else:

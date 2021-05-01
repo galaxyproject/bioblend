@@ -296,8 +296,7 @@ There is one input, labelled 'Input RNA-seq fastq'. This input is passed to the 
 
 To specify the inputs, we build a data map and pass this to the ``run_workflow`` method. This data map is a nested dictionary object which maps inputs to datasets. We call::
 
-    >>> datamap = dict()
-    >>> datamap['252'] = {'src':'hda', 'id':'10a4b652da44e82a'}
+    >>> datamap = {'252': {'src':'hda', 'id':'10a4b652da44e82a'}}
     >>> gi.workflows.run_workflow('e8b85ad72aefca86', datamap, history_name='New output history')
     {'history': '0a7b7992a7cabaec',
      'outputs': ['33be8ad9917d9207',

@@ -5,9 +5,9 @@ from bioblend.galaxy.client import Client
 
 
 class RolesClient(Client):
+    module = 'roles'
 
     def __init__(self, galaxy_instance):
-        self.module = 'roles'
         super().__init__(galaxy_instance)
 
     def get_roles(self):
