@@ -48,6 +48,7 @@ class GalaxyInstance:
         self.histories = client.ObjHistoryClient(self)
         self.libraries = client.ObjLibraryClient(self)
         self.workflows = client.ObjWorkflowClient(self)
+        self.invocations = client.ObjInvocationClient(self)
         self.tools = client.ObjToolClient(self)
         self.jobs = client.ObjJobClient(self)
 
