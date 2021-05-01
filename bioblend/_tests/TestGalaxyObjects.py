@@ -355,9 +355,9 @@ class TestInvocation(GalaxyObjectsTestBase):
 
     def test_refresh(self):
         inv = self._obj_invoke_workflow()
+        inv.state = 'placeholder'
         # use wait_for_invocation() directly, because inv.wait() will update inv automatically
         self.gi.gi.invocations.wait_for_invocation(inv.id)
-        self.assertEqual(inv.state, 'new')
         inv.refresh()
         self.assertEqual(inv.state, 'scheduled')
 
