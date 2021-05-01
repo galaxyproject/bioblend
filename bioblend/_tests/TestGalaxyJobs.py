@@ -213,6 +213,12 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
         status = self.gi.jobs.update_job_lock(active=False)
         self.assertFalse(status)
 
+    @test_util.skip_unless_galaxy('release_18.01')
+    def test_cancel_job(self):
+        job_id = self._run_tool()['jobs'][0]['id']
+        job_state = self.gi.jobs.show_job(job_id)['state']
+        self.assertTrue(job_state, 'deleted')
+
     def _run_tool(self, input_format: str = 'legacy') -> dict:
         tool_inputs = {
             'num_lines': '1',
