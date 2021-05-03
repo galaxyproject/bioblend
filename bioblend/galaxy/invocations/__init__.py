@@ -194,19 +194,19 @@ class InvocationClient(Client):
         :return: A dict describing the new workflow invocation.
 
         .. note::
-          This method can only be used with Galaxy ``release_21.05`` or later.
+          This method can only be used with Galaxy ``release_21.01`` or later.
         """
         invocation_details = self.show_invocation(invocation_id)
-        workflow_id = invocation_details['stored_workflow_id']
+        workflow_id = invocation_details['workflow_id']
         inputs = invocation_details['inputs']
-        params = invocation_details['input_step_parameters']
+        wf_params = invocation_details['input_step_parameters']
         if inputs_update:
             for inp, input_value in inputs_update.items():
                 inputs[inp] = input_value
         if params_update:
             for param, param_value in params_update.items():
-                params[param] = param_value
-        payload = {'inputs': inputs, 'params': params}
+                wf_params[param] = param_value
+        payload = {'inputs': inputs, 'params': wf_params}
 
         if replacement_params:
             payload['replacement_params'] = replacement_params
@@ -222,9 +222,9 @@ class InvocationClient(Client):
             payload['inputs_by'] = inputs_by
         if parameters_normalized:
             payload['parameters_normalized'] = parameters_normalized
-
+        api_params = {'instance': True}
         url = '/'.join((self.gi.url, 'workflows', workflow_id, 'invocations'))
-        return self._post(payload, url=url)
+        return self.gi.make_post_request(url=url, payload=payload, params=api_params)
 
     def cancel_invocation(self, invocation_id):
         """
