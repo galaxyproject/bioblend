@@ -136,7 +136,7 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
         self.assertTrue(self.gi.invocations.show_invocation_step(invocation_id, pause_step["id"])["action"])
         self.gi.invocations.wait_for_invocation(invocation['id'])
 
-    @test_util.skip_unless_galaxy('release_21.05')
+    @test_util.skip_unless_galaxy('release_21.01')
     def test_rerun_invocation(self):
         invocation = self._invoke_workflow()
         self.gi.invocations.wait_for_invocation(invocation['id'])
