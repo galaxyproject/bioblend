@@ -859,12 +859,10 @@ class CloudManLauncher:
         """
         try:
             p = urlparse(url)
-            if p.scheme == 'http':
-                h = HTTPConnection(p[1])
-            elif p.scheme == 'https':
+            if p.scheme == 'https':
                 h = HTTPSConnection(p[1])
             else:
-                raise RuntimeError("Unexpected url scheme: {}".format(p.scheme))
+                h = HTTPConnection(p[1])
             h.putrequest('HEAD', p[2])
             h.endheaders()
             r = h.getresponse()
