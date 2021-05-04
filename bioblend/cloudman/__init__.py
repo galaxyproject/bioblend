@@ -729,8 +729,12 @@ class CloudManInstance(GenericVMInstance):
             parameters = {}
         req_url = '/'.join((self.cloudman_url, 'root', url))
         # need to set the user "ubuntu" for auth, and indicate verify=False for HTTPS
-        # connections to self-signed certificates
-        r = requests.get(req_url, params=parameters, auth=("ubuntu", self.password), timeout=timeout, verify=False)
+        # connections to self-signed certificate, avoid adding verify=False unless use_ssl
+        # config is set
+        extrakwargs = {}
+        if self.config.kwargs.get('use_ssl', False):
+            extragetkwargs = { 'verify': False }
+        r = requests.get(req_url, params=parameters, auth=("ubuntu", self.password), timeout=timeout, **extragetkwargs)
         try:
             json = r.json()
             return json
