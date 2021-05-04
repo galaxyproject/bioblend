@@ -20,6 +20,7 @@ from bioblend.galaxy.objects import (
 )
 from . import test_util
 
+
 bioblend.set_stream_logger('test', level='INFO')
 socket.setdefaulttimeout(10.0)
 SAMPLE_FN = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
@@ -73,6 +74,48 @@ SAMPLE_WF_DICT = {
     },
     'tags': [],
     'url': '/api/workflows/9005c5112febe774',
+}
+SAMPLE_INV_DICT = {
+    'history_id': '2f94e8ae9edff68a',
+    'id': 'df7a1f0c02a5b08e',
+    'inputs': {
+        '0': {
+            'id': 'a7db2fac67043c7e',
+            'src': 'hda',
+            'uuid': '7932ffe0-2340-4952-8857-dbaa50f1f46a'
+        }
+    },
+    'model_class': 'WorkflowInvocation',
+    'state': 'ready',
+    'steps': [
+        {
+            'action': None,
+            'id': 'd413a19dec13d11e',
+            'job_id': None,
+            'model_class': 'WorkflowInvocationStep',
+            'order_index': 0,
+            'state': None,
+            'update_time': '2015-10-31T22:00:26',
+            'workflow_step_id': 'cbbbf59e8f08c98c',
+            'workflow_step_label': None,
+            'workflow_step_uuid': 'b81250fd-3278-4e6a-b269-56a1f01ef485'
+        },
+        {
+            'action': None,
+            'id': '2f94e8ae9edff68a',
+            'job_id': 'e89067bb68bee7a0',
+            'model_class': 'WorkflowInvocationStep',
+            'order_index': 1,
+            'state': 'new',
+            'update_time': '2015-10-31T22:00:26',
+            'workflow_step_id': '964b37715ec9bd22',
+            'workflow_step_label': None,
+            'workflow_step_uuid': 'e62440b8-e911-408b-b124-e05435d3125e'
+        }
+    ],
+    'update_time': '2015-10-31T22:00:26',
+    'uuid': 'c8aa2b1c-801a-11e5-a9e5-8ca98228593c',
+    'workflow_id': '03501d7626bd192f'
 }
 
 
@@ -230,6 +273,198 @@ class GalaxyObjectsTestBase(unittest.TestCase):
         galaxy_key = os.environ['BIOBLEND_GALAXY_API_KEY']
         galaxy_url = os.environ['BIOBLEND_GALAXY_URL']
         self.gi = galaxy_instance.GalaxyInstance(galaxy_url, galaxy_key)
+
+
+@test_util.skip_unless_galaxy('release_19.09')
+class TestInvocation(GalaxyObjectsTestBase):
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUp(cls)
+        cls.inv = wrappers.Invocation(SAMPLE_INV_DICT)
+        with open(SAMPLE_FN) as f:
+            cls.workflow = cls.gi.workflows.import_new(f.read())
+        path_pause = test_util.get_abspath(os.path.join('data', 'test_workflow_pause.ga'))
+        with open(path_pause) as f:
+            cls.workflow_pause = cls.gi.workflows.import_new(f.read())
+        cls.history = cls.gi.histories.create(name="TestInvocation")
+        cls.dataset_id = cls.history.paste_content('1\t2\t3').id
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.history.delete(purge=True)
+
+    def test_initialize(self):
+        self.assertEqual(self.inv.workflow_id, '03501d7626bd192f')
+        self.assertEqual(self.inv.history_id, '2f94e8ae9edff68a')
+        self.assertEqual(self.inv.id, 'df7a1f0c02a5b08e')
+        self.assertEqual(self.inv.state, 'ready')
+        self.assertEqual(self.inv.update_time, '2015-10-31T22:00:26')
+        self.assertEqual(self.inv.uuid, 'c8aa2b1c-801a-11e5-a9e5-8ca98228593c')
+
+    def test_initialize_steps(self):
+        for step, step_dict in zip(self.inv.steps, SAMPLE_INV_DICT['steps']):
+            self.assertIsInstance(step, wrappers.InvocationStep)
+            self.assertIs(step.parent, self.inv)
+            self.assertEqual(step.id, step_dict['id'])
+            self.assertEqual(step.job_id, step_dict['job_id'])
+            self.assertEqual(step.order_index, step_dict['order_index'])
+            self.assertEqual(step.state, step_dict['state'])
+            self.assertEqual(step.update_time, step_dict['update_time'])
+            self.assertEqual(step.workflow_step_id, step_dict['workflow_step_id'])
+            self.assertEqual(step.workflow_step_label, step_dict['workflow_step_label'])
+            self.assertEqual(step.workflow_step_uuid, step_dict['workflow_step_uuid'])
+
+    def test_initialize_inputs(self):
+        for i, input in enumerate(self.inv.inputs):
+            self.assertEqual(input, {**SAMPLE_INV_DICT['inputs'][str(i)], 'label': str(i)})
+
+    def test_sorted_step_ids(self):
+        self.assertListEqual(self.inv.sorted_step_ids(), ['d413a19dec13d11e', '2f94e8ae9edff68a'])
+
+    def test_step_states(self):
+        self.assertSetEqual(self.inv.step_states(), {None, 'new'})
+
+    def test_number_of_steps(self):
+        self.assertEqual(self.inv.number_of_steps(), 2)
+
+    def test_sorted_steps_by(self):
+        self.assertEqual(len(self.inv.sorted_steps_by()), 2)
+        steps = self.inv.sorted_steps_by(step_ids={'2f94e8ae9edff68a'})
+        self.assertEqual(len(steps), 1)
+        self.assertEqual(steps[0].id, '2f94e8ae9edff68a')
+        self.assertListEqual(self.inv.sorted_steps_by(step_ids={'unmatched_id'}), [])
+        steps = self.inv.sorted_steps_by(states={'new'})
+        self.assertEqual(len(steps), 1)
+        self.assertEqual(steps[0].state, 'new')
+        self.assertListEqual(self.inv.sorted_steps_by(states={'unmatched_state'}), [])
+        steps = self.inv.sorted_steps_by(indices={0}, states={None, 'new'})
+        self.assertEqual(len(steps), 1)
+        self.assertEqual(steps[0].order_index, 0)
+        self.assertListEqual(self.inv.sorted_steps_by(indices={2}), [])
+
+    def test_cancel(self):
+        inv = self._obj_invoke_workflow()
+        inv.cancel()
+        self.assertEqual(inv.state, 'cancelled')
+
+    def test_wait(self):
+        inv = self._obj_invoke_workflow()
+        inv.wait()
+        self.assertEqual(inv.state, 'scheduled')
+
+    def test_refresh(self):
+        inv = self._obj_invoke_workflow()
+        inv.state = 'placeholder'
+        # use wait_for_invocation() directly, because inv.wait() will update inv automatically
+        self.gi.gi.invocations.wait_for_invocation(inv.id)
+        inv.refresh()
+        self.assertEqual(inv.state, 'scheduled')
+
+    def test_run_step_actions(self):
+        inv = self.workflow_pause.invoke(
+            inputs={"0": {"src": "hda", "id": self.dataset_id}},
+            history=self.history,
+        )
+        for _ in range(20):
+            with self.assertRaises(bioblend.TimeoutException):
+                inv.wait(maxwait=0.5, interval=0.5)
+            inv.refresh()
+            if len(inv.steps) >= 3:
+                break
+        self.assertEqual(inv.steps[2].action, None)
+        inv.run_step_actions([inv.steps[2]], [True])
+        self.assertEqual(inv.steps[2].action, True)
+
+    def test_summary(self):
+        inv = self._obj_invoke_workflow()
+        inv.wait()
+        summary = inv.summary()
+        self.assertEqual(summary['populated_state'], 'ok')
+
+    def test_step_jobs_summary(self):
+        inv = self._obj_invoke_workflow()
+        inv.wait()
+        step_jobs_summary = inv.step_jobs_summary()
+        self.assertEqual(len(step_jobs_summary), 1)
+        self.assertEqual(step_jobs_summary[0]['populated_state'], 'ok')
+
+    def test_report(self):
+        inv = self._obj_invoke_workflow()
+        report = inv.report()
+        assert report['workflows'] == {self.workflow.id: {'name': 'paste_columns'}}
+
+    @test_util.skip_unless_galaxy('release_20.09')
+    def test_biocompute_object(self):
+        inv = self._obj_invoke_workflow()
+        inv.wait()
+        biocompute_object = inv.biocompute_object()
+        self.assertEqual(len(biocompute_object['description_domain']['pipeline_steps']), 1)
+
+    def _obj_invoke_workflow(self):
+        dataset = {'src': 'hda', 'id': self.dataset_id}
+        return self.workflow.invoke(
+            inputs={'Input 1': dataset, 'Input 2': dataset},
+            history=self.history,
+            inputs_by='name',
+        )
+
+
+@test_util.skip_unless_galaxy('release_19.09')
+class TestObjInvocationClient(GalaxyObjectsTestBase):
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUp(cls)
+        with open(SAMPLE_FN) as f:
+            cls.workflow = cls.gi.workflows.import_new(f.read())
+        cls.history = cls.gi.histories.create(name="TestGalaxyObjInvocationClient")
+        dataset_id = cls.history.paste_content('1\t2\t3').id
+        dataset = {'src': 'hda', 'id': dataset_id}
+        cls.inv = cls.workflow.invoke(
+            inputs={'Input 1': dataset, 'Input 2': dataset},
+            history=cls.history,
+            inputs_by='name',
+        )
+        cls.inv.wait()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.history.delete(purge=True)
+
+    def test_get(self):
+        inv = self.gi.invocations.get(self.inv.id)
+        self.assertEqual(inv.id, self.inv.id)
+        self.assertEqual(inv.workflow_id, self.workflow.id)
+        self.assertEqual(inv.history_id, self.history.id)
+        self.assertEqual(inv.state, 'scheduled')
+        self.assertEqual(inv.update_time, self.inv.update_time)
+        self.assertEqual(inv.uuid, self.inv.uuid)
+
+    def test_get_previews(self):
+        previews = self.gi.invocations.get_previews()
+        self.assertSetEqual({type(preview) for preview in previews}, {wrappers.InvocationPreview})
+        inv_preview = next(p for p in previews if p.id == self.inv.id)
+        self.assertEqual(inv_preview.id, self.inv.id)
+        self.assertEqual(inv_preview.workflow_id, self.workflow.id)
+        self.assertEqual(inv_preview.history_id, self.history.id)
+        self.assertEqual(inv_preview.state, 'scheduled')
+        self.assertEqual(inv_preview.update_time, self.inv.update_time)
+        self.assertEqual(inv_preview.uuid, self.inv.uuid)
+
+    def test_list(self):
+        invs = self.gi.invocations.list()
+        inv = next(i for i in invs if i.id == self.inv.id)
+        self.assertEqual(inv.id, self.inv.id)
+        self.assertEqual(inv.workflow_id, self.workflow.id)
+        self.assertEqual(inv.history_id, self.history.id)
+        self.assertEqual(inv.state, 'scheduled')
+        self.assertEqual(inv.update_time, self.inv.update_time)
+        self.assertEqual(inv.uuid, self.inv.uuid)
+        self.assertGreater(len(self.inv.steps), 0)
+        history = self.gi.histories.create(name="TestGalaxyObjInvocationClientList")
+        self.assertEqual(self.gi.invocations.list(history=history), [])
+        history.delete(purge=True)
 
 
 class TestGalaxyInstance(GalaxyObjectsTestBase):
