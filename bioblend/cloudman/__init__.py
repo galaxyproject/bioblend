@@ -367,8 +367,12 @@ class CloudManInstance(GenericVMInstance):
         self.config = kwargs.pop('cloudman_config', None)
         if not self.config:
             self.password = password
+            self.verify = kwargs.get("verify",None)
         else:
             self.password = self.config.password
+            if self.config.kwargs.get('use_ssl'):
+                self.verify = kwargs.get("verify",False)
+        self.authuser = kwargs.get("authuser","")
         self._set_url(url)
 
     def __repr__(self):
@@ -397,7 +401,7 @@ class CloudManInstance(GenericVMInstance):
             # Make sure the URL scheme is defined (otherwise requests will not work)
             if not url.lower().startswith('http'):
                 # Check the config for use_ssl to see whether https scheme is required
-                if self.config.kwargs.get('use_ssl', False):
+                if self.config and self.config.kwargs.get('use_ssl', False):
                     url = "https://" + url
                 else:
                     url = "http://" + url
@@ -728,13 +732,10 @@ class CloudManInstance(GenericVMInstance):
         if parameters is None:
             parameters = {}
         req_url = '/'.join((self.cloudman_url, 'root', url))
-        # need to set the user "ubuntu" for auth, and indicate verify=False for HTTPS
-        # connections to self-signed certificate, avoid adding verify=False unless use_ssl
-        # config is set
-        extrakwargs = {}
-        if self.config.kwargs.get('use_ssl', False):
-            extragetkwargs = { 'verify': False }
-        r = requests.get(req_url, params=parameters, auth=("ubuntu", self.password), timeout=timeout, **extragetkwargs)
+        extragetargs = {}
+        if self.verify is not None:
+            extragetargs = {'verify': self.verify}
+        r = requests.get(req_url, params=parameters, auth=(self.authuser, self.password), timeout=timeout, **extragetargs)
         try:
             json = r.json()
             return json
