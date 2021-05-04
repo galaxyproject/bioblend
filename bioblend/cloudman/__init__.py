@@ -468,6 +468,10 @@ class CloudManInstance(GenericVMInstance):
         self.vm_error = ms.get('error', None)
         public_ip = ms.get('public_ip', None)
         # Update url if we don't have it or is different than what we have
+        # After _set_url is called, self.url will have a scheme, so
+        # self.url is always different than public_ip. This has the
+        # potential to change the self.url scheme from https to http if
+        # which are not in launch and don't have access to self.config.
         if not self.url and (public_ip and self.url != public_ip):
             self._set_url(public_ip)
         # See if the cluster has been initialized

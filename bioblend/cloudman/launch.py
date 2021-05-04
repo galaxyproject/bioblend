@@ -7,7 +7,6 @@ from http.client import (
     BadStatusLine,
     HTTPConnection,
     HTTPException,
-    HTTPSConnection,
 )
 from urllib.parse import urlparse
 
