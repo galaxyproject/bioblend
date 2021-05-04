@@ -365,13 +365,16 @@ class CloudManInstance(GenericVMInstance):
         else:
             super().__init__(None, None)
         self.config = kwargs.pop('cloudman_config', None)
+        self.use_ssl = False
         if not self.config:
             self.password = password
             self.verify = kwargs.get("verify",None)
+            self.use_ssl = kwargs.get("use_ssl",kwargs.get("verify",None) is not None)
         else:
             self.password = self.config.password
-            if self.config.kwargs.get('use_ssl'):
+            if self.config.kwargs.get('use_ssl',False):
                 self.verify = kwargs.get("verify",False)
+                self.use_ssl = True
         self.authuser = kwargs.get("authuser","")
         self._set_url(url)
 
@@ -400,8 +403,8 @@ class CloudManInstance(GenericVMInstance):
         if url:
             # Make sure the URL scheme is defined (otherwise requests will not work)
             if not url.lower().startswith('http'):
-                # Check the config for use_ssl to see whether https scheme is required
-                if self.config and self.config.kwargs.get('use_ssl', False):
+                # Check to see whether https scheme is required
+                if self.use_ssl:
                     url = "https://" + url
                 else:
                     url = "http://" + url
@@ -468,10 +471,6 @@ class CloudManInstance(GenericVMInstance):
         self.vm_error = ms.get('error', None)
         public_ip = ms.get('public_ip', None)
         # Update url if we don't have it or is different than what we have
-        # After _set_url is called, self.url will have a scheme, so
-        # self.url is always different than public_ip. This has the
-        # potential to change the self.url scheme from https to http if
-        # which are not in launch and don't have access to self.config.
         if not self.url and (public_ip and self.url != public_ip):
             self._set_url(public_ip)
         # See if the cluster has been initialized
