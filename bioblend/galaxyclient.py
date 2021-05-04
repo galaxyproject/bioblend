@@ -30,6 +30,8 @@ class GalaxyClient:
         :param timeout: Timeout for requests operations, set to None for no timeout (the default).
         :type timeout: float
         """
+        self.verify = verify
+        self.timeout = timeout
         # Make sure the URL scheme is defined (otherwise requests will not work)
         if not url.lower().startswith('http'):
             found_scheme = None
@@ -37,7 +39,11 @@ class GalaxyClient:
             for scheme in ('https://', 'http://'):
                 log.warning(f"Missing scheme in url, trying with {scheme}")
                 try:
-                    r = requests.get(scheme + url)
+                    r = requests.get(
+                        scheme + url,
+                        timeout=self.timeout,
+                        verify=self.verify,
+                    )
                     r.raise_for_status()
                     found_scheme = scheme
                     break
@@ -61,8 +67,6 @@ class GalaxyClient:
             'Content-Type': 'application/json',
             'x-api-key': self.key,
         }
-        self.verify = verify
-        self.timeout = timeout
 
     def make_get_request(self, url, **kwargs):
         """
@@ -81,8 +85,8 @@ class GalaxyClient:
         :return: the response object.
         """
         headers = self.json_headers
-        kwargs.setdefault('verify', self.verify)
         kwargs.setdefault('timeout', self.timeout)
+        kwargs.setdefault('verify', self.verify)
         r = requests.get(url, headers=headers, **kwargs)
         return r
 
@@ -127,9 +131,15 @@ class GalaxyClient:
             headers = self.json_headers
             post_params = params
 
-        r = requests.post(url, data=payload, headers=headers,
-                          verify=self.verify, params=post_params,
-                          timeout=self.timeout, allow_redirects=False)
+        r = requests.post(
+            url,
+            params=post_params,
+            data=payload,
+            headers=headers,
+            timeout=self.timeout,
+            allow_redirects=False,
+            verify=self.verify,
+        )
         if r.status_code == 200:
             try:
                 return r.json()
@@ -159,8 +169,15 @@ class GalaxyClient:
         if payload is not None:
             payload = json.dumps(payload)
         headers = self.json_headers
-        r = requests.delete(url, verify=self.verify, data=payload, params=params,
-                            headers=headers, timeout=self.timeout, allow_redirects=False)
+        r = requests.delete(
+            url,
+            params=params,
+            data=payload,
+            headers=headers,
+            timeout=self.timeout,
+            allow_redirects=False,
+            verify=self.verify,
+        )
         return r
 
     def make_put_request(self, url, payload=None, params=None):
@@ -174,8 +191,15 @@ class GalaxyClient:
         """
         payload = json.dumps(payload)
         headers = self.json_headers
-        r = requests.put(url, data=payload, params=params, headers=headers,
-                         verify=self.verify, timeout=self.timeout, allow_redirects=False)
+        r = requests.put(
+            url,
+            params=params,
+            data=payload,
+            headers=headers,
+            timeout=self.timeout,
+            allow_redirects=False,
+            verify=self.verify,
+        )
         if r.status_code == 200:
             try:
                 return r.json()
@@ -197,8 +221,15 @@ class GalaxyClient:
         """
         payload = json.dumps(payload)
         headers = self.json_headers
-        r = requests.patch(url, data=payload, params=params, headers=headers,
-                           verify=self.verify, timeout=self.timeout, allow_redirects=False)
+        r = requests.patch(
+            url,
+            params=params,
+            data=payload,
+            headers=headers,
+            timeout=self.timeout,
+            allow_redirects=False,
+            verify=self.verify,
+        )
         if r.status_code == 200:
             try:
                 return r.json()
@@ -219,7 +250,12 @@ class GalaxyClient:
             auth_url = "%s/authenticate/baseauth" % self.url
             # make_post_request uses default_params, which uses this and
             # sets wrong headers - so using lower level method.
-            r = requests.get(auth_url, verify=self.verify, headers=headers)
+            r = requests.get(
+                auth_url,
+                headers=headers,
+                timeout=self.timeout,
+                verify=self.verify,
+            )
             if r.status_code != 200:
                 raise Exception("Failed to authenticate user.")
             response = r.json()
