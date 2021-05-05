@@ -150,8 +150,10 @@ class DatasetClient(Client):
         state: Optional[Union[str, List[str]]] = None,
         visible: bool = True,
         history_id: Optional[str] = None,
-        create_time: Optional[Dict[str, str]] = None,
-        update_time: Optional[Dict[str, str]] = None,
+        create_time_min: str = None,
+        create_time_max: str = None,
+        update_time_min: str = None,
+        update_time_max: str = None,
         limit: int = 500,
         offset: int = 0,
     ) -> List[dict]:
@@ -180,19 +182,21 @@ class DatasetClient(Client):
         :type history_id: str
         :param history_id: Encoded history ID to filter on.
 
-        :type create_time: dict
-        :param create_time: Specify a create time range to filter on.
-          Must be a mapping from ``op`` to ``date``.
-          Valid options for ``op``: 'ge', 'gt', 'le', 'lt'
-          Example: {'gt': '2015-10-31T22:00:26',
-                    'le': '2018-04-29T05:03:41'}
+        :type create_time_min: str
+        :param create_time_min: Show only datasets created after the provided
+          time and date. The argument should be formatted as ``YYYY-MM-DDTHH-MM-SS``.
 
-        :type update_time: dict
-        :param update_time: Specify a update time range to filter on.
-          Must be a mapping from ``op`` to ``date``.
-          Valid options for ``op``: 'ge', 'gt', 'le', 'lt'
-          Example: {'gt': '2015-10-31T22:00:26',
-                    'le': '2018-04-29T05:03:41'}
+        :type create_time_max: str
+        :param create_time_max: Show only datasets created before the provided
+          time and date. The argument should be formatted as ``YYYY-MM-DDTHH-MM-SS``.
+
+        :type update_time_min: str
+        :param update_time_min: Show only datasets last updated after the provided
+          time and date. The argument should be formatted as ``YYYY-MM-DDTHH-MM-SS``.
+
+        :type create_time_max: str
+        :param create_time_max: Show only datasets last updated before the provided
+          time and date. The argument should be formatted as ``YYYY-MM-DDTHH-MM-SS``.
 
         :type limit: int
         :param limit: Maximum number of datasets to return.
@@ -229,14 +233,18 @@ class DatasetClient(Client):
         if visible:
             q.append('visible-eq')
             qv.append(str(visible))
-        if create_time:
-            for k, v in create_time.items():
-                q.append(f'create_time-{k}')
-                qv.append(v)
-        if update_time:
-            for k, v in update_time.items():
-                q.append(f'update_time-{k}')
-                qv.append(v)
+        if create_time_min:
+            q.append(f'create_time-ge')
+            qv.append(create_time_min)
+        if create_time_max:
+            q.append(f'create_time-le')
+            qv.append(create_time_max)
+        if update_time_min:
+            q.append(f'update_time-ge')
+            qv.append(update_time_min)
+        if update_time_max:
+            q.append(f'update_time-le')
+            qv.append(update_time_max)
 
         params['q'] = q
         params['qv'] = qv

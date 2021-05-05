@@ -82,24 +82,24 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
     def test_get_datasets_time(self):
         dataset = self.gi.datasets.show_dataset(self.dataset_id)
         ct = dataset['create_time']
-        datasets = self.gi.datasets.get_datasets(history_id=self.history_id, create_time={'gt': ct})
-        self.assertEqual(datasets, [])
-        datasets = self.gi.datasets.get_datasets(history_id=self.history_id, create_time={'ge': ct})
+        datasets = self.gi.datasets.get_datasets(history_id=self.history_id, create_time_min=ct)
         self.assertEqual(len(datasets), 1)
-        datasets = self.gi.datasets.get_datasets(history_id=self.history_id, create_time={'lt': ct})
-        self.assertEqual(datasets, [])
-        datasets = self.gi.datasets.get_datasets(history_id=self.history_id, create_time={'le': ct})
+        datasets = self.gi.datasets.get_datasets(history_id=self.history_id, create_time_max=ct)
         self.assertEqual(len(datasets), 1)
+        datasets = self.gi.datasets.get_datasets(history_id=self.history_id, create_time_min='2100-01-01T00:00:00')
+        self.assertEqual(datasets, [])
+        datasets = self.gi.datasets.get_datasets(history_id=self.history_id, create_time_max='2000-01-01T00:00:00')
+        self.assertEqual(datasets, [])
 
         ut = dataset['update_time']
-        datasets = self.gi.datasets.get_datasets(history_id=self.history_id, update_time={'gt': ut})
-        self.assertEqual(datasets, [])
-        datasets = self.gi.datasets.get_datasets(history_id=self.history_id, update_time={'ge': ut})
+        datasets = self.gi.datasets.get_datasets(history_id=self.history_id, update_time_min=ut)
         self.assertEqual(len(datasets), 1)
-        datasets = self.gi.datasets.get_datasets(history_id=self.history_id, update_time={'lt': ut})
-        self.assertEqual(datasets, [])
-        datasets = self.gi.datasets.get_datasets(history_id=self.history_id, update_time={'le': ut})
+        datasets = self.gi.datasets.get_datasets(history_id=self.history_id, update_time_max=ut)
         self.assertEqual(len(datasets), 1)
+        datasets = self.gi.datasets.get_datasets(history_id=self.history_id, update_time_min='2100-01-01T00:00:00')
+        self.assertEqual(datasets, [])
+        datasets = self.gi.datasets.get_datasets(history_id=self.history_id, update_time_max='2000-01-01T00:00:00')
+        self.assertEqual(datasets, [])
 
     @test_util.skip_unless_galaxy('release_20.05')
     def test_get_datasets_extension(self):
