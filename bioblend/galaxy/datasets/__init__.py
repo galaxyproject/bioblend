@@ -156,8 +156,7 @@ class DatasetClient(Client):
         create_time_max: str = None,
         update_time_min: str = None,
         update_time_max: str = None,
-        order_by: str = 'create_time',
-        order_descending: bool = True,
+        order: str = 'create_time-dsc',
     ) -> List[dict]:
         """
         Get the latest datasets, or select another subset by specifying optional
@@ -208,21 +207,16 @@ class DatasetClient(Client):
         :param update_time_max: Show only datasets last updated before the provided
           time and date, which should be formatted as ``YYYY-MM-DDTHH-MM-SS``.
 
-        :type order_by: str
-        :param order_by: Attribute for ordering datasets - must be one of
-          ``create_time`` (default), ``update_time``, ``hid``, ``name``.
-
-        :type order_descending: bool
-        :param order_descending: Whether to sort datasets in descending order (according
-          to the ``order_by`` attribute). Default is ``True``; set to ``False`` to sort
-          in ascending order.
+        :type order: str
+        :param order: One or more of the following attributes for ordering datasets:
+          ``create_time`` (default), ``extension``, ``hid``, ``history_id``, ``name``,
+          ``update_time``. Optionally, ``-asc`` or ``-dsc`` (default) can be appended
+          for ascending and descending order respectively. Multiple attributes can be
+          stacked as a comma-separated list of values, e.g. ``create_time-asc,hid-dsc``.
 
         :rtype: list
         :param: A list of datasets
         """
-        if order_by not in ['hid', 'create_time', 'update_time', 'name']:
-            raise Exception("order_by is not one of 'hid', 'create_time', 'update_time' or 'name'.")
-        order = '-'.join((order_by, 'dsc' if order_descending else 'asc'))
         params: Dict[str, Any] = {
             'limit': limit,
             'offset': offset,

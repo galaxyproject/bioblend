@@ -133,13 +133,13 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
 
     @test_util.skip_unless_galaxy('release_19.05')
     def test_get_datasets_ordering(self):
-        datasets = self.gi.datasets.get_datasets(history_id=self.history_id, order_by='create_time', order_descending=True)
+        datasets = self.gi.datasets.get_datasets(history_id=self.history_id, order='create_time-dsc')
         self.assertEqual(datasets[0]['id'], self.dataset_id2)
-        datasets = self.gi.datasets.get_datasets(history_id=self.history_id, order_by='create_time', order_descending=False)
+        datasets = self.gi.datasets.get_datasets(history_id=self.history_id, order='create_time-asc')
         self.assertEqual(datasets[0]['id'], self.dataset_id)
-        datasets = self.gi.datasets.get_datasets(history_id=self.history_id, order_by='hid', order_descending=True)
+        datasets = self.gi.datasets.get_datasets(history_id=self.history_id, order='hid-dsc')
         self.assertEqual(datasets[0]['id'], self.dataset_id2)
-        datasets = self.gi.datasets.get_datasets(history_id=self.history_id, order_by='hid', order_descending=False)
+        datasets = self.gi.datasets.get_datasets(history_id=self.history_id, order='hid-asc')
         self.assertEqual(datasets[0]['id'], self.dataset_id)
 
     def test_wait_for_dataset(self):
