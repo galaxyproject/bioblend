@@ -145,6 +145,8 @@ class DatasetClient(Client):
 
     def get_datasets(
         self,
+        limit: int = 500,
+        offset: int = 0,
         name: Optional[str] = None,
         extension: Optional[Union[str, List[str]]] = None,
         state: Optional[Union[str, List[str]]] = None,
@@ -154,27 +156,33 @@ class DatasetClient(Client):
         create_time_max: str = None,
         update_time_min: str = None,
         update_time_max: str = None,
-        limit: int = 500,
-        offset: int = 0,
     ) -> List[dict]:
         """
         Get the latest datasets, or select another subset by specifying optional
         arguments for filtering (e.g. a history ID).
 
         Since the number of datasets may be very large, ``limit`` and ``offset``
-        parameters should always be used to specify the desired range.
+        parameters are required to specify the desired range.
 
         If the user is an admin, this will return datasets for all the users,
         otherwise only for the current user.
+
+        :type limit: int
+        :param limit: Maximum number of datasets to return.
+
+        :type offset: int
+        :param offset: Return datasets starting from this specified position.
+          For example, if ``limit`` is set to 100 and ``offset`` to 200,
+          datasets 200-299 will be returned.
 
         :type name: str
         :param name: Dataset name to filter on.
 
         :type extension: str or list of str
-        :param extension: Dataset extensions to filter on.
+        :param extension: Dataset extension (or list of extensions) to filter on.
 
         :type state: str or list of str
-        :param state: Dataset states to filter on.
+        :param state: Dataset state (or list of states) to filter on.
 
         :type visible: bool
         :param visible: If ``False``, include datasets marked as not ``visible``.
@@ -184,27 +192,19 @@ class DatasetClient(Client):
 
         :type create_time_min: str
         :param create_time_min: Show only datasets created after the provided
-          time and date. The argument should be formatted as ``YYYY-MM-DDTHH-MM-SS``.
+          time and date, which should be formatted as ``YYYY-MM-DDTHH-MM-SS``.
 
         :type create_time_max: str
         :param create_time_max: Show only datasets created before the provided
-          time and date. The argument should be formatted as ``YYYY-MM-DDTHH-MM-SS``.
+          time and date, which should be formatted as ``YYYY-MM-DDTHH-MM-SS``.
 
         :type update_time_min: str
         :param update_time_min: Show only datasets last updated after the provided
-          time and date. The argument should be formatted as ``YYYY-MM-DDTHH-MM-SS``.
+          time and date, which should be formatted as ``YYYY-MM-DDTHH-MM-SS``.
 
-        :type create_time_max: str
-        :param create_time_max: Show only datasets last updated before the provided
-          time and date. The argument should be formatted as ``YYYY-MM-DDTHH-MM-SS``.
-
-        :type limit: int
-        :param limit: Maximum number of datasets to return.
-
-        :type offset: int
-        :param offset: Return datasets starting from this specified position.
-          For example, if ``limit`` is set to 100 and ``offset`` to 200,
-          datasets 200-299 will be returned.
+        :type update_time_max: str
+        :param update_time_max: Show only datasets last updated before the provided
+          time and date, which should be formatted as ``YYYY-MM-DDTHH-MM-SS``.
 
         :rtype: list
         :param: A list of datasets
@@ -234,16 +234,16 @@ class DatasetClient(Client):
             q.append('visible-eq')
             qv.append(str(visible))
         if create_time_min:
-            q.append(f'create_time-ge')
+            q.append('create_time-ge')
             qv.append(create_time_min)
         if create_time_max:
-            q.append(f'create_time-le')
+            q.append('create_time-le')
             qv.append(create_time_max)
         if update_time_min:
-            q.append(f'update_time-ge')
+            q.append('update_time-ge')
             qv.append(update_time_min)
         if update_time_max:
-            q.append(f'update_time-le')
+            q.append('update_time-le')
             qv.append(update_time_max)
 
         params['q'] = q
