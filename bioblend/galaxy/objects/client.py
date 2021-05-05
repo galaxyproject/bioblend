@@ -10,21 +10,28 @@ from collections.abc import (
     Mapping,
     Sequence,
 )
+from typing import List
 
 import bioblend
 from . import wrappers
 
 
-class ObjClient(metaclass=abc.ABCMeta):
+class ObjClient(abc.ABC):
 
-    @abc.abstractmethod
     def __init__(self, obj_gi):
         self.obj_gi = obj_gi
         self.gi = self.obj_gi.gi
         self.log = bioblend.log
 
     @abc.abstractmethod
-    def get_previews(self, **kwargs):
+    def get(self, id_) -> wrappers.Wrapper:
+        """
+        Retrieve the object corresponding to the given id.
+        """
+        pass
+
+    @abc.abstractmethod
+    def get_previews(self) -> list:
         """
         Get a list of object previews.
 
@@ -39,7 +46,7 @@ class ObjClient(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def list(self, **kwargs):
+    def list(self) -> list:
         """
         Get a list of objects.
 
@@ -234,9 +241,6 @@ class ObjWorkflowClient(ObjClient):
     Interacts with Galaxy workflows.
     """
 
-    def __init__(self, obj_gi):
-        super().__init__(obj_gi)
-
     def import_new(self, src, publish=False):
         """
         Imports a new workflow into Galaxy.
@@ -323,13 +327,74 @@ class ObjWorkflowClient(ObjClient):
                 self._error('delete_workflow: unexpected reply: %r' % res)
 
 
+class ObjInvocationClient(ObjClient):
+    """
+    Interacts with Galaxy Invocations.
+    """
+    def get(self, id_) -> wrappers.Invocation:
+        """
+        Get an invocation by ID.
+
+        :rtype: Invocation
+        :param: invocation object
+        """
+        inv_dict = self.gi.invocations.show_invocation(id_)
+        return wrappers.Invocation(inv_dict, self.obj_gi)
+
+    def get_previews(self) -> List[wrappers.InvocationPreview]:
+        """
+        Get previews of all invocations.
+
+        :rtype: list of InvocationPreview
+        :param: previews of invocations
+        """
+        inv_list = self.gi.invocations.get_invocations()
+        return [wrappers.InvocationPreview(inv_dict, self.obj_gi) for inv_dict in inv_list]
+
+    def list(
+        self,
+        workflow=None,
+        history=None,
+        include_terminal=True,
+        limit=None
+    ) -> List[wrappers.Invocation]:
+        """
+        Get full listing of workflow invocations, or select a subset
+        by specifying optional arguments for filtering (e.g. a workflow).
+
+        :type workflow: wrappers.Workflow
+        :param workflow: Include only invocations associated with
+          this workflow
+
+        :type history: str
+        :param history: Include only invocations associated with
+          this history
+
+        :param include_terminal: bool
+        :param: Whether to include invocations in terminal states
+
+        :type limit: int
+        :param limit: Maximum number of invocations to return - if specified,
+          the most recent invocations will be returned.
+
+        :rtype: list of Invocation
+        :param: invocation objects
+        """
+        inv_dict_list = self.gi.invocations.get_invocations(
+            workflow_id=workflow.id if workflow else None,
+            history_id=history.id if history else None,
+            include_terminal=include_terminal,
+            limit=limit,
+            view='element',
+            step_details=True
+        )
+        return [wrappers.Invocation(inv_dict, self.obj_gi) for inv_dict in inv_dict_list]
+
+
 class ObjToolClient(ObjClient):
     """
     Interacts with Galaxy tools.
     """
-
-    def __init__(self, obj_gi):
-        super().__init__(obj_gi)
 
     def get(self, id_, io_details=False, link_details=False):
         """
@@ -395,9 +460,6 @@ class ObjJobClient(ObjClient):
     """
     Interacts with Galaxy jobs.
     """
-
-    def __init__(self, obj_gi):
-        super().__init__(obj_gi)
 
     def get(self, id_, full_details=False):
         """

@@ -53,7 +53,12 @@
                     "output_name": "output"
                 }
             },
-            "inputs": [],
+            "inputs": [
+                {
+                    "description": "runtime parameter for tool Select first",
+                    "name": "input"
+                }
+            ],
             "label": null,
             "name": "Select first",
             "outputs": [
@@ -64,15 +69,15 @@
             ],
             "post_job_actions": {},
             "tool_id": "Show beginning1",
-            "tool_state": "{\"input\": {\"__class__\": \"ConnectedValue\"}, \"lineNum\": {\"__class__\": \"ConnectedValue\"}, \"__page__\": null, \"__rerun_remap_job_id__\": null}",
-            "tool_version": "1.0.0",
+            "tool_state": "{\"header\": \"false\", \"input\": {\"__class__\": \"RuntimeValue\"}, \"lineNum\": {\"__class__\": \"ConnectedValue\"}, \"__page__\": null, \"__rerun_remap_job_id__\": null}",
+            "tool_version": "1.0.1",
             "type": "tool",
-            "uuid": "ebe5983a-70bb-4ee0-b218-92026dcd1282",
+            "uuid": "809c3a0a-1a95-414d-ae64-bb3e19df7b99",
             "workflow_outputs": [
                 {
                     "label": null,
                     "output_name": "out_file1",
-                    "uuid": "435362b3-636b-4ad9-8346-0fe6d21c8dc5"
+                    "uuid": "50c8e9c9-5ede-4a17-801f-21376f053dd4"
                 }
             ]
         },
@@ -91,16 +96,7 @@
                     "output_name": "out_file1"
                 }
             },
-            "inputs": [
-                {
-                    "description": "runtime parameter for tool Paste",
-                    "name": "input1"
-                },
-                {
-                    "description": "runtime parameter for tool Paste",
-                    "name": "input2"
-                }
-            ],
+            "inputs": [],
             "label": null,
             "name": "Paste",
             "outputs": [
@@ -119,7 +115,7 @@
                 }
             },
             "tool_id": "Paste1",
-            "tool_state": "{\"delimiter\": \"T\", \"input1\": {\"__class__\": \"RuntimeValue\"}, \"input2\": {\"__class__\": \"RuntimeValue\"}, \"__page__\": null, \"__rerun_remap_job_id__\": null}",
+            "tool_state": "{\"delimiter\": \"T\", \"input1\": {\"__class__\": \"ConnectedValue\"}, \"input2\": {\"__class__\": \"ConnectedValue\"}, \"__page__\": null, \"__rerun_remap_job_id__\": null}",
             "tool_version": "1.0.0",
             "type": "tool",
             "uuid": "41d799a6-bde2-46cb-a206-caa7621151a6",
@@ -127,12 +123,12 @@
                 {
                     "label": null,
                     "output_name": "out_file1",
-                    "uuid": "cdaf754c-8275-4244-b9a9-666abc24c2c6"
+                    "uuid": "74584c3d-bf88-4bb3-846a-bfcb9ff375f8"
                 }
             ]
         }
     },
     "tags": [],
-    "uuid": "ec97af03-495c-42dc-9f33-3aa11219d416",
+    "uuid": "d38ebab1-6534-4702-a7c3-7ca44dd9d1ae",
     "version": 1
 }

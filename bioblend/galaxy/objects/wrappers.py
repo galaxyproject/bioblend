@@ -14,13 +14,13 @@ from collections.abc import (
 from typing import Tuple
 
 import bioblend
+from bioblend.util import abstractclass
 
 
 __all__ = (
     'Wrapper',
     'Step',
     'Workflow',
-    'ContentInfo',
     'LibraryContentInfo',
     'HistoryContentInfo',
     'DatasetContainer',
@@ -35,14 +35,14 @@ __all__ = (
     'LibraryDataset',
     'Tool',
     'Job',
-    'Preview',
     'LibraryPreview',
     'HistoryPreview',
     'WorkflowPreview',
 )
 
 
-class Wrapper(metaclass=abc.ABCMeta):
+@abstractclass
+class Wrapper:
     """
     Abstract base class for Galaxy entity wrappers.
 
@@ -55,9 +55,8 @@ class Wrapper(metaclass=abc.ABCMeta):
     Note that the wrapped dictionary is accessible via the ``wrapped``
     attribute.
     """
-    BASE_ATTRS: Tuple[str, ...] = ('id', 'name')
+    BASE_ATTRS: Tuple[str, ...] = ('id', )
 
-    @abc.abstractmethod
     def __init__(self, wrapped, parent=None, gi=None):
         """
         :type wrapped: dict
@@ -82,13 +81,6 @@ class Wrapper(metaclass=abc.ABCMeta):
         object.__setattr__(self, '_cached_parent', parent)
         object.__setattr__(self, 'is_modified', False)
         object.__setattr__(self, 'gi', gi)
-
-    @abc.abstractproperty
-    def gi_module(self):
-        """
-        The GalaxyInstance module that deals with objects of this type.
-        """
-        pass
 
     @property
     def parent(self):
@@ -152,7 +144,7 @@ class Wrapper(metaclass=abc.ABCMeta):
 
 class Step(Wrapper):
     """
-    Abstract base class for workflow steps.
+    Workflow step.
 
     Steps are the main building blocks of a Galaxy workflow. A step can be: an
     input (type ``data_collection_input``, ``data_input`` or
@@ -160,7 +152,12 @@ class Step(Wrapper):
     (type ``subworkflow``) or a pause (type ``pause``).
     """
     BASE_ATTRS = Wrapper.BASE_ATTRS + (
-        'input_steps', 'tool_id', 'tool_inputs', 'tool_version', 'type'
+        'input_steps',
+        'name',
+        'tool_id',
+        'tool_inputs',
+        'tool_version',
+        'type',
     )
 
     def __init__(self, step_dict, parent):
@@ -172,9 +169,21 @@ class Step(Wrapper):
         if stype not in {'data_collection_input', 'data_input', 'parameter_input', 'pause', 'subworkflow', 'tool'}:
             raise ValueError('Unknown step type: %r' % stype)
 
-    @property
-    def gi_module(self):
-        return self.gi.workflows
+
+class InvocationStep(Wrapper):
+    """
+    Abstract base class for invocation steps.
+    """
+    BASE_ATTRS = Wrapper.BASE_ATTRS + (
+        'action',
+        'job_id',
+        'order_index',
+        'state',
+        'update_time',
+        'workflow_step_id',
+        'workflow_step_label',
+        'workflow_step_uuid',
+    )
 
 
 class Workflow(Wrapper):
@@ -188,6 +197,7 @@ class Workflow(Wrapper):
         'deleted',
         'inputs',
         'latest_workflow_uuid',
+        'name',
         'owner',
         'published',
         'steps',
@@ -229,10 +239,6 @@ class Workflow(Wrapper):
                 self.inputs, self.data_collection_input_ids, self.data_input_ids, self.parameter_input_ids)
         object.__setattr__(self, 'sink_ids', tails - heads)
         object.__setattr__(self, 'missing_ids', missing_ids)
-
-    @property
-    def gi_module(self):
-        return self.gi.workflows
 
     def _get_dag(self):
         """
@@ -356,6 +362,9 @@ class Workflow(Wrapper):
             polling_interval=POLLING_INTERVAL, break_on_error=True):
         """
         Run the workflow in the current Galaxy instance.
+
+        .. deprecated:: 0.16.0
+           Use :meth:`invoke` instead.
 
         :type input_map: dict
         :param input_map: a mapping from workflow input labels to
@@ -489,22 +498,355 @@ class Workflow(Wrapper):
         self.gi.workflows.delete(id_=self.id)
         self.unmap()
 
+    def invoke(self, inputs=None, params=None, history=None,
+               import_inputs_to_history=None, replacement_params=None,
+               allow_tool_state_corrections=True, inputs_by=None,
+               parameters_normalized=False):
+        """
+        Invoke the workflow. This will cause a workflow to be scheduled
+        and return an object describing the workflow invocation.
+
+        :type inputs: dict
+        :param inputs: A mapping of workflow inputs to datasets and dataset collections.
+                       The datasets source can be a LibraryDatasetDatasetAssociation (``ldda``),
+                       LibraryDataset (``ld``), HistoryDatasetAssociation (``hda``), or
+                       HistoryDatasetCollectionAssociation (``hdca``).
+
+                       The map must be in the following format:
+                       ``{'<input_index>': {'id': <encoded dataset ID>, 'src': '[ldda, ld, hda, hdca]'}}``
+                       (e.g. ``{'2': {'id': '29beef4fadeed09f', 'src': 'hda'}}``)
+
+                       This map may also be indexed by the UUIDs of the workflow steps,
+                       as indicated by the ``uuid`` property of steps returned from the
+                       Galaxy API. Alternatively workflow steps may be addressed by
+                       the label that can be set in the workflow editor. If using
+                       uuid or label you need to also set the ``inputs_by`` parameter
+                       to ``step_uuid`` or ``name``.
+
+        :type params: dict
+        :param params: A mapping of non-datasets tool parameters (see below)
+
+        :type history: str
+        :param history: The history in which to store the workflow
+          output.
+
+        :type import_inputs_to_history: bool
+        :param import_inputs_to_history: If ``True``, used workflow inputs will
+          be imported into the history. If ``False``, only workflow outputs will
+          be visible in the given history.
+
+        :type allow_tool_state_corrections: bool
+        :param allow_tool_state_corrections: If True, allow Galaxy to fill in
+          missing tool state when running workflows. This may be useful for
+          workflows using tools that have changed over time or for workflows
+          built outside of Galaxy with only a subset of inputs defined.
+
+        :type replacement_params: dict
+        :param replacement_params: pattern-based replacements for post-job
+          actions (see below)
+
+        :type inputs_by: str
+        :param inputs_by: Determines how inputs are referenced. Can be
+          "step_index|step_uuid" (default), "step_index", "step_id", "step_uuid", or "name".
+
+        :type parameters_normalized: bool
+        :param parameters_normalized: Whether Galaxy should normalize ``params``
+          to ensure everything is referenced by a numeric step ID. Default is
+          ``False``, but when setting ``params`` for a subworkflow, ``True`` is
+          required.
+
+        :rtype: Invocation
+        :return: the workflow invocation
+
+        The ``params`` dict should be specified as follows::
+
+          {STEP_ID: PARAM_DICT, ...}
+
+        where PARAM_DICT is::
+
+          {PARAM_NAME: VALUE, ...}
+
+        For backwards compatibility, the following (deprecated) format is
+        also supported for ``params``::
+
+          {TOOL_ID: PARAM_DICT, ...}
+
+        in which case PARAM_DICT affects all steps with the given tool id.
+        If both by-tool-id and by-step-id specifications are used, the
+        latter takes precedence.
+
+        Finally (again, for backwards compatibility), PARAM_DICT can also
+        be specified as::
+
+          {'param': PARAM_NAME, 'value': VALUE}
+
+        Note that this format allows only one parameter to be set per step.
+
+        For a ``repeat`` parameter, the names of the contained parameters needs
+        to be specified as ``<repeat name>_<repeat index>|<param name>``, with
+        the repeat index starting at 0. For example, if the tool XML contains::
+
+          <repeat name="cutoff" title="Parameters used to filter cells" min="1">
+              <param name="name" type="text" value="n_genes" label="Name of param...">
+                  <option value="n_genes">n_genes</option>
+                  <option value="n_counts">n_counts</option>
+              </param>
+              <param name="min" type="float" min="0" value="0" label="Min value"/>
+          </repeat>
+
+        then the PARAM_DICT should be something like::
+
+          {...
+           "cutoff_0|name": "n_genes",
+           "cutoff_0|min": "2",
+           "cutoff_1|name": "n_counts",
+           "cutoff_1|min": "4",
+           ...}
+
+        At the time of this writing, it is not possible to change the number of
+        times the contained parameters are repeated. Therefore, the parameter
+        indexes can go from 0 to n-1, where n is the number of times the
+        repeated element was added when the workflow was saved in the Galaxy UI.
+
+        The ``replacement_params`` dict should map parameter names in
+        post-job actions (PJAs) to their runtime values. For
+        instance, if the final step has a PJA like the following::
+
+          {'RenameDatasetActionout_file1': {'action_arguments': {'newname': '${output}'},
+                                            'action_type': 'RenameDatasetAction',
+                                            'output_name': 'out_file1'}}
+
+        then the following renames the output dataset to 'foo'::
+
+          replacement_params = {'output': 'foo'}
+
+        see also `this email thread
+        <http://lists.bx.psu.edu/pipermail/galaxy-dev/2011-September/006875.html>`_.
+
+        .. warning::
+          Historically, the ``run_workflow`` method consumed a ``dataset_map``
+          data structure that was indexed by unencoded workflow step IDs. These
+          IDs would not be stable across Galaxy instances. The new ``inputs``
+          property is instead indexed by either the ``order_index`` property
+          (which is stable across workflow imports) or the step UUID which is
+          also stable.
+        """
+        inv_dict = self.gi.gi.workflows.invoke_workflow(
+            workflow_id=self.id,
+            inputs=inputs,
+            params=params,
+            history_id=history.id,
+            import_inputs_to_history=import_inputs_to_history,
+            replacement_params=replacement_params,
+            allow_tool_state_corrections=allow_tool_state_corrections,
+            inputs_by=inputs_by,
+            parameters_normalized=parameters_normalized
+        )
+        return self.gi.invocations.get(inv_dict['id'])
+
+
+class Invocation(Wrapper):
+    """
+    Invocation of a workflow.
+    This causes the steps of a workflow to be executed in sequential order.
+    """
+    BASE_ATTRS = Wrapper.BASE_ATTRS + (
+        'history_id',
+        'inputs',
+        'state',
+        'steps',
+        'update_time',
+        'uuid',
+        'workflow_id',
+    )
+
+    def __init__(self, inv_dict, gi=None):
+        super().__init__(inv_dict, gi=gi)
+        self.steps = [InvocationStep(step, self) for step in self.steps]
+        self.inputs = [{**v, 'label': k} for k, v in self.inputs.items()]
+
+    def sorted_step_ids(self):
+        """
+        Get the step IDs sorted based on this order index.
+
+        :rtype: list of str
+        :param: sorted step IDs
+        """
+        return [step.id for step in sorted(self.steps, key=lambda step: step.order_index)]
+
+    def step_states(self):
+        """
+        Get the set of step states for this invocation.
+
+        :rtype: set
+        :param: step states
+        """
+        return set(step.state for step in self.steps)
+
+    def number_of_steps(self):
+        """
+        Get the number of steps for this invocation.
+
+        :rtype: int
+        :param: number of steps
+        """
+        return len(self.steps)
+
+    def sorted_steps_by(self, indices=None, states=None, step_ids=None):
+        """
+        Get steps for this invocation, or get a subset by specifying
+        optional parameters for filtering.
+
+        :type indices: list of int
+        :param indices: return steps that have matching order_index
+
+        :type states: list of str
+        :param states: return steps that have matching states
+
+        :type step_ids: list of str
+        :param step_ids: return steps that have matching step_ids
+
+        :rtype: list of InvocationStep
+        :param: invocation steps
+        """
+        steps = self.steps
+        if indices is not None:
+            steps = filter(lambda step: step.order_index in indices, steps)
+        if states is not None:
+            steps = filter(lambda step: step.state in states, steps)
+        if step_ids is not None:
+            steps = filter(lambda step: step.id in step_ids, steps)
+        return sorted(steps, key=lambda step: step.order_index)
+
+    def cancel(self):
+        """
+        Cancel this invocation.
+
+        .. note::
+          On success, this method updates the Invocation object's internal variables.
+        """
+        inv_dict = self.gi.gi.invocations.cancel_invocation(self.id)
+        self.__init__(inv_dict, gi=self.gi)
+
+    def refresh(self):
+        """
+        Update this invocation with the latest information from the server.
+
+        .. note::
+          On success, this method updates the Invocation object's internal variables.
+        """
+        inv_dict = self.gi.gi.invocations.show_invocation(self.id)
+        self.__init__(inv_dict, gi=self.gi)
+
+    def run_step_actions(self, steps, actions):
+        """
+        Run actions for active steps of this invocation.
+
+        :type steps: list of InvocationStep
+        :param steps: list of steps to run actions on
+
+        :type actions: list of str
+        :param actions: list of actions to run
+
+        .. note::
+          On success, this method updates the Invocation object's internal step variables.
+        """
+        if not len(steps) == len(actions):
+            raise RuntimeError(f'Different number of ``steps`` ({len(steps)}) and ``actions`` ({len(actions)}) in ``{self}.run_step_actions()``')
+        step_dict_list = [self.gi.gi.invocations.run_invocation_step_action(self.id, step.id, action) for step, action in zip(steps, actions)]
+        for step, step_dict in zip(steps, step_dict_list):
+            step.__init__(step_dict, parent=self)
+
+    def summary(self):
+        """
+        Get a summary for this invocation.
+
+        :rtype: dict
+        :param: invocation summary
+        """
+        return self.gi.gi.invocations.get_invocation_summary(self.id)
+
+    def step_jobs_summary(self):
+        """
+        Get a summary for this invocation's step jobs.
+
+        :rtype: list of dicts
+        :param: step job summaries
+        """
+        return self.gi.gi.invocations.get_invocation_step_jobs_summary(self.id)
+
+    def report(self):
+        """
+        Get a dictionary containing a Markdown report for this invocation.
+
+        :rtype: dict
+        :param: invocation report
+        """
+        return self.gi.gi.invocations.get_invocation_report(self.id)
+
+    def save_report_pdf(self, file_path, chunk_size=bioblend.CHUNK_SIZE):
+        """
+        Download a PDF report for this invocation.
+
+        :type file_path: str
+        :param file_path: path to save the report
+
+        :type chunk_size: int
+        :param chunk_size: chunk size in bytes for reading remote data
+        """
+        self.gi.gi.invocations.get_invocation_report_pdf(self.id, file_path, chunk_size)
+
+    def biocompute_object(self):
+        """
+        Get a BioCompute object for this invocation.
+
+        :rtype: dict
+        :param: BioCompute object
+        """
+        return self.gi.gi.invocations.get_invocation_biocompute_object(self.id)
+
+    def wait(self, maxwait=12000, interval=3, check=True):
+        """
+        Wait for this invocation to reach a terminal state.
+
+        :type maxwait: float
+        :param maxwait: upper limit on waiting time
+
+        :type interval: float
+        :param interval: polling interval in secconds
+
+        :type check: bool
+        :param check: if ``true``, raise an error if the terminal state is not 'scheduled'
+
+        .. note::
+          On success, this method updates the Invocation object's internal variables.
+        """
+        inv_dict = self.gi.gi.invocations.wait_for_invocation(self.id, maxwait=maxwait, interval=interval, check=check)
+        self.__init__(inv_dict, gi=self.gi)
+
 
 class Dataset(Wrapper, metaclass=abc.ABCMeta):
     """
     Abstract base class for Galaxy datasets.
     """
     BASE_ATTRS = Wrapper.BASE_ATTRS + (
-        'data_type', 'file_ext', 'file_name', 'file_size', 'genome_build', 'misc_info', 'state'
+        'data_type',
+        'file_ext',
+        'file_name',
+        'file_size',
+        'genome_build',
+        'misc_info',
+        'name',
+        'state',
     )
     POLLING_INTERVAL = 1  # for state monitoring
 
-    @abc.abstractmethod
     def __init__(self, ds_dict, container, gi=None):
         super().__init__(ds_dict, gi=gi)
         object.__setattr__(self, 'container', container)
 
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def _stream_url(self):
         """
         Return the URL to stream this dataset.
@@ -599,13 +941,6 @@ class HistoryDatasetAssociation(Dataset):
     BASE_ATTRS = Dataset.BASE_ATTRS + ('annotation', 'deleted', 'purged', 'tags', 'visible')
     SRC = 'hda'
 
-    def __init__(self, ds_dict, container, gi=None):
-        super().__init__(ds_dict, container, gi=gi)
-
-    @property
-    def gi_module(self):
-        return self.gi.histories
-
     @property
     def _stream_url(self):
         base_url = self.gi.gi.histories._make_url(module_id=self.container.id, contents=True)
@@ -659,10 +994,12 @@ class DatasetCollection(Wrapper, metaclass=abc.ABCMeta):
     Abstract base class for Galaxy dataset collections.
     """
     BASE_ATTRS = Wrapper.BASE_ATTRS + (
-        'state', 'deleted', 'collection_type'
+        'collection_type',
+        'deleted',
+        'name',
+        'state',
     )
 
-    @abc.abstractmethod
     def __init__(self, dsc_dict, container, gi=None):
         super().__init__(dsc_dict, gi=gi)
         object.__setattr__(self, 'container', container)
@@ -678,6 +1015,10 @@ class DatasetCollection(Wrapper, metaclass=abc.ABCMeta):
         self.__init__(dsc_dict, self.container, self.gi)
         return self
 
+    @abc.abstractmethod
+    def delete(self):
+        pass
+
 
 class HistoryDatasetCollectionAssociation(DatasetCollection):
     """
@@ -685,13 +1026,6 @@ class HistoryDatasetCollectionAssociation(DatasetCollection):
     """
     BASE_ATTRS = DatasetCollection.BASE_ATTRS + ('tags', 'visible', 'elements')
     SRC = 'hdca'
-
-    def __init__(self, dsc_dict, container, gi=None):
-        super().__init__(dsc_dict, container, gi=gi)
-
-    @property
-    def gi_module(self):
-        return self.gi.histories
 
     def delete(self):
         """
@@ -702,17 +1036,11 @@ class HistoryDatasetCollectionAssociation(DatasetCollection):
         self.refresh()
 
 
+@abstractclass
 class LibRelatedDataset(Dataset):
     """
     Base class for LibraryDatasetDatasetAssociation and LibraryDataset classes.
     """
-
-    def __init__(self, ds_dict, container, gi=None):
-        super().__init__(ds_dict, container, gi=gi)
-
-    @property
-    def gi_module(self):
-        return self.gi.libraries
 
     @property
     def _stream_url(self):
@@ -763,16 +1091,16 @@ class LibraryDataset(LibRelatedDataset):
         return self
 
 
-class ContentInfo(Wrapper, metaclass=abc.ABCMeta):
+@abstractclass
+class ContentInfo(Wrapper):
     """
     Instances of this class wrap dictionaries obtained by getting
     ``/api/{histories,libraries}/<ID>/contents`` from Galaxy.
     """
-    BASE_ATTRS = Wrapper.BASE_ATTRS + ('type',)
-
-    @abc.abstractmethod
-    def __init__(self, info_dict, gi=None):
-        super().__init__(info_dict, gi=gi)
+    BASE_ATTRS = Wrapper.BASE_ATTRS + (
+        'name',
+        'type',
+    )
 
 
 class LibraryContentInfo(ContentInfo):
@@ -780,12 +1108,6 @@ class LibraryContentInfo(ContentInfo):
     Instances of this class wrap dictionaries obtained by getting
     ``/api/libraries/<ID>/contents`` from Galaxy.
     """
-    def __init__(self, info_dict, gi=None):
-        super().__init__(info_dict, gi=gi)
-
-    @property
-    def gi_module(self):
-        return self.gi.libraries
 
 
 class HistoryContentInfo(ContentInfo):
@@ -795,21 +1117,16 @@ class HistoryContentInfo(ContentInfo):
     """
     BASE_ATTRS = ContentInfo.BASE_ATTRS + ('deleted', 'state', 'visible')
 
-    def __init__(self, info_dict, gi=None):
-        super().__init__(info_dict, gi=gi)
-
-    @property
-    def gi_module(self):
-        return self.gi.histories
-
 
 class DatasetContainer(Wrapper, metaclass=abc.ABCMeta):
     """
     Abstract base class for dataset containers (histories and libraries).
     """
-    BASE_ATTRS = Wrapper.BASE_ATTRS + ('deleted',)
+    BASE_ATTRS = Wrapper.BASE_ATTRS + (
+        'deleted',
+        'name',
+    )
 
-    @abc.abstractmethod
     def __init__(self, c_dict, content_infos=None, gi=None):
         """
         :type content_infos: list of :class:`ContentInfo`
@@ -819,6 +1136,12 @@ class DatasetContainer(Wrapper, metaclass=abc.ABCMeta):
         if content_infos is None:
             content_infos = []
         object.__setattr__(self, 'content_infos', content_infos)
+        object.__setattr__(self, 'obj_gi_client', getattr(self.gi, self.API_MODULE))
+
+    @property
+    @abc.abstractmethod
+    def API_MODULE(self):
+        pass
 
     @property
     def dataset_ids(self):
@@ -828,7 +1151,7 @@ class DatasetContainer(Wrapper, metaclass=abc.ABCMeta):
         return [_.id for _ in self.content_infos if _.type == 'file']
 
     def preview(self):
-        getf = self.gi_module.get_previews
+        getf = self.obj_gi_client.get_previews
         # self.state could be stale: check both regular and deleted containers
         try:
             p = [_ for _ in getf() if _.id == self.id][0]
@@ -845,7 +1168,7 @@ class DatasetContainer(Wrapper, metaclass=abc.ABCMeta):
 
         Returns: self
         """
-        fresh = self.gi_module.get(self.id)
+        fresh = self.obj_gi_client.get(self.id)
         self.__init__(
             fresh.wrapped, content_infos=fresh.content_infos, gi=self.gi)
         return self
@@ -901,13 +1224,6 @@ class History(DatasetContainer):
     DSC_TYPE = HistoryDatasetCollectionAssociation
     CONTENT_INFO_TYPE = HistoryContentInfo
     API_MODULE = 'histories'
-
-    def __init__(self, hist_dict, content_infos=None, gi=None):
-        super().__init__(hist_dict, content_infos=content_infos, gi=gi)
-
-    @property
-    def gi_module(self):
-        return self.gi.histories
 
     def update(self, **kwds):
         """
@@ -1089,13 +1405,6 @@ class Library(DatasetContainer):
     CONTENT_INFO_TYPE = LibraryContentInfo
     API_MODULE = 'libraries'
 
-    def __init__(self, lib_dict, content_infos=None, gi=None):
-        super().__init__(lib_dict, content_infos=content_infos, gi=gi)
-
-    @property
-    def gi_module(self):
-        return self.gi.libraries
-
     @property
     def folder_ids(self):
         """
@@ -1273,7 +1582,12 @@ class Folder(Wrapper):
     """
     Maps to a folder in a Galaxy library.
     """
-    BASE_ATTRS = Wrapper.BASE_ATTRS + ('description', 'deleted', 'item_count')
+    BASE_ATTRS = Wrapper.BASE_ATTRS + (
+        'deleted',
+        'description',
+        'item_count',
+        'name',
+    )
 
     def __init__(self, f_dict, container, gi=None):
         super().__init__(f_dict, gi=gi)
@@ -1303,10 +1617,6 @@ class Folder(Wrapper):
             return None
         return self.container.get_folder(parent_id)
 
-    @property
-    def gi_module(self):
-        return self.gi.libraries
-
     def refresh(self):
         """
         Re-fetch the attributes pertaining to this object.
@@ -1322,15 +1632,11 @@ class Tool(Wrapper):
     """
     Maps to a Galaxy tool.
     """
-    BASE_ATTRS = Wrapper.BASE_ATTRS + ('version',)
+    BASE_ATTRS = Wrapper.BASE_ATTRS + (
+        'name',
+        'version',
+    )
     POLLING_INTERVAL = 10  # for output state monitoring
-
-    def __init__(self, t_dict, gi=None):
-        super().__init__(t_dict, gi=gi)
-
-    @property
-    def gi_module(self):
-        return self.gi.tools
 
     def run(self, inputs, history, wait=False,
             polling_interval=POLLING_INTERVAL):
@@ -1377,71 +1683,55 @@ class Job(Wrapper):
     """
     Maps to a Galaxy job.
     """
-    BASE_ATTRS = ('id', 'state')
-
-    def __init__(self, j_dict, gi=None):
-        super().__init__(j_dict, gi=gi)
-
-    @property
-    def gi_module(self):
-        return self.gi.jobs
+    BASE_ATTRS = Wrapper.BASE_ATTRS + ('state',)
 
 
-class Preview(Wrapper, metaclass=abc.ABCMeta):
+@abstractclass
+class DatasetContainerPreview(Wrapper):
     """
-    Abstract base class for Galaxy entity 'previews'.
-
-    Classes derived from this one model the short summaries returned
-    by global getters such as ``/api/libraries``.
+    Abstract base class for dataset container (history and library) 'previews'.
     """
-    BASE_ATTRS = Wrapper.BASE_ATTRS + ('deleted',)
+    BASE_ATTRS = Wrapper.BASE_ATTRS + (
+        'deleted',
+        'name',
+    )
 
-    @abc.abstractmethod
-    def __init__(self, pw_dict, gi=None):
-        super().__init__(pw_dict, gi=gi)
 
-
-class LibraryPreview(Preview):
+class LibraryPreview(DatasetContainerPreview):
     """
     Models Galaxy library 'previews'.
 
     Instances of this class wrap dictionaries obtained by getting
     ``/api/libraries`` from Galaxy.
     """
-    def __init__(self, pw_dict, gi=None):
-        super().__init__(pw_dict, gi=gi)
-
-    @property
-    def gi_module(self):
-        return self.gi.libraries
 
 
-class HistoryPreview(Preview):
+class HistoryPreview(DatasetContainerPreview):
     """
     Models Galaxy history 'previews'.
 
     Instances of this class wrap dictionaries obtained by getting
     ``/api/histories`` from Galaxy.
     """
-    BASE_ATTRS = Preview.BASE_ATTRS + ('annotation', 'published', 'purged', 'tags',)
-
-    def __init__(self, pw_dict, gi=None):
-        super().__init__(pw_dict, gi=gi)
-
-    @property
-    def gi_module(self):
-        return self.gi.histories
+    BASE_ATTRS = DatasetContainerPreview.BASE_ATTRS + (
+        'annotation',
+        'published',
+        'purged',
+        'tags',
+    )
 
 
-class WorkflowPreview(Preview):
+class WorkflowPreview(Wrapper):
     """
     Models Galaxy workflow 'previews'.
 
     Instances of this class wrap dictionaries obtained by getting
     ``/api/workflows`` from Galaxy.
     """
-    BASE_ATTRS = Preview.BASE_ATTRS + (
+    BASE_ATTRS = Wrapper.BASE_ATTRS + (
+        'deleted',
         'latest_workflow_uuid',
+        'name',
         'number_of_steps',
         'owner',
         'published',
@@ -1449,26 +1739,29 @@ class WorkflowPreview(Preview):
         'tags',
     )
 
-    def __init__(self, pw_dict, gi=None):
-        super().__init__(pw_dict, gi=gi)
 
-    @property
-    def gi_module(self):
-        return self.gi.workflows
+class InvocationPreview(Wrapper):
+    """
+    Models Galaxy invocation 'previews'.
+
+    Instances of this class wrap dictionaries obtained by getting
+    ``/api/invocations`` from Galaxy.
+    """
+    BASE_ATTRS = Wrapper.BASE_ATTRS + (
+        'history_id',
+        'id',
+        'state',
+        'update_time',
+        'uuid',
+        'workflow_id',
+    )
 
 
-class JobPreview(Preview):
+class JobPreview(Wrapper):
     """
     Models Galaxy job 'previews'.
 
     Instances of this class wrap dictionaries obtained by getting
     ``/api/jobs`` from Galaxy.
     """
-    BASE_ATTRS = ('id', 'state')
-
-    def __init__(self, pw_dict, gi=None):
-        super().__init__(pw_dict, gi=gi)
-
-    @property
-    def gi_module(self):
-        return self.gi.jobs
+    BASE_ATTRS = Wrapper.BASE_ATTRS + ('state',)
