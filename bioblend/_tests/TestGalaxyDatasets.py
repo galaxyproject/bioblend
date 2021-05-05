@@ -131,6 +131,7 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
         self.assertEqual(len(datasets), 2)
         self.gi.histories.update_dataset(history_id=self.history_id, dataset_id=self.dataset_id, visible=True)
 
+    @test_util.skip_unless_galaxy('release_19.05')
     def test_get_datasets_ordering(self):
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id, order_by='create_time', order_descending=True)
         self.assertEqual(datasets[0]['id'], self.dataset_id2)
