@@ -364,18 +364,11 @@ class CloudManInstance(GenericVMInstance):
             super().__init__(kwargs['launcher'], kwargs['launch_result'])
         else:
             super().__init__(None, None)
-        self.config = kwargs.pop('cloudman_config', None)
-        self.use_ssl = False
-        if not self.config:
-            self.password = password
-            self.verify = kwargs.get("verify",None)
-            self.use_ssl = kwargs.get("use_ssl",kwargs.get("verify",None) is not None)
-        else:
-            self.password = self.config.password
-            if self.config.kwargs.get('use_ssl',False):
-                self.verify = kwargs.get("verify",False)
-                self.use_ssl = True
-        self.authuser = kwargs.get("authuser","")
+        self.config = kwargs.pop('cloudman_config', CloudManConfig())
+        self.password = password or self.config.password
+        self.use_ssl = kwargs.get("use_ssl", self.config.kwargs.get("use_ssl", False))
+        self.verify = kwargs.get("verify", self.config.kwargs.get("verify", False))
+        self.authuser = kwargs.get("authuser", "")
         self._set_url(url)
 
     def __repr__(self):
@@ -735,10 +728,13 @@ class CloudManInstance(GenericVMInstance):
         if parameters is None:
             parameters = {}
         req_url = '/'.join((self.cloudman_url, 'root', url))
-        extragetargs = {}
-        if self.verify is not None:
-            extragetargs = {'verify': self.verify}
-        r = requests.get(req_url, params=parameters, auth=(self.authuser, self.password), timeout=timeout, **extragetargs)
+        r = requests.get(
+            req_url,
+            params=parameters,
+            auth=(self.authuser, self.password),
+            timeout=timeout,
+            verify=self.verify,
+        )
         try:
             json = r.json()
             return json
