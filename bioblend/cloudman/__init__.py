@@ -364,11 +364,11 @@ class CloudManInstance(GenericVMInstance):
             super().__init__(kwargs['launcher'], kwargs['launch_result'])
         else:
             super().__init__(None, None)
-        self.config = kwargs.pop('cloudman_config', None)
-        if not self.config:
-            self.password = password
-        else:
-            self.password = self.config.password
+        self.config = kwargs.pop('cloudman_config', CloudManConfig())
+        self.password = password or self.config.password
+        self.use_ssl = kwargs.get("use_ssl", self.config.kwargs.get("use_ssl", False))
+        self.verify = kwargs.get("verify", self.config.kwargs.get("verify", False))
+        self.authuser = kwargs.get("authuser", "")
         self._set_url(url)
 
     def __repr__(self):
@@ -396,7 +396,11 @@ class CloudManInstance(GenericVMInstance):
         if url:
             # Make sure the URL scheme is defined (otherwise requests will not work)
             if not url.lower().startswith('http'):
-                url = "http://" + url
+                # Check to see whether https scheme is required
+                if self.use_ssl:
+                    url = "https://" + url
+                else:
+                    url = "http://" + url
             # Parse the corrected URL again to extract the hostname
             parse_result = urlparse(url)
             super()._update_host_name(parse_result.hostname)
@@ -724,7 +728,13 @@ class CloudManInstance(GenericVMInstance):
         if parameters is None:
             parameters = {}
         req_url = '/'.join((self.cloudman_url, 'root', url))
-        r = requests.get(req_url, params=parameters, auth=("", self.password), timeout=timeout)
+        r = requests.get(
+            req_url,
+            params=parameters,
+            auth=(self.authuser, self.password),
+            timeout=timeout,
+            verify=self.verify,
+        )
         try:
             json = r.json()
             return json

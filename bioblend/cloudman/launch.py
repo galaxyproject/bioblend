@@ -501,9 +501,13 @@ class CloudManLauncher:
                     # attempt auto allocation of floating IP
                     if rs[0].instances[0].private_ip_address and not public_ip:
                         self.assign_floating_ip(ec2_conn, rs[0].instances[0])
+                    # Wait until the CloudMan URL is accessible to return
+                    # the data - this may only be correct initially at
+                    # bootup for instances that configure themselves for
+                    # https - they may ultimately block port 80. However,
+                    # we don't have a good way to determine whether to
+                    # check using http or https.
                     cm_url = f"http://{public_ip}/cloud"
-                    # Wait until the CloudMan URL is accessible to return the
-                    # data
                     if self._checkURL(cm_url) is True:
                         state['instance_state'] = inst_state
                         state['placement'] = rs[0].instances[0].placement
