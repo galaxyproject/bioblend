@@ -150,7 +150,7 @@ class DatasetClient(Client):
         name: Optional[str] = None,
         extension: Optional[Union[str, List[str]]] = None,
         state: Optional[Union[str, List[str]]] = None,
-        visible: bool = True,
+        visible: Optional[bool] = None,
         history_id: Optional[str] = None,
         create_time_min: str = None,
         create_time_max: str = None,
@@ -186,7 +186,7 @@ class DatasetClient(Client):
         :param state: Dataset state (or list of states) to filter on.
 
         :type visible: bool
-        :param visible: If ``False``, include datasets marked as not ``visible``.
+        :param visible: Optionally filter datasets by their ``visible`` attribute.
 
         :type history_id: str
         :param history_id: Encoded history ID to filter on.
@@ -239,7 +239,7 @@ class DatasetClient(Client):
             op, val = self._param_to_filter(extension)
             q.append(f'extension-{op}')
             qv.append(val)
-        if visible:
+        if visible is not None:
             q.append('visible-eq')
             qv.append(str(visible))
         if create_time_min:

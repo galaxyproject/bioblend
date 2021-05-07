@@ -15,9 +15,9 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
         super().setUp(cls)
         cls.history_id = cls.gi.histories.create_history(name='TestDataset')['id']
         cls.dataset_contents = "line 1\nline 2\rline 3\r\nline 4"
-        cls.dataset_id = super()._test_dataset(cls, cls.history_id, contents=cls.dataset_contents)
+        cls.dataset_id = cls._test_dataset(cls, cls.history_id, contents=cls.dataset_contents)
         cls.gi.datasets.wait_for_dataset(cls.dataset_id)
-        cls.dataset_id2 = super()._test_dataset(cls, cls.history_id, contents=cls.dataset_contents)
+        cls.dataset_id2 = cls._test_dataset(cls, cls.history_id, contents=cls.dataset_contents)
         cls.gi.datasets.wait_for_dataset(cls.dataset_id2)
 
     @classmethod
@@ -75,6 +75,8 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id, offset=1)
         self.assertEqual(len(datasets), 1)
 
+    @test_util.skip_unless_galaxy('release_19.05')
+    def test_get_datasets_name(self):
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id, name='Pasted Entry')
         self.assertEqual(len(datasets), 2)
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id, name='Wrong Name')
@@ -124,12 +126,10 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
 
     @test_util.skip_unless_galaxy('release_20.05')
     def test_get_datasets_visible(self):
-        self.gi.histories.update_dataset(history_id=self.history_id, dataset_id=self.dataset_id, visible=False)
-        datasets = self.gi.datasets.get_datasets(history_id=self.history_id)
-        self.assertEqual(len(datasets), 1)
-        datasets = self.gi.datasets.get_datasets(history_id=self.history_id, visible=False)
+        datasets = self.gi.datasets.get_datasets(history_id=self.history_id, visible=True)
         self.assertEqual(len(datasets), 2)
-        self.gi.histories.update_dataset(history_id=self.history_id, dataset_id=self.dataset_id, visible=True)
+        datasets = self.gi.datasets.get_datasets(history_id=self.history_id, visible=False)
+        self.assertEqual(len(datasets), 0)
 
     @test_util.skip_unless_galaxy('release_19.05')
     def test_get_datasets_ordering(self):
