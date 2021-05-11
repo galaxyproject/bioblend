@@ -154,7 +154,8 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
         self.gi.histories.delete_dataset(self.history_id, self.dataset_id2, purge=True)
         purged_datasets = self.gi.datasets.get_datasets(history_id=self.history_id, purged=True)
         self.assertEqual(len(purged_datasets), 1)
-        # self.dataset_id = self._test_dataset(self.history_id, contents=self.dataset_contents)
+        self.tearDown()
+        self.setUp()
 
     @test_util.skip_unless_galaxy('release_19.05')
     def test_get_datasets_tool_id_and_tag(self):
@@ -162,11 +163,12 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
         self.assertEqual(cat1_datasets, [])
         upload1_datasets = self.gi.datasets.get_datasets(history_id=self.history_id, tool_id='upload1')
         self.assertEqual(len(upload1_datasets), 2)
-        tagged_datasets = self.gi.datasets.get_datasets(history_id=self.history_id, tag='test')
-        self.assertEqual(tagged_datasets, [])
         self.gi.histories.update_dataset(self.history_id, self.dataset_id2, tags=['test'])
         tagged_datasets = self.gi.datasets.get_datasets(history_id=self.history_id, tag='test')
         self.assertEqual(len(tagged_datasets), 1)
+        self.gi.histories.update_dataset(self.history_id, self.dataset_id2, tags=[])
+        tagged_datasets = self.gi.datasets.get_datasets(history_id=self.history_id, tag='test')
+        self.assertEqual(tagged_datasets, [])
 
     def test_wait_for_dataset(self):
         history_id = self.gi.histories.create_history(name='TestWaitForDataset')['id']

@@ -195,7 +195,7 @@ class DatasetClient(Client):
         :type deleted: bool
         :param deleted: Optionally filter datasets by their ``deleted`` attribute.
 
-        :type purged: str
+        :type purged: bool
         :param purged: Optionally filter datasets by their ``purged`` attribute.
 
         :type tool_id: str
