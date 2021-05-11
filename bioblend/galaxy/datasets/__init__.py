@@ -151,6 +151,10 @@ class DatasetClient(Client):
         extension: Optional[Union[str, List[str]]] = None,
         state: Optional[Union[str, List[str]]] = None,
         visible: Optional[bool] = None,
+        deleted: Optional[bool] = None,
+        purged: Optional[bool] = None,
+        tool_id: Optional[str] = None,
+        tag: Optional[str] = None,
         history_id: Optional[str] = None,
         create_time_min: str = None,
         create_time_max: str = None,
@@ -187,6 +191,18 @@ class DatasetClient(Client):
 
         :type visible: bool
         :param visible: Optionally filter datasets by their ``visible`` attribute.
+
+        :type deleted: bool
+        :param deleted: Optionally filter datasets by their ``deleted`` attribute.
+
+        :type purged: str
+        :param purged: Optionally filter datasets by their ``purged`` attribute.
+
+        :type tool_id: str
+        :param tool_id: Tool ID to filter on.
+
+        :type tag: str
+        :param tag: Dataset tag to filter on.
 
         :type history_id: str
         :param history_id: Encoded history ID to filter on.
@@ -229,7 +245,7 @@ class DatasetClient(Client):
         qv: List[Any] = []
 
         if name:
-            q.append('name-eq')
+            q.append('name')
             qv.append(name)
         if state:
             op, val = self._param_to_filter(state)
@@ -240,8 +256,20 @@ class DatasetClient(Client):
             q.append(f'extension-{op}')
             qv.append(val)
         if visible is not None:
-            q.append('visible-eq')
+            q.append('visible')
             qv.append(str(visible))
+        if deleted is not None:
+            q.append('deleted')
+            qv.append(str(deleted))
+        if purged is not None:
+            q.append('purged')
+            qv.append(str(purged))
+        if tool_id is not None:
+            q.append('tool_id')
+            qv.append(str(tool_id))
+        if tag is not None:
+            q.append('tag')
+            qv.append(str(tag))
         if create_time_min:
             q.append('create_time-ge')
             qv.append(create_time_min)
