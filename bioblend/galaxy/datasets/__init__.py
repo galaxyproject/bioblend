@@ -9,7 +9,9 @@ import warnings
 from typing import (
     Any,
     Dict,
+    List,
     Optional,
+    Union,
 )
 from urllib.parse import urljoin
 
@@ -141,13 +143,34 @@ class DatasetClient(Client):
             # Return location file was saved to
             return file_local_path
 
-    def get_datasets(self, limit=500, offset=0, history_id=None):
+    def get_datasets(
+        self,
+        limit: int = 500,
+        offset: int = 0,
+        name: Optional[str] = None,
+        extension: Optional[Union[str, List[str]]] = None,
+        state: Optional[Union[str, List[str]]] = None,
+        visible: Optional[bool] = None,
+        deleted: Optional[bool] = None,
+        purged: Optional[bool] = None,
+        tool_id: Optional[str] = None,
+        tag: Optional[str] = None,
+        history_id: Optional[str] = None,
+        create_time_min: str = None,
+        create_time_max: str = None,
+        update_time_min: str = None,
+        update_time_max: str = None,
+        order: str = 'create_time-dsc',
+    ) -> List[dict]:
         """
         Get the latest datasets, or select another subset by specifying optional
-        arguments for filtering (e.g. a history id).
+        arguments for filtering (e.g. a history ID).
 
         Since the number of datasets may be very large, ``limit`` and ``offset``
-        parameters should always be used to specify the desired range.
+        parameters are required to specify the desired range.
+
+        If the user is an admin, this will return datasets for all the users,
+        otherwise only for the current user.
 
         :type limit: int
         :param limit: Maximum number of datasets to return.
@@ -157,19 +180,122 @@ class DatasetClient(Client):
           For example, if ``limit`` is set to 100 and ``offset`` to 200,
           datasets 200-299 will be returned.
 
+        :type name: str
+        :param name: Dataset name to filter on.
+
+        :type extension: str or list of str
+        :param extension: Dataset extension (or list of extensions) to filter on.
+
+        :type state: str or list of str
+        :param state: Dataset state (or list of states) to filter on.
+
+        :type visible: bool
+        :param visible: Optionally filter datasets by their ``visible`` attribute.
+
+        :type deleted: bool
+        :param deleted: Optionally filter datasets by their ``deleted`` attribute.
+
+        :type purged: bool
+        :param purged: Optionally filter datasets by their ``purged`` attribute.
+
+        :type tool_id: str
+        :param tool_id: Tool ID to filter on.
+
+        :type tag: str
+        :param tag: Dataset tag to filter on.
+
         :type history_id: str
         :param history_id: Encoded history ID to filter on.
 
+        :type create_time_min: str
+        :param create_time_min: Show only datasets created after the provided
+          time and date, which should be formatted as ``YYYY-MM-DDTHH-MM-SS``.
+
+        :type create_time_max: str
+        :param create_time_max: Show only datasets created before the provided
+          time and date, which should be formatted as ``YYYY-MM-DDTHH-MM-SS``.
+
+        :type update_time_min: str
+        :param update_time_min: Show only datasets last updated after the provided
+          time and date, which should be formatted as ``YYYY-MM-DDTHH-MM-SS``.
+
+        :type update_time_max: str
+        :param update_time_max: Show only datasets last updated before the provided
+          time and date, which should be formatted as ``YYYY-MM-DDTHH-MM-SS``.
+
+        :type order: str
+        :param order: One or more of the following attributes for ordering datasets:
+          ``create_time`` (default), ``extension``, ``hid``, ``history_id``, ``name``,
+          ``update_time``. Optionally, ``-asc`` or ``-dsc`` (default) can be appended
+          for ascending and descending order respectively. Multiple attributes can be
+          stacked as a comma-separated list of values, e.g. ``create_time-asc,hid-dsc``.
+
         :rtype: list
-        :return: Return a list of dataset dicts.
+        :param: A list of datasets
         """
-        params = {
+        params: Dict[str, Any] = {
             'limit': limit,
             'offset': offset,
+            'order': order,
         }
         if history_id:
             params['history_id'] = history_id
+
+        q: List[str] = []
+        qv: List[Any] = []
+
+        if name:
+            q.append('name')
+            qv.append(name)
+        if state:
+            op, val = self._param_to_filter(state)
+            q.append(f'state-{op}')
+            qv.append(val)
+        if extension:
+            op, val = self._param_to_filter(extension)
+            q.append(f'extension-{op}')
+            qv.append(val)
+        if visible is not None:
+            q.append('visible')
+            qv.append(str(visible))
+        if deleted is not None:
+            q.append('deleted')
+            qv.append(str(deleted))
+        if purged is not None:
+            q.append('purged')
+            qv.append(str(purged))
+        if tool_id is not None:
+            q.append('tool_id')
+            qv.append(str(tool_id))
+        if tag is not None:
+            q.append('tag')
+            qv.append(str(tag))
+        if create_time_min:
+            q.append('create_time-ge')
+            qv.append(create_time_min)
+        if create_time_max:
+            q.append('create_time-le')
+            qv.append(create_time_max)
+        if update_time_min:
+            q.append('update_time-ge')
+            qv.append(update_time_min)
+        if update_time_max:
+            q.append('update_time-le')
+            qv.append(update_time_max)
+
+        params['q'] = q
+        params['qv'] = qv
+
         return self._get(params=params)
+
+    def _param_to_filter(self, param):
+        if type(param) is str:
+            return 'eq', param
+        if type(param) is list:
+            if len(param) == 1:
+                return 'eq', param.pop()
+            return 'in', ','.join(param)
+        raise Exception("Filter param is not of type ``str`` or ``list``")
 
     def publish_dataset(self, dataset_id: str, published: bool = False):
         """

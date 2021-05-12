@@ -180,6 +180,12 @@ class HistoryClient(Client):
 
         :rtype: dict or list of dicts
         :return: details of the given history or list of dataset info
+
+        .. note::
+            As an alternative to using the ``contents=True`` parameter, consider
+            using ``gi.datasets.get_datasets(history_id=history_id)`` which offers
+            more extensive functionality for filtering and ordering the results.
+
         """
         params = {}
         if contents:
