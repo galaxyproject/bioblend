@@ -132,7 +132,7 @@ class InvocationClient(Client):
         url = self._make_url(invocation_id)
         return self._get(url=url)
 
-    def rerun_invocation(self, invocation_id: str, inputs_update: Optional[dict] = None,
+    def rerun_invocation(self, invocation_id: str, remap: bool = False, inputs_update: Optional[dict] = None,
                          params_update: Optional[dict] = None, history_id: Optional[str] = None,
                          history_name: Optional[str] = None, import_inputs_to_history: bool = False,
                          replacement_params: Optional[dict] = None, allow_tool_state_corrections: bool = False,
@@ -143,6 +143,13 @@ class InvocationClient(Client):
 
         :type invocation_id: str
         :param invocation_id: Encoded workflow invocation ID to be rerun
+
+        :type remap: bool
+        :param remap: when ``True``, only failed jobs will be rerun. All other parameters
+          for this method will be ignored. Job output(s) will be remapped onto the dataset(s)
+          created by the original jobs; if other jobs were waiting for these jobs to finish
+          successfully, they will be resumed using the new outputs of the tool runs. When ``False``,
+          an entire new invocation will be created, using the other parameters specified.
 
         :type inputs_update: dict
         :param inputs_update: If different datasets should be used to the original
@@ -190,12 +197,27 @@ class InvocationClient(Client):
           Default is ``False``, but when setting parameters for a subworkflow,
           ``True`` is required.
 
-        :rtype: dict
-        :return: A dict describing the new workflow invocation.
+        :rtype: dict if ``remap=False``, or list if ``remap=True``
+        :return: A dict describing the new workflow invocation, or a list of remapped jobs.
 
         .. note::
           This method can only be used with Galaxy ``release_21.01`` or later.
         """
+        if remap:
+            errored_jobs = self.gi.jobs.get_jobs(state='error', invocation_id=invocation_id)
+            remap_failures = 0
+            rerun_jobs = []
+            for job in errored_jobs:
+                try:
+                    job = self.gi.jobs.rerun_job(job['id'], remap=True)
+                    rerun_jobs.append(job)
+                except ValueError:
+                    # should not occur, jobs from an invocation should always be remappable
+                    remap_failures += 1
+            if remap_failures:
+                raise ValueError(f'remap was set to True, but {remap_failures} out of {len(errored_jobs)} errored jobs could not be remapped.')
+            return rerun_jobs
+
         invocation_details = self.show_invocation(invocation_id)
         workflow_id = invocation_details['workflow_id']
         inputs = invocation_details['inputs']
