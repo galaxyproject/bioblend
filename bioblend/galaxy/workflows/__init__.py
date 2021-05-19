@@ -295,7 +295,8 @@ class WorkflowClient(Client):
                             (e.g. ``{'23': {'id': '29beef4fadeed09f', 'src': 'ld'}}``)
 
         :type params: dict
-        :param params: A mapping of non-datasets tool parameters (see below)
+        :param params: A mapping of non-datasets tool parameters (see below). Runtime parameters
+        should be specified through  ``inputs``.
 
         :type history_id: str
         :param history_id: The encoded history ID where to store the workflow

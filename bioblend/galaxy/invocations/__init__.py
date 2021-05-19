@@ -133,7 +133,7 @@ class InvocationClient(Client):
         return self._get(url=url)
 
     def rerun_invocation(self, invocation_id: str, remap: bool = False, inputs_update: Optional[dict] = None,
-                         history_id: Optional[str] = None,
+                         params: Optional[dict] = None, history_id: Optional[str] = None,
                          history_name: Optional[str] = None, import_inputs_to_history: bool = False,
                          replacement_params: Optional[dict] = None, allow_tool_state_corrections: bool = False,
                          inputs_by: Optional[str] = None, parameters_normalized: bool = False):
@@ -155,6 +155,12 @@ class InvocationClient(Client):
         :param inputs_update: If different datasets or parameters should be used to the original
           invocation, this should contain a mapping of workflow inputs to the new
           datasets and dataset collections.
+
+        :type params: dict
+        :param params: If different non-dataset tool parameters should be
+          used to the original invocation, this should contain a mapping of the
+          new parameter values. Runtime parameters should be specified through
+          ``inputs_update``.
 
         :type history_id: str
         :param history_id: The encoded history ID where to store the workflow
@@ -222,7 +228,8 @@ class InvocationClient(Client):
             for inp, input_value in inputs_update.items():
                 inputs[inp] = input_value
         payload = {'inputs': inputs}
-
+        if params:
+            payload['parameters'] = params
         if replacement_params:
             payload['replacement_params'] = replacement_params
         if history_id:
