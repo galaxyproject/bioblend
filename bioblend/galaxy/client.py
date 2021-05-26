@@ -8,7 +8,6 @@ should not use it directly.
 import time
 
 import requests
-from requests.packages.urllib3.exceptions import ProtocolError
 
 import bioblend
 # The following import must be preserved for compatibility because
@@ -127,7 +126,7 @@ class Client:
             attempts_left -= 1
             try:
                 r = self.gi.make_get_request(url, params=params)
-            except (requests.exceptions.ConnectionError, ProtocolError) as e:
+            except requests.exceptions.ConnectionError as e:
                 msg = str(e)
                 r = requests.Response()  # empty Response object used when raising ConnectionError
             else:
