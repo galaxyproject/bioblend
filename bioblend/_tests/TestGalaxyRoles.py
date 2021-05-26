@@ -11,7 +11,7 @@ class TestGalaxyRoles(GalaxyTestBase.GalaxyTestBase):
 
     def setUp(self):
         super().setUp()
-        self.name = 'test_%s' % uuid.uuid4().hex
+        self.name = f"test_{uuid.uuid4().hex}"
         self.description = 'automated test role'
         self.role = self.gi.roles.create_role(self.name, self.description)
 

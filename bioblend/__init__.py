@@ -101,7 +101,7 @@ class ConnectionError(Exception):
         self.status_code = status_code
 
     def __str__(self):
-        return "{}: {}".format(self.args[0], self.body)
+        return f"{self.args[0]}: {self.body}"
 
 
 class TimeoutException(Exception):

@@ -167,7 +167,7 @@ class Step(Wrapper):
         except KeyError:
             raise ValueError('not a step dict')
         if stype not in {'data_collection_input', 'data_input', 'parameter_input', 'pause', 'subworkflow', 'tool'}:
-            raise ValueError('Unknown step type: %r' % stype)
+            raise ValueError(f"Unknown step type: {stype!r}")
 
 
 class InvocationStep(Wrapper):
@@ -235,8 +235,7 @@ class Workflow(Wrapper):
         object.__setattr__(self, 'inv_dag', inv_dag)
         object.__setattr__(self, 'source_ids', heads - tails)
         assert set(self.inputs) == self.data_collection_input_ids | self.data_input_ids | self.parameter_input_ids, \
-            "inputs is {!r}, while data_collection_input_ids is {!r}, data_input_ids is {!r} and parameter_input_ids is {!r}".format(
-                self.inputs, self.data_collection_input_ids, self.data_input_ids, self.parameter_input_ids)
+            f"inputs is {self.inputs!r}, while data_collection_input_ids is {self.data_collection_input_ids!r}, data_input_ids is {self.data_input_ids!r} and parameter_input_ids is {self.parameter_input_ids!r}"
         object.__setattr__(self, 'sink_ids', tails - heads)
         object.__setattr__(self, 'missing_ids', missing_ids)
 
@@ -344,7 +343,7 @@ class Workflow(Wrapper):
             if not isinstance(datasets, Iterable):
                 datasets = [datasets]
             if len(datasets) < len(slot_ids):
-                raise RuntimeError('not enough datasets for "%s"' % label)
+                raise RuntimeError(f'not enough datasets for "{label}"')
             for id_, ds in zip(slot_ids, datasets):
                 m[id_] = {'id': ds.id, 'src': ds.SRC}
         return m
@@ -354,7 +353,7 @@ class Workflow(Wrapper):
         try:
             p = [_ for _ in getf(published=True) if _.id == self.id][0]
         except IndexError:
-            raise ValueError('no object for id %s' % self.id)
+            raise ValueError(f"no object for id {self.id}")
         return p
 
     def run(self, input_map=None, history='', params=None, import_inputs=False,
@@ -443,9 +442,8 @@ class Workflow(Wrapper):
         if not self.is_mapped:
             raise RuntimeError('workflow is not mapped to a Galaxy object')
         if not self.is_runnable:
-            raise RuntimeError('workflow has missing tools: %s' % ', '.join(
-                '{}[{}]'.format(self.steps[_].tool_id, _)
-                for _ in self.missing_ids))
+            missing_tools_str = ', '.join(f"{self.steps[step_id].tool_id}[{step_id}]" for step_id in self.missing_ids)
+            raise RuntimeError(f"workflow has missing tools: {missing_tools_str}")
         kwargs = {
             'dataset_map': self.convert_input_map(input_map or {}),
             'params': params,
@@ -681,7 +679,7 @@ class Invocation(Wrapper):
         :rtype: set
         :param: step states
         """
-        return set(step.state for step in self.steps)
+        return {step.state for step in self.steps}
 
     def number_of_steps(self):
         """
@@ -1045,7 +1043,7 @@ class LibRelatedDataset(Dataset):
     @property
     def _stream_url(self):
         base_url = self.gi.gi.libraries._make_url()
-        return "%s/datasets/download/uncompressed" % base_url
+        return f"{base_url}/datasets/download/uncompressed"
 
 
 class LibraryDatasetDatasetAssociation(LibRelatedDataset):
@@ -1159,7 +1157,7 @@ class DatasetContainer(Wrapper, metaclass=abc.ABCMeta):
             try:
                 p = [_ for _ in getf(deleted=True) if _.id == self.id][0]
             except IndexError:
-                raise ValueError('no object for id %s' % self.id)
+                raise ValueError(f"no object for id {self.id}")
         return p
 
     def refresh(self):
@@ -1289,7 +1287,8 @@ class History(DatasetContainer):
         res = self.gi.gi.histories.upload_dataset_from_library(self.id, lds.id)
         if not isinstance(res, Mapping):
             raise RuntimeError(
-                'upload_dataset_from_library: unexpected reply: %r' % res)
+                f"upload_dataset_from_library: unexpected reply: {res!r}"
+            )
         self.refresh()
         return self.get_dataset(res['id'])
 
@@ -1512,7 +1511,8 @@ class Library(DatasetContainer):
             raise RuntimeError('upload_from_galaxy_filesystem: no reply')
         if not isinstance(res, Sequence):
             raise RuntimeError(
-                'upload_from_galaxy_filesystem: unexpected reply: %r' % res)
+                f"upload_from_galaxy_filesystem: unexpected reply: {res!r}"
+            )
         new_datasets = [
             self.get_dataset(ds_info['id']) for ds_info in res
         ]

@@ -13,7 +13,7 @@ from . import client
 def _get_error_info(hda):
     msg = hda.id
     try:
-        msg += ' (%s): ' % hda.name
+        msg += f" ({hda.name}): "
         msg += hda.wrapped['misc_info']
     except Exception:  # avoid 'error while generating an error report'
         msg += ': error'
@@ -83,7 +83,7 @@ class GalaxyInstance:
                 if not ds.state:
                     self.log.warning("Dataset %s has an empty state", ds.id)
                 elif ds.state not in TERMINAL_STATES:
-                    self.log.info("Dataset {0.id} is in non-terminal state {0.state}".format(ds))
+                    self.log.info(f"Dataset {ds.id} is in non-terminal state {ds.state}")
                     pending.append(ds)
             return pending
 

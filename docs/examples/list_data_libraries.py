@@ -27,4 +27,4 @@ if len(libraries) == 0:
 else:
     print("\nData Libraries:")
     for lib_dict in libraries:
-        print("{} : {}".format(lib_dict['name'], lib_dict['id']))
+        print(f"{lib_dict['name']} : {lib_dict['id']}")

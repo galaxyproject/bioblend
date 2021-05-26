@@ -641,7 +641,7 @@ class HistoryClient(Client):
             'include_hidden': include_hidden,
             'include_deleted': include_deleted,
         }
-        url = '%s/exports' % self._make_url(history_id)
+        url = f"{self._make_url(history_id)}/exports"
         time_left = maxwait
         while True:
             try:
@@ -683,8 +683,7 @@ class HistoryClient(Client):
         :rtype: None
         :return: None
         """
-        url = '{}/exports/{}'.format(
-            self._make_url(module_id=history_id), jeha_id)
+        url = f"{self._make_url(module_id=history_id)}/exports/{jeha_id}"
         r = self.gi.make_get_request(url, stream=True)
         r.raise_for_status()
         for chunk in r.iter_content(chunk_size):

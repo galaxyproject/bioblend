@@ -238,7 +238,7 @@ class WorkflowClient(Client):
         workflow_dict = self.export_workflow_dict(workflow_id)
 
         if use_default_filename:
-            filename = 'Galaxy-Workflow-%s.ga' % workflow_dict['name']
+            filename = f"Galaxy-Workflow-{workflow_dict['name']}.ga"
             file_local_path = os.path.join(file_local_path, filename)
 
         with open(file_local_path, 'w') as fp:

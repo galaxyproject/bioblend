@@ -43,7 +43,7 @@ class Client:
         Default: 1
         """
         if value < 1:
-            raise ValueError("Number of retries must be >= 1 (got: %s)" % value)
+            raise ValueError(f"Number of retries must be >= 1 (got: {value})")
         cls._max_get_retries = value
         return cls
 
@@ -62,7 +62,7 @@ class Client:
         request. Default: 10
         """
         if value < 0:
-            raise ValueError("Retry delay must be >= 0 (got: %s)" % value)
+            raise ValueError(f"Retry delay must be >= 0 (got: {value})")
         cls._get_retry_delay = value
         return cls
 
@@ -143,11 +143,14 @@ class Client:
                             msg = f"GET: invalid JSON : {r.content!r}"
                 else:
                     msg = f"GET: error {r.status_code}: {r.content!r}"
-            msg = "%s, %d attempts left" % (msg, attempts_left)
+            msg = f"{msg}, {attempts_left} attempts left"
             if attempts_left <= 0:
                 bioblend.log.error(msg)
-                raise ConnectionError(msg, body=r.text,
-                                      status_code=r.status_code)
+                raise ConnectionError(
+                    msg,
+                    body=r.text,
+                    status_code=r.status_code,
+                )
             else:
                 bioblend.log.warning(msg)
                 time.sleep(retry_delay)
@@ -213,5 +216,8 @@ class Client:
         if r.status_code == 200:
             return r.json()
         # @see self.body for HTTP response body
-        raise ConnectionError("Unexpected HTTP status code: %s" % r.status_code,
-                              body=r.text, status_code=r.status_code)
+        raise ConnectionError(
+            f"Unexpected HTTP status code: {r.status_code}",
+            body=r.text,
+            status_code=r.status_code,
+        )

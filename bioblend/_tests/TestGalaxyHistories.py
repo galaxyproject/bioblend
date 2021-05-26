@@ -25,7 +25,7 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
 
     def test_update_history(self):
         new_name = 'buildbot - automated test renamed'
-        new_annotation = 'Annotation for %s' % new_name
+        new_annotation = f"Annotation for {new_name}"
         new_tags = ['tag1', 'tag2']
         updated_hist = self.gi.histories.update_history(self.history['id'], name=new_name, annotation=new_annotation, tags=new_tags)
         if 'id' not in updated_hist:

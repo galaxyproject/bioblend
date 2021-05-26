@@ -27,4 +27,4 @@ if len(workflows) == 0:
 else:
     print("\nWorkflows:")
     for wf_dict in workflows:
-        print("{} : {}".format(wf_dict['name'], wf_dict['id']))
+        print(f"{wf_dict['name']} : {wf_dict['id']}")

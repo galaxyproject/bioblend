@@ -43,7 +43,7 @@ class RepeatBuilder:
 
     def flat_iter(self, prefix=None):
         for index, instance in enumerate(self._instances):
-            index_prefix = "%s_%d" % (prefix, index)
+            index_prefix = f"{prefix}_{index}"
             yield from instance.flat_iter(index_prefix)
 
 

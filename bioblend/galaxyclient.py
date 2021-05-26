@@ -144,11 +144,17 @@ class GalaxyClient:
             try:
                 return r.json()
             except Exception as e:
-                raise ConnectionError("Request was successful, but cannot decode the response content: %s" %
-                                      e, body=r.content, status_code=r.status_code)
+                raise ConnectionError(
+                    f"Request was successful, but cannot decode the response content: {e}",
+                    body=r.content,
+                    status_code=r.status_code,
+                )
         # @see self.body for HTTP response body
-        raise ConnectionError("Unexpected HTTP status code: %s" % r.status_code,
-                              body=r.text, status_code=r.status_code)
+        raise ConnectionError(
+            f"Unexpected HTTP status code: {r.status_code}",
+            body=r.text,
+            status_code=r.status_code,
+        )
 
     def make_delete_request(self, url, payload=None, params=None):
         """
@@ -204,11 +210,17 @@ class GalaxyClient:
             try:
                 return r.json()
             except Exception as e:
-                raise ConnectionError("Request was successful, but cannot decode the response content: %s" %
-                                      e, body=r.content, status_code=r.status_code)
+                raise ConnectionError(
+                    f"Request was successful, but cannot decode the response content: {e}",
+                    body=r.content,
+                    status_code=r.status_code,
+                )
         # @see self.body for HTTP response body
-        raise ConnectionError("Unexpected HTTP status code: %s" % r.status_code,
-                              body=r.text, status_code=r.status_code)
+        raise ConnectionError(
+            f"Unexpected HTTP status code: {r.status_code}",
+            body=r.text,
+            status_code=r.status_code,
+        )
 
     def make_patch_request(self, url, payload=None, params=None):
         """
@@ -234,11 +246,17 @@ class GalaxyClient:
             try:
                 return r.json()
             except Exception as e:
-                raise ConnectionError("Request was successful, but cannot decode the response content: %s" %
-                                      e, body=r.content, status_code=r.status_code)
+                raise ConnectionError(
+                    f"Request was successful, but cannot decode the response content: {e}",
+                    body=r.content,
+                    status_code=r.status_code,
+                )
         # @see self.body for HTTP response body
-        raise ConnectionError("Unexpected HTTP status code: %s" % r.status_code,
-                              body=r.text, status_code=r.status_code)
+        raise ConnectionError(
+            f"Unexpected HTTP status code: {r.status_code}",
+            body=r.text,
+            status_code=r.status_code,
+        )
 
     @property
     def key(self):
@@ -247,7 +265,7 @@ class GalaxyClient:
             authorization = base64.b64encode(unencoded_credentials.encode())
             headers = self.json_headers.copy()
             headers["Authorization"] = authorization
-            auth_url = "%s/authenticate/baseauth" % self.url
+            auth_url = f"{self.url}/authenticate/baseauth"
             # make_post_request uses default_params, which uses this and
             # sets wrong headers - so using lower level method.
             r = requests.get(

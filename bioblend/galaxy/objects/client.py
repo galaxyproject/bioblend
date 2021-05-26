@@ -77,7 +77,7 @@ class ObjClient(abc.ABC):
 
     def _get_dict(self, meth_name, reply):
         if reply is None:
-            self._error('%s: no reply' % meth_name)
+            self._error(f"{meth_name}: no reply")
         elif isinstance(reply, Mapping):
             return reply
         try:
@@ -89,7 +89,7 @@ class ObjClient(abc.ABC):
 class ObjDatasetContainerClient(ObjClient):
 
     def _get_container(self, id_, ctype):
-        show_fname = 'show_%s' % ctype.__name__.lower()
+        show_fname = f"show_{ctype.__name__.lower()}"
         gi_client = getattr(self.gi, ctype.API_MODULE)
         show_f = getattr(gi_client, show_fname)
         res = show_f(id_)
@@ -324,7 +324,7 @@ class ObjWorkflowClient(ObjClient):
         for id_ in self._select_ids(id_=id_, name=name):
             res = self.gi.workflows.delete_workflow(id_)
             if not isinstance(res, str):
-                self._error('delete_workflow: unexpected reply: %r' % res)
+                self._error(f"delete_workflow: unexpected reply: {res!r}")
 
 
 class ObjInvocationClient(ObjClient):

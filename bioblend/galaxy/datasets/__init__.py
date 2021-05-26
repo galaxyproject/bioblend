@@ -91,7 +91,7 @@ class DatasetClient(Client):
         """
         dataset = self.wait_for_dataset(dataset_id, maxwait=maxwait, check=False)
         if not dataset['state'] == 'ok':
-            message = "Dataset state is not 'ok'. Dataset id: {}, current state: {}".format(dataset_id, dataset['state'])
+            message = f"Dataset state is not 'ok'. Dataset id: {dataset_id}, current state: {dataset['state']}"
             if require_ok_state:
                 raise DatasetStateException(message)
             else:
