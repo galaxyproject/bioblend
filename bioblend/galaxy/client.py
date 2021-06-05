@@ -159,13 +159,15 @@ class Client:
         """
         Do a generic POST request, composing the url from the contents of the
         arguments. Alternatively, an explicit ``url`` can be provided to use
-        for the request. ``payload`` must be a dict that contains additional
-        request arguments which will be sent along with the request body.
+        for the request.
         The payload dict may contain file handles (in which case the
         ``files_attached`` flag must be set to true).
 
         If ``files_attached`` is set to ``False``, the request body will be
         JSON-encoded; otherwise, it will be encoded as multipart/form-data.
+
+        :type payload: dict
+        :param payload: additional parameters to send in the body of the request
 
         :return: The decoded response.
         """
@@ -178,8 +180,10 @@ class Client:
         """
         Do a generic PUT request, composing the url from the contents of the
         arguments. Alternatively, an explicit ``url`` can be provided to use
-        for the request. ``payload`` must be a dict that contains additional
-        request arguments which will be sent along with the request body.
+        for the request.
+
+        :type payload: dict
+        :param payload: additional parameters to send in the body of the request
 
         :return: The decoded response.
         """
@@ -191,8 +195,10 @@ class Client:
         """
         Do a generic PATCH request, composing the url from the contents of the
         arguments. Alternatively, an explicit ``url`` can be provided to use
-        for the request. ``payload`` must be a dict that contains additional
-        request arguments which will be sent along with the request body.
+        for the request.
+
+        :type payload: dict
+        :param payload: additional parameters to send in the body of the request
 
         :return: The decoded response.
         """
@@ -204,8 +210,10 @@ class Client:
         """
         Do a generic DELETE request, composing the url from the contents of the
         arguments. Alternatively, an explicit ``url`` can be provided to use
-        for the request. ``payload`` must be a dict that contains additional
-        request arguments which will be sent along with the request body.
+        for the request.
+
+        :type payload: dict
+        :param payload: additional parameters to send in the body of the request
 
         :return: The decoded response.
         """
