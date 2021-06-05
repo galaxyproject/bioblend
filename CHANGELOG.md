@@ -1,12 +1,38 @@
 ### BioBlend v - unreleased
 
-* BioBlend.objects: Removed deprecated ``container_id`` property of ``Dataset``
-  and ``Folder`` objects.
+* Added support for Galaxy release 21.05.
+
 * Pass the API key for all requests as the ``x-api-key`` header instead of as a
   parameter (thanks to [rikeshi](https://github.com/rikeshi)).
-* Added ``get_invocation_biocompute_object``, ``get_invocation_report_pdf``,
-  ``get_invocation_step_jobs_summary`` methods to ``InvocationClient`` (thanks
+
+* Added a new ``dataset_collections`` attribute to ``GalaxyInstance`` objects,
+  which is an instance of the new ``DatasetCollectionClient``. This new module
+  can be used to get details of a dataset collection, wait until elements of a
+  dataset collection are in a terminal state, and download a history dataset
+  collection as an archive (thanks to [rikeshi](https://github.com/rikeshi)).
+
+* Added a new ``tool_dependencies`` attribute to ``GalaxyInstance`` objects,
+  which is an instance of the new ``ToolDependenciesClient``. This new module
+  can be used to summarize requirements across toolbox (thanks to
+  [cat-bro](https://github.com/cat-bro)).
+
+* Added ``publish_dataset()`` and ``update_permissions()`` methods to
+  ``DatasetClient``.
+
+* Added ``get_invocation_biocompute_object()``, ``get_invocation_report_pdf()``,
+  ``get_invocation_step_jobs_summary()`` methods to ``InvocationClient`` (thanks
   to [rikeshi](https://github.com/rikeshi)).
+
+* Added several parameters to ``DatasetClient.get_datasets()`` method (thanks to
+  [rikeshi](https://github.com/rikeshi)).
+
+* BioBlend.objects: Removed deprecated ``container_id`` property of ``Dataset``
+  and ``Folder`` objects.
+
+* Added ``use_ssl``, ``verify`` and ``authuser`` parameters to
+  ``CloudManInstance.__init__()`` (thanks to
+  [Nathan Edwards](https://github.com/edwardsnj)).
+
 * Improvements to tests and documentation (thanks to
   [rikeshi](https://github.com/rikeshi)).
 
