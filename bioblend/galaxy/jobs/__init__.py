@@ -300,7 +300,7 @@ class JobsClient(Client):
         :return: ``True`` if the job was successfully cancelled, ``False`` if
           it was already in a terminal state before the cancellation.
         """
-        return self.gi._delete(job_id)
+        return self._delete(id=job_id)
 
     def report_error(self, job_id: str, dataset_id: str, message: str, email: str = None) -> dict:
         """
