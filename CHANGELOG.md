@@ -1,9 +1,17 @@
-### BioBlend v - unreleased
+### BioBlend v0.16.0 - 2021-06-13
 
 * Added support for Galaxy release 21.05.
 
+* Replaced the ``job_info`` parameter with separate ``tool_id``, ``inputs`` and
+  ``state`` parameters in ``JobsClient.search_jobs()`` (thanks to
+  [rikeshi](https://github.com/rikeshi)).
+
 * Pass the API key for all requests as the ``x-api-key`` header instead of as a
   parameter (thanks to [rikeshi](https://github.com/rikeshi)).
+
+* Try prepending https:// and http:// if the scheme is missing in the ``url``
+  parameter of ``GalaxyClient``, i.e. when initialising a Galaxy or ToolShed
+  instance.
 
 * Added a new ``dataset_collections`` attribute to ``GalaxyInstance`` objects,
   which is an instance of the new ``DatasetCollectionClient``. This new module
@@ -16,24 +24,73 @@
   can be used to summarize requirements across toolbox (thanks to
   [cat-bro](https://github.com/cat-bro)).
 
-* Added ``publish_dataset()`` and ``update_permissions()`` methods to
-  ``DatasetClient``.
+* Added ``publish_dataset()`` ``update_permissions()`` and
+``wait_for_dataset()`` methods to ``DatasetClient``.
 
 * Added ``get_invocation_biocompute_object()``, ``get_invocation_report_pdf()``,
-  ``get_invocation_step_jobs_summary()`` methods to ``InvocationClient`` (thanks
-  to [rikeshi](https://github.com/rikeshi)).
+  ``get_invocation_step_jobs_summary()``, ``rerun_invocation()`` and
+  ``wait_for_invocation()`` methods to ``InvocationClient`` (thanks to
+  [rikeshi](https://github.com/rikeshi)).
+
+* Added ``cancel_job()``, ``get_common_problems()``,
+  ``get_destination_params()``, ``get_inputs()``, ``get_outputs()``,
+  ``resume_job()``, ``show_job_lock()``, ``update_job_lock()`` and
+  ``wait_for_job()`` methods to ``JobsClient`` (thanks to
+  [Andrew Mcgregor](https://github.com/Mcgregor381) and
+  [rikeshi](https://github.com/rikeshi)).
+
+* Added ``get_citations()`` and ``uninstall_dependencies()`` methods to
+  ``ToolClient`` (thanks to [rikeshi](https://github.com/rikeshi)).
+
+* Added ``extract_workflow_from_history()``, ``refactor_workflow()`` and
+  ``show_versions()`` methods to ``WorkflowClient`` (thanks to
+  [rikeshi](https://github.com/rikeshi)).
 
 * Added several parameters to ``DatasetClient.get_datasets()`` method (thanks to
   [rikeshi](https://github.com/rikeshi)).
 
+* Added several parameters to ``InvocationClient.get_invocations()`` method
+  (thanks to [Nolan Woods](https://github.com/innovate-invent) and
+  [rikeshi](https://github.com/rikeshi)).
+
+* Added several parameters to ``JobsClient.get_jobs()`` method (thanks to
+  [rikeshi](https://github.com/rikeshi)).
+
+* Added ``parameters_normalized`` parameter to
+  ``WorkflowClient.invoke_workflow()`` method (thanks to
+  [rikeshi](https://github.com/rikeshi)).
+
+* Deprecated ``folder_id`` parameter of ``LibraryClient.get_folders()`` method.
+
+* Deprecated ``library_id`` parameter of ``LibraryClient.get_libraries()``
+  method.
+
+* Deprecated ``tool_id`` parameter of ``ToolClient.get_tools()`` method.
+
+* Deprecated ``workflow_id`` parameter of ``WorkflowClient.get_workflows()``
+  method.
+
 * BioBlend.objects: Removed deprecated ``container_id`` property of ``Dataset``
   and ``Folder`` objects.
+
+* BioBlend.objects: Removed ``Preview`` abstract class.
+
+* BioBlend.objects: Added ``invoke()`` method to ``Workflow``. Added
+  ``ObjInvocationClient``, and ``Invocation`` and ``InvocationPreview`` wrappers
+  (thanks to [rikeshi](https://github.com/rikeshi)).
+
+* BioBlend.objects: Added ``latest_workflow_uuid`` property to ``Workflow``
+  objects. Added ``deleted``, ``latest_workflow_uuid``, ``number_of_steps``,
+  ``owner`` and ``show_in_tool_panel`` properties to ``WorkflowPreview`` (thanks
+  to [Nolan Woods](https://github.com/innovate-invent)).
+
+* BioBlend.objects: Deprecated ``run()`` method of ``Workflow``.
 
 * Added ``use_ssl``, ``verify`` and ``authuser`` parameters to
   ``CloudManInstance.__init__()`` (thanks to
   [Nathan Edwards](https://github.com/edwardsnj)).
 
-* Improvements to tests and documentation (thanks to
+* Improvements to type annotations, tests and documentation (thanks to
   [rikeshi](https://github.com/rikeshi)).
 
 ### BioBlend v0.15.0 - 2021-02-10

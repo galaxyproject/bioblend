@@ -321,22 +321,19 @@ class InvocationClient(Client):
         :rtype: list of dicts
         :return: The invocation step jobs summary.
           For example::
-            [
-                {'populated_state': 'ok',
-                 'states': {'ok': 1},
-                 'model': 'Job',
-                 'id': 'e85a3be143d5905b'},
 
-                {'populated_state': 'ok',
-                 'states': {'running': 1},
-                 'model': 'Job',
-                 'id': 'c9468fdb6dc5c5f1'}
-
-                {'populated_state': 'ok',
-                 'states': {'new': 1},
-                 'model': 'Job',
-                 'id': '2a56795cad3c7db3'}
-            ]
+            [{'id': 'e85a3be143d5905b',
+              'model': 'Job',
+              'populated_state': 'ok',
+              'states': {'ok': 1}},
+             {'id': 'c9468fdb6dc5c5f1',
+              'model': 'Job',
+              'populated_state': 'ok',
+              'states': {'running': 1}},
+             {'id': '2a56795cad3c7db3',
+              'model': 'Job',
+              'populated_state': 'ok',
+              'states': {'new': 1}}]
         """
         url = self._make_url(invocation_id) + '/step_jobs_summary'
         return self._get(url=url)

@@ -86,15 +86,6 @@ class LibraryDatasetElement(SimpleElement):
         ))
 
 
-__all__ = (
-    "CollectionDescription",
-    "CollectionElement",
-    "HistoryDatasetElement",
-    "HistoryDatasetCollectionElement",
-    "LibraryDatasetElement",
-)
-
-
 class DatasetCollectionClient(Client):
     module = 'dataset_collections'
 
@@ -217,3 +208,13 @@ class DatasetCollectionClient(Client):
 
 class DatasetCollectionTimeoutException(TimeoutException):
     pass
+
+
+__all__ = (
+    "CollectionDescription",
+    "CollectionElement",
+    "DatasetCollectionClient",
+    "HistoryDatasetElement",
+    "HistoryDatasetCollectionElement",
+    "LibraryDatasetElement",
+)

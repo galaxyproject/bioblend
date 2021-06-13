@@ -310,6 +310,7 @@ class DatasetClient(Client):
 
         :rtype: dict
         :return: Current roles for all available permission types.
+
         .. note::
           This method can only be used with Galaxy ``release_19.05`` or later.
         """
@@ -338,6 +339,7 @@ class DatasetClient(Client):
 
         :rtype: dict
         :return: Current roles for all available permission types.
+
         .. note::
           This method can only be used with Galaxy ``release_19.05`` or later.
         """

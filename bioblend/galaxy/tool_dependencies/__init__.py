@@ -32,12 +32,12 @@ class ToolDependenciesClient(Client):
 
         :type index_by: str
         :param index_by: By default results are grouped by requirements.  Set to 'tools'
-            to return one entry per tool.
+          to return one entry per tool.
 
         :rtype: list of dicts
         :returns: dictified descriptions of the dependencies, with attribute
-            `dependency_type: None` if no match was found.
-            For example::
+          `dependency_type: None` if no match was found.
+          For example::
 
             [{'requirements': [{'name': 'galaxy_sequence_utils',
                                 'specs': [],
@@ -60,6 +60,7 @@ class ToolDependenciesClient(Client):
                           'name': 'bx-python',
                           'version': '0.8.6'}],
               'tool_ids': ['vcf_to_maf_customtrack1']}]
+
         .. note::
           This method can only be used with Galaxy ``release_20.01`` or later and requires
             the user to be an admin. It relies on an experimental API particularly tied to

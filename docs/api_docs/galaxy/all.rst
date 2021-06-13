@@ -27,6 +27,13 @@ Datasets
 
 -----
 
+Dataset collections
+-------------------
+
+.. automodule:: bioblend.galaxy.dataset_collections
+
+-----
+
 Datatypes
 ---------
 
@@ -120,6 +127,13 @@ Tool data tables
 ----------------
 
 .. automodule:: bioblend.galaxy.tool_data
+
+-----
+
+Tool dependencies
+-----------------
+
+.. automodule:: bioblend.galaxy.tool_dependencies
 
 -----
 

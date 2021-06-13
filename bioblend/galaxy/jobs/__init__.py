@@ -193,6 +193,7 @@ class JobsClient(Client):
 
         :rtype: dict
         :return: Information about outputs and the rerun job
+
         .. note::
           This method can only be used with Galaxy ``release_21.01`` or later.
         """

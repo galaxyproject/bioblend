@@ -172,7 +172,7 @@ class Step(Wrapper):
 
 class InvocationStep(Wrapper):
     """
-    Abstract base class for invocation steps.
+    Invocation step.
     """
     BASE_ATTRS = Wrapper.BASE_ATTRS + (
         'action',
