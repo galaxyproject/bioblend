@@ -194,7 +194,7 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
             shutil.rmtree(tempdir)
 
     def test_import_history(self):
-        path = test_util.get_abspath(os.path.join('data', 'Galaxy-History-test.tar.gz'))
+        path = test_util.get_abspath(os.path.join('data', 'Galaxy-History-Test-history-for-export.tar.gz'))
         self.gi.histories.import_history(file_path=path)
 
     def test_copy_dataset(self):
