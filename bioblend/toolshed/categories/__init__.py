@@ -45,3 +45,71 @@ class ToolShedCategoryClient(Client):
         :return: details of the given category
         """
         return self._get(id=category_id)
+
+    def get_repositories(self, category_id, sort_key=None, sort_order=None):
+        """
+        Returns a dictionary of information for a repository category including
+        a list of repositories belonging to the category
+
+        :type category_id: str
+        :param category_id: Encoded category ID
+
+        :type  sort_key: str
+        :param sort_key: key for sorting. Options are 'name' or 'owner' (default 'name').
+
+        :type  sort_order: str
+        :param sort_order: ordering of sorted output. Options are 'asc' or 'desc' (default 'asc').
+
+        :rtype: dict
+        :return: A dict containing information about the category
+          including a list of repository dicts
+          For example::
+          {'deleted': False,
+          'description': 'Tools for constructing and analyzing 3-dimensional shapes and '
+                          'their properties',
+          'id': '589548af7e391bcf',
+          'model_class': 'Category',
+          'name': 'Constructive Solid Geometry',
+          'repositories': [{'create_time': '2016-08-23T18:53:23.845013',
+                            'deleted': False,
+                            'deprecated': False,
+                            'description': 'Adds a surface field to a selected shape '
+                                            'based on a given mathematical expression',
+                            'homepage_url': 'https://github.com/gregvonkuster/galaxy-csg',
+                            'id': 'af2ccc53697b064c',
+                            'metadata': {'0:e12b55e960de': {'changeset_revision': 'e12b55e960de',
+                                                            'downloadable': True,
+                                                            'has_repository_dependencies': False,
+                                                            'id': 'dfe022067783215f',
+                                                            'includes_datatypes': False,
+                                                            'includes_tool_dependencies': False,
+                                                            'includes_tools': True,
+                                                            'includes_tools_for_display_in_tool_panel': True,
+                                                            'includes_workflows': False,
+                                                            'malicious': False,
+                                                            'missing_test_components': False,
+                                                            'model_class': 'RepositoryMetadata',
+                                                            'numeric_revision': 0,
+                                                            'repository_id': 'af2ccc53697b064c'}},
+                            'model_class': 'Repository',
+                            'name': 'icqsol_add_surface_field_from_expression',
+                            'owner': 'iuc',
+                            'private': False,
+                            'remote_repository_url': 'https://github.com/gregvonkuster/galaxy-csg',
+                            'times_downloaded': 152,
+                            'type': 'unrestricted',
+                            'user_id': 'b563abc230aa8fd0'},
+          # ...
+          ],
+          'repository_count': 11,
+          'url': '/api/categories/589548af7e391bcf'}
+        """
+
+        params = {}
+        if sort_key:
+            params.update({'sort_key': sort_key})
+        if sort_order:
+            params.update({'sort_order': sort_order})
+
+        url = self._make_url() + f'/{category_id}/repositories'
+        return self._get(url=url, params=params)
