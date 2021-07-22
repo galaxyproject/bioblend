@@ -62,8 +62,9 @@ class ToolShedCategoryClient(Client):
 
         :rtype: dict
         :return: A dict containing information about the category
-          including a list of repository dicts
+          including a list of repository dicts.
           For example::
+
           {'deleted': False,
           'description': 'Tools for constructing and analyzing 3-dimensional shapes and '
                           'their properties',
