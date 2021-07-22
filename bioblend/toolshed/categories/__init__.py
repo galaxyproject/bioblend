@@ -46,7 +46,7 @@ class ToolShedCategoryClient(Client):
         """
         return self._get(id=category_id)
 
-    def get_repositories(self, category_id, sort_key=None, sort_order=None):
+    def get_repositories(self, category_id, sort_key='name', sort_order='asc'):
         """
         Returns a dictionary of information for a repository category including
         a list of repositories belonging to the category
