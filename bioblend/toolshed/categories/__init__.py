@@ -49,7 +49,7 @@ class ToolShedCategoryClient(Client):
     def get_repositories(self, category_id, sort_key='name', sort_order='asc'):
         """
         Returns a dictionary of information for a repository category including
-        a list of repositories belonging to the category
+        a list of repositories belonging to the category.
 
         :type category_id: str
         :param category_id: Encoded category ID
