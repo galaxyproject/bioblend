@@ -112,5 +112,5 @@ class ToolShedCategoryClient(Client):
         if sort_order:
             params.update({'sort_order': sort_order})
 
-        url = self._make_url() + f'/{category_id}/repositories'
+        url = self._make_url(category_id) + '/repositories'
         return self._get(url=url, params=params)
