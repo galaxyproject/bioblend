@@ -63,10 +63,9 @@ class GalaxyClient:
             self._key = None
             self.email = email
             self.password = password
-        self.json_headers = {
-            'Content-Type': 'application/json',
-            'x-api-key': self.key,
-        }
+        self.json_headers = {'Content-Type': 'application/json'}
+        # json_headers needs to be set before key can be defined, otherwise authentication with email/password causes an error
+        self.json_headers['x-api-key'] = self.key
 
     def make_get_request(self, url, **kwargs):
         """
