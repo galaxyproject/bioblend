@@ -2,6 +2,7 @@
 Tests the functionality of the Blend CloudMan API. These tests require working
 credentials to supported cloud infrastructure.
 """
+import bioblend.galaxy
 from . import GalaxyTestBase
 
 
@@ -44,9 +45,15 @@ class TestGalaxyUsers(GalaxyTestBase.GalaxyTestBase):
         if self.gi.config.get_config()['use_remote_user']:
             self.skipTest('This Galaxy instance is not configured to use local users')
         new_user_email = 'newuser@example.com'
-        user = self.gi.users.create_local_user('newuser', new_user_email, 'secret')
-        self.assertEqual(user['username'], 'newuser')
+        username = 'newuser'
+        password = 'secret'
+        user = self.gi.users.create_local_user(username, new_user_email, password)
+        self.assertEqual(user['username'], username)
         self.assertEqual(user['email'], new_user_email)
+        # test a BioBlend GalaxyInstance can be created using username+password
+        user_gi = bioblend.galaxy.GalaxyInstance(url=self.gi.base_url, email=new_user_email, password=password)
+        self.assertEqual(user_gi.users.get_current_user()['email'], new_user_email)
+        # test deletion
         if self.gi.config.get_config()['allow_user_deletion']:
             deleted_user = self.gi.users.delete_user(user['id'])
             self.assertEqual(deleted_user['email'], new_user_email)
