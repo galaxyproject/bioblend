@@ -17,7 +17,7 @@ class TestToolshed(unittest.TestCase):
         # get_categories
         categories = self.ts.categories.get_categories()
         self.assertIn('Assembly', [n['name'] for n in categories])
-        # deleted_categories = ts.categories.get_categories(deleted=True)  # broken, gives 500 error
+        # we cannot test get_categories with deleted=True as it requires administrator status
 
         # show_category
         visualization_category_id = [n for n in categories if n['name'] == 'Visualization'][0]['id']
@@ -45,7 +45,7 @@ class TestToolshed(unittest.TestCase):
         # show_repository
         bam_to_sam_repo = [n for n in repositories if n['name'] == 'bam_to_sam'][0]
         show_bam_to_sam_repo = self.ts.repositories.show_repository(bam_to_sam_repo['id'])
-        self.assertEqual(show_bam_to_sam_repo['long_description'], 'This tool uses the SAMtools toolkit to produce a SAM file from a BAM file.\n')
+        self.assertIn('SAM (Sequence Alignment/Map) format', show_bam_to_sam_repo['long_description'])
 
         # test_create_repository
         # need to provide an API key to test this
@@ -64,11 +64,10 @@ class TestToolshed(unittest.TestCase):
         self.assertEqual(revision_0['id'], revisions[0]['id'])
 
         # repository_revisions with filters
-        for filter in ["downloadable", "malicious", "tools_functionally_correct", "missing_test_components", "do_not_test", "includes_tools", "test_install_error", "skip_tool_test"]:
-            if filter in ["tools_functionally_correct", "do_not_test", "test_install_error", "skip_tool_test"]:
-                continue  # these filters seem not to work
-            filtered_revisions = self.ts.repositories.repository_revisions(**{filter: True})
-            self.assertLess(len(filtered_revisions), len(revisions))
+        for filter in ["downloadable", "malicious", "missing_test_components", "includes_tools"]:
+            filtered_revisions_true = self.ts.repositories.repository_revisions(**{filter: True})
+            filtered_revisions_false = self.ts.repositories.repository_revisions(**{filter: False})
+            self.assertEqual(len(filtered_revisions_false) + len(filtered_revisions_true), len(revisions))
 
         # get_ordered_installable_revisions
         bam_to_sam_revisions = self.ts.repositories.get_ordered_installable_revisions('bam_to_sam', 'devteam')

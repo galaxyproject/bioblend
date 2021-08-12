@@ -21,18 +21,19 @@ class ToolShedRepositoryClient(Client):
           For example::
 
             [{'category_ids': ['c1df3132f6334b0e', 'f6d7b0037d901d9b'],
+              'create_time': '2020-02-09T16:24:37.098176',
               'deleted': False,
               'deprecated': False,
               'description': 'Order Contigs',
               'homepage_url': '',
               'id': '287bd69f724b99ce',
+              'model_class': 'Repository',
               'name': 'best_tool_ever',
               'owner': 'billybob',
               'private': False,
               'remote_repository_url': '',
               'times_downloaded': 0,
               'type': 'unrestricted',
-              'url': '/api/repositories/287bd69f724b99ce',
               'user_id': '5cefd48bc04af6d4'}]
 
         .. versionchanged:: 0.4.1
@@ -61,6 +62,7 @@ class ToolShedRepositoryClient(Client):
 
             {'hits': [{'matched_terms': [],
                        'repository': {'approved': 'no',
+                                      'categories': 'fastq manipulation',
                                       'description': 'Convert export file to fastq',
                                       'full_last_updated': '2015-01-18 09:48 AM',
                                       'homepage_url': '',
@@ -69,11 +71,13 @@ class ToolShedRepositoryClient(Client):
                                       'long_description': 'This is a simple too to convert Solexas Export files to FASTQ files.',
                                       'name': 'export_to_fastq',
                                       'remote_repository_url': '',
+                                      'repo_lineage': "['0:c9e926d9d87e', '1:38859774da87']"
                                       'repo_owner_username': 'louise',
                                       'times_downloaded': 164},
                        'score': 4.92},
                       {'matched_terms': [],
                        'repository': {'approved': 'no',
+                                      'categories': 'fastq manipulation',
                                       'description': 'Convert BAM file to fastq',
                                       'full_last_updated': '2015-04-07 11:57 AM',
                                       'homepage_url': '',
@@ -82,6 +86,7 @@ class ToolShedRepositoryClient(Client):
                                       'long_description': 'Use Picards SamToFastq to convert a BAM file to fastq. Useful for storing reads as BAM in Galaxy and converting to fastq when needed for analysis.',
                                       'name': 'bam_to_fastq',
                                       'remote_repository_url': '',
+                                      'repo_lineage': "['0:a0af255e28c1', '1:2523cb0fb84c', '2:2656247b5253']"
                                       'repo_owner_username': 'brad-chapman',
                                       'times_downloaded': 138},
                        'score': 4.14}],
@@ -105,19 +110,20 @@ class ToolShedRepositoryClient(Client):
           For example::
 
             {'category_ids': ['c1df3132f6334b0e', 'f6d7b0037d901d9b'],
+             'create_time': '2020-02-22T20:39:15.548491',
              'deleted': False,
              'deprecated': False,
              'description': 'Order Contigs',
              'homepage_url': '',
              'id': '287bd69f724b99ce',
              'long_description': '',
+             'model_class': 'Repository',
              'name': 'best_tool_ever',
              'owner': 'billybob',
              'private': False,
              'remote_repository_url': '',
              'times_downloaded': 0,
              'type': 'unrestricted',
-             'url': '/api/repositories/287bd69f724b99ce',
              'user_id': '5cefd48bc04af6d4'}
 
         .. versionchanged:: 0.4.1
@@ -176,12 +182,14 @@ class ToolShedRepositoryClient(Client):
 
           For example::
 
-            [{'deleted': False,
+            [{'create_time': '2020-08-20T13:17:08.818518',
+              'deleted': False,
               'deprecated': False,
               'description': 'Galaxy Freebayes Bayesian genetic variant detector tool',
               'homepage_url': '',
               'id': '491b7a3fddf9366f',
               'long_description': 'Galaxy Freebayes Bayesian genetic variant detector tool originally included in the Galaxy code distribution but migrated to the tool shed.',
+              'model_class': 'Repository',
               'name': 'freebayes',
               'owner': 'devteam',
               'private': False,
@@ -201,8 +209,34 @@ class ToolShedRepositoryClient(Client):
               'includes_tools_for_display_in_tool_panel': True,
               'includes_workflows': False,
               'malicious': False,
+              'missing_test_components': False,
+              'model_class': 'RepositoryMetadata',
+              'numeric_revision': 0,
               'repository_id': '491b7a3fddf9366f',
               'url': '/api/repository_revisions/504be8aaa652c154'},
+              'valid_tools': [{'add_to_tool_panel': True,
+                'description': '- Bayesian genetic variant detector',
+                'guid': 'testtoolshed.g2.bx.psu.edu/repos/devteam/freebayes/freebayes/0.0.3',
+                'id': 'freebayes',
+                'name': 'FreeBayes',
+                'requirements': [{'name': 'freebayes',
+                  'type': 'package',
+                  'version': '0.9.6_9608597d12e127c847ae03aa03440ab63992fedf'},
+                {'name': 'samtools', 'type': 'package', 'version': '0.1.18'}],
+                'tests': [{'inputs': [['reference_source|reference_source_selector',
+                    'history'],
+                  ['options_type|options_type_selector', 'basic'],
+                  ['reference_source|ref_file', 'phiX.fasta'],
+                  ['reference_source|input_bams_0|input_bam', 'fake_phiX_reads_1.bam']],
+                  'name': 'Test-1',
+                  'outputs': [['output_vcf', 'freebayes_out_1.vcf.contains']],
+                  'required_files': ['fake_phiX_reads_1.bam',
+                  'phiX.fasta',
+                  'freebayes_out_1.vcf.contains']}],
+                'tool_config': '/srv/toolshed/test/var/data/repos/000/repo_708/freebayes.xml',
+                'tool_type': 'default',
+                'version': '0.0.3',
+                'version_string_cmd': None}]},
              {'freebayes': ['Galaxy Freebayes Bayesian genetic variant detector tool',
                             'http://testtoolshed.g2.bx.psu.edu/repos/devteam/freebayes',
                             'd291dc763c4c',
@@ -231,10 +265,7 @@ class ToolShedRepositoryClient(Client):
         return self._get(url=url, params=params)
 
     def repository_revisions(self, downloadable=None, malicious=None,
-                             tools_functionally_correct=None,
-                             missing_test_components=None, do_not_test=None,
-                             includes_tools=None, test_install_error=None,
-                             skip_tool_test=None):
+                             missing_test_components=None, includes_tools=None):
         """
         Returns a (possibly filtered) list of dictionaries that include
         information about all repository revisions. The following parameters can
@@ -246,23 +277,11 @@ class ToolShedRepositoryClient(Client):
         :type malicious: bool
         :param malicious:
 
-        :type tools_functionally_correct: bool
-        :param tools_functionally_correct:
-
         :type missing_test_components: bool
         :param missing_test_components:
 
-        :type do_not_test: bool
-        :param do_not_test:
-
         :type includes_tools: bool
         :param includes_tools:
-
-        :type test_install_error: bool
-        :param test_install_error:
-
-        :type skip_tool_test: bool
-        :param skip_tool_test:
 
         :rtype: List of dictionaries
         :return: Returns a (possibly filtered) list of dictionaries that include
@@ -270,7 +289,6 @@ class ToolShedRepositoryClient(Client):
           For example::
 
             [{'changeset_revision': '6e26c5a48e9a',
-              'do_not_test': False,
               'downloadable': True,
               'has_repository_dependencies': False,
               'id': '92250afff777a169',
@@ -281,13 +299,11 @@ class ToolShedRepositoryClient(Client):
               'includes_workflows': False,
               'malicious': False,
               'missing_test_components': False,
+              'model_class': 'RepositoryMetadata',
+              'numeric_revision': None,
               'repository_id': '78f2604ff5e65707',
-              'test_install_error': False,
-              'time_last_tested': None,
-              'tools_functionally_correct': False,
               'url': '/api/repository_revisions/92250afff777a169'},
              {'changeset_revision': '15a54fa11ad7',
-              'do_not_test': False,
               'downloadable': True,
               'has_repository_dependencies': False,
               'id': 'd3823c748ae2205d',
@@ -298,32 +314,23 @@ class ToolShedRepositoryClient(Client):
               'includes_workflows': False,
               'malicious': False,
               'missing_test_components': False,
+              'model_class': 'RepositoryMetadata',
+              'numeric_revision': None,
               'repository_id': 'f9662009da7bfce0',
-              'test_install_error': False,
-              'time_last_tested': None,
-              'tools_functionally_correct': False,
               'url': '/api/repository_revisions/d3823c748ae2205d'}]
         """
         # Not using '_make_url' or '_get' to create url since the module id used
         # to create url is not the same as needed for this method
         url = self.gi.url + '/repository_revisions'
         params = {}
-        if downloadable:
-            params['downloadable'] = True
-        if malicious:
-            params['malicious'] = True
-        if tools_functionally_correct:
-            params['tools_functionally_correct'] = True
-        if missing_test_components:
-            params['missing_test_components'] = True
-        if do_not_test:
-            params['do_not_test'] = True
-        if includes_tools:
-            params['includes_tools'] = True
-        if test_install_error:
-            params['test_install_error'] = True
-        if skip_tool_test:
-            params['skip_tool_test'] = True
+        if downloadable is not None:
+            params['downloadable'] = downloadable
+        if malicious is not None:
+            params['malicious'] = malicious
+        if missing_test_components is not None:
+            params['missing_test_components'] = missing_test_components
+        if includes_tools is not None:
+            params['includes_tools'] = includes_tools
         return self._get(url=url, params=params)
 
     def show_repository_revision(self, metadata_id):
@@ -340,7 +347,6 @@ class ToolShedRepositoryClient(Client):
           For example::
 
             {'changeset_revision': '7602de1e7f32',
-             'do_not_test': False,
              'downloadable': True,
              'has_repository_dependencies': False,
              'id': '504be8aaa652c154',
@@ -351,11 +357,10 @@ class ToolShedRepositoryClient(Client):
              'includes_workflows': False,
              'malicious': False,
              'missing_test_components': True,
+             'model_class': 'RepositoryMetadata',
+             'numeric_revision': None,
+             'repository_dependencies': [],
              'repository_id': '491b7a3fddf9366f',
-             'test_install_error': False,
-             'time_last_tested': None,
-             'tool_test_results': {'missing_test_components': []},
-             'tools_functionally_correct': False,
              'url': '/api/repository_revisions/504be8aaa652c154'}
         '''
         # Not using '_make_url' or '_get' to create url since the module id used

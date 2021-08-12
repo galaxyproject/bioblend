@@ -16,7 +16,8 @@ class ToolShedCategoryClient(Client):
         repository categories found on the given Tool Shed instance.
 
         :type deleted: bool
-        :param deleted: whether to show deleted categories
+        :param deleted: whether to show deleted categories. Requires
+          administrator access to the Tool Shed instance.
 
         :rtype: list
         :return: A list of dictionaries containing information about
