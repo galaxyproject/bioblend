@@ -218,5 +218,12 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
         updated_hda = self.gi.datasets.show_dataset(dataset1_id)
         assert updated_hda['extension'] == 'tabular'
 
+    @test_util.skip_unless_galaxy('release_19.01')
+    def test_get_extra_files(self):
+        history_id = self.history["id"]
+        dataset_id = self._test_dataset(history_id)
+        extra_files = self.gi.histories.get_extra_files(history_id, dataset_id)
+        self.assertEqual(extra_files, [])
+
     def tearDown(self):
         self.gi.histories.delete_history(self.history['id'], purge=True)
