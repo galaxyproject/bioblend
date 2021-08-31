@@ -105,6 +105,14 @@ class ToolClient(Client):
         url = self._make_url(tool_id) + '/requirements'
         return self._get(url=url)
 
+    def reload(self, tool_id):
+        """
+        Reload specified tool.
+        This functionality is available only to Galaxy admins.
+        """
+        url = self._make_url(tool_id) + '/reload'
+        return self._get(url=url)
+
     def get_citations(self, tool_id: str) -> List[dict]:
         """
         Get BibTeX citations for a given tool ID.
