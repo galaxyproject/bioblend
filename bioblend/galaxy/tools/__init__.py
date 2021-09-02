@@ -107,8 +107,19 @@ class ToolClient(Client):
 
     def reload(self, tool_id):
         """
-        Reload specified tool.
+        Reload the specified tool in the toolbox.
         This functionality is available only to Galaxy admins.
+
+        :type tool_id: str
+        :param tool_id: id of the requested tool
+
+        :rtype: dict
+        :param: dict containing the id, name, and version of the reloaded tool.
+          For example:
+
+          {'message': {'name': 'Cutadapt',
+                       'id': 'toolshed.g2.bx.psu.edu/repos/lparsons/cutadapt/cutadapt/3.4+galaxy1',
+                       'version': '3.4+galaxy1'}}
         """
         url = self._make_url(tool_id) + '/reload'
         return self._get(url=url)
