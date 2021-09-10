@@ -1,6 +1,10 @@
 """
 Interaction with a Tool Shed instance repositories
 """
+from typing import (
+    Optional,
+)
+
 from bioblend.galaxy.client import Client
 from bioblend.util import attach_file
 
@@ -470,3 +474,52 @@ class ToolShedRepositoryClient(Client):
         if category_ids is not None:
             payload['category_ids[]'] = category_ids
         return self._post(payload)
+
+    def update_repository_metadata(self, toolShed_id: str, name: Optional[str] = None,
+                                   synopsis: Optional[str] = None,
+                                   description: Optional[str] = None,
+                                   remote_repository_url: Optional[str] = None,
+                                   homepage_url: Optional[str] = None,
+                                   category_ids: Optional[str] = None) -> dict:
+        """
+        Update metadata of a Tool Shed repository.
+
+        :type toolShed_id: str
+        :param name: ID of the repository to update
+
+        :type name: str
+        :param name: New name of the repository
+
+        :type synopsis: str
+        :param synopsis: New synopsis of the repository
+
+        :type description: str
+        :param description: New description of the repository
+
+        :type remote_repository_url: str
+        :param remote_repository_url: New remote URL (e.g. GitHub/Bitbucket
+          repository)
+
+        :type homepage_url: str
+        :param homepage_url: New upstream homepage for the project
+
+        :type category_ids: list
+        :param category_ids: New list of encoded category IDs
+
+        :rtype: dict
+        :return: a dictionary containing information about the updated repository.
+        """
+        payload = {}
+        if name:
+            payload['name'] = name
+        if synopsis:
+            payload['synopsis'] = synopsis
+        if description:
+            payload['description'] = description
+        if remote_repository_url:
+            payload['remote_repository_url'] = remote_repository_url
+        if homepage_url:
+            payload['homepage_url'] = homepage_url
+        if category_ids:
+            payload['category_ids'] = category_ids
+        return self._put(id=toolShed_id, payload=payload)

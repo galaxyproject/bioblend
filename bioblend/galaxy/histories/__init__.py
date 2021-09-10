@@ -7,6 +7,7 @@ import sys
 import time
 import warnings
 import webbrowser
+from typing import List
 from urllib.parse import urljoin
 
 import bioblend
@@ -756,3 +757,23 @@ class HistoryClient(Client):
 
         url = urljoin(self.gi.base_url, f"history/switch_to_history?hist_id={history_id}")
         webbrowser.open_new_tab(url)
+
+    def get_extra_files(self, history_id: str, dataset_id: str) -> List[dict]:
+        """
+        Get extra files associated with a composite dataset, or an empty list if
+        there are none.
+
+        :type history_id: str
+        :param history_id: history ID
+
+        :type dataset_id: str
+        :param dataset_id: dataset ID
+
+        :rtype: list
+        :return: List of extra files
+
+        .. note::
+          This method is only supported by Galaxy 19.01 or later.
+        """
+        url = '/'.join((self._make_url(history_id, contents=True), dataset_id, 'extra_files'))
+        return self._get(url=url)
