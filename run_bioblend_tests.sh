@@ -117,3 +117,4 @@ GALAXY_RUN_ALL=1 "${BIOBLEND_DIR}/run_galaxy.sh" --daemon stop
 if [ -n "${c_val}" ] || [ $exit_code -eq 0 ]; then
   rm -rf "$TEMP_DIR"
 fi
+exit $exit_code
