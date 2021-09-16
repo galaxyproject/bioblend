@@ -107,7 +107,8 @@ class ToolClient(Client):
 
     def reload(self, tool_id):
         """
-        Reload the specified tool in the toolbox.
+        Reload the specified tool in the toolbox. Any changes that have been made to the wrapper
+        since the tool was last reloaded will take effect.
         This functionality is available only to Galaxy admins.
 
         :type tool_id: str
