@@ -171,6 +171,8 @@ class GalaxyClient:
         :rtype: requests.Response
         :return: the response object.
         """
+        if payload is not None:
+            payload = json.dumps(payload)
         headers = self.json_headers
         r = requests.delete(
             url,
@@ -192,6 +194,8 @@ class GalaxyClient:
 
         :return: The decoded response.
         """
+        if payload is not None:
+            payload = json.dumps(payload)
         headers = self.json_headers
         r = requests.put(
             url,
@@ -227,6 +231,8 @@ class GalaxyClient:
 
         :return: The decoded response.
         """
+        if payload is not None:
+            payload = json.dumps(payload)
         headers = self.json_headers
         r = requests.patch(
             url,
