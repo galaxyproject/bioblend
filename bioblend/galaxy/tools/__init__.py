@@ -131,7 +131,7 @@ class ToolClient(Client):
         :return: Tool requirement status
         """
         url = self._make_url(tool_id) + '/install_dependencies'
-        return self._post(payload={}, url=url)
+        return self._post(url=url)
 
     def uninstall_dependencies(self, tool_id: str) -> dict:
         """
@@ -146,7 +146,7 @@ class ToolClient(Client):
         :return: Tool requirement status
         """
         url = self._make_url(tool_id) + '/dependencies'
-        return self._delete(payload={}, url=url)
+        return self._delete(url=url)
 
     def show_tool(self, tool_id, io_details=False, link_details=False):
         """

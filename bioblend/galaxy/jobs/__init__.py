@@ -405,7 +405,7 @@ class JobsClient(Client):
           This method is only supported by Galaxy 18.09 or later.
         """
         url = self._make_url(module_id=job_id) + '/resume'
-        return self._put(url=url, payload={})
+        return self._put(url=url)
 
     def get_destination_params(self, job_id: str) -> dict:
         """

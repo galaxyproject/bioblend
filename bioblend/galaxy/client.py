@@ -154,7 +154,7 @@ class Client:
                 bioblend.log.warning(msg)
                 time.sleep(retry_delay)
 
-    def _post(self, payload, id=None, deleted=False, contents=None, url=None,
+    def _post(self, payload=None, id=None, deleted=False, contents=None, url=None,
               files_attached=False):
         """
         Do a generic POST request, composing the url from the contents of the
@@ -176,7 +176,7 @@ class Client:
         return self.gi.make_post_request(url, payload=payload,
                                          files_attached=files_attached)
 
-    def _put(self, payload, id=None, url=None, params=None):
+    def _put(self, payload=None, id=None, url=None, params=None):
         """
         Do a generic PUT request, composing the url from the contents of the
         arguments. Alternatively, an explicit ``url`` can be provided to use
@@ -191,7 +191,7 @@ class Client:
             url = self._make_url(module_id=id)
         return self.gi.make_put_request(url, payload=payload, params=params)
 
-    def _patch(self, payload, id=None, url=None, params=None):
+    def _patch(self, payload=None, id=None, url=None, params=None):
         """
         Do a generic PATCH request, composing the url from the contents of the
         arguments. Alternatively, an explicit ``url`` can be provided to use

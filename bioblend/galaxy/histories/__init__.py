@@ -562,7 +562,7 @@ class HistoryClient(Client):
         :return: 'OK' if it was deleted
         """
         url = self._make_url(history_id, deleted=True) + '/undelete'
-        return self._post(payload={}, url=url)
+        return self._post(url=url)
 
     def get_status(self, history_id):
         """
@@ -646,7 +646,7 @@ class HistoryClient(Client):
         time_left = maxwait
         while True:
             try:
-                r = self._put(payload={}, url=url, params=params)
+                r = self._put(url=url, params=params)
             except ConnectionError as e:
                 if e.status_code == 202:  # export is not ready
                     if time_left > 0:
