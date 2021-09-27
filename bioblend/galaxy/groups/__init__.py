@@ -155,7 +155,7 @@ class GroupsClient(Client):
         :return: Added group user's info
         """
         url = '/'.join((self._make_url(group_id), 'users', user_id))
-        return self._put(payload={}, url=url)
+        return self._put(url=url)
 
     def add_group_role(self, group_id, role_id):
         """
@@ -171,7 +171,7 @@ class GroupsClient(Client):
         :return: Added group role's info
         """
         url = '/'.join((self._make_url(group_id), 'roles', role_id))
-        return self._put(payload={}, url=url)
+        return self._put(url=url)
 
     def delete_group_user(self, group_id, user_id):
         """

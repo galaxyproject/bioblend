@@ -89,7 +89,7 @@ class GalaxyClient:
         r = requests.get(url, headers=headers, **kwargs)
         return r
 
-    def make_post_request(self, url, payload, params=None, files_attached=False):
+    def make_post_request(self, url, payload=None, params=None, files_attached=False):
         """
         Make a POST request using the provided ``url`` and ``payload``.
         The ``payload`` must be a dict that contains the request values.
@@ -126,7 +126,8 @@ class GalaxyClient:
             headers['Content-Type'] = payload.content_type
             post_params = None
         else:
-            payload = json.dumps(payload)
+            if payload is not None:
+                payload = json.dumps(payload)
             headers = self.json_headers
             post_params = params
 
@@ -194,7 +195,8 @@ class GalaxyClient:
 
         :return: The decoded response.
         """
-        payload = json.dumps(payload)
+        if payload is not None:
+            payload = json.dumps(payload)
         headers = self.json_headers
         r = requests.put(
             url,
@@ -230,7 +232,8 @@ class GalaxyClient:
 
         :return: The decoded response.
         """
-        payload = json.dumps(payload)
+        if payload is not None:
+            payload = json.dumps(payload)
         headers = self.json_headers
         r = requests.patch(
             url,
