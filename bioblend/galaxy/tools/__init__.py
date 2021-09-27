@@ -123,7 +123,7 @@ class ToolClient(Client):
                        'version': '3.4+galaxy1'}}
         """
         url = self._make_url(tool_id) + '/reload'
-        return self._get(url=url)
+        return self._put(url=url)
 
     def get_citations(self, tool_id: str) -> List[dict]:
         """
