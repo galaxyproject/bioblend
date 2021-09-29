@@ -105,6 +105,26 @@ class ToolClient(Client):
         url = self._make_url(tool_id) + '/requirements'
         return self._get(url=url)
 
+    def reload(self, tool_id: str) -> dict:
+        """
+        Reload the specified tool in the toolbox. Any changes that have been made to the wrapper
+        since the tool was last reloaded will take effect.
+        This functionality is available only to Galaxy admins.
+
+        :type tool_id: str
+        :param tool_id: id of the requested tool
+
+        :rtype: dict
+        :param: dict containing the id, name, and version of the reloaded tool.
+          For example::
+
+          {'message': {'name': 'Cutadapt',
+                       'id': 'toolshed.g2.bx.psu.edu/repos/lparsons/cutadapt/cutadapt/3.4+galaxy1',
+                       'version': '3.4+galaxy1'}}
+        """
+        url = self._make_url(tool_id) + '/reload'
+        return self._put(url=url)
+
     def get_citations(self, tool_id: str) -> List[dict]:
         """
         Get BibTeX citations for a given tool ID.
