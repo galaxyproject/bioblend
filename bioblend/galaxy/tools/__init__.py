@@ -116,7 +116,7 @@ class ToolClient(Client):
 
         :rtype: dict
         :param: dict containing the id, name, and version of the reloaded tool.
-          For example:
+          For example::
 
           {'message': {'name': 'Cutadapt',
                        'id': 'toolshed.g2.bx.psu.edu/repos/lparsons/cutadapt/cutadapt/3.4+galaxy1',
