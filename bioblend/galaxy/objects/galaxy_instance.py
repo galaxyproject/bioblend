@@ -45,6 +45,8 @@ class GalaxyInstance:
     def __init__(self, url, api_key=None, email=None, password=None, verify=True):
         self.gi = bioblend.galaxy.GalaxyInstance(url, api_key, email, password, verify)
         self.log = bioblend.log
+        self.datasets = client.ObjDatasetClient(self)
+        self.dataset_collections = client.ObjDatasetCollectionClient(self)
         self.histories = client.ObjHistoryClient(self)
         self.libraries = client.ObjLibraryClient(self)
         self.workflows = client.ObjWorkflowClient(self)

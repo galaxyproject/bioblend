@@ -17,7 +17,7 @@ In practice, it makes it possible to do things like this:
     gi = GalaxyInstance('<Galaxy IP>', key='your API key')
     libs = gi.libraries.get_libraries()
     gi.workflows.show_workflow('workflow ID')
-    gi.workflows.run_workflow('workflow ID', input_dataset_map)
+    wf_invocation = gi.workflows.invoke_workflow('workflow ID', inputs)
 
 - Interact with Galaxy via an object-oriented API::
 
@@ -28,7 +28,7 @@ In practice, it makes it possible to do things like this:
     inputs = hist.get_datasets()[:2]
     input_map = dict(zip(wf.input_labels, inputs))
     params = {"Paste1": {"delimiter": "U"}}
-    wf.run(input_map, "wf_output", params=params)
+    wf_invocation = wf.invoke(input_map, params=params)
 
 - Create a CloudMan compute cluster, via an API and directly from your
   local machine::

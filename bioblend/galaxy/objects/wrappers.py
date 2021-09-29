@@ -7,7 +7,6 @@ A basic object-oriented interface for Galaxy entities.
 import abc
 import json
 from collections.abc import (
-    Iterable,
     Mapping,
     Sequence,
 )
@@ -185,6 +184,44 @@ class InvocationStep(Wrapper):
         'workflow_step_uuid',
     )
 
+    def refresh(self):
+        """
+        Re-fetch the attributes pertaining to this object.
+
+        :return: self
+        """
+        step_dict = self.gi.gi.invocations.show_invocation_step(self.parent.id, self.id)
+        self.__init__(step_dict, parent=self.parent, gi=self.gi)
+        return self
+
+    def get_outputs(self):
+        """
+        Get the output datasets of the invocation step
+
+        :rtype: dict of `HistoryDatasetAssociation`
+        :return: dictionary mapping output names to history datasets
+        """
+        if not hasattr(self, 'outputs'):
+            self.refresh()
+        outputs = {}
+        for name, out_dict in self.wrapped['outputs'].items():
+            outputs[name] = self.gi.datasets.get(out_dict['id'])
+        return outputs
+
+    def get_output_collections(self):
+        """
+        Get the output dataset collections of the invocation step
+
+        :rtype: dict of `HistoryDatasetCollectionAssociation`
+        :return: dictionary mapping output names to history dataset collections
+        """
+        if not hasattr(self, 'output_collections'):
+            self.refresh()
+        output_collections = {}
+        for name, out_coll_dict in self.wrapped['output_collections'].items():
+            output_collections[name] = self.gi.dataset_collections.get(out_coll_dict['id'])
+        return output_collections
+
 
 class Workflow(Wrapper):
     """
@@ -326,27 +363,24 @@ class Workflow(Wrapper):
         """
         return not self.missing_ids
 
-    def convert_input_map(self, input_map):
+    @staticmethod
+    def _convert_input_map(input_map: dict) -> dict:
         """
         Convert ``input_map`` to the format required by the Galaxy web API.
 
         :type input_map: dict
-        :param input_map: a mapping from input labels to datasets
+        :param input_map: a mapping to datasets or dataset collections
 
         :rtype: dict
-        :return: a mapping from input slot ids to dataset ids in the
-          format required by the Galaxy web API.
+        :return: a mapping in the format required by the Galaxy web API.
         """
-        m = {}
-        for label, slot_ids in self.input_labels_to_ids.items():
-            datasets = input_map.get(label, [])
-            if not isinstance(datasets, Iterable):
-                datasets = [datasets]
-            if len(datasets) < len(slot_ids):
-                raise RuntimeError(f'not enough datasets for "{label}"')
-            for id_, ds in zip(slot_ids, datasets):
-                m[id_] = {'id': ds.id, 'src': ds.SRC}
-        return m
+        ret = {}
+        for key, value in input_map.items():
+            if isinstance(value, (HistoryDatasetAssociation, HistoryDatasetCollectionAssociation, LibraryDatasetDatasetAssociation, LibraryDataset)):
+                ret[key] = {'id': value.id, 'src': value.SRC}  # type: ignore
+            else:
+                ret[key] = value
+        return ret
 
     def preview(self):
         getf = self.gi.workflows.get_previews
@@ -355,126 +389,6 @@ class Workflow(Wrapper):
         except IndexError:
             raise ValueError(f"no object for id {self.id}")
         return p
-
-    def run(self, input_map=None, history='', params=None, import_inputs=False,
-            replacement_params=None, wait=False,
-            polling_interval=POLLING_INTERVAL, break_on_error=True):
-        """
-        Run the workflow in the current Galaxy instance.
-
-        .. deprecated:: 0.16.0
-           Use :meth:`invoke` instead.
-
-        :type input_map: dict
-        :param input_map: a mapping from workflow input labels to
-          datasets, e.g.: ``dict(zip(workflow.input_labels,
-          library.get_datasets()))``
-
-        :type history: :class:`History` or str
-        :param history: either a valid history object (results will be
-          stored there) or a string (a new history will be created with
-          the given name).
-
-        :type params: dict
-        :param params: a mapping of non-datasets tool parameters (see below)
-
-        :type import_inputs: bool
-        :param import_inputs: If ``True``, workflow inputs will be imported into
-          the history; if ``False``, only workflow outputs will be visible in
-          the history.
-
-        :type replacement_params: dict
-        :param replacement_params: pattern-based replacements for
-          post-job actions (see the docs for
-          :meth:`~bioblend.galaxy.workflows.WorkflowClient.invoke_workflow`)
-
-        :type wait: bool
-        :param wait: whether to wait while the returned datasets are
-          in a pending state
-
-        :type polling_interval: float
-        :param polling_interval: polling interval in seconds
-
-        :type break_on_error: bool
-        :param break_on_error: whether to break as soon as at least one
-          of the returned datasets is in the 'error' state
-
-        :rtype: tuple
-        :return: list of output datasets, output history
-
-        The ``params`` dict should be specified as follows::
-
-          {STEP_ID: PARAM_DICT, ...}
-
-        where PARAM_DICT is::
-
-          {PARAM_NAME: VALUE, ...}
-
-        For backwards compatibility, the following (deprecated) format is
-        also supported for ``params``::
-
-          {TOOL_ID: PARAM_DICT, ...}
-
-        in which case PARAM_DICT affects all steps with the given tool id.
-        If both by-tool-id and by-step-id specifications are used, the
-        latter takes precedence.
-
-        Finally (again, for backwards compatibility), PARAM_DICT can also
-        be specified as::
-
-          {'param': PARAM_NAME, 'value': VALUE}
-
-        Note that this format allows only one parameter to be set per step.
-
-        Example: set 'a' to 1 for the third workflow step::
-
-          params = {workflow.steps[2].id: {'a': 1}}
-
-        .. warning::
-
-          This is a blocking operation that can take a very long time. If
-          ``wait`` is set to ``False``, the method will return as soon as the
-          workflow has been *scheduled*, otherwise it will wait until the
-          workflow has been *run*. With a large number of steps, however, the
-          delay may not be negligible even in the former case (e.g. minutes for
-          100 steps).
-        """
-        if not self.is_mapped:
-            raise RuntimeError('workflow is not mapped to a Galaxy object')
-        if not self.is_runnable:
-            missing_tools_str = ', '.join(f"{self.steps[step_id].tool_id}[{step_id}]" for step_id in self.missing_ids)
-            raise RuntimeError(f"workflow has missing tools: {missing_tools_str}")
-        kwargs = {
-            'dataset_map': self.convert_input_map(input_map or {}),
-            'params': params,
-            'import_inputs_to_history': import_inputs,
-            'replacement_params': replacement_params,
-        }
-        if isinstance(history, History):
-            try:
-                kwargs['history_id'] = history.id
-            except AttributeError:
-                raise RuntimeError('history does not have an id')
-        elif isinstance(history, str):
-            kwargs['history_name'] = history
-        else:
-            raise TypeError(
-                'history must be either a history wrapper or a string')
-        res = self.gi.gi.workflows.run_workflow(self.id, **kwargs)
-        # res structure: {'history': HIST_ID, 'outputs': [CI_ID, CI_ID, ...]}
-        out_hist = self.gi.histories.get(res['history'])
-        content_infos_dict = {ci.id: ci for ci in out_hist.content_infos}
-        outputs = []
-        for output_id in res['outputs']:
-            if content_infos_dict[output_id].type == 'file':
-                outputs.append(out_hist.get_dataset(output_id))
-            elif content_infos_dict[output_id].type == 'collection':
-                outputs.append(out_hist.get_dataset_collection(output_id))
-
-        if wait:
-            self.gi._wait_datasets(outputs, polling_interval=polling_interval,
-                                   break_on_error=break_on_error)
-        return outputs, out_hist
 
     def export(self):
         """
@@ -511,8 +425,8 @@ class Workflow(Wrapper):
                        HistoryDatasetCollectionAssociation (``hdca``).
 
                        The map must be in the following format:
-                       ``{'<input_index>': {'id': <encoded dataset ID>, 'src': '[ldda, ld, hda, hdca]'}}``
-                       (e.g. ``{'2': {'id': '29beef4fadeed09f', 'src': 'hda'}}``)
+                       ``{'<input_index>': dataset or collection}``
+                       (e.g. ``{'2': HistoryDatasetAssociation()}``)
 
                        This map may also be indexed by the UUIDs of the workflow steps,
                        as indicated by the ``uuid`` property of steps returned from the
@@ -524,9 +438,10 @@ class Workflow(Wrapper):
         :type params: dict
         :param params: A mapping of non-datasets tool parameters (see below)
 
-        :type history: str
-        :param history: The history in which to store the workflow
-          output.
+        :type history: History or str
+        :param history: The history in which to store the workflow output, or
+          the name of a new history to create. If ``None``, a new 'Unnamed
+          history' is created.
 
         :type import_inputs_to_history: bool
         :param import_inputs_to_history: If ``True``, used workflow inputs will
@@ -622,18 +537,25 @@ class Workflow(Wrapper):
         <http://lists.bx.psu.edu/pipermail/galaxy-dev/2011-September/006875.html>`_.
 
         .. warning::
-          Historically, the ``run_workflow`` method consumed a ``dataset_map``
+          Historically, workflow invocation consumed a ``dataset_map``
           data structure that was indexed by unencoded workflow step IDs. These
           IDs would not be stable across Galaxy instances. The new ``inputs``
           property is instead indexed by either the ``order_index`` property
           (which is stable across workflow imports) or the step UUID which is
           also stable.
         """
+        if not self.is_mapped:
+            raise RuntimeError('workflow is not mapped to a Galaxy object')
+        if not self.is_runnable:
+            missing_tools_str = ', '.join(f"{self.steps[step_id].tool_id}[{step_id}]" for step_id in self.missing_ids)
+            raise RuntimeError(f"workflow has missing tools: {missing_tools_str}")
+
         inv_dict = self.gi.gi.workflows.invoke_workflow(
             workflow_id=self.id,
-            inputs=inputs,
+            inputs=self._convert_input_map(inputs or {}),
             params=params,
-            history_id=history.id,
+            history_id=history.id if isinstance(history, History) else None,
+            history_name=history if isinstance(history, str) else None,
             import_inputs_to_history=import_inputs_to_history,
             replacement_params=replacement_params,
             allow_tool_state_corrections=allow_tool_state_corrections,
@@ -660,7 +582,7 @@ class Invocation(Wrapper):
 
     def __init__(self, inv_dict, gi=None):
         super().__init__(inv_dict, gi=gi)
-        self.steps = [InvocationStep(step, self) for step in self.steps]
+        self.steps = [InvocationStep(step, parent=self, gi=gi) for step in self.steps]
         self.inputs = [{**v, 'label': k} for k, v in self.inputs.items()]
 
     def sorted_step_ids(self):
@@ -728,13 +650,13 @@ class Invocation(Wrapper):
 
     def refresh(self):
         """
-        Update this invocation with the latest information from the server.
+        Re-fetch the attributes pertaining to this object.
 
-        .. note::
-          On success, this method updates the Invocation object's internal variables.
+        :return: self
         """
         inv_dict = self.gi.gi.invocations.show_invocation(self.id)
         self.__init__(inv_dict, gi=self.gi)
+        return self
 
     def run_step_actions(self, steps, actions):
         """
@@ -904,7 +826,7 @@ class Dataset(Wrapper, metaclass=abc.ABCMeta):
         """
         Re-fetch the attributes pertaining to this object.
 
-        Returns: self
+        :return: self
         """
         gi_client = getattr(self.gi.gi, self.container.API_MODULE)
         ds_dict = gi_client.show_dataset(self.container.id, self.id)
@@ -943,6 +865,19 @@ class HistoryDatasetAssociation(Dataset):
     def _stream_url(self):
         base_url = self.gi.gi.histories._make_url(module_id=self.container.id, contents=True)
         return f"{base_url}/{self.id}/display"
+
+    def get_stream(self, chunk_size=bioblend.CHUNK_SIZE):
+        """
+        Open dataset for reading and return an iterator over its contents.
+
+        :type chunk_size: int
+        :param chunk_size: read this amount of bytes at a time
+        """
+        _, _, r = self.gi.gi.datasets._initiate_download(
+            self.id,
+            stream_content=True,
+        )
+        return r.iter_content(chunk_size)  # FIXME: client can't close r
 
     def update(self, **kwds):
         """
@@ -1006,7 +941,7 @@ class DatasetCollection(Wrapper, metaclass=abc.ABCMeta):
         """
         Re-fetch the attributes pertaining to this object.
 
-        Returns: self
+        :return: self
         """
         gi_client = getattr(self.gi.gi, self.container.API_MODULE)
         dsc_dict = gi_client.show_dataset_collection(self.container.id, self.id)
@@ -1164,7 +1099,7 @@ class DatasetContainer(Wrapper, metaclass=abc.ABCMeta):
         """
         Re-fetch the attributes pertaining to this object.
 
-        Returns: self
+        :return: self
         """
         fresh = self.obj_gi_client.get(self.id)
         self.__init__(
@@ -1621,7 +1556,7 @@ class Folder(Wrapper):
         """
         Re-fetch the attributes pertaining to this object.
 
-        Returns: self
+        :return: self
         """
         f_dict = self.gi.gi.libraries.show_folder(self.container.id, self.id)
         self.__init__(f_dict, self.container, gi=self.gi)
