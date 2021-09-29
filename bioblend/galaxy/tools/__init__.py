@@ -105,7 +105,7 @@ class ToolClient(Client):
         url = self._make_url(tool_id) + '/requirements'
         return self._get(url=url)
 
-    def reload(self, tool_id):
+    def reload(self, tool_id: str) -> dict:
         """
         Reload the specified tool in the toolbox. Any changes that have been made to the wrapper
         since the tool was last reloaded will take effect.
