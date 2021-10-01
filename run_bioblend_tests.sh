@@ -2,7 +2,7 @@
 set -e
 
 show_help () {
-  echo "Usage:  $0 -g GALAXY_DIR [-p PORT] [-e TOX_ENV] [-t BIOBLEND_TESTS] [-r GALAXY_REV] [-c]
+    echo "Usage:  $0 -g GALAXY_DIR [-p PORT] [-e TOX_ENV] [-t BIOBLEND_TESTS] [-r GALAXY_REV] [-c]
 
   Run tests for BioBlend. Useful for Continuous Integration testing.
   *Please note* that this script overwrites the main.pid file and appends to the
@@ -27,37 +27,36 @@ Options:
 }
 
 get_abs_dirname () {
-  # $1 : relative dirname
-  cd "$1" && pwd
+    # $1 : relative dirname
+    cd "$1" && pwd
 }
 
 e_val=py36
 GALAXY_PORT=8080
-while getopts 'hcg:e:p:t:r:' option
-do
-  case $option in
-    h) show_help
-       exit;;
-    c) c_val=1;;
-    g) GALAXY_DIR=$(get_abs_dirname "$OPTARG");;
-    e) e_val=$OPTARG;;
-    p) GALAXY_PORT=$OPTARG;;
-    t) t_val=$OPTARG;;
-    r) r_val=$OPTARG;;
-  esac
+while getopts 'hcg:e:p:t:r:' option; do
+    case $option in
+        h) show_help
+           exit;;
+        c) c_val=1;;
+        g) GALAXY_DIR=$(get_abs_dirname "$OPTARG");;
+        e) e_val=$OPTARG;;
+        p) GALAXY_PORT=$OPTARG;;
+        t) t_val=$OPTARG;;
+        r) r_val=$OPTARG;;
+    esac
 done
 
 if [ -z "$GALAXY_DIR" ]; then
-  echo "Error: missing -g value."
-  show_help
-  exit 1
+    echo "Error: missing -g value."
+    show_help
+    exit 1
 fi
 
 # Install BioBlend
 BIOBLEND_DIR=$(get_abs_dirname "$(dirname "$0")")
 cd "${BIOBLEND_DIR}"
 if [ ! -d .venv ]; then
-  virtualenv -p python3 .venv
+    virtualenv -p python3 .venv
 fi
 . .venv/bin/activate
 python3 setup.py install
@@ -103,9 +102,9 @@ export BIOBLEND_GALAXY_URL=http://localhost:${GALAXY_PORT}
 cd "${BIOBLEND_DIR}"
 set +e  # don't stop the script if tox fails
 if [ -n "${t_val}" ]; then
-  tox -e "${e_val}" -- "${t_val}"
+    tox -e "${e_val}" -- "${t_val}"
 else
-  tox -e "${e_val}"
+    tox -e "${e_val}"
 fi
 exit_code=$?
 deactivate
@@ -115,6 +114,6 @@ cd "${GALAXY_DIR}"
 GALAXY_RUN_ALL=1 "${BIOBLEND_DIR}/run_galaxy.sh" --daemon stop
 # Remove temporary directory if -c is specified or if all tests passed
 if [ -n "${c_val}" ] || [ $exit_code -eq 0 ]; then
-  rm -rf "$TEMP_DIR"
+    rm -rf "$TEMP_DIR"
 fi
 exit $exit_code
