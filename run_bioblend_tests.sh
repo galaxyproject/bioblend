@@ -43,6 +43,8 @@ while getopts 'hcg:e:p:t:r:' option; do
         p) GALAXY_PORT=$OPTARG;;
         t) t_val=$OPTARG;;
         r) r_val=$OPTARG;;
+        *) show_help
+           exit 1;;
     esac
 done
 
@@ -84,10 +86,13 @@ fi
 # Setup Galaxy master API key and admin user
 TEMP_DIR=$(mktemp -d 2>/dev/null || mktemp -d -t 'mytmpdir')
 echo "Created temporary directory $TEMP_DIR"
+mkdir "$TEMP_DIR/config"
+printf "<?xml version=\"1.0\"?>\n<toolbox tool_path=\"%s\">\n</toolbox>\n" "$TEMP_DIR/shed_tools" > "$TEMP_DIR/config/shed_tool_conf.xml"
 # Export GALAXY_CONFIG_FILE environment variable to be used by run_galaxy.sh
-export GALAXY_CONFIG_FILE="$TEMP_DIR/galaxy.ini"
+export GALAXY_CONFIG_FILE="$TEMP_DIR/config/galaxy.ini"
 # Export BIOBLEND_ environment variables to be used in BioBlend tests
-export BIOBLEND_GALAXY_MASTER_API_KEY=$(LC_ALL=C tr -dc A-Za-z0-9 < /dev/urandom | head -c 32)
+BIOBLEND_GALAXY_MASTER_API_KEY=$(LC_ALL=C tr -dc A-Za-z0-9 < /dev/urandom | head -c 32)
+export BIOBLEND_GALAXY_MASTER_API_KEY
 export BIOBLEND_GALAXY_USER_EMAIL="${USER}@localhost.localdomain"
 DATABASE_CONNECTION="sqlite:///$TEMP_DIR/universe.sqlite?isolation_level=IMMEDIATE"
 eval "echo \"$(cat "${BIOBLEND_DIR}/tests/template_galaxy.ini")\"" > "$GALAXY_CONFIG_FILE"
