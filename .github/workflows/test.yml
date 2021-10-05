@@ -47,6 +47,9 @@ jobs:
           - release_17.09
         include:
           - os: ubuntu-latest
+            tox_env: py310
+            galaxy_version: dev
+          - os: ubuntu-latest
             tox_env: py39
             galaxy_version: dev
           - os: ubuntu-latest
@@ -69,7 +72,7 @@ jobs:
           key: pip-cache-${{ matrix.tox_env }}-${{ matrix.galaxy_version }}
       - name: Calculate Python version for BioBlend from tox_env
         id: get_bioblend_python_version
-        run: echo "::set-output name=bioblend_python_version::$(echo "${{ matrix.tox_env }}" | sed -e 's/^py\([0-9]\)\([0-9]\+\)/\1.\2/')"
+        run: echo "::set-output name=bioblend_python_version::$(echo "${{ matrix.tox_env }}" | sed -e 's/^py\([3-9]\)\([0-9]\+\)/\1.\2/')"
       - name: Set up Python for BioBlend
         uses: actions/setup-python@v2
         with:
@@ -110,6 +113,7 @@ jobs:
           tar xvzf ${{ matrix.galaxy_version }}.tar.gz | tail
           cd galaxy-${{ matrix.galaxy_version }}
           export GALAXY_DIR=$PWD
+          export GALAXY_PYTHON=python${{ steps.get_galaxy_python_version.outputs.galaxy_python_version }}
           export GALAXY_VERSION=${{ matrix.galaxy_version }}
           # Export GALAXY_CONFIG_FILE environment variable to be used by run_galaxy.sh
           export GALAXY_CONFIG_FILE=config/galaxy.ini
