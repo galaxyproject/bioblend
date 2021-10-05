@@ -45,7 +45,7 @@ class TestToolshed(unittest.TestCase):
         # show_repository
         bam_to_sam_repo = [n for n in repositories if n['name'] == 'bam_to_sam'][0]
         show_bam_to_sam_repo = self.ts.repositories.show_repository(bam_to_sam_repo['id'])
-        self.assertIn('SAM (Sequence Alignment/Map) format', show_bam_to_sam_repo['long_description'])
+        self.assertIn('SAM', show_bam_to_sam_repo['long_description'])
 
         # test_create_repository
         # need to provide an API key to test this
