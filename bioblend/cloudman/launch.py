@@ -1,6 +1,7 @@
 """
 Setup and launch a CloudMan instance.
 """
+import contextlib
 import datetime
 import socket
 from http.client import (
@@ -551,7 +552,7 @@ class CloudManLauncher:
             if pd:
                 # We are dealing with a CloudMan bucket
                 pd_contents = pd.get_contents_as_string()
-                pd = yaml.load(pd_contents)
+                pd = yaml.safe_load(pd_contents)
                 if 'cluster_name' in pd:
                     cluster_name = pd['cluster_name']
                 else:
@@ -840,7 +841,7 @@ class CloudManLauncher:
         Check if the ``url`` is *alive* (i.e., remote server returns code 200(OK)
         or 401 (unauthorized)).
         """
-        try:
+        with contextlib.suppress(Exception):
             p = urlparse(url)
             h = HTTPConnection(p[1])
             h.putrequest('HEAD', p[2])
@@ -849,7 +850,4 @@ class CloudManLauncher:
             # CloudMan UI is pwd protected so include 401
             if r.status in (200, 401):
                 return True
-        except Exception:
-            # No response or no good response
-            pass
         return False

@@ -2,6 +2,8 @@
 Tests the functionality of the Blend CloudMan API. These tests require working
 credentials to supported cloud infrastructure.
 """
+import contextlib
+
 from bioblend.cloudman import CloudManConfig, CloudManInstance
 from . import CloudmanTestBase, test_util
 
@@ -36,9 +38,7 @@ class TestCloudmanLaunch(CloudmanTestBase.CloudmanTestBase):
         cmi = CloudManInstance.launch_instance(cfg)
         status = cmi.get_status()
         self.assertNotEqual(status['cluster_status'], 'ERROR', "instance.get_status() returned ERROR. Should return a successful status!")
-        try:
+        with contextlib.suppress(Exception):
             # TODO: The terminate method is unpredictable! Needs fix.
             result = cmi.terminate(delete_cluster=True)
             self.assertEqual(result['cluster_status'], 'SHUTDOWN', "Cluster should be in status SHUTDOWN after call to terminate!")
-        except Exception:
-            pass

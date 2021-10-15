@@ -6,6 +6,7 @@ should not use it directly.
 A base representation of an instance
 """
 import base64
+import contextlib
 import json
 import logging
 from urllib.parse import (
@@ -38,7 +39,7 @@ class GalaxyClient:
             # Try to guess the scheme, starting from the more secure
             for scheme in ('https://', 'http://'):
                 log.warning(f"Missing scheme in url, trying with {scheme}")
-                try:
+                with contextlib.suppress(requests.RequestException):
                     r = requests.get(
                         scheme + url,
                         timeout=self.timeout,
@@ -47,8 +48,6 @@ class GalaxyClient:
                     r.raise_for_status()
                     found_scheme = scheme
                     break
-                except Exception:
-                    pass
             else:
                 raise ValueError(f"Missing scheme in url {url}")
             url = found_scheme + url
