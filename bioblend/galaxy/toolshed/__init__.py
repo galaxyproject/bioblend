@@ -41,7 +41,7 @@ class ToolShedClient(Client):
         Galaxy instance.
 
         :type toolShed_id: str
-        :param toolShed_id: Encoded toolshed ID
+        :param toolShed_id: Encoded Tool Shed ID
 
         :rtype: dict
         :return: Information about the tool
