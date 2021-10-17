@@ -97,12 +97,12 @@ class ToolShedRepositoryClient(Client):
         params = dict(q=q, page=page, page_size=page_size)
         return self._get(params=params)
 
-    def show_repository(self, toolshed_id):
+    def show_repository(self, toolShed_id):
         """
         Display information of a repository from Tool Shed
 
-        :type toolshed_id: str
-        :param toolshed_id: Encoded Tool Shed ID
+        :type toolShed_id: str
+        :param toolShed_id: Encoded Tool Shed ID
 
         :rtype: dict
         :return: Information about the tool.
@@ -128,7 +128,7 @@ class ToolShedRepositoryClient(Client):
           Changed method name from ``show_tool`` to ``show_repository`` to
           better align with the Tool Shed concepts.
         """
-        return self._get(id=toolshed_id)
+        return self._get(id=toolShed_id)
 
     def get_ordered_installable_revisions(self, name, owner):
         """
@@ -470,7 +470,7 @@ class ToolShedRepositoryClient(Client):
             payload['category_ids[]'] = category_ids
         return self._post(payload)
 
-    def update_repository_metadata(self, toolshed_id: str, name: Optional[str] = None,
+    def update_repository_metadata(self, toolShed_id: str, name: Optional[str] = None,
                                    synopsis: Optional[str] = None,
                                    description: Optional[str] = None,
                                    remote_repository_url: Optional[str] = None,
@@ -479,7 +479,7 @@ class ToolShedRepositoryClient(Client):
         """
         Update metadata of a Tool Shed repository.
 
-        :type toolshed_id: str
+        :type toolShed_id: str
         :param name: ID of the repository to update
 
         :type name: str
@@ -517,4 +517,4 @@ class ToolShedRepositoryClient(Client):
             payload['homepage_url'] = homepage_url
         if category_ids:
             payload['category_ids'] = category_ids
-        return self._put(id=toolshed_id, payload=payload)
+        return self._put(id=toolShed_id, payload=payload)

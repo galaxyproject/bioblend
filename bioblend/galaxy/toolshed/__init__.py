@@ -35,13 +35,13 @@ class ToolShedClient(Client):
         """
         return self._get()
 
-    def show_repository(self, toolshed_id):
+    def show_repository(self, toolShed_id):
         """
         Get details of a given Tool Shed repository as it is installed on this
         Galaxy instance.
 
-        :type toolshed_id: str
-        :param toolshed_id: Encoded toolshed ID
+        :type toolShed_id: str
+        :param toolShed_id: Encoded toolshed ID
 
         :rtype: dict
         :return: Information about the tool
@@ -57,7 +57,7 @@ class ToolShedClient(Client):
             Changed method name from ``show_tool`` to ``show_repository`` to
             better align with the Tool Shed concepts
         """
-        return self._get(id=toolshed_id)
+        return self._get(id=toolShed_id)
 
     def install_repository_revision(self, tool_shed_url, name, owner,
                                     changeset_revision,
