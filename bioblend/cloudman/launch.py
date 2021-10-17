@@ -841,13 +841,14 @@ class CloudManLauncher:
         Check if the ``url`` is *alive* (i.e., remote server returns code 200(OK)
         or 401 (unauthorized)).
         """
-        with contextlib.suppress(Exception):
+        try:
             p = urlparse(url)
             h = HTTPConnection(p[1])
             h.putrequest('HEAD', p[2])
             h.endheaders()
             r = h.getresponse()
             # CloudMan UI is pwd protected so include 401
-            if r.status in (200, 401):
-                return True
-        return False
+            return r.status in (200, 401)
+        except Exception:
+            # No response or no good response
+            return False
