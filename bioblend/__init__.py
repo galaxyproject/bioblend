@@ -1,3 +1,4 @@
+import contextlib
 import logging
 import os
 
@@ -32,10 +33,8 @@ def init_logging():
     Initialize BioBlend's logging from a configuration file.
     """
     for config_file in BioBlendConfigLocations:
-        try:
+        with contextlib.suppress(Exception):
             logging.config.fileConfig(os.path.expanduser(config_file))
-        except Exception:
-            pass
 
 
 class NullHandler(logging.Handler):
