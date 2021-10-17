@@ -1,7 +1,6 @@
 """
 Setup and launch a CloudMan instance.
 """
-import contextlib
 import datetime
 import socket
 from http.client import (
