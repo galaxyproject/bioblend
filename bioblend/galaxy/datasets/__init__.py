@@ -53,6 +53,33 @@ class DatasetClient(Client):
         )
         return self._get(id=dataset_id, deleted=deleted, params=params)
 
+    def _initiate_download(self, dataset_id: str, stream_content: bool,
+                           require_ok_state: bool = True, maxwait: float = 12000):
+        dataset = self.wait_for_dataset(dataset_id, maxwait=maxwait, check=False)
+        if not dataset['state'] == 'ok':
+            message = f"Dataset state is not 'ok'. Dataset id: {dataset_id}, current state: {dataset['state']}"
+            if require_ok_state:
+                raise DatasetStateException(message)
+            else:
+                warnings.warn(message, DatasetStateWarning)
+
+        file_ext = dataset.get('file_ext')
+        # Resort to 'data' when Galaxy returns an empty or temporary extension
+        if not file_ext or file_ext == 'auto' or file_ext == '_sniff_':
+            file_ext = 'data'
+        # The preferred download URL is
+        # '/api/histories/<history_id>/contents/<dataset_id>/display?to_ext=<dataset_ext>'
+        # since the old URL:
+        # '/dataset/<dataset_id>/display?to_ext=<dataset_ext>'
+        # does not work when using REMOTE_USER with access disabled to
+        # everything but /api without auth
+        download_url = dataset['download_url'] + '?to_ext=' + file_ext
+        url = urljoin(self.gi.base_url, download_url)
+
+        r = self.gi.make_get_request(url, stream=stream_content)
+        r.raise_for_status()
+        return dataset, file_ext, r
+
     def download_dataset(self, dataset_id, file_path=None, use_default_filename=True,
                          require_ok_state=True, maxwait=12000):
         """
@@ -85,35 +112,16 @@ class DatasetClient(Client):
           become terminal. If the dataset state is not terminal within this
           time, a ``DatasetTimeoutException`` will be thrown.
 
-        :rtype: dict
-        :return: If a ``file_path`` argument is not provided, returns a dict containing the file content.
-                 Otherwise returns nothing.
+        :rtype: bytes or str
+        :return: If a ``file_path`` argument is not provided, returns the file
+          content. Otherwise returns the local path of the downloaded file.
         """
-        dataset = self.wait_for_dataset(dataset_id, maxwait=maxwait, check=False)
-        if not dataset['state'] == 'ok':
-            message = f"Dataset state is not 'ok'. Dataset id: {dataset_id}, current state: {dataset['state']}"
-            if require_ok_state:
-                raise DatasetStateException(message)
-            else:
-                warnings.warn(message, DatasetStateWarning)
-
-        file_ext = dataset.get('file_ext')
-        # Resort to 'data' when Galaxy returns an empty or temporary extension
-        if not file_ext or file_ext == 'auto' or file_ext == '_sniff_':
-            file_ext = 'data'
-        # The preferred download URL is
-        # '/api/histories/<history_id>/contents/<dataset_id>/display?to_ext=<dataset_ext>'
-        # since the old URL:
-        # '/dataset/<dataset_id>/display/to_ext=<dataset_ext>'
-        # does not work when using REMOTE_USER with access disabled to
-        # everything but /api without auth
-        download_url = dataset['download_url'] + '?to_ext=' + file_ext
-        url = urljoin(self.gi.base_url, download_url)
-
-        stream_content = file_path is not None
-        r = self.gi.make_get_request(url, stream=stream_content)
-        r.raise_for_status()
-
+        dataset, file_ext, r = self._initiate_download(
+            dataset_id,
+            stream_content=file_path is not None,
+            require_ok_state=require_ok_state,
+            maxwait=maxwait
+        )
         if file_path is None:
             if 'content-length' in r.headers and len(r.content) != int(r.headers['content-length']):
                 log.warning("Transferred content size does not match content-length header (%s != %s)", len(r.content), r.headers['content-length'])

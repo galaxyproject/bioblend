@@ -6,6 +6,7 @@ should not use it directly.
 A base representation of an instance
 """
 import base64
+import contextlib
 import json
 import logging
 from urllib.parse import (
@@ -38,7 +39,7 @@ class GalaxyClient:
             # Try to guess the scheme, starting from the more secure
             for scheme in ('https://', 'http://'):
                 log.warning(f"Missing scheme in url, trying with {scheme}")
-                try:
+                with contextlib.suppress(requests.RequestException):
                     r = requests.get(
                         scheme + url,
                         timeout=self.timeout,
@@ -47,8 +48,6 @@ class GalaxyClient:
                     r.raise_for_status()
                     found_scheme = scheme
                     break
-                except Exception:
-                    pass
             else:
                 raise ValueError(f"Missing scheme in url {url}")
             url = found_scheme + url
@@ -89,7 +88,7 @@ class GalaxyClient:
         r = requests.get(url, headers=headers, **kwargs)
         return r
 
-    def make_post_request(self, url, payload, params=None, files_attached=False):
+    def make_post_request(self, url, payload=None, params=None, files_attached=False):
         """
         Make a POST request using the provided ``url`` and ``payload``.
         The ``payload`` must be a dict that contains the request values.
@@ -126,7 +125,8 @@ class GalaxyClient:
             headers['Content-Type'] = payload.content_type
             post_params = None
         else:
-            payload = json.dumps(payload)
+            if payload is not None:
+                payload = json.dumps(payload)
             headers = self.json_headers
             post_params = params
 
@@ -194,7 +194,8 @@ class GalaxyClient:
 
         :return: The decoded response.
         """
-        payload = json.dumps(payload)
+        if payload is not None:
+            payload = json.dumps(payload)
         headers = self.json_headers
         r = requests.put(
             url,
@@ -230,7 +231,8 @@ class GalaxyClient:
 
         :return: The decoded response.
         """
-        payload = json.dumps(payload)
+        if payload is not None:
+            payload = json.dumps(payload)
         headers = self.json_headers
         r = requests.patch(
             url,

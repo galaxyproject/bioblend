@@ -551,7 +551,7 @@ class CloudManLauncher:
             if pd:
                 # We are dealing with a CloudMan bucket
                 pd_contents = pd.get_contents_as_string()
-                pd = yaml.load(pd_contents)
+                pd = yaml.safe_load(pd_contents)
                 if 'cluster_name' in pd:
                     cluster_name = pd['cluster_name']
                 else:
@@ -847,9 +847,7 @@ class CloudManLauncher:
             h.endheaders()
             r = h.getresponse()
             # CloudMan UI is pwd protected so include 401
-            if r.status in (200, 401):
-                return True
+            return r.status in (200, 401)
         except Exception:
             # No response or no good response
-            pass
-        return False
+            return False

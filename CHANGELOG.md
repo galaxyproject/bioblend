@@ -1,3 +1,11 @@
+### BioBlend v - unreleased
+
+* Added support for Python 3.10. Added support for Galaxy release 21.09.
+
+* Added ``get_extra_files()`` method to ``HistoryClient``.
+
+* Improvements to type annotations, tests and documentation
+
 ### BioBlend v0.16.0 - 2021-06-13
 
 * Added support for Galaxy release 21.05.

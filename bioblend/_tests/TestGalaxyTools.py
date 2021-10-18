@@ -142,6 +142,13 @@ class TestGalaxyTools(GalaxyTestBase.GalaxyTestBase):
             f"tool_requirements is {tool_requirements}",
         )
 
+    @test_util.skip_unless_tool('CONVERTER_fasta_to_bowtie_color_index')
+    def test_reload(self):
+        response = self.gi.tools.reload('CONVERTER_fasta_to_bowtie_color_index')
+        self.assertIsInstance(response, dict)
+        self.assertIn('message', response)
+        self.assertIn('id', response['message'])
+
     @test_util.skip_unless_tool('sra_source')
     def test_get_citations(self):
         citations = self.gi.tools.get_citations('sra_source')

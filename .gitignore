@@ -36,6 +36,7 @@ cover
 #eclipse/pydev
 .project
 .pydevproject
+.idea
 
 # compiled docs
 docs/_build

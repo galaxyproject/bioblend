@@ -88,4 +88,4 @@ for (data1, data2) in dataset_ids:
         input1: {'src': 'ld', 'id': data1},
         input2: {'src': 'ld', 'id': data2},
     }
-    result = gi.workflows.run_workflow(workflow, datamap, history_id=outputhist, import_inputs_to_history=True)
+    invocation = gi.workflows.invoke_workflow(workflow, inputs=datamap, history_id=outputhist, import_inputs_to_history=True)

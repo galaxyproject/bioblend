@@ -2,6 +2,7 @@
 Tests the functionality of the Blend CloudMan API. These tests require working
 credentials to supported cloud infrastructure.
 """
+import contextlib
 import os
 import unittest
 
@@ -61,8 +62,6 @@ class CloudmanTestBase(unittest.TestCase):
     @classmethod
     @test_util.skip_unless_cloudman()
     def tearDownClass(cls):
-        try:
+        with contextlib.suppress(Exception):
             # TODO: cloudman's terminate method has a bug. Needs fix
             cls.cmi.terminate(delete_cluster=True)
-        except Exception:
-            pass

@@ -246,24 +246,10 @@ class TestWorkflow(unittest.TestCase):
         self.assertTrue(self.wf.is_modified)
 
     def test_input_map(self):
-        class DummyLD:
-            SRC = 'ld'
-
-            def __init__(self, id_):
-                self.id = id_
-
-        label = 'Input Dataset'
-        self.assertEqual(self.wf.input_labels, {label})
-        input_map = self.wf.convert_input_map(
-            {label: [DummyLD('a'), DummyLD('b')]})
-        # {'571': {'id': 'a', 'src': 'ld'}, '572': {'id': 'b', 'src': 'ld'}}
-        # OR
-        # {'571': {'id': 'b', 'src': 'ld'}, '572': {'id': 'a', 'src': 'ld'}}
-        self.assertEqual(set(input_map), {'571', '572'})
-        for d in input_map.values():
-            self.assertEqual(set(d), {'id', 'src'})
-            self.assertEqual(d['src'], 'ld')
-            self.assertIn(d['id'], 'ab')
+        hda = wrappers.HistoryDatasetAssociation({'id': 'hda_id'}, container='mock_history')
+        ldda = wrappers.LibraryDatasetDatasetAssociation({'id': 'ldda_id'}, container='mock_library')
+        input_map = self.wf._convert_input_map({'0': hda, '1': ldda, '2': {'id': 'hda2_id', 'src': 'hda'}})
+        self.assertEqual(input_map, {'0': {'id': 'hda_id', 'src': 'hda'}, '1': {'id': 'ldda_id', 'src': 'ldda'}, '2': {'id': 'hda2_id', 'src': 'hda'}})
 
 
 @test_util.skip_unless_galaxy()
@@ -288,7 +274,7 @@ class TestInvocation(GalaxyObjectsTestBase):
         with open(path_pause) as f:
             cls.workflow_pause = cls.gi.workflows.import_new(f.read())
         cls.history = cls.gi.histories.create(name="TestInvocation")
-        cls.dataset_id = cls.history.paste_content('1\t2\t3').id
+        cls.dataset = cls.history.paste_content('1\t2\t3')
 
     @classmethod
     def tearDownClass(cls):
@@ -363,7 +349,7 @@ class TestInvocation(GalaxyObjectsTestBase):
 
     def test_run_step_actions(self):
         inv = self.workflow_pause.invoke(
-            inputs={"0": {"src": "hda", "id": self.dataset_id}},
+            inputs={"0": self.dataset},
             history=self.history,
         )
         for _ in range(20):
@@ -402,9 +388,8 @@ class TestInvocation(GalaxyObjectsTestBase):
         self.assertEqual(len(biocompute_object['description_domain']['pipeline_steps']), 1)
 
     def _obj_invoke_workflow(self):
-        dataset = {'src': 'hda', 'id': self.dataset_id}
         return self.workflow.invoke(
-            inputs={'Input 1': dataset, 'Input 2': dataset},
+            inputs={'Input 1': self.dataset, 'Input 2': self.dataset},
             history=self.history,
             inputs_by='name',
         )
@@ -419,8 +404,7 @@ class TestObjInvocationClient(GalaxyObjectsTestBase):
         with open(SAMPLE_FN) as f:
             cls.workflow = cls.gi.workflows.import_new(f.read())
         cls.history = cls.gi.histories.create(name="TestGalaxyObjInvocationClient")
-        dataset_id = cls.history.paste_content('1\t2\t3').id
-        dataset = {'src': 'hda', 'id': dataset_id}
+        dataset = cls.history.paste_content('1\t2\t3')
         cls.inv = cls.workflow.invoke(
             inputs={'Input 1': dataset, 'Input 2': dataset},
             history=cls.history,
@@ -521,7 +505,7 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
         wf = wrappers.Workflow(wf_dict, gi=self.gi)
         self.assertFalse(wf.is_runnable)
         with self.assertRaises(RuntimeError):
-            wf.run()
+            wf.invoke()
         wf.delete()
 
     def test_workflow_export(self):
@@ -910,7 +894,6 @@ class TestHDAContents(GalaxyObjectsTestBase):
         super().setUp()
         self.hist = self.gi.histories.create(f"test_{uuid.uuid4().hex}")
         self.ds = self.hist.paste_content(FOO_DATA)
-        self.ds.wait()
 
     def tearDown(self):
         self.hist.delete(purge=True)
@@ -953,6 +936,7 @@ class TestHDAContents(GalaxyObjectsTestBase):
         self.assertTrue(self.ds.purged)
 
 
+@test_util.skip_unless_galaxy('release_19.09')
 class TestRunWorkflow(GalaxyObjectsTestBase):
 
     def setUp(self):
@@ -981,11 +965,13 @@ class TestRunWorkflow(GalaxyObjectsTestBase):
             sep = '\t'  # default
         input_map = {'Input 1': self.inputs[0], 'Input 2': self.inputs[1]}
         sys.stderr.write(os.linesep)
-        outputs, out_hist = self.wf.run(
-            input_map, hist, params=params, wait=True, polling_interval=1)
-        self.assertEqual(len(outputs), 1)
-        out_ds = outputs[0]
-        self.assertIn(out_ds.id, out_hist.dataset_ids)
+        inv = self.wf.invoke(
+            inputs=input_map, params=params, history=hist, inputs_by='name')
+        out_hist = self.gi.histories.get(inv.history_id)
+        inv.wait()
+        last_step = inv.sorted_steps_by()[-1]
+        out_ds = last_step.get_outputs()['out_file1']
+        self.assertEqual(out_ds.container.id, out_hist.id)
         res = out_ds.get_contents()
         exp_rows = zip(*(_.splitlines() for _ in self.contents))
         exp_res = ("\n".join(sep.join(t) for t in exp_rows) + "\n").encode()
@@ -1004,6 +990,7 @@ class TestRunWorkflow(GalaxyObjectsTestBase):
         self._test(params=True)
 
 
+@test_util.skip_unless_galaxy('release_19.09')
 class TestRunDatasetCollectionWorkflow(GalaxyObjectsTestBase):
 
     def setUp(self):
@@ -1027,15 +1014,18 @@ class TestRunDatasetCollectionWorkflow(GalaxyObjectsTestBase):
             ]
         )
         dataset_collection = self.hist.create_dataset_collection(collection_description)
-        input_map = {"Input Dataset Collection": dataset_collection,
-                     "Input 2": dataset1}
-        outputs, out_hist = self.wf.run(input_map, self.hist, wait=True)
-        self.assertEqual(len(outputs), 1)
-        out_hdca = outputs[0]
-        self.assertIsInstance(out_hdca, wrappers.HistoryDatasetCollectionAssociation)
+        self.assertEqual(len(self.hist.content_infos), 3)
+        input_map = {"0": dataset_collection,
+                     "1": dataset1}
+        inv = self.wf.invoke(input_map, history=self.hist)
+        inv.wait()
+        self.hist.refresh()
+        self.assertEqual(len(self.hist.content_infos), 6)
+        last_step = inv.sorted_steps_by()[-1]
+        out_hdca = last_step.get_output_collections()['out_file1']
         self.assertEqual(out_hdca.collection_type, 'list')
         self.assertEqual(len(out_hdca.elements), 2)
-        self.assertEqual(out_hist.id, self.hist.id)
+        self.assertEqual(out_hdca.container.id, self.hist.id)
 
 
 class TestJob(GalaxyObjectsTestBase):

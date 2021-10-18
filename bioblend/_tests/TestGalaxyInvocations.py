@@ -1,3 +1,4 @@
+import contextlib
 import os
 import time
 
@@ -82,11 +83,9 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
         workflow_id = invocation['workflow_id']
         report = self.gi.invocations.get_invocation_report(invocation_id)
         assert report['workflows'] == {workflow_id: {'name': 'paste_columns'}}
-        try:
-            self.gi.invocations.get_invocation_report_pdf(invocation_id, 'report.pdf')
-        except Exception:
+        with contextlib.suppress(Exception):
             # This can fail if dependencies as weasyprint are not installed on the Galaxy server
-            pass
+            self.gi.invocations.get_invocation_report_pdf(invocation_id, 'report.pdf')
 
     @test_util.skip_unless_galaxy('release_20.09')
     def test_get_invocation_biocompute_object(self):

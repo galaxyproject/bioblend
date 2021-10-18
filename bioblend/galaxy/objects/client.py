@@ -24,7 +24,7 @@ class ObjClient(abc.ABC):
         self.log = bioblend.log
 
     @abc.abstractmethod
-    def get(self, id_) -> wrappers.Wrapper:
+    def get(self, id_: str) -> wrappers.Wrapper:
         """
         Retrieve the object corresponding to the given id.
         """
@@ -473,7 +473,7 @@ class ObjJobClient(ObjClient):
         :return: the job corresponding to ``id_``
         """
         res = self.gi.jobs.show_job(id_, full_details)
-        job_dict = self._get_dict('job_tool', res)
+        job_dict = self._get_dict('show_job', res)
         return wrappers.Job(job_dict, gi=self.obj_gi)
 
     def get_previews(self):
@@ -488,3 +488,61 @@ class ObjJobClient(ObjClient):
         """
         dicts = self.gi.jobs.get_jobs()
         return [self.get(_['id']) for _ in dicts]
+
+
+class ObjDatasetClient(ObjClient):
+    """
+    Interacts with Galaxy datasets.
+    """
+
+    def get(self, id_: str, hda_ldda: str = 'hda'):
+        """
+        Retrieve the dataset corresponding to the given id.
+
+        :type hda_ldda: str
+        :param hda_ldda: Whether to show a history dataset ('hda' - the default)
+          or library dataset ('ldda')
+
+        :rtype: :class:`~.wrappers.HistoryDatasetAssociation` or :class:`~.wrappers.LibraryDatasetDatasetAssociation`
+        :return: the history or library dataset corresponding to ``id_``
+        """
+        res = self.gi.datasets.show_dataset(id_, hda_ldda=hda_ldda)
+        ds_dict = self._get_dict('show_dataset', res)
+        if hda_ldda == 'hda':
+            hist = self.obj_gi.histories.get(ds_dict['history_id'])
+            return wrappers.HistoryDatasetAssociation(ds_dict, hist, gi=self.obj_gi)
+        elif hda_ldda == 'ldda':
+            lib = self.obj_gi.libraries.get(ds_dict['parent_library_id'])
+            return wrappers.LibraryDatasetDatasetAssociation(ds_dict, lib, gi=self.obj_gi)
+        else:
+            raise ValueError(f"Unsupported value for hda_ldda: {hda_ldda}")
+
+    def get_previews(self) -> list:
+        raise NotImplementedError()
+
+    def list(self) -> list:
+        raise NotImplementedError()
+
+
+class ObjDatasetCollectionClient(ObjClient):
+    """
+    Interacts with Galaxy dataset collections.
+    """
+
+    def get(self, id_: str):
+        """
+        Retrieve the dataset collection corresponding to the given id.
+
+        :rtype: :class:`~.wrappers.HistoryDatasetCollectionAssociation`
+        :return: the history dataset collection corresponding to ``id_``
+        """
+        res = self.gi.dataset_collections.show_dataset_collection(id_)
+        ds_dict = self._get_dict('show_dataset_collection', res)
+        hist = self.obj_gi.histories.get(ds_dict['history_id'])
+        return wrappers.HistoryDatasetCollectionAssociation(ds_dict, hist, gi=self.obj_gi)
+
+    def get_previews(self) -> list:
+        raise NotImplementedError()
+
+    def list(self) -> list:
+        raise NotImplementedError()
