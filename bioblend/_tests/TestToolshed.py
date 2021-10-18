@@ -16,11 +16,11 @@ class TestToolshed(unittest.TestCase):
     def test_categories_client(self):
         # get_categories
         categories = self.ts.categories.get_categories()
-        self.assertIn('Assembly', [n['name'] for n in categories])
+        self.assertIn('Assembly', [c['name'] for c in categories])
         # we cannot test get_categories with deleted=True as it requires administrator status
 
         # show_category
-        visualization_category_id = [n for n in categories if n['name'] == 'Visualization'][0]['id']
+        visualization_category_id = [c for c in categories if c['name'] == 'Visualization'][0]['id']
         visualization_category = self.ts.categories.show_category(visualization_category_id)
         self.assertEqual(visualization_category['description'], 'Tools for visualizing data')
 
