@@ -6,6 +6,7 @@ should not use it directly.
 A base representation of an instance
 """
 import base64
+import contextlib
 import json
 import logging
 from urllib.parse import (
@@ -38,7 +39,7 @@ class GalaxyClient:
             # Try to guess the scheme, starting from the more secure
             for scheme in ('https://', 'http://'):
                 log.warning(f"Missing scheme in url, trying with {scheme}")
-                try:
+                with contextlib.suppress(requests.RequestException):
                     r = requests.get(
                         scheme + url,
                         timeout=self.timeout,
@@ -47,8 +48,6 @@ class GalaxyClient:
                     r.raise_for_status()
                     found_scheme = scheme
                     break
-                except Exception:
-                    pass
             else:
                 raise ValueError(f"Missing scheme in url {url}")
             url = found_scheme + url
@@ -63,10 +62,9 @@ class GalaxyClient:
             self._key = None
             self.email = email
             self.password = password
-        self.json_headers = {
-            'Content-Type': 'application/json',
-            'x-api-key': self.key,
-        }
+        self.json_headers = {'Content-Type': 'application/json'}
+        # json_headers needs to be set before key can be defined, otherwise authentication with email/password causes an error
+        self.json_headers['x-api-key'] = self.key
 
     def make_get_request(self, url, **kwargs):
         """
@@ -90,7 +88,7 @@ class GalaxyClient:
         r = requests.get(url, headers=headers, **kwargs)
         return r
 
-    def make_post_request(self, url, payload, params=None, files_attached=False):
+    def make_post_request(self, url, payload=None, params=None, files_attached=False):
         """
         Make a POST request using the provided ``url`` and ``payload``.
         The ``payload`` must be a dict that contains the request values.
@@ -127,7 +125,8 @@ class GalaxyClient:
             headers['Content-Type'] = payload.content_type
             post_params = None
         else:
-            payload = json.dumps(payload)
+            if payload is not None:
+                payload = json.dumps(payload)
             headers = self.json_headers
             post_params = params
 
@@ -144,11 +143,17 @@ class GalaxyClient:
             try:
                 return r.json()
             except Exception as e:
-                raise ConnectionError("Request was successful, but cannot decode the response content: %s" %
-                                      e, body=r.content, status_code=r.status_code)
+                raise ConnectionError(
+                    f"Request was successful, but cannot decode the response content: {e}",
+                    body=r.content,
+                    status_code=r.status_code,
+                )
         # @see self.body for HTTP response body
-        raise ConnectionError("Unexpected HTTP status code: %s" % r.status_code,
-                              body=r.text, status_code=r.status_code)
+        raise ConnectionError(
+            f"Unexpected HTTP status code: {r.status_code}",
+            body=r.text,
+            status_code=r.status_code,
+        )
 
     def make_delete_request(self, url, payload=None, params=None):
         """
@@ -189,7 +194,8 @@ class GalaxyClient:
 
         :return: The decoded response.
         """
-        payload = json.dumps(payload)
+        if payload is not None:
+            payload = json.dumps(payload)
         headers = self.json_headers
         r = requests.put(
             url,
@@ -204,11 +210,17 @@ class GalaxyClient:
             try:
                 return r.json()
             except Exception as e:
-                raise ConnectionError("Request was successful, but cannot decode the response content: %s" %
-                                      e, body=r.content, status_code=r.status_code)
+                raise ConnectionError(
+                    f"Request was successful, but cannot decode the response content: {e}",
+                    body=r.content,
+                    status_code=r.status_code,
+                )
         # @see self.body for HTTP response body
-        raise ConnectionError("Unexpected HTTP status code: %s" % r.status_code,
-                              body=r.text, status_code=r.status_code)
+        raise ConnectionError(
+            f"Unexpected HTTP status code: {r.status_code}",
+            body=r.text,
+            status_code=r.status_code,
+        )
 
     def make_patch_request(self, url, payload=None, params=None):
         """
@@ -219,7 +231,8 @@ class GalaxyClient:
 
         :return: The decoded response.
         """
-        payload = json.dumps(payload)
+        if payload is not None:
+            payload = json.dumps(payload)
         headers = self.json_headers
         r = requests.patch(
             url,
@@ -234,11 +247,17 @@ class GalaxyClient:
             try:
                 return r.json()
             except Exception as e:
-                raise ConnectionError("Request was successful, but cannot decode the response content: %s" %
-                                      e, body=r.content, status_code=r.status_code)
+                raise ConnectionError(
+                    f"Request was successful, but cannot decode the response content: {e}",
+                    body=r.content,
+                    status_code=r.status_code,
+                )
         # @see self.body for HTTP response body
-        raise ConnectionError("Unexpected HTTP status code: %s" % r.status_code,
-                              body=r.text, status_code=r.status_code)
+        raise ConnectionError(
+            f"Unexpected HTTP status code: {r.status_code}",
+            body=r.text,
+            status_code=r.status_code,
+        )
 
     @property
     def key(self):
@@ -247,7 +266,7 @@ class GalaxyClient:
             authorization = base64.b64encode(unencoded_credentials.encode())
             headers = self.json_headers.copy()
             headers["Authorization"] = authorization
-            auth_url = "%s/authenticate/baseauth" % self.url
+            auth_url = f"{self.url}/authenticate/baseauth"
             # make_post_request uses default_params, which uses this and
             # sets wrong headers - so using lower level method.
             r = requests.get(

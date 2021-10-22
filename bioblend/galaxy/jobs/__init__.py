@@ -185,7 +185,10 @@ class JobsClient(Client):
 
         :type tool_inputs_update: dict
         :param tool_inputs_update: dictionary specifying any changes which should be
-          made to tool parameters for the rerun job.
+          made to tool parameters for the rerun job. This dictionary should have the same
+          structure as is required when submitting the ``tool_inputs`` dictionary to
+          ``gi.tools.run_tool()``, but only needs to include the inputs or parameters
+          to be updated for the rerun job.
 
         :type history_id: str
         :param history_id: ID of the history in which the job should be executed; if
@@ -193,6 +196,7 @@ class JobsClient(Client):
 
         :rtype: dict
         :return: Information about outputs and the rerun job
+
         .. note::
           This method can only be used with Galaxy ``release_21.01`` or later.
         """
@@ -204,9 +208,18 @@ class JobsClient(Client):
                 raise ValueError('remap was set to True, but this job is not remappable.')
             job_inputs['rerun_remap_job_id'] = job_id
 
-        if tool_inputs_update:
+        def update_inputs(inputs, tool_inputs_update):
+            # recursively update inputs with tool_inputs_update
             for input_param, input_value in tool_inputs_update.items():
-                job_inputs[input_param] = input_value
+                if type(input_value) is dict:
+                    update_inputs(inputs[input_param], input_value)
+                else:
+                    inputs[input_param] = input_value
+            return inputs
+
+        if tool_inputs_update:
+            update_inputs(job_inputs, tool_inputs_update)
+
         url = '/'.join((self.gi.url, 'tools'))
         payload = {
             "history_id": history_id if history_id else job_rerun_params['history_id'],
@@ -300,7 +313,7 @@ class JobsClient(Client):
         :return: ``True`` if the job was successfully cancelled, ``False`` if
           it was already in a terminal state before the cancellation.
         """
-        return self.gi._delete(job_id)
+        return self._delete(id=job_id)
 
     def report_error(self, job_id: str, dataset_id: str, message: str, email: str = None) -> dict:
         """
@@ -392,7 +405,7 @@ class JobsClient(Client):
           This method is only supported by Galaxy 18.09 or later.
         """
         url = self._make_url(module_id=job_id) + '/resume'
-        return self._put(url=url, payload={})
+        return self._put(url=url)
 
     def get_destination_params(self, job_id: str) -> dict:
         """

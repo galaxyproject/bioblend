@@ -8,7 +8,6 @@ should not use it directly.
 import time
 
 import requests
-from requests.packages.urllib3.exceptions import ProtocolError
 
 import bioblend
 # The following import must be preserved for compatibility because
@@ -43,7 +42,7 @@ class Client:
         Default: 1
         """
         if value < 1:
-            raise ValueError("Number of retries must be >= 1 (got: %s)" % value)
+            raise ValueError(f"Number of retries must be >= 1 (got: {value})")
         cls._max_get_retries = value
         return cls
 
@@ -62,7 +61,7 @@ class Client:
         request. Default: 10
         """
         if value < 0:
-            raise ValueError("Retry delay must be >= 0 (got: %s)" % value)
+            raise ValueError(f"Retry delay must be >= 0 (got: {value})")
         cls._get_retry_delay = value
         return cls
 
@@ -127,7 +126,7 @@ class Client:
             attempts_left -= 1
             try:
                 r = self.gi.make_get_request(url, params=params)
-            except (requests.exceptions.ConnectionError, ProtocolError) as e:
+            except requests.exceptions.ConnectionError as e:
                 msg = str(e)
                 r = requests.Response()  # empty Response object used when raising ConnectionError
             else:
@@ -143,27 +142,32 @@ class Client:
                             msg = f"GET: invalid JSON : {r.content!r}"
                 else:
                     msg = f"GET: error {r.status_code}: {r.content!r}"
-            msg = "%s, %d attempts left" % (msg, attempts_left)
+            msg = f"{msg}, {attempts_left} attempts left"
             if attempts_left <= 0:
                 bioblend.log.error(msg)
-                raise ConnectionError(msg, body=r.text,
-                                      status_code=r.status_code)
+                raise ConnectionError(
+                    msg,
+                    body=r.text,
+                    status_code=r.status_code,
+                )
             else:
                 bioblend.log.warning(msg)
                 time.sleep(retry_delay)
 
-    def _post(self, payload, id=None, deleted=False, contents=None, url=None,
+    def _post(self, payload=None, id=None, deleted=False, contents=None, url=None,
               files_attached=False):
         """
         Do a generic POST request, composing the url from the contents of the
         arguments. Alternatively, an explicit ``url`` can be provided to use
-        for the request. ``payload`` must be a dict that contains additional
-        request arguments which will be sent along with the request body.
+        for the request.
         The payload dict may contain file handles (in which case the
         ``files_attached`` flag must be set to true).
 
         If ``files_attached`` is set to ``False``, the request body will be
         JSON-encoded; otherwise, it will be encoded as multipart/form-data.
+
+        :type payload: dict
+        :param payload: additional parameters to send in the body of the request
 
         :return: The decoded response.
         """
@@ -172,12 +176,14 @@ class Client:
         return self.gi.make_post_request(url, payload=payload,
                                          files_attached=files_attached)
 
-    def _put(self, payload, id=None, url=None, params=None):
+    def _put(self, payload=None, id=None, url=None, params=None):
         """
         Do a generic PUT request, composing the url from the contents of the
         arguments. Alternatively, an explicit ``url`` can be provided to use
-        for the request. ``payload`` must be a dict that contains additional
-        request arguments which will be sent along with the request body.
+        for the request.
+
+        :type payload: dict
+        :param payload: additional parameters to send in the body of the request
 
         :return: The decoded response.
         """
@@ -185,12 +191,14 @@ class Client:
             url = self._make_url(module_id=id)
         return self.gi.make_put_request(url, payload=payload, params=params)
 
-    def _patch(self, payload, id=None, url=None, params=None):
+    def _patch(self, payload=None, id=None, url=None, params=None):
         """
         Do a generic PATCH request, composing the url from the contents of the
         arguments. Alternatively, an explicit ``url`` can be provided to use
-        for the request. ``payload`` must be a dict that contains additional
-        request arguments which will be sent along with the request body.
+        for the request.
+
+        :type payload: dict
+        :param payload: additional parameters to send in the body of the request
 
         :return: The decoded response.
         """
@@ -202,8 +210,10 @@ class Client:
         """
         Do a generic DELETE request, composing the url from the contents of the
         arguments. Alternatively, an explicit ``url`` can be provided to use
-        for the request. ``payload`` must be a dict that contains additional
-        request arguments which will be sent along with the request body.
+        for the request.
+
+        :type payload: dict
+        :param payload: additional parameters to send in the body of the request
 
         :return: The decoded response.
         """
@@ -213,5 +223,8 @@ class Client:
         if r.status_code == 200:
             return r.json()
         # @see self.body for HTTP response body
-        raise ConnectionError("Unexpected HTTP status code: %s" % r.status_code,
-                              body=r.text, status_code=r.status_code)
+        raise ConnectionError(
+            f"Unexpected HTTP status code: {r.status_code}",
+            body=r.text,
+            status_code=r.status_code,
+        )

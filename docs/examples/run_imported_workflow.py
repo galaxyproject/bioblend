@@ -47,7 +47,7 @@ print("Importing workflow")
 wf_import_dict = gi.workflows.import_workflow_from_local_path(workflow_file)
 workflow = wf_import_dict['id']
 
-print("Creating data library '%s'" % library_name)
+print(f"Creating data library '{library_name}'")
 
 library_dict = gi.libraries.create_library(library_name)
 library = library_dict['id']
@@ -66,12 +66,12 @@ for (file1, file2) in import_file_pairs:
     filenames[id2] = file2
     dataset_ids.append((id1, id2))
 
-print("Creating output history '%s'" % output_history_name)
+print(f"Creating output history '{output_history_name}'")
 
 outputhist_dict = gi.histories.create_history(output_history_name)
 outputhist = outputhist_dict['id']
 
-print("Will run workflow on %d pairs of files" % len(dataset_ids))
+print(f"Will run workflow on {len(dataset_ids)} pairs of files")
 
 # Get the input step IDs from the workflow.
 # We use the BioBlend convenience function get_workflow_inputs to retrieve inputs by label.
@@ -83,9 +83,9 @@ input2 = gi.workflows.get_workflow_inputs(workflow, label='Input fastq readpair-
 # For each input we need to build a datamap dict with 'src' set to 'ld', as we stored our data in a Galaxy Library
 
 for (data1, data2) in dataset_ids:
-    print("Initiating workflow run on files {}, {}".format(filenames[data1], filenames[data2]))
+    print(f"Initiating workflow run on files {filenames[data1]}, {filenames[data2]}")
     datamap = {
         input1: {'src': 'ld', 'id': data1},
         input2: {'src': 'ld', 'id': data2},
     }
-    result = gi.workflows.run_workflow(workflow, datamap, history_id=outputhist, import_inputs_to_history=True)
+    invocation = gi.workflows.invoke_workflow(workflow, inputs=datamap, history_id=outputhist, import_inputs_to_history=True)

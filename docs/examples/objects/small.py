@@ -50,4 +50,4 @@ print(f'Output history: {out_hist.name} [{out_hist.id}]')
 out_ds = get_one([_ for _ in outputs if _.name == 'Cut on data 1'])
 with tempfile.NamedTemporaryFile(prefix='bioblend_', delete=False) as f:
     out_ds.download(f)
-print('Output downloaded to "%s"' % f.name)
+print(f'Output downloaded to "{f.name}"')

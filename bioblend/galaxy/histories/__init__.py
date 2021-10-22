@@ -7,6 +7,7 @@ import sys
 import time
 import warnings
 import webbrowser
+from typing import List
 from urllib.parse import urljoin
 
 import bioblend
@@ -561,7 +562,7 @@ class HistoryClient(Client):
         :return: 'OK' if it was deleted
         """
         url = self._make_url(history_id, deleted=True) + '/undelete'
-        return self._post(payload={}, url=url)
+        return self._post(url=url)
 
     def get_status(self, history_id):
         """
@@ -641,11 +642,11 @@ class HistoryClient(Client):
             'include_hidden': include_hidden,
             'include_deleted': include_deleted,
         }
-        url = '%s/exports' % self._make_url(history_id)
+        url = f"{self._make_url(history_id)}/exports"
         time_left = maxwait
         while True:
             try:
-                r = self._put(payload={}, url=url, params=params)
+                r = self._put(url=url, params=params)
             except ConnectionError as e:
                 if e.status_code == 202:  # export is not ready
                     if time_left > 0:
@@ -683,8 +684,7 @@ class HistoryClient(Client):
         :rtype: None
         :return: None
         """
-        url = '{}/exports/{}'.format(
-            self._make_url(module_id=history_id), jeha_id)
+        url = f"{self._make_url(module_id=history_id)}/exports/{jeha_id}"
         r = self.gi.make_get_request(url, stream=True)
         r.raise_for_status()
         for chunk in r.iter_content(chunk_size):
@@ -757,3 +757,23 @@ class HistoryClient(Client):
 
         url = urljoin(self.gi.base_url, f"history/switch_to_history?hist_id={history_id}")
         webbrowser.open_new_tab(url)
+
+    def get_extra_files(self, history_id: str, dataset_id: str) -> List[dict]:
+        """
+        Get extra files associated with a composite dataset, or an empty list if
+        there are none.
+
+        :type history_id: str
+        :param history_id: history ID
+
+        :type dataset_id: str
+        :param dataset_id: dataset ID
+
+        :rtype: list
+        :return: List of extra files
+
+        .. note::
+          This method is only supported by Galaxy 19.01 or later.
+        """
+        url = '/'.join((self._make_url(history_id, contents=True), dataset_id, 'extra_files'))
+        return self._get(url=url)

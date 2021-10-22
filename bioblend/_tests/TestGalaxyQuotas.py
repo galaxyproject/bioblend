@@ -9,7 +9,7 @@ class TestGalaxyQuotas(GalaxyTestBase.GalaxyTestBase):
         super().setUp()
         # Quota names must be unique, and they're impossible to delete
         # without accessing the database.
-        self.quota_name = 'BioBlend-Test-Quota-%s' % uuid.uuid4().hex
+        self.quota_name = f"BioBlend-Test-Quota-{uuid.uuid4().hex}"
         self.quota = self.gi.quotas.create_quota(
             self.quota_name, 'testing', '100 GB', '=',
             default='registered'

@@ -22,7 +22,7 @@ iw = gi.workflows.import_shared(p.id)
 
 # Create a new history
 
-history_name = '%s output' % workflow_name
+history_name = f"{workflow_name} output"
 h = gi.histories.create(history_name)
 
 # Select the "Orione SupMat" library

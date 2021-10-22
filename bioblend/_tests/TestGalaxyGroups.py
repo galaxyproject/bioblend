@@ -10,7 +10,7 @@ class TestGalaxyGroups(GalaxyTestBase.GalaxyTestBase):
 
     def setUp(self):
         super().setUp()
-        self.name = 'test_%s' % uuid.uuid4().hex
+        self.name = f"test_{uuid.uuid4().hex}"
         self.group = self.gi.groups.create_group(self.name)[0]
 
     def tearDown(self):
@@ -41,7 +41,7 @@ class TestGalaxyGroups(GalaxyTestBase.GalaxyTestBase):
         self.assertEqual(group_roles, [])
 
     def test_update_group(self):
-        new_name = 'test_%s' % uuid.uuid4().hex
+        new_name = f"test_{uuid.uuid4().hex}"
         new_users = [self.gi.users.get_current_user()['id']]
         self.gi.groups.update_group(self.group['id'], new_name, user_ids=new_users)
         updated_group = self.gi.groups.show_group(self.group['id'])

@@ -238,7 +238,7 @@ class WorkflowClient(Client):
         workflow_dict = self.export_workflow_dict(workflow_id)
 
         if use_default_filename:
-            filename = 'Galaxy-Workflow-%s.ga' % workflow_dict['name']
+            filename = f"Galaxy-Workflow-{workflow_dict['name']}.ga"
             file_local_path = os.path.join(file_local_path, filename)
 
         with open(file_local_path, 'w') as fp:
@@ -273,124 +273,6 @@ class WorkflowClient(Client):
         :return: Dictionary representing the updated workflow
         """
         return self._put(payload=kwds, id=workflow_id)
-
-    def run_workflow(self, workflow_id, dataset_map=None, params=None,
-                     history_id=None, history_name=None,
-                     import_inputs_to_history=False, replacement_params=None):
-        """
-        Run the workflow identified by ``workflow_id``.
-
-        .. deprecated:: 0.7.0
-           Use :meth:`invoke_workflow` instead.
-
-        :type workflow_id: str
-        :param workflow_id: Encoded workflow ID
-
-        :type dataset_map: dict
-        :param dataset_map: A mapping of workflow inputs to datasets. The datasets
-                            source can be a LibraryDatasetDatasetAssociation (``ldda``),
-                            LibraryDataset (``ld``), or HistoryDatasetAssociation (``hda``).
-                            The map must be in the following format:
-                            ``{'<input>': {'id': <encoded dataset ID>, 'src': '[ldda, ld, hda]'}}``
-                            (e.g. ``{'23': {'id': '29beef4fadeed09f', 'src': 'ld'}}``)
-
-        :type params: dict
-        :param params: A mapping of non-datasets tool parameters (see below). Runtime parameters
-        should be specified through  ``inputs``.
-
-        :type history_id: str
-        :param history_id: The encoded history ID where to store the workflow
-          output. Alternatively, ``history_name`` may be specified to create a
-          new history.
-
-        :type history_name: str
-        :param history_name: Create a new history with the given name to store
-          the workflow output. If both ``history_id`` and ``history_name`` are
-          provided, ``history_name`` is ignored. If neither is specified, a new
-          'Unnamed history' is created.
-
-        :type import_inputs_to_history: bool
-        :param import_inputs_to_history: If ``True``, used workflow inputs will be imported
-                                         into the history. If ``False``, only workflow outputs
-                                         will be visible in the given history.
-
-        :type replacement_params: dict
-        :param replacement_params: pattern-based replacements for post-job actions (see below)
-
-        :rtype: dict
-        :return: A dict containing the history ID where the outputs are placed
-          as well as output dataset IDs. For example::
-
-            {'history': '64177123325c9cfd',
-             'outputs': ['aa4d3084af404259']}
-
-        The ``params`` dict should be specified as follows::
-
-          {STEP_ID: PARAM_DICT, ...}
-
-        where PARAM_DICT is::
-
-          {PARAM_NAME: VALUE, ...}
-
-        For backwards compatibility, the following (deprecated) format is
-        also supported for ``params``::
-
-          {TOOL_ID: PARAM_DICT, ...}
-
-        in which case PARAM_DICT affects all steps with the given tool id.
-        If both by-tool-id and by-step-id specifications are used, the
-        latter takes precedence.
-
-        Finally (again, for backwards compatibility), PARAM_DICT can also
-        be specified as::
-
-          {'param': PARAM_NAME, 'value': VALUE}
-
-        Note that this format allows only one parameter to be set per step.
-
-        The ``replacement_params`` dict should map parameter names in
-        post-job actions (PJAs) to their runtime values. For
-        instance, if the final step has a PJA like the following::
-
-          {'RenameDatasetActionout_file1': {'action_arguments': {'newname': '${output}'},
-                                            'action_type': 'RenameDatasetAction',
-                                            'output_name': 'out_file1'}}
-
-        then the following renames the output dataset to 'foo'::
-
-          replacement_params = {'output': 'foo'}
-
-        see also `this email thread
-        <http://lists.bx.psu.edu/pipermail/galaxy-dev/2011-September/006875.html>`_.
-
-        .. warning::
-            This method waits for the whole workflow to be scheduled before
-            returning and does not scale to large workflows as a result. This
-            method has therefore been deprecated in favor of
-            :meth:`invoke_workflow`, which also features improved default
-            behavior for dataset input handling.
-        """
-        warnings.warn(
-            'The run_workflow() method is deprecated, use the invoke_workflow() method instead.',
-            category=FutureWarning
-        )
-        payload = {'workflow_id': workflow_id}
-        if dataset_map:
-            payload['ds_map'] = dataset_map
-
-        if params:
-            payload['parameters'] = params
-
-        if replacement_params:
-            payload['replacement_params'] = replacement_params
-
-        if history_id:
-            payload['history'] = f'hist_id={history_id}'
-        elif history_name:
-            payload['history'] = history_name
-        if import_inputs_to_history is False:
-            payload['no_add_to_history'] = True
-        return self._post(payload)
 
     def invoke_workflow(self, workflow_id: str, inputs: Optional[dict] = None,
                         params: Optional[dict] = None, history_id: Optional[str] = None,
@@ -562,7 +444,7 @@ class WorkflowClient(Client):
         <http://lists.bx.psu.edu/pipermail/galaxy-dev/2011-September/006875.html>`_.
 
         .. warning::
-          Historically, the ``run_workflow`` method consumed a ``dataset_map``
+          Historically, workflow invocation consumed a ``dataset_map``
           data structure that was indexed by unencoded workflow step IDs. These
           IDs would not be stable across Galaxy instances. The new ``inputs``
           property is instead indexed by either the ``order_index`` property

@@ -1,3 +1,4 @@
+import contextlib
 import logging
 import os
 
@@ -7,7 +8,7 @@ from bioblend.config import (
 )
 
 # Current version of the library
-__version__ = '0.15.0'
+__version__ = '0.16.0'
 
 # default chunk size (in bytes) for reading remote data
 try:
@@ -32,10 +33,8 @@ def init_logging():
     Initialize BioBlend's logging from a configuration file.
     """
     for config_file in BioBlendConfigLocations:
-        try:
+        with contextlib.suppress(Exception):
             logging.config.fileConfig(os.path.expanduser(config_file))
-        except Exception:
-            pass
 
 
 class NullHandler(logging.Handler):
@@ -101,7 +100,7 @@ class ConnectionError(Exception):
         self.status_code = status_code
 
     def __str__(self):
-        return "{}: {}".format(self.args[0], self.body)
+        return f"{self.args[0]}: {self.body}"
 
 
 class TimeoutException(Exception):

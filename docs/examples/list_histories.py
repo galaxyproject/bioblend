@@ -29,4 +29,4 @@ else:
     for hist_dict in histories:
         # As an example, we retrieve a piece of metadata (the size) using show_history
         hist_details = gi.histories.show_history(hist_dict['id'])
-        print("{} ({}) : {}".format(hist_dict['name'], hist_details['size'], hist_dict['id']))
+        print(f"{hist_dict['name']} ({hist_details['size']}) : {hist_dict['id']}")

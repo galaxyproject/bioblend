@@ -25,7 +25,7 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
 
     def test_update_history(self):
         new_name = 'buildbot - automated test renamed'
-        new_annotation = 'Annotation for %s' % new_name
+        new_annotation = f"Annotation for {new_name}"
         new_tags = ['tag1', 'tag2']
         updated_hist = self.gi.histories.update_history(self.history['id'], name=new_name, annotation=new_annotation, tags=new_tags)
         if 'id' not in updated_hist:
@@ -194,7 +194,7 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
             shutil.rmtree(tempdir)
 
     def test_import_history(self):
-        path = test_util.get_abspath(os.path.join('data', 'Galaxy-History-test.tar.gz'))
+        path = test_util.get_abspath(os.path.join('data', 'Galaxy-History-Test-history-for-export.tar.gz'))
         self.gi.histories.import_history(file_path=path)
 
     def test_copy_dataset(self):
@@ -217,6 +217,13 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
         self.gi.histories.update_dataset(history_id, dataset1_id, datatype='tabular')
         updated_hda = self.gi.datasets.show_dataset(dataset1_id)
         assert updated_hda['extension'] == 'tabular'
+
+    @test_util.skip_unless_galaxy('release_19.01')
+    def test_get_extra_files(self):
+        history_id = self.history["id"]
+        dataset_id = self._test_dataset(history_id)
+        extra_files = self.gi.histories.get_extra_files(history_id, dataset_id)
+        self.assertEqual(extra_files, [])
 
     def tearDown(self):
         self.gi.histories.delete_history(self.history['id'], purge=True)

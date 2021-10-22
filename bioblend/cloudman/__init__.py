@@ -203,7 +203,7 @@ class CloudManConfig:
     class CustomTypeEncoder(json.JSONEncoder):
         def default(self, obj):
             if isinstance(obj, (CloudManConfig, Bunch)):
-                key = '__%s__' % obj.__class__.__name__
+                key = f"__{obj.__class__.__name__}__"
                 return {key: obj.__dict__}
             return json.JSONEncoder.default(self, obj)
 
@@ -336,16 +336,18 @@ class GenericVMInstance:
                 self._init_instance(status['public_ip'])
                 return
             elif status['error'] != '':
-                msg = "Error launching an instance: {}".format(status['error'])
+                msg = f"Error launching an instance: {status['error']}"
                 bioblend.log.error(msg)
                 raise VMLaunchException(msg)
             else:
-                bioblend.log.warning("Instance not ready yet (it's in state '{}'); waiting another {} seconds..."
-                                     .format(status['instance_state'], time_left))
+                bioblend.log.warning(
+                    f"Instance not ready yet (it's in state '{status['instance_state']}'); waiting another {time_left} seconds..."
+                )
                 time.sleep(vm_ready_check_interval)
 
-        raise VMLaunchException("Waited too long for instance to become ready. Instance Id: %s"
-                                % self.instance_id)
+        raise VMLaunchException(
+            f"Waited too long for instance to become ready. Instance Id: {self.instance_id}"
+        )
 
 
 class CloudManInstance(GenericVMInstance):
@@ -435,15 +437,15 @@ class CloudManInstance(GenericVMInstance):
         validation_result = cfg.validate()
         if validation_result is not None:
             raise VMLaunchException(
-                "Invalid CloudMan configuration provided: {}"
-                .format(validation_result))
+                f"Invalid CloudMan configuration provided: {validation_result}"
+            )
         launcher = CloudManLauncher(cfg.access_key, cfg.secret_key, cfg.cloud_metadata)
         result = launcher.launch(
             cfg.cluster_name, cfg.image_id, cfg.instance_type, cfg.password,
             cfg.kernel_id, cfg.ramdisk_id, cfg.key_name, cfg.security_groups,
             cfg.placement, **cfg.kwargs)
         if result['error'] is not None:
-            raise VMLaunchException("Error launching cloudman instance: {}".format(result['error']))
+            raise VMLaunchException(f"Error launching cloudman instance: {result['error']}")
         instance = CloudManInstance(None, None, launcher=launcher,
                                     launch_result=result, cloudman_config=cfg)
         if cfg.block_until_ready and cfg.cluster_type:

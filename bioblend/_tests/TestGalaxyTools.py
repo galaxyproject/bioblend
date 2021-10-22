@@ -132,15 +132,22 @@ class TestGalaxyTools(GalaxyTestBase.GalaxyTestBase):
 
     def test_tool_dependency_install(self):
         installed_dependencies = self.gi.tools.install_dependencies('CONVERTER_fasta_to_bowtie_color_index')
-        self.assertTrue(any(True for d in installed_dependencies if d.get('name') == 'bowtie' and d.get('dependency_type') == 'conda'), "installed_dependencies is %s" % installed_dependencies)
+        self.assertTrue(any(True for d in installed_dependencies if d.get('name') == 'bowtie' and d.get('dependency_type') == 'conda'), f"installed_dependencies is {installed_dependencies}")
 
     @test_util.skip_unless_tool('CONVERTER_fasta_to_bowtie_color_index')
     def test_tool_requirements(self):
         tool_requirements = self.gi.tools.requirements('CONVERTER_fasta_to_bowtie_color_index')
         self.assertTrue(
             any(True for tr in tool_requirements if {'dependency_type', 'version'} <= set(tr.keys()) and tr.get('name') == 'bowtie'),
-            'tool_requirements is %s' % tool_requirements
+            f"tool_requirements is {tool_requirements}",
         )
+
+    @test_util.skip_unless_tool('CONVERTER_fasta_to_bowtie_color_index')
+    def test_reload(self):
+        response = self.gi.tools.reload('CONVERTER_fasta_to_bowtie_color_index')
+        self.assertIsInstance(response, dict)
+        self.assertIn('message', response)
+        self.assertIn('id', response['message'])
 
     @test_util.skip_unless_tool('sra_source')
     def test_get_citations(self):

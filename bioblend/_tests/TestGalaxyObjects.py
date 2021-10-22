@@ -246,24 +246,10 @@ class TestWorkflow(unittest.TestCase):
         self.assertTrue(self.wf.is_modified)
 
     def test_input_map(self):
-        class DummyLD:
-            SRC = 'ld'
-
-            def __init__(self, id_):
-                self.id = id_
-
-        label = 'Input Dataset'
-        self.assertEqual(self.wf.input_labels, {label})
-        input_map = self.wf.convert_input_map(
-            {label: [DummyLD('a'), DummyLD('b')]})
-        # {'571': {'id': 'a', 'src': 'ld'}, '572': {'id': 'b', 'src': 'ld'}}
-        # OR
-        # {'571': {'id': 'b', 'src': 'ld'}, '572': {'id': 'a', 'src': 'ld'}}
-        self.assertEqual(set(input_map), {'571', '572'})
-        for d in input_map.values():
-            self.assertEqual(set(d), {'id', 'src'})
-            self.assertEqual(d['src'], 'ld')
-            self.assertIn(d['id'], 'ab')
+        hda = wrappers.HistoryDatasetAssociation({'id': 'hda_id'}, container='mock_history')
+        ldda = wrappers.LibraryDatasetDatasetAssociation({'id': 'ldda_id'}, container='mock_library')
+        input_map = self.wf._convert_input_map({'0': hda, '1': ldda, '2': {'id': 'hda2_id', 'src': 'hda'}})
+        self.assertEqual(input_map, {'0': {'id': 'hda_id', 'src': 'hda'}, '1': {'id': 'ldda_id', 'src': 'ldda'}, '2': {'id': 'hda2_id', 'src': 'hda'}})
 
 
 @test_util.skip_unless_galaxy()
@@ -288,7 +274,7 @@ class TestInvocation(GalaxyObjectsTestBase):
         with open(path_pause) as f:
             cls.workflow_pause = cls.gi.workflows.import_new(f.read())
         cls.history = cls.gi.histories.create(name="TestInvocation")
-        cls.dataset_id = cls.history.paste_content('1\t2\t3').id
+        cls.dataset = cls.history.paste_content('1\t2\t3')
 
     @classmethod
     def tearDownClass(cls):
@@ -363,7 +349,7 @@ class TestInvocation(GalaxyObjectsTestBase):
 
     def test_run_step_actions(self):
         inv = self.workflow_pause.invoke(
-            inputs={"0": {"src": "hda", "id": self.dataset_id}},
+            inputs={"0": self.dataset},
             history=self.history,
         )
         for _ in range(20):
@@ -402,9 +388,8 @@ class TestInvocation(GalaxyObjectsTestBase):
         self.assertEqual(len(biocompute_object['description_domain']['pipeline_steps']), 1)
 
     def _obj_invoke_workflow(self):
-        dataset = {'src': 'hda', 'id': self.dataset_id}
         return self.workflow.invoke(
-            inputs={'Input 1': dataset, 'Input 2': dataset},
+            inputs={'Input 1': self.dataset, 'Input 2': self.dataset},
             history=self.history,
             inputs_by='name',
         )
@@ -419,8 +404,7 @@ class TestObjInvocationClient(GalaxyObjectsTestBase):
         with open(SAMPLE_FN) as f:
             cls.workflow = cls.gi.workflows.import_new(f.read())
         cls.history = cls.gi.histories.create(name="TestGalaxyObjInvocationClient")
-        dataset_id = cls.history.paste_content('1\t2\t3').id
-        dataset = {'src': 'hda', 'id': dataset_id}
+        dataset = cls.history.paste_content('1\t2\t3')
         cls.inv = cls.workflow.invoke(
             inputs={'Input 1': dataset, 'Input 2': dataset},
             history=cls.history,
@@ -470,7 +454,7 @@ class TestObjInvocationClient(GalaxyObjectsTestBase):
 class TestGalaxyInstance(GalaxyObjectsTestBase):
 
     def test_library(self):
-        name = 'test_%s' % uuid.uuid4().hex
+        name = f"test_{uuid.uuid4().hex}"
         description, synopsis = 'D', 'S'
         lib = self.gi.libraries.create(
             name, description=description, synopsis=synopsis)
@@ -521,7 +505,7 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
         wf = wrappers.Workflow(wf_dict, gi=self.gi)
         self.assertFalse(wf.is_runnable)
         with self.assertRaises(RuntimeError):
-            wf.run()
+            wf.invoke()
         wf.delete()
 
     def test_workflow_export(self):
@@ -606,7 +590,7 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
         def ids(seq):
             return {_.id for _ in seq}
 
-        names = ['test_%s' % uuid.uuid4().hex for _ in range(2)]
+        names = [f"test_{uuid.uuid4().hex}" for _ in range(2)]
         objs = []
         try:
             objs = [create(_) for _ in names]
@@ -641,7 +625,7 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
         obj_gi_client = getattr(self.gi, obj_type)
         create, del_kwargs = self._normalized_functions(
             obj_type)
-        name = 'test_%s' % uuid.uuid4().hex
+        name = f"test_{uuid.uuid4().hex}"
         objs = [create(name) for _ in range(2)]
         final_name = objs[0].name
         prevs = [_ for _ in obj_gi_client.get_previews(name=final_name) if not _.deleted]
@@ -658,7 +642,7 @@ class TestLibrary(GalaxyObjectsTestBase):
 
     def setUp(self):
         super().setUp()
-        self.lib = self.gi.libraries.create('test_%s' % uuid.uuid4().hex)
+        self.lib = self.gi.libraries.create(f"test_{uuid.uuid4().hex}")
 
     def tearDown(self):
         self.lib.delete()
@@ -668,7 +652,8 @@ class TestLibrary(GalaxyObjectsTestBase):
         self.assertIsNone(r.parent)
 
     def test_folder(self):
-        name, desc = 'test_%s' % uuid.uuid4().hex, 'D'
+        name = f"test_{uuid.uuid4().hex}"
+        desc = "D"
         folder = self.lib.create_folder(name, description=desc)
         self.assertEqual(folder.name, name)
         self.assertEqual(folder.description, desc)
@@ -687,7 +672,7 @@ class TestLibrary(GalaxyObjectsTestBase):
             self.assertIs(ds.container, self.lib)
 
     def test_dataset(self):
-        folder = self.lib.create_folder('test_%s' % uuid.uuid4().hex)
+        folder = self.lib.create_folder(f"test_{uuid.uuid4().hex}")
         ds = self.lib.upload_data(FOO_DATA, folder=folder)
         self.assertEqual(len(self.lib.content_infos), 3)
         self.assertEqual(len(self.lib.folder_ids), 2)
@@ -698,7 +683,7 @@ class TestLibrary(GalaxyObjectsTestBase):
             ds = self.lib.upload_from_url(self.DS_URL)
             self._check_datasets([ds])
         else:
-            self.skipTest('%s not reachable' % self.DS_URL)
+            self.skipTest(f"{self.DS_URL} not reachable")
 
     def test_dataset_from_local(self):
         with tempfile.NamedTemporaryFile(mode='w', prefix='bioblend_test_') as f:
@@ -708,7 +693,7 @@ class TestLibrary(GalaxyObjectsTestBase):
         self._check_datasets([ds])
 
     def test_datasets_from_fs(self):
-        bnames = ['f%d.txt' % i for i in range(2)]
+        bnames = [f"f{i}.txt" for i in range(2)]
         dss, fnames = upload_from_fs(self.lib, bnames)
         self._check_datasets(dss)
         dss, fnames = upload_from_fs(
@@ -717,7 +702,7 @@ class TestLibrary(GalaxyObjectsTestBase):
             self.assertEqual(ds.file_name, fn)
 
     def test_copy_from_dataset(self):
-        hist = self.gi.histories.create('test_%s' % uuid.uuid4().hex)
+        hist = self.gi.histories.create(f"test_{uuid.uuid4().hex}")
         try:
             hda = hist.paste_content(FOO_DATA)
             ds = self.lib.copy_from_dataset(hda)
@@ -731,12 +716,12 @@ class TestLibrary(GalaxyObjectsTestBase):
         self.assertEqual(ds.id, retrieved.id)
 
     def test_get_datasets(self):
-        bnames = ['f%d.txt' % _ for _ in range(2)]
+        bnames = [f"f{i}.txt" for i in range(2)]
         dss, _ = upload_from_fs(self.lib, bnames)
         retrieved = self.lib.get_datasets()
         self.assertEqual(len(dss), len(retrieved))
         self.assertEqual({_.id for _ in dss}, {_.id for _ in retrieved})
-        name = '/%s' % bnames[0]
+        name = f"/{bnames[0]}"
         selected = self.lib.get_datasets(name=name)
         self.assertEqual(len(selected), 1)
         self.assertEqual(selected[0].name, bnames[0])
@@ -746,7 +731,7 @@ class TestLDContents(GalaxyObjectsTestBase):
 
     def setUp(self):
         super().setUp()
-        self.lib = self.gi.libraries.create('test_%s' % uuid.uuid4().hex)
+        self.lib = self.gi.libraries.create(f"test_{uuid.uuid4().hex}")
         self.ds = self.lib.upload_data(FOO_DATA)
         self.ds.wait()
 
@@ -777,8 +762,8 @@ class TestLDContents(GalaxyObjectsTestBase):
         # self.assertTrue(self.ds.deleted)
 
     def test_dataset_update(self):
-        new_name = 'test_%s' % uuid.uuid4().hex
-        new_misc_info = 'Annotation for %s' % new_name
+        new_name = f"test_{uuid.uuid4().hex}"
+        new_misc_info = f"Annotation for {new_name}"
         new_genome_build = 'hg19'
         updated_ldda = self.ds.update(name=new_name, misc_info=new_misc_info, genome_build=new_genome_build)
         self.assertEqual(self.ds.id, updated_ldda.id)
@@ -791,13 +776,13 @@ class TestHistory(GalaxyObjectsTestBase):
 
     def setUp(self):
         super().setUp()
-        self.hist = self.gi.histories.create('test_%s' % uuid.uuid4().hex)
+        self.hist = self.gi.histories.create(f"test_{uuid.uuid4().hex}")
 
     def tearDown(self):
         self.hist.delete(purge=True)
 
     def test_create_delete(self):
-        name = 'test_%s' % uuid.uuid4().hex
+        name = f"test_{uuid.uuid4().hex}"
         hist = self.gi.histories.create(name)
         self.assertEqual(hist.name, name)
         hist_id = hist.id
@@ -814,7 +799,7 @@ class TestHistory(GalaxyObjectsTestBase):
         self.assertEqual(self.hist.dataset_ids[0], hda.id)
 
     def test_import_dataset(self):
-        lib = self.gi.libraries.create('test_%s' % uuid.uuid4().hex)
+        lib = self.gi.libraries.create(f"test_{uuid.uuid4().hex}")
         lds = lib.upload_data(FOO_DATA)
         self.assertEqual(len(self.hist.dataset_ids), 0)
         hda = self.hist.import_dataset(lds)
@@ -838,8 +823,8 @@ class TestHistory(GalaxyObjectsTestBase):
         self.assertEqual(hda.id, retrieved.id)
 
     def test_get_datasets(self):
-        bnames = ['f%d.txt' % _ for _ in range(2)]
-        lib = self.gi.libraries.create('test_%s' % uuid.uuid4().hex)
+        bnames = [f"f{i}.txt" for i in range(2)]
+        lib = self.gi.libraries.create(f"test_{uuid.uuid4().hex}")
         lds = upload_from_fs(lib, bnames)[0]
         hdas = [self.hist.import_dataset(_) for _ in lds]
         lib.delete()
@@ -863,8 +848,8 @@ class TestHistory(GalaxyObjectsTestBase):
             shutil.rmtree(tempdir)
 
     def test_update(self):
-        new_name = 'test_%s' % uuid.uuid4().hex
-        new_annotation = 'Annotation for %s' % new_name
+        new_name = f"test_{uuid.uuid4().hex}"
+        new_annotation = f"Annotation for {new_name}"
         new_tags = ['tag1', 'tag2']
         updated_hist = self.hist.update(name=new_name, annotation=new_annotation, tags=new_tags)
         self.assertEqual(self.hist.id, updated_hist.id)
@@ -907,9 +892,8 @@ class TestHDAContents(GalaxyObjectsTestBase):
 
     def setUp(self):
         super().setUp()
-        self.hist = self.gi.histories.create('test_%s' % uuid.uuid4().hex)
+        self.hist = self.gi.histories.create(f"test_{uuid.uuid4().hex}")
         self.ds = self.hist.paste_content(FOO_DATA)
-        self.ds.wait()
 
     def tearDown(self):
         self.hist.delete(purge=True)
@@ -932,8 +916,8 @@ class TestHDAContents(GalaxyObjectsTestBase):
         self.assertEqual(FOO_DATA.encode(), self.ds.get_contents())
 
     def test_dataset_update(self):
-        new_name = 'test_%s' % uuid.uuid4().hex
-        new_annotation = 'Annotation for %s' % new_name
+        new_name = f"test_{uuid.uuid4().hex}"
+        new_annotation = f"Annotation for {new_name}"
         new_genome_build = 'hg19'
         updated_hda = self.ds.update(name=new_name, annotation=new_annotation, genome_build=new_genome_build)
         self.assertEqual(self.ds.id, updated_hda.id)
@@ -952,11 +936,12 @@ class TestHDAContents(GalaxyObjectsTestBase):
         self.assertTrue(self.ds.purged)
 
 
+@test_util.skip_unless_galaxy('release_19.09')
 class TestRunWorkflow(GalaxyObjectsTestBase):
 
     def setUp(self):
         super().setUp()
-        self.lib = self.gi.libraries.create('test_%s' % uuid.uuid4().hex)
+        self.lib = self.gi.libraries.create(f"test_{uuid.uuid4().hex}")
         with open(SAMPLE_FN) as f:
             self.wf = self.gi.workflows.import_new(f.read())
         self.contents = ['one\ntwo\n', '1\n2\n']
@@ -967,7 +952,7 @@ class TestRunWorkflow(GalaxyObjectsTestBase):
         self.lib.delete()
 
     def _test(self, existing_hist=False, params=False):
-        hist_name = 'test_%s' % uuid.uuid4().hex
+        hist_name = f"test_{uuid.uuid4().hex}"
         if existing_hist:
             hist = self.gi.histories.create(hist_name)
         else:
@@ -980,11 +965,13 @@ class TestRunWorkflow(GalaxyObjectsTestBase):
             sep = '\t'  # default
         input_map = {'Input 1': self.inputs[0], 'Input 2': self.inputs[1]}
         sys.stderr.write(os.linesep)
-        outputs, out_hist = self.wf.run(
-            input_map, hist, params=params, wait=True, polling_interval=1)
-        self.assertEqual(len(outputs), 1)
-        out_ds = outputs[0]
-        self.assertIn(out_ds.id, out_hist.dataset_ids)
+        inv = self.wf.invoke(
+            inputs=input_map, params=params, history=hist, inputs_by='name')
+        out_hist = self.gi.histories.get(inv.history_id)
+        inv.wait()
+        last_step = inv.sorted_steps_by()[-1]
+        out_ds = last_step.get_outputs()['out_file1']
+        self.assertEqual(out_ds.container.id, out_hist.id)
         res = out_ds.get_contents()
         exp_rows = zip(*(_.splitlines() for _ in self.contents))
         exp_res = ("\n".join(sep.join(t) for t in exp_rows) + "\n").encode()
@@ -1003,13 +990,14 @@ class TestRunWorkflow(GalaxyObjectsTestBase):
         self._test(params=True)
 
 
+@test_util.skip_unless_galaxy('release_19.09')
 class TestRunDatasetCollectionWorkflow(GalaxyObjectsTestBase):
 
     def setUp(self):
         super().setUp()
         with open(SAMPLE_WF_COLL_FN) as f:
             self.wf = self.gi.workflows.import_new(f.read())
-        self.hist = self.gi.histories.create('test_%s' % uuid.uuid4().hex)
+        self.hist = self.gi.histories.create(f"test_{uuid.uuid4().hex}")
 
     def tearDown(self):
         self.wf.delete()
@@ -1026,15 +1014,18 @@ class TestRunDatasetCollectionWorkflow(GalaxyObjectsTestBase):
             ]
         )
         dataset_collection = self.hist.create_dataset_collection(collection_description)
-        input_map = {"Input Dataset Collection": dataset_collection,
-                     "Input 2": dataset1}
-        outputs, out_hist = self.wf.run(input_map, self.hist, wait=True)
-        self.assertEqual(len(outputs), 1)
-        out_hdca = outputs[0]
-        self.assertIsInstance(out_hdca, wrappers.HistoryDatasetCollectionAssociation)
+        self.assertEqual(len(self.hist.content_infos), 3)
+        input_map = {"0": dataset_collection,
+                     "1": dataset1}
+        inv = self.wf.invoke(input_map, history=self.hist)
+        inv.wait()
+        self.hist.refresh()
+        self.assertEqual(len(self.hist.content_infos), 6)
+        last_step = inv.sorted_steps_by()[-1]
+        out_hdca = last_step.get_output_collections()['out_file1']
         self.assertEqual(out_hdca.collection_type, 'list')
         self.assertEqual(len(out_hdca.elements), 2)
-        self.assertEqual(out_hist.id, self.hist.id)
+        self.assertEqual(out_hdca.container.id, self.hist.id)
 
 
 class TestJob(GalaxyObjectsTestBase):

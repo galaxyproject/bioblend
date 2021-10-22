@@ -86,15 +86,6 @@ class LibraryDatasetElement(SimpleElement):
         ))
 
 
-__all__ = (
-    "CollectionDescription",
-    "CollectionElement",
-    "HistoryDatasetElement",
-    "HistoryDatasetCollectionElement",
-    "LibraryDatasetElement",
-)
-
-
 class DatasetCollectionClient(Client):
     module = 'dataset_collections'
 
@@ -164,7 +155,7 @@ class DatasetCollectionClient(Client):
         collection are in a terminal state.
 
         :type dataset_collection_id: str
-        :param dataset_id: dataset collection ID
+        :param dataset_collection_id: dataset collection ID
 
         :type maxwait: float
         :param maxwait: Total time (in seconds) to wait for the dataset
@@ -217,3 +208,13 @@ class DatasetCollectionClient(Client):
 
 class DatasetCollectionTimeoutException(TimeoutException):
     pass
+
+
+__all__ = (
+    "CollectionDescription",
+    "CollectionElement",
+    "DatasetCollectionClient",
+    "HistoryDatasetElement",
+    "HistoryDatasetCollectionElement",
+    "LibraryDatasetElement",
+)

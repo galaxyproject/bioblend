@@ -1,0 +1,136 @@
+name: Tests
+on:
+  push:
+  pull_request:
+  schedule:
+    # Run at midnight UTC every Tuesday
+    - cron: '0 0 * * 2'
+jobs:
+  test:
+    if: github.event_name != 'schedule' || github.repository_owner == 'galaxyproject'
+    runs-on: ${{ matrix.os }}
+    services:
+      postgres:
+        # Use PostgreSQL 11 to workaround https://github.com/sqlalchemy/sqlalchemy/issues/4919
+        # for Galaxy 18.05, 18.09 and 19.01
+        image: postgres:11
+        # Provide the password for postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        tox_env: [py36]
+        galaxy_version:
+          - dev
+          - release_21.09
+          - release_21.05
+          - release_21.01
+          - release_20.09
+          - release_20.05
+          - release_20.01
+          - release_19.09
+          - release_19.05
+          - release_19.01
+          - release_18.09
+          - release_18.05
+          - release_18.01
+          - release_17.09
+        include:
+          - os: ubuntu-latest
+            tox_env: py310
+            galaxy_version: dev
+          - os: ubuntu-latest
+            tox_env: py39
+            galaxy_version: dev
+          - os: ubuntu-latest
+            tox_env: py38
+            galaxy_version: dev
+          - os: ubuntu-latest
+            tox_env: py37
+            galaxy_version: dev
+          # Cannot test on macOS because service containers are not supported
+          # yet: https://github.community/t/github-actions-services-available-on-others-vms/16916
+          # - os: macos-latest
+          #   tox_env: py36
+          #   galaxy_version: dev
+    steps:
+      - uses: actions/checkout@v2
+      - name: Cache pip dir
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: pip-cache-${{ matrix.tox_env }}-${{ matrix.galaxy_version }}
+      - name: Calculate Python version for BioBlend from tox_env
+        id: get_bioblend_python_version
+        run: echo "::set-output name=bioblend_python_version::$(echo "${{ matrix.tox_env }}" | sed -e 's/^py\([3-9]\)\([0-9]\+\)/\1.\2/')"
+      - name: Set up Python for BioBlend
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ steps.get_bioblend_python_version.outputs.bioblend_python_version }}
+      - name: Install tox
+        run: |
+          python3 -m pip install --upgrade pip setuptools
+          python3 -m pip install 'tox>=1.8.0' 'virtualenv>=20.0.14'
+      - name: Determine Python version for Galaxy
+        id: get_galaxy_python_version
+        run: |
+          case ${{ matrix.galaxy_version }} in
+            release_17.09 | release_18.0* | release_19.0* )
+              galaxy_python_version=2.7
+              ;;
+            release_20.0* )
+              galaxy_python_version=3.5
+              ;;
+            release_21.0* | dev )
+              galaxy_python_version=3.6
+              ;;
+          esac
+          echo "::set-output name=galaxy_python_version::$galaxy_python_version"
+      - name: Set up Python for Galaxy
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ steps.get_galaxy_python_version.outputs.galaxy_python_version }}
+      - name: Run tests
+        env:
+          PGPASSWORD: postgres
+          PGPORT: 5432
+          PGHOST: localhost
+        run: |
+          # Create a PostgreSQL database for Galaxy. The default SQLite3 database makes test fail randomly because of "database locked" error.
+          createdb -U postgres galaxy
+          # Install Galaxy
+          wget https://github.com/galaxyproject/galaxy/archive/${{ matrix.galaxy_version }}.tar.gz
+          tar xvzf ${{ matrix.galaxy_version }}.tar.gz | tail
+          cd galaxy-${{ matrix.galaxy_version }}
+          export GALAXY_DIR=$PWD
+          export GALAXY_PYTHON=python${{ steps.get_galaxy_python_version.outputs.galaxy_python_version }}
+          export GALAXY_VERSION=${{ matrix.galaxy_version }}
+          # Export GALAXY_CONFIG_FILE environment variable to be used by run_galaxy.sh
+          export GALAXY_CONFIG_FILE=config/galaxy.ini
+          # Export BIOBLEND_ environment variables to be used in BioBlend tests
+          export BIOBLEND_GALAXY_MASTER_API_KEY=$(LC_ALL=C tr -dc A-Za-z0-9 < /dev/urandom | head -c 32)
+          export BIOBLEND_GALAXY_USER_EMAIL=${USER}@localhost.localdomain
+          export DATABASE_CONNECTION=postgresql://postgres:@localhost/galaxy
+          eval "echo \"$(cat "${{ github.workspace }}/tests/template_galaxy.ini")\"" > "$GALAXY_CONFIG_FILE"
+          # Update psycopg2 requirement to a version compatible with glibc 2.26 for Galaxy releases 16.01-18.01, see https://github.com/psycopg/psycopg2-wheels/issues/2
+          sed -i.bak -e 's/psycopg2==2.6.1/psycopg2==2.7.3.1/' lib/galaxy/dependencies/conditional-requirements.txt
+          # Start Galaxy and wait for successful server start
+          export GALAXY_SKIP_CLIENT_BUILD=1
+          GALAXY_RUN_ALL=1 "${{ github.workspace }}/run_galaxy.sh" --daemon --wait
+          export BIOBLEND_GALAXY_URL=http://localhost:8080
+          cd "${{ github.workspace }}"
+          tox -e ${{ matrix.tox_env }}
+      - name: The job has failed
+        if: ${{ failure() }}
+        run: |
+          cat galaxy-${{ matrix.galaxy_version }}/main.log

@@ -1,4 +1,3 @@
-
 """
 Test functions in bioblend.galaxy.tool_dependencies
 """

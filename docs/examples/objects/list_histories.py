@@ -30,4 +30,4 @@ if len(histories) == 0:
 else:
     print("\nHistories:")
     for hist in histories:
-        print("{} ({}) : {}".format(hist.name, hist.wrapped['nice_size'], hist.id))
+        print(f"{hist.name} ({hist.wrapped['nice_size']}) : {hist.id}")

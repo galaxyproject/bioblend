@@ -281,12 +281,12 @@ Instead of using dictionaries directly, workflows can be exported to or imported
 .. Note:: If we export a workflow from one Galaxy instance and import it into another, Galaxy will only run it without modification if it has the same versions of the tool wrappers installed. This is to ensure reproducibility. Otherwise, we will need to manually update the workflow to use the new tool versions.
 
 
-Run a Workflow
+Invoke a Workflow
 ~~~~~~~~~~~~~~
 
-To run a Workflow, we need to tell Galaxy which datasets to use for which workflow inputs. We can use datasets from Histories or Data Libraries.
+To invoke a workflow, we need to tell Galaxy which datasets to use for which workflow inputs. We can use datasets from histories or data libraries.
 
-Examine the Workflow above. We can see that it takes only one input file. That is:
+Examine the workflow above. We can see that it takes only one input file. That is:
 
     >>> wf = gi.workflows.show_workflow('e8b85ad72aefca86')
     >>> wf['inputs']
@@ -294,10 +294,10 @@ Examine the Workflow above. We can see that it takes only one input file. That i
 
 There is one input, labelled 'Input RNA-seq fastq'. This input is passed to the Tophat tool and should be a fastq file. We will use the dataset we examined above, under :ref:`view-histories-and-datasets`, which had name 'C1_R2_1.chr4.fq' and id '10a4b652da44e82a'.
 
-To specify the inputs, we build a data map and pass this to the ``run_workflow`` method. This data map is a nested dictionary object which maps inputs to datasets. We call::
+To specify the inputs, we build a data map and pass this to the ``invoke_workflow`` method. This data map is a nested dictionary object which maps inputs to datasets. We call::
 
     >>> datamap = {'252': {'src':'hda', 'id':'10a4b652da44e82a'}}
-    >>> gi.workflows.run_workflow('e8b85ad72aefca86', datamap, history_name='New output history')
+    >>> gi.workflows.invoke_workflow('e8b85ad72aefca86', inputs=datamap, history_name='New output history')
     {'history': '0a7b7992a7cabaec',
      'outputs': ['33be8ad9917d9207',
                  'fbee1c2dc793c114',
@@ -310,9 +310,9 @@ To specify the inputs, we build a data map and pass this to the ``run_workflow``
 
 In this case the only input id is '252' and the corresponding dataset id is '10a4b652da44e82a'. We have specified the dataset source to be 'hda' (HistoryDatasetAssociation) since the dataset is stored in a History. See the :ref:`API reference <workflows-api>` for allowed dataset specifications. We have also requested that a new History be created and used to store the results of the run, by setting ``history_name='New output history'``.
 
-The ``run_workflow`` call submits all the jobs which need to be run to the Galaxy workflow engine, with the appropriate dependencies so that they will run in order. The call returns immediately, so we can continue to submit new jobs while waiting for this workflow to execute. ``run_workflow`` returns the id of the output History and of the datasets that will be created as a result of this run. Note that these dataset ids are valid immediately, so we can specify these datasets as inputs to new jobs even before the files have been created, and the new jobs will be added to the queue with the appropriate dependencies.
+The ``invoke_workflow`` call submits all the jobs which need to be run to the Galaxy workflow engine, with the appropriate dependencies so that they will run in order. The call returns immediately, so we can continue to submit new jobs while waiting for this workflow to execute. ``invoke_workflow`` returns the a dictionary describing the workflow invocation.
 
-If we view the output History immediately after calling ``run_workflow``, we will see something like::
+If we view the output History immediately after calling ``invoke_workflow``, we will see something like::
 
     >>> gi.histories.show_history('0a7b7992a7cabaec')
     {'annotation': '',
