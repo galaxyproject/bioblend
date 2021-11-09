@@ -130,9 +130,13 @@ class TestGalaxyTools(GalaxyTestBase.GalaxyTestBase):
         # TODO: Wait for results and verify it has 3 lines - 1 2 3, 4 5 6,
         # and 7 8 9.
 
+    @test_util.skip_unless_galaxy('release_19.05')
+    @test_util.skip_unless_tool('CONVERTER_fasta_to_bowtie_color_index')
     def test_tool_dependency_install(self):
         installed_dependencies = self.gi.tools.install_dependencies('CONVERTER_fasta_to_bowtie_color_index')
         self.assertTrue(any(True for d in installed_dependencies if d.get('name') == 'bowtie' and d.get('dependency_type') == 'conda'), f"installed_dependencies is {installed_dependencies}")
+        status = self.gi.tools.uninstall_dependencies('CONVERTER_fasta_to_bowtie_color_index')
+        self.assertEqual(status[0]['model_class'], 'NullDependency', status)
 
     @test_util.skip_unless_tool('CONVERTER_fasta_to_bowtie_color_index')
     def test_tool_requirements(self):
@@ -153,10 +157,6 @@ class TestGalaxyTools(GalaxyTestBase.GalaxyTestBase):
     def test_get_citations(self):
         citations = self.gi.tools.get_citations('sra_source')
         self.assertEqual(len(citations), 2)
-
-    def test_tool_dependency_uninstall(self):
-        status = self.gi.tools.uninstall_dependencies('CONVERTER_fasta_to_bowtie_color_index')
-        self.assertEqual(status[0]['model_class'], 'NullDependency')
 
     def _wait_for_and_verify_upload(self, tool_output, file_name, fn, expected_dbkey="?"):
         self.assertEqual(len(tool_output["outputs"]), 1)
