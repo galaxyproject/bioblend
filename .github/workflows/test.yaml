@@ -5,6 +5,9 @@ on:
   schedule:
     # Run at midnight UTC every Tuesday
     - cron: '0 0 * * 2'
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   test:
     if: github.event_name != 'schedule' || github.repository_owner == 'galaxyproject'
