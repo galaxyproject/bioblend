@@ -91,9 +91,11 @@ jobs:
             release_20.0* )
               galaxy_python_version=3.5
               ;;
-            release_21.0* | dev )
+            release_21.0* )
               galaxy_python_version=3.6
               ;;
+            release_22.0* | dev )
+              galaxy_python_version=3.7
           esac
           echo "::set-output name=galaxy_python_version::$galaxy_python_version"
       - name: Set up Python for Galaxy
