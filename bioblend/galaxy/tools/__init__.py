@@ -195,7 +195,7 @@ class ToolClient(Client):
         Get updated tool parameters of a given tool.
 
         :type inputs: dict
-        :param inputs: dictionary of tool parameters         
+        :param inputs: dictionary of tool parameters
 
         :type tool_id: str
         :param tool_id: id of the requested tool
@@ -204,7 +204,7 @@ class ToolClient(Client):
         :param history_id: id of the requested history
 
         :type tool_version str
-        :param tool_version: version of the requested tool 
+        :param tool_version: version of the requested tool
 
         :rtype: dict
         :return: Returns a tool model including dynamic parameters and updated values, repeats block etc.
@@ -212,17 +212,16 @@ class ToolClient(Client):
         params = {}
 
         if inputs:
-          params['inputs'] = inputs
+            params['inputs'] = inputs
 
         if tool_version:
-          params['tool_version'] = tool_version
+            params['tool_version'] = tool_version
 
         if history_id:
-          params['history_id'] = history_id
+            params['history_id'] = history_id
 
         url = '/'.join((self.gi.url, 'tools', tool_id, 'build'))
 
-        
         return self._post(payload=params, url=url)
 
     def run_tool(self, history_id, tool_id, tool_inputs, input_format='legacy'):
