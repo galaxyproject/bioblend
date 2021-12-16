@@ -192,7 +192,7 @@ class ToolClient(Client):
     def build(self, tool_id, inputs=None, tool_version=None, history_id=None):
 
         """
-        Get updated tool parameters  given tool.
+        Get updated tool parameters of a given tool.
 
         :type inputs: dict
         :param inputs: dictionary of tool parameters         
