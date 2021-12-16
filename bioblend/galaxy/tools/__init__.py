@@ -189,7 +189,7 @@ class ToolClient(Client):
         params['link_details'] = link_details
         return self._get(id=tool_id, params=params)
 
-    def build_tool(self, tool_id, inputs=None, tool_version=None, history_id=None):
+    def build(self, tool_id, inputs=None, tool_version=None, history_id=None):
 
         """
         Get updated tool parameters  given tool.
