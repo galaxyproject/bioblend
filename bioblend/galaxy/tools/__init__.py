@@ -192,10 +192,19 @@ class ToolClient(Client):
     def build(self, tool_id, inputs=None, tool_version=None, history_id=None):
 
         """
-        Get updated tool parameters of a given tool.
+        This method returns the tool model, which includes an updated input parameter array for the given tool,
+        based on user-defined "inputs".
 
         :type inputs: dict
-        :param inputs: dictionary of tool parameters
+        :param inputs: (optional) inputs for the payload. Possible values are the
+          default 'legacy' (where inputs nested inside conditionals
+          or repeats are identified with e.g. '<conditional_name>|<input_name>')
+          or '21.01' (where inputs inside conditionals or repeats are nested elements).
+          For example::
+
+              {"num_lines": "1",
+              "input": {"values": [{"src": "hda", "id": "4d366c1196c36d18"}]},
+              "seed_source|seed_source_selector": "no_seed",}
 
         :type tool_id: str
         :param tool_id: id of the requested tool
@@ -208,6 +217,168 @@ class ToolClient(Client):
 
         :rtype: dict
         :return: Returns a tool model including dynamic parameters and updated values, repeats block etc.
+          For example:
+
+              {"model_class": "Tool",
+                "id": "random_lines1",
+                "name": "Select random lines",
+                "version": "2.0.2",
+                "description": "from a file",
+                "labels": [],
+                "edam_operations": [],
+                "edam_topics": [],
+                "hidden": "",
+                "is_workflow_compatible": True,
+                "xrefs": [],
+                "config_file": "/Users/joshij/galaxy/tools/filters/randomlines.xml",
+                "panel_section_id": "textutil",
+                "panel_section_name": "Text Manipulation",
+                "form_style": "regular",
+                "inputs": [
+                    {
+                        "model_class": "IntegerToolParameter",
+                        "name": "num_lines",
+                        "argument": None,
+                        "type": "integer",
+                        "label": "Randomly select",
+                        "help": "lines",
+                        "refresh_on_change": False,
+                        "min": None,
+                        "max": None,
+                        "optional": False,
+                        "hidden": False,
+                        "is_dynamic": False,
+                        "value": "1",
+                        "area": False,
+                        "datalist": [],
+                        "default_value": "1",
+                        "text_value": "1",
+                    },
+                    {
+                        "model_class": "DataToolParameter",
+                        "name": "input",
+                        "argument": None,
+                        "type": "data",
+                        "label": "from",
+                        "help": "",
+                        "refresh_on_change": True,
+                        "optional": False,
+                        "hidden": False,
+                        "is_dynamic": False,
+                        "value": {"values": [{"id": "4d366c1196c36d18", "src": "hda"}]},
+                        "extensions": ["txt"],
+                        "edam": {"edam_formats": ["format_2330"], "edam_data": ["data_0006"]},
+                        "multiple": False,
+                        "options": {
+                            "hda": [
+                                {
+                                    "id": "4d366c1196c36d18",
+                                    "hid": 4,
+                                    "name": "non_ACPs.fasta",
+                                    "tags": [],
+                                    "src": "hda",
+                                    "keep": False,
+                                }
+                            ],
+                            "hdca": [
+                                {
+                                    "id": "1cd8e2f6b131e891",
+                                    "hid": 8,
+                                    "name": "data 55 and data 56 (as list) (with implicit datatype conversion)",
+                                    "tags": [],
+                                    "src": "hdca",
+                                    "keep": False,
+                                },
+                                {
+                                    "id": "f597429621d6eb2b",
+                                    "hid": 3,
+                                    "name": "data 55 and data 56 (as list) (with implicit datatype conversion)",
+                                    "tags": [],
+                                    "src": "hdca",
+                                    "keep": False,
+                                },
+                            ],
+                        },
+                        "default_value": {"values": [{"id": "4d366c1196c36d18", "src": "hda"}]},
+                        "text_value": "No dataset.",
+                    },
+                    {
+                        "model_class": "Conditional",
+                        "name": "seed_source",
+                        "type": "conditional",
+                        "cases": [
+                            {"model_class": "ConditionalWhen", "value": "no_seed", "inputs": []},
+                            {
+                                "model_class": "ConditionalWhen",
+                                "value": "set_seed",
+                                "inputs": [
+                                    {
+                                        "model_class": "TextToolParameter",
+                                        "name": "seed",
+                                        "argument": None,
+                                        "type": "text",
+                                        "label": "Random seed",
+                                        "help": "",
+                                        "refresh_on_change": False,
+                                        "optional": False,
+                                        "hidden": False,
+                                        "is_dynamic": False,
+                                        "value": "",
+                                        "area": False,
+                                        "datalist": [],
+                                        "default_value": "",
+                                        "text_value": "Empty.",
+                                    }
+                                ],
+                            },
+                        ],
+                        "test_param": {
+                            "model_class": "SelectToolParameter",
+                            "name": "seed_source_selector",
+                            "argument": None,
+                            "type": "select",
+                            "label": "Set a random seed",
+                            "help": "",
+                            "refresh_on_change": True,
+                            "optional": False,
+                            "hidden": False,
+                            "is_dynamic": False,
+                            "value": "no_seed",
+                            "options": [
+                                ["Don't set seed", "no_seed", True],
+                                ["Set seed", "set_seed", False],
+                            ],
+                            "display": None,
+                            "multiple": False,
+                            "textable": False,
+                            "text_value": "Don't set seed",
+                        },
+                    },
+                ],
+                "help": '<p><strong>What it does</strong></p>\n<p>This tool selects N random lines from a file, with no repeats, and preserving ordering.</p>\n<hr class="docutils" />\n<p><strong>Example</strong></p>\n<p>Input File:</p>\n<pre class="literal-block">\nchr7  56632  56652   D17003_CTCF_R6  310   \nchr7  56736  56756   D17003_CTCF_R7  354   \nchr7  56761  56781   D17003_CTCF_R4  220   \nchr7  56772  56792   D17003_CTCF_R7  372   \nchr7  56775  56795   D17003_CTCF_R4  207   \n</pre>\n<p>Selecting 2 random lines might return this:</p>\n<pre class="literal-block">\nchr7  56736  56756   D17003_CTCF_R7  354   \nchr7  56775  56795   D17003_CTCF_R4  207   \n</pre>\n',
+                "citations": False,
+                "sharable_url": None,
+                "message": "",
+                "warnings": "",
+                "versions": ["2.0.2"],
+                "requirements": [],
+                "errors": {},
+                "tool_errors": None,
+                "state_inputs": {
+                    "num_lines": "1",
+                    "input": {"values": [{"id": "4d366c1196c36d18", "src": "hda"}]},
+                    "seed_source": {"seed_source_selector": "no_seed", "__current_case__": 0},
+                },
+                "job_id": None,
+                "job_remap": None,
+                "history_id": "c9468fdb6dc5c5f1",
+                "display": True,
+                "action": "/tool_runner/index",
+                "license": None,
+                "creator": None,
+                "method": "post",
+                "enctype": "application/x-www-form-urlencoded",}
+
         """
         params = {}
 
