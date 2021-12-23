@@ -165,3 +165,9 @@ class TestGalaxyTools(GalaxyTestBase.GalaxyTestBase):
         expected_contents = open(fn, "rb").read()
         self._wait_and_verify_dataset(output["id"], expected_contents)
         self.assertEqual(output["genome_build"], expected_dbkey)
+
+    @test_util.skip_unless_tool("random_lines1")
+    def test_get_tool_model(self):
+        history_id = self.gi.histories.create_history(name="test_run_random_lines history")["id"]
+        tool_model = self.gi.tools.build(tool_id="random_lines1", history_id=history_id)
+        self.assertEqual(len(tool_model['inputs']), 3)

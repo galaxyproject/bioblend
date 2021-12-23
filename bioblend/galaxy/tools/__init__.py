@@ -189,6 +189,119 @@ class ToolClient(Client):
         params['link_details'] = link_details
         return self._get(id=tool_id, params=params)
 
+    def build(self, tool_id, inputs=None, tool_version=None, history_id=None):
+        """
+        This method returns the tool model, which includes an updated input parameter array for the given tool,
+        based on user-defined "inputs".
+
+        :type inputs: dict
+        :param inputs: (optional) inputs for the payload.
+          For example::
+
+            {
+                "num_lines": "1",
+                "input": {
+                    "values": [
+                        {
+                            "src": "hda",
+                            "id": "4d366c1196c36d18"
+                        }
+                    ]
+                },
+                "seed_source|seed_source_selector": "no_seed",
+            }
+
+        :type tool_id: str
+        :param tool_id: id of the requested tool
+
+        :type history_id: str
+        :param history_id: id of the requested history
+
+        :type tool_version: str
+        :param tool_version: version of the requested tool
+
+        :rtype: dict
+        :return: Returns a tool model including dynamic parameters and updated values, repeats block etc.
+          For example::
+
+            {
+                "model_class": "Tool",
+                "id": "random_lines1",
+                "name": "Select random lines",
+                "version": "2.0.2",
+                "description": "from a file",
+                "labels": [],
+                "edam_operations": [],
+                "edam_topics": [],
+                "hidden": "",
+                "is_workflow_compatible": True,
+                "xrefs": [],
+                "config_file": "/Users/joshij/galaxy/tools/filters/randomlines.xml",
+                "panel_section_id": "textutil",
+                "panel_section_name": "Text Manipulation",
+                "form_style": "regular",
+                "inputs": [
+                    {
+                        "model_class": "IntegerToolParameter",
+                        "name": "num_lines",
+                        "argument": None,
+                        "type": "integer",
+                        "label": "Randomly select",
+                        "help": "lines",
+                        "refresh_on_change": False,
+                        "min": None,
+                        "max": None,
+                        "optional": False,
+                        "hidden": False,
+                        "is_dynamic": False,
+                        "value": "1",
+                        "area": False,
+                        "datalist": [],
+                        "default_value": "1",
+                        "text_value": "1",
+                    },
+                ],
+                "help": 'This tool selects N random lines from a file, with no repeats, and preserving ordering.',
+                "citations": False,
+                "sharable_url": None,
+                "message": "",
+                "warnings": "",
+                "versions": ["2.0.2"],
+                "requirements": [],
+                "errors": {},
+                "tool_errors": None,
+                "state_inputs": {
+                    "num_lines": "1",
+                    "input": {"values": [{"id": "4d366c1196c36d18", "src": "hda"}]},
+                    "seed_source": {"seed_source_selector": "no_seed", "__current_case__": 0},
+                },
+                "job_id": None,
+                "job_remap": None,
+                "history_id": "c9468fdb6dc5c5f1",
+                "display": True,
+                "action": "/tool_runner/index",
+                "license": None,
+                "creator": None,
+                "method": "post",
+                "enctype": "application/x-www-form-urlencoded",
+            }
+
+        """
+        params = {}
+
+        if inputs:
+            params['inputs'] = inputs
+
+        if tool_version:
+            params['tool_version'] = tool_version
+
+        if history_id:
+            params['history_id'] = history_id
+
+        url = '/'.join((self.gi.url, 'tools', tool_id, 'build'))
+
+        return self._post(payload=params, url=url)
+
     def run_tool(self, history_id, tool_id, tool_inputs, input_format='legacy'):
         """
         Runs tool specified by ``tool_id`` in history indicated
