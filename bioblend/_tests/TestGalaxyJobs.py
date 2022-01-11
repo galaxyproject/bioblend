@@ -74,10 +74,10 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
         self.gi.invocations.wait_for_invocation(invocation1['id'])
         self.gi.invocations.wait_for_invocation(invocation2['id'])
 
-        jobs = self.gi.jobs.get_jobs(history_id=self.history_id)
-        self.assertEqual(len(jobs), 3)
-        job1_id = jobs[1]['id']
-        jobs = self.gi.jobs.get_jobs(history_id=self.history_id, limit=1, offset=1)
+        all_jobs = self.gi.jobs.get_jobs(history_id=self.history_id, order_by='create_time')
+        self.assertEqual(len(all_jobs), 3)
+        job1_id = all_jobs[1]['id']
+        jobs = self.gi.jobs.get_jobs(history_id=self.history_id, limit=1, offset=1, order_by='create_time')
         self.assertEqual(len(jobs), 1)
         self.assertEqual(jobs[0]['id'], job1_id)
         jobs = self.gi.jobs.get_jobs(invocation_id=invocation1['id'])

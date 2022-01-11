@@ -26,7 +26,7 @@ class JobsClient(Client):
 
     def get_jobs(self, state=None, history_id=None, invocation_id=None, tool_id=None,
                  workflow_id=None, user_id=None, date_range_min=None, date_range_max=None,
-                 limit=500, offset=0, user_details=False):
+                 limit=500, offset=0, user_details=False, order_by=None):
         """
         Get all jobs, or select a subset by specifying optional arguments for
         filtering (e.g. a state).
@@ -73,6 +73,10 @@ class JobsClient(Client):
         :param user_details: If ``True`` and the user is an admin, add the user
           email to each returned job dictionary.
 
+        :type order_by: str
+        :param order_by: Whether to order jobs by ``create_time`` or
+          ``update_time`` (the default).
+
         :rtype: list of dict
         :return: Summary information for each selected job.
           For example::
@@ -118,6 +122,8 @@ class JobsClient(Client):
             params['date_range_max'] = date_range_max
         if user_details:
             params['user_details'] = user_details
+        if order_by:
+            params['order_by'] = order_by
         return self._get(params=params)
 
     def show_job(self, job_id, full_details=False):
