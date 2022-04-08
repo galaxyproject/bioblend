@@ -614,26 +614,43 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
 
     def test_delete_libraries_by_name(self):
         self._test_delete_by_name('libraries')
+        self._test_delete_by_ambiguous_name('libraries')
 
     def test_delete_histories_by_name(self):
         self._test_delete_by_name('histories')
+        self._test_delete_by_ambiguous_name('histories')
 
     def test_delete_workflows_by_name(self):
         self._test_delete_by_name('workflows')
+        self._test_delete_by_ambiguous_name('workflows')
 
     def _test_delete_by_name(self, obj_type):
         obj_gi_client = getattr(self.gi, obj_type)
-        create, del_kwargs = self._normalized_functions(
-            obj_type)
+        create, del_kwargs = self._normalized_functions(obj_type)
+        name = f"test_{uuid.uuid4().hex}"
+        create(name)
+        prevs = [_ for _ in obj_gi_client.get_previews(name=name) if not _.deleted]
+        self.assertEqual(len(prevs), 1)
+        del_kwargs["name"] = name
+        obj_gi_client.delete(**del_kwargs)
+        prevs = [_ for _ in obj_gi_client.get_previews(name=name) if not _.deleted]
+        self.assertEqual(len(prevs), 0)
+
+    def _test_delete_by_ambiguous_name(self, obj_type):
+        obj_gi_client = getattr(self.gi, obj_type)
+        create, del_kwargs = self._normalized_functions(obj_type)
         name = f"test_{uuid.uuid4().hex}"
         objs = [create(name) for _ in range(2)]
-        final_name = objs[0].name
-        prevs = [_ for _ in obj_gi_client.get_previews(name=final_name) if not _.deleted]
+        prevs = [_ for _ in obj_gi_client.get_previews(name=name) if not _.deleted]
         self.assertEqual(len(prevs), len(objs))
-        del_kwargs['name'] = final_name
-        obj_gi_client.delete(**del_kwargs)
-        prevs = [_ for _ in obj_gi_client.get_previews(name=final_name) if not _.deleted]
-        self.assertEqual(len(prevs), 0)
+        del_kwargs["name"] = name
+        with self.assertRaises(ValueError):
+            obj_gi_client.delete(**del_kwargs)
+        # Cleanup
+        del del_kwargs["name"]
+        for prev in prevs:
+            del_kwargs["id_"] = prev.id
+            obj_gi_client.delete(**del_kwargs)
 
 
 class TestLibrary(GalaxyObjectsTestBase):

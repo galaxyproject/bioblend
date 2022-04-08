@@ -5,6 +5,9 @@
 
 * Added ``get_extra_files()`` method to ``HistoryClient``.
 
+* BioBlend.objects: Fail if multiple libraries/histories/workflows match when
+  deleting by name, instead of deleting them all.
+
 * Improvements to type annotations, tests and documentation
 
 ### BioBlend v0.16.0 - 2021-06-13

@@ -58,32 +58,33 @@ class ObjClient(abc.ABC):
         """
         pass
 
-    def _select_ids(self, id_=None, name=None):
+    def _select_id(self, id_=None, name=None):
         """
-        Return the id list that corresponds to the given id or name info.
+        Return the id that corresponds to the given id or name info.
         """
         if id_ is None and name is None:
-            self._error('neither id nor name provided', err_type=TypeError)
+            raise ValueError('Neither id nor name provided')
         if id_ is not None and name is not None:
-            self._error('both id and name provided', err_type=TypeError)
+            raise ValueError('Both id and name provided')
         if id_ is None:
-            return [_.id for _ in self.get_previews(name=name)]
+            id_list = [_.id for _ in self.get_previews(name=name)]
+            if len(id_list) > 1:
+                raise ValueError("Ambiguous name")
+            if not id_list:
+                raise ValueError("name not found")
+            return id_list[0]
         else:
-            return [id_]
-
-    def _error(self, msg, err_type=RuntimeError):
-        self.log.error(msg)
-        raise err_type(msg)
+            return id_
 
     def _get_dict(self, meth_name, reply):
         if reply is None:
-            self._error(f"{meth_name}: no reply")
+            raise RuntimeError(f"{meth_name}: no reply")
         elif isinstance(reply, Mapping):
             return reply
         try:
             return reply[0]
         except (TypeError, IndexError):
-            self._error(f'{meth_name}: unexpected reply: {reply!r}')
+            raise RuntimeError(f'{meth_name}: unexpected reply: {reply!r}')
 
 
 class ObjDatasetContainerClient(ObjClient):
@@ -97,7 +98,7 @@ class ObjDatasetContainerClient(ObjClient):
         cdict['id'] = id_  # overwrite unencoded id
         c_infos = show_f(id_, contents=True)
         if not isinstance(c_infos, Sequence):
-            self._error(f'{show_fname}: unexpected reply: {c_infos!r}')
+            raise RuntimeError(f'{show_fname}: unexpected reply: {c_infos!r}')
         c_infos = [ctype.CONTENT_INFO_TYPE(_) for _ in c_infos]
         return ctype(cdict, content_infos=c_infos, gi=self.obj_gi)
 
@@ -158,16 +159,16 @@ class ObjLibraryClient(ObjDatasetContainerClient):
         """
         Delete the library with the given id or name.
 
-        Note that the same name can map to multiple libraries.
+        Fails if multiple libraries have the specified name.
 
         .. warning::
           Deleting a data library is irreversible - all of the data from
           the library will be permanently deleted.
         """
-        for id_ in self._select_ids(id_=id_, name=name):
-            res = self.gi.libraries.delete_library(id_)
-            if not isinstance(res, Mapping):
-                self._error(f'delete_library: unexpected reply: {res!r}')
+        id_ = self._select_id(id_=id_, name=name)
+        res = self.gi.libraries.delete_library(id_)
+        if not isinstance(res, Mapping):
+            raise RuntimeError(f'delete_library: unexpected reply: {res!r}')
 
 
 class ObjHistoryClient(ObjDatasetContainerClient):
@@ -220,7 +221,7 @@ class ObjHistoryClient(ObjDatasetContainerClient):
         """
         Delete the history with the given id or name.
 
-        Note that the same name can map to multiple histories.
+        Fails if multiple histories have the same name.
 
         :type purge: bool
         :param purge: if ``True``, also purge (permanently delete) the history
@@ -230,10 +231,10 @@ class ObjHistoryClient(ObjDatasetContainerClient):
           ``allow_user_dataset_purge`` option set to ``true`` in the
           ``config/galaxy.yml`` configuration file.
         """
-        for id_ in self._select_ids(id_=id_, name=name):
-            res = self.gi.histories.delete_history(id_, purge=purge)
-            if not isinstance(res, Mapping):
-                self._error(f'delete_history: unexpected reply: {res!r}')
+        id_ = self._select_id(id_=id_, name=name)
+        res = self.gi.histories.delete_history(id_, purge=purge)
+        if not isinstance(res, Mapping):
+            raise RuntimeError(f'delete_history: unexpected reply: {res!r}')
 
 
 class ObjWorkflowClient(ObjClient):
@@ -263,7 +264,7 @@ class ObjWorkflowClient(ObjClient):
             try:
                 wf_dict = json.loads(src)
             except (TypeError, ValueError):
-                self._error(f'src not supported: {src!r}')
+                raise ValueError(f'src not supported: {src!r}')
         wf_info = self.gi.workflows.import_workflow_dict(wf_dict, publish)
         return self.get(wf_info['id'])
 
@@ -315,16 +316,16 @@ class ObjWorkflowClient(ObjClient):
         """
         Delete the workflow with the given id or name.
 
-        Note that the same name can map to multiple workflows.
+        Fails if multiple workflows have the specified name.
 
         .. warning::
           Deleting a workflow is irreversible - all of the data from
           the workflow will be permanently deleted.
         """
-        for id_ in self._select_ids(id_=id_, name=name):
-            res = self.gi.workflows.delete_workflow(id_)
-            if not isinstance(res, str):
-                self._error(f"delete_workflow: unexpected reply: {res!r}")
+        id_ = self._select_id(id_=id_, name=name)
+        res = self.gi.workflows.delete_workflow(id_)
+        if not isinstance(res, str):
+            raise RuntimeError(f"delete_workflow: unexpected reply: {res!r}")
 
 
 class ObjInvocationClient(ObjClient):
