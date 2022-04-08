@@ -1,6 +1,7 @@
 ### BioBlend v - unreleased
 
-* Added support for Python 3.10. Added support for Galaxy release 21.09.
+* Dropped support for Python 3.6. Added support for Python 3.10. Added support
+  for Galaxy release 21.09 and 22.01.
 
 * Added ``get_extra_files()`` method to ``HistoryClient``.
 
