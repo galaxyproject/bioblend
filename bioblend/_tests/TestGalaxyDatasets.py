@@ -66,8 +66,8 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
 
     @test_util.skip_unless_galaxy('release_19.05')
     def test_get_datasets_limit_offset(self):
-        datasets = self.gi.datasets.get_datasets(limit=0)
-        self.assertEqual(datasets, [])
+        datasets = self.gi.datasets.get_datasets(limit=1)
+        self.assertEqual(len(datasets), 1)
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id, offset=1)
         self.assertEqual(datasets, [])
 
