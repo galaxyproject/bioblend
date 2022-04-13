@@ -109,7 +109,7 @@ class GalaxyClient:
             not of type ``FileStream``.
             """
             for k, v in d.items():
-                if not isinstance(v, FileStream):
+                if not isinstance(v, (FileStream, str, bytes)):
                     d[k] = json.dumps(v)
             return d
 
@@ -117,9 +117,9 @@ class GalaxyClient:
         # leveraging the requests-toolbelt library if any files have
         # been attached.
         if files_attached:
-            payload = my_dumps(payload)
             if params:
                 payload.update(params)
+            payload = my_dumps(payload)
             payload = MultipartEncoder(fields=payload)
             headers = self.json_headers.copy()
             headers['Content-Type'] = payload.content_type

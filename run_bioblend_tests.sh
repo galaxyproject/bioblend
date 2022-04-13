@@ -155,7 +155,6 @@ else
     tox -e "${e_val}"
 fi
 exit_code=$?
-deactivate
 
 # Stop Galaxy
 echo 'Stopping Galaxy'
