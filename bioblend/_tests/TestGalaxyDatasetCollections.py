@@ -131,7 +131,18 @@ class TestGalaxyDatasetCollections(GalaxyTestBase.GalaxyTestBase):
         history_id = self.gi.histories.create_history(name="TestDatasetCollectionShow")["id"]
         dataset_collection1 = self._create_pair_in_history(history_id)
         dataset_collection2 = self.gi.dataset_collections.show_dataset_collection(dataset_collection1['id'])
-        self.assertEqual(dataset_collection1.keys(), dataset_collection2.keys())
+        for key in (
+            "collection_type",
+            "deleted",
+            "id",
+            "hid",
+            "history_content_type",
+            "history_id",
+            "name",
+            "url",
+            "visible",
+        ):
+            self.assertEqual(dataset_collection1[key], dataset_collection2[key])
         for element1, element2 in zip(dataset_collection1['elements'], dataset_collection2['elements']):
             self.assertEqual(element1['id'], element2['id'])
             self.assertEqual(element1.keys(), element2.keys())
