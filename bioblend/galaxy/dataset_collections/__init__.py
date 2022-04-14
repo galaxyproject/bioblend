@@ -107,11 +107,10 @@ class DatasetCollectionClient(Client):
         :return: element view of the dataset collection
         """
         params = {
-            'id': dataset_collection_id,
             'instance_type': instance_type,
         }
         url = self._make_url(module_id=dataset_collection_id)
-        return self._get(url=url, params=params)
+        return self._get(id=dataset_collection_id, url=url, params=params)
 
     def download_dataset_collection(self, dataset_collection_id: str, file_path: str) -> dict:
         """
