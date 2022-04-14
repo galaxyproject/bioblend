@@ -6,6 +6,7 @@ should not use it directly.
 """
 
 import time
+from typing import Optional
 
 import requests
 
@@ -16,6 +17,8 @@ from bioblend import ConnectionError  # noqa: I202
 
 
 class Client:
+    # The `module` attribute needs to be defined in subclasses
+    module: str
 
     # Class variables that configure GET request retries.  Note that since these
     # are class variables their values are shared by all Client instances --
@@ -76,7 +79,7 @@ class Client:
         """
         self.gi = galaxy_instance
 
-    def _make_url(self, module_id=None, deleted=False, contents=False):
+    def _make_url(self, module_id: Optional[str] = None, deleted: bool = False, contents: bool = False):
         """
         Compose a URL based on the provided arguments.
 
@@ -92,16 +95,23 @@ class Client:
                          ``<base_url>/api/libraries/<encoded_library_id>/contents``
         """
         c_url = '/'.join((self.gi.url, self.module))
-        if deleted is True:
+        if deleted:
             c_url = c_url + '/deleted'
-        if module_id is not None:
+        if module_id:
             c_url = '/'.join((c_url, module_id))
-            if contents is True:
+            if contents:
                 c_url = c_url + '/contents'
         return c_url
 
-    def _get(self, id=None, deleted=False, contents=None, url=None,
-             params=None, json=True):
+    def _get(
+        self,
+        id: Optional[str] = None,
+        deleted: bool = False,
+        contents: bool = False,
+        url: Optional[str] = None,
+        params=None,
+        json: bool = True,
+    ):
         """
         Do a GET request, composing the URL from ``id``, ``deleted`` and
         ``contents``.  Alternatively, an explicit ``url`` can be provided.
