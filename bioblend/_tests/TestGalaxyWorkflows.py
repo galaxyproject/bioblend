@@ -173,7 +173,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         wf_list = [w for w in wfs_with_name if w['id'] == workflow['id']]
         self.assertEqual(len(wf_list), 1)
         wf_data = wf_list[0]
-        self.assertEqual(wf_data['url'], workflow['url'])
+        self.assertEqual(wf_data['create_time'], workflow['create_time'])
 
     def test_show_workflow(self):
         path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
