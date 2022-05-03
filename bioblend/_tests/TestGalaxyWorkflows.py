@@ -173,7 +173,10 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         wf_list = [w for w in wfs_with_name if w['id'] == workflow['id']]
         self.assertEqual(len(wf_list), 1)
         wf_data = wf_list[0]
-        self.assertEqual(wf_data['url'], workflow['url'])
+        if 'create_time' in workflow:  # Galaxy >= 20.01
+            self.assertEqual(wf_data['create_time'], workflow['create_time'])
+        else:  # Galaxy <= 22.01
+            self.assertEqual(wf_data['url'], workflow['url'])
 
     def test_show_workflow(self):
         path = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
