@@ -361,11 +361,11 @@ Methods for managing users are grouped under ``GalaxyInstance.users.*``. User ma
 To get a list of users, call:
 
     >>> gi.users.get_users()
-    [{'email': 'userA@unimelb.edu.au',
+    [{'email': 'userA@example.org',
       'id': '975a9ce09b49502a',
       'quota_percent': None,
       'url': '/api/users/975a9ce09b49502a'},
-     {'email': 'userB@student.unimelb.edu.au',
+     {'email': 'userB@example.org',
       'id': '0193a95acf427d2c',
       'quota_percent': None,
       'url': '/api/users/0193a95acf427d2c'}]

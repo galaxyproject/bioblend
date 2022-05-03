@@ -176,7 +176,7 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
     @test_util.skip_unless_galaxy('release_19.05')
     def test_dataset_permissions(self):
         admin_user_id = self.gi.users.get_current_user()['id']
-        user_id = self.gi.users.create_local_user('newuser3', 'newuser3@example.com', 'secret')['id']
+        user_id = self.gi.users.create_local_user('newuser3', 'newuser3@example.org', 'secret')['id']
         user_api_key = self.gi.users.create_user_apikey(user_id)
         anonymous_gi = galaxy.GalaxyInstance(url=self.gi.base_url, key=None)
         user_gi = galaxy.GalaxyInstance(url=self.gi.base_url, key=user_api_key)
