@@ -64,5 +64,5 @@ class ConfigClient(Client):
              'model_class': 'User',
              'username': 'julia'}
         """
-        url = '/'.join((self.gi.url, 'whoami'))
+        url = self.gi.url + "/whoami"
         return self._get(url=url)
