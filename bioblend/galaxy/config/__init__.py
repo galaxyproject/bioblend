@@ -48,3 +48,21 @@ class ConfigClient(Client):
         """
         url = self.gi.url + '/version'
         return self._get(url=url)
+
+    def whoami(self):
+        """
+        Return information about the current authenticated user.
+
+        :rtype: dict
+        :return: Information about current authenticated user
+          For example::
+            {'active': True,
+             'deleted': False,
+             'email': 'jgillard83649163@student.unimelb.edu.au',
+             'id': '4aaaaa85aacc9caa',
+             'last_password_change': '2021-07-29T05:34:54.632345',
+             'model_class': 'User',
+             'username': 'julia'}
+        """
+        url = '/'.join((self.gi.url, 'whoami'))
+        return self._get(url=url)
