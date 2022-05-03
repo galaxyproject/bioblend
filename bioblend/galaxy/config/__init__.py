@@ -58,7 +58,7 @@ class ConfigClient(Client):
           For example::
             {'active': True,
              'deleted': False,
-             'email': 'jgillard83649163@student.unimelb.edu.au',
+             'email': 'user@example.org',
              'id': '4aaaaa85aacc9caa',
              'last_password_change': '2021-07-29T05:34:54.632345',
              'model_class': 'User',
