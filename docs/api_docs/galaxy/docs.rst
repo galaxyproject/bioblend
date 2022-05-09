@@ -281,8 +281,8 @@ Instead of using dictionaries directly, workflows can be exported to or imported
 .. Note:: If we export a workflow from one Galaxy instance and import it into another, Galaxy will only run it without modification if it has the same versions of the tool wrappers installed. This is to ensure reproducibility. Otherwise, we will need to manually update the workflow to use the new tool versions.
 
 
-Invoke a Workflow
-~~~~~~~~~~~~~~
+Invoke a workflow
+~~~~~~~~~~~~~~~~~
 
 To invoke a workflow, we need to tell Galaxy which datasets to use for which workflow inputs. We can use datasets from histories or data libraries.
 

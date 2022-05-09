@@ -97,8 +97,8 @@ class JobsClient(Client):
               'update_time': '2014-03-01T16:05:39.558458'}]
 
         .. note::
-          The following filtering options can only be used with Galaxy ``release_21.05`` or later:
-            user_id, limit, offset, workflow_id, invocation_id
+          The following options work only on Galaxy 21.05 or later: ``user_id``,
+          ``limit``, ``offset``, ``workflow_id``, ``invocation_id``.
         """
         params = {
             'limit': limit,
@@ -204,7 +204,7 @@ class JobsClient(Client):
         :return: Information about outputs and the rerun job
 
         .. note::
-          This method can only be used with Galaxy ``release_21.01`` or later.
+          This method works only on Galaxy 21.01 or later.
         """
         job_rerun_params = self._build_for_rerun(job_id)
         job_inputs = job_rerun_params['state_inputs']
@@ -277,7 +277,7 @@ class JobsClient(Client):
           ``inputs`` and ``state``.
 
         .. note::
-          This method is only supported by Galaxy 18.01 or later.
+          This method works only on Galaxy 18.01 or later.
         """
         job_info = {
             'tool_id': tool_id,
@@ -342,7 +342,7 @@ class JobsClient(Client):
         :return: dict containing job error reply
 
         .. note::
-          This method is only supported by Galaxy 20.01 or later.
+          This method works only on Galaxy 20.01 or later.
         """
         payload = {
             "message": message,
@@ -366,7 +366,7 @@ class JobsClient(Client):
         :return: dict containing potential problems
 
         .. note::
-          This method is only supported by Galaxy 19.05 or later.
+          This method works only on Galaxy 19.05 or later.
         """
         url = self._make_url(module_id=job_id) + '/common_problems'
         return self._get(url=url)
@@ -408,7 +408,7 @@ class JobsClient(Client):
         :return: dict containing output dataset associations
 
         .. note::
-          This method is only supported by Galaxy 18.09 or later.
+          This method works only on Galaxy 18.09 or later.
         """
         url = self._make_url(module_id=job_id) + '/resume'
         return self._put(url=url)
@@ -425,8 +425,8 @@ class JobsClient(Client):
         :return: Destination parameters for the given job
 
         .. note::
-          This method is only supported by Galaxy 20.05 or later and requires
-          the user to be an admin.
+          This method works only on Galaxy 20.05 or later and if the user is a
+          Galaxy admin.
         """
         url = self._make_url(module_id=job_id) + '/destination_params'
         return self._get(url=url)
@@ -440,8 +440,8 @@ class JobsClient(Client):
         :return: Status of the job lock
 
         .. note::
-          This method is only supported by Galaxy 20.05 or later and requires
-          the user to be an admin.
+          This method works only on Galaxy 20.05 or later and if the user is a
+          Galaxy admin.
         """
         url = self.gi.url + '/job_lock'
         response = self._get(url=url)
@@ -457,8 +457,8 @@ class JobsClient(Client):
         :return: Updated status of the job lock
 
         .. note::
-          This method is only supported by Galaxy 20.05 or later and requires
-          the user to be an admin.
+          This method works only on Galaxy 20.05 or later and if the user is a
+          Galaxy admin.
         """
         payload = {
             'active': active,

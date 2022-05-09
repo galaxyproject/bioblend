@@ -77,7 +77,7 @@ class UserClient(Client):
         Create a new Galaxy remote user.
 
         .. note::
-          For this method to work, the Galaxy instance must have the
+          This method works only if the Galaxy instance has the
           ``allow_user_creation`` and ``use_remote_user`` options set to
           ``true`` in the ``config/galaxy.yml`` configuration file. Also
           note that setting ``use_remote_user`` will require an upstream
@@ -99,7 +99,7 @@ class UserClient(Client):
         Create a new Galaxy local user.
 
         .. note::
-          For this method to work, the Galaxy instance must have the
+          This method works only if the Galaxy instance has the
           ``allow_user_creation`` option set to ``true`` and
           ``use_remote_user`` option set to ``false`` in the
           ``config/galaxy.yml`` configuration file.
@@ -153,7 +153,7 @@ class UserClient(Client):
         Delete a user.
 
         .. note::
-          For this method to work, the Galaxy instance must have the
+          This method works only if the Galaxy instance has the
           ``allow_user_deletion`` option set to ``true`` in the
           ``config/galaxy.yml`` configuration file.
 

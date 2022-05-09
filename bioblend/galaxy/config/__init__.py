@@ -56,6 +56,7 @@ class ConfigClient(Client):
         :rtype: dict
         :return: Information about current authenticated user
           For example::
+
             {'active': True,
              'deleted': False,
              'email': 'user@example.org',

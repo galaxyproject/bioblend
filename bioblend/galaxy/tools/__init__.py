@@ -75,7 +75,6 @@ class ToolClient(Client):
     def requirements(self, tool_id):
         """
         Return the resolver status for a specific tool.
-        This functionality is available only to Galaxy admins.
 
         :type tool_id: str
         :param tool_id: id of the requested tool
@@ -101,15 +100,19 @@ class ToolClient(Client):
               'model_class': 'MergedCondaDependency',
               'name': 'blast',
               'version': '2.10.1'}]
+
+        .. note::
+          This method works only if the user is a Galaxy admin.
         """
         url = self._make_url(tool_id) + '/requirements'
         return self._get(url=url)
 
     def reload(self, tool_id: str) -> dict:
         """
-        Reload the specified tool in the toolbox. Any changes that have been made to the wrapper
-        since the tool was last reloaded will take effect.
-        This functionality is available only to Galaxy admins.
+        Reload the specified tool in the toolbox.
+
+        Any changes that have been made to the wrapper since the tool was last
+        reloaded will take effect.
 
         :type tool_id: str
         :param tool_id: id of the requested tool
@@ -118,9 +121,12 @@ class ToolClient(Client):
         :param: dict containing the id, name, and version of the reloaded tool.
           For example::
 
-          {'message': {'name': 'Cutadapt',
-                       'id': 'toolshed.g2.bx.psu.edu/repos/lparsons/cutadapt/cutadapt/3.4+galaxy1',
-                       'version': '3.4+galaxy1'}}
+            {'message': {'id': 'toolshed.g2.bx.psu.edu/repos/lparsons/cutadapt/cutadapt/3.4+galaxy1',
+                         'name': 'Cutadapt',
+                         'version': '3.4+galaxy1'}}
+
+        .. note::
+          This method works only if the user is a Galaxy admin.
         """
         url = self._make_url(tool_id) + '/reload'
         return self._put(url=url)
@@ -142,13 +148,15 @@ class ToolClient(Client):
         """
         Install dependencies for a given tool via a resolver.
         This works only for Conda currently.
-        This functionality is available only to Galaxy admins.
 
         :type tool_id: str
         :param tool_id: id of the requested tool
 
         :rtype: dict
         :return: Tool requirement status
+
+        .. note::
+          This method works only if the user is a Galaxy admin.
         """
         url = self._make_url(tool_id) + '/install_dependencies'
         return self._post(url=url)
@@ -157,13 +165,15 @@ class ToolClient(Client):
         """
         Uninstall dependencies for a given tool via a resolver.
         This works only for Conda currently.
-        This functionality is available only to Galaxy admins.
 
         :type tool_id: str
         :param tool_id: id of the requested tool
 
         :rtype: dict
         :return: Tool requirement status
+
+        .. note::
+          This method works only if the user is a Galaxy admin.
         """
         url = self._make_url(tool_id) + '/dependencies'
         return self._delete(url=url)

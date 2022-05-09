@@ -492,11 +492,6 @@ class LibraryClient(Client):
         Upload all files in the specified subdirectory of the Galaxy library
         import directory to a library.
 
-        .. note::
-          For this method to work, the Galaxy instance must have the
-          ``library_import_dir`` option configured in the ``config/galaxy.yml``
-          configuration file.
-
         :type library_id: str
         :param library_id: id of the library where to place the uploaded file
 
@@ -539,6 +534,11 @@ class LibraryClient(Client):
 
         :rtype: list
         :return: List with a single dictionary containing information about the LDDA
+
+        .. note::
+          This method works only if the Galaxy instance has the
+          ``library_import_dir`` option configured in the ``config/galaxy.yml``
+          configuration file.
         """
         return self._do_upload(library_id, server_dir=server_dir,
                                folder_id=folder_id, file_type=file_type,
@@ -554,11 +554,6 @@ class LibraryClient(Client):
         """
         Upload a set of files already present on the filesystem of the Galaxy
         server to a library.
-
-        .. note::
-          For this method to work, the Galaxy instance must have the
-          ``allow_path_paste`` option set to ``true`` in the
-          ``config/galaxy.yml`` configuration file.
 
         :type library_id: str
         :param library_id: id of the library where to place the uploaded file
@@ -600,6 +595,11 @@ class LibraryClient(Client):
 
         :rtype: list
         :return: List with a single dictionary containing information about the LDDA
+
+        .. note::
+          This method works only if the Galaxy instance has the
+          ``allow_path_paste`` option set to ``true`` in the
+          ``config/galaxy.yml`` configuration file.
         """
         return self._do_upload(library_id, filesystem_paths=filesystem_paths,
                                folder_id=folder_id, file_type=file_type,

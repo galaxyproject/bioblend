@@ -913,9 +913,9 @@ class HistoryDatasetAssociation(Dataset):
         :param purge: if ``True``, also purge (permanently delete) the dataset
 
         .. note::
-            For the purge option to work, the Galaxy instance must have the
-            ``allow_user_dataset_purge`` option set to ``true`` in the
-            ``config/galaxy.yml`` configuration file.
+          The ``purge`` option works only if the Galaxy instance has the
+          ``allow_user_dataset_purge`` option set to ``true`` in the
+          ``config/galaxy.yml`` configuration file.
         """
         self.gi.gi.histories.delete_dataset(self.container.id, self.id, purge=purge)
         self.container.refresh()
@@ -1134,7 +1134,6 @@ class DatasetContainer(Wrapper, metaclass=abc.ABCMeta):
           container
 
         .. note::
-
           when filtering library datasets by name, specify their full
           paths starting from the library's root folder, e.g.,
           ``/seqdata/reads.fastq``.  Full paths are available through
@@ -1197,7 +1196,7 @@ class History(DatasetContainer):
         :param purge: if ``True``, also purge (permanently delete) the history
 
         .. note::
-          For the purge option to work, the Galaxy instance must have the
+          The ``purge`` option works only if the Galaxy instance has the
           ``allow_user_dataset_purge`` option set to ``true`` in the
           ``config/galaxy.yml`` configuration file.
         """
@@ -1417,11 +1416,6 @@ class Library(DatasetContainer):
         """
         Upload data to this library from filesystem paths on the server.
 
-        .. note::
-          For this method to work, the Galaxy instance must have the
-          ``allow_path_paste`` option set to ``true`` in the
-          ``config/galaxy.yml`` configuration file.
-
         :type paths: str or :class:`~collections.abc.Iterable` of str
         :param paths: server-side file paths from which data should be read
 
@@ -1434,6 +1428,11 @@ class Library(DatasetContainer):
         :return: the dataset objects that represent the uploaded content
 
         See :meth:`.upload_data` for info on other params.
+
+        .. note::
+          This method works only if the Galaxy instance has the
+          ``allow_path_paste`` option set to ``true`` in the
+          ``config/galaxy.yml`` configuration file.
         """
         fid = self._pre_upload(folder)
         if isinstance(paths, str):

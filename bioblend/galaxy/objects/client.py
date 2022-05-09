@@ -227,7 +227,7 @@ class ObjHistoryClient(ObjDatasetContainerClient):
         :param purge: if ``True``, also purge (permanently delete) the history
 
         .. note::
-          For the purge option to work, the Galaxy instance must have the
+          The ``purge`` option works only if the Galaxy instance has the
           ``allow_user_dataset_purge`` option set to ``true`` in the
           ``config/galaxy.yml`` configuration file.
         """

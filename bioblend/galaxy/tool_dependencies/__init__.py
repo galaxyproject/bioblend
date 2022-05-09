@@ -62,9 +62,9 @@ class ToolDependenciesClient(Client):
               'tool_ids': ['vcf_to_maf_customtrack1']}]
 
         .. note::
-          This method can only be used with Galaxy ``release_20.01`` or later and requires
-            the user to be an admin. It relies on an experimental API particularly tied to
-            the GUI and therefore is subject to breaking changes.
+          This method works only on Galaxy 20.01 or later and if the user is a
+          Galaxy admin. It relies on an experimental API particularly tied to
+          the GUI and therefore is subject to breaking changes.
         """
         assert index_by in ['tools', 'requirements'], "index_by must be one of 'tools' or 'requirements'."
         params = {

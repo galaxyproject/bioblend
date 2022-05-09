@@ -194,7 +194,7 @@ class InvocationClient(Client):
         :return: A dict describing the new workflow invocation.
 
         .. note::
-          This method can only be used with Galaxy ``release_21.01`` or later.
+          This method works only on Galaxy 21.01 or later.
         """
         invocation_details = self.show_invocation(invocation_id)
         workflow_id = invocation_details['workflow_id']

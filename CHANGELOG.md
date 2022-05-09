@@ -1,14 +1,63 @@
-### BioBlend v - unreleased
+### BioBlend v0.17.0 - 2022-05-09
 
 * Dropped support for Python 3.6. Added support for Python 3.10. Added support
   for Galaxy release 21.09 and 22.01.
 
+* Removed deprecated ``run_workflow()`` method of ``WorkflowClient``.
+
+* Using the deprecated ``history_id`` parameter of the
+  ``HistoryClient.get_histories()`` method now raises a ``ValueError``
+  exception.
+
+* Made ``tool_inputs_update`` parameter of ``JobsClient.rerun_job()`` more
+  flexible.
+
+* Added ``whoami()`` method to ``ConfigClient`` (thanks to
+  [cat-bro](https://github.com/cat-bro)).
+
 * Added ``get_extra_files()`` method to ``HistoryClient``.
+
+* Added ``build()`` and ``reload()`` methods to ``ToolClient`` (thanks to
+  [Jayadev Joshi](https://github.com/jaidevjoshi83) and
+  [cat-bro](https://github.com/cat-bro) respectively).
+
+* Added ``get_repositories()`` method to ``ToolShedCategoryClient`` (thanks to
+  [cat-bro](https://github.com/cat-bro)).
+
+* Added ``update_repository_metadata()`` method to ``ToolShedRepositoryClient``.
+
+* Added ``order_by`` parameter to ``JobsClient.get_jobs()`` method.
+
+* BioBlend.objects: Removed deprecated ``run()`` method of ``Workflow``.
 
 * BioBlend.objects: Fail if multiple libraries/histories/workflows match when
   deleting by name, instead of deleting them all.
 
-* Improvements to type annotations, tests and documentation
+* BioBlend.objects: in ``HistoryDatasetAssociation.get_stream()``, wait for
+  the dataset to be ready.
+
+* BioBlend.objects: in ``Workflow.invoke()``, check that the workflow is mapped
+  and runnable before invoking, allow the ``inputs`` parameter to be an instance
+  of a ``Dataset`` subclass, and allow the ``history`` parameter to be the name
+  of a new history.
+
+* BioBlend.objects: Added new ``datasets`` and ``dataset_collections``
+  attributes to ``GalaxyInstance`` objects, which are instances of the new
+  ``ObjDatasetClient`` and ``ObjDatasetCollectionClient`` respectively.
+
+* BioBlend.objects: Added ``refresh()``, ``get_outputs()`` and
+  ``get_output_collections()`` methods to ``InvocationStep``.
+
+* Fixed [error](https://github.com/galaxyproject/bioblend/issues/398) when
+  instantiating ``GalaxyInstance`` with ``email`` and ``password`` (reported by
+  [Peter Briggs](https://github.com/pjbriggs)).
+
+* Fixed parameter validation errors for POST requests with attached files on
+  upcoming Galaxy 22.05.
+
+* Code cleanups (thanks to [Martmists](https://github.com/Martmists-GH)).
+
+* Improvements to type annotations, tests and documentation.
 
 ### BioBlend v0.16.0 - 2021-06-13
 
@@ -280,7 +329,7 @@
 * BioBlend.objects: added ``update()`` method to ``LibraryDataset`` (thanks to
   [Anthony Bretaudeau](https://github.com/abretaud)).
 
-* Run tests with pytest instead of nose
+* Run tests with pytest instead of nose.
 
 ### BioBlend v0.11.0 - 2018-04-18
 
@@ -413,7 +462,7 @@
 
 * Added ``install_resolver_dependencies`` parameter to
   ``ToolShedClient.install_repository_revision()``, applicable for Galaxy
-  release_16.07 and later (thanks to
+  release 16.07 and later (thanks to
   [Marius van den Beek](https://github.com/mvdbeek)).
 
 * Improve ``DatasetClient.download_dataset()`` by downloading the dataset in
@@ -529,7 +578,7 @@
 * Project source moved to new URL - https://github.com/galaxyproject/bioblend
 
 * Huge improvements to automated testing, tests now run against Galaxy
-  release_14.02 and all later versions to ensure backward compatibility
+  release 14.02 and all later versions to ensure backward compatibility
   (see `.travis.yml` for details).
 
 * Many documentation improvements (thanks to
@@ -553,7 +602,7 @@
   deployments.
 
 * Made ``LibraryClient._get_root_folder_id()`` method safer and faster for
-  Galaxy release_13.06 and later.
+  Galaxy release 13.06 and later.
 
 * Deprecate and ignore invalid ``deleted`` parameter to
   ``WorkflowClient.get_workflows()``.

@@ -5,7 +5,6 @@ import logging
 import re
 import sys
 import time
-import warnings
 import webbrowser
 from typing import List
 from urllib.parse import urljoin
@@ -56,12 +55,10 @@ class HistoryClient(Client):
 
         return self._post(payload=payload, files_attached=file_path is not None)
 
-    def _get_histories(self, history_id=None, name=None, deleted=False, filter_user_published=None, get_all_published=False, slug=None):
+    def _get_histories(self, name=None, deleted=False, filter_user_published=None, get_all_published=False, slug=None):
         """
         Hidden method to be used by both get_histories() and get_published_histories()
         """
-        if history_id is not None and name is not None:
-            raise ValueError('Provide only one argument between name or history_id, but not both')
         assert not (filter_user_published is not None and get_all_published)
 
         params = {}
@@ -78,10 +75,7 @@ class HistoryClient(Client):
         url = '/'.join((self._make_url(), 'published')) if get_all_published else None
         histories = self._get(url=url, params=params)
 
-        if history_id is not None:
-            history = next((_ for _ in histories if _['id'] == history_id), None)
-            histories = [history] if history is not None else []
-        elif name is not None:
+        if name is not None:
             histories = [_ for _ in histories if _['name'] == name]
         return histories
 
@@ -89,13 +83,6 @@ class HistoryClient(Client):
         """
         Get all histories, or select a subset by specifying optional arguments
         for filtering (e.g. a history name).
-
-        :type history_id: str
-        :param history_id: Encoded history ID to filter on
-
-          .. deprecated:: 0.15.0
-             To get details of a history for which you know the ID, use the much
-             more efficient :meth:`show_history` instead.
 
         :type name: str
         :param name: History name to filter on.
@@ -116,13 +103,16 @@ class HistoryClient(Client):
 
         :rtype: list
         :return: List of history dicts.
+
+        .. versionchanged:: 0.17.0
+            Using the deprecated ``history_id`` parameter now raises a
+            ``ValueError`` exception.
         """
         if history_id is not None:
-            warnings.warn(
-                'The history_id parameter is deprecated, use the show_history() method to view details of a history for which you know the ID.',
-                category=FutureWarning
+            raise ValueError(
+                'The history_id parameter has been removed, use the show_history() method to view details of a history for which you know the ID.',
             )
-        return self._get_histories(history_id=history_id, name=name, deleted=deleted, filter_user_published=published, get_all_published=False, slug=slug)
+        return self._get_histories(name=name, deleted=deleted, filter_user_published=published, get_all_published=False, slug=slug)
 
     def get_published_histories(self, name=None, deleted=False, slug=None):
         """
@@ -217,9 +207,9 @@ class HistoryClient(Client):
         :return: None
 
         .. note::
-            For the purge option to work, the Galaxy instance must have the
-            ``allow_user_dataset_purge`` option set to ``true`` in the
-            ``config/galaxy.yml`` configuration file.
+          The ``purge`` option works only if the Galaxy instance has the
+          ``allow_user_dataset_purge`` option set to ``true`` in the
+          ``config/galaxy.yml`` configuration file.
         """
         url = '/'.join((self._make_url(history_id, contents=True), dataset_id))
         payload = {}
@@ -542,7 +532,7 @@ class HistoryClient(Client):
                  purged).
 
         .. note::
-          For the purge option to work, the Galaxy instance must have the
+          The ``purge`` option works only if the Galaxy instance has the
           ``allow_user_dataset_purge`` option set to ``true`` in the
           ``config/galaxy.yml`` configuration file.
         """
@@ -773,7 +763,7 @@ class HistoryClient(Client):
         :return: List of extra files
 
         .. note::
-          This method is only supported by Galaxy 19.01 or later.
+          This method works only on Galaxy 19.01 or later.
         """
         url = '/'.join((self._make_url(history_id, contents=True), dataset_id, 'extra_files'))
         return self._get(url=url)

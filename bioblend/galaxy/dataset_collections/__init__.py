@@ -128,7 +128,7 @@ class DatasetCollectionClient(Client):
         .. note::
           This method downloads a ``zip`` archive for Galaxy 21.01 and later.
           For earlier versions of Galaxy this method downloads a ``tgz`` archive.
-          This method is only supported by Galaxy 18.01 or later.
+          This method works only on Galaxy 18.01 or later.
         """
         url = self._make_url(module_id=dataset_collection_id) + '/download'
         r = self.gi.make_get_request(url, stream=True)
