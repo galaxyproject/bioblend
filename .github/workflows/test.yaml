@@ -53,12 +53,6 @@ jobs:
           - os: ubuntu-latest
             tox_env: py310
             galaxy_version: dev
-          - os: ubuntu-latest
-            tox_env: py39
-            galaxy_version: dev
-          - os: ubuntu-latest
-            tox_env: py38
-            galaxy_version: dev
           # Cannot test on macOS because service containers are not supported
           # yet: https://github.community/t/github-actions-services-available-on-others-vms/16916
           # - os: macos-latest
