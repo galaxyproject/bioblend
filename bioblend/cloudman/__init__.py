@@ -37,17 +37,21 @@ def block_until_vm_ready(func):
     :param vm_ready_check_interval: The number of seconds to pause between consecutive
                                     calls when polling the VM's ready status.
     """
+
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         obj = args[0]
-        timeout = kwargs.pop('vm_ready_timeout', 300)
-        interval = kwargs.pop('vm_ready_check_interval', 10)
+        timeout = kwargs.pop("vm_ready_timeout", 300)
+        interval = kwargs.pop("vm_ready_check_interval", 10)
         try:
             obj.wait_until_instance_ready(timeout, interval)
         except AttributeError:
-            raise VMLaunchException("Decorated object does not define a wait_until_instance_ready method."
-                                    "Make sure that the object is of type GenericVMInstance.")
+            raise VMLaunchException(
+                "Decorated object does not define a wait_until_instance_ready method."
+                "Make sure that the object is of type GenericVMInstance."
+            )
         return func(*args, **kwargs)
+
     return wrapper
 
 
@@ -60,25 +64,26 @@ class VMLaunchException(Exception):
 
 
 class CloudManConfig:
-
-    def __init__(self,
-                 access_key=None,
-                 secret_key=None,
-                 cluster_name=None,
-                 image_id=None,
-                 instance_type='m1.medium',
-                 password=None,
-                 cloud_metadata=None,
-                 cluster_type=None,
-                 galaxy_data_option='',
-                 initial_storage_size=10,
-                 key_name='cloudman_key_pair',
-                 security_groups=None,
-                 placement='',
-                 kernel_id=None,
-                 ramdisk_id=None,
-                 block_until_ready=False,
-                 **kwargs):
+    def __init__(
+        self,
+        access_key=None,
+        secret_key=None,
+        cluster_name=None,
+        image_id=None,
+        instance_type="m1.medium",
+        password=None,
+        cloud_metadata=None,
+        cluster_type=None,
+        galaxy_data_option="",
+        initial_storage_size=10,
+        key_name="cloudman_key_pair",
+        security_groups=None,
+        placement="",
+        kernel_id=None,
+        ramdisk_id=None,
+        block_until_ready=False,
+        **kwargs,
+    ):
         """
         Initializes a CloudMan launch configuration object.
 
@@ -161,12 +166,20 @@ class CloudManConfig:
                                  method.
         """
         if security_groups is None:
-            security_groups = ['CloudMan']
+            security_groups = ["CloudMan"]
         self.set_connection_parameters(access_key, secret_key, cloud_metadata)
         self.set_pre_launch_parameters(
-            cluster_name, image_id, instance_type,
-            password, kernel_id, ramdisk_id, key_name, security_groups,
-            placement, block_until_ready)
+            cluster_name,
+            image_id,
+            instance_type,
+            password,
+            kernel_id,
+            ramdisk_id,
+            key_name,
+            security_groups,
+            placement,
+            block_until_ready,
+        )
         self.set_post_launch_parameters(cluster_type, galaxy_data_option, initial_storage_size)
         self.set_extra_parameters(**kwargs)
 
@@ -176,11 +189,20 @@ class CloudManConfig:
         self.cloud_metadata = cloud_metadata
 
     def set_pre_launch_parameters(
-            self, cluster_name, image_id, instance_type, password,
-            kernel_id=None, ramdisk_id=None, key_name='cloudman_key_pair',
-            security_groups=None, placement='', block_until_ready=False):
+        self,
+        cluster_name,
+        image_id,
+        instance_type,
+        password,
+        kernel_id=None,
+        ramdisk_id=None,
+        key_name="cloudman_key_pair",
+        security_groups=None,
+        placement="",
+        block_until_ready=False,
+    ):
         if security_groups is None:
-            security_groups = ['CloudMan']
+            security_groups = ["CloudMan"]
         self.cluster_name = cluster_name
         self.image_id = image_id
         self.instance_type = instance_type
@@ -192,7 +214,7 @@ class CloudManConfig:
         self.placement = placement
         self.block_until_ready = block_until_ready
 
-    def set_post_launch_parameters(self, cluster_type=None, galaxy_data_option='', initial_storage_size=10):
+    def set_post_launch_parameters(self, cluster_type=None, galaxy_data_option="", initial_storage_size=10):
         self.cluster_type = cluster_type
         self.galaxy_data_option = galaxy_data_option
         self.initial_storage_size = initial_storage_size
@@ -209,10 +231,10 @@ class CloudManConfig:
 
     @staticmethod
     def CustomTypeDecoder(dct):
-        if '__CloudManConfig__' in dct:
-            return CloudManConfig(**dct['__CloudManConfig__'])
-        elif '__Bunch__' in dct:
-            return Bunch(**dct['__Bunch__'])
+        if "__CloudManConfig__" in dct:
+            return CloudManConfig(**dct["__CloudManConfig__"])
+        elif "__Bunch__" in dct:
+            return Bunch(**dct["__Bunch__"])
         else:
             return dct
 
@@ -236,9 +258,9 @@ class CloudManConfig:
             return "Instance type must not be null"
         elif self.password is None:
             return "Password must not be null"
-        elif self.cluster_type not in [None, 'Test', 'Data', 'Galaxy', 'Shared_cluster']:
+        elif self.cluster_type not in [None, "Test", "Data", "Galaxy", "Shared_cluster"]:
             return f"Unrecognized cluster type ({self.cluster_type})"
-        elif self.galaxy_data_option not in [None, '', 'custom-size', 'transient']:
+        elif self.galaxy_data_option not in [None, "", "custom-size", "transient"]:
             return f"Unrecognized galaxy data option ({self.galaxy_data_option})"
         elif self.key_name is None:
             return "Key-pair name must not be null"
@@ -247,7 +269,6 @@ class CloudManConfig:
 
 
 class GenericVMInstance:
-
     def __init__(self, launcher, launch_result):
         """
         Create an instance of the CloudMan API class, which is to be used when
@@ -274,7 +295,7 @@ class GenericVMInstance:
         Returns the ID of this instance (e.g., ``i-87ey32dd``) if launch was
         successful or ``None`` otherwise.
         """
-        return None if self.launch_result is None else self.launch_result['instance_id']
+        return None if self.launch_result is None else self.launch_result["instance_id"]
 
     @property
     def key_pair_name(self):
@@ -282,7 +303,7 @@ class GenericVMInstance:
         Returns the name of the key pair used by this instance. If instance was
         not launched properly, returns ``None``.
         """
-        return None if self.launch_result is None else self.launch_result['kp_name']
+        return None if self.launch_result is None else self.launch_result["kp_name"]
 
     @property
     def key_pair_material(self):
@@ -291,7 +312,7 @@ class GenericVMInstance:
         if the instance was properly launched and key pair generated; ``None``
         otherwise.
         """
-        return None if self.launch_result is None else self.launch_result['kp_material']
+        return None if self.launch_result is None else self.launch_result["kp_material"]
 
     def get_machine_status(self):
         """
@@ -309,10 +330,12 @@ class GenericVMInstance:
         # elif self.host_name:
 
         else:
-            state = {'instance_state': "",
-                     'public_ip': "",
-                     'placement': "",
-                     'error': "No reference to the instance object"}
+            state = {
+                "instance_state": "",
+                "public_ip": "",
+                "placement": "",
+                "error": "No reference to the instance object",
+            }
             return state
 
     def _init_instance(self, host_name):
@@ -332,10 +355,10 @@ class GenericVMInstance:
 
         for time_left in range(vm_ready_timeout, 0, -vm_ready_check_interval):
             status = self.get_machine_status()
-            if status['public_ip'] != '' and status['error'] == '':
-                self._init_instance(status['public_ip'])
+            if status["public_ip"] != "" and status["error"] == "":
+                self._init_instance(status["public_ip"])
                 return
-            elif status['error'] != '':
+            elif status["error"] != "":
                 msg = f"Error launching an instance: {status['error']}"
                 bioblend.log.error(msg)
                 raise VMLaunchException(msg)
@@ -345,13 +368,10 @@ class GenericVMInstance:
                 )
                 time.sleep(vm_ready_check_interval)
 
-        raise VMLaunchException(
-            f"Waited too long for instance to become ready. Instance Id: {self.instance_id}"
-        )
+        raise VMLaunchException(f"Waited too long for instance to become ready. Instance Id: {self.instance_id}")
 
 
 class CloudManInstance(GenericVMInstance):
-
     def __init__(self, url, password, **kwargs):
         """
         Create an instance of the CloudMan API class, which is to be used when
@@ -362,11 +382,11 @@ class CloudManInstance(GenericVMInstance):
         as defined in the user data sent to CloudMan on instance creation.
         """
         self.initialized = False
-        if kwargs.get('launch_result', None) is not None:  # Used internally by the launch_instance method
-            super().__init__(kwargs['launcher'], kwargs['launch_result'])
+        if kwargs.get("launch_result", None) is not None:  # Used internally by the launch_instance method
+            super().__init__(kwargs["launcher"], kwargs["launch_result"])
         else:
             super().__init__(None, None)
-        self.config = kwargs.pop('cloudman_config', CloudManConfig())
+        self.config = kwargs.pop("cloudman_config", CloudManConfig())
         self.password = password or self.config.password
         self.use_ssl = kwargs.get("use_ssl", self.config.kwargs.get("use_ssl", False))
         self.verify = kwargs.get("verify", self.config.kwargs.get("verify", False))
@@ -389,7 +409,11 @@ class CloudManInstance(GenericVMInstance):
     def _init_instance(self, hostname):
         super()._init_instance(hostname)
         if self.config.cluster_type:
-            self.initialize(self.config.cluster_type, galaxy_data_option=self.config.galaxy_data_option, initial_storage_size=self.config.initial_storage_size)
+            self.initialize(
+                self.config.cluster_type,
+                galaxy_data_option=self.config.galaxy_data_option,
+                initial_storage_size=self.config.initial_storage_size,
+            )
 
     def _set_url(self, url):
         """
@@ -397,7 +421,7 @@ class CloudManInstance(GenericVMInstance):
         """
         if url:
             # Make sure the URL scheme is defined (otherwise requests will not work)
-            if not url.lower().startswith('http'):
+            if not url.lower().startswith("http"):
                 # Check to see whether https scheme is required
                 if self.use_ssl:
                     url = "https://" + url
@@ -422,7 +446,7 @@ class CloudManInstance(GenericVMInstance):
         Returns the URL for accessing this instance of CloudMan.
         """
         if self.url:
-            return self.url + '/cloud'
+            return self.url + "/cloud"
         return None
 
     @staticmethod
@@ -436,18 +460,23 @@ class CloudManInstance(GenericVMInstance):
         """
         validation_result = cfg.validate()
         if validation_result is not None:
-            raise VMLaunchException(
-                f"Invalid CloudMan configuration provided: {validation_result}"
-            )
+            raise VMLaunchException(f"Invalid CloudMan configuration provided: {validation_result}")
         launcher = CloudManLauncher(cfg.access_key, cfg.secret_key, cfg.cloud_metadata)
         result = launcher.launch(
-            cfg.cluster_name, cfg.image_id, cfg.instance_type, cfg.password,
-            cfg.kernel_id, cfg.ramdisk_id, cfg.key_name, cfg.security_groups,
-            cfg.placement, **cfg.kwargs)
-        if result['error'] is not None:
+            cfg.cluster_name,
+            cfg.image_id,
+            cfg.instance_type,
+            cfg.password,
+            cfg.kernel_id,
+            cfg.ramdisk_id,
+            cfg.key_name,
+            cfg.security_groups,
+            cfg.placement,
+            **cfg.kwargs,
+        )
+        if result["error"] is not None:
             raise VMLaunchException(f"Error launching cloudman instance: {result['error']}")
-        instance = CloudManInstance(None, None, launcher=launcher,
-                                    launch_result=result, cloudman_config=cfg)
+        instance = CloudManInstance(None, None, launcher=launcher, launch_result=result, cloudman_config=cfg)
         if cfg.block_until_ready and cfg.cluster_type:
             instance.get_status()  # this will indirect result in initialize being invoked
         return instance
@@ -462,16 +491,16 @@ class CloudManInstance(GenericVMInstance):
         """
         ms = self.get_machine_status()
         # Check if the machine is running and update IP and state
-        self.vm_status = ms.get('instance_state', None)
-        self.vm_error = ms.get('error', None)
-        public_ip = ms.get('public_ip', None)
+        self.vm_status = ms.get("instance_state", None)
+        self.vm_error = ms.get("error", None)
+        public_ip = ms.get("public_ip", None)
         # Update url if we don't have it or is different than what we have
         if not self.url and (public_ip and self.url != public_ip):
             self._set_url(public_ip)
         # See if the cluster has been initialized
-        if self.vm_status == 'running' or self.url:
+        if self.vm_status == "running" or self.url:
             ct = self.get_cluster_type()
-            if ct.get('cluster_type', None):
+            if ct.get("cluster_type", None):
                 self.initialized = True
         if self.vm_error:
             bioblend.log.error(self.vm_error)
@@ -484,12 +513,12 @@ class CloudManInstance(GenericVMInstance):
         """
         try:
             r = self._make_get_request("cloudman_version")
-            return r['version']
+            return r["version"]
         except Exception:
             return 1
 
     @block_until_vm_ready
-    def initialize(self, cluster_type, galaxy_data_option='', initial_storage_size=None, shared_bucket=None):
+    def initialize(self, cluster_type, galaxy_data_option="", initial_storage_size=None, shared_bucket=None):
         """
         Initialize CloudMan platform. This needs to be done before the cluster
         can be used.
@@ -502,19 +531,21 @@ class CloudManInstance(GenericVMInstance):
                 r = self._make_get_request(
                     "initialize_cluster",
                     parameters={
-                        'startup_opt': cluster_type,
-                        'g_pss': initial_storage_size,
-                        'shared_bucket': shared_bucket
-                    })
+                        "startup_opt": cluster_type,
+                        "g_pss": initial_storage_size,
+                        "shared_bucket": shared_bucket,
+                    },
+                )
             else:
                 r = self._make_get_request(
                     "initialize_cluster",
                     parameters={
-                        'startup_opt': cluster_type,
-                        'galaxy_data_option': galaxy_data_option,
-                        'pss': initial_storage_size,
-                        'shared_bucket': shared_bucket
-                    })
+                        "startup_opt": cluster_type,
+                        "galaxy_data_option": galaxy_data_option,
+                        "pss": initial_storage_size,
+                        "shared_bucket": shared_bucket,
+                    },
+                )
             self.initialized = True
             return r
 
@@ -526,7 +557,7 @@ class CloudManInstance(GenericVMInstance):
         for example: ``{'cluster_type': 'Test'}``.
         """
         cluster_type = self._make_get_request("cluster_type")
-        if cluster_type['cluster_type']:
+        if cluster_type["cluster_type"]:
             self.initialized = True
         return cluster_type
 
@@ -543,7 +574,7 @@ class CloudManInstance(GenericVMInstance):
         Get a list of nodes currently running in this CloudMan cluster.
         """
         instance_feed_json = self._make_get_request("instance_feed_json")
-        return instance_feed_json['instances']
+        return instance_feed_json["instances"]
 
     @block_until_vm_ready
     def get_cluster_size(self):
@@ -567,7 +598,7 @@ class CloudManInstance(GenericVMInstance):
         Returns the public IP of the master node in this CloudMan cluster
         """
         status_json = self.get_static_state()
-        return status_json['master_ip']
+        return status_json["master_ip"]
 
     @block_until_vm_ready
     def get_master_id(self):
@@ -575,10 +606,10 @@ class CloudManInstance(GenericVMInstance):
         Returns the instance ID of the master node in this CloudMan cluster
         """
         status_json = self.get_static_state()
-        return status_json['master_id']
+        return status_json["master_id"]
 
     @block_until_vm_ready
-    def add_nodes(self, num_nodes, instance_type='', spot_price=''):
+    def add_nodes(self, num_nodes, instance_type="", spot_price=""):
         """
         Add a number of worker nodes to the cluster, optionally specifying
         the type for new instances. If ``instance_type`` is not specified,
@@ -590,9 +621,7 @@ class CloudManInstance(GenericVMInstance):
         price for Spot instances, thus turning this request for more instances
         into a Spot request.
         """
-        payload = {'number_nodes': num_nodes,
-                   'instance_type': instance_type,
-                   'spot_price': spot_price}
+        payload = {"number_nodes": num_nodes, "instance_type": instance_type, "spot_price": spot_price}
         return self._make_get_request("add_instances", parameters=payload)
 
     @block_until_vm_ready
@@ -604,7 +633,7 @@ class CloudManInstance(GenericVMInstance):
         The ``force`` parameter (defaulting to False), is a boolean indicating
         whether the nodes should be forcibly removed rather than gracefully removed.
         """
-        payload = {'number_nodes': num_nodes, 'force_termination': force}
+        payload = {"number_nodes": num_nodes, "force_termination": force}
         result = self._make_get_request("remove_instances", parameters=payload)
         return result
 
@@ -619,7 +648,7 @@ class CloudManInstance(GenericVMInstance):
         than gracefully removed.
 
         """
-        payload = {'instance_id': instance_id}
+        payload = {"instance_id": instance_id}
         return self._make_get_request("remove_instance", parameters=payload)
 
     @block_until_vm_ready
@@ -630,7 +659,7 @@ class CloudManInstance(GenericVMInstance):
         The ``instance_id`` parameter defines the ID, as a string, of a worker node
         to reboot.
         """
-        payload = {'instance_id': instance_id}
+        payload = {"instance_id": instance_id}
         return self._make_get_request("reboot_instance", parameters=payload)
 
     @block_until_vm_ready
@@ -638,7 +667,7 @@ class CloudManInstance(GenericVMInstance):
         """
         Returns a boolean indicating whether autoscaling is enabled.
         """
-        return bool(self.get_status()['autoscaling']['use_autoscaling'])
+        return bool(self.get_status()["autoscaling"]["use_autoscaling"])
 
     @block_until_vm_ready
     def enable_autoscaling(self, minimum_nodes=0, maximum_nodes=19):
@@ -650,7 +679,7 @@ class CloudManInstance(GenericVMInstance):
         (default is 0) and ``maximum_nodes`` (default is 19) parameters.
         """
         if not self.autoscaling_enabled():
-            payload = {'as_min': minimum_nodes, 'as_max': maximum_nodes}
+            payload = {"as_min": minimum_nodes, "as_max": maximum_nodes}
             self._make_get_request("toggle_autoscaling", parameters=payload)
 
     @block_until_vm_ready
@@ -672,7 +701,7 @@ class CloudManInstance(GenericVMInstance):
         not provided then its configuration value does not change.
         """
         if self.autoscaling_enabled():
-            payload = {'as_min_adj': minimum_nodes, 'as_max_adj': maximum_nodes}
+            payload = {"as_min_adj": minimum_nodes, "as_max_adj": maximum_nodes}
             self._make_get_request("adjust_autoscaling", parameters=payload)
 
     @block_until_vm_ready
@@ -682,7 +711,7 @@ class CloudManInstance(GenericVMInstance):
 
         """
         status = self._make_get_request("get_all_services_status")
-        return bool(status['master_is_exec_host'])
+        return bool(status["master_is_exec_host"])
 
     @block_until_vm_ready
     def set_master_as_execution_host(self, enable):
@@ -698,9 +727,9 @@ class CloudManInstance(GenericVMInstance):
         """
         Get the current status of Galaxy running on the cluster.
         """
-        payload = {'srvc': 'Galaxy'}
+        payload = {"srvc": "Galaxy"}
         status = self._make_get_request("get_srvc_status", parameters=payload)
-        return {'status': status['status']}
+        return {"status": status["status"]}
 
     @block_until_vm_ready
     def terminate(self, terminate_master_instance=True, delete_cluster=False):
@@ -713,10 +742,8 @@ class CloudManInstance(GenericVMInstance):
             Deleting a cluster is irreversible - all of the data will be
             permanently deleted.
         """
-        payload = {'terminate_master_instance': terminate_master_instance,
-                   'delete_cluster': delete_cluster}
-        result = self._make_get_request("kill_all", parameters=payload,
-                                        timeout=15)
+        payload = {"terminate_master_instance": terminate_master_instance, "delete_cluster": delete_cluster}
+        result = self._make_get_request("kill_all", parameters=payload, timeout=15)
         return result
 
     def _make_get_request(self, url, parameters=None, timeout=None):
@@ -729,7 +756,7 @@ class CloudManInstance(GenericVMInstance):
         """
         if parameters is None:
             parameters = {}
-        req_url = '/'.join((self.cloudman_url, 'root', url))
+        req_url = "/".join((self.cloudman_url, "root", url))
         r = requests.get(
             req_url,
             params=parameters,

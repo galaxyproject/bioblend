@@ -7,7 +7,7 @@ from bioblend.galaxy.client import Client
 
 
 class UserClient(Client):
-    module = 'users'
+    module = "users"
 
     def __init__(self, galaxy_instance):
         super().__init__(galaxy_instance)
@@ -50,11 +50,11 @@ class UserClient(Client):
         """
         params = {}
         if f_email:
-            params['f_email'] = f_email
+            params["f_email"] = f_email
         if f_name:
-            params['f_name'] = f_name
+            params["f_name"] = f_name
         if f_any:
-            params['f_any'] = f_any
+            params["f_any"] = f_any
         return self._get(deleted=deleted, params=params)
 
     def show_user(self, user_id, deleted=False):
@@ -91,7 +91,7 @@ class UserClient(Client):
         :return: a dictionary containing information about the created user
         """
         payload = {}
-        payload['remote_user_email'] = user_email
+        payload["remote_user_email"] = user_email
         return self._post(payload)
 
     def create_local_user(self, username, user_email, password):
@@ -117,9 +117,9 @@ class UserClient(Client):
         :return: a dictionary containing information about the created user
         """
         payload = {}
-        payload['username'] = username
-        payload['email'] = user_email
-        payload['password'] = password
+        payload["username"] = username
+        payload["email"] = user_email
+        payload["password"] = password
         return self._post(payload)
 
     def get_current_user(self):
@@ -130,7 +130,7 @@ class UserClient(Client):
         :rtype: dict
         :return: a dictionary containing information about the current user
         """
-        url = self._make_url() + '/current'
+        url = self._make_url() + "/current"
         return self._get(url=url)
 
     def create_user_apikey(self, user_id):
@@ -143,9 +143,9 @@ class UserClient(Client):
         :rtype: str
         :return: the API key for the user
         """
-        url = self._make_url(user_id) + '/api_key'
+        url = self._make_url(user_id) + "/api_key"
         payload = {}
-        payload['user_id'] = user_id
+        payload["user_id"] = user_id
         return self._post(payload, url=url)
 
     def delete_user(self, user_id, purge=False):
@@ -168,7 +168,7 @@ class UserClient(Client):
         """
         params = {}
         if purge is True:
-            params['purge'] = purge
+            params["purge"] = purge
         return self._delete(id=user_id, params=params)
 
     def get_user_apikey(self, user_id):
@@ -181,8 +181,8 @@ class UserClient(Client):
         :rtype: str
         :return: the API key for the user
         """
-        url = self._make_url(user_id) + '/api_key/inputs'
-        return self._get(url=url)['inputs'][0]['value']
+        url = self._make_url(user_id) + "/api_key/inputs"
+        return self._get(url=url)["inputs"][0]["value"]
 
     def update_user(self, user_id, **kwds):
         """
@@ -201,5 +201,5 @@ class UserClient(Client):
         :rtype: dict
         :return: details of the updated user
         """
-        url = self._make_url(user_id) + '/information/inputs'
+        url = self._make_url(user_id) + "/information/inputs"
         return self._put(url=url, payload=kwds, id=user_id)

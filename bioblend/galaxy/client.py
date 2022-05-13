@@ -11,6 +11,7 @@ from typing import Optional
 import requests
 
 import bioblend
+
 # The following import must be preserved for compatibility because
 # ConnectionError class was originally defined here
 from bioblend import ConnectionError  # noqa: I202
@@ -94,13 +95,13 @@ class Client:
         :param contents: If ``True``, include 'contents' in the URL, after the module ID:
                          ``<base_url>/api/libraries/<encoded_library_id>/contents``
         """
-        c_url = '/'.join((self.gi.url, self.module))
+        c_url = "/".join((self.gi.url, self.module))
         if deleted:
-            c_url = c_url + '/deleted'
+            c_url = c_url + "/deleted"
         if module_id:
-            c_url = '/'.join((c_url, module_id))
+            c_url = "/".join((c_url, module_id))
             if contents:
-                c_url = c_url + '/contents'
+                c_url = c_url + "/contents"
         return c_url
 
     def _get(
@@ -129,9 +130,8 @@ class Client:
             url = self._make_url(module_id=id, deleted=deleted, contents=contents)
         attempts_left = self.max_get_retries()
         retry_delay = self.get_retry_delay()
-        bioblend.log.debug("GET - attempts left: %s; retry delay: %s",
-                           attempts_left, retry_delay)
-        msg = ''
+        bioblend.log.debug("GET - attempts left: %s; retry delay: %s", attempts_left, retry_delay)
+        msg = ""
         while attempts_left > 0:
             attempts_left -= 1
             try:
@@ -164,8 +164,7 @@ class Client:
                 bioblend.log.warning(msg)
                 time.sleep(retry_delay)
 
-    def _post(self, payload=None, id=None, deleted=False, contents=None, url=None,
-              files_attached=False):
+    def _post(self, payload=None, id=None, deleted=False, contents=None, url=None, files_attached=False):
         """
         Do a generic POST request, composing the url from the contents of the
         arguments. Alternatively, an explicit ``url`` can be provided to use
@@ -183,8 +182,7 @@ class Client:
         """
         if not url:
             url = self._make_url(module_id=id, deleted=deleted, contents=contents)
-        return self.gi.make_post_request(url, payload=payload,
-                                         files_attached=files_attached)
+        return self.gi.make_post_request(url, payload=payload, files_attached=files_attached)
 
     def _put(self, payload=None, id=None, url=None, params=None):
         """

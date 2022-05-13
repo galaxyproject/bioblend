@@ -2,7 +2,11 @@
 A base representation of an instance of Tool Shed
 """
 from bioblend.galaxyclient import GalaxyClient
-from bioblend.toolshed import categories, repositories, tools
+from bioblend.toolshed import (
+    categories,
+    repositories,
+    tools,
+)
 
 
 class ToolShedInstance(GalaxyClient):

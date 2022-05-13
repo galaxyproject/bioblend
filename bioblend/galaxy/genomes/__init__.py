@@ -5,7 +5,7 @@ from bioblend.galaxy.client import Client
 
 
 class GenomeClient(Client):
-    module = 'genomes'
+    module = "genomes"
 
     def __init__(self, galaxy_instance):
         super().__init__(galaxy_instance)
@@ -44,18 +44,25 @@ class GenomeClient(Client):
         """
         params = {}
         if num:
-            params['num'] = num
+            params["num"] = num
         if chrom:
-            params['chrom'] = chrom
+            params["chrom"] = chrom
         if low:
-            params['low'] = low
+            params["low"] = low
         if high:
-            params['high'] = high
+            params["high"] = high
         return self._get(id, params)
 
-    def install_genome(self, func='download', source=None, dbkey=None,
-                       ncbi_name=None, ensembl_dbkey=None, url_dbkey=None,
-                       indexers=None):
+    def install_genome(
+        self,
+        func="download",
+        source=None,
+        dbkey=None,
+        ncbi_name=None,
+        ensembl_dbkey=None,
+        url_dbkey=None,
+        indexers=None,
+    ):
         """
         Download and/or index a genome.
 
@@ -88,17 +95,17 @@ class GenomeClient(Client):
         """
         payload = {}
         if source:
-            payload['source'] = source
+            payload["source"] = source
         if func:
-            payload['func'] = func
+            payload["func"] = func
         if dbkey:
-            payload['dbkey'] = dbkey
+            payload["dbkey"] = dbkey
         if ncbi_name:
-            payload['ncbi_name'] = ncbi_name
+            payload["ncbi_name"] = ncbi_name
         if ensembl_dbkey:
-            payload['ensembl_dbkey'] = ensembl_dbkey
+            payload["ensembl_dbkey"] = ensembl_dbkey
         if url_dbkey:
-            payload['url_dbkey'] = url_dbkey
+            payload["url_dbkey"] = url_dbkey
         if indexers:
-            payload['indexers'] = indexers
+            payload["indexers"] = indexers
         return self._post(payload)

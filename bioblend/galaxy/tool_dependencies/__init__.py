@@ -5,12 +5,20 @@ from bioblend.galaxy.client import Client
 
 
 class ToolDependenciesClient(Client):
-    module = 'dependency_resolvers'
+    module = "dependency_resolvers"
 
     def __init__(self, galaxy_instance):
         super().__init__(galaxy_instance)
 
-    def summarize_toolbox(self, index=None, tool_ids=None, resolver_type=None, include_containers=False, container_type=None, index_by='requirements'):
+    def summarize_toolbox(
+        self,
+        index=None,
+        tool_ids=None,
+        resolver_type=None,
+        include_containers=False,
+        container_type=None,
+        index_by="requirements",
+    ):
         """
         Summarize requirements across toolbox (for Tool Management grid).
 
@@ -66,19 +74,19 @@ class ToolDependenciesClient(Client):
           Galaxy admin. It relies on an experimental API particularly tied to
           the GUI and therefore is subject to breaking changes.
         """
-        assert index_by in ['tools', 'requirements'], "index_by must be one of 'tools' or 'requirements'."
+        assert index_by in ["tools", "requirements"], "index_by must be one of 'tools' or 'requirements'."
         params = {
-            'include_containers': str(include_containers),
-            'index_by': index_by,
+            "include_containers": str(include_containers),
+            "index_by": index_by,
         }
         if index:
-            params['index'] = str(index)
+            params["index"] = str(index)
         if tool_ids:
-            params['tool_ids'] = ','.join(tool_ids)
+            params["tool_ids"] = ",".join(tool_ids)
         if resolver_type:
-            params['resolver_type'] = resolver_type
+            params["resolver_type"] = resolver_type
         if container_type:
-            params['container_type'] = container_type
+            params["container_type"] = container_type
 
-        url = '/'.join((self._make_url(), 'toolbox'))
+        url = "/".join((self._make_url(), "toolbox"))
         return self._get(url=url, params=params)

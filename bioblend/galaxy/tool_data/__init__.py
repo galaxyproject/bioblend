@@ -5,7 +5,7 @@ from bioblend.galaxy.client import Client
 
 
 class ToolDataClient(Client):
-    module = 'tool_data'
+    module = "tool_data"
 
     def __init__(self, galaxy_instance):
         super().__init__(galaxy_instance)
@@ -64,7 +64,7 @@ class ToolDataClient(Client):
              'model_class': 'TabularToolDataTable',
              'name': 'all_fasta'}
         """
-        url = self._make_url(data_table_id) + '/reload'
+        url = self._make_url(data_table_id) + "/reload"
         return self._get(url=url)
 
     def delete_data_table(self, data_table_id, values):
@@ -81,5 +81,5 @@ class ToolDataClient(Client):
         :rtype: dict
         :return: Remaining contents of the given data table
         """
-        payload = {'values': values}
+        payload = {"values": values}
         return self._delete(payload=payload, id=data_table_id)

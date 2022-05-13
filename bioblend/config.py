@@ -1,9 +1,9 @@
 import configparser
 import os
 
-BioBlendConfigPath = '/etc/bioblend.cfg'
+BioBlendConfigPath = "/etc/bioblend.cfg"
 BioBlendConfigLocations = [BioBlendConfigPath]
-UserConfigPath = os.path.join(os.path.expanduser('~'), '.bioblend')
+UserConfigPath = os.path.join(os.path.expanduser("~"), ".bioblend")
 BioBlendConfigLocations.append(UserConfigPath)
 
 
@@ -16,8 +16,9 @@ class Config(configparser.ConfigParser):
     * System wide: ``/etc/bioblend.cfg``
     * Individual user: ``~/.bioblend`` (which works on both Windows and Unix)
     """
+
     def __init__(self, path=None, fp=None, do_load=True):
-        super().__init__({'working_dir': '/mnt/pyami', 'debug': '0'})
+        super().__init__({"working_dir": "/mnt/pyami", "debug": "0"})
         if do_load:
             if path:
                 self.load_from_path(path)
@@ -30,8 +31,7 @@ class Config(configparser.ConfigParser):
         return self.get(section, name, default)
 
     def get(self, section, name, default=None):
-        """
-        """
+        """ """
         try:
             val = super().get(section, name)
         except Exception:
@@ -55,7 +55,7 @@ class Config(configparser.ConfigParser):
     def getbool(self, section, name, default=False):
         if self.has_option(section, name):
             val = self.get(section, name)
-            if val.lower() == 'true':
+            if val.lower() == "true":
                 val = True
             else:
                 val = False

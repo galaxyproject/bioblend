@@ -1,7 +1,11 @@
+### BioBlend v
+
+* Format Python code with black and isort.
+
 ### BioBlend v0.17.0 - 2022-05-09
 
 * Dropped support for Python 3.6. Added support for Python 3.10. Added support
-  for Galaxy release 21.09 and 22.01.
+  for Galaxy releases 21.09 and 22.01.
 
 * Removed deprecated ``run_workflow()`` method of ``WorkflowClient``.
 

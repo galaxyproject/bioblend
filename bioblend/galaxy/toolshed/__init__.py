@@ -5,7 +5,7 @@ from bioblend.galaxy.client import Client
 
 
 class ToolShedClient(Client):
-    module = 'tool_shed_repositories'
+    module = "tool_shed_repositories"
 
     def __init__(self, galaxy_instance):
         super().__init__(galaxy_instance)
@@ -59,13 +59,18 @@ class ToolShedClient(Client):
         """
         return self._get(id=toolShed_id)
 
-    def install_repository_revision(self, tool_shed_url, name, owner,
-                                    changeset_revision,
-                                    install_tool_dependencies=False,
-                                    install_repository_dependencies=False,
-                                    install_resolver_dependencies=False,
-                                    tool_panel_section_id=None,
-                                    new_tool_panel_section_label=None):
+    def install_repository_revision(
+        self,
+        tool_shed_url,
+        name,
+        owner,
+        changeset_revision,
+        install_tool_dependencies=False,
+        install_repository_dependencies=False,
+        install_resolver_dependencies=False,
+        tool_panel_section_id=None,
+        new_tool_panel_section_label=None,
+    ):
         """
         Install a specified repository revision from a specified Tool Shed into
         this Galaxy instance. This example demonstrates installation of a repository
@@ -128,23 +133,22 @@ class ToolShedClient(Client):
                                              installed into.
         """
         payload = {}
-        payload['tool_shed_url'] = tool_shed_url
-        payload['name'] = name
-        payload['owner'] = owner
-        payload['changeset_revision'] = changeset_revision
-        payload['install_tool_dependencies'] = install_tool_dependencies
-        payload['install_repository_dependencies'] = install_repository_dependencies
-        payload['install_resolver_dependencies'] = install_resolver_dependencies
+        payload["tool_shed_url"] = tool_shed_url
+        payload["name"] = name
+        payload["owner"] = owner
+        payload["changeset_revision"] = changeset_revision
+        payload["install_tool_dependencies"] = install_tool_dependencies
+        payload["install_repository_dependencies"] = install_repository_dependencies
+        payload["install_resolver_dependencies"] = install_resolver_dependencies
         if tool_panel_section_id:
-            payload['tool_panel_section_id'] = tool_panel_section_id
+            payload["tool_panel_section_id"] = tool_panel_section_id
         elif new_tool_panel_section_label:
-            payload['new_tool_panel_section_label'] = new_tool_panel_section_label
+            payload["new_tool_panel_section_label"] = new_tool_panel_section_label
 
-        url = self._make_url() + '/new/install_repository_revision'
+        url = self._make_url() + "/new/install_repository_revision"
         return self._post(url=url, payload=payload)
 
-    def uninstall_repository_revision(self, name, owner, changeset_revision,
-                                      tool_shed_url, remove_from_disk=True):
+    def uninstall_repository_revision(self, name, owner, changeset_revision, tool_shed_url, remove_from_disk=True):
         """
         Uninstalls a specified repository revision from this Galaxy instance.
 
@@ -169,10 +173,10 @@ class ToolShedClient(Client):
         :return: If successful, a dictionary with a message noting the removal
         """
         payload = {
-            'tool_shed_url': tool_shed_url,
-            'name': name,
-            'owner': owner,
-            'changeset_revision': changeset_revision,
-            'remove_from_disk': remove_from_disk
+            "tool_shed_url": tool_shed_url,
+            "name": name,
+            "owner": owner,
+            "changeset_revision": changeset_revision,
+            "remove_from_disk": remove_from_disk,
         }
         return self._delete(params=payload)

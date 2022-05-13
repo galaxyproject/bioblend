@@ -20,102 +20,95 @@ from bioblend.galaxy.objects import (
 )
 from . import test_util
 
-
-bioblend.set_stream_logger('test', level='INFO')
+bioblend.set_stream_logger("test", level="INFO")
 socket.setdefaulttimeout(10.0)
-SAMPLE_FN = test_util.get_abspath(os.path.join('data', 'paste_columns.ga'))
-SAMPLE_WF_COLL_FN = test_util.get_abspath(os.path.join('data', 'paste_columns_collections.ga'))
-SAMPLE_WF_PARAMETER_INPUT_FN = test_util.get_abspath(os.path.join('data', 'workflow_with_parameter_input.ga'))
-FOO_DATA = 'foo\nbar\n'
-FOO_DATA_2 = 'foo2\nbar2\n'
+SAMPLE_FN = test_util.get_abspath(os.path.join("data", "paste_columns.ga"))
+SAMPLE_WF_COLL_FN = test_util.get_abspath(os.path.join("data", "paste_columns_collections.ga"))
+SAMPLE_WF_PARAMETER_INPUT_FN = test_util.get_abspath(os.path.join("data", "workflow_with_parameter_input.ga"))
+FOO_DATA = "foo\nbar\n"
+FOO_DATA_2 = "foo2\nbar2\n"
 SAMPLE_WF_DICT = {
-    'deleted': False,
-    'id': '9005c5112febe774',
-    'inputs': {
-        '571': {'label': 'Input Dataset', 'value': ''},
-        '572': {'label': 'Input Dataset', 'value': ''},
+    "deleted": False,
+    "id": "9005c5112febe774",
+    "inputs": {
+        "571": {"label": "Input Dataset", "value": ""},
+        "572": {"label": "Input Dataset", "value": ""},
     },
-    'model_class': 'StoredWorkflow',
-    'name': 'paste_columns',
-    'owner': 'user_foo',
-    'published': False,
-    'steps': {
-        '571': {
-            'id': 571,
-            'input_steps': {},
-            'tool_id': None,
-            'tool_inputs': {'name': 'Input Dataset'},
-            'tool_version': None,
-            'type': 'data_input',
+    "model_class": "StoredWorkflow",
+    "name": "paste_columns",
+    "owner": "user_foo",
+    "published": False,
+    "steps": {
+        "571": {
+            "id": 571,
+            "input_steps": {},
+            "tool_id": None,
+            "tool_inputs": {"name": "Input Dataset"},
+            "tool_version": None,
+            "type": "data_input",
         },
-        '572': {
-            'id': 572,
-            'input_steps': {},
-            'tool_id': None,
-            'tool_inputs': {'name': 'Input Dataset'},
-            'tool_version': None,
-            'type': 'data_input',
+        "572": {
+            "id": 572,
+            "input_steps": {},
+            "tool_id": None,
+            "tool_inputs": {"name": "Input Dataset"},
+            "tool_version": None,
+            "type": "data_input",
         },
-        '573': {
-            'id': 573,
-            'input_steps': {
-                'input1': {'source_step': 571, 'step_output': 'output'},
-                'input2': {'source_step': 572, 'step_output': 'output'},
+        "573": {
+            "id": 573,
+            "input_steps": {
+                "input1": {"source_step": 571, "step_output": "output"},
+                "input2": {"source_step": 572, "step_output": "output"},
             },
-            'tool_id': 'Paste1',
-            'tool_inputs': {
-                'delimiter': '"T"',
-                'input1': 'null',
-                'input2': 'null',
+            "tool_id": "Paste1",
+            "tool_inputs": {
+                "delimiter": '"T"',
+                "input1": "null",
+                "input2": "null",
             },
-            'tool_version': '1.0.0',
-            'type': 'tool',
-        }
+            "tool_version": "1.0.0",
+            "type": "tool",
+        },
     },
-    'tags': [],
-    'url': '/api/workflows/9005c5112febe774',
+    "tags": [],
+    "url": "/api/workflows/9005c5112febe774",
 }
 SAMPLE_INV_DICT = {
-    'history_id': '2f94e8ae9edff68a',
-    'id': 'df7a1f0c02a5b08e',
-    'inputs': {
-        '0': {
-            'id': 'a7db2fac67043c7e',
-            'src': 'hda',
-            'uuid': '7932ffe0-2340-4952-8857-dbaa50f1f46a'
-        }
-    },
-    'model_class': 'WorkflowInvocation',
-    'state': 'ready',
-    'steps': [
+    "history_id": "2f94e8ae9edff68a",
+    "id": "df7a1f0c02a5b08e",
+    "inputs": {"0": {"id": "a7db2fac67043c7e", "src": "hda", "uuid": "7932ffe0-2340-4952-8857-dbaa50f1f46a"}},
+    "model_class": "WorkflowInvocation",
+    "state": "ready",
+    "steps": [
         {
-            'action': None,
-            'id': 'd413a19dec13d11e',
-            'job_id': None,
-            'model_class': 'WorkflowInvocationStep',
-            'order_index': 0,
-            'state': None,
-            'update_time': '2015-10-31T22:00:26',
-            'workflow_step_id': 'cbbbf59e8f08c98c',
-            'workflow_step_label': None,
-            'workflow_step_uuid': 'b81250fd-3278-4e6a-b269-56a1f01ef485'
+            "action": None,
+            "id": "d413a19dec13d11e",
+            "job_id": None,
+            "model_class": "WorkflowInvocationStep",
+            "order_index": 0,
+            "state": None,
+            "update_time": "2015-10-31T22:00:26",
+            "workflow_step_id": "cbbbf59e8f08c98c",
+            "workflow_step_label": None,
+            "workflow_step_uuid": "b81250fd-3278-4e6a-b269-56a1f01ef485",
         },
         {
-            'action': None,
-            'id': '2f94e8ae9edff68a',
-            'job_id': 'e89067bb68bee7a0',
-            'model_class': 'WorkflowInvocationStep',
-            'order_index': 1,
-            'state': 'new',
-            'update_time': '2015-10-31T22:00:26',
-            'workflow_step_id': '964b37715ec9bd22',
-            'workflow_step_label': None,
-            'workflow_step_uuid': 'e62440b8-e911-408b-b124-e05435d3125e'
-        }
+            "action": None,
+            "id": "2f94e8ae9edff68a",
+            "job_id": "e89067bb68bee7a0",
+            "model_class": "WorkflowInvocationStep",
+            "order_index": 1,
+            "state": "new",
+            "update_time": "2015-10-31T22:00:26",
+            "workflow_step_id": "964b37715ec9bd22",
+            "workflow_step_label": None,
+            "workflow_step_uuid": "e62440b8-e911-408b-b124-e05435d3125e",
+        },
     ],
-    'update_time': '2015-10-31T22:00:26',
-    'uuid': 'c8aa2b1c-801a-11e5-a9e5-8ca98228593c',
-    'workflow_id': '03501d7626bd192f'
+    "update_time": "2015-10-31T22:00:26",
+    "uuid": "c8aa2b1c-801a-11e5-a9e5-8ca98228593c",
+    "workflow_id": "03501d7626bd192f",
 }
 
 
@@ -131,11 +124,11 @@ def is_reachable(url):
 
 
 def upload_from_fs(lib, bnames, **kwargs):
-    tempdir = tempfile.mkdtemp(prefix='bioblend_test_')
+    tempdir = tempfile.mkdtemp(prefix="bioblend_test_")
     try:
         fnames = [os.path.join(tempdir, _) for _ in bnames]
         for fn in fnames:
-            with open(fn, 'w') as f:
+            with open(fn, "w") as f:
                 f.write(FOO_DATA)
         dss = lib.upload_from_galaxy_fs(fnames, **kwargs)
     finally:
@@ -144,16 +137,15 @@ def upload_from_fs(lib, bnames, **kwargs):
 
 
 class MockWrapper(wrappers.Wrapper):
-    BASE_ATTRS = ('a', 'b')
+    BASE_ATTRS = ("a", "b")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
 
 class TestWrapper(unittest.TestCase):
-
     def setUp(self):
-        self.d = {'a': 1, 'b': [2, 3], 'c': {'x': 4}}
+        self.d = {"a": 1, "b": [2, 3], "c": {"x": 4}}
         with self.assertRaises(TypeError):
             wrappers.Wrapper(self.d)
         self.w = MockWrapper(self.d)
@@ -165,8 +157,8 @@ class TestWrapper(unittest.TestCase):
         self.w.b[0] = 222
         self.assertEqual(self.w.a, 222)
         self.assertEqual(self.w.b[0], 222)
-        self.assertEqual(self.d['a'], 1)
-        self.assertEqual(self.d['b'][0], 2)
+        self.assertEqual(self.d["a"], 1)
+        self.assertEqual(self.d["b"][0], 2)
         with self.assertRaises(AttributeError):
             self.w.foo
         with self.assertRaises(AttributeError):
@@ -188,7 +180,7 @@ class TestWrapper(unittest.TestCase):
         self.assertEqual(self.w.b[0], 2)
 
     def test_kwargs(self):
-        parent = MockWrapper({'a': 10})
+        parent = MockWrapper({"a": 10})
         w = MockWrapper(self.d, parent=parent)
         self.assertIs(w.parent, parent)
         with self.assertRaises(AttributeError):
@@ -196,23 +188,21 @@ class TestWrapper(unittest.TestCase):
 
 
 class TestWorkflow(unittest.TestCase):
-
     def setUp(self):
         self.wf = wrappers.Workflow(SAMPLE_WF_DICT)
 
     def test_initialize(self):
-        self.assertEqual(self.wf.id, '9005c5112febe774')
-        self.assertEqual(self.wf.name, 'paste_columns')
+        self.assertEqual(self.wf.id, "9005c5112febe774")
+        self.assertEqual(self.wf.name, "paste_columns")
         self.assertEqual(self.wf.deleted, False)
-        self.assertEqual(self.wf.owner, 'user_foo')
+        self.assertEqual(self.wf.owner, "user_foo")
         self.assertEqual(self.wf.published, False)
         self.assertEqual(self.wf.tags, [])
-        self.assertEqual(
-            self.wf.input_labels_to_ids, {'Input Dataset': {'571', '572'}})
-        self.assertEqual(self.wf.tool_labels_to_ids, {'Paste1': {'573'}})
-        self.assertEqual(self.wf.data_input_ids, {'571', '572'})
-        self.assertEqual(self.wf.source_ids, {'571', '572'})
-        self.assertEqual(self.wf.sink_ids, {'573'})
+        self.assertEqual(self.wf.input_labels_to_ids, {"Input Dataset": {"571", "572"}})
+        self.assertEqual(self.wf.tool_labels_to_ids, {"Paste1": {"573"}})
+        self.assertEqual(self.wf.data_input_ids, {"571", "572"})
+        self.assertEqual(self.wf.source_ids, {"571", "572"})
+        self.assertEqual(self.wf.sink_ids, {"573"})
 
     def test_dag(self):
         inv_dag = {}
@@ -231,100 +221,105 @@ class TestWorkflow(unittest.TestCase):
                 self.assertLess(ids.index(h), ids.index(t))
 
     def test_steps(self):
-        steps = SAMPLE_WF_DICT['steps']
+        steps = SAMPLE_WF_DICT["steps"]
         for sid, s in self.wf.steps.items():
             self.assertIsInstance(s, wrappers.Step)
             self.assertEqual(s.id, sid)
             self.assertIn(sid, steps)
             self.assertIs(s.parent, self.wf)
-        self.assertEqual(self.wf.data_input_ids, {'571', '572'})
-        self.assertEqual(self.wf.tool_ids, {'573'})
+        self.assertEqual(self.wf.data_input_ids, {"571", "572"})
+        self.assertEqual(self.wf.tool_ids, {"573"})
 
     def test_taint(self):
         self.assertFalse(self.wf.is_modified)
-        self.wf.steps['571'].tool_id = 'foo'
+        self.wf.steps["571"].tool_id = "foo"
         self.assertTrue(self.wf.is_modified)
 
     def test_input_map(self):
-        hda = wrappers.HistoryDatasetAssociation({'id': 'hda_id'}, container='mock_history')
-        ldda = wrappers.LibraryDatasetDatasetAssociation({'id': 'ldda_id'}, container='mock_library')
-        input_map = self.wf._convert_input_map({'0': hda, '1': ldda, '2': {'id': 'hda2_id', 'src': 'hda'}})
-        self.assertEqual(input_map, {'0': {'id': 'hda_id', 'src': 'hda'}, '1': {'id': 'ldda_id', 'src': 'ldda'}, '2': {'id': 'hda2_id', 'src': 'hda'}})
+        hda = wrappers.HistoryDatasetAssociation({"id": "hda_id"}, container="mock_history")
+        ldda = wrappers.LibraryDatasetDatasetAssociation({"id": "ldda_id"}, container="mock_library")
+        input_map = self.wf._convert_input_map({"0": hda, "1": ldda, "2": {"id": "hda2_id", "src": "hda"}})
+        self.assertEqual(
+            input_map,
+            {
+                "0": {"id": "hda_id", "src": "hda"},
+                "1": {"id": "ldda_id", "src": "ldda"},
+                "2": {"id": "hda2_id", "src": "hda"},
+            },
+        )
 
 
 @test_util.skip_unless_galaxy()
 class GalaxyObjectsTestBase(unittest.TestCase):
-
     def setUp(self):
-        galaxy_key = os.environ['BIOBLEND_GALAXY_API_KEY']
-        galaxy_url = os.environ['BIOBLEND_GALAXY_URL']
+        galaxy_key = os.environ["BIOBLEND_GALAXY_API_KEY"]
+        galaxy_url = os.environ["BIOBLEND_GALAXY_URL"]
         self.gi = galaxy_instance.GalaxyInstance(galaxy_url, galaxy_key)
 
 
-@test_util.skip_unless_galaxy('release_19.09')
+@test_util.skip_unless_galaxy("release_19.09")
 class TestInvocation(GalaxyObjectsTestBase):
-
     @classmethod
     def setUpClass(cls):
         super().setUp(cls)
         cls.inv = wrappers.Invocation(SAMPLE_INV_DICT)
         with open(SAMPLE_FN) as f:
             cls.workflow = cls.gi.workflows.import_new(f.read())
-        path_pause = test_util.get_abspath(os.path.join('data', 'test_workflow_pause.ga'))
+        path_pause = test_util.get_abspath(os.path.join("data", "test_workflow_pause.ga"))
         with open(path_pause) as f:
             cls.workflow_pause = cls.gi.workflows.import_new(f.read())
         cls.history = cls.gi.histories.create(name="TestInvocation")
-        cls.dataset = cls.history.paste_content('1\t2\t3')
+        cls.dataset = cls.history.paste_content("1\t2\t3")
 
     @classmethod
     def tearDownClass(cls):
         cls.history.delete(purge=True)
 
     def test_initialize(self):
-        self.assertEqual(self.inv.workflow_id, '03501d7626bd192f')
-        self.assertEqual(self.inv.history_id, '2f94e8ae9edff68a')
-        self.assertEqual(self.inv.id, 'df7a1f0c02a5b08e')
-        self.assertEqual(self.inv.state, 'ready')
-        self.assertEqual(self.inv.update_time, '2015-10-31T22:00:26')
-        self.assertEqual(self.inv.uuid, 'c8aa2b1c-801a-11e5-a9e5-8ca98228593c')
+        self.assertEqual(self.inv.workflow_id, "03501d7626bd192f")
+        self.assertEqual(self.inv.history_id, "2f94e8ae9edff68a")
+        self.assertEqual(self.inv.id, "df7a1f0c02a5b08e")
+        self.assertEqual(self.inv.state, "ready")
+        self.assertEqual(self.inv.update_time, "2015-10-31T22:00:26")
+        self.assertEqual(self.inv.uuid, "c8aa2b1c-801a-11e5-a9e5-8ca98228593c")
 
     def test_initialize_steps(self):
-        for step, step_dict in zip(self.inv.steps, SAMPLE_INV_DICT['steps']):
+        for step, step_dict in zip(self.inv.steps, SAMPLE_INV_DICT["steps"]):
             self.assertIsInstance(step, wrappers.InvocationStep)
             self.assertIs(step.parent, self.inv)
-            self.assertEqual(step.id, step_dict['id'])
-            self.assertEqual(step.job_id, step_dict['job_id'])
-            self.assertEqual(step.order_index, step_dict['order_index'])
-            self.assertEqual(step.state, step_dict['state'])
-            self.assertEqual(step.update_time, step_dict['update_time'])
-            self.assertEqual(step.workflow_step_id, step_dict['workflow_step_id'])
-            self.assertEqual(step.workflow_step_label, step_dict['workflow_step_label'])
-            self.assertEqual(step.workflow_step_uuid, step_dict['workflow_step_uuid'])
+            self.assertEqual(step.id, step_dict["id"])
+            self.assertEqual(step.job_id, step_dict["job_id"])
+            self.assertEqual(step.order_index, step_dict["order_index"])
+            self.assertEqual(step.state, step_dict["state"])
+            self.assertEqual(step.update_time, step_dict["update_time"])
+            self.assertEqual(step.workflow_step_id, step_dict["workflow_step_id"])
+            self.assertEqual(step.workflow_step_label, step_dict["workflow_step_label"])
+            self.assertEqual(step.workflow_step_uuid, step_dict["workflow_step_uuid"])
 
     def test_initialize_inputs(self):
         for i, input in enumerate(self.inv.inputs):
-            self.assertEqual(input, {**SAMPLE_INV_DICT['inputs'][str(i)], 'label': str(i)})
+            self.assertEqual(input, {**SAMPLE_INV_DICT["inputs"][str(i)], "label": str(i)})
 
     def test_sorted_step_ids(self):
-        self.assertListEqual(self.inv.sorted_step_ids(), ['d413a19dec13d11e', '2f94e8ae9edff68a'])
+        self.assertListEqual(self.inv.sorted_step_ids(), ["d413a19dec13d11e", "2f94e8ae9edff68a"])
 
     def test_step_states(self):
-        self.assertSetEqual(self.inv.step_states(), {None, 'new'})
+        self.assertSetEqual(self.inv.step_states(), {None, "new"})
 
     def test_number_of_steps(self):
         self.assertEqual(self.inv.number_of_steps(), 2)
 
     def test_sorted_steps_by(self):
         self.assertEqual(len(self.inv.sorted_steps_by()), 2)
-        steps = self.inv.sorted_steps_by(step_ids={'2f94e8ae9edff68a'})
+        steps = self.inv.sorted_steps_by(step_ids={"2f94e8ae9edff68a"})
         self.assertEqual(len(steps), 1)
-        self.assertEqual(steps[0].id, '2f94e8ae9edff68a')
-        self.assertListEqual(self.inv.sorted_steps_by(step_ids={'unmatched_id'}), [])
-        steps = self.inv.sorted_steps_by(states={'new'})
+        self.assertEqual(steps[0].id, "2f94e8ae9edff68a")
+        self.assertListEqual(self.inv.sorted_steps_by(step_ids={"unmatched_id"}), [])
+        steps = self.inv.sorted_steps_by(states={"new"})
         self.assertEqual(len(steps), 1)
-        self.assertEqual(steps[0].state, 'new')
-        self.assertListEqual(self.inv.sorted_steps_by(states={'unmatched_state'}), [])
-        steps = self.inv.sorted_steps_by(indices={0}, states={None, 'new'})
+        self.assertEqual(steps[0].state, "new")
+        self.assertListEqual(self.inv.sorted_steps_by(states={"unmatched_state"}), [])
+        steps = self.inv.sorted_steps_by(indices={0}, states={None, "new"})
         self.assertEqual(len(steps), 1)
         self.assertEqual(steps[0].order_index, 0)
         self.assertListEqual(self.inv.sorted_steps_by(indices={2}), [])
@@ -332,20 +327,20 @@ class TestInvocation(GalaxyObjectsTestBase):
     def test_cancel(self):
         inv = self._obj_invoke_workflow()
         inv.cancel()
-        self.assertEqual(inv.state, 'cancelled')
+        self.assertEqual(inv.state, "cancelled")
 
     def test_wait(self):
         inv = self._obj_invoke_workflow()
         inv.wait()
-        self.assertEqual(inv.state, 'scheduled')
+        self.assertEqual(inv.state, "scheduled")
 
     def test_refresh(self):
         inv = self._obj_invoke_workflow()
-        inv.state = 'placeholder'
+        inv.state = "placeholder"
         # use wait_for_invocation() directly, because inv.wait() will update inv automatically
         self.gi.gi.invocations.wait_for_invocation(inv.id)
         inv.refresh()
-        self.assertEqual(inv.state, 'scheduled')
+        self.assertEqual(inv.state, "scheduled")
 
     def test_run_step_actions(self):
         inv = self.workflow_pause.invoke(
@@ -366,49 +361,48 @@ class TestInvocation(GalaxyObjectsTestBase):
         inv = self._obj_invoke_workflow()
         inv.wait()
         summary = inv.summary()
-        self.assertEqual(summary['populated_state'], 'ok')
+        self.assertEqual(summary["populated_state"], "ok")
 
     def test_step_jobs_summary(self):
         inv = self._obj_invoke_workflow()
         inv.wait()
         step_jobs_summary = inv.step_jobs_summary()
         self.assertEqual(len(step_jobs_summary), 1)
-        self.assertEqual(step_jobs_summary[0]['populated_state'], 'ok')
+        self.assertEqual(step_jobs_summary[0]["populated_state"], "ok")
 
     def test_report(self):
         inv = self._obj_invoke_workflow()
         report = inv.report()
-        assert report['workflows'] == {self.workflow.id: {'name': 'paste_columns'}}
+        assert report["workflows"] == {self.workflow.id: {"name": "paste_columns"}}
 
-    @test_util.skip_unless_galaxy('release_20.09')
+    @test_util.skip_unless_galaxy("release_20.09")
     def test_biocompute_object(self):
         inv = self._obj_invoke_workflow()
         inv.wait()
         biocompute_object = inv.biocompute_object()
-        self.assertEqual(len(biocompute_object['description_domain']['pipeline_steps']), 1)
+        self.assertEqual(len(biocompute_object["description_domain"]["pipeline_steps"]), 1)
 
     def _obj_invoke_workflow(self):
         return self.workflow.invoke(
-            inputs={'Input 1': self.dataset, 'Input 2': self.dataset},
+            inputs={"Input 1": self.dataset, "Input 2": self.dataset},
             history=self.history,
-            inputs_by='name',
+            inputs_by="name",
         )
 
 
-@test_util.skip_unless_galaxy('release_19.09')
+@test_util.skip_unless_galaxy("release_19.09")
 class TestObjInvocationClient(GalaxyObjectsTestBase):
-
     @classmethod
     def setUpClass(cls):
         super().setUp(cls)
         with open(SAMPLE_FN) as f:
             cls.workflow = cls.gi.workflows.import_new(f.read())
         cls.history = cls.gi.histories.create(name="TestGalaxyObjInvocationClient")
-        dataset = cls.history.paste_content('1\t2\t3')
+        dataset = cls.history.paste_content("1\t2\t3")
         cls.inv = cls.workflow.invoke(
-            inputs={'Input 1': dataset, 'Input 2': dataset},
+            inputs={"Input 1": dataset, "Input 2": dataset},
             history=cls.history,
-            inputs_by='name',
+            inputs_by="name",
         )
         cls.inv.wait()
 
@@ -421,7 +415,7 @@ class TestObjInvocationClient(GalaxyObjectsTestBase):
         self.assertEqual(inv.id, self.inv.id)
         self.assertEqual(inv.workflow_id, self.workflow.id)
         self.assertEqual(inv.history_id, self.history.id)
-        self.assertEqual(inv.state, 'scheduled')
+        self.assertEqual(inv.state, "scheduled")
         self.assertEqual(inv.update_time, self.inv.update_time)
         self.assertEqual(inv.uuid, self.inv.uuid)
 
@@ -432,7 +426,7 @@ class TestObjInvocationClient(GalaxyObjectsTestBase):
         self.assertEqual(inv_preview.id, self.inv.id)
         self.assertEqual(inv_preview.workflow_id, self.workflow.id)
         self.assertEqual(inv_preview.history_id, self.history.id)
-        self.assertEqual(inv_preview.state, 'scheduled')
+        self.assertEqual(inv_preview.state, "scheduled")
         self.assertEqual(inv_preview.update_time, self.inv.update_time)
         self.assertEqual(inv_preview.uuid, self.inv.uuid)
 
@@ -442,7 +436,7 @@ class TestObjInvocationClient(GalaxyObjectsTestBase):
         self.assertEqual(inv.id, self.inv.id)
         self.assertEqual(inv.workflow_id, self.workflow.id)
         self.assertEqual(inv.history_id, self.history.id)
-        self.assertEqual(inv.state, 'scheduled')
+        self.assertEqual(inv.state, "scheduled")
         self.assertEqual(inv.update_time, self.inv.update_time)
         self.assertEqual(inv.uuid, self.inv.uuid)
         self.assertGreater(len(self.inv.steps), 0)
@@ -452,12 +446,10 @@ class TestObjInvocationClient(GalaxyObjectsTestBase):
 
 
 class TestGalaxyInstance(GalaxyObjectsTestBase):
-
     def test_library(self):
         name = f"test_{uuid.uuid4().hex}"
-        description, synopsis = 'D', 'S'
-        lib = self.gi.libraries.create(
-            name, description=description, synopsis=synopsis)
+        description, synopsis = "D", "S"
+        lib = self.gi.libraries.create(name, description=description, synopsis=synopsis)
         self.assertEqual(lib.name, name)
         self.assertEqual(lib.description, description)
         self.assertEqual(lib.synopsis, synopsis)
@@ -478,7 +470,7 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
             wf = self.gi.workflows.import_new(f.read())
         self._check_and_del_workflow(wf)
 
-    @test_util.skip_unless_galaxy('release_19.01')
+    @test_util.skip_unless_galaxy("release_19.01")
     def test_workflow_parameter_input(self):
         with open(SAMPLE_WF_PARAMETER_INPUT_FN) as f:
             self.gi.workflows.import_new(f.read())
@@ -497,11 +489,11 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
         with open(SAMPLE_FN) as f:
             wf_dump = json.load(f)
         wf_info = self.gi.gi.workflows.import_workflow_dict(wf_dump)
-        wf_dict = self.gi.gi.workflows.show_workflow(wf_info['id'])
-        for id_, step in wf_dict['steps'].items():
-            if step['type'] == 'tool':
-                for k in 'tool_inputs', 'tool_version':
-                    wf_dict['steps'][id_][k] = None
+        wf_dict = self.gi.gi.workflows.show_workflow(wf_info["id"])
+        for id_, step in wf_dict["steps"].items():
+            if step["type"] == "tool":
+                for k in "tool_inputs", "tool_version":
+                    wf_dict["steps"][id_][k] = None
         wf = wrappers.Workflow(wf_dict, gi=self.gi)
         self.assertFalse(wf.is_runnable)
         with self.assertRaises(RuntimeError):
@@ -518,18 +510,18 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
 
     def _check_and_del_workflow(self, wf, check_is_public=False):
         # Galaxy appends additional text to imported workflow names
-        self.assertTrue(wf.name.startswith('paste_columns'))
+        self.assertTrue(wf.name.startswith("paste_columns"))
         self.assertEqual(type(wf.owner), str)
         self.assertEqual(len(wf.steps), 3)
         for step_id, step in wf.steps.items():
             self.assertIsInstance(step, wrappers.Step)
             self.assertEqual(step_id, step.id)
             self.assertIsInstance(step.tool_inputs, dict)
-            if step.type == 'tool':
+            if step.type == "tool":
                 self.assertIsNotNone(step.tool_id)
                 self.assertIsNotNone(step.tool_version)
                 self.assertIsInstance(step.input_steps, dict)
-            elif step.type in ('data_collection_input', 'data_input'):
+            elif step.type in ("data_collection_input", "data_input"):
                 self.assertIsNone(step.tool_id)
                 self.assertIsNone(step.tool_version)
                 self.assertEqual(step.input_steps, {})
@@ -543,40 +535,38 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
     #   * we can't publish a wf from the API
     #   * we can't directly get another user's wf
     def test_workflow_from_shared(self):
-        all_prevs = {
-            _.id: _ for _ in self.gi.workflows.get_previews(published=True)
-        }
-        pub_only_ids = set(all_prevs).difference(
-            _.id for _ in self.gi.workflows.get_previews())
+        all_prevs = {_.id: _ for _ in self.gi.workflows.get_previews(published=True)}
+        pub_only_ids = set(all_prevs).difference(_.id for _ in self.gi.workflows.get_previews())
         if pub_only_ids:
             wf_id = pub_only_ids.pop()
             imported = self.gi.workflows.import_shared(wf_id)
             self.assertIsInstance(imported, wrappers.Workflow)
             imported.delete()
         else:
-            self.skipTest('no published workflows, manually publish a workflow to run this test')
+            self.skipTest("no published workflows, manually publish a workflow to run this test")
 
     def test_get_libraries(self):
-        self._test_multi_get('libraries')
+        self._test_multi_get("libraries")
 
     def test_get_histories(self):
-        self._test_multi_get('histories')
+        self._test_multi_get("histories")
 
     def test_get_workflows(self):
-        self._test_multi_get('workflows')
+        self._test_multi_get("workflows")
 
     def _normalized_functions(self, obj_type):
-        if obj_type == 'libraries':
+        if obj_type == "libraries":
             create = self.gi.libraries.create
             del_kwargs = {}
-        elif obj_type == 'histories':
+        elif obj_type == "histories":
             create = self.gi.histories.create
-            del_kwargs = {'purge': True}
-        elif obj_type == 'workflows':
+            del_kwargs = {"purge": True}
+        elif obj_type == "workflows":
+
             def create(name):
                 with open(SAMPLE_FN) as f:
                     d = json.load(f)
-                d['name'] = name
+                d["name"] = name
                 return self.gi.workflows.import_new(d)
 
             del_kwargs = {}
@@ -584,8 +574,7 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
 
     def _test_multi_get(self, obj_type):
         obj_gi_client = getattr(self.gi, obj_type)
-        create, del_kwargs = self._normalized_functions(
-            obj_type)
+        create, del_kwargs = self._normalized_functions(obj_type)
 
         def ids(seq):
             return {_.id for _ in seq}
@@ -595,7 +584,7 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
         try:
             objs = [create(_) for _ in names]
             self.assertLessEqual(ids(objs), ids(obj_gi_client.list()))
-            if obj_type != 'workflows':
+            if obj_type != "workflows":
                 filtered = obj_gi_client.list(name=names[0])
                 self.assertEqual(len(filtered), 1)
                 self.assertEqual(filtered[0].id, objs[0].id)
@@ -613,16 +602,16 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
                 o.delete(**del_kwargs)
 
     def test_delete_libraries_by_name(self):
-        self._test_delete_by_name('libraries')
-        self._test_delete_by_ambiguous_name('libraries')
+        self._test_delete_by_name("libraries")
+        self._test_delete_by_ambiguous_name("libraries")
 
     def test_delete_histories_by_name(self):
-        self._test_delete_by_name('histories')
-        self._test_delete_by_ambiguous_name('histories')
+        self._test_delete_by_name("histories")
+        self._test_delete_by_ambiguous_name("histories")
 
     def test_delete_workflows_by_name(self):
-        self._test_delete_by_name('workflows')
-        self._test_delete_by_ambiguous_name('workflows')
+        self._test_delete_by_name("workflows")
+        self._test_delete_by_ambiguous_name("workflows")
 
     def _test_delete_by_name(self, obj_type):
         obj_gi_client = getattr(self.gi, obj_type)
@@ -655,7 +644,7 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
 
 class TestLibrary(GalaxyObjectsTestBase):
     # just something that can be expected to be always up
-    DS_URL = 'https://tools.ietf.org/rfc/rfc1866.txt'
+    DS_URL = "https://tools.ietf.org/rfc/rfc1866.txt"
 
     def setUp(self):
         super().setUp()
@@ -703,7 +692,7 @@ class TestLibrary(GalaxyObjectsTestBase):
             self.skipTest(f"{self.DS_URL} not reachable")
 
     def test_dataset_from_local(self):
-        with tempfile.NamedTemporaryFile(mode='w', prefix='bioblend_test_') as f:
+        with tempfile.NamedTemporaryFile(mode="w", prefix="bioblend_test_") as f:
             f.write(FOO_DATA)
             f.flush()
             ds = self.lib.upload_from_local(f.name)
@@ -713,8 +702,7 @@ class TestLibrary(GalaxyObjectsTestBase):
         bnames = [f"f{i}.txt" for i in range(2)]
         dss, fnames = upload_from_fs(self.lib, bnames)
         self._check_datasets(dss)
-        dss, fnames = upload_from_fs(
-            self.lib, bnames, link_data_only='link_to_files')
+        dss, fnames = upload_from_fs(self.lib, bnames, link_data_only="link_to_files")
         for ds, fn in zip(dss, fnames):
             self.assertEqual(ds.file_name, fn)
 
@@ -745,7 +733,6 @@ class TestLibrary(GalaxyObjectsTestBase):
 
 
 class TestLDContents(GalaxyObjectsTestBase):
-
     def setUp(self):
         super().setUp()
         self.lib = self.gi.libraries.create(f"test_{uuid.uuid4().hex}")
@@ -781,7 +768,7 @@ class TestLDContents(GalaxyObjectsTestBase):
     def test_dataset_update(self):
         new_name = f"test_{uuid.uuid4().hex}"
         new_misc_info = f"Annotation for {new_name}"
-        new_genome_build = 'hg19'
+        new_genome_build = "hg19"
         updated_ldda = self.ds.update(name=new_name, misc_info=new_misc_info, genome_build=new_genome_build)
         self.assertEqual(self.ds.id, updated_ldda.id)
         self.assertEqual(self.ds.name, new_name)
@@ -790,7 +777,6 @@ class TestLDContents(GalaxyObjectsTestBase):
 
 
 class TestHistory(GalaxyObjectsTestBase):
-
     def setUp(self):
         super().setUp()
         self.hist = self.gi.histories.create(f"test_{uuid.uuid4().hex}")
@@ -824,7 +810,7 @@ class TestHistory(GalaxyObjectsTestBase):
         self._check_dataset(hda)
 
     def test_upload_file(self):
-        with tempfile.NamedTemporaryFile(mode='w', prefix='bioblend_test_') as f:
+        with tempfile.NamedTemporaryFile(mode="w", prefix="bioblend_test_") as f:
             f.write(FOO_DATA)
             f.flush()
             hda = self.hist.upload_file(f.name)
@@ -855,10 +841,10 @@ class TestHistory(GalaxyObjectsTestBase):
     def test_export_and_download(self):
         jeha_id = self.hist.export(wait=True, maxwait=60)
         self.assertTrue(jeha_id)
-        tempdir = tempfile.mkdtemp(prefix='bioblend_test_')
-        temp_fn = os.path.join(tempdir, 'export.tar.gz')
+        tempdir = tempfile.mkdtemp(prefix="bioblend_test_")
+        temp_fn = os.path.join(tempdir, "export.tar.gz")
         try:
-            with open(temp_fn, 'wb') as fo:
+            with open(temp_fn, "wb") as fo:
                 self.hist.download(jeha_id, fo)
             self.assertTrue(tarfile.is_tarfile(temp_fn))
         finally:
@@ -867,7 +853,7 @@ class TestHistory(GalaxyObjectsTestBase):
     def test_update(self):
         new_name = f"test_{uuid.uuid4().hex}"
         new_annotation = f"Annotation for {new_name}"
-        new_tags = ['tag1', 'tag2']
+        new_tags = ["tag1", "tag2"]
         updated_hist = self.hist.update(name=new_name, annotation=new_annotation, tags=new_tags)
         self.assertEqual(self.hist.id, updated_hist.id)
         self.assertEqual(self.hist.name, new_name)
@@ -881,11 +867,11 @@ class TestHistory(GalaxyObjectsTestBase):
         self._create_collection_description()
         hdca = self.hist.create_dataset_collection(self.collection_description)
         self.assertIsInstance(hdca, wrappers.HistoryDatasetCollectionAssociation)
-        self.assertEqual(hdca.collection_type, 'list')
+        self.assertEqual(hdca.collection_type, "list")
         self.assertIs(hdca.container, self.hist)
         self.assertEqual(len(hdca.elements), 2)
-        self.assertEqual(self.dataset1.id, hdca.elements[0]['object']['id'])
-        self.assertEqual(self.dataset2.id, hdca.elements[1]['object']['id'])
+        self.assertEqual(self.dataset1.id, hdca.elements[0]["object"]["id"])
+        self.assertEqual(self.dataset2.id, hdca.elements[1]["object"]["id"])
 
     def test_delete_dataset_collection(self):
         self._create_collection_description()
@@ -901,12 +887,11 @@ class TestHistory(GalaxyObjectsTestBase):
             elements=[
                 dataset_collections.HistoryDatasetElement(name="sample1", id=self.dataset1.id),
                 dataset_collections.HistoryDatasetElement(name="sample2", id=self.dataset2.id),
-            ]
+            ],
         )
 
 
 class TestHDAContents(GalaxyObjectsTestBase):
-
     def setUp(self):
         super().setUp()
         self.hist = self.gi.histories.create(f"test_{uuid.uuid4().hex}")
@@ -935,7 +920,7 @@ class TestHDAContents(GalaxyObjectsTestBase):
     def test_dataset_update(self):
         new_name = f"test_{uuid.uuid4().hex}"
         new_annotation = f"Annotation for {new_name}"
-        new_genome_build = 'hg19'
+        new_genome_build = "hg19"
         updated_hda = self.ds.update(name=new_name, annotation=new_annotation, genome_build=new_genome_build)
         self.assertEqual(self.ds.id, updated_hda.id)
         self.assertEqual(self.ds.name, new_name)
@@ -953,15 +938,14 @@ class TestHDAContents(GalaxyObjectsTestBase):
         self.assertTrue(self.ds.purged)
 
 
-@test_util.skip_unless_galaxy('release_19.09')
+@test_util.skip_unless_galaxy("release_19.09")
 class TestRunWorkflow(GalaxyObjectsTestBase):
-
     def setUp(self):
         super().setUp()
         self.lib = self.gi.libraries.create(f"test_{uuid.uuid4().hex}")
         with open(SAMPLE_FN) as f:
             self.wf = self.gi.workflows.import_new(f.read())
-        self.contents = ['one\ntwo\n', '1\n2\n']
+        self.contents = ["one\ntwo\n", "1\n2\n"]
         self.inputs = [self.lib.upload_data(_) for _ in self.contents]
 
     def tearDown(self):
@@ -975,19 +959,18 @@ class TestRunWorkflow(GalaxyObjectsTestBase):
         else:
             hist = hist_name
         if params:
-            params = {'Paste1': {'delimiter': 'U'}}
-            sep = '_'  # 'U' maps to '_' in the paste tool
+            params = {"Paste1": {"delimiter": "U"}}
+            sep = "_"  # 'U' maps to '_' in the paste tool
         else:
             params = None
-            sep = '\t'  # default
-        input_map = {'Input 1': self.inputs[0], 'Input 2': self.inputs[1]}
+            sep = "\t"  # default
+        input_map = {"Input 1": self.inputs[0], "Input 2": self.inputs[1]}
         sys.stderr.write(os.linesep)
-        inv = self.wf.invoke(
-            inputs=input_map, params=params, history=hist, inputs_by='name')
+        inv = self.wf.invoke(inputs=input_map, params=params, history=hist, inputs_by="name")
         out_hist = self.gi.histories.get(inv.history_id)
         inv.wait()
         last_step = inv.sorted_steps_by()[-1]
-        out_ds = last_step.get_outputs()['out_file1']
+        out_ds = last_step.get_outputs()["out_file1"]
         self.assertEqual(out_ds.container.id, out_hist.id)
         res = out_ds.get_contents()
         exp_rows = zip(*(_.splitlines() for _ in self.contents))
@@ -1007,9 +990,8 @@ class TestRunWorkflow(GalaxyObjectsTestBase):
         self._test(params=True)
 
 
-@test_util.skip_unless_galaxy('release_19.09')
+@test_util.skip_unless_galaxy("release_19.09")
 class TestRunDatasetCollectionWorkflow(GalaxyObjectsTestBase):
-
     def setUp(self):
         super().setUp()
         with open(SAMPLE_WF_COLL_FN) as f:
@@ -1028,25 +1010,23 @@ class TestRunDatasetCollectionWorkflow(GalaxyObjectsTestBase):
             elements=[
                 dataset_collections.HistoryDatasetElement(name="sample1", id=dataset1.id),
                 dataset_collections.HistoryDatasetElement(name="sample2", id=dataset2.id),
-            ]
+            ],
         )
         dataset_collection = self.hist.create_dataset_collection(collection_description)
         self.assertEqual(len(self.hist.content_infos), 3)
-        input_map = {"0": dataset_collection,
-                     "1": dataset1}
+        input_map = {"0": dataset_collection, "1": dataset1}
         inv = self.wf.invoke(input_map, history=self.hist)
         inv.wait()
         self.hist.refresh()
         self.assertEqual(len(self.hist.content_infos), 6)
         last_step = inv.sorted_steps_by()[-1]
-        out_hdca = last_step.get_output_collections()['out_file1']
-        self.assertEqual(out_hdca.collection_type, 'list')
+        out_hdca = last_step.get_output_collections()["out_file1"]
+        self.assertEqual(out_hdca.collection_type, "list")
         self.assertEqual(len(out_hdca.elements), 2)
         self.assertEqual(out_hdca.container.id, self.hist.id)
 
 
 class TestJob(GalaxyObjectsTestBase):
-
     def test_get(self):
         job_prevs = self.gi.jobs.get_previews()
         if len(job_prevs) > 0:
@@ -1062,20 +1042,25 @@ class TestJob(GalaxyObjectsTestBase):
 def suite():
     loader = unittest.TestLoader()
     s = unittest.TestSuite()
-    s.addTests([loader.loadTestsFromTestCase(c) for c in (
-        TestWrapper,
-        TestWorkflow,
-        TestGalaxyInstance,
-        TestLibrary,
-        TestLDContents,
-        TestHistory,
-        TestHDAContents,
-        TestRunWorkflow,
-    )])
+    s.addTests(
+        [
+            loader.loadTestsFromTestCase(c)
+            for c in (
+                TestWrapper,
+                TestWorkflow,
+                TestGalaxyInstance,
+                TestLibrary,
+                TestLDContents,
+                TestHistory,
+                TestHDAContents,
+                TestRunWorkflow,
+            )
+        ]
+    )
     return s
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     tests = suite()
     RUNNER = unittest.TextTestRunner(verbosity=2)
     RUNNER.run(tests)

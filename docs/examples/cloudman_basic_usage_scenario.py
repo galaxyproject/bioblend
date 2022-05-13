@@ -36,8 +36,8 @@ cm.enable_autoscaling(minimum_nodes=0, maximum_nodes=19)
 # autoscaling should be enabled now
 is_enabled = cm.autoscaling_enabled()
 
-min_autoscaling = cm.get_status()['autoscaling']['as_min']
-max_autoscaling = cm.get_status()['autoscaling']['as_max']
+min_autoscaling = cm.get_status()["autoscaling"]["as_min"]
+max_autoscaling = cm.get_status()["autoscaling"]["as_max"]
 
 # adjust
 cm.adjust_autoscaling(minimum_nodes=5, maximum_nodes=10)

@@ -6,7 +6,7 @@ from bioblend.galaxy.client import Client
 
 
 class ConfigClient(Client):
-    module = 'configuration'
+    module = "configuration"
 
     def __init__(self, galaxy_instance):
         super().__init__(galaxy_instance)
@@ -46,7 +46,7 @@ class ConfigClient(Client):
 
             {'extra': {}, 'version_major': '17.01'}
         """
-        url = self.gi.url + '/version'
+        url = self.gi.url + "/version"
         return self._get(url=url)
 
     def whoami(self):
