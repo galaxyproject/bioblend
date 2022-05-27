@@ -5,7 +5,7 @@ from bioblend.galaxy.client import Client
 
 
 class ToolShedCategoryClient(Client):
-    module = 'categories'
+    module = "categories"
 
     def __init__(self, toolshed_instance):
         super().__init__(toolshed_instance)
@@ -46,7 +46,7 @@ class ToolShedCategoryClient(Client):
         """
         return self._get(id=category_id)
 
-    def get_repositories(self, category_id, sort_key='name', sort_order='asc'):
+    def get_repositories(self, category_id, sort_key="name", sort_order="asc"):
         """
         Returns a dictionary of information for a repository category including
         a list of repositories belonging to the category.
@@ -108,9 +108,9 @@ class ToolShedCategoryClient(Client):
 
         params = {}
         if sort_key:
-            params.update({'sort_key': sort_key})
+            params.update({"sort_key": sort_key})
         if sort_order:
-            params.update({'sort_order': sort_order})
+            params.update({"sort_order": sort_order})
 
-        url = self._make_url(category_id) + '/repositories'
+        url = self._make_url(category_id) + "/repositories"
         return self._get(url=url, params=params)

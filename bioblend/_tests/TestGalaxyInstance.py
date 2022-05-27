@@ -12,7 +12,6 @@ from . import test_util
 
 
 class TestGalaxyInstance(unittest.TestCase):
-
     def setUp(self):
         # "connect" to a fake Galaxy instance
         self.gi = GalaxyInstance("http://localhost:56789", key="whatever")
@@ -44,9 +43,9 @@ class TestGalaxyInstance(unittest.TestCase):
 
     @test_util.skip_unless_galaxy()
     def test_missing_scheme_real_url(self):
-        galaxy_url = os.environ['BIOBLEND_GALAXY_URL']
+        galaxy_url = os.environ["BIOBLEND_GALAXY_URL"]
         # Strip the scheme from galaxy_url
-        scheme_sep = '://'
+        scheme_sep = "://"
         if scheme_sep in galaxy_url:
             galaxy_url = galaxy_url.partition(scheme_sep)[2]
         GalaxyInstance(url=galaxy_url)

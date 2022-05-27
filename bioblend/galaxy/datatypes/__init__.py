@@ -5,7 +5,7 @@ from bioblend.galaxy.client import Client
 
 
 class DatatypesClient(Client):
-    module = 'datatypes'
+    module = "datatypes"
 
     def __init__(self, galaxy_instance):
         super().__init__(galaxy_instance)
@@ -38,10 +38,10 @@ class DatatypesClient(Client):
 
         params = {}
         if extension_only:
-            params['extension_only'] = True
+            params["extension_only"] = True
 
         if upload_only:
-            params['upload_only'] = True
+            params["upload_only"] = True
 
         return self._get(params=params)
 
@@ -63,5 +63,5 @@ class DatatypesClient(Client):
              'galaxy.datatypes.sequence:Lav',
              'galaxy.datatypes.sequence:csFasta']
         """
-        url = self._make_url() + '/sniffers'
+        url = self._make_url() + "/sniffers"
         return self._get(url=url)

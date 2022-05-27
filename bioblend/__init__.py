@@ -8,11 +8,12 @@ from bioblend.config import (
 )
 
 # Current version of the library
-__version__ = '0.16.0'
+__version__ = "0.17.0"
 
 # default chunk size (in bytes) for reading remote data
 try:
     import resource
+
     CHUNK_SIZE = resource.getpagesize()
 except Exception:
     CHUNK_SIZE = 4096
@@ -47,7 +48,7 @@ class NullHandler(logging.Handler):
 #   import logging
 #   logging.basicConfig(filename="bioblend.log", level=logging.DEBUG)
 default_format_string = "%(asctime)s %(name)s [%(levelname)s]: %(message)s"
-log = logging.getLogger('bioblend')
+log = logging.getLogger("bioblend")
 log.addHandler(NullHandler())
 init_logging()
 
@@ -94,6 +95,7 @@ class ConnectionError(Exception):
     proxy server getting in the way of the request etc.
     @see: body attribute to see the content of the http response
     """
+
     def __init__(self, message, body=None, status_code=None):
         super().__init__(message)
         self.body = body
