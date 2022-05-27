@@ -378,8 +378,11 @@ class ToolClient(Client):
                           'visible': True}]}
 
         The ``tool_inputs`` dict should contain input datasets and parameters
-        in the (largely undocumented) format used by the Galaxy API.
-        Some examples can be found in `Galaxy's API test suite
+        in the (largely undocumented) format used by the Galaxy API. If you are unsure
+        how to construct this dict for the tool you want to run, you can obtain a
+        template by executing the ``build()`` method and taking the value of
+        ``state_inputs`` from its output, then modifying it as you require.
+        You can also check the examples in `Galaxy's API test suite
         <https://github.com/galaxyproject/galaxy/blob/dev/lib/galaxy_test/api/test_tools.py>`_.
         """
         payload = {}
