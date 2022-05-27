@@ -10,7 +10,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   test-galaxy:
-    if: github.event_name != 'schedule' || github.repository_owner == 'galaxyproject'
+    if: (github.event_name != 'schedule' || github.repository_owner == 'galaxyproject') && git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | grep 'bioblend/galaxy'
     runs-on: ${{ matrix.os }}
     services:
       postgres:
