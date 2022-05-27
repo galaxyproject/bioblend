@@ -138,7 +138,7 @@ class InvocationClient(Client):
         invocation_id: str,
         remap: bool = False,
         inputs_update: Optional[dict] = None,
-        params_update: Optional[dict] = None,
+        params: Optional[dict] = None,
         history_id: Optional[str] = None,
         history_name: Optional[str] = None,
         import_inputs_to_history: bool = False,
