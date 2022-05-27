@@ -21,17 +21,17 @@ from bioblend.galaxy.client import Client
 
 log = logging.getLogger(__name__)
 
-TERMINAL_STATES = {'ok', 'empty', 'error', 'discarded', 'failed_metadata'}
+TERMINAL_STATES = {"ok", "empty", "error", "discarded", "failed_metadata"}
 # Non-terminal states are: 'new', 'upload', 'queued', 'running', 'paused', 'setting_metadata'
 
 
 class DatasetClient(Client):
-    module = 'datasets'
+    module = "datasets"
 
     def __init__(self, galaxy_instance):
         super().__init__(galaxy_instance)
 
-    def show_dataset(self, dataset_id, deleted=False, hda_ldda='hda'):
+    def show_dataset(self, dataset_id, deleted=False, hda_ldda="hda"):
         """
         Get details about a given dataset. This can be a history or a library dataset.
 
@@ -53,35 +53,37 @@ class DatasetClient(Client):
         )
         return self._get(id=dataset_id, deleted=deleted, params=params)
 
-    def _initiate_download(self, dataset_id: str, stream_content: bool,
-                           require_ok_state: bool = True, maxwait: float = 12000):
+    def _initiate_download(
+        self, dataset_id: str, stream_content: bool, require_ok_state: bool = True, maxwait: float = 12000
+    ):
         dataset = self.wait_for_dataset(dataset_id, maxwait=maxwait, check=False)
-        if not dataset['state'] == 'ok':
+        if not dataset["state"] == "ok":
             message = f"Dataset state is not 'ok'. Dataset id: {dataset_id}, current state: {dataset['state']}"
             if require_ok_state:
                 raise DatasetStateException(message)
             else:
                 warnings.warn(message, DatasetStateWarning)
 
-        file_ext = dataset.get('file_ext')
+        file_ext = dataset.get("file_ext")
         # Resort to 'data' when Galaxy returns an empty or temporary extension
-        if not file_ext or file_ext == 'auto' or file_ext == '_sniff_':
-            file_ext = 'data'
+        if not file_ext or file_ext == "auto" or file_ext == "_sniff_":
+            file_ext = "data"
         # The preferred download URL is
         # '/api/histories/<history_id>/contents/<dataset_id>/display?to_ext=<dataset_ext>'
         # since the old URL:
         # '/dataset/<dataset_id>/display?to_ext=<dataset_ext>'
         # does not work when using REMOTE_USER with access disabled to
         # everything but /api without auth
-        download_url = dataset['download_url'] + '?to_ext=' + file_ext
+        download_url = dataset["download_url"] + "?to_ext=" + file_ext
         url = urljoin(self.gi.base_url, download_url)
 
         r = self.gi.make_get_request(url, stream=stream_content)
         r.raise_for_status()
         return dataset, file_ext, r
 
-    def download_dataset(self, dataset_id, file_path=None, use_default_filename=True,
-                         require_ok_state=True, maxwait=12000):
+    def download_dataset(
+        self, dataset_id, file_path=None, use_default_filename=True, require_ok_state=True, maxwait=12000
+    ):
         """
         Download a dataset to file or in memory. If the dataset state is not
         'ok', a ``DatasetStateException`` will be thrown, unless ``require_ok_state=False``.
@@ -117,25 +119,26 @@ class DatasetClient(Client):
           content. Otherwise returns the local path of the downloaded file.
         """
         dataset, file_ext, r = self._initiate_download(
-            dataset_id,
-            stream_content=file_path is not None,
-            require_ok_state=require_ok_state,
-            maxwait=maxwait
+            dataset_id, stream_content=file_path is not None, require_ok_state=require_ok_state, maxwait=maxwait
         )
         if file_path is None:
-            if 'content-length' in r.headers and len(r.content) != int(r.headers['content-length']):
-                log.warning("Transferred content size does not match content-length header (%s != %s)", len(r.content), r.headers['content-length'])
+            if "content-length" in r.headers and len(r.content) != int(r.headers["content-length"]):
+                log.warning(
+                    "Transferred content size does not match content-length header (%s != %s)",
+                    len(r.content),
+                    r.headers["content-length"],
+                )
             return r.content
         else:
             if use_default_filename:
                 # Build a useable filename
-                filename = dataset['name'] + '.' + file_ext
+                filename = dataset["name"] + "." + file_ext
                 # Now try to get a better filename from the response headers
                 # We expect tokens 'filename' '=' to be followed by the quoted filename
-                if 'content-disposition' in r.headers:
-                    tokens = list(shlex.shlex(r.headers['content-disposition'], posix=True))
+                if "content-disposition" in r.headers:
+                    tokens = list(shlex.shlex(r.headers["content-disposition"], posix=True))
                     try:
-                        header_filepath = tokens[tokens.index('filename') + 2]
+                        header_filepath = tokens[tokens.index("filename") + 2]
                         filename = os.path.basename(header_filepath)
                     except (ValueError, IndexError):
                         pass
@@ -143,7 +146,7 @@ class DatasetClient(Client):
             else:
                 file_local_path = file_path
 
-            with open(file_local_path, 'wb') as fp:
+            with open(file_local_path, "wb") as fp:
                 for chunk in r.iter_content(chunk_size=bioblend.CHUNK_SIZE):
                     if chunk:
                         fp.write(chunk)
@@ -168,7 +171,7 @@ class DatasetClient(Client):
         create_time_max: str = None,
         update_time_min: str = None,
         update_time_max: str = None,
-        order: str = 'create_time-dsc',
+        order: str = "create_time-dsc",
     ) -> List[dict]:
         """
         Get the latest datasets, or select another subset by specifying optional
@@ -242,67 +245,67 @@ class DatasetClient(Client):
         :param: A list of datasets
         """
         params: Dict[str, Any] = {
-            'limit': limit,
-            'offset': offset,
-            'order': order,
+            "limit": limit,
+            "offset": offset,
+            "order": order,
         }
         if history_id:
-            params['history_id'] = history_id
+            params["history_id"] = history_id
 
         q: List[str] = []
         qv: List[Any] = []
 
         if name:
-            q.append('name')
+            q.append("name")
             qv.append(name)
         if state:
             op, val = self._param_to_filter(state)
-            q.append(f'state-{op}')
+            q.append(f"state-{op}")
             qv.append(val)
         if extension:
             op, val = self._param_to_filter(extension)
-            q.append(f'extension-{op}')
+            q.append(f"extension-{op}")
             qv.append(val)
         if visible is not None:
-            q.append('visible')
+            q.append("visible")
             qv.append(str(visible))
         if deleted is not None:
-            q.append('deleted')
+            q.append("deleted")
             qv.append(str(deleted))
         if purged is not None:
-            q.append('purged')
+            q.append("purged")
             qv.append(str(purged))
         if tool_id is not None:
-            q.append('tool_id')
+            q.append("tool_id")
             qv.append(str(tool_id))
         if tag is not None:
-            q.append('tag')
+            q.append("tag")
             qv.append(str(tag))
         if create_time_min:
-            q.append('create_time-ge')
+            q.append("create_time-ge")
             qv.append(create_time_min)
         if create_time_max:
-            q.append('create_time-le')
+            q.append("create_time-le")
             qv.append(create_time_max)
         if update_time_min:
-            q.append('update_time-ge')
+            q.append("update_time-ge")
             qv.append(update_time_min)
         if update_time_max:
-            q.append('update_time-le')
+            q.append("update_time-le")
             qv.append(update_time_max)
 
-        params['q'] = q
-        params['qv'] = qv
+        params["q"] = q
+        params["qv"] = qv
 
         return self._get(params=params)
 
     def _param_to_filter(self, param):
         if type(param) is str:
-            return 'eq', param
+            return "eq", param
         if type(param) is list:
             if len(param) == 1:
-                return 'eq', param.pop()
-            return 'in', ','.join(param)
+                return "eq", param.pop()
+            return "in", ",".join(param)
         raise Exception("Filter param is not of type ``str`` or ``list``")
 
     def publish_dataset(self, dataset_id: str, published: bool = False):
@@ -320,16 +323,19 @@ class DatasetClient(Client):
         :return: Current roles for all available permission types.
 
         .. note::
-          This method can only be used with Galaxy ``release_19.05`` or later.
+          This method works only on Galaxy 19.05 or later.
         """
-        payload: Dict[str, Any] = {
-            'action': 'remove_restrictions' if published else 'make_private'
-        }
-        url = self._make_url(dataset_id) + '/permissions'
+        payload: Dict[str, Any] = {"action": "remove_restrictions" if published else "make_private"}
+        url = self._make_url(dataset_id) + "/permissions"
         self.gi.datasets._put(url=url, payload=payload)
 
-    def update_permissions(self, dataset_id: str, access_ids: Optional[list] = None,
-                           manage_ids: Optional[list] = None, modify_ids: Optional[list] = None):
+    def update_permissions(
+        self,
+        dataset_id: str,
+        access_ids: Optional[list] = None,
+        manage_ids: Optional[list] = None,
+        modify_ids: Optional[list] = None,
+    ):
         """
         Set access, manage or modify permissions for a dataset to a list of roles.
 
@@ -349,18 +355,16 @@ class DatasetClient(Client):
         :return: Current roles for all available permission types.
 
         .. note::
-          This method can only be used with Galaxy ``release_19.05`` or later.
+          This method works only on Galaxy 19.05 or later.
         """
-        payload: Dict[str, Any] = {
-            'action': 'set_permissions'
-        }
+        payload: Dict[str, Any] = {"action": "set_permissions"}
         if access_ids:
-            payload['access'] = access_ids
+            payload["access"] = access_ids
         if manage_ids:
-            payload['manage'] = manage_ids
+            payload["manage"] = manage_ids
         if modify_ids:
-            payload['modify'] = modify_ids
-        url = self._make_url(dataset_id) + '/permissions'
+            payload["modify"] = modify_ids
+        url = self._make_url(dataset_id) + "/permissions"
         self.gi.datasets._put(url=url, payload=payload)
 
     def wait_for_dataset(self, dataset_id, maxwait=12000, interval=3, check=True):
@@ -390,9 +394,9 @@ class DatasetClient(Client):
         time_left = maxwait
         while True:
             dataset = self.show_dataset(dataset_id)
-            state = dataset['state']
+            state = dataset["state"]
             if state in TERMINAL_STATES:
-                if check and state != 'ok':
+                if check and state != "ok":
                     raise Exception(f"Dataset {dataset_id} is in terminal state {state}")
                 return dataset
             if time_left > 0:
@@ -400,7 +404,9 @@ class DatasetClient(Client):
                 time.sleep(min(time_left, interval))
                 time_left -= interval
             else:
-                raise DatasetTimeoutException(f"Dataset {dataset_id} is still in non-terminal state {state} after {maxwait} s")
+                raise DatasetTimeoutException(
+                    f"Dataset {dataset_id} is still in non-terminal state {state} after {maxwait} s"
+                )
 
 
 class DatasetStateException(Exception):

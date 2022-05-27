@@ -15,28 +15,27 @@ from typing import Tuple
 import bioblend
 from bioblend.util import abstractclass
 
-
 __all__ = (
-    'Wrapper',
-    'Step',
-    'Workflow',
-    'LibraryContentInfo',
-    'HistoryContentInfo',
-    'DatasetContainer',
-    'History',
-    'Library',
-    'Folder',
-    'Dataset',
-    'HistoryDatasetAssociation',
-    'DatasetCollection',
-    'HistoryDatasetCollectionAssociation',
-    'LibraryDatasetDatasetAssociation',
-    'LibraryDataset',
-    'Tool',
-    'Job',
-    'LibraryPreview',
-    'HistoryPreview',
-    'WorkflowPreview',
+    "Wrapper",
+    "Step",
+    "Workflow",
+    "LibraryContentInfo",
+    "HistoryContentInfo",
+    "DatasetContainer",
+    "History",
+    "Library",
+    "Folder",
+    "Dataset",
+    "HistoryDatasetAssociation",
+    "DatasetCollection",
+    "HistoryDatasetCollectionAssociation",
+    "LibraryDatasetDatasetAssociation",
+    "LibraryDataset",
+    "Tool",
+    "Job",
+    "LibraryPreview",
+    "HistoryPreview",
+    "WorkflowPreview",
 )
 
 
@@ -54,7 +53,8 @@ class Wrapper:
     Note that the wrapped dictionary is accessible via the ``wrapped``
     attribute.
     """
-    BASE_ATTRS: Tuple[str, ...] = ('id', )
+
+    BASE_ATTRS: Tuple[str, ...] = ("id",)
 
     def __init__(self, wrapped, parent=None, gi=None):
         """
@@ -68,18 +68,18 @@ class Wrapper:
         :param gi: the GalaxyInstance through which we can access this wrapper
         """
         if not isinstance(wrapped, Mapping):
-            raise TypeError('wrapped object must be a mapping type')
+            raise TypeError("wrapped object must be a mapping type")
         # loads(dumps(x)) is a bit faster than deepcopy and allows type checks
         try:
             dumped = json.dumps(wrapped)
         except (TypeError, ValueError):
-            raise ValueError('wrapped object must be JSON-serializable')
-        object.__setattr__(self, 'wrapped', json.loads(dumped))
+            raise ValueError("wrapped object must be JSON-serializable")
+        object.__setattr__(self, "wrapped", json.loads(dumped))
         for k in self.BASE_ATTRS:
             object.__setattr__(self, k, self.wrapped.get(k))
-        object.__setattr__(self, '_cached_parent', parent)
-        object.__setattr__(self, 'is_modified', False)
-        object.__setattr__(self, 'gi', gi)
+        object.__setattr__(self, "_cached_parent", parent)
+        object.__setattr__(self, "is_modified", False)
+        object.__setattr__(self, "gi", gi)
 
     @property
     def parent(self):
@@ -99,7 +99,7 @@ class Wrapper:
         """
         Disconnect this wrapper from Galaxy.
         """
-        object.__setattr__(self, 'id', None)
+        object.__setattr__(self, "id", None)
 
     def clone(self):
         """
@@ -111,7 +111,7 @@ class Wrapper:
         """
         Mark this wrapper as having been modified since its creation.
         """
-        object.__setattr__(self, 'is_modified', True)
+        object.__setattr__(self, "is_modified", True)
         if self.parent:
             self.parent.touch()
 
@@ -150,22 +150,23 @@ class Step(Wrapper):
     ``parameter_input``), a computational tool (type ``tool``), a subworkflow
     (type ``subworkflow``) or a pause (type ``pause``).
     """
+
     BASE_ATTRS = Wrapper.BASE_ATTRS + (
-        'input_steps',
-        'name',
-        'tool_id',
-        'tool_inputs',
-        'tool_version',
-        'type',
+        "input_steps",
+        "name",
+        "tool_id",
+        "tool_inputs",
+        "tool_version",
+        "type",
     )
 
     def __init__(self, step_dict, parent):
         super().__init__(step_dict, parent=parent, gi=parent.gi)
         try:
-            stype = step_dict['type']
+            stype = step_dict["type"]
         except KeyError:
-            raise ValueError('not a step dict')
-        if stype not in {'data_collection_input', 'data_input', 'parameter_input', 'pause', 'subworkflow', 'tool'}:
+            raise ValueError("not a step dict")
+        if stype not in {"data_collection_input", "data_input", "parameter_input", "pause", "subworkflow", "tool"}:
             raise ValueError(f"Unknown step type: {stype!r}")
 
 
@@ -173,15 +174,16 @@ class InvocationStep(Wrapper):
     """
     Invocation step.
     """
+
     BASE_ATTRS = Wrapper.BASE_ATTRS + (
-        'action',
-        'job_id',
-        'order_index',
-        'state',
-        'update_time',
-        'workflow_step_id',
-        'workflow_step_label',
-        'workflow_step_uuid',
+        "action",
+        "job_id",
+        "order_index",
+        "state",
+        "update_time",
+        "workflow_step_id",
+        "workflow_step_label",
+        "workflow_step_uuid",
     )
 
     def refresh(self):
@@ -201,11 +203,11 @@ class InvocationStep(Wrapper):
         :rtype: dict of `HistoryDatasetAssociation`
         :return: dictionary mapping output names to history datasets
         """
-        if not hasattr(self, 'outputs'):
+        if not hasattr(self, "outputs"):
             self.refresh()
         outputs = {}
-        for name, out_dict in self.wrapped['outputs'].items():
-            outputs[name] = self.gi.datasets.get(out_dict['id'])
+        for name, out_dict in self.wrapped["outputs"].items():
+            outputs[name] = self.gi.datasets.get(out_dict["id"])
         return outputs
 
     def get_output_collections(self):
@@ -215,11 +217,11 @@ class InvocationStep(Wrapper):
         :rtype: dict of `HistoryDatasetCollectionAssociation`
         :return: dictionary mapping output names to history dataset collections
         """
-        if not hasattr(self, 'output_collections'):
+        if not hasattr(self, "output_collections"):
             self.refresh()
         output_collections = {}
-        for name, out_coll_dict in self.wrapped['output_collections'].items():
-            output_collections[name] = self.gi.dataset_collections.get(out_coll_dict['id'])
+        for name, out_coll_dict in self.wrapped["output_collections"].items():
+            output_collections[name] = self.gi.dataset_collections.get(out_coll_dict["id"])
         return output_collections
 
 
@@ -230,15 +232,16 @@ class Workflow(Wrapper):
     A workflow defines a sequence of steps that produce one or more
     results from an input dataset.
     """
+
     BASE_ATTRS = Wrapper.BASE_ATTRS + (
-        'deleted',
-        'inputs',
-        'latest_workflow_uuid',
-        'name',
-        'owner',
-        'published',
-        'steps',
-        'tags',
+        "deleted",
+        "inputs",
+        "latest_workflow_uuid",
+        "name",
+        "owner",
+        "published",
+        "steps",
+        "tags",
     )
     POLLING_INTERVAL = 10  # for output state monitoring
 
@@ -252,29 +255,30 @@ class Workflow(Wrapper):
         tool_labels_to_ids = {}
         for k, v in self.steps.items():
             # convert step ids to str for consistency with outer keys
-            v['id'] = str(v['id'])
-            for i in v['input_steps'].values():
-                i['source_step'] = str(i['source_step'])
+            v["id"] = str(v["id"])
+            for i in v["input_steps"].values():
+                i["source_step"] = str(i["source_step"])
             step = Step(v, self)
             self.steps[k] = step
-            if step.type == 'tool':
+            if step.type == "tool":
                 if not step.tool_inputs or step.tool_id not in tools_list_by_id:
                     missing_ids.append(k)
                 tool_labels_to_ids.setdefault(step.tool_id, set()).add(step.id)
         input_labels_to_ids = {}
         for id_, d in self.inputs.items():
-            input_labels_to_ids.setdefault(d['label'], set()).add(id_)
-        object.__setattr__(self, 'input_labels_to_ids', input_labels_to_ids)
-        object.__setattr__(self, 'tool_labels_to_ids', tool_labels_to_ids)
+            input_labels_to_ids.setdefault(d["label"], set()).add(id_)
+        object.__setattr__(self, "input_labels_to_ids", input_labels_to_ids)
+        object.__setattr__(self, "tool_labels_to_ids", tool_labels_to_ids)
         dag, inv_dag = self._get_dag()
         heads, tails = set(dag), set(inv_dag)
-        object.__setattr__(self, 'dag', dag)
-        object.__setattr__(self, 'inv_dag', inv_dag)
-        object.__setattr__(self, 'source_ids', heads - tails)
-        assert set(self.inputs) == self.data_collection_input_ids | self.data_input_ids | self.parameter_input_ids, \
-            f"inputs is {self.inputs!r}, while data_collection_input_ids is {self.data_collection_input_ids!r}, data_input_ids is {self.data_input_ids!r} and parameter_input_ids is {self.parameter_input_ids!r}"
-        object.__setattr__(self, 'sink_ids', tails - heads)
-        object.__setattr__(self, 'missing_ids', missing_ids)
+        object.__setattr__(self, "dag", dag)
+        object.__setattr__(self, "inv_dag", inv_dag)
+        object.__setattr__(self, "source_ids", heads - tails)
+        assert (
+            set(self.inputs) == self.data_collection_input_ids | self.data_input_ids | self.parameter_input_ids
+        ), f"inputs is {self.inputs!r}, while data_collection_input_ids is {self.data_collection_input_ids!r}, data_input_ids is {self.data_input_ids!r} and parameter_input_ids is {self.parameter_input_ids!r}"
+        object.__setattr__(self, "sink_ids", tails - heads)
+        object.__setattr__(self, "missing_ids", missing_ids)
 
     def _get_dag(self):
         """
@@ -296,7 +300,7 @@ class Workflow(Wrapper):
         dag, inv_dag = {}, {}
         for s in self.steps.values():
             for i in s.input_steps.values():
-                head, tail = i['source_step'], s.id
+                head, tail = i["source_step"], s.id
                 dag.setdefault(head, set()).add(tail)
                 inv_dag.setdefault(tail, set()).add(head)
         return dag, inv_dag
@@ -323,28 +327,28 @@ class Workflow(Wrapper):
         """
         Return the ids of data input steps for this workflow.
         """
-        return {id_ for id_, s in self.steps.items() if s.type == 'data_input'}
+        return {id_ for id_, s in self.steps.items() if s.type == "data_input"}
 
     @property
     def data_collection_input_ids(self):
         """
         Return the ids of data collection input steps for this workflow.
         """
-        return {id_ for id_, s in self.steps.items() if s.type == 'data_collection_input'}
+        return {id_ for id_, s in self.steps.items() if s.type == "data_collection_input"}
 
     @property
     def parameter_input_ids(self):
         """
         Return the ids of parameter input steps for this workflow.
         """
-        return {id_ for id_, s in self.steps.items() if s.type == 'parameter_input'}
+        return {id_ for id_, s in self.steps.items() if s.type == "parameter_input"}
 
     @property
     def tool_ids(self):
         """
         Return the ids of tool steps for this workflow.
         """
-        return {id_ for id_, s in self.steps.items() if s.type == 'tool'}
+        return {id_ for id_, s in self.steps.items() if s.type == "tool"}
 
     @property
     def input_labels(self):
@@ -376,8 +380,16 @@ class Workflow(Wrapper):
         """
         ret = {}
         for key, value in input_map.items():
-            if isinstance(value, (HistoryDatasetAssociation, HistoryDatasetCollectionAssociation, LibraryDatasetDatasetAssociation, LibraryDataset)):
-                ret[key] = {'id': value.id, 'src': value.SRC}  # type: ignore
+            if isinstance(
+                value,
+                (
+                    HistoryDatasetAssociation,
+                    HistoryDatasetCollectionAssociation,
+                    LibraryDatasetDatasetAssociation,
+                    LibraryDataset,
+                ),
+            ):
+                ret[key] = {"id": value.id, "src": value.SRC}  # type: ignore
             else:
                 ret[key] = value
         return ret
@@ -410,10 +422,17 @@ class Workflow(Wrapper):
         self.gi.workflows.delete(id_=self.id)
         self.unmap()
 
-    def invoke(self, inputs=None, params=None, history=None,
-               import_inputs_to_history=None, replacement_params=None,
-               allow_tool_state_corrections=True, inputs_by=None,
-               parameters_normalized=False):
+    def invoke(
+        self,
+        inputs=None,
+        params=None,
+        history=None,
+        import_inputs_to_history=None,
+        replacement_params=None,
+        allow_tool_state_corrections=True,
+        inputs_by=None,
+        parameters_normalized=False,
+    ):
         """
         Invoke the workflow. This will cause a workflow to be scheduled
         and return an object describing the workflow invocation.
@@ -545,9 +564,9 @@ class Workflow(Wrapper):
           also stable.
         """
         if not self.is_mapped:
-            raise RuntimeError('workflow is not mapped to a Galaxy object')
+            raise RuntimeError("workflow is not mapped to a Galaxy object")
         if not self.is_runnable:
-            missing_tools_str = ', '.join(f"{self.steps[step_id].tool_id}[{step_id}]" for step_id in self.missing_ids)
+            missing_tools_str = ", ".join(f"{self.steps[step_id].tool_id}[{step_id}]" for step_id in self.missing_ids)
             raise RuntimeError(f"workflow has missing tools: {missing_tools_str}")
 
         inv_dict = self.gi.gi.workflows.invoke_workflow(
@@ -560,9 +579,9 @@ class Workflow(Wrapper):
             replacement_params=replacement_params,
             allow_tool_state_corrections=allow_tool_state_corrections,
             inputs_by=inputs_by,
-            parameters_normalized=parameters_normalized
+            parameters_normalized=parameters_normalized,
         )
-        return self.gi.invocations.get(inv_dict['id'])
+        return self.gi.invocations.get(inv_dict["id"])
 
 
 class Invocation(Wrapper):
@@ -570,20 +589,21 @@ class Invocation(Wrapper):
     Invocation of a workflow.
     This causes the steps of a workflow to be executed in sequential order.
     """
+
     BASE_ATTRS = Wrapper.BASE_ATTRS + (
-        'history_id',
-        'inputs',
-        'state',
-        'steps',
-        'update_time',
-        'uuid',
-        'workflow_id',
+        "history_id",
+        "inputs",
+        "state",
+        "steps",
+        "update_time",
+        "uuid",
+        "workflow_id",
     )
 
     def __init__(self, inv_dict, gi=None):
         super().__init__(inv_dict, gi=gi)
         self.steps = [InvocationStep(step, parent=self, gi=gi) for step in self.steps]
-        self.inputs = [{**v, 'label': k} for k, v in self.inputs.items()]
+        self.inputs = [{**v, "label": k} for k, v in self.inputs.items()]
 
     def sorted_step_ids(self):
         """
@@ -672,8 +692,13 @@ class Invocation(Wrapper):
           On success, this method updates the Invocation object's internal step variables.
         """
         if not len(steps) == len(actions):
-            raise RuntimeError(f'Different number of ``steps`` ({len(steps)}) and ``actions`` ({len(actions)}) in ``{self}.run_step_actions()``')
-        step_dict_list = [self.gi.gi.invocations.run_invocation_step_action(self.id, step.id, action) for step, action in zip(steps, actions)]
+            raise RuntimeError(
+                f"Different number of ``steps`` ({len(steps)}) and ``actions`` ({len(actions)}) in ``{self}.run_step_actions()``"
+            )
+        step_dict_list = [
+            self.gi.gi.invocations.run_invocation_step_action(self.id, step.id, action)
+            for step, action in zip(steps, actions)
+        ]
         for step, step_dict in zip(steps, step_dict_list):
             step.__init__(step_dict, parent=self)
 
@@ -749,21 +774,22 @@ class Dataset(Wrapper, metaclass=abc.ABCMeta):
     """
     Abstract base class for Galaxy datasets.
     """
+
     BASE_ATTRS = Wrapper.BASE_ATTRS + (
-        'data_type',
-        'file_ext',
-        'file_name',
-        'file_size',
-        'genome_build',
-        'misc_info',
-        'name',
-        'state',
+        "data_type",
+        "file_ext",
+        "file_name",
+        "file_size",
+        "genome_build",
+        "misc_info",
+        "name",
+        "state",
     )
     POLLING_INTERVAL = 1  # for state monitoring
 
     def __init__(self, ds_dict, container, gi=None):
         super().__init__(ds_dict, gi=gi)
-        object.__setattr__(self, 'container', container)
+        object.__setattr__(self, "container", container)
 
     @property
     @abc.abstractmethod
@@ -780,13 +806,13 @@ class Dataset(Wrapper, metaclass=abc.ABCMeta):
         :type chunk_size: int
         :param chunk_size: read this amount of bytes at a time
         """
-        kwargs = {'stream': True}
+        kwargs = {"stream": True}
         if isinstance(self, LibraryDataset):
-            kwargs['params'] = {'ld_ids%5B%5D': self.id}
+            kwargs["params"] = {"ld_ids%5B%5D": self.id}
         r = self.gi.gi.make_get_request(self._stream_url, **kwargs)
         if isinstance(self, LibraryDataset) and r.status_code == 500:
             # compatibility with older Galaxy releases
-            kwargs['params'] = {'ldda_ids%5B%5D': self.id}
+            kwargs["params"] = {"ldda_ids%5B%5D": self.id}
             r = self.gi.gi.make_get_request(self._stream_url, **kwargs)
         r.raise_for_status()
         return r.iter_content(chunk_size)  # FIXME: client can't close r
@@ -800,7 +826,7 @@ class Dataset(Wrapper, metaclass=abc.ABCMeta):
         try:
             return next(self.get_stream(chunk_size=chunk_size))
         except StopIteration:
-            return b''
+            return b""
 
     def download(self, file_object, chunk_size=bioblend.CHUNK_SIZE):
         """
@@ -820,7 +846,7 @@ class Dataset(Wrapper, metaclass=abc.ABCMeta):
 
         See :meth:`.get_stream` for param info.
         """
-        return b''.join(self.get_stream(chunk_size=chunk_size))
+        return b"".join(self.get_stream(chunk_size=chunk_size))
 
     def refresh(self):
         """
@@ -850,16 +876,16 @@ class Dataset(Wrapper, metaclass=abc.ABCMeta):
           note that this method does not return anything; however, this dataset
           is refreshed (possibly multiple times) during the execution.
         """
-        self.gi._wait_datasets([self], polling_interval=polling_interval,
-                               break_on_error=break_on_error)
+        self.gi._wait_datasets([self], polling_interval=polling_interval, break_on_error=break_on_error)
 
 
 class HistoryDatasetAssociation(Dataset):
     """
     Maps to a Galaxy ``HistoryDatasetAssociation``.
     """
-    BASE_ATTRS = Dataset.BASE_ATTRS + ('annotation', 'deleted', 'purged', 'tags', 'visible')
-    SRC = 'hda'
+
+    BASE_ATTRS = Dataset.BASE_ATTRS + ("annotation", "deleted", "purged", "tags", "visible")
+    SRC = "hda"
 
     @property
     def _stream_url(self):
@@ -913,9 +939,9 @@ class HistoryDatasetAssociation(Dataset):
         :param purge: if ``True``, also purge (permanently delete) the dataset
 
         .. note::
-            For the purge option to work, the Galaxy instance must have the
-            ``allow_user_dataset_purge`` option set to ``true`` in the
-            ``config/galaxy.yml`` configuration file.
+          The ``purge`` option works only if the Galaxy instance has the
+          ``allow_user_dataset_purge`` option set to ``true`` in the
+          ``config/galaxy.yml`` configuration file.
         """
         self.gi.gi.histories.delete_dataset(self.container.id, self.id, purge=purge)
         self.container.refresh()
@@ -926,16 +952,17 @@ class DatasetCollection(Wrapper, metaclass=abc.ABCMeta):
     """
     Abstract base class for Galaxy dataset collections.
     """
+
     BASE_ATTRS = Wrapper.BASE_ATTRS + (
-        'collection_type',
-        'deleted',
-        'name',
-        'state',
+        "collection_type",
+        "deleted",
+        "name",
+        "state",
     )
 
     def __init__(self, dsc_dict, container, gi=None):
         super().__init__(dsc_dict, gi=gi)
-        object.__setattr__(self, 'container', container)
+        object.__setattr__(self, "container", container)
 
     def refresh(self):
         """
@@ -957,8 +984,9 @@ class HistoryDatasetCollectionAssociation(DatasetCollection):
     """
     Maps to a Galaxy ``HistoryDatasetCollectionAssociation``.
     """
-    BASE_ATTRS = DatasetCollection.BASE_ATTRS + ('tags', 'visible', 'elements')
-    SRC = 'hdca'
+
+    BASE_ATTRS = DatasetCollection.BASE_ATTRS + ("tags", "visible", "elements")
+    SRC = "hdca"
 
     def delete(self):
         """
@@ -985,15 +1013,17 @@ class LibraryDatasetDatasetAssociation(LibRelatedDataset):
     """
     Maps to a Galaxy ``LibraryDatasetDatasetAssociation``.
     """
-    BASE_ATTRS = LibRelatedDataset.BASE_ATTRS + ('deleted',)
-    SRC = 'ldda'
+
+    BASE_ATTRS = LibRelatedDataset.BASE_ATTRS + ("deleted",)
+    SRC = "ldda"
 
 
 class LibraryDataset(LibRelatedDataset):
     """
     Maps to a Galaxy ``LibraryDataset``.
     """
-    SRC = 'ld'
+
+    SRC = "ld"
 
     def delete(self, purged=False):
         """
@@ -1002,8 +1032,7 @@ class LibraryDataset(LibRelatedDataset):
         :type purged: bool
         :param purged: if ``True``, also purge (permanently delete) the dataset
         """
-        self.gi.gi.libraries.delete_library_dataset(
-            self.container.id, self.id, purged=purged)
+        self.gi.gi.libraries.delete_library_dataset(self.container.id, self.id, purged=purged)
         self.container.refresh()
         self.refresh()
 
@@ -1030,9 +1059,10 @@ class ContentInfo(Wrapper):
     Instances of this class wrap dictionaries obtained by getting
     ``/api/{histories,libraries}/<ID>/contents`` from Galaxy.
     """
+
     BASE_ATTRS = Wrapper.BASE_ATTRS + (
-        'name',
-        'type',
+        "name",
+        "type",
     )
 
 
@@ -1048,16 +1078,18 @@ class HistoryContentInfo(ContentInfo):
     Instances of this class wrap dictionaries obtained by getting
     ``/api/histories/<ID>/contents`` from Galaxy.
     """
-    BASE_ATTRS = ContentInfo.BASE_ATTRS + ('deleted', 'state', 'visible')
+
+    BASE_ATTRS = ContentInfo.BASE_ATTRS + ("deleted", "state", "visible")
 
 
 class DatasetContainer(Wrapper, metaclass=abc.ABCMeta):
     """
     Abstract base class for dataset containers (histories and libraries).
     """
+
     BASE_ATTRS = Wrapper.BASE_ATTRS + (
-        'deleted',
-        'name',
+        "deleted",
+        "name",
     )
 
     def __init__(self, c_dict, content_infos=None, gi=None):
@@ -1068,8 +1100,8 @@ class DatasetContainer(Wrapper, metaclass=abc.ABCMeta):
         super().__init__(c_dict, gi=gi)
         if content_infos is None:
             content_infos = []
-        object.__setattr__(self, 'content_infos', content_infos)
-        object.__setattr__(self, 'obj_gi_client', getattr(self.gi, self.API_MODULE))
+        object.__setattr__(self, "content_infos", content_infos)
+        object.__setattr__(self, "obj_gi_client", getattr(self.gi, self.API_MODULE))
 
     @property
     @abc.abstractmethod
@@ -1081,7 +1113,7 @@ class DatasetContainer(Wrapper, metaclass=abc.ABCMeta):
         """
         Return the ids of the contained datasets.
         """
-        return [_.id for _ in self.content_infos if _.type == 'file']
+        return [_.id for _ in self.content_infos if _.type == "file"]
 
     def preview(self):
         getf = self.obj_gi_client.get_previews
@@ -1102,8 +1134,7 @@ class DatasetContainer(Wrapper, metaclass=abc.ABCMeta):
         :return: self
         """
         fresh = self.obj_gi_client.get(self.id)
-        self.__init__(
-            fresh.wrapped, content_infos=fresh.content_infos, gi=self.gi)
+        self.__init__(fresh.wrapped, content_infos=fresh.content_infos, gi=self.gi)
         return self
 
     def get_dataset(self, ds_id):
@@ -1134,7 +1165,6 @@ class DatasetContainer(Wrapper, metaclass=abc.ABCMeta):
           container
 
         .. note::
-
           when filtering library datasets by name, specify their full
           paths starting from the library's root folder, e.g.,
           ``/seqdata/reads.fastq``.  Full paths are available through
@@ -1152,11 +1182,19 @@ class History(DatasetContainer):
     """
     Maps to a Galaxy history.
     """
-    BASE_ATTRS = DatasetContainer.BASE_ATTRS + ('annotation', 'published', 'state', 'state_ids', 'state_details', 'tags')
+
+    BASE_ATTRS = DatasetContainer.BASE_ATTRS + (
+        "annotation",
+        "published",
+        "state",
+        "state_ids",
+        "state_details",
+        "tags",
+    )
     DS_TYPE = HistoryDatasetAssociation
     DSC_TYPE = HistoryDatasetCollectionAssociation
     CONTENT_INFO_TYPE = HistoryContentInfo
-    API_MODULE = 'histories'
+    API_MODULE = "histories"
 
     def update(self, **kwds):
         """
@@ -1197,7 +1235,7 @@ class History(DatasetContainer):
         :param purge: if ``True``, also purge (permanently delete) the history
 
         .. note::
-          For the purge option to work, the Galaxy instance must have the
+          The ``purge`` option works only if the Galaxy instance has the
           ``allow_user_dataset_purge`` option set to ``true`` in the
           ``config/galaxy.yml`` configuration file.
         """
@@ -1216,16 +1254,14 @@ class History(DatasetContainer):
         :return: the imported history dataset
         """
         if not self.is_mapped:
-            raise RuntimeError('history is not mapped to a Galaxy object')
+            raise RuntimeError("history is not mapped to a Galaxy object")
         if not isinstance(lds, LibraryDataset):
-            raise TypeError('lds is not a LibraryDataset')
+            raise TypeError("lds is not a LibraryDataset")
         res = self.gi.gi.histories.upload_dataset_from_library(self.id, lds.id)
         if not isinstance(res, Mapping):
-            raise RuntimeError(
-                f"upload_dataset_from_library: unexpected reply: {res!r}"
-            )
+            raise RuntimeError(f"upload_dataset_from_library: unexpected reply: {res!r}")
         self.refresh()
-        return self.get_dataset(res['id'])
+        return self.get_dataset(res["id"])
 
     def upload_file(self, path, **kwargs):
         """
@@ -1242,7 +1278,7 @@ class History(DatasetContainer):
         """
         out_dict = self.gi.gi.tools.upload_file(path, self.id, **kwargs)
         self.refresh()
-        return self.get_dataset(out_dict['outputs'][0]['id'])
+        return self.get_dataset(out_dict["outputs"][0]["id"])
 
     upload_dataset = upload_file
 
@@ -1262,7 +1298,7 @@ class History(DatasetContainer):
         """
         out_dict = self.gi.gi.tools.upload_from_ftp(path, self.id, **kwargs)
         self.refresh()
-        return self.get_dataset(out_dict['outputs'][0]['id'])
+        return self.get_dataset(out_dict["outputs"][0]["id"])
 
     def paste_content(self, content, **kwargs):
         """
@@ -1279,18 +1315,22 @@ class History(DatasetContainer):
         """
         out_dict = self.gi.gi.tools.paste_content(content, self.id, **kwargs)
         self.refresh()
-        return self.get_dataset(out_dict['outputs'][0]['id'])
+        return self.get_dataset(out_dict["outputs"][0]["id"])
 
-    def export(self, gzip=True, include_hidden=False, include_deleted=False,
-               wait=False, maxwait=None):
+    def export(self, gzip=True, include_hidden=False, include_deleted=False, wait=False, maxwait=None):
         """
         Start a job to create an export archive for this history.  See
         :meth:`~bioblend.galaxy.histories.HistoryClient.export_history`
         for parameter and return value info.
         """
         return self.gi.gi.histories.export_history(
-            self.id, gzip=gzip, include_hidden=include_hidden,
-            include_deleted=include_deleted, wait=wait, maxwait=maxwait)
+            self.id,
+            gzip=gzip,
+            include_hidden=include_hidden,
+            include_deleted=include_deleted,
+            wait=wait,
+            maxwait=maxwait,
+        )
 
     def download(self, jeha_id, outf, chunk_size=bioblend.CHUNK_SIZE):
         """
@@ -1299,8 +1339,7 @@ class History(DatasetContainer):
         :meth:`~bioblend.galaxy.histories.HistoryClient.download_history`
         for parameter and return value info.
         """
-        return self.gi.gi.histories.download_history(
-            self.id, jeha_id, outf, chunk_size=chunk_size)
+        return self.gi.gi.histories.download_history(self.id, jeha_id, outf, chunk_size=chunk_size)
 
     def create_dataset_collection(self, collection_description):
         """
@@ -1314,7 +1353,7 @@ class History(DatasetContainer):
         """
         dataset_collection = self.gi.gi.histories.create_dataset_collection(self.id, collection_description)
         self.refresh()
-        return self.get_dataset_collection(dataset_collection['id'])
+        return self.get_dataset_collection(dataset_collection["id"])
 
     def get_dataset_collection(self, dsc_id):
         """
@@ -1334,17 +1373,18 @@ class Library(DatasetContainer):
     """
     Maps to a Galaxy library.
     """
-    BASE_ATTRS = DatasetContainer.BASE_ATTRS + ('description', 'synopsis')
+
+    BASE_ATTRS = DatasetContainer.BASE_ATTRS + ("description", "synopsis")
     DS_TYPE = LibraryDataset
     CONTENT_INFO_TYPE = LibraryContentInfo
-    API_MODULE = 'libraries'
+    API_MODULE = "libraries"
 
     @property
     def folder_ids(self):
         """
         Return the ids of the contained folders.
         """
-        return [_.id for _ in self.content_infos if _.type == 'folder']
+        return [_.id for _ in self.content_infos if _.type == "folder"]
 
     def delete(self):
         """
@@ -1359,7 +1399,7 @@ class Library(DatasetContainer):
         Return the id of the given folder, after sanity checking.
         """
         if not self.is_mapped:
-            raise RuntimeError('library is not mapped to a Galaxy object')
+            raise RuntimeError("library is not mapped to a Galaxy object")
         return None if folder is None else folder.id
 
     def upload_data(self, data, folder=None, **kwargs):
@@ -1378,10 +1418,9 @@ class Library(DatasetContainer):
         Optional keyword arguments: ``file_type``, ``dbkey``.
         """
         fid = self._pre_upload(folder)
-        res = self.gi.gi.libraries.upload_file_contents(
-            self.id, data, folder_id=fid, **kwargs)
+        res = self.gi.gi.libraries.upload_file_contents(self.id, data, folder_id=fid, **kwargs)
         self.refresh()
-        return self.get_dataset(res[0]['id'])
+        return self.get_dataset(res[0]["id"])
 
     def upload_from_url(self, url, folder=None, **kwargs):
         """
@@ -1393,10 +1432,9 @@ class Library(DatasetContainer):
         See :meth:`.upload_data` for info on other params.
         """
         fid = self._pre_upload(folder)
-        res = self.gi.gi.libraries.upload_file_from_url(
-            self.id, url, folder_id=fid, **kwargs)
+        res = self.gi.gi.libraries.upload_file_from_url(self.id, url, folder_id=fid, **kwargs)
         self.refresh()
-        return self.get_dataset(res[0]['id'])
+        return self.get_dataset(res[0]["id"])
 
     def upload_from_local(self, path, folder=None, **kwargs):
         """
@@ -1408,19 +1446,13 @@ class Library(DatasetContainer):
         See :meth:`.upload_data` for info on other params.
         """
         fid = self._pre_upload(folder)
-        res = self.gi.gi.libraries.upload_file_from_local_path(
-            self.id, path, folder_id=fid, **kwargs)
+        res = self.gi.gi.libraries.upload_file_from_local_path(self.id, path, folder_id=fid, **kwargs)
         self.refresh()
-        return self.get_dataset(res[0]['id'])
+        return self.get_dataset(res[0]["id"])
 
     def upload_from_galaxy_fs(self, paths, folder=None, link_data_only=None, **kwargs):
         """
         Upload data to this library from filesystem paths on the server.
-
-        .. note::
-          For this method to work, the Galaxy instance must have the
-          ``allow_path_paste`` option set to ``true`` in the
-          ``config/galaxy.yml`` configuration file.
 
         :type paths: str or :class:`~collections.abc.Iterable` of str
         :param paths: server-side file paths from which data should be read
@@ -1434,27 +1466,28 @@ class Library(DatasetContainer):
         :return: the dataset objects that represent the uploaded content
 
         See :meth:`.upload_data` for info on other params.
+
+        .. note::
+          This method works only if the Galaxy instance has the
+          ``allow_path_paste`` option set to ``true`` in the
+          ``config/galaxy.yml`` configuration file.
         """
         fid = self._pre_upload(folder)
         if isinstance(paths, str):
             paths = (paths,)
-        paths = '\n'.join(paths)
+        paths = "\n".join(paths)
         res = self.gi.gi.libraries.upload_from_galaxy_filesystem(
-            self.id, paths, folder_id=fid, link_data_only=link_data_only,
-            **kwargs)
+            self.id, paths, folder_id=fid, link_data_only=link_data_only, **kwargs
+        )
         if res is None:
-            raise RuntimeError('upload_from_galaxy_filesystem: no reply')
+            raise RuntimeError("upload_from_galaxy_filesystem: no reply")
         if not isinstance(res, Sequence):
-            raise RuntimeError(
-                f"upload_from_galaxy_filesystem: unexpected reply: {res!r}"
-            )
-        new_datasets = [
-            self.get_dataset(ds_info['id']) for ds_info in res
-        ]
+            raise RuntimeError(f"upload_from_galaxy_filesystem: unexpected reply: {res!r}")
+        new_datasets = [self.get_dataset(ds_info["id"]) for ds_info in res]
         self.refresh()
         return new_datasets
 
-    def copy_from_dataset(self, hda, folder=None, message=''):
+    def copy_from_dataset(self, hda, folder=None, message=""):
         """
         Copy a history dataset into this library.
 
@@ -1464,10 +1497,9 @@ class Library(DatasetContainer):
         See :meth:`.upload_data` for info on other params.
         """
         fid = self._pre_upload(folder)
-        res = self.gi.gi.libraries.copy_from_dataset(
-            self.id, hda.id, folder_id=fid, message=message)
+        res = self.gi.gi.libraries.copy_from_dataset(self.id, hda.id, folder_id=fid, message=message)
         self.refresh()
-        return self.get_dataset(res['library_dataset_id'])
+        return self.get_dataset(res["library_dataset_id"])
 
     def create_folder(self, name, description=None, base_folder=None):
         """
@@ -1487,10 +1519,9 @@ class Library(DatasetContainer):
         :return: the folder just created
         """
         bfid = None if base_folder is None else base_folder.id
-        res = self.gi.gi.libraries.create_folder(
-            self.id, name, description=description, base_folder_id=bfid)
+        res = self.gi.gi.libraries.create_folder(self.id, name, description=description, base_folder_id=bfid)
         self.refresh()
-        return self.get_folder(res[0]['id'])
+        return self.get_folder(res[0]["id"])
 
     def get_folder(self, f_id):
         """
@@ -1517,16 +1548,17 @@ class Folder(Wrapper):
     """
     Maps to a folder in a Galaxy library.
     """
+
     BASE_ATTRS = Wrapper.BASE_ATTRS + (
-        'deleted',
-        'description',
-        'item_count',
-        'name',
+        "deleted",
+        "description",
+        "item_count",
+        "name",
     )
 
     def __init__(self, f_dict, container, gi=None):
         super().__init__(f_dict, gi=gi)
-        object.__setattr__(self, 'container', container)
+        object.__setattr__(self, "container", container)
 
     @property
     def parent(self):
@@ -1538,16 +1570,14 @@ class Folder(Wrapper):
         :return: the parent of this folder
         """
         if self._cached_parent is None:
-            object.__setattr__(self,
-                               '_cached_parent',
-                               self._get_parent())
+            object.__setattr__(self, "_cached_parent", self._get_parent())
         return self._cached_parent
 
     def _get_parent(self):
         """
         Return the parent folder of this folder.
         """
-        parent_id = self.wrapped['parent_id']
+        parent_id = self.wrapped["parent_id"]
         if parent_id is None:
             return None
         return self.container.get_folder(parent_id)
@@ -1567,14 +1597,14 @@ class Tool(Wrapper):
     """
     Maps to a Galaxy tool.
     """
+
     BASE_ATTRS = Wrapper.BASE_ATTRS + (
-        'name',
-        'version',
+        "name",
+        "version",
     )
     POLLING_INTERVAL = 10  # for output state monitoring
 
-    def run(self, inputs, history, wait=False,
-            polling_interval=POLLING_INTERVAL):
+    def run(self, inputs, history, wait=False, polling_interval=POLLING_INTERVAL):
         """
         Execute this tool in the given history with inputs from dict
         ``inputs``.
@@ -1606,9 +1636,9 @@ class Tool(Wrapper):
         """
         for k, v in inputs.items():
             if isinstance(v, Dataset):
-                inputs[k] = {'src': v.SRC, 'id': v.id}
+                inputs[k] = {"src": v.SRC, "id": v.id}
         out_dict = self.gi.gi.tools.run_tool(history.id, self.id, inputs)
-        outputs = [history.get_dataset(_['id']) for _ in out_dict['outputs']]
+        outputs = [history.get_dataset(_["id"]) for _ in out_dict["outputs"]]
         if wait:
             self.gi._wait_datasets(outputs, polling_interval=polling_interval)
         return outputs
@@ -1618,7 +1648,8 @@ class Job(Wrapper):
     """
     Maps to a Galaxy job.
     """
-    BASE_ATTRS = Wrapper.BASE_ATTRS + ('state',)
+
+    BASE_ATTRS = Wrapper.BASE_ATTRS + ("state",)
 
 
 @abstractclass
@@ -1626,9 +1657,10 @@ class DatasetContainerPreview(Wrapper):
     """
     Abstract base class for dataset container (history and library) 'previews'.
     """
+
     BASE_ATTRS = Wrapper.BASE_ATTRS + (
-        'deleted',
-        'name',
+        "deleted",
+        "name",
     )
 
 
@@ -1648,11 +1680,12 @@ class HistoryPreview(DatasetContainerPreview):
     Instances of this class wrap dictionaries obtained by getting
     ``/api/histories`` from Galaxy.
     """
+
     BASE_ATTRS = DatasetContainerPreview.BASE_ATTRS + (
-        'annotation',
-        'published',
-        'purged',
-        'tags',
+        "annotation",
+        "published",
+        "purged",
+        "tags",
     )
 
 
@@ -1663,15 +1696,16 @@ class WorkflowPreview(Wrapper):
     Instances of this class wrap dictionaries obtained by getting
     ``/api/workflows`` from Galaxy.
     """
+
     BASE_ATTRS = Wrapper.BASE_ATTRS + (
-        'deleted',
-        'latest_workflow_uuid',
-        'name',
-        'number_of_steps',
-        'owner',
-        'published',
-        'show_in_tool_panel',
-        'tags',
+        "deleted",
+        "latest_workflow_uuid",
+        "name",
+        "number_of_steps",
+        "owner",
+        "published",
+        "show_in_tool_panel",
+        "tags",
     )
 
 
@@ -1682,13 +1716,14 @@ class InvocationPreview(Wrapper):
     Instances of this class wrap dictionaries obtained by getting
     ``/api/invocations`` from Galaxy.
     """
+
     BASE_ATTRS = Wrapper.BASE_ATTRS + (
-        'history_id',
-        'id',
-        'state',
-        'update_time',
-        'uuid',
-        'workflow_id',
+        "history_id",
+        "id",
+        "state",
+        "update_time",
+        "uuid",
+        "workflow_id",
     )
 
 
@@ -1699,4 +1734,5 @@ class JobPreview(Wrapper):
     Instances of this class wrap dictionaries obtained by getting
     ``/api/jobs`` from Galaxy.
     """
-    BASE_ATTRS = Wrapper.BASE_ATTRS + ('state',)
+
+    BASE_ATTRS = Wrapper.BASE_ATTRS + ("state",)

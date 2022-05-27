@@ -8,11 +8,10 @@ from . import GalaxyTestBase
 
 
 class TestGalaxyRoles(GalaxyTestBase.GalaxyTestBase):
-
     def setUp(self):
         super().setUp()
         self.name = f"test_{uuid.uuid4().hex}"
-        self.description = 'automated test role'
+        self.description = "automated test role"
         self.role = self.gi.roles.create_role(self.name, self.description)
 
     def tearDown(self):
@@ -22,10 +21,10 @@ class TestGalaxyRoles(GalaxyTestBase.GalaxyTestBase):
     def test_get_roles(self):
         roles = self.gi.roles.get_roles()
         for role in roles:
-            self.assertIsNotNone(role['id'])
-            self.assertIsNotNone(role['name'])
+            self.assertIsNotNone(role["id"])
+            self.assertIsNotNone(role["name"])
 
     def test_create_role(self):
-        self.assertEqual(self.role['name'], self.name)
-        self.assertEqual(self.role['description'], self.description)
-        self.assertIsNotNone(self.role['id'])
+        self.assertEqual(self.role["name"], self.name)
+        self.assertEqual(self.role["description"], self.description)
+        self.assertIsNotNone(self.role["id"])

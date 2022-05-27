@@ -1,16 +1,14 @@
 """
 Interaction with a Tool Shed instance repositories
 """
-from typing import (
-    Optional,
-)
+from typing import Optional
 
 from bioblend.galaxy.client import Client
 from bioblend.util import attach_file
 
 
 class ToolShedRepositoryClient(Client):
-    module = 'repositories'
+    module = "repositories"
 
     def __init__(self, toolshed_instance):
         super().__init__(toolshed_instance)
@@ -151,17 +149,13 @@ class ToolShedRepositoryClient(Client):
         :rtype: list
         :return: List of changeset revision hash strings from oldest to newest
         """
-        url = self._make_url() + '/get_ordered_installable_revisions'
-        params = {
-            'name': name,
-            'owner': owner
-        }
+        url = self._make_url() + "/get_ordered_installable_revisions"
+        params = {"name": name, "owner": owner}
         r = self._get(url=url, params=params)
 
         return r
 
-    def get_repository_revision_install_info(self, name, owner,
-                                             changeset_revision):
+    def get_repository_revision_install_info(self, name, owner, changeset_revision):
         """
         Return a list of dictionaries of metadata about a certain changeset
         revision for a single tool.
@@ -260,12 +254,8 @@ class ToolShedRepositoryClient(Client):
                                                  'type': 'package',
                                                  'version': '0.1.18'}}]}]
         """
-        url = self._make_url() + '/get_repository_revision_install_info'
-        params = {
-            'name': name,
-            'owner': owner,
-            'changeset_revision': changeset_revision
-        }
+        url = self._make_url() + "/get_repository_revision_install_info"
+        params = {"name": name, "owner": owner, "changeset_revision": changeset_revision}
         return self._get(url=url, params=params)
 
     def repository_revisions(self, downloadable=None, malicious=None,
@@ -325,7 +315,7 @@ class ToolShedRepositoryClient(Client):
         """
         # Not using '_make_url' or '_get' to create url since the module id used
         # to create url is not the same as needed for this method
-        url = self.gi.url + '/repository_revisions'
+        url = self.gi.url + "/repository_revisions"
         params = {}
         if downloadable is not None:
             params['downloadable'] = downloadable
@@ -338,7 +328,7 @@ class ToolShedRepositoryClient(Client):
         return self._get(url=url, params=params)
 
     def show_repository_revision(self, metadata_id):
-        '''
+        """
         Returns a dictionary that includes information about a specified
         repository revision.
 
@@ -366,11 +356,11 @@ class ToolShedRepositoryClient(Client):
              'repository_dependencies': [],
              'repository_id': '491b7a3fddf9366f',
              'url': '/api/repository_revisions/504be8aaa652c154'}
-        '''
+        """
         # Not using '_make_url' or '_get' to create url since the module id used
         # to create url is not the same as needed for this method
         # since metadata_id has to be defined, easy to create the url here
-        url = '/'.join((self.gi.url, 'repository_revisions', metadata_id))
+        url = "/".join((self.gi.url, "repository_revisions", metadata_id))
         return self._get(url=url)
 
     def update_repository(self, id, tar_ball_path, commit_message=None):
@@ -398,20 +388,25 @@ class ToolShedRepositoryClient(Client):
 
         .. versionadded:: 0.5.2
         """
-        url = self._make_url(id) + '/changeset_revision'
-        payload = {
-            'file': attach_file(tar_ball_path)
-        }
+        url = self._make_url(id) + "/changeset_revision"
+        payload = {"file": attach_file(tar_ball_path)}
         if commit_message is not None:
-            payload['commit_message'] = commit_message
+            payload["commit_message"] = commit_message
         try:
             return self._post(payload=payload, files_attached=True, url=url)
         finally:
-            payload['file'].close()
+            payload["file"].close()
 
-    def create_repository(self, name, synopsis, description=None,
-                          type='unrestricted', remote_repository_url=None,
-                          homepage_url=None, category_ids=None):
+    def create_repository(
+        self,
+        name,
+        synopsis,
+        description=None,
+        type="unrestricted",
+        remote_repository_url=None,
+        homepage_url=None,
+        category_ids=None,
+    ):
         """
         Create a new repository in a Tool Shed.
 
@@ -458,29 +453,33 @@ class ToolShedRepositoryClient(Client):
              "user_id": "adb5f5c93f827949"}
         """
         payload = {
-            'name': name,
-            'synopsis': synopsis,
+            "name": name,
+            "synopsis": synopsis,
         }
         if description is not None:
-            payload['description'] = description
+            payload["description"] = description
         if description is not None:
-            payload['description'] = description
+            payload["description"] = description
         if type is not None:
-            payload['type'] = type
+            payload["type"] = type
         if remote_repository_url is not None:
-            payload['remote_repository_url'] = remote_repository_url
+            payload["remote_repository_url"] = remote_repository_url
         if homepage_url is not None:
-            payload['homepage_url'] = homepage_url
+            payload["homepage_url"] = homepage_url
         if category_ids is not None:
-            payload['category_ids[]'] = category_ids
+            payload["category_ids[]"] = category_ids
         return self._post(payload)
 
-    def update_repository_metadata(self, toolShed_id: str, name: Optional[str] = None,
-                                   synopsis: Optional[str] = None,
-                                   description: Optional[str] = None,
-                                   remote_repository_url: Optional[str] = None,
-                                   homepage_url: Optional[str] = None,
-                                   category_ids: Optional[str] = None) -> dict:
+    def update_repository_metadata(
+        self,
+        toolShed_id: str,
+        name: Optional[str] = None,
+        synopsis: Optional[str] = None,
+        description: Optional[str] = None,
+        remote_repository_url: Optional[str] = None,
+        homepage_url: Optional[str] = None,
+        category_ids: Optional[str] = None,
+    ) -> dict:
         """
         Update metadata of a Tool Shed repository.
 
@@ -511,15 +510,15 @@ class ToolShedRepositoryClient(Client):
         """
         payload = {}
         if name:
-            payload['name'] = name
+            payload["name"] = name
         if synopsis:
-            payload['synopsis'] = synopsis
+            payload["synopsis"] = synopsis
         if description:
-            payload['description'] = description
+            payload["description"] = description
         if remote_repository_url:
-            payload['remote_repository_url'] = remote_repository_url
+            payload["remote_repository_url"] = remote_repository_url
         if homepage_url:
-            payload['homepage_url'] = homepage_url
+            payload["homepage_url"] = homepage_url
         if category_ids:
-            payload['category_ids'] = category_ids
+            payload["category_ids"] = category_ids
         return self._put(id=toolShed_id, payload=payload)

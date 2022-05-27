@@ -5,7 +5,7 @@ from bioblend.galaxy.client import Client
 
 
 class RolesClient(Client):
-    module = 'roles'
+    module = "roles"
 
     def __init__(self, galaxy_instance):
         super().__init__(galaxy_instance)
@@ -83,12 +83,7 @@ class RolesClient(Client):
             user_ids = []
         if group_ids is None:
             group_ids = []
-        payload = {
-            'name': role_name,
-            'description': description,
-            'user_ids': user_ids,
-            'group_ids': group_ids
-        }
+        payload = {"name": role_name, "description": description, "user_ids": user_ids, "group_ids": group_ids}
         ret = self._post(payload)
         if isinstance(ret, list):
             # Galaxy release_20.09 and earlier returned a 1-element list

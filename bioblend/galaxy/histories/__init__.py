@@ -5,7 +5,6 @@ import logging
 import re
 import sys
 import time
-import warnings
 import webbrowser
 from typing import List
 from urllib.parse import urljoin
@@ -19,7 +18,7 @@ log = logging.getLogger(__name__)
 
 
 class HistoryClient(Client):
-    module = 'histories'
+    module = "histories"
 
     def __init__(self, galaxy_instance):
         super().__init__(galaxy_instance)
@@ -36,7 +35,7 @@ class HistoryClient(Client):
         """
         payload = {}
         if name is not None:
-            payload['name'] = name
+            payload["name"] = name
         return self._post(payload)
 
     def import_history(self, file_path=None, url=None):
@@ -50,52 +49,40 @@ class HistoryClient(Client):
         """
         if file_path:
             archive_file = attach_file(file_path)
-            payload = dict(archive_source='', archive_file=archive_file, archive_type="file")
+            payload = dict(archive_source="", archive_file=archive_file, archive_type="file")
         else:
-            payload = dict(archive_source=url, archive_type='url')
+            payload = dict(archive_source=url, archive_type="url")
 
         return self._post(payload=payload, files_attached=file_path is not None)
 
-    def _get_histories(self, history_id=None, name=None, deleted=False, filter_user_published=None, get_all_published=False, slug=None):
+    def _get_histories(self, name=None, deleted=False, filter_user_published=None, get_all_published=False, slug=None):
         """
         Hidden method to be used by both get_histories() and get_published_histories()
         """
-        if history_id is not None and name is not None:
-            raise ValueError('Provide only one argument between name or history_id, but not both')
         assert not (filter_user_published is not None and get_all_published)
 
         params = {}
         if deleted:
-            params.setdefault('q', []).append('deleted')
-            params.setdefault('qv', []).append(deleted)
+            params.setdefault("q", []).append("deleted")
+            params.setdefault("qv", []).append(deleted)
         if filter_user_published is not None:
-            params.setdefault('q', []).append('published')
-            params.setdefault('qv', []).append(filter_user_published)
+            params.setdefault("q", []).append("published")
+            params.setdefault("qv", []).append(filter_user_published)
         if slug is not None:
-            params.setdefault('q', []).append('slug')
-            params.setdefault('qv', []).append(slug)
+            params.setdefault("q", []).append("slug")
+            params.setdefault("qv", []).append(slug)
 
-        url = '/'.join((self._make_url(), 'published')) if get_all_published else None
+        url = "/".join((self._make_url(), "published")) if get_all_published else None
         histories = self._get(url=url, params=params)
 
-        if history_id is not None:
-            history = next((_ for _ in histories if _['id'] == history_id), None)
-            histories = [history] if history is not None else []
-        elif name is not None:
-            histories = [_ for _ in histories if _['name'] == name]
+        if name is not None:
+            histories = [_ for _ in histories if _["name"] == name]
         return histories
 
     def get_histories(self, history_id=None, name=None, deleted=False, published=None, slug=None):
         """
         Get all histories, or select a subset by specifying optional arguments
         for filtering (e.g. a history name).
-
-        :type history_id: str
-        :param history_id: Encoded history ID to filter on
-
-          .. deprecated:: 0.15.0
-             To get details of a history for which you know the ID, use the much
-             more efficient :meth:`show_history` instead.
 
         :type name: str
         :param name: History name to filter on.
@@ -116,13 +103,18 @@ class HistoryClient(Client):
 
         :rtype: list
         :return: List of history dicts.
+
+        .. versionchanged:: 0.17.0
+            Using the deprecated ``history_id`` parameter now raises a
+            ``ValueError`` exception.
         """
         if history_id is not None:
-            warnings.warn(
-                'The history_id parameter is deprecated, use the show_history() method to view details of a history for which you know the ID.',
-                category=FutureWarning
+            raise ValueError(
+                "The history_id parameter has been removed, use the show_history() method to view details of a history for which you know the ID.",
             )
-        return self._get_histories(history_id=history_id, name=name, deleted=deleted, filter_user_published=published, get_all_published=False, slug=slug)
+        return self._get_histories(
+            name=name, deleted=deleted, filter_user_published=published, get_all_published=False, slug=slug
+        )
 
     def get_published_histories(self, name=None, deleted=False, slug=None):
         """
@@ -142,7 +134,9 @@ class HistoryClient(Client):
         :rtype: list
         :return: List of history dicts.
         """
-        return self._get_histories(name=name, deleted=deleted, filter_user_published=None, get_all_published=True, slug=slug)
+        return self._get_histories(
+            name=name, deleted=deleted, filter_user_published=None, get_all_published=True, slug=slug
+        )
 
     def show_history(self, history_id, contents=False, deleted=None, visible=None, details=None, types=None):
         """
@@ -191,13 +185,13 @@ class HistoryClient(Client):
         params = {}
         if contents:
             if details:
-                params['details'] = details
+                params["details"] = details
             if deleted is not None:
-                params['deleted'] = deleted
+                params["deleted"] = deleted
             if visible is not None:
-                params['visible'] = visible
+                params["visible"] = visible
             if types is not None:
-                params['types'] = types
+                params["types"] = types
         return self._get(id=history_id, contents=contents, params=params)
 
     def delete_dataset(self, history_id, dataset_id, purge=False):
@@ -217,14 +211,14 @@ class HistoryClient(Client):
         :return: None
 
         .. note::
-            For the purge option to work, the Galaxy instance must have the
-            ``allow_user_dataset_purge`` option set to ``true`` in the
-            ``config/galaxy.yml`` configuration file.
+          The ``purge`` option works only if the Galaxy instance has the
+          ``allow_user_dataset_purge`` option set to ``true`` in the
+          ``config/galaxy.yml`` configuration file.
         """
-        url = '/'.join((self._make_url(history_id, contents=True), dataset_id))
+        url = "/".join((self._make_url(history_id, contents=True), dataset_id))
         payload = {}
         if purge is True:
-            payload['purge'] = purge
+            payload["purge"] = purge
         self._delete(payload=payload, url=url)
 
     def delete_dataset_collection(self, history_id, dataset_collection_id):
@@ -240,7 +234,7 @@ class HistoryClient(Client):
         :rtype: None
         :return: None
         """
-        url = '/'.join((self._make_url(history_id, contents=True), 'dataset_collections', dataset_collection_id))
+        url = "/".join((self._make_url(history_id, contents=True), "dataset_collections", dataset_collection_id))
         self._delete(url=url)
 
     def show_dataset(self, history_id, dataset_id):
@@ -256,7 +250,7 @@ class HistoryClient(Client):
         :rtype: dict
         :return: Information about the dataset
         """
-        url = '/'.join((self._make_url(history_id, contents=True), dataset_id))
+        url = "/".join((self._make_url(history_id, contents=True), dataset_id))
         return self._get(url=url)
 
     def show_dataset_collection(self, history_id, dataset_collection_id):
@@ -272,7 +266,7 @@ class HistoryClient(Client):
         :rtype: dict
         :return: Information about the dataset collection
         """
-        url = '/'.join((self._make_url(history_id, contents=True), 'dataset_collections', dataset_collection_id))
+        url = "/".join((self._make_url(history_id, contents=True), "dataset_collections", dataset_collection_id))
         return self._get(url=url)
 
     def show_matching_datasets(self, history_id, name_filter=None):
@@ -292,10 +286,12 @@ class HistoryClient(Client):
         :return: List of dictionaries
         """
         if isinstance(name_filter, str):
-            name_filter = re.compile(name_filter + '$')
-        return [self.show_dataset(history_id, h['id'])
-                for h in self.show_history(history_id, contents=True)
-                if name_filter is None or name_filter.match(h['name'])]
+            name_filter = re.compile(name_filter + "$")
+        return [
+            self.show_dataset(history_id, h["id"])
+            for h in self.show_history(history_id, contents=True)
+            if name_filter is None or name_filter.match(h["name"])
+        ]
 
     def show_dataset_provenance(self, history_id, dataset_id, follow=False):
         """
@@ -332,7 +328,7 @@ class HistoryClient(Client):
              'tool_id': 'toolshed.g2.bx.psu.edu/repos/ziru-zhou/macs2/modencode_peakcalling_macs2/2.0.10.2',
              'uuid': '5c0c43f5-8d93-44bd-939d-305e82f213c6'}
         """
-        url = '/'.join((self._make_url(history_id, contents=True), dataset_id, 'provenance'))
+        url = "/".join((self._make_url(history_id, contents=True), dataset_id, "provenance"))
         return self._get(url=url)
 
     def update_history(self, history_id, **kwds):
@@ -411,7 +407,7 @@ class HistoryClient(Client):
         .. versionchanged:: 0.8.0
             Changed the return value from the status code (type int) to a dict.
         """
-        url = '/'.join((self._make_url(history_id, contents=True), dataset_id))
+        url = "/".join((self._make_url(history_id, contents=True), dataset_id))
         return self._put(payload=kwds, url=url)
 
     def update_dataset_collection(self, history_id, dataset_collection_id, **kwds):
@@ -441,7 +437,7 @@ class HistoryClient(Client):
         .. versionchanged:: 0.8.0
             Changed the return value from the status code (type int) to a dict.
         """
-        url = '/'.join((self._make_url(history_id, contents=True), 'dataset_collections', dataset_collection_id))
+        url = "/".join((self._make_url(history_id, contents=True), "dataset_collections", dataset_collection_id))
         return self._put(payload=kwds, url=url)
 
     def create_history_tag(self, history_id, tag):
@@ -465,7 +461,7 @@ class HistoryClient(Client):
         """
         # empty payload since we are adding the new tag using the url
         payload = {}
-        url = '/'.join((self._make_url(history_id), 'tags', tag))
+        url = "/".join((self._make_url(history_id), "tags", tag))
         return self._post(payload, url=url)
 
     def upload_dataset_from_library(self, history_id, lib_dataset_id):
@@ -484,9 +480,9 @@ class HistoryClient(Client):
         :return: Information about the newly created HDA
         """
         payload = {
-            'content': lib_dataset_id,
-            'source': 'library',
-            'from_ld_id': lib_dataset_id,  # compatibility with old API
+            "content": lib_dataset_id,
+            "source": "library",
+            "from_ld_id": lib_dataset_id,  # compatibility with old API
         }
         return self._post(payload, id=history_id, contents=True)
 
@@ -542,13 +538,13 @@ class HistoryClient(Client):
                  purged).
 
         .. note::
-          For the purge option to work, the Galaxy instance must have the
+          The ``purge`` option works only if the Galaxy instance has the
           ``allow_user_dataset_purge`` option set to ``true`` in the
           ``config/galaxy.yml`` configuration file.
         """
         payload = {}
         if purge is True:
-            payload['purge'] = purge
+            payload["purge"] = purge
         return self._delete(payload=payload, id=history_id)
 
     def undelete_history(self, history_id):
@@ -561,7 +557,7 @@ class HistoryClient(Client):
         :rtype: str
         :return: 'OK' if it was deleted
         """
-        url = self._make_url(history_id, deleted=True) + '/undelete'
+        url = self._make_url(history_id, deleted=True) + "/undelete"
         return self._post(url=url)
 
     def get_status(self, history_id):
@@ -579,14 +575,14 @@ class HistoryClient(Client):
         """
         state = {}
         history = self.show_history(history_id)
-        state['state'] = history['state']
-        if history.get('state_details') is not None:
-            state['state_details'] = history['state_details']
-            total_complete = sum(history['state_details'].values())
+        state["state"] = history["state"]
+        if history.get("state_details") is not None:
+            state["state_details"] = history["state_details"]
+            total_complete = sum(history["state_details"].values())
             if total_complete > 0:
-                state['percent_complete'] = 100 * history['state_details']['ok'] / total_complete
+                state["percent_complete"] = 100 * history["state_details"]["ok"] / total_complete
             else:
-                state['percent_complete'] = 0
+                state["percent_complete"] = 0
         return state
 
     def get_most_recently_used_history(self):
@@ -596,11 +592,12 @@ class HistoryClient(Client):
         :rtype: dict
         :return: History representation
         """
-        url = self._make_url() + '/most_recently_used'
+        url = self._make_url() + "/most_recently_used"
         return self._get(url=url)
 
-    def export_history(self, history_id, gzip=True, include_hidden=False,
-                       include_deleted=False, wait=False, maxwait=None):
+    def export_history(
+        self, history_id, gzip=True, include_hidden=False, include_deleted=False, wait=False, maxwait=None
+    ):
         """
         Start a job to create an export archive for the given history.
 
@@ -638,9 +635,9 @@ class HistoryClient(Client):
             else:
                 maxwait = 0
         params = {
-            'gzip': gzip,
-            'include_hidden': include_hidden,
-            'include_deleted': include_deleted,
+            "gzip": gzip,
+            "include_hidden": include_hidden,
+            "include_deleted": include_deleted,
         }
         url = f"{self._make_url(history_id)}/exports"
         time_left = maxwait
@@ -650,20 +647,23 @@ class HistoryClient(Client):
             except ConnectionError as e:
                 if e.status_code == 202:  # export is not ready
                     if time_left > 0:
-                        log.info("Waiting for the export of history %s to complete. Will wait %i more s", history_id, time_left)
+                        log.info(
+                            "Waiting for the export of history %s to complete. Will wait %i more s",
+                            history_id,
+                            time_left,
+                        )
                         time.sleep(1)
                         time_left -= 1
                     else:
-                        return ''
+                        return ""
                 else:
                     raise
             else:
                 break
-        jeha_id = r['download_url'].rsplit('/', 1)[-1]
+        jeha_id = r["download_url"].rsplit("/", 1)[-1]
         return jeha_id
 
-    def download_history(self, history_id, jeha_id, outf,
-                         chunk_size=bioblend.CHUNK_SIZE):
+    def download_history(self, history_id, jeha_id, outf, chunk_size=bioblend.CHUNK_SIZE):
         """
         Download a history export archive.  Use :meth:`export_history`
         to create an export.
@@ -690,7 +690,7 @@ class HistoryClient(Client):
         for chunk in r.iter_content(chunk_size):
             outf.write(chunk)
 
-    def copy_dataset(self, history_id, dataset_id, source='hda'):
+    def copy_dataset(self, history_id, dataset_id, source="hda"):
         """
         Copy a dataset to a history.
 
@@ -708,7 +708,7 @@ class HistoryClient(Client):
         """
         return self.copy_content(history_id, dataset_id, source)
 
-    def copy_content(self, history_id, content_id, source='hda'):
+    def copy_content(self, history_id, content_id, source="hda"):
         """
         Copy existing content (e.g. a dataset) to a history.
 
@@ -729,9 +729,9 @@ class HistoryClient(Client):
         """
 
         payload = {
-            'content': content_id,
-            'source': source,
-            'type': 'dataset' if source != 'hdca' else 'dataset_collection',
+            "content": content_id,
+            "source": source,
+            "type": "dataset" if source != "hdca" else "dataset_collection",
         }
 
         url = self._make_url(history_id, contents=True)
@@ -773,7 +773,7 @@ class HistoryClient(Client):
         :return: List of extra files
 
         .. note::
-          This method is only supported by Galaxy 19.01 or later.
+          This method works only on Galaxy 19.01 or later.
         """
-        url = '/'.join((self._make_url(history_id, contents=True), dataset_id, 'extra_files'))
+        url = "/".join((self._make_url(history_id, contents=True), dataset_id, "extra_files"))
         return self._get(url=url)

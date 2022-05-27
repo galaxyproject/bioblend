@@ -9,9 +9,7 @@ import base64
 import contextlib
 import json
 import logging
-from urllib.parse import (
-    urljoin,
-)
+from urllib.parse import urljoin
 
 import requests
 from requests_toolbelt import MultipartEncoder
@@ -23,7 +21,6 @@ log = logging.getLogger(__name__)
 
 
 class GalaxyClient:
-
     def __init__(self, url, key=None, email=None, password=None, verify=True, timeout=None):
         """
         :param verify: Whether to verify the server's TLS certificate
@@ -34,10 +31,10 @@ class GalaxyClient:
         self.verify = verify
         self.timeout = timeout
         # Make sure the URL scheme is defined (otherwise requests will not work)
-        if not url.lower().startswith('http'):
+        if not url.lower().startswith("http"):
             found_scheme = None
             # Try to guess the scheme, starting from the more secure
-            for scheme in ('https://', 'http://'):
+            for scheme in ("https://", "http://"):
                 log.warning(f"Missing scheme in url, trying with {scheme}")
                 with contextlib.suppress(requests.RequestException):
                     r = requests.get(
@@ -53,7 +50,7 @@ class GalaxyClient:
             url = found_scheme + url
         # All of Galaxy's and ToolShed's API's are rooted at <url>/api so make that the url
         self.base_url = url
-        self.url = urljoin(url, 'api')
+        self.url = urljoin(url, "api")
         # If key has been supplied, use it; otherwise just set email and
         # password and grab user's key before first request.
         if key:
@@ -62,9 +59,9 @@ class GalaxyClient:
             self._key = None
             self.email = email
             self.password = password
-        self.json_headers = {'Content-Type': 'application/json'}
+        self.json_headers = {"Content-Type": "application/json"}
         # json_headers needs to be set before key can be defined, otherwise authentication with email/password causes an error
-        self.json_headers['x-api-key'] = self.key
+        self.json_headers["x-api-key"] = self.key
 
     def make_get_request(self, url, **kwargs):
         """
@@ -83,8 +80,8 @@ class GalaxyClient:
         :return: the response object.
         """
         headers = self.json_headers
-        kwargs.setdefault('timeout', self.timeout)
-        kwargs.setdefault('verify', self.verify)
+        kwargs.setdefault("timeout", self.timeout)
+        kwargs.setdefault("verify", self.verify)
         r = requests.get(url, headers=headers, **kwargs)
         return r
 
@@ -109,7 +106,7 @@ class GalaxyClient:
             not of type ``FileStream``.
             """
             for k, v in d.items():
-                if not isinstance(v, FileStream):
+                if not isinstance(v, (FileStream, str, bytes)):
                     d[k] = json.dumps(v)
             return d
 
@@ -117,12 +114,12 @@ class GalaxyClient:
         # leveraging the requests-toolbelt library if any files have
         # been attached.
         if files_attached:
-            payload = my_dumps(payload)
             if params:
                 payload.update(params)
+            payload = my_dumps(payload)
             payload = MultipartEncoder(fields=payload)
             headers = self.json_headers.copy()
-            headers['Content-Type'] = payload.content_type
+            headers["Content-Type"] = payload.content_type
             post_params = None
         else:
             if payload is not None:

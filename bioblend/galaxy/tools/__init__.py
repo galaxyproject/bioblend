@@ -10,7 +10,7 @@ from bioblend.util import attach_file
 
 
 class ToolClient(Client):
-    module = 'tools'
+    module = "tools"
 
     def __init__(self, galaxy_instance):
         super().__init__(galaxy_instance)
@@ -41,17 +41,17 @@ class ToolClient(Client):
         """
         if tool_id is not None:
             warnings.warn(
-                'The tool_id parameter is deprecated, use the show_tool() method to view details of a tool for which you know the ID.',
-                category=FutureWarning
+                "The tool_id parameter is deprecated, use the show_tool() method to view details of a tool for which you know the ID.",
+                category=FutureWarning,
             )
         if tool_id is not None and name is not None:
-            raise ValueError('Provide only one argument between name or tool_id, but not both')
+            raise ValueError("Provide only one argument between name or tool_id, but not both")
         tools = self._raw_get_tool(in_panel=False, trackster=trackster)
         if tool_id is not None:
-            tool = next((_ for _ in tools if _['id'] == tool_id), None)
+            tool = next((_ for _ in tools if _["id"] == tool_id), None)
             tools = [tool] if tool is not None else []
         elif name is not None:
-            tools = [_ for _ in tools if _['name'] == name]
+            tools = [_ for _ in tools if _["name"] == name]
         return tools
 
     def get_tool_panel(self):
@@ -68,14 +68,13 @@ class ToolClient(Client):
 
     def _raw_get_tool(self, in_panel=None, trackster=None):
         params = {}
-        params['in_panel'] = in_panel
-        params['trackster'] = trackster
+        params["in_panel"] = in_panel
+        params["trackster"] = trackster
         return self._get(params=params)
 
     def requirements(self, tool_id):
         """
         Return the resolver status for a specific tool.
-        This functionality is available only to Galaxy admins.
 
         :type tool_id: str
         :param tool_id: id of the requested tool
@@ -101,15 +100,19 @@ class ToolClient(Client):
               'model_class': 'MergedCondaDependency',
               'name': 'blast',
               'version': '2.10.1'}]
+
+        .. note::
+          This method works only if the user is a Galaxy admin.
         """
-        url = self._make_url(tool_id) + '/requirements'
+        url = self._make_url(tool_id) + "/requirements"
         return self._get(url=url)
 
     def reload(self, tool_id: str) -> dict:
         """
-        Reload the specified tool in the toolbox. Any changes that have been made to the wrapper
-        since the tool was last reloaded will take effect.
-        This functionality is available only to Galaxy admins.
+        Reload the specified tool in the toolbox.
+
+        Any changes that have been made to the wrapper since the tool was last
+        reloaded will take effect.
 
         :type tool_id: str
         :param tool_id: id of the requested tool
@@ -118,11 +121,14 @@ class ToolClient(Client):
         :param: dict containing the id, name, and version of the reloaded tool.
           For example::
 
-          {'message': {'name': 'Cutadapt',
-                       'id': 'toolshed.g2.bx.psu.edu/repos/lparsons/cutadapt/cutadapt/3.4+galaxy1',
-                       'version': '3.4+galaxy1'}}
+            {'message': {'id': 'toolshed.g2.bx.psu.edu/repos/lparsons/cutadapt/cutadapt/3.4+galaxy1',
+                         'name': 'Cutadapt',
+                         'version': '3.4+galaxy1'}}
+
+        .. note::
+          This method works only if the user is a Galaxy admin.
         """
-        url = self._make_url(tool_id) + '/reload'
+        url = self._make_url(tool_id) + "/reload"
         return self._put(url=url)
 
     def get_citations(self, tool_id: str) -> List[dict]:
@@ -135,37 +141,41 @@ class ToolClient(Client):
         :rtype: list of dicts
         :param: list containing the citations
         """
-        url = self._make_url(tool_id) + '/citations'
+        url = self._make_url(tool_id) + "/citations"
         return self._get(url=url)
 
     def install_dependencies(self, tool_id):
         """
         Install dependencies for a given tool via a resolver.
         This works only for Conda currently.
-        This functionality is available only to Galaxy admins.
 
         :type tool_id: str
         :param tool_id: id of the requested tool
 
         :rtype: dict
         :return: Tool requirement status
+
+        .. note::
+          This method works only if the user is a Galaxy admin.
         """
-        url = self._make_url(tool_id) + '/install_dependencies'
+        url = self._make_url(tool_id) + "/install_dependencies"
         return self._post(url=url)
 
     def uninstall_dependencies(self, tool_id: str) -> dict:
         """
         Uninstall dependencies for a given tool via a resolver.
         This works only for Conda currently.
-        This functionality is available only to Galaxy admins.
 
         :type tool_id: str
         :param tool_id: id of the requested tool
 
         :rtype: dict
         :return: Tool requirement status
+
+        .. note::
+          This method works only if the user is a Galaxy admin.
         """
-        url = self._make_url(tool_id) + '/dependencies'
+        url = self._make_url(tool_id) + "/dependencies"
         return self._delete(url=url)
 
     def show_tool(self, tool_id, io_details=False, link_details=False):
@@ -185,11 +195,124 @@ class ToolClient(Client):
         :return: Information about the tool's interface
         """
         params = {}
-        params['io_details'] = io_details
-        params['link_details'] = link_details
+        params["io_details"] = io_details
+        params["link_details"] = link_details
         return self._get(id=tool_id, params=params)
 
-    def run_tool(self, history_id, tool_id, tool_inputs, input_format='legacy'):
+    def build(self, tool_id, inputs=None, tool_version=None, history_id=None):
+        """
+        This method returns the tool model, which includes an updated input parameter array for the given tool,
+        based on user-defined "inputs".
+
+        :type inputs: dict
+        :param inputs: (optional) inputs for the payload.
+          For example::
+
+            {
+                "num_lines": "1",
+                "input": {
+                    "values": [
+                        {
+                            "src": "hda",
+                            "id": "4d366c1196c36d18"
+                        }
+                    ]
+                },
+                "seed_source|seed_source_selector": "no_seed",
+            }
+
+        :type tool_id: str
+        :param tool_id: id of the requested tool
+
+        :type history_id: str
+        :param history_id: id of the requested history
+
+        :type tool_version: str
+        :param tool_version: version of the requested tool
+
+        :rtype: dict
+        :return: Returns a tool model including dynamic parameters and updated values, repeats block etc.
+          For example::
+
+            {
+                "model_class": "Tool",
+                "id": "random_lines1",
+                "name": "Select random lines",
+                "version": "2.0.2",
+                "description": "from a file",
+                "labels": [],
+                "edam_operations": [],
+                "edam_topics": [],
+                "hidden": "",
+                "is_workflow_compatible": True,
+                "xrefs": [],
+                "config_file": "/Users/joshij/galaxy/tools/filters/randomlines.xml",
+                "panel_section_id": "textutil",
+                "panel_section_name": "Text Manipulation",
+                "form_style": "regular",
+                "inputs": [
+                    {
+                        "model_class": "IntegerToolParameter",
+                        "name": "num_lines",
+                        "argument": None,
+                        "type": "integer",
+                        "label": "Randomly select",
+                        "help": "lines",
+                        "refresh_on_change": False,
+                        "min": None,
+                        "max": None,
+                        "optional": False,
+                        "hidden": False,
+                        "is_dynamic": False,
+                        "value": "1",
+                        "area": False,
+                        "datalist": [],
+                        "default_value": "1",
+                        "text_value": "1",
+                    },
+                ],
+                "help": 'This tool selects N random lines from a file, with no repeats, and preserving ordering.',
+                "citations": False,
+                "sharable_url": None,
+                "message": "",
+                "warnings": "",
+                "versions": ["2.0.2"],
+                "requirements": [],
+                "errors": {},
+                "tool_errors": None,
+                "state_inputs": {
+                    "num_lines": "1",
+                    "input": {"values": [{"id": "4d366c1196c36d18", "src": "hda"}]},
+                    "seed_source": {"seed_source_selector": "no_seed", "__current_case__": 0},
+                },
+                "job_id": None,
+                "job_remap": None,
+                "history_id": "c9468fdb6dc5c5f1",
+                "display": True,
+                "action": "/tool_runner/index",
+                "license": None,
+                "creator": None,
+                "method": "post",
+                "enctype": "application/x-www-form-urlencoded",
+            }
+
+        """
+        params = {}
+
+        if inputs:
+            params["inputs"] = inputs
+
+        if tool_version:
+            params["tool_version"] = tool_version
+
+        if history_id:
+            params["history_id"] = history_id
+
+        url = "/".join((self.gi.url, "tools", tool_id, "build"))
+
+        return self._post(payload=params, url=url)
+
+    def run_tool(self, history_id, tool_id, tool_inputs, input_format="legacy"):
         """
         Runs tool specified by ``tool_id`` in history indicated
         by ``history_id`` with inputs from ``dict`` ``tool_inputs``.
@@ -255,8 +378,11 @@ class ToolClient(Client):
                           'visible': True}]}
 
         The ``tool_inputs`` dict should contain input datasets and parameters
-        in the (largely undocumented) format used by the Galaxy API.
-        Some examples can be found in `Galaxy's API test suite
+        in the (largely undocumented) format used by the Galaxy API. If you are unsure
+        how to construct this dict for the tool you want to run, you can obtain a
+        template by executing the ``build()`` method and taking the value of
+        ``state_inputs`` from its output, then modifying it as you require.
+        You can also check the examples in `Galaxy's API test suite
         <https://github.com/galaxyproject/galaxy/blob/dev/lib/galaxy_test/api/test_tools.py>`_.
         """
         payload = {}
@@ -327,7 +453,7 @@ class ToolClient(Client):
         :return: Information about the created upload job
         """
         payload = self._upload_payload(history_id, **keywords)
-        payload['files_0|ftp_files'] = path
+        payload["files_0|ftp_files"] = path
         return self._post(payload)
 
     def paste_content(self, content, history_id, **kwds):
@@ -358,14 +484,14 @@ class ToolClient(Client):
         payload["history_id"] = history_id
         payload["tool_id"] = keywords.get("tool_id", "upload1")
         tool_input = {}
-        tool_input["file_type"] = keywords.get('file_type', 'auto')
+        tool_input["file_type"] = keywords.get("file_type", "auto")
         tool_input["dbkey"] = keywords.get("dbkey", "?")
-        if not keywords.get('to_posix_lines', True):
-            tool_input['files_0|to_posix_lines'] = False
-        elif keywords.get('space_to_tab', False):
-            tool_input['files_0|space_to_tab'] = 'Yes'
-        if 'file_name' in keywords:
-            tool_input["files_0|NAME"] = keywords['file_name']
+        if not keywords.get("to_posix_lines", True):
+            tool_input["files_0|to_posix_lines"] = False
+        elif keywords.get("space_to_tab", False):
+            tool_input["files_0|space_to_tab"] = "Yes"
+        if "file_name" in keywords:
+            tool_input["files_0|NAME"] = keywords["file_name"]
         tool_input["files_0|type"] = "upload_dataset"
         payload["inputs"] = tool_input
         return payload

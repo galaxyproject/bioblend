@@ -14,9 +14,9 @@ def _get_error_info(hda):
     msg = hda.id
     try:
         msg += f" ({hda.name}): "
-        msg += hda.wrapped['misc_info']
+        msg += hda.wrapped["misc_info"]
     except Exception:  # avoid 'error while generating an error report'
-        msg += ': error'
+        msg += ": error"
     return msg
 
 
@@ -42,6 +42,7 @@ class GalaxyInstance:
       gi = GalaxyInstance('http://127.0.0.1:8080', 'foo')
       histories = gi.histories.list()
     """
+
     def __init__(self, url, api_key=None, email=None, password=None, verify=True):
         self.gi = bioblend.galaxy.GalaxyInstance(url, api_key, email, password, verify)
         self.log = bioblend.log
@@ -76,11 +77,12 @@ class GalaxyInstance:
           however, each input dataset is refreshed (possibly multiple
           times) during the execution.
         """
+
         def poll(ds_list):
             pending = []
             for ds in ds_list:
                 ds.refresh()
-                if break_on_error and ds.state == 'error':
+                if break_on_error and ds.state == "error":
                     raise RuntimeError(_get_error_info(ds))
                 if not ds.state:
                     self.log.warning("Dataset %s has an empty state", ds.id)
@@ -89,7 +91,7 @@ class GalaxyInstance:
                     pending.append(ds)
             return pending
 
-        self.log.info('Waiting for datasets')
+        self.log.info("Waiting for datasets")
         while datasets:
             datasets = poll(datasets)
             time.sleep(polling_interval)

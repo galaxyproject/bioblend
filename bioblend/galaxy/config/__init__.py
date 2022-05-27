@@ -6,7 +6,7 @@ from bioblend.galaxy.client import Client
 
 
 class ConfigClient(Client):
-    module = 'configuration'
+    module = "configuration"
 
     def __init__(self, galaxy_instance):
         super().__init__(galaxy_instance)
@@ -46,5 +46,24 @@ class ConfigClient(Client):
 
             {'extra': {}, 'version_major': '17.01'}
         """
-        url = self.gi.url + '/version'
+        url = self.gi.url + "/version"
+        return self._get(url=url)
+
+    def whoami(self):
+        """
+        Return information about the current authenticated user.
+
+        :rtype: dict
+        :return: Information about current authenticated user
+          For example::
+
+            {'active': True,
+             'deleted': False,
+             'email': 'user@example.org',
+             'id': '4aaaaa85aacc9caa',
+             'last_password_change': '2021-07-29T05:34:54.632345',
+             'model_class': 'User',
+             'username': 'julia'}
+        """
+        url = self.gi.url + "/whoami"
         return self._get(url=url)

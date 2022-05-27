@@ -281,8 +281,8 @@ Instead of using dictionaries directly, workflows can be exported to or imported
 .. Note:: If we export a workflow from one Galaxy instance and import it into another, Galaxy will only run it without modification if it has the same versions of the tool wrappers installed. This is to ensure reproducibility. Otherwise, we will need to manually update the workflow to use the new tool versions.
 
 
-Invoke a Workflow
-~~~~~~~~~~~~~~
+Invoke a workflow
+~~~~~~~~~~~~~~~~~
 
 To invoke a workflow, we need to tell Galaxy which datasets to use for which workflow inputs. We can use datasets from histories or data libraries.
 
@@ -361,11 +361,11 @@ Methods for managing users are grouped under ``GalaxyInstance.users.*``. User ma
 To get a list of users, call:
 
     >>> gi.users.get_users()
-    [{'email': 'userA@unimelb.edu.au',
+    [{'email': 'userA@example.org',
       'id': '975a9ce09b49502a',
       'quota_percent': None,
       'url': '/api/users/975a9ce09b49502a'},
-     {'email': 'userB@student.unimelb.edu.au',
+     {'email': 'userB@example.org',
       'id': '0193a95acf427d2c',
       'quota_percent': None,
       'url': '/api/users/0193a95acf427d2c'}]

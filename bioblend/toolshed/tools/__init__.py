@@ -5,7 +5,7 @@ from bioblend.galaxy.client import Client
 
 
 class ToolShedToolClient(Client):
-    module = 'tools'
+    module = "tools"
 
     def __init__(self, toolshed_instance):
         super().__init__(toolshed_instance)

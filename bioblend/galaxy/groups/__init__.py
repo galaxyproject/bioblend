@@ -5,7 +5,7 @@ from bioblend.galaxy.client import Client
 
 
 class GroupsClient(Client):
-    module = 'groups'
+    module = "groups"
 
     def __init__(self, galaxy_instance):
         super().__init__(galaxy_instance)
@@ -75,11 +75,7 @@ class GroupsClient(Client):
             user_ids = []
         if role_ids is None:
             role_ids = []
-        payload = {
-            'name': group_name,
-            'user_ids': user_ids,
-            'role_ids': role_ids
-        }
+        payload = {"name": group_name, "user_ids": user_ids, "role_ids": role_ids}
         return self._post(payload)
 
     def update_group(self, group_id, group_name=None, user_ids=None, role_ids=None):
@@ -108,11 +104,7 @@ class GroupsClient(Client):
             user_ids = []
         if role_ids is None:
             role_ids = []
-        payload = {
-            'name': group_name,
-            'user_ids': user_ids,
-            'role_ids': role_ids
-        }
+        payload = {"name": group_name, "user_ids": user_ids, "role_ids": role_ids}
         return self._put(payload=payload, id=group_id)
 
     def get_group_users(self, group_id):
@@ -125,7 +117,7 @@ class GroupsClient(Client):
         :rtype: list of dicts
         :return: List of group users' info
         """
-        url = self._make_url(group_id) + '/users'
+        url = self._make_url(group_id) + "/users"
         return self._get(url=url)
 
     def get_group_roles(self, group_id):
@@ -138,7 +130,7 @@ class GroupsClient(Client):
         :rtype: list of dicts
         :return: List of group roles' info
         """
-        url = self._make_url(group_id) + '/roles'
+        url = self._make_url(group_id) + "/roles"
         return self._get(url=url)
 
     def add_group_user(self, group_id, user_id):
@@ -154,7 +146,7 @@ class GroupsClient(Client):
         :rtype: dict
         :return: Added group user's info
         """
-        url = '/'.join((self._make_url(group_id), 'users', user_id))
+        url = "/".join((self._make_url(group_id), "users", user_id))
         return self._put(url=url)
 
     def add_group_role(self, group_id, role_id):
@@ -170,7 +162,7 @@ class GroupsClient(Client):
         :rtype: dict
         :return: Added group role's info
         """
-        url = '/'.join((self._make_url(group_id), 'roles', role_id))
+        url = "/".join((self._make_url(group_id), "roles", role_id))
         return self._put(url=url)
 
     def delete_group_user(self, group_id, user_id):
@@ -186,7 +178,7 @@ class GroupsClient(Client):
         :rtype: dict
         :return: The user which was removed
         """
-        url = '/'.join((self._make_url(group_id), 'users', user_id))
+        url = "/".join((self._make_url(group_id), "users", user_id))
         return self._delete(url=url)
 
     def delete_group_role(self, group_id, role_id):
@@ -202,5 +194,5 @@ class GroupsClient(Client):
         :rtype: dict
         :return: The role which was removed
         """
-        url = '/'.join((self._make_url(group_id), 'roles', role_id))
+        url = "/".join((self._make_url(group_id), "roles", role_id))
         return self._delete(url=url)
