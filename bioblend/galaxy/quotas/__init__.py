@@ -5,7 +5,7 @@ from bioblend.galaxy.client import Client
 
 
 class QuotaClient(Client):
-    module = 'quotas'
+    module = "quotas"
 
     def __init__(self, galaxy_instance):
         super().__init__(galaxy_instance)
@@ -59,8 +59,7 @@ class QuotaClient(Client):
         """
         return self._get(id=quota_id, deleted=deleted)
 
-    def create_quota(self, name, description, amount, operation,
-                     default='no', in_users=None, in_groups=None):
+    def create_quota(self, name, description, amount, operation, default="no", in_users=None, in_groups=None):
         """
         Create a new quota
 
@@ -98,22 +97,31 @@ class QuotaClient(Client):
              'name': 'Testing'}
         """
         payload = {
-            'name': name,
-            'description': description,
-            'amount': amount,
-            'operation': operation,
-            'default': default
+            "name": name,
+            "description": description,
+            "amount": amount,
+            "operation": operation,
+            "default": default,
         }
         if in_users:
-            payload['in_users'] = in_users
+            payload["in_users"] = in_users
 
         if in_groups:
-            payload['in_groups'] = in_groups
+            payload["in_groups"] = in_groups
 
         return self._post(payload)
 
-    def update_quota(self, quota_id, name=None, description=None, amount=None, operation=None,
-                     default='no', in_users=None, in_groups=None):
+    def update_quota(
+        self,
+        quota_id,
+        name=None,
+        description=None,
+        amount=None,
+        operation=None,
+        default="no",
+        in_users=None,
+        in_groups=None,
+    ):
         """
         Update an existing quota
 
@@ -154,26 +162,24 @@ class QuotaClient(Client):
 
             "Quota 'Testing-A' has been renamed to 'Testing-B'; Quota 'Testing-e' is now '-100.0 GB'; Quota 'Testing-B' is now the default for unregistered users"
         """
-        payload = {
-            'default': default
-        }
+        payload = {"default": default}
         if name:
-            payload['name'] = name
+            payload["name"] = name
 
         if description:
-            payload['description'] = description
+            payload["description"] = description
 
         if amount:
-            payload['amount'] = amount
+            payload["amount"] = amount
 
         if operation:
-            payload['operation'] = operation
+            payload["operation"] = operation
 
         if in_users:
-            payload['in_users'] = in_users
+            payload["in_users"] = in_users
 
         if in_groups:
-            payload['in_groups'] = in_groups
+            payload["in_groups"] = in_groups
 
         return self._put(id=quota_id, payload=payload)
 
@@ -207,5 +213,5 @@ class QuotaClient(Client):
 
             "Undeleted 1 quotas: Testing-B"
         """
-        url = self._make_url(quota_id, deleted=True) + '/undelete'
-        return self._post(url=url, payload={'id': quota_id})
+        url = self._make_url(quota_id, deleted=True) + "/undelete"
+        return self._post(url=url, payload={"id": quota_id})

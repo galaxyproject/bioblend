@@ -14,41 +14,44 @@ MISSING_TOOL_MESSAGE = "Externally configured Galaxy instance requires tool %s t
 
 
 def skip_unless_cloudman():
-    """ Decorate tests with this to skip the test if CloudMan is not
+    """Decorate tests with this to skip the test if CloudMan is not
     configured.
     """
-    if 'BIOBLEND_AMI_ID' not in os.environ:
+    if "BIOBLEND_AMI_ID" not in os.environ:
         return unittest.skip(NO_CLOUDMAN_MESSAGE)
     else:
         return lambda f: f
 
 
 def skip_unless_galaxy(min_release=None):
-    """ Decorate tests with this to skip the test if Galaxy is not
+    """Decorate tests with this to skip the test if Galaxy is not
     configured.
     """
     if min_release is not None:
-        galaxy_release = os.environ.get('GALAXY_VERSION', None)
-        if galaxy_release is not None and galaxy_release != 'dev':
-            if not galaxy_release.startswith('release_'):
+        galaxy_release = os.environ.get("GALAXY_VERSION", None)
+        if galaxy_release is not None and galaxy_release != "dev":
+            if not galaxy_release.startswith("release_"):
                 raise ValueError("The value of GALAXY_VERSION environment variable should start with 'release_'")
-            if not min_release.startswith('release_'):
+            if not min_release.startswith("release_"):
                 raise Exception("min_release should start with 'release_'")
             if galaxy_release[8:] < min_release[8:]:
                 return unittest.skip(OLD_GALAXY_RELEASE % (galaxy_release, min_release))
 
-    if 'BIOBLEND_GALAXY_URL' not in os.environ:
+    if "BIOBLEND_GALAXY_URL" not in os.environ:
         return unittest.skip(NO_GALAXY_MESSAGE)
 
-    if 'BIOBLEND_GALAXY_API_KEY' not in os.environ and 'BIOBLEND_GALAXY_MASTER_API_KEY' in os.environ:
-        galaxy_url = os.environ['BIOBLEND_GALAXY_URL']
-        galaxy_master_api_key = os.environ['BIOBLEND_GALAXY_MASTER_API_KEY']
+    if "BIOBLEND_GALAXY_API_KEY" not in os.environ and "BIOBLEND_GALAXY_MASTER_API_KEY" in os.environ:
+        galaxy_url = os.environ["BIOBLEND_GALAXY_URL"]
+        galaxy_master_api_key = os.environ["BIOBLEND_GALAXY_MASTER_API_KEY"]
         gi = bioblend.galaxy.GalaxyInstance(galaxy_url, galaxy_master_api_key)
 
-        if 'BIOBLEND_GALAXY_USER_EMAIL' in os.environ:
-            galaxy_user_email = os.environ['BIOBLEND_GALAXY_USER_EMAIL']
+        if "BIOBLEND_GALAXY_USER_EMAIL" in os.environ:
+            galaxy_user_email = os.environ["BIOBLEND_GALAXY_USER_EMAIL"]
         else:
-            galaxy_user_email = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(5)) + "@localhost.localdomain"
+            galaxy_user_email = (
+                "".join(random.choice(string.ascii_uppercase + string.digits) for _ in range(5))
+                + "@localhost.localdomain"
+            )
 
         galaxy_user_id = None
         for user in gi.users.get_users():
@@ -67,7 +70,7 @@ def skip_unless_galaxy(min_release=None):
                 new_user = gi.users.create_remote_user(galaxy_user_email)
             else:
                 galaxy_user = galaxy_user_email.split("@", 1)[0]
-                galaxy_password = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(20))
+                galaxy_password = "".join(random.choice(string.ascii_uppercase + string.digits) for _ in range(20))
 
                 # Create a new user and get a new API key for her
                 new_user = gi.users.create_local_user(galaxy_user, galaxy_user_email, galaxy_password)
@@ -76,23 +79,22 @@ def skip_unless_galaxy(min_release=None):
         api_key = gi.users.create_user_apikey(galaxy_user_id)
         os.environ["BIOBLEND_GALAXY_API_KEY"] = api_key
 
-    if 'BIOBLEND_GALAXY_API_KEY' not in os.environ:
+    if "BIOBLEND_GALAXY_API_KEY" not in os.environ:
         return unittest.skip(NO_GALAXY_MESSAGE)
 
     return lambda f: f
 
 
 def skip_unless_tool(tool_id):
-    """ Decorate a Galaxy test method as requiring a specific tool,
+    """Decorate a Galaxy test method as requiring a specific tool,
     skip the test case if the tool is unavailable.
     """
 
     def method_wrapper(method):
-
         def wrapped_method(has_gi, *args, **kwargs):
             tools = has_gi.gi.tools.get_tools()
             # In panels by default, so flatten out sections...
-            tool_ids = [_['id'] for _ in tools]
+            tool_ids = [_["id"] for _ in tools]
             if tool_id not in tool_ids:
                 raise unittest.SkipTest(MISSING_TOOL_MESSAGE % tool_id)
 

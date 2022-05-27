@@ -2,17 +2,30 @@
 Tests the functionality of the Blend CloudMan API. These tests require working
 credentials to supported cloud infrastructure.
 """
-from bioblend.cloudman import CloudManConfig, CloudManInstance
-from . import CloudmanTestBase, test_util
+from bioblend.cloudman import (
+    CloudManConfig,
+    CloudManInstance,
+)
+from . import (
+    CloudmanTestBase,
+    test_util,
+)
 
 
 @test_util.skip_unless_cloudman()
 class TestCloudmanServices(CloudmanTestBase.CloudmanTestBase):
-
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.cfg = CloudManConfig(cls.access_key, cls.secret_key, cls.cluster_name, cls.ami_id, cls.instance_type, cls.password, cloud_metadata=cls.cloud_metadata)
+        cls.cfg = CloudManConfig(
+            cls.access_key,
+            cls.secret_key,
+            cls.cluster_name,
+            cls.ami_id,
+            cls.instance_type,
+            cls.password,
+            cloud_metadata=cls.cloud_metadata,
+        )
         cls.cmi = CloudManInstance.launch_instance(cls.cfg)
 
     def setUp(self):
@@ -50,6 +63,7 @@ class TestCloudmanServices(CloudmanTestBase.CloudmanTestBase):
 
     def test_adjust_autoscaling(self):
         self.cmi.adjust_autoscaling(minimum_nodes=3, maximum_nodes=4)
+
 
 #    def test_get_galaxy_state_stopped(self):
 #        self.assertEqual(self.cmi.get_galaxy_state(), "'Galaxy' is not running")

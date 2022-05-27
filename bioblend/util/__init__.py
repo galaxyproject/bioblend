@@ -1,7 +1,7 @@
 import os
 from typing import (
     IO,
-    NamedTuple
+    NamedTuple,
 )
 
 
@@ -12,6 +12,7 @@ class Bunch:
     The end result is that this allows a dict to be to be represented the same
     as a database class, thus the two become interchangeable as a data source.
     """
+
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
 
@@ -56,6 +57,7 @@ def abstractclass(decorated_cls):
 
     Adapted from https://stackoverflow.com/a/49013561/4503125
     """
+
     def clsnew(cls, *args, **kwargs):
         if cls is decorated_cls:
             raise TypeError(f"Can't instantiate abstract class {decorated_cls.__name__}")
@@ -66,6 +68,6 @@ def abstractclass(decorated_cls):
 
 
 __all__ = (
-    'Bunch',
-    'attach_file',
+    "Bunch",
+    "attach_file",
 )

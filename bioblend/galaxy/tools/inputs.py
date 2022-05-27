@@ -1,6 +1,5 @@
 class InputsBuilder:
-    """
-    """
+    """ """
 
     def __init__(self):
         self._input_dict = {}
@@ -33,7 +32,6 @@ class InputsBuilder:
 
 
 class RepeatBuilder:
-
     def __init__(self):
         self._instances = []
 
@@ -48,13 +46,11 @@ class RepeatBuilder:
 
 
 class Param:
-
     def __init__(self, value):
         self.value = value
 
 
 class DatasetParam(Param):
-
     def __init__(self, value, src="hda"):
         if not isinstance(value, dict):
             value = dict(src=src, id=value)

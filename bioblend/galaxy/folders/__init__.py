@@ -5,7 +5,7 @@ from bioblend.galaxy.client import Client
 
 
 class FoldersClient(Client):
-    module = 'folders'
+    module = "folders"
 
     def __init__(self, galaxy_instance):
         super().__init__(galaxy_instance)
@@ -26,9 +26,9 @@ class FoldersClient(Client):
         :rtype: dict
         :return: details of the updated folder
         """
-        payload = {'name': name}
+        payload = {"name": name}
         if description:
-            payload['description'] = description
+            payload["description"] = description
         return self._post(payload=payload, id=parent_folder_id)
 
     def show_folder(self, folder_id, contents=False):
@@ -63,7 +63,7 @@ class FoldersClient(Client):
         :return: detailed folder information
         :rtype: dict
         """
-        payload = {'undelete': undelete}
+        payload = {"undelete": undelete}
         return self._delete(payload=payload, id=folder_id)
 
     def update_folder(self, folder_id, name, description=None):
@@ -82,9 +82,9 @@ class FoldersClient(Client):
         :rtype: dict
         :return: details of the updated folder
         """
-        payload = {'name': name}
+        payload = {"name": name}
         if description:
-            payload['description'] = description
+            payload["description"] = description
         return self._put(payload=payload, id=folder_id)
 
     def get_permissions(self, folder_id, scope):
@@ -100,10 +100,10 @@ class FoldersClient(Client):
         :rtype: dict
         :return: dictionary including details of the folder
         """
-        url = self._make_url(folder_id) + '/permissions'
+        url = self._make_url(folder_id) + "/permissions"
         return self._get(url=url)
 
-    def set_permissions(self, folder_id, action='set_permissions', add_ids=None, manage_ids=None, modify_ids=None):
+    def set_permissions(self, folder_id, action="set_permissions", add_ids=None, manage_ids=None, modify_ids=None):
         """
         Set the permissions of a folder.
 
@@ -125,12 +125,12 @@ class FoldersClient(Client):
         :rtype: dict
         :return: dictionary including details of the folder
         """
-        url = self._make_url(folder_id) + '/permissions'
-        payload = {'action': action}
+        url = self._make_url(folder_id) + "/permissions"
+        payload = {"action": action}
         if add_ids:
-            payload['add_ids[]'] = add_ids
+            payload["add_ids[]"] = add_ids
         if manage_ids:
-            payload['manage_ids[]'] = manage_ids
+            payload["manage_ids[]"] = manage_ids
         if modify_ids:
-            payload['modify_ids[]'] = modify_ids
+            payload["modify_ids[]"] = modify_ids
         return self._post(url=url, payload=payload)

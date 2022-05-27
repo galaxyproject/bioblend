@@ -5,7 +5,7 @@ from bioblend.galaxy.client import Client
 
 
 class FTPFilesClient(Client):
-    module = 'ftp_files'
+    module = "ftp_files"
 
     def __init__(self, galaxy_instance):
         super().__init__(galaxy_instance)

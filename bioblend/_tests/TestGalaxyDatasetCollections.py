@@ -7,12 +7,11 @@ from zipfile import ZipFile
 from bioblend.galaxy import dataset_collections
 from . import (
     GalaxyTestBase,
-    test_util
+    test_util,
 )
 
 
 class TestGalaxyDatasetCollections(GalaxyTestBase.GalaxyTestBase):
-
     def test_create_list_in_history(self):
         history_id = self.gi.histories.create_history(name="TestDSListCreate")["id"]
         dataset1_id = self._test_dataset(history_id)
@@ -26,8 +25,8 @@ class TestGalaxyDatasetCollections(GalaxyTestBase.GalaxyTestBase):
                     dataset_collections.HistoryDatasetElement(name="sample1", id=dataset1_id),
                     dataset_collections.HistoryDatasetElement(name="sample2", id=dataset2_id),
                     dataset_collections.HistoryDatasetElement(name="sample3", id=dataset3_id),
-                ]
-            )
+                ],
+            ),
         )
         self.assertEqual(collection_response["name"], "MyDatasetList")
         self.assertEqual(collection_response["collection_type"], "list")
@@ -57,7 +56,7 @@ class TestGalaxyDatasetCollections(GalaxyTestBase.GalaxyTestBase):
                         elements=[
                             dataset_collections.HistoryDatasetElement(name="forward", id=dataset1_id),
                             dataset_collections.HistoryDatasetElement(name="reverse", id=dataset2_id),
-                        ]
+                        ],
                     ),
                     dataset_collections.CollectionElement(
                         name="sample2",
@@ -65,10 +64,10 @@ class TestGalaxyDatasetCollections(GalaxyTestBase.GalaxyTestBase):
                         elements=[
                             dataset_collections.HistoryDatasetElement(name="forward", id=dataset3_id),
                             dataset_collections.HistoryDatasetElement(name="reverse", id=dataset4_id),
-                        ]
+                        ],
                     ),
-                ]
-            )
+                ],
+            ),
         )
         self.assertEqual(collection_response["name"], "MyListOfPairedDatasets")
         self.assertEqual(collection_response["collection_type"], "list:paired")
@@ -130,30 +129,43 @@ class TestGalaxyDatasetCollections(GalaxyTestBase.GalaxyTestBase):
     def test_show_dataset_collection(self):
         history_id = self.gi.histories.create_history(name="TestDatasetCollectionShow")["id"]
         dataset_collection1 = self._create_pair_in_history(history_id)
-        dataset_collection2 = self.gi.dataset_collections.show_dataset_collection(dataset_collection1['id'])
-        self.assertEqual(dataset_collection1.keys(), dataset_collection2.keys())
-        for element1, element2 in zip(dataset_collection1['elements'], dataset_collection2['elements']):
-            self.assertEqual(element1['id'], element2['id'])
+        dataset_collection2 = self.gi.dataset_collections.show_dataset_collection(dataset_collection1["id"])
+        for key in (
+            "collection_type",
+            "deleted",
+            "id",
+            "hid",
+            "history_content_type",
+            "history_id",
+            "name",
+            "url",
+            "visible",
+        ):
+            self.assertEqual(dataset_collection1[key], dataset_collection2[key])
+        for element1, element2 in zip(dataset_collection1["elements"], dataset_collection2["elements"]):
+            self.assertEqual(element1["id"], element2["id"])
             self.assertEqual(element1.keys(), element2.keys())
-            for key in element1['object'].keys():
-                self.assertIn(key, element2['object'].keys())
+            for key in element1["object"].keys():
+                self.assertIn(key, element2["object"].keys())
 
-    @test_util.skip_unless_galaxy('release_18.01')
+    @test_util.skip_unless_galaxy("release_18.01")
     def test_download_dataset_collection(self):
         history_id = self.gi.histories.create_history(name="TestDatasetCollectionDownload")["id"]
-        dataset_collection_id = self._create_pair_in_history(history_id)['id']
+        dataset_collection_id = self._create_pair_in_history(history_id)["id"]
         self.gi.dataset_collections.wait_for_dataset_collection(dataset_collection_id)
 
-        tempdir = tempfile.mkdtemp(prefix='bioblend_test_dataset_collection_download_')
-        archive_path = os.path.join(tempdir, 'dataset_collection')
-        archive_type = self.gi.dataset_collections.download_dataset_collection(dataset_collection_id, file_path=archive_path)['archive_type']
-        expected_contents = signature(self._test_dataset).parameters['contents'].default + '\n'
-        extract_dir_path = os.path.join(tempdir, 'extracted_files')
+        tempdir = tempfile.mkdtemp(prefix="bioblend_test_dataset_collection_download_")
+        archive_path = os.path.join(tempdir, "dataset_collection")
+        archive_type = self.gi.dataset_collections.download_dataset_collection(
+            dataset_collection_id, file_path=archive_path
+        )["archive_type"]
+        expected_contents = signature(self._test_dataset).parameters["contents"].default + "\n"
+        extract_dir_path = os.path.join(tempdir, "extracted_files")
         os.mkdir(extract_dir_path)
 
-        if archive_type == 'zip':
+        if archive_type == "zip":
             archive = ZipFile(archive_path)
-        elif archive_type == 'tgz':
+        elif archive_type == "tgz":
             archive = tarfile.open(archive_path)
 
         archive.extractall(extract_dir_path)
@@ -166,10 +178,10 @@ class TestGalaxyDatasetCollections(GalaxyTestBase.GalaxyTestBase):
 
     def test_wait_for_dataset_collection(self):
         history_id = self.gi.histories.create_history(name="TestDatasetCollectionWait")["id"]
-        dataset_collection_id = self._create_pair_in_history(history_id)['id']
+        dataset_collection_id = self._create_pair_in_history(history_id)["id"]
         dataset_collection = self.gi.dataset_collections.wait_for_dataset_collection(dataset_collection_id)
-        for element in dataset_collection['elements']:
-            self.assertEqual(element['object']['state'], 'ok')
+        for element in dataset_collection["elements"]:
+            self.assertEqual(element["object"]["state"], "ok")
 
     def _create_pair_in_history(self, history_id):
         dataset1_id = self._test_dataset(history_id)
@@ -182,7 +194,7 @@ class TestGalaxyDatasetCollections(GalaxyTestBase.GalaxyTestBase):
                 elements=[
                     dataset_collections.HistoryDatasetElement(name="forward", id=dataset1_id),
                     dataset_collections.HistoryDatasetElement(name="reverse", id=dataset2_id),
-                ]
-            )
+                ],
+            ),
         )
         return collection_response

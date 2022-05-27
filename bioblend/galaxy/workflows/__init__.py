@@ -14,7 +14,7 @@ from bioblend.galaxy.client import Client
 
 
 class WorkflowClient(Client):
-    module = 'workflows'
+    module = "workflows"
 
     def __init__(self, galaxy_instance):
         super().__init__(galaxy_instance)
@@ -49,20 +49,20 @@ class WorkflowClient(Client):
         """
         if workflow_id is not None:
             warnings.warn(
-                'The workflow_id parameter is deprecated, use the show_workflow() method to view details of a workflow for which you know the ID.',
-                category=FutureWarning
+                "The workflow_id parameter is deprecated, use the show_workflow() method to view details of a workflow for which you know the ID.",
+                category=FutureWarning,
             )
         if workflow_id is not None and name is not None:
-            raise ValueError('Provide only one argument between name or workflow_id, but not both')
+            raise ValueError("Provide only one argument between name or workflow_id, but not both")
         params = {}
         if published:
-            params['show_published'] = True
+            params["show_published"] = True
         workflows = self._get(params=params)
         if workflow_id is not None:
-            workflow = next((_ for _ in workflows if _['id'] == workflow_id), None)
+            workflow = next((_ for _ in workflows if _["id"] == workflow_id), None)
             workflows = [workflow] if workflow is not None else []
         elif name is not None:
-            workflows = [_ for _ in workflows if _['name'] == name]
+            workflows = [_ for _ in workflows if _["name"] == name]
         return workflows
 
     def show_workflow(self, workflow_id, version=None):
@@ -86,7 +86,7 @@ class WorkflowClient(Client):
         """
         params = {}
         if version is not None:
-            params['version'] = version
+            params["version"] = version
 
         return self._get(id=workflow_id, params=params)
 
@@ -105,8 +105,8 @@ class WorkflowClient(Client):
         :return: list of workflow inputs matching the label query
         """
         wf = self._get(id=workflow_id)
-        inputs = wf['inputs']
-        return [id for id in inputs if inputs[id]['label'] == label]
+        inputs = wf["inputs"]
+        return [id for id in inputs if inputs[id]["label"] == label]
 
     def import_workflow_dict(self, workflow_dict, publish=False):
         """
@@ -135,7 +135,7 @@ class WorkflowClient(Client):
              'model_class': 'StoredWorkflow',
              'id': '94bac0a90086bdcf'}
         """
-        payload = {'workflow': workflow_dict, 'publish': publish}
+        payload = {"workflow": workflow_dict, "publish": publish}
 
         url = self._make_url() + "/upload"
         return self._post(url=url, payload=payload)
@@ -191,7 +191,7 @@ class WorkflowClient(Client):
              'tags': [],
              'url': '/api/workflows/ee0e2b4b696d9092'}
         """
-        payload = {'shared_workflow_id': workflow_id}
+        payload = {"shared_workflow_id": workflow_id}
         url = self._make_url()
         return self._post(url=url, payload=payload)
 
@@ -210,9 +210,9 @@ class WorkflowClient(Client):
         """
         params = {}
         if version is not None:
-            params['version'] = version
+            params["version"] = version
 
-        url = '/'.join((self._make_url(), 'download', workflow_id))
+        url = "/".join((self._make_url(), "download", workflow_id))
         return self._get(url=url, params=params)
 
     def export_workflow_to_local_path(self, workflow_id, file_local_path, use_default_filename=True):
@@ -241,7 +241,7 @@ class WorkflowClient(Client):
             filename = f"Galaxy-Workflow-{workflow_dict['name']}.ga"
             file_local_path = os.path.join(file_local_path, filename)
 
-        with open(file_local_path, 'w') as fp:
+        with open(file_local_path, "w") as fp:
             json.dump(workflow_dict, fp)
 
     def update_workflow(self, workflow_id, **kwds):
@@ -274,11 +274,19 @@ class WorkflowClient(Client):
         """
         return self._put(payload=kwds, id=workflow_id)
 
-    def invoke_workflow(self, workflow_id: str, inputs: Optional[dict] = None,
-                        params: Optional[dict] = None, history_id: Optional[str] = None,
-                        history_name: Optional[str] = None, import_inputs_to_history: bool = False,
-                        replacement_params: Optional[dict] = None, allow_tool_state_corrections: bool = False,
-                        inputs_by: Optional[str] = None, parameters_normalized: bool = False) -> dict:
+    def invoke_workflow(
+        self,
+        workflow_id: str,
+        inputs: Optional[dict] = None,
+        params: Optional[dict] = None,
+        history_id: Optional[str] = None,
+        history_name: Optional[str] = None,
+        import_inputs_to_history: bool = False,
+        replacement_params: Optional[dict] = None,
+        allow_tool_state_corrections: bool = False,
+        inputs_by: Optional[str] = None,
+        parameters_normalized: bool = False,
+    ) -> dict:
         """
         Invoke the workflow identified by ``workflow_id``. This will
         cause a workflow to be scheduled and return an object describing
@@ -453,26 +461,26 @@ class WorkflowClient(Client):
         """
         payload: Dict[str, Any] = {}
         if inputs:
-            payload['inputs'] = inputs
+            payload["inputs"] = inputs
 
         if params:
-            payload['parameters'] = params
+            payload["parameters"] = params
 
         if replacement_params:
-            payload['replacement_params'] = replacement_params
+            payload["replacement_params"] = replacement_params
 
         if history_id:
-            payload['history'] = f'hist_id={history_id}'
+            payload["history"] = f"hist_id={history_id}"
         elif history_name:
-            payload['history'] = history_name
+            payload["history"] = history_name
         if not import_inputs_to_history:
-            payload['no_add_to_history'] = True
+            payload["no_add_to_history"] = True
         if allow_tool_state_corrections:
-            payload['allow_tool_state_corrections'] = allow_tool_state_corrections
+            payload["allow_tool_state_corrections"] = allow_tool_state_corrections
         if inputs_by is not None:
-            payload['inputs_by'] = inputs_by
+            payload["inputs_by"] = inputs_by
         if parameters_normalized:
-            payload['parameters_normalized'] = parameters_normalized
+            payload["parameters_normalized"] = parameters_normalized
         url = self._invocations_url(workflow_id)
         return self._post(payload, url=url)
 
@@ -600,7 +608,7 @@ class WorkflowClient(Client):
         return self._get(url=url)
 
     def run_invocation_step_action(self, workflow_id, invocation_id, step_id, action):
-        """ Execute an action for an active workflow invocation step. The
+        """Execute an action for an active workflow invocation step. The
         nature of this action and what is expected will vary based on the
         the type of workflow step (the only currently valid action is True/False
         for pause steps).
@@ -676,14 +684,15 @@ class WorkflowClient(Client):
                  and the refactored workflow.
         """
         payload = {
-            'actions': actions,
-            'dry_run': dry_run,
+            "actions": actions,
+            "dry_run": dry_run,
         }
-        url = '/'.join((self._make_url(workflow_id), 'refactor'))
+        url = "/".join((self._make_url(workflow_id), "refactor"))
         return self._put(payload=payload, url=url)
 
-    def extract_workflow_from_history(self, history_id, workflow_name,
-                                      job_ids=None, dataset_hids=None, dataset_collection_hids=None):
+    def extract_workflow_from_history(
+        self, history_id, workflow_name, job_ids=None, dataset_hids=None, dataset_collection_hids=None
+    ):
         """
         Extract a workflow from a history.
 
@@ -712,7 +721,7 @@ class WorkflowClient(Client):
             "job_ids": job_ids if job_ids else [],
             "dataset_ids": dataset_hids if dataset_hids else [],
             "dataset_collection_ids": dataset_collection_hids if dataset_collection_hids else [],
-            "workflow_name": workflow_name
+            "workflow_name": workflow_name,
         }
         return self._post(payload=payload)
 
@@ -726,17 +735,17 @@ class WorkflowClient(Client):
         :rtype: list of dicts
         :return: Ordered list of version descriptions for this workflow
         """
-        url = self._make_url(workflow_id) + '/versions'
+        url = self._make_url(workflow_id) + "/versions"
         return self._get(url=url)
 
     def _invocation_step_url(self, workflow_id, invocation_id, step_id):
-        return '/'.join((self._invocation_url(workflow_id, invocation_id), "steps", step_id))
+        return "/".join((self._invocation_url(workflow_id, invocation_id), "steps", step_id))
 
     def _invocation_url(self, workflow_id, invocation_id):
-        return '/'.join((self._invocations_url(workflow_id), invocation_id))
+        return "/".join((self._invocations_url(workflow_id), invocation_id))
 
     def _invocations_url(self, workflow_id):
-        return '/'.join((self._make_url(workflow_id), 'invocations'))
+        return "/".join((self._make_url(workflow_id), "invocations"))
 
 
-__all__ = ('WorkflowClient',)
+__all__ = ("WorkflowClient",)

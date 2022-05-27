@@ -13,20 +13,32 @@ from bioblend.galaxy.client import Client
 
 log = logging.getLogger(__name__)
 
-JOB_TERMINAL_STATES = {'deleted', 'error', 'ok'}
+JOB_TERMINAL_STATES = {"deleted", "error", "ok"}
 # Job non-terminal states are: 'deleted_new', 'failed', 'new', 'paused',
 # 'queued', 'resubmitted', 'running', 'upload', 'waiting'
 
 
 class JobsClient(Client):
-    module = 'jobs'
+    module = "jobs"
 
     def __init__(self, galaxy_instance):
         super().__init__(galaxy_instance)
 
-    def get_jobs(self, state=None, history_id=None, invocation_id=None, tool_id=None,
-                 workflow_id=None, user_id=None, date_range_min=None, date_range_max=None,
-                 limit=500, offset=0, user_details=False):
+    def get_jobs(
+        self,
+        state=None,
+        history_id=None,
+        invocation_id=None,
+        tool_id=None,
+        workflow_id=None,
+        user_id=None,
+        date_range_min=None,
+        date_range_max=None,
+        limit=500,
+        offset=0,
+        user_details=False,
+        order_by=None,
+    ):
         """
         Get all jobs, or select a subset by specifying optional arguments for
         filtering (e.g. a state).
@@ -73,6 +85,10 @@ class JobsClient(Client):
         :param user_details: If ``True`` and the user is an admin, add the user
           email to each returned job dictionary.
 
+        :type order_by: str
+        :param order_by: Whether to order jobs by ``create_time`` or
+          ``update_time`` (the default).
+
         :rtype: list of dict
         :return: Summary information for each selected job.
           For example::
@@ -93,31 +109,30 @@ class JobsClient(Client):
               'update_time': '2014-03-01T16:05:39.558458'}]
 
         .. note::
-          The following filtering options can only be used with Galaxy ``release_21.05`` or later:
-            user_id, limit, offset, workflow_id, invocation_id
+          The following options work only on Galaxy 21.05 or later: ``user_id``,
+          ``limit``, ``offset``, ``workflow_id``, ``invocation_id``.
         """
-        params = {
-            'limit': limit,
-            'offset': offset
-        }
+        params = {"limit": limit, "offset": offset}
         if state:
-            params['state'] = state
+            params["state"] = state
         if history_id:
-            params['history_id'] = history_id
+            params["history_id"] = history_id
         if invocation_id:
-            params['invocation_id'] = invocation_id
+            params["invocation_id"] = invocation_id
         if tool_id:
-            params['tool_id'] = tool_id
+            params["tool_id"] = tool_id
         if workflow_id:
-            params['workflow_id'] = workflow_id
+            params["workflow_id"] = workflow_id
         if user_id:
-            params['user_id'] = user_id
+            params["user_id"] = user_id
         if date_range_min:
-            params['date_range_min'] = date_range_min
+            params["date_range_min"] = date_range_min
         if date_range_max:
-            params['date_range_max'] = date_range_max
+            params["date_range_max"] = date_range_max
         if user_details:
-            params['user_details'] = user_details
+            params["user_details"] = user_details
+        if order_by:
+            params["order_by"] = order_by
         return self._get(params=params)
 
     def show_job(self, job_id, full_details=False):
@@ -151,7 +166,7 @@ class JobsClient(Client):
         """
         params = {}
         if full_details:
-            params['full'] = full_details
+            params["full"] = full_details
 
         return self._get(id=job_id, params=params)
 
@@ -166,7 +181,7 @@ class JobsClient(Client):
         :return: A description of the given job, with all parameters required to rerun.
 
         """
-        url = '/'.join((self._make_url(job_id), 'build_for_rerun'))
+        url = "/".join((self._make_url(job_id), "build_for_rerun"))
         return self._get(url=url)
 
     def rerun_job(self, job_id, remap=False, tool_inputs_update=None, history_id=None):
@@ -198,15 +213,15 @@ class JobsClient(Client):
         :return: Information about outputs and the rerun job
 
         .. note::
-          This method can only be used with Galaxy ``release_21.01`` or later.
+          This method works only on Galaxy 21.01 or later.
         """
         job_rerun_params = self._build_for_rerun(job_id)
-        job_inputs = job_rerun_params['state_inputs']
+        job_inputs = job_rerun_params["state_inputs"]
 
         if remap:
-            if not job_rerun_params['job_remap']:
-                raise ValueError('remap was set to True, but this job is not remappable.')
-            job_inputs['rerun_remap_job_id'] = job_id
+            if not job_rerun_params["job_remap"]:
+                raise ValueError("remap was set to True, but this job is not remappable.")
+            job_inputs["rerun_remap_job_id"] = job_id
 
         def update_inputs(inputs, tool_inputs_update):
             # recursively update inputs with tool_inputs_update
@@ -220,12 +235,12 @@ class JobsClient(Client):
         if tool_inputs_update:
             update_inputs(job_inputs, tool_inputs_update)
 
-        url = '/'.join((self.gi.url, 'tools'))
+        url = "/".join((self.gi.url, "tools"))
         payload = {
-            "history_id": history_id if history_id else job_rerun_params['history_id'],
-            "tool_id": job_rerun_params['id'],
+            "history_id": history_id if history_id else job_rerun_params["history_id"],
+            "tool_id": job_rerun_params["id"],
             "inputs": job_inputs,
-            "input_format": '21.01'
+            "input_format": "21.01",
         }
         return self._post(url=url, payload=payload)
 
@@ -243,7 +258,7 @@ class JobsClient(Client):
 
         .. versionadded:: 0.5.3
         """
-        return self.show_job(job_id).get('state', '')
+        return self.show_job(job_id).get("state", "")
 
     def search_jobs(self, tool_id: str, inputs: dict, state: Optional[str] = None) -> List[dict]:
         """
@@ -271,15 +286,15 @@ class JobsClient(Client):
           ``inputs`` and ``state``.
 
         .. note::
-          This method is only supported by Galaxy 18.01 or later.
+          This method works only on Galaxy 18.01 or later.
         """
         job_info = {
-            'tool_id': tool_id,
-            'inputs': inputs,
+            "tool_id": tool_id,
+            "inputs": inputs,
         }
         if state:
-            job_info['state'] = state
-        url = self._make_url() + '/search'
+            job_info["state"] = state
+        url = self._make_url() + "/search"
         return self._post(url=url, payload=job_info)
 
     def get_metrics(self, job_id: str) -> List[dict]:
@@ -299,7 +314,7 @@ class JobsClient(Client):
           ``expose_potentially_sensitive_job_metrics`` option set to ``true`` in
           the ``config/galaxy.yml`` configuration file.
         """
-        url = self._make_url(module_id=job_id) + '/metrics'
+        url = self._make_url(module_id=job_id) + "/metrics"
         return self._get(url=url)
 
     def cancel_job(self, job_id: str):
@@ -336,7 +351,7 @@ class JobsClient(Client):
         :return: dict containing job error reply
 
         .. note::
-          This method is only supported by Galaxy 20.01 or later.
+          This method works only on Galaxy 20.01 or later.
         """
         payload = {
             "message": message,
@@ -345,7 +360,7 @@ class JobsClient(Client):
         if email is not None:
             payload["email"] = email
 
-        url = self._make_url(module_id=job_id) + '/error'
+        url = self._make_url(module_id=job_id) + "/error"
         return self._post(url=url, payload=payload)
 
     def get_common_problems(self, job_id: str) -> dict:
@@ -360,9 +375,9 @@ class JobsClient(Client):
         :return: dict containing potential problems
 
         .. note::
-          This method is only supported by Galaxy 19.05 or later.
+          This method works only on Galaxy 19.05 or later.
         """
-        url = self._make_url(module_id=job_id) + '/common_problems'
+        url = self._make_url(module_id=job_id) + "/common_problems"
         return self._get(url=url)
 
     def get_inputs(self, job_id: str) -> List[dict]:
@@ -375,7 +390,7 @@ class JobsClient(Client):
         :rtype: list of dicts
         :return: Inputs for the given job
         """
-        url = self._make_url(module_id=job_id) + '/inputs'
+        url = self._make_url(module_id=job_id) + "/inputs"
         return self._get(url=url)
 
     def get_outputs(self, job_id: str) -> List[dict]:
@@ -388,7 +403,7 @@ class JobsClient(Client):
         :rtype: list of dicts
         :return: Outputs of the given job
         """
-        url = self._make_url(module_id=job_id) + '/outputs'
+        url = self._make_url(module_id=job_id) + "/outputs"
         return self._get(url=url)
 
     def resume_job(self, job_id: str) -> dict:
@@ -402,9 +417,9 @@ class JobsClient(Client):
         :return: dict containing output dataset associations
 
         .. note::
-          This method is only supported by Galaxy 18.09 or later.
+          This method works only on Galaxy 18.09 or later.
         """
-        url = self._make_url(module_id=job_id) + '/resume'
+        url = self._make_url(module_id=job_id) + "/resume"
         return self._put(url=url)
 
     def get_destination_params(self, job_id: str) -> dict:
@@ -419,10 +434,10 @@ class JobsClient(Client):
         :return: Destination parameters for the given job
 
         .. note::
-          This method is only supported by Galaxy 20.05 or later and requires
-          the user to be an admin.
+          This method works only on Galaxy 20.05 or later and if the user is a
+          Galaxy admin.
         """
-        url = self._make_url(module_id=job_id) + '/destination_params'
+        url = self._make_url(module_id=job_id) + "/destination_params"
         return self._get(url=url)
 
     def show_job_lock(self) -> bool:
@@ -434,12 +449,12 @@ class JobsClient(Client):
         :return: Status of the job lock
 
         .. note::
-          This method is only supported by Galaxy 20.05 or later and requires
-          the user to be an admin.
+          This method works only on Galaxy 20.05 or later and if the user is a
+          Galaxy admin.
         """
-        url = self.gi.url + '/job_lock'
+        url = self.gi.url + "/job_lock"
         response = self._get(url=url)
-        return response['active']
+        return response["active"]
 
     def update_job_lock(self, active=False) -> bool:
         """
@@ -451,15 +466,15 @@ class JobsClient(Client):
         :return: Updated status of the job lock
 
         .. note::
-          This method is only supported by Galaxy 20.05 or later and requires
-          the user to be an admin.
+          This method works only on Galaxy 20.05 or later and if the user is a
+          Galaxy admin.
         """
         payload = {
-            'active': active,
+            "active": active,
         }
-        url = self.gi.url + '/job_lock'
+        url = self.gi.url + "/job_lock"
         response = self._put(url=url, payload=payload)
-        return response['active']
+        return response["active"]
 
     def wait_for_job(self, job_id, maxwait=12000, interval=3, check=True):
         """
@@ -488,9 +503,9 @@ class JobsClient(Client):
         time_left = maxwait
         while True:
             job = self.show_job(job_id)
-            state = job['state']
+            state = job["state"]
             if state in JOB_TERMINAL_STATES:
-                if check and state != 'ok':
+                if check and state != "ok":
                     raise Exception(f"Job {job_id} is in terminal state {state}")
                 return job
             if time_left > 0:

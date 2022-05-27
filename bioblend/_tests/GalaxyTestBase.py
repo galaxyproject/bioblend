@@ -5,17 +5,16 @@ import bioblend
 import bioblend.galaxy
 from . import test_util
 
-bioblend.set_stream_logger('test', level='INFO')
+bioblend.set_stream_logger("test", level="INFO")
 
 BIOBLEND_TEST_JOB_TIMEOUT = int(os.environ.get("BIOBLEND_TEST_JOB_TIMEOUT", "60"))
 
 
 @test_util.skip_unless_galaxy()
 class GalaxyTestBase(unittest.TestCase):
-
     def setUp(self):
-        galaxy_key = os.environ['BIOBLEND_GALAXY_API_KEY']
-        galaxy_url = os.environ['BIOBLEND_GALAXY_URL']
+        galaxy_key = os.environ["BIOBLEND_GALAXY_API_KEY"]
+        galaxy_url = os.environ["BIOBLEND_GALAXY_URL"]
         self.gi = bioblend.galaxy.GalaxyInstance(url=galaxy_url, key=galaxy_key)
 
     def _test_dataset(self, history_id, contents="1\t2\t3", **kwds):
