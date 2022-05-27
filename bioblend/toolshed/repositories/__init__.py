@@ -258,8 +258,9 @@ class ToolShedRepositoryClient(Client):
         params = {"name": name, "owner": owner, "changeset_revision": changeset_revision}
         return self._get(url=url, params=params)
 
-    def repository_revisions(self, downloadable=None, malicious=None,
-                             missing_test_components=None, includes_tools=None):
+    def repository_revisions(
+        self, downloadable=None, malicious=None, missing_test_components=None, includes_tools=None
+    ):
         """
         Returns a (possibly filtered) list of dictionaries that include
         information about all repository revisions. The following parameters can
@@ -318,13 +319,13 @@ class ToolShedRepositoryClient(Client):
         url = self.gi.url + "/repository_revisions"
         params = {}
         if downloadable is not None:
-            params['downloadable'] = downloadable
+            params["downloadable"] = downloadable
         if malicious is not None:
-            params['malicious'] = malicious
+            params["malicious"] = malicious
         if missing_test_components is not None:
-            params['missing_test_components'] = missing_test_components
+            params["missing_test_components"] = missing_test_components
         if includes_tools is not None:
-            params['includes_tools'] = includes_tools
+            params["includes_tools"] = includes_tools
         return self._get(url=url, params=params)
 
     def show_repository_revision(self, metadata_id):
