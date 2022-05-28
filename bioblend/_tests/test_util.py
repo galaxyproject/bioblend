@@ -5,8 +5,6 @@ import random
 import string
 import unittest
 
-import requests
-
 import bioblend
 
 NO_CLOUDMAN_MESSAGE = "CloudMan required and no CloudMan AMI configured."
@@ -14,7 +12,6 @@ NO_GALAXY_MESSAGE = "Externally configured Galaxy required, but not found. Set B
 NO_TOOLSHED_MESSAGE = (
     "Externally configured ToolShed required, but not found. Set BIOBLEND_TOOLSHED_URL to run this test."
 )
-INACCESSIBLE_TOOLSHED_MESSAGE = "Externally configured ToolShed is not accessible."
 OLD_GALAXY_RELEASE = "Testing on Galaxy %s, but need %s to run this test."
 MISSING_TOOL_MESSAGE = "Externally configured Galaxy instance requires tool %s to run test."
 
@@ -35,10 +32,7 @@ def skip_unless_toolshed():
     """
     if "BIOBLEND_TOOLSHED_URL" not in os.environ:
         return unittest.skip(NO_TOOLSHED_MESSAGE)
-    elif requests.get(os.environ["BIOBLEND_TOOLSHED_URL"]).status_code != 200:
-        return unittest.skip(INACCESSIBLE_TOOLSHED_MESSAGE)
-    else:
-        return lambda f: f
+    return lambda f: f
 
 
 def skip_unless_galaxy(min_release=None):

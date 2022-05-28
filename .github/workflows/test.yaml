@@ -105,6 +105,10 @@ jobs:
         run: |
           # Create a PostgreSQL database for Galaxy. The default SQLite3 database makes test fail randomly because of "database locked" error.
           createdb -U postgres galaxy
+          # Run ToolShed tests only once per Python version
+          if [ "${{ matrix.galaxy_version }}" = 'dev' ]; then
+              export BIOBLEND_TOOLSHED_URL=https://testtoolshed.g2.bx.psu.edu/
+          fi
           # Install Galaxy
           GALAXY_DIR=galaxy-${{ matrix.galaxy_version }}
           git clone --depth=1 -b ${{ matrix.galaxy_version }} https://github.com/galaxyproject/galaxy $GALAXY_DIR
@@ -114,38 +118,3 @@ jobs:
         if: ${{ failure() }}
         run: |
           cat galaxy-${{ matrix.galaxy_version }}/*.log
-  test-toolshed:
-    if: (github.event_name != 'schedule' || github.repository_owner == 'galaxyproject') && git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | grep 'bioblend/toolshed'
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest]
-        galaxy_version: [dev]
-        tox_env:
-          - py39
-          - py38
-          - py37
-          - py36
-    steps:
-      - uses: actions/checkout@v2
-      - name: Cache pip dir
-        uses: actions/cache@v2
-        with:
-          path: ~/.cache/pip
-          key: pip-cache-${{ matrix.tox_env }}-${{ matrix.galaxy_version }}
-      - name: Calculate Python version for BioBlend from tox_env
-        id: get_bioblend_python_version
-        run: echo "::set-output name=bioblend_python_version::$(echo "${{ matrix.tox_env }}" | sed -e 's/^py\([0-9]\)\([0-9]\+\)/\1.\2/')"
-      - name: Set up Python for BioBlend
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ steps.get_bioblend_python_version.outputs.bioblend_python_version }}
-      - name: Install tox
-        run: |
-          python3 -m pip install --upgrade pip setuptools
-          python3 -m pip install 'tox>=1.8.0' 'virtualenv>=20.0.14'
-      - name: Run ToolShed tests
-        run: |
-          export BIOBLEND_TOOLSHED_URL=https://testtoolshed.g2.bx.psu.edu/
-          tox -e ${{ matrix.tox_env }}

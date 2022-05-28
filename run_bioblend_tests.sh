@@ -146,9 +146,6 @@ else
 fi
 export BIOBLEND_GALAXY_URL=http://localhost:${GALAXY_PORT}
 
-# Set variable for ToolShed tests
-export BIOBLEND_TOOLSHED_URL=https://testtoolshed.g2.bx.psu.edu/
-
 # Run the tests
 cd "${BIOBLEND_DIR}"
 set +e  # don't stop the script if tox fails
