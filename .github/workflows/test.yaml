@@ -9,8 +9,8 @@ concurrency:
   group: test-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  test-galaxy:
-    if: (github.event_name != 'schedule' || github.repository_owner == 'galaxyproject') && git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | grep 'bioblend/galaxy'
+  test:
+    if: github.event_name != 'schedule' || github.repository_owner == 'galaxyproject'
     runs-on: ${{ matrix.os }}
     services:
       postgres:
@@ -97,7 +97,7 @@ jobs:
         uses: actions/setup-python@v3
         with:
           python-version: ${{ steps.get_galaxy_python_version.outputs.galaxy_python_version }}
-      - name: Run Galaxy tests
+      - name: Run tests
         env:
           PGPASSWORD: postgres
           PGPORT: 5432
