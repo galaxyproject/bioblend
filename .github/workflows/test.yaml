@@ -105,6 +105,10 @@ jobs:
         run: |
           # Create a PostgreSQL database for Galaxy. The default SQLite3 database makes test fail randomly because of "database locked" error.
           createdb -U postgres galaxy
+          # Run ToolShed tests only once per Python version
+          if [ "${{ matrix.galaxy_version }}" = 'dev' ]; then
+              export BIOBLEND_TOOLSHED_URL=https://testtoolshed.g2.bx.psu.edu/
+          fi
           # Install Galaxy
           GALAXY_DIR=galaxy-${{ matrix.galaxy_version }}
           git clone --depth=1 -b ${{ matrix.galaxy_version }} https://github.com/galaxyproject/galaxy $GALAXY_DIR
