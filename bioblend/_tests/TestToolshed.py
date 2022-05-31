@@ -42,7 +42,7 @@ class TestToolshed(unittest.TestCase):
         self.assertEqual(len(samtools_search["hits"]), 5)
 
         # show_repository
-        bam_to_sam_repo = [n for n in repositories if n["name"] == "bam_to_sam"][0]
+        bam_to_sam_repo = [r for r in repositories if r["name"] == "bam_to_sam"][0]
         show_bam_to_sam_repo = self.ts.repositories.show_repository(bam_to_sam_repo["id"])
         self.assertIn("SAM", show_bam_to_sam_repo["long_description"])
 
@@ -53,21 +53,6 @@ class TestToolshed(unittest.TestCase):
         # need to provide an API key to test this
 
     def test_repositories_revisions(self):
-        # repository_revisions
-        revisions = self.ts.repositories.repository_revisions()
-        self.assertGreater(len(revisions), 15000)
-        self.assertEqual(revisions[0]["model_class"], "RepositoryMetadata")
-
-        # show_repository_revision
-        revision_0 = self.ts.repositories.show_repository_revision(revisions[0]["id"])
-        self.assertEqual(revision_0["id"], revisions[0]["id"])
-
-        # repository_revisions with filters
-        for filter in ["downloadable", "malicious", "missing_test_components", "includes_tools"]:
-            filtered_revisions_true = self.ts.repositories.repository_revisions(**{filter: True})
-            filtered_revisions_false = self.ts.repositories.repository_revisions(**{filter: False})
-            self.assertEqual(len(filtered_revisions_false) + len(filtered_revisions_true), len(revisions))
-
         # get_ordered_installable_revisions
         bam_to_sam_revisions = self.ts.repositories.get_ordered_installable_revisions("bam_to_sam", "devteam")
         self.assertGreaterEqual(len(bam_to_sam_revisions), 4)
