@@ -1,5 +1,7 @@
 ### BioBlend v
 
+* Added support for Galaxy release 22.05.
+
 * Format Python code with black and isort.
 
 ### BioBlend v0.17.0 - 2022-05-09
