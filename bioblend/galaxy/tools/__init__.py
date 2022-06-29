@@ -8,6 +8,8 @@ from typing import List
 from bioblend.galaxy.client import Client
 from bioblend.util import attach_file
 
+FETCH_ENDPOINT = "tools/fetch"
+
 
 class ToolClient(Client):
     module = "tools"
@@ -436,6 +438,46 @@ class ToolClient(Client):
         finally:
             payload["files_0|file_data"].close()
 
+    def upload_file_tus(self, path, history_id, metadata=None, storage=None, **keywords):
+        """
+        Upload the file specified by ``path`` to the history specified by
+        ``history_id`` using the tus protocol.
+
+        TODO: document params
+        """
+        uploader = self.gi.get_tus_uploader(path, metadata=metadata, storage=storage)
+        uploader.upload()
+        session_id = uploader.url.rsplit("/", 1)[1]
+        payload = self._fetch_payload(path, history_id, session_id, **keywords)
+        url = "/".join((self.gi.url, FETCH_ENDPOINT))
+        return self._post(payload, url=url)
+        #    f"{url}{SUBMISSION_ENDPOINT}",
+        #    json=payload,
+        #    headers=headers,
+        #)
+        #response.raise_for_status()
+
+    def upload_file_tus_yield(self, path, history_id, metadata=None, storage=None, **keywords):
+        """
+        Upload the file specified by ``path`` to the history specified by
+        ``history_id`` using the tus protocol, yielding the uploader after each
+        chunk.
+
+        TODO: document params
+        """
+        uploader = self.gi.get_tus_uploader(path, metadata=metadata, storage=storage)
+        # yield once before first chunk so caller can query for size (or the caller could just get the size first...)
+        yield uploader
+        # TODO: this is uploader.get_file_size() in tusclient 1.0.0
+        stop_at = uploader.file_size
+        while uploader.offset < stop_at:
+            uploader.upload_chunk()
+            yield uploader
+        session_id = uploader.url.rsplit("/", 1)[1]
+        payload = self._fetch_payload(path, history_id, session_id, **keywords)
+        url = "/".join((self.gi.url, FETCH_ENDPOINT))
+        self._post(payload, url=url)
+
     def upload_from_ftp(self, path, history_id, **keywords):
         """
         Upload the file specified by ``path`` from the user's FTP directory to
@@ -494,4 +536,21 @@ class ToolClient(Client):
             tool_input["files_0|NAME"] = keywords["file_name"]
         tool_input["files_0|type"] = "upload_dataset"
         payload["inputs"] = tool_input
+        return payload
+
+    def _fetch_payload(self, path, history_id, session_id, **keywords):
+        file_name = keywords.get("file_name", basename(path))
+        file_type = keywords.get("file_type", "auto")
+        dbkey = keywords.get("dbkey", "?")
+        payload = {
+            "history_id": history_id,
+            "targets":
+                [
+                    {
+                        "destination": {"type": "hdas"},
+                        "elements": [{"src": "files", "ext": file_type, "dbkey": dbkey, "name": file_name}],
+                    }
+                ],
+            "files_0|file_data": {"session_id": session_id, "name": file_name},
+        }
         return payload

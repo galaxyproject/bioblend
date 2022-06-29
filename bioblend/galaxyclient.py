@@ -12,12 +12,16 @@ import logging
 from urllib.parse import urljoin
 
 import requests
+import tusclient.client
 from requests_toolbelt import MultipartEncoder
 
 from bioblend import ConnectionError
 from bioblend.util import FileStream
 
 log = logging.getLogger(__name__)
+
+UPLOAD_CHUNK_SIZE = 10**7
+UPLOAD_ENDPOINT = "/upload/resumable_upload"
 
 
 class GalaxyClient:
@@ -255,6 +259,18 @@ class GalaxyClient:
             body=r.text,
             status_code=r.status_code,
         )
+
+    def get_tus_uploader(self, path, url=None, storage=None, metadata=None, chunk_size=None):
+        """
+        """
+        url = url or UPLOAD_ENDPOINT
+        headers = {"x-api-key": self.key}
+        if storage:
+            storage = tusclient.storage.filestorage.FileStorage(storage)
+        client = tusclient.client.TusClient(f"{self.url}{url}", headers=headers)
+        uploader = client.uploader(path, metadata=metadata, url_storage=storage)
+        uploader.chunk_size = chunk_size or UPLOAD_CHUNK_SIZE
+        return uploader
 
     @property
     def key(self):
