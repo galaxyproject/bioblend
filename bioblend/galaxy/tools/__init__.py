@@ -490,34 +490,32 @@ class ToolClient(Client):
         """
         uploader = self.gi.get_tus_uploader(path, metadata=metadata, storage=storage)
         uploader.upload()
-        session_id = uploader.url.rsplit("/", 1)[1]
+        return self.post_to_fetch(path, history_id, uploader.session_id, **keywords)
+
+    def post_to_fetch(self, path, history_id, session_id, **keywords):
+        """
+        POST to the Fetch API after performing a tus upload.
+
+        This is called by :meth:`upload_file_tus` after performing an upload. This method is useful if you want to
+        control the tus uploader (e.g. to report on progress) yourself::
+
+            uploader = gi.get_tus_uploader(path, storage=storage)
+            while uploader.offset < uploader.file_size:
+                uploader.upload_chunk()
+                # perform other actions...
+            gi.tools.post_to_fetch(path, history_id, uploader.session_id, **upload_kwargs)
+
+        See :meth:`upload_file_tus` for additional parameters.
+
+        :type session_id: str
+        :param session_id: Session ID returned by tus service
+
+        :rtype: dict
+        :return: Information about the created upload job
+        """
         payload = self._fetch_payload(path, history_id, session_id, **keywords)
         url = "/".join((self.gi.url, FETCH_ENDPOINT))
         return self._post(payload, url=url)
-
-    def upload_file_tus_yield(self, path, history_id, storage=None, metadata=None, chunk_size=None, **keywords):
-        """
-        Upload the file specified by ``path`` to the history specified by
-        ``history_id`` using the tus protocol, yielding the uploader after each
-        chunk.
-
-        See :meth:`upload_file_tus` for parameters.
-
-        :rtype: tusclient.uploader.Uploader instance
-        :return: Yields uploader object after each chunk for updating e.g. a progress display, final return is None
-        """
-        uploader = self.gi.get_tus_uploader(path, metadata=metadata, storage=storage)
-        # yield once before first chunk so caller can query for size (or the caller could just get the size first...)
-        yield uploader
-        # TODO: this is uploader.get_file_size() in tusclient 1.0.0
-        stop_at = uploader.file_size
-        while uploader.offset < stop_at:
-            uploader.upload_chunk()
-            yield uploader
-        session_id = uploader.url.rsplit("/", 1)[1]
-        payload = self._fetch_payload(path, history_id, session_id, **keywords)
-        url = "/".join((self.gi.url, FETCH_ENDPOINT))
-        self._post(payload, url=url)
 
     def upload_from_ftp(self, path, history_id, **keywords):
         """

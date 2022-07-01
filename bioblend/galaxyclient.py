@@ -15,6 +15,7 @@ import requests
 import tusclient.client
 import tusclient.exceptions
 import tusclient.storage.filestorage
+import tusclient.uploader
 from requests_toolbelt import MultipartEncoder
 
 from bioblend import ConnectionError
@@ -324,3 +325,12 @@ class GalaxyClient:
                 response = json.loads(response)
             self._key = response["api_key"]
         return self._key
+
+
+def _tus_uploader_session_id(self):
+    if self.url:
+        return self.url.rsplit("/", 1)[1]
+
+
+# monkeypatch a session_id property on to uploader
+tusclient.uploader.Uploader.session_id = property(_tus_uploader_session_id)
