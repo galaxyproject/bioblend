@@ -488,7 +488,7 @@ class ToolClient(Client):
         :rtype: dict
         :return: Information about the created upload job
         """
-        uploader = self.gi.get_tus_uploader(path, metadata=metadata, storage=storage)
+        uploader = self.gi.get_tus_uploader(path, metadata=metadata, storage=storage, chunk_size=chunk_size)
         uploader.upload()
         return self.post_to_fetch(path, history_id, uploader.session_id, **keywords)
 
