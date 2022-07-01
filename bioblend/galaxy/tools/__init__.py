@@ -429,6 +429,27 @@ class ToolClient(Client):
         :rtype: dict
         :return: Information about the created upload job
         """
+        if self.gi.config.get_version()["version_major"] >= "22.01":
+            return self.upload_file_tus(path, history_id, **keywords)
+        else:
+            return self.upload_file_legacy(path, history_id, **keywords)
+
+    def upload_file_legacy(self, path, history_id, **keywords):
+        """
+        Upload the file specified by ``path`` to the history specified by
+        ``history_id``.
+
+        :type path: str
+        :param path: path of the file to upload
+
+        :type history_id: str
+        :param history_id: id of the history where to upload the file
+
+        See :meth:`upload_file` for additional parameters.
+
+        :rtype: dict
+        :return: Information about the created upload job
+        """
         if "file_name" not in keywords:
             keywords["file_name"] = basename(path)
         payload = self._upload_payload(history_id, **keywords)
@@ -438,12 +459,34 @@ class ToolClient(Client):
         finally:
             payload["files_0|file_data"].close()
 
-    def upload_file_tus(self, path, history_id, metadata=None, storage=None, **keywords):
+    def upload_file_tus(self, path, history_id, storage=None, metadata=None, chunk_size=None, **keywords):
         """
         Upload the file specified by ``path`` to the history specified by
         ``history_id`` using the tus protocol.
 
-        TODO: document params
+        :type path: str
+        :param path: path of the file to upload
+
+        :type history_id: str
+        :param history_id: id of the history where to upload the file
+
+        :type storage: str
+        :param storage: Local path to store URLs resuming uploads
+
+        :type metadata: dict
+        :param metadata: Metadata to send with upload request
+
+        :type chunk_size: int
+        :param chunk_size: Number of bytes to send in each chunk
+
+        :type auto_decompress: bool
+        :param auto_decompress: Automatically decompress files if the uploaded file is compress and the file type is not
+          one that supports compression (e.g. ``fastqsanger.gz``)
+
+        See :meth:`upload_file` for additional parameters.
+
+        :rtype: dict
+        :return: Information about the created upload job
         """
         uploader = self.gi.get_tus_uploader(path, metadata=metadata, storage=storage)
         uploader.upload()
@@ -451,19 +494,17 @@ class ToolClient(Client):
         payload = self._fetch_payload(path, history_id, session_id, **keywords)
         url = "/".join((self.gi.url, FETCH_ENDPOINT))
         return self._post(payload, url=url)
-        #    f"{url}{SUBMISSION_ENDPOINT}",
-        #    json=payload,
-        #    headers=headers,
-        #)
-        #response.raise_for_status()
 
-    def upload_file_tus_yield(self, path, history_id, metadata=None, storage=None, **keywords):
+    def upload_file_tus_yield(self, path, history_id, storage=None, metadata=None, chunk_size=None, **keywords):
         """
         Upload the file specified by ``path`` to the history specified by
         ``history_id`` using the tus protocol, yielding the uploader after each
         chunk.
 
-        TODO: document params
+        See :meth:`upload_file_tus` for parameters.
+
+        :rtype: tusclient.uploader.Uploader instance
+        :return: Yields uploader object after each chunk for updating e.g. a progress display, final return is None
         """
         uploader = self.gi.get_tus_uploader(path, metadata=metadata, storage=storage)
         # yield once before first chunk so caller can query for size (or the caller could just get the size first...)
@@ -540,17 +581,23 @@ class ToolClient(Client):
 
     def _fetch_payload(self, path, history_id, session_id, **keywords):
         file_name = keywords.get("file_name", basename(path))
-        file_type = keywords.get("file_type", "auto")
-        dbkey = keywords.get("dbkey", "?")
+        element = {
+            "src": "files",
+            "ext": keywords.get("file_type", "auto"),
+            "dbkey": keywords.get("dbkey", "?"),
+            "to_posix_lines": keywords.get("to_posix_lines", True),
+            "space_to_tab": keywords.get("space_to_tab", False),
+            "name": file_name,
+        }
         payload = {
             "history_id": history_id,
-            "targets":
-                [
-                    {
-                        "destination": {"type": "hdas"},
-                        "elements": [{"src": "files", "ext": file_type, "dbkey": dbkey, "name": file_name}],
-                    }
-                ],
+            "targets": [
+                {
+                    "destination": {"type": "hdas"},
+                    "elements": [element],
+                }
+            ],
             "files_0|file_data": {"session_id": session_id, "name": file_name},
+            "auto_decompress": keywords.get("auto_decompress", False),
         }
         return payload

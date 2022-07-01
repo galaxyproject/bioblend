@@ -13,6 +13,8 @@ from urllib.parse import urljoin
 
 import requests
 import tusclient.client
+import tusclient.exceptions
+import tusclient.storage.filestorage
 from requests_toolbelt import MultipartEncoder
 
 from bioblend import ConnectionError
@@ -262,13 +264,39 @@ class GalaxyClient:
 
     def get_tus_uploader(self, path, url=None, storage=None, metadata=None, chunk_size=None):
         """
+        Return the Tus Client uploader object for uploading to the Galaxy tus endpoint
+
+        :type path: str
+        :param path: path of the file to upload
+
+        :type url: str
+        :param url: URL (relative to base URL) of the upload endpoint
+
+        :type storage: str
+        :param storage: Local path to store URLs resuming uploads
+
+        :type metadata: dict
+        :param metadata: Metadata to send with upload request
+
+        :type chunk_size: int
+        :param chunk_size: Number of bytes to send in each chunk
+
+        :rtype: tus.uploader.Uploader instance
+        :return: Tus uploader object
         """
         url = url or UPLOAD_ENDPOINT
         headers = {"x-api-key": self.key}
         if storage:
             storage = tusclient.storage.filestorage.FileStorage(storage)
         client = tusclient.client.TusClient(f"{self.url}{url}", headers=headers)
-        uploader = client.uploader(path, metadata=metadata, url_storage=storage)
+        try:
+            uploader = client.uploader(path, metadata=metadata, store_url=(storage is not None), url_storage=storage)
+        except tusclient.exceptions.TusCommunicationError as exc:
+            raise ConnectionError(
+                f"Unexpected HTTP status code: {exc.status_code}",
+                body=str(exc),
+                status_code=exc.status_code,
+            )
         uploader.chunk_size = chunk_size or UPLOAD_CHUNK_SIZE
         return uploader
 
