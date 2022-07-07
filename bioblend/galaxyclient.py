@@ -9,6 +9,7 @@ import base64
 import contextlib
 import json
 import logging
+from typing import Optional
 from urllib.parse import urljoin
 
 import requests
@@ -24,7 +25,6 @@ from bioblend.util import FileStream
 log = logging.getLogger(__name__)
 
 UPLOAD_CHUNK_SIZE = 10**7
-UPLOAD_ENDPOINT = "/upload/resumable_upload"
 
 
 class GalaxyClient:
@@ -263,9 +263,16 @@ class GalaxyClient:
             status_code=r.status_code,
         )
 
-    def get_tus_uploader(self, path, url=None, storage=None, metadata=None, chunk_size=None):
+    def get_tus_uploader(
+        self,
+        path: str,
+        url: Optional[str] = "/upload/resumable_upload",
+        storage: Optional[str] = None,
+        metadata: Optional[dict] = None,
+        chunk_size: Optional[int] = UPLOAD_CHUNK_SIZE,
+    ) -> tusclient.uploader.Uploader:
         """
-        Return the Tus Client uploader object for uploading to the Galaxy tus endpoint
+        Return the tus client uploader object for uploading to the Galaxy tus endpoint
 
         :type path: str
         :param path: path of the file to upload
@@ -282,24 +289,27 @@ class GalaxyClient:
         :type chunk_size: int
         :param chunk_size: Number of bytes to send in each chunk
 
-        :rtype: tus.uploader.Uploader instance
-        :return: Tus uploader object
+        :rtype: tusclient.uploader.Uploader
+        :return: tus uploader object
         """
-        url = url or UPLOAD_ENDPOINT
         headers = {"x-api-key": self.key}
+        client = tusclient.client.TusClient(self.url + url, headers=headers)
         if storage:
             storage = tusclient.storage.filestorage.FileStorage(storage)
-        client = tusclient.client.TusClient(f"{self.url}{url}", headers=headers)
         try:
-            uploader = client.uploader(path, metadata=metadata, store_url=(storage is not None), url_storage=storage)
+            return client.uploader(
+                file_path=path,
+                chunk_size=chunk_size,
+                metadata=metadata,
+                store_url=storage is not None,
+                url_storage=storage,
+            )
         except tusclient.exceptions.TusCommunicationError as exc:
             raise ConnectionError(
                 f"Unexpected HTTP status code: {exc.status_code}",
                 body=str(exc),
                 status_code=exc.status_code,
             )
-        uploader.chunk_size = chunk_size or UPLOAD_CHUNK_SIZE
-        return uploader
 
     @property
     def key(self):
@@ -327,9 +337,8 @@ class GalaxyClient:
         return self._key
 
 
-def _tus_uploader_session_id(self):
-    if self.url:
-        return self.url.rsplit("/", 1)[1]
+def _tus_uploader_session_id(self) -> str:
+    return self.url.rsplit("/", 1)[1]
 
 
 # monkeypatch a session_id property on to uploader

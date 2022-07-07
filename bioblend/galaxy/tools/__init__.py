@@ -3,12 +3,14 @@ Contains possible interaction dealing with Galaxy tools.
 """
 import warnings
 from os.path import basename
-from typing import List
+from typing import (
+    List,
+    Optional,
+)
 
 from bioblend.galaxy.client import Client
+from bioblend.galaxyclient import UPLOAD_CHUNK_SIZE
 from bioblend.util import attach_file
-
-FETCH_ENDPOINT = "tools/fetch"
 
 
 class ToolClient(Client):
@@ -397,7 +399,15 @@ class ToolClient(Client):
             payload["inputs"] = tool_inputs
         return self._post(payload)
 
-    def upload_file(self, path, history_id, **keywords):
+    def upload_file(
+        self,
+        path: str,
+        history_id: str,
+        storage: Optional[str] = None,
+        metadata: Optional[dict] = None,
+        chunk_size: Optional[int] = UPLOAD_CHUNK_SIZE,
+        **keywords,
+    ):
         """
         Upload the file specified by ``path`` to the history specified by
         ``history_id``.
@@ -407,6 +417,15 @@ class ToolClient(Client):
 
         :type history_id: str
         :param history_id: id of the history where to upload the file
+
+        :type storage: str
+        :param storage: Local path to store URLs resuming uploads
+
+        :type metadata: dict
+        :param metadata: Metadata to send with upload request
+
+        :type chunk_size: int
+        :param chunk_size: Number of bytes to send in each chunk
 
         :type file_name: str
         :param file_name: (optional) name of the new history dataset
@@ -426,78 +445,40 @@ class ToolClient(Client):
         :param space_to_tab: whether to convert spaces to tabs. Default is
           ``False``. Applicable only if to_posix_lines is ``True``
 
+        :type auto_decompress: bool
+        :param auto_decompress: Automatically decompress files if the uploaded
+          file is compressed and the file type is not one that supports
+          compression (e.g. ``fastqsanger.gz``). Default is ``False``.
+
         :rtype: dict
         :return: Information about the created upload job
+
+        .. note::
+          The following options work only on Galaxy 22.01 or later: ``storage``,
+          ``metadata``, ``chunk_size``, ``auto_decompress``.
         """
         if self.gi.config.get_version()["version_major"] >= "22.01":
-            return self.upload_file_tus(path, history_id, **keywords)
+            # Use the tus protocol
+            uploader = self.gi.get_tus_uploader(path, storage=storage, metadata=metadata, chunk_size=chunk_size)
+            uploader.upload()
+            return self.post_to_fetch(path, history_id, uploader.session_id, **keywords)
         else:
-            return self.upload_file_legacy(path, history_id, **keywords)
+            if "file_name" not in keywords:
+                keywords["file_name"] = basename(path)
+            payload = self._upload_payload(history_id, **keywords)
+            payload["files_0|file_data"] = attach_file(path, name=keywords["file_name"])
+            try:
+                return self._post(payload, files_attached=True)
+            finally:
+                payload["files_0|file_data"].close()
 
-    def upload_file_legacy(self, path, history_id, **keywords):
+    def post_to_fetch(self, path: str, history_id: str, session_id: str, **keywords):
         """
-        Upload the file specified by ``path`` to the history specified by
-        ``history_id``.
+        Make a POST request to the Fetch API after performing a tus upload.
 
-        :type path: str
-        :param path: path of the file to upload
-
-        :type history_id: str
-        :param history_id: id of the history where to upload the file
-
-        See :meth:`upload_file` for additional parameters.
-
-        :rtype: dict
-        :return: Information about the created upload job
-        """
-        if "file_name" not in keywords:
-            keywords["file_name"] = basename(path)
-        payload = self._upload_payload(history_id, **keywords)
-        payload["files_0|file_data"] = attach_file(path, name=keywords["file_name"])
-        try:
-            return self._post(payload, files_attached=True)
-        finally:
-            payload["files_0|file_data"].close()
-
-    def upload_file_tus(self, path, history_id, storage=None, metadata=None, chunk_size=None, **keywords):
-        """
-        Upload the file specified by ``path`` to the history specified by
-        ``history_id`` using the tus protocol.
-
-        :type path: str
-        :param path: path of the file to upload
-
-        :type history_id: str
-        :param history_id: id of the history where to upload the file
-
-        :type storage: str
-        :param storage: Local path to store URLs resuming uploads
-
-        :type metadata: dict
-        :param metadata: Metadata to send with upload request
-
-        :type chunk_size: int
-        :param chunk_size: Number of bytes to send in each chunk
-
-        :type auto_decompress: bool
-        :param auto_decompress: Automatically decompress files if the uploaded file is compress and the file type is not
-          one that supports compression (e.g. ``fastqsanger.gz``)
-
-        See :meth:`upload_file` for additional parameters.
-
-        :rtype: dict
-        :return: Information about the created upload job
-        """
-        uploader = self.gi.get_tus_uploader(path, metadata=metadata, storage=storage, chunk_size=chunk_size)
-        uploader.upload()
-        return self.post_to_fetch(path, history_id, uploader.session_id, **keywords)
-
-    def post_to_fetch(self, path, history_id, session_id, **keywords):
-        """
-        POST to the Fetch API after performing a tus upload.
-
-        This is called by :meth:`upload_file_tus` after performing an upload. This method is useful if you want to
-        control the tus uploader (e.g. to report on progress) yourself::
+        This is called by :meth:`upload_file` after performing an upload. This
+        method is useful if you want to control the tus uploader yourself (e.g.
+        to report on progress)::
 
             uploader = gi.get_tus_uploader(path, storage=storage)
             while uploader.offset < uploader.file_size:
@@ -505,16 +486,16 @@ class ToolClient(Client):
                 # perform other actions...
             gi.tools.post_to_fetch(path, history_id, uploader.session_id, **upload_kwargs)
 
-        See :meth:`upload_file_tus` for additional parameters.
-
         :type session_id: str
-        :param session_id: Session ID returned by tus service
+        :param session_id: Session ID returned by the tus service
+
+        See :meth:`upload_file` for additional parameters.
 
         :rtype: dict
         :return: Information about the created upload job
         """
         payload = self._fetch_payload(path, history_id, session_id, **keywords)
-        url = "/".join((self.gi.url, FETCH_ENDPOINT))
+        url = "/".join((self.gi.url, "tools/fetch"))
         return self._post(payload, url=url)
 
     def upload_from_ftp(self, path, history_id, **keywords):
@@ -577,7 +558,7 @@ class ToolClient(Client):
         payload["inputs"] = tool_input
         return payload
 
-    def _fetch_payload(self, path, history_id, session_id, **keywords):
+    def _fetch_payload(self, path: str, history_id: str, session_id: str, **keywords) -> dict:
         file_name = keywords.get("file_name", basename(path))
         element = {
             "src": "files",
