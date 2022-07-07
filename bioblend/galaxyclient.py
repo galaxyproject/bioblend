@@ -9,15 +9,22 @@ import base64
 import contextlib
 import json
 import logging
+from typing import Optional
 from urllib.parse import urljoin
 
 import requests
+import tusclient.client
+import tusclient.exceptions
+import tusclient.storage.filestorage
+import tusclient.uploader
 from requests_toolbelt import MultipartEncoder
 
 from bioblend import ConnectionError
 from bioblend.util import FileStream
 
 log = logging.getLogger(__name__)
+
+UPLOAD_CHUNK_SIZE = 10**7
 
 
 class GalaxyClient:
@@ -256,6 +263,54 @@ class GalaxyClient:
             status_code=r.status_code,
         )
 
+    def get_tus_uploader(
+        self,
+        path: str,
+        url: Optional[str] = "/upload/resumable_upload",
+        storage: Optional[str] = None,
+        metadata: Optional[dict] = None,
+        chunk_size: Optional[int] = UPLOAD_CHUNK_SIZE,
+    ) -> tusclient.uploader.Uploader:
+        """
+        Return the tus client uploader object for uploading to the Galaxy tus endpoint
+
+        :type path: str
+        :param path: path of the file to upload
+
+        :type url: str
+        :param url: URL (relative to base URL) of the upload endpoint
+
+        :type storage: str
+        :param storage: Local path to store URLs resuming uploads
+
+        :type metadata: dict
+        :param metadata: Metadata to send with upload request
+
+        :type chunk_size: int
+        :param chunk_size: Number of bytes to send in each chunk
+
+        :rtype: tusclient.uploader.Uploader
+        :return: tus uploader object
+        """
+        headers = {"x-api-key": self.key}
+        client = tusclient.client.TusClient(self.url + url, headers=headers)
+        if storage:
+            storage = tusclient.storage.filestorage.FileStorage(storage)
+        try:
+            return client.uploader(
+                file_path=path,
+                chunk_size=chunk_size,
+                metadata=metadata,
+                store_url=storage is not None,
+                url_storage=storage,
+            )
+        except tusclient.exceptions.TusCommunicationError as exc:
+            raise ConnectionError(
+                f"Unexpected HTTP status code: {exc.status_code}",
+                body=str(exc),
+                status_code=exc.status_code,
+            )
+
     @property
     def key(self):
         if not self._key and self.email is not None and self.password is not None:
@@ -280,3 +335,11 @@ class GalaxyClient:
                 response = json.loads(response)
             self._key = response["api_key"]
         return self._key
+
+
+def _tus_uploader_session_id(self) -> str:
+    return self.url.rsplit("/", 1)[1]
+
+
+# monkeypatch a session_id property on to uploader
+tusclient.uploader.Uploader.session_id = property(_tus_uploader_session_id)
