@@ -1,8 +1,13 @@
-### BioBlend v
+### BioBlend v0.18.0 - 2022-07-07
 
 * Added support for Galaxy release 22.05.
 
+* Add tus support to ``ToolClient.upload_file()`` (thanks to
+  [Nate Coraor](https://github.com/natefoo)).
+
 * Format Python code with black and isort.
+
+* Improvements to type annotations, tests and documentation.
 
 ### BioBlend v0.17.0 - 2022-05-09
 
