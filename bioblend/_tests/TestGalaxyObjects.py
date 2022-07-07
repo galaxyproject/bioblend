@@ -187,7 +187,18 @@ class TestWrapper(unittest.TestCase):
             w.parent = 0
 
 
-class TestWorkflow(unittest.TestCase):
+@test_util.skip_unless_galaxy()
+class GalaxyObjectsTestBase(unittest.TestCase):
+    gi: galaxy_instance.GalaxyInstance
+
+    @classmethod
+    def setUpClass(cls):
+        galaxy_key = os.environ["BIOBLEND_GALAXY_API_KEY"]
+        galaxy_url = os.environ["BIOBLEND_GALAXY_URL"]
+        cls.gi = galaxy_instance.GalaxyInstance(galaxy_url, galaxy_key)
+
+
+class TestWorkflow(GalaxyObjectsTestBase):
     def setUp(self):
         self.wf = wrappers.Workflow(SAMPLE_WF_DICT)
 
@@ -236,8 +247,10 @@ class TestWorkflow(unittest.TestCase):
         self.assertTrue(self.wf.is_modified)
 
     def test_input_map(self):
-        hda = wrappers.HistoryDatasetAssociation({"id": "hda_id"}, container="mock_history")
-        ldda = wrappers.LibraryDatasetDatasetAssociation({"id": "ldda_id"}, container="mock_library")
+        history = wrappers.History({}, gi=self.gi)
+        library = wrappers.Library({}, gi=self.gi)
+        hda = wrappers.HistoryDatasetAssociation({"id": "hda_id"}, container=history, gi=self.gi)
+        ldda = wrappers.LibraryDatasetDatasetAssociation({"id": "ldda_id"}, container=library, gi=self.gi)
         input_map = self.wf._convert_input_map({"0": hda, "1": ldda, "2": {"id": "hda2_id", "src": "hda"}})
         self.assertEqual(
             input_map,
@@ -249,20 +262,12 @@ class TestWorkflow(unittest.TestCase):
         )
 
 
-@test_util.skip_unless_galaxy()
-class GalaxyObjectsTestBase(unittest.TestCase):
-    def setUp(self):
-        galaxy_key = os.environ["BIOBLEND_GALAXY_API_KEY"]
-        galaxy_url = os.environ["BIOBLEND_GALAXY_URL"]
-        self.gi = galaxy_instance.GalaxyInstance(galaxy_url, galaxy_key)
-
-
 @test_util.skip_unless_galaxy("release_19.09")
 class TestInvocation(GalaxyObjectsTestBase):
     @classmethod
     def setUpClass(cls):
-        super().setUp(cls)
-        cls.inv = wrappers.Invocation(SAMPLE_INV_DICT)
+        super().setUpClass()
+        cls.inv = wrappers.Invocation(SAMPLE_INV_DICT, gi=cls.gi)
         with open(SAMPLE_FN) as f:
             cls.workflow = cls.gi.workflows.import_new(f.read())
         path_pause = test_util.get_abspath(os.path.join("data", "test_workflow_pause.ga"))
@@ -394,7 +399,7 @@ class TestInvocation(GalaxyObjectsTestBase):
 class TestObjInvocationClient(GalaxyObjectsTestBase):
     @classmethod
     def setUpClass(cls):
-        super().setUp(cls)
+        super().setUpClass()
         with open(SAMPLE_FN) as f:
             cls.workflow = cls.gi.workflows.import_new(f.read())
         cls.history = cls.gi.histories.create(name="TestGalaxyObjInvocationClient")

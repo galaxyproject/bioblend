@@ -6,14 +6,26 @@ A basic object-oriented interface for Galaxy entities.
 
 import abc
 import json
+import typing
 from collections.abc import (
     Mapping,
     Sequence,
 )
-from typing import Tuple
+from typing import (
+    Dict,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Union,
+)
 
 import bioblend
 from bioblend.util import abstractclass
+
+if typing.TYPE_CHECKING:
+    from . import client
+    from .galaxy_instance import GalaxyInstance
 
 __all__ = (
     "Wrapper",
@@ -55,8 +67,12 @@ class Wrapper:
     """
 
     BASE_ATTRS: Tuple[str, ...] = ("id",)
+    gi: Optional["GalaxyInstance"]
+    id: str
+    wrapped: dict
+    _cached_parent: Optional["Wrapper"]
 
-    def __init__(self, wrapped, parent=None, gi=None):
+    def __init__(self, wrapped: dict, parent: Optional["Wrapper"] = None, gi: Optional["GalaxyInstance"] = None):
         """
         :type wrapped: dict
         :param wrapped: JSON-serializable dictionary
@@ -82,7 +98,7 @@ class Wrapper:
         object.__setattr__(self, "gi", gi)
 
     @property
-    def parent(self):
+    def parent(self) -> Optional["Wrapper"]:
         """
         The parent of this wrapper.
         """
@@ -159,6 +175,9 @@ class Step(Wrapper):
         "tool_version",
         "type",
     )
+    type: str
+    tool_id: str
+    tool_inputs: Dict
 
     def __init__(self, step_dict, parent):
         super().__init__(step_dict, parent=parent, gi=parent.gi)
@@ -185,15 +204,25 @@ class InvocationStep(Wrapper):
         "workflow_step_label",
         "workflow_step_uuid",
     )
+    gi: "GalaxyInstance"
 
-    def refresh(self):
+    @property
+    def parent(self) -> Wrapper:
+        ret = super().parent
+        assert ret is not None
+        return ret
+
+    def __init__(self, wrapped: dict, parent: Wrapper, gi: "GalaxyInstance"):
+        super().__init__(wrapped, parent, gi)
+
+    def refresh(self) -> "InvocationStep":
         """
         Re-fetch the attributes pertaining to this object.
 
         :return: self
         """
         step_dict = self.gi.gi.invocations.show_invocation_step(self.parent.id, self.id)
-        self.__init__(step_dict, parent=self.parent, gi=self.gi)
+        self.__init__(step_dict, parent=self.parent, gi=self.gi)  # type: ignore[misc]
         return self
 
     def get_outputs(self):
@@ -243,16 +272,19 @@ class Workflow(Wrapper):
         "steps",
         "tags",
     )
+    inputs: Dict
+    missing_ids: List
+    steps: Dict
     POLLING_INTERVAL = 10  # for output state monitoring
 
-    def __init__(self, wf_dict, gi=None):
+    def __init__(self, wf_dict: dict, gi: Optional["GalaxyInstance"] = None):
         super().__init__(wf_dict, gi=gi)
         missing_ids = []
         if gi:
             tools_list_by_id = [t.id for t in gi.tools.get_previews()]
         else:
             tools_list_by_id = []
-        tool_labels_to_ids = {}
+        tool_labels_to_ids: Dict[str, Set[str]] = {}
         for k, v in self.steps.items():
             # convert step ids to str for consistency with outer keys
             v["id"] = str(v["id"])
@@ -264,7 +296,7 @@ class Workflow(Wrapper):
                 if not step.tool_inputs or step.tool_id not in tools_list_by_id:
                     missing_ids.append(k)
                 tool_labels_to_ids.setdefault(step.tool_id, set()).add(step.id)
-        input_labels_to_ids = {}
+        input_labels_to_ids: Dict[str, Set[str]] = {}
         for id_, d in self.inputs.items():
             input_labels_to_ids.setdefault(d["label"], set()).add(id_)
         object.__setattr__(self, "input_labels_to_ids", input_labels_to_ids)
@@ -402,13 +434,14 @@ class Workflow(Wrapper):
             raise ValueError(f"no object for id {self.id}")
         return p
 
-    def export(self):
+    def export(self) -> dict:
         """
         Export a re-importable representation of the workflow.
 
         :rtype: dict
         :return: a JSON-serializable dump of the workflow
         """
+        assert self.gi is not None
         return self.gi.gi.workflows.export_workflow_dict(self.id)
 
     def delete(self):
@@ -419,6 +452,7 @@ class Workflow(Wrapper):
           Deleting a workflow is irreversible - all of the data from
           the workflow will be permanently deleted.
         """
+        assert self.gi is not None
         self.gi.workflows.delete(id_=self.id)
         self.unmap()
 
@@ -432,7 +466,7 @@ class Workflow(Wrapper):
         allow_tool_state_corrections=True,
         inputs_by=None,
         parameters_normalized=False,
-    ):
+    ) -> "Invocation":
         """
         Invoke the workflow. This will cause a workflow to be scheduled
         and return an object describing the workflow invocation.
@@ -563,6 +597,7 @@ class Workflow(Wrapper):
           (which is stable across workflow imports) or the step UUID which is
           also stable.
         """
+        assert self.gi is not None
         if not self.is_mapped:
             raise RuntimeError("workflow is not mapped to a Galaxy object")
         if not self.is_runnable:
@@ -592,18 +627,18 @@ class Invocation(Wrapper):
 
     BASE_ATTRS = Wrapper.BASE_ATTRS + (
         "history_id",
-        "inputs",
         "state",
-        "steps",
         "update_time",
         "uuid",
         "workflow_id",
     )
+    gi: "GalaxyInstance"
+    steps: List[InvocationStep]
 
-    def __init__(self, inv_dict, gi=None):
+    def __init__(self, inv_dict: dict, gi: "GalaxyInstance"):
         super().__init__(inv_dict, gi=gi)
-        self.steps = [InvocationStep(step, parent=self, gi=gi) for step in self.steps]
-        self.inputs = [{**v, "label": k} for k, v in self.inputs.items()]
+        self.steps = [InvocationStep(step, parent=self, gi=gi) for step in inv_dict["steps"]]
+        self.inputs = [{**v, "label": k} for k, v in inv_dict["inputs"].items()]
 
     def sorted_step_ids(self):
         """
@@ -666,19 +701,19 @@ class Invocation(Wrapper):
           On success, this method updates the Invocation object's internal variables.
         """
         inv_dict = self.gi.gi.invocations.cancel_invocation(self.id)
-        self.__init__(inv_dict, gi=self.gi)
+        self.__init__(inv_dict, gi=self.gi)  # type: ignore[misc]
 
-    def refresh(self):
+    def refresh(self) -> "Invocation":
         """
         Re-fetch the attributes pertaining to this object.
 
         :return: self
         """
         inv_dict = self.gi.gi.invocations.show_invocation(self.id)
-        self.__init__(inv_dict, gi=self.gi)
+        self.__init__(inv_dict, gi=self.gi)  # type: ignore[misc]
         return self
 
-    def run_step_actions(self, steps, actions):
+    def run_step_actions(self, steps: List[InvocationStep], actions):
         """
         Run actions for active steps of this invocation.
 
@@ -700,7 +735,7 @@ class Invocation(Wrapper):
             for step, action in zip(steps, actions)
         ]
         for step, step_dict in zip(steps, step_dict_list):
-            step.__init__(step_dict, parent=self)
+            step.__init__(step_dict, parent=self, gi=self.gi)  # type: ignore[misc]
 
     def summary(self):
         """
@@ -750,7 +785,7 @@ class Invocation(Wrapper):
         """
         return self.gi.gi.invocations.get_invocation_biocompute_object(self.id)
 
-    def wait(self, maxwait=12000, interval=3, check=True):
+    def wait(self, maxwait: int = 12000, interval: int = 3, check: bool = True):
         """
         Wait for this invocation to reach a terminal state.
 
@@ -767,7 +802,7 @@ class Invocation(Wrapper):
           On success, this method updates the Invocation object's internal variables.
         """
         inv_dict = self.gi.gi.invocations.wait_for_invocation(self.id, maxwait=maxwait, interval=interval, check=check)
-        self.__init__(inv_dict, gi=self.gi)
+        self.__init__(inv_dict, gi=self.gi)  # type: ignore[misc]
 
 
 class Dataset(Wrapper, metaclass=abc.ABCMeta):
@@ -785,9 +820,11 @@ class Dataset(Wrapper, metaclass=abc.ABCMeta):
         "name",
         "state",
     )
+    container: "DatasetContainer"
+    gi: "GalaxyInstance"
     POLLING_INTERVAL = 1  # for state monitoring
 
-    def __init__(self, ds_dict, container, gi=None):
+    def __init__(self, ds_dict, container: "DatasetContainer", gi: "GalaxyInstance"):
         super().__init__(ds_dict, gi=gi)
         object.__setattr__(self, "container", container)
 
@@ -848,7 +885,7 @@ class Dataset(Wrapper, metaclass=abc.ABCMeta):
         """
         return b"".join(self.get_stream(chunk_size=chunk_size))
 
-    def refresh(self):
+    def refresh(self) -> "Dataset":
         """
         Re-fetch the attributes pertaining to this object.
 
@@ -856,7 +893,7 @@ class Dataset(Wrapper, metaclass=abc.ABCMeta):
         """
         gi_client = getattr(self.gi.gi, self.container.API_MODULE)
         ds_dict = gi_client.show_dataset(self.container.id, self.id)
-        self.__init__(ds_dict, self.container, self.gi)
+        self.__init__(ds_dict, self.container, self.gi)  # type: ignore[misc]
         return self
 
     def wait(self, polling_interval=POLLING_INTERVAL, break_on_error=True):
@@ -905,7 +942,7 @@ class HistoryDatasetAssociation(Dataset):
         )
         return r.iter_content(chunk_size)  # FIXME: client can't close r
 
-    def update(self, **kwds):
+    def update(self, **kwds) -> "HistoryDatasetAssociation":
         """
         Update this history dataset metadata. Some of the attributes that can be
         modified are documented below.
@@ -928,7 +965,7 @@ class HistoryDatasetAssociation(Dataset):
         res = self.gi.gi.histories.update_dataset(self.container.id, self.id, **kwds)
         # Refresh also the history because the dataset may have been (un)deleted
         self.container.refresh()
-        self.__init__(res, self.container, gi=self.gi)
+        self.__init__(res, self.container, gi=self.gi)  # type: ignore[misc]
         return self
 
     def delete(self, purge=False):
@@ -959,12 +996,15 @@ class DatasetCollection(Wrapper, metaclass=abc.ABCMeta):
         "name",
         "state",
     )
+    container: Union["DatasetCollection", "History"]
+    API_MODULE = "dataset_collections"
+    gi: "GalaxyInstance"
 
-    def __init__(self, dsc_dict, container, gi=None):
+    def __init__(self, dsc_dict, container, gi: "GalaxyInstance"):
         super().__init__(dsc_dict, gi=gi)
         object.__setattr__(self, "container", container)
 
-    def refresh(self):
+    def refresh(self) -> "DatasetCollection":
         """
         Re-fetch the attributes pertaining to this object.
 
@@ -972,7 +1012,7 @@ class DatasetCollection(Wrapper, metaclass=abc.ABCMeta):
         """
         gi_client = getattr(self.gi.gi, self.container.API_MODULE)
         dsc_dict = gi_client.show_dataset_collection(self.container.id, self.id)
-        self.__init__(dsc_dict, self.container, self.gi)
+        self.__init__(dsc_dict, self.container, self.gi)  # type: ignore[misc]
         return self
 
     @abc.abstractmethod
@@ -1036,7 +1076,7 @@ class LibraryDataset(LibRelatedDataset):
         self.container.refresh()
         self.refresh()
 
-    def update(self, **kwds):
+    def update(self, **kwds) -> "LibraryDataset":
         """
         Update this library dataset metadata. Some of the attributes that can be
         modified are documented below.
@@ -1049,7 +1089,7 @@ class LibraryDataset(LibRelatedDataset):
         """
         res = self.gi.gi.libraries.update_library_dataset(self.id, **kwds)
         self.container.refresh()
-        self.__init__(res, self.container, gi=self.gi)
+        self.__init__(res, self.container, gi=self.gi)  # type: ignore[misc]
         return self
 
 
@@ -1091,8 +1131,12 @@ class DatasetContainer(Wrapper, metaclass=abc.ABCMeta):
         "deleted",
         "name",
     )
+    API_MODULE: str
+    content_infos: List[ContentInfo]
+    gi: "GalaxyInstance"
+    obj_gi_client: "client.ObjDatasetContainerClient"
 
-    def __init__(self, c_dict, content_infos=None, gi=None):
+    def __init__(self, c_dict, content_infos=None, gi: "GalaxyInstance" = None):
         """
         :type content_infos: list of :class:`ContentInfo`
         :param content_infos: info objects for the container's contents
@@ -1102,11 +1146,6 @@ class DatasetContainer(Wrapper, metaclass=abc.ABCMeta):
             content_infos = []
         object.__setattr__(self, "content_infos", content_infos)
         object.__setattr__(self, "obj_gi_client", getattr(self.gi, self.API_MODULE))
-
-    @property
-    @abc.abstractmethod
-    def API_MODULE(self):
-        pass
 
     @property
     def dataset_ids(self):
@@ -1127,14 +1166,14 @@ class DatasetContainer(Wrapper, metaclass=abc.ABCMeta):
                 raise ValueError(f"no object for id {self.id}")
         return p
 
-    def refresh(self):
+    def refresh(self) -> "DatasetContainer":
         """
         Re-fetch the attributes pertaining to this object.
 
         :return: self
         """
         fresh = self.obj_gi_client.get(self.id)
-        self.__init__(fresh.wrapped, content_infos=fresh.content_infos, gi=self.gi)
+        self.__init__(fresh.wrapped, content_infos=fresh.content_infos, gi=self.gi)  # type: ignore[misc]
         return self
 
     def get_dataset(self, ds_id):
@@ -1555,13 +1594,16 @@ class Folder(Wrapper):
         "item_count",
         "name",
     )
+    container: Library
+    gi: "GalaxyInstance"
+    _cached_parent: Optional["Folder"]
 
-    def __init__(self, f_dict, container, gi=None):
+    def __init__(self, f_dict, container, gi: "GalaxyInstance"):
         super().__init__(f_dict, gi=gi)
         object.__setattr__(self, "container", container)
 
     @property
-    def parent(self):
+    def parent(self) -> Optional["Folder"]:
         """
         The parent folder of this folder. The parent of the root folder is
         ``None``.
@@ -1573,7 +1615,7 @@ class Folder(Wrapper):
             object.__setattr__(self, "_cached_parent", self._get_parent())
         return self._cached_parent
 
-    def _get_parent(self):
+    def _get_parent(self) -> Optional["Folder"]:
         """
         Return the parent folder of this folder.
         """
@@ -1582,14 +1624,14 @@ class Folder(Wrapper):
             return None
         return self.container.get_folder(parent_id)
 
-    def refresh(self):
+    def refresh(self) -> "Folder":
         """
         Re-fetch the attributes pertaining to this object.
 
         :return: self
         """
         f_dict = self.gi.gi.libraries.show_folder(self.container.id, self.id)
-        self.__init__(f_dict, self.container, gi=self.gi)
+        self.__init__(f_dict, self.container, gi=self.gi)  # type: ignore[misc]
         return self
 
 

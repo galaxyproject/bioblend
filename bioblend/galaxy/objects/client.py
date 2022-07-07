@@ -6,6 +6,7 @@ via their handles in :class:`~.galaxy_instance.GalaxyInstance`.
 """
 import abc
 import json
+import typing
 from collections.abc import (
     Mapping,
     Sequence,
@@ -15,9 +16,12 @@ from typing import List
 import bioblend
 from . import wrappers
 
+if typing.TYPE_CHECKING:
+    from .galaxy_instance import GalaxyInstance
+
 
 class ObjClient(abc.ABC):
-    def __init__(self, obj_gi):
+    def __init__(self, obj_gi: "GalaxyInstance"):
         self.obj_gi = obj_gi
         self.gi = self.obj_gi.gi
         self.log = bioblend.log
@@ -100,6 +104,13 @@ class ObjDatasetContainerClient(ObjClient):
         c_infos = [ctype.CONTENT_INFO_TYPE(_) for _ in c_infos]
         return ctype(cdict, content_infos=c_infos, gi=self.obj_gi)
 
+    @abc.abstractmethod
+    def get(self, id_: str) -> wrappers.DatasetContainer:
+        """
+        Retrieve the dataset corresponding to the given id.
+        """
+        pass
+
 
 class ObjLibraryClient(ObjDatasetContainerClient):
     """
@@ -120,7 +131,7 @@ class ObjLibraryClient(ObjDatasetContainerClient):
         lib_info = self._get_dict("create_library", res)
         return self.get(lib_info["id"])
 
-    def get(self, id_):
+    def get(self, id_) -> wrappers.Library:
         """
         Retrieve the data library corresponding to the given id.
 
@@ -188,7 +199,7 @@ class ObjHistoryClient(ObjDatasetContainerClient):
         hist_info = self._get_dict("create_history", res)
         return self.get(hist_info["id"])
 
-    def get(self, id_):
+    def get(self, id_) -> wrappers.History:
         """
         Retrieve the history corresponding to the given id.
 
@@ -279,7 +290,7 @@ class ObjWorkflowClient(ObjClient):
         wf_info = self.gi.workflows.import_shared_workflow(id_)
         return self.get(wf_info["id"])
 
-    def get(self, id_):
+    def get(self, id_) -> wrappers.Workflow:
         """
         Retrieve the workflow corresponding to the given id.
 
@@ -349,7 +360,7 @@ class ObjInvocationClient(ObjClient):
         :param: previews of invocations
         """
         inv_list = self.gi.invocations.get_invocations()
-        return [wrappers.InvocationPreview(inv_dict, self.obj_gi) for inv_dict in inv_list]
+        return [wrappers.InvocationPreview(inv_dict, gi=self.obj_gi) for inv_dict in inv_list]
 
     def list(self, workflow=None, history=None, include_terminal=True, limit=None) -> List[wrappers.Invocation]:
         """
@@ -390,7 +401,7 @@ class ObjToolClient(ObjClient):
     Interacts with Galaxy tools.
     """
 
-    def get(self, id_, io_details=False, link_details=False):
+    def get(self, id_, io_details=False, link_details=False) -> wrappers.Tool:
         """
         Retrieve the tool corresponding to the given id.
 
@@ -454,7 +465,7 @@ class ObjJobClient(ObjClient):
     Interacts with Galaxy jobs.
     """
 
-    def get(self, id_, full_details=False):
+    def get(self, id_, full_details=False) -> wrappers.Job:
         """
         Retrieve the job corresponding to the given id.
 
@@ -488,7 +499,7 @@ class ObjDatasetClient(ObjClient):
     Interacts with Galaxy datasets.
     """
 
-    def get(self, id_: str, hda_ldda: str = "hda"):
+    def get(self, id_: str, hda_ldda: str = "hda") -> wrappers.Dataset:
         """
         Retrieve the dataset corresponding to the given id.
 
@@ -522,7 +533,7 @@ class ObjDatasetCollectionClient(ObjClient):
     Interacts with Galaxy dataset collections.
     """
 
-    def get(self, id_: str):
+    def get(self, id_: str) -> wrappers.HistoryDatasetCollectionAssociation:
         """
         Retrieve the dataset collection corresponding to the given id.
 

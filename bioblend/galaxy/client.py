@@ -6,6 +6,7 @@ should not use it directly.
 """
 
 import time
+import typing
 from typing import Optional
 
 import requests
@@ -16,10 +17,14 @@ import bioblend
 # ConnectionError class was originally defined here
 from bioblend import ConnectionError  # noqa: I202
 
+if typing.TYPE_CHECKING:
+    from bioblend.galaxy import GalaxyInstance
+
 
 class Client:
     # The `module` attribute needs to be defined in subclasses
     module: str
+    gi: "GalaxyInstance"
 
     # Class variables that configure GET request retries.  Note that since these
     # are class variables their values are shared by all Client instances --
@@ -69,7 +74,7 @@ class Client:
         cls._get_retry_delay = value
         return cls
 
-    def __init__(self, galaxy_instance):
+    def __init__(self, galaxy_instance: "GalaxyInstance"):
         """
         A generic Client interface defining the common fields.
 
