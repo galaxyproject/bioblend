@@ -25,7 +25,6 @@ from bioblend.galaxy import (
     visual,
     workflows,
 )
-from bioblend.galaxy.client import Client
 from bioblend.galaxyclient import GalaxyClient
 
 
@@ -96,22 +95,6 @@ class GalaxyInstance(GalaxyClient):
         self.tool_data = tool_data.ToolDataClient(self)
         self.folders = folders.FoldersClient(self)
         self.tool_dependencies = tool_dependencies.ToolDependenciesClient(self)
-
-    @property
-    def max_get_attempts(self):
-        return Client.max_get_retries()
-
-    @max_get_attempts.setter
-    def max_get_attempts(self, v):
-        Client.set_max_get_retries(v)
-
-    @property
-    def get_retry_delay(self):
-        return Client.get_retry_delay()
-
-    @get_retry_delay.setter
-    def get_retry_delay(self, v):
-        Client.set_get_retry_delay(v)
 
     def __repr__(self):
         """

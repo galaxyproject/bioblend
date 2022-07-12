@@ -26,53 +26,21 @@ class Client:
     module: str
     gi: "GalaxyClient"
 
-    # Class variables that configure GET request retries.  Note that since these
-    # are class variables their values are shared by all Client instances --
-    # i.e., HistoryClient, WorkflowClient, etc.
-    #
-    # Number of attempts before giving up on a GET request.
-    _max_get_retries = 1
-    # Delay in seconds between subsequent retries.
-    _get_retry_delay = 10
-
     @classmethod
     def max_get_retries(cls):
-        """
-        The maximum number of attempts for a GET request.
-        """
-        return cls._max_get_retries
+        raise AttributeError("Deprecated method, please use gi's `max_get_attempts` property")
 
     @classmethod
     def set_max_get_retries(cls, value):
-        """
-        Set the maximum number of attempts for GET requests. A value greater
-        than one causes failed GET requests to be retried `value` - 1 times.
-
-        Default: 1
-        """
-        if value < 1:
-            raise ValueError(f"Number of retries must be >= 1 (got: {value})")
-        cls._max_get_retries = value
-        return cls
+        raise AttributeError("Deprecated method, please use gi's `max_get_attempts` property")
 
     @classmethod
     def get_retry_delay(cls):
-        """
-        The delay (in seconds) to wait before retrying a failed GET
-        request.
-        """
-        return cls._get_retry_delay
+        raise AttributeError("Deprecated method, please use gi's `get_retry_delay` property")
 
     @classmethod
     def set_get_retry_delay(cls, value):
-        """
-        Set the delay (in seconds) to wait before retrying a failed GET
-        request. Default: 10
-        """
-        if value < 0:
-            raise ValueError(f"Retry delay must be >= 0 (got: {value})")
-        cls._get_retry_delay = value
-        return cls
+        raise AttributeError("Deprecated method, please use gi's `get_retry_delay` property")
 
     def __init__(self, galaxy_instance: "GalaxyClient"):
         """
@@ -115,7 +83,7 @@ class Client:
         deleted: bool = False,
         contents: bool = False,
         url: Optional[str] = None,
-        params=None,
+        params: Optional[dict] = None,
         json: bool = True,
     ):
         """
@@ -124,8 +92,8 @@ class Client:
         If ``json`` is set to ``True``, return a decoded JSON object
         (and treat an empty or undecodable response as an error).
 
-        The request will optionally be retried as configured by
-        ``max_get_retries`` and ``get_retry_delay``: this offers some
+        The request will optionally be retried as configured by gi's
+        ``max_get_attempts`` and ``get_retry_delay``: this offers some
         resilience in the presence of temporary failures.
 
         :return: The decoded response if ``json`` is set to ``True``, otherwise
@@ -133,8 +101,8 @@ class Client:
         """
         if url is None:
             url = self._make_url(module_id=id, deleted=deleted, contents=contents)
-        attempts_left = self.max_get_retries()
-        retry_delay = self.get_retry_delay()
+        attempts_left = self.gi.max_get_attempts
+        retry_delay = self.gi.get_retry_delay
         bioblend.log.debug("GET - attempts left: %s; retry delay: %s", attempts_left, retry_delay)
         msg = ""
         while attempts_left > 0:

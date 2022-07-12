@@ -7,7 +7,6 @@ import unittest
 
 from bioblend import ConnectionError
 from bioblend.galaxy import GalaxyInstance
-from bioblend.galaxy.client import Client
 from . import test_util
 
 
@@ -16,26 +15,28 @@ class TestGalaxyInstance(unittest.TestCase):
         # "connect" to a fake Galaxy instance
         self.gi = GalaxyInstance("http://localhost:56789", key="whatever")
 
-    def test_set_max_get_retries(self):
+    def test_set_max_get_attempts(self):
         self.gi.max_get_attempts = 3
-        self.assertEqual(3, Client.max_get_retries())
+        self.assertEqual(3, self.gi.max_get_attempts)
 
     def test_set_retry_delay(self):
-        self.gi.get_retry_delay = 5
-        self.assertEqual(5, Client.get_retry_delay())
+        self.gi.get_retry_delay = 5.0
+        self.assertEqual(5.0, self.gi.get_retry_delay)
 
     def test_get_retry(self):
         # We set the client to try twice, with a delay of 5 seconds between
         # attempts. So, we expect the call to take at least 5 seconds before
         # failing.
-        self.gi.max_get_attempts = 2
-        self.gi.get_retry_delay = 5
+        self.gi.max_get_attempts = 3
+        self.gi.get_retry_delay = 2
         start = time.time()
         with self.assertRaises(ConnectionError):
             self.gi.libraries.get_libraries()
         end = time.time()
         duration = end - start
-        self.assertGreater(duration, self.gi.get_retry_delay, "Didn't seem to retry long enough")
+        self.assertGreater(
+            duration, self.gi.get_retry_delay * (self.gi.max_get_attempts - 1), "Didn't seem to retry long enough"
+        )
 
     def test_missing_scheme_fake_url(self):
         with self.assertRaises(ValueError):

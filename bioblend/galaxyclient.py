@@ -77,6 +77,45 @@ class GalaxyClient:
         self.json_headers: dict = {"Content-Type": "application/json"}
         # json_headers needs to be set before key can be defined, otherwise authentication with email/password causes an error
         self.json_headers["x-api-key"] = self.key
+        # Number of attempts before giving up on a GET request.
+        self._max_get_attempts = 1
+        # Delay in seconds between subsequent retries.
+        self._get_retry_delay = 10.0
+
+    @property
+    def max_get_attempts(self) -> int:
+        """
+        The maximum number of attempts for a GET request. Default: 1
+        """
+        return self._max_get_attempts
+
+    @max_get_attempts.setter
+    def max_get_attempts(self, value: int) -> None:
+        """
+        Set the maximum number of attempts for GET requests. A value greater
+        than one causes failed GET requests to be retried `value` - 1 times.
+        """
+        if value < 1:
+            raise ValueError(f"Number of attempts must be >= 1 (got: {value})")
+        self._max_get_attempts = value
+
+    @property
+    def get_retry_delay(self) -> float:
+        """
+        The delay (in seconds) to wait before retrying a failed GET request.
+        Default: 10.0
+        """
+        return self._get_retry_delay
+
+    @get_retry_delay.setter
+    def get_retry_delay(self, value: float) -> None:
+        """
+        Set the delay (in seconds) to wait before retrying a failed GET
+        request.
+        """
+        if value < 0:
+            raise ValueError(f"Retry delay must be >= 0 (got: {value})")
+        self._get_retry_delay = value
 
     def make_get_request(self, url: str, **kwargs):
         """

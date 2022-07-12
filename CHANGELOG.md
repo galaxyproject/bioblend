@@ -1,11 +1,16 @@
+### BioBlend v
+
+* Deprecated ``max_get_retries``, ``set_max_get_retries``, ``get_retry_delay``
+  and ``set_get_retry_delay`` methods of ``Client``.
+
 ### BioBlend v0.18.0 - 2022-07-07
 
 * Added support for Galaxy release 22.05.
 
-* Add tus support to ``ToolClient.upload_file()`` (thanks to
+* Added tus support to ``ToolClient.upload_file()`` (thanks to
   [Nate Coraor](https://github.com/natefoo)).
 
-* Format Python code with black and isort.
+* Formatted Python code with black and isort.
 
 * Improvements to type annotations, tests and documentation.
 
