@@ -167,6 +167,10 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
     @test_util.skip_unless_tool("random_lines1")
     def test_get_destination_params(self):
         job_id = self._run_tool()["jobs"][0]["id"]
+        # In Galaxy 20.05 and 20.09 we need to wait for the job, otherwise
+        # `get_destination_params()` receives a 500 error code. Fixed upstream
+        # in https://github.com/galaxyproject/galaxy/commit/3e7f03cd1f229b8c9421ade02002728a33e131d8
+        self.gi.jobs.wait_for_job(job_id)
         response = self.gi.jobs.get_destination_params(job_id)
         self.assertIn("Runner", response)
         self.assertIn("Runner Job ID", response)
