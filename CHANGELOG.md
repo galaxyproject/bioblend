@@ -3,6 +3,14 @@
 * Deprecated ``max_get_retries``, ``set_max_get_retries``, ``get_retry_delay``
   and ``set_get_retry_delay`` methods of ``Client``.
 
+* Moved ``max_get_attempts`` and ``get_retry_delay`` properties from
+  ``GalaxyInstance`` to ``GalaxyClient``, so they are also available in
+  ``ToolshedInstance``.
+
+* Added Code of Conduct for the project.
+
+* Improvements to type annotations, tests and documentation.
+
 ### BioBlend v0.18.0 - 2022-07-07
 
 * Added support for Galaxy release 22.05.
