@@ -5,6 +5,7 @@ import logging
 import os
 import shlex
 import time
+import typing
 import warnings
 from typing import (
     Any,
@@ -19,6 +20,9 @@ import bioblend
 from bioblend import TimeoutException
 from bioblend.galaxy.client import Client
 
+if typing.TYPE_CHECKING:
+    from bioblend.galaxy import GalaxyInstance
+
 log = logging.getLogger(__name__)
 
 TERMINAL_STATES = {"ok", "empty", "error", "discarded", "failed_metadata"}
@@ -26,9 +30,10 @@ TERMINAL_STATES = {"ok", "empty", "error", "discarded", "failed_metadata"}
 
 
 class DatasetClient(Client):
+    gi: "GalaxyInstance"
     module = "datasets"
 
-    def __init__(self, galaxy_instance):
+    def __init__(self, galaxy_instance: "GalaxyInstance"):
         super().__init__(galaxy_instance)
 
     def show_dataset(self, dataset_id, deleted=False, hda_ldda="hda"):

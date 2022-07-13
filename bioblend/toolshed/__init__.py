@@ -1,6 +1,8 @@
 """
 A base representation of an instance of Tool Shed
 """
+from typing import Optional
+
 from bioblend.galaxyclient import GalaxyClient
 from bioblend.toolshed import (
     categories,
@@ -10,7 +12,14 @@ from bioblend.toolshed import (
 
 
 class ToolShedInstance(GalaxyClient):
-    def __init__(self, url, key=None, email=None, password=None, verify=True):
+    def __init__(
+        self,
+        url: str,
+        key: Optional[str] = None,
+        email: Optional[str] = None,
+        password: Optional[str] = None,
+        verify: bool = True,
+    ):
         """
         A base representation of a connection to a ToolShed instance, identified
         by the ToolShed URL and user credentials.

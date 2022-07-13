@@ -28,7 +28,15 @@ UPLOAD_CHUNK_SIZE = 10**7
 
 
 class GalaxyClient:
-    def __init__(self, url, key=None, email=None, password=None, verify=True, timeout=None):
+    def __init__(
+        self,
+        url: str,
+        key: Optional[str] = None,
+        email: Optional[str] = None,
+        password: Optional[str] = None,
+        verify: bool = True,
+        timeout: Optional[float] = None,
+    ):
         """
         :param verify: Whether to verify the server's TLS certificate
         :type verify: bool
@@ -61,16 +69,16 @@ class GalaxyClient:
         # If key has been supplied, use it; otherwise just set email and
         # password and grab user's key before first request.
         if key:
-            self._key = key
+            self._key: Optional[str] = key
         else:
             self._key = None
             self.email = email
             self.password = password
-        self.json_headers = {"Content-Type": "application/json"}
+        self.json_headers: dict = {"Content-Type": "application/json"}
         # json_headers needs to be set before key can be defined, otherwise authentication with email/password causes an error
         self.json_headers["x-api-key"] = self.key
 
-    def make_get_request(self, url, **kwargs):
+    def make_get_request(self, url: str, **kwargs):
         """
         Make a GET request using the provided ``url``.
 
@@ -92,7 +100,9 @@ class GalaxyClient:
         r = requests.get(url, headers=headers, **kwargs)
         return r
 
-    def make_post_request(self, url, payload=None, params=None, files_attached=False):
+    def make_post_request(
+        self, url: str, payload: Optional[dict] = None, params: Optional[dict] = None, files_attached: bool = False
+    ):
         """
         Make a POST request using the provided ``url`` and ``payload``.
         The ``payload`` must be a dict that contains the request values.
@@ -121,23 +131,22 @@ class GalaxyClient:
         # leveraging the requests-toolbelt library if any files have
         # been attached.
         if files_attached:
+            payload_copy = payload.copy() if payload is not None else {}
             if params:
-                payload.update(params)
-            payload = my_dumps(payload)
-            payload = MultipartEncoder(fields=payload)
+                payload_copy.update(params)
+            data = MultipartEncoder(fields=my_dumps(payload_copy))
             headers = self.json_headers.copy()
-            headers["Content-Type"] = payload.content_type
+            headers["Content-Type"] = data.content_type
             post_params = None
         else:
-            if payload is not None:
-                payload = json.dumps(payload)
+            data = json.dumps(payload) if payload is not None else None
             headers = self.json_headers
             post_params = params
 
         r = requests.post(
             url,
             params=post_params,
-            data=payload,
+            data=data,
             headers=headers,
             timeout=self.timeout,
             allow_redirects=False,
@@ -159,7 +168,7 @@ class GalaxyClient:
             status_code=r.status_code,
         )
 
-    def make_delete_request(self, url, payload=None, params=None):
+    def make_delete_request(self, url: str, payload: Optional[dict] = None, params: Optional[dict] = None):
         """
         Make a DELETE request using the provided ``url`` and the optional
         arguments.
@@ -175,13 +184,12 @@ class GalaxyClient:
         :rtype: requests.Response
         :return: the response object.
         """
-        if payload is not None:
-            payload = json.dumps(payload)
+        data = json.dumps(payload) if payload is not None else None
         headers = self.json_headers
         r = requests.delete(
             url,
             params=params,
-            data=payload,
+            data=data,
             headers=headers,
             timeout=self.timeout,
             allow_redirects=False,
@@ -189,7 +197,7 @@ class GalaxyClient:
         )
         return r
 
-    def make_put_request(self, url, payload=None, params=None):
+    def make_put_request(self, url: str, payload: Optional[dict] = None, params: Optional[dict] = None):
         """
         Make a PUT request using the provided ``url`` with required payload.
 
@@ -198,13 +206,12 @@ class GalaxyClient:
 
         :return: The decoded response.
         """
-        if payload is not None:
-            payload = json.dumps(payload)
+        data = json.dumps(payload) if payload is not None else None
         headers = self.json_headers
         r = requests.put(
             url,
             params=params,
-            data=payload,
+            data=data,
             headers=headers,
             timeout=self.timeout,
             allow_redirects=False,
@@ -226,7 +233,7 @@ class GalaxyClient:
             status_code=r.status_code,
         )
 
-    def make_patch_request(self, url, payload=None, params=None):
+    def make_patch_request(self, url: str, payload: Optional[dict] = None, params: Optional[dict] = None):
         """
         Make a PATCH request using the provided ``url`` with required payload.
 
@@ -235,13 +242,12 @@ class GalaxyClient:
 
         :return: The decoded response.
         """
-        if payload is not None:
-            payload = json.dumps(payload)
+        data = json.dumps(payload) if payload is not None else None
         headers = self.json_headers
         r = requests.patch(
             url,
             params=params,
-            data=payload,
+            data=data,
             headers=headers,
             timeout=self.timeout,
             allow_redirects=False,
@@ -266,7 +272,7 @@ class GalaxyClient:
     def get_tus_uploader(
         self,
         path: str,
-        url: Optional[str] = "/upload/resumable_upload",
+        url: str = "/upload/resumable_upload",
         storage: Optional[str] = None,
         metadata: Optional[dict] = None,
         chunk_size: Optional[int] = UPLOAD_CHUNK_SIZE,
@@ -312,7 +318,7 @@ class GalaxyClient:
             )
 
     @property
-    def key(self):
+    def key(self) -> Optional[str]:
         if not self._key and self.email is not None and self.password is not None:
             unencoded_credentials = f"{self.email}:{self.password}"
             authorization = base64.b64encode(unencoded_credentials.encode())

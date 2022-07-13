@@ -18,13 +18,13 @@ import bioblend
 from bioblend import ConnectionError  # noqa: I202
 
 if typing.TYPE_CHECKING:
-    from bioblend.galaxy import GalaxyInstance
+    from bioblend.galaxyclient import GalaxyClient
 
 
 class Client:
     # The `module` attribute needs to be defined in subclasses
     module: str
-    gi: "GalaxyInstance"
+    gi: "GalaxyClient"
 
     # Class variables that configure GET request retries.  Note that since these
     # are class variables their values are shared by all Client instances --
@@ -74,7 +74,7 @@ class Client:
         cls._get_retry_delay = value
         return cls
 
-    def __init__(self, galaxy_instance: "GalaxyInstance"):
+    def __init__(self, galaxy_instance: "GalaxyClient"):
         """
         A generic Client interface defining the common fields.
 
@@ -131,7 +131,7 @@ class Client:
         :return: The decoded response if ``json`` is set to ``True``, otherwise
           the response object
         """
-        if not url:
+        if url is None:
             url = self._make_url(module_id=id, deleted=deleted, contents=contents)
         attempts_left = self.max_get_retries()
         retry_delay = self.get_retry_delay()

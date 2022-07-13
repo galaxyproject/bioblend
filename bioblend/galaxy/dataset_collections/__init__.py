@@ -1,5 +1,6 @@
 import logging
 import time
+import typing
 
 from bioblend import (
     CHUNK_SIZE,
@@ -7,6 +8,9 @@ from bioblend import (
 )
 from bioblend.galaxy.client import Client
 from bioblend.galaxy.datasets import TERMINAL_STATES
+
+if typing.TYPE_CHECKING:
+    from bioblend.galaxy import GalaxyInstance
 
 log = logging.getLogger(__name__)
 
@@ -82,9 +86,10 @@ class LibraryDatasetElement(SimpleElement):
 
 
 class DatasetCollectionClient(Client):
+    gi: "GalaxyInstance"
     module = "dataset_collections"
 
-    def __init__(self, galaxy_instance):
+    def __init__(self, galaxy_instance: "GalaxyInstance"):
         super().__init__(galaxy_instance)
 
     def show_dataset_collection(self, dataset_collection_id: str, instance_type: str = "history") -> dict:

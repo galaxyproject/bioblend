@@ -1,6 +1,7 @@
 """
 Contains possible interaction dealing with Galaxy tools.
 """
+import typing
 import warnings
 from os.path import basename
 from typing import (
@@ -12,11 +13,15 @@ from bioblend.galaxy.client import Client
 from bioblend.galaxyclient import UPLOAD_CHUNK_SIZE
 from bioblend.util import attach_file
 
+if typing.TYPE_CHECKING:
+    from bioblend.galaxy import GalaxyInstance
+
 
 class ToolClient(Client):
+    gi: "GalaxyInstance"
     module = "tools"
 
-    def __init__(self, galaxy_instance):
+    def __init__(self, galaxy_instance: "GalaxyInstance"):
         super().__init__(galaxy_instance)
 
     def get_tools(self, tool_id=None, name=None, trackster=None):

@@ -1,13 +1,19 @@
 """
 Interaction with a Tool Shed instance tools
 """
+import typing
+
 from bioblend.galaxy.client import Client
+
+if typing.TYPE_CHECKING:
+    from bioblend.toolshed import ToolShedInstance
 
 
 class ToolShedToolClient(Client):
+    gi: "ToolShedInstance"
     module = "tools"
 
-    def __init__(self, toolshed_instance):
+    def __init__(self, toolshed_instance: "ToolShedInstance"):
         super().__init__(toolshed_instance)
 
     def search_tools(self, q, page=1, page_size=10):
