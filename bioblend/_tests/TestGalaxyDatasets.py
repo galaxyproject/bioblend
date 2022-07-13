@@ -108,11 +108,15 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
 
     @test_util.skip_unless_galaxy("release_20.05")
     def test_get_datasets_extension(self):
-        datasets = self.gi.datasets.get_datasets(history_id=self.history_id)
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id, extension="txt")
         self.assertEqual(len(datasets), 1)
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id, extension="bam")
         self.assertEqual(datasets, [])
+
+    @test_util.skip_unless_galaxy("release_22.01")
+    def test_get_datasets_extension_list(self):
+        datasets = self.gi.datasets.get_datasets(history_id=self.history_id, extension=["bam", "txt"])
+        self.assertEqual(len(datasets), 1)
 
     @test_util.skip_unless_galaxy("release_20.05")
     def test_get_datasets_state(self):
