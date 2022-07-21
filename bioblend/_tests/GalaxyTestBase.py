@@ -17,7 +17,7 @@ class GalaxyTestBase(unittest.TestCase):
         galaxy_url = os.environ["BIOBLEND_GALAXY_URL"]
         self.gi = bioblend.galaxy.GalaxyInstance(url=galaxy_url, key=galaxy_key)
 
-    def _test_dataset(self, history_id, contents="1\t2\t3", **kwds):
+    def _test_dataset(self, history_id: str, contents: str = "1\t2\t3", **kwds) -> str:
         tool_output = self.gi.tools.paste_content(contents, history_id, **kwds)
         return tool_output["outputs"][0]["id"]
 
