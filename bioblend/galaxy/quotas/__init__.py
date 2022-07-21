@@ -1,16 +1,27 @@
 """
 Contains possible interactions with the Galaxy Quota
 """
+
+from typing import (
+    Any,
+    Dict,
+    List,
+    TYPE_CHECKING,
+)
+
 from bioblend.galaxy.client import Client
+
+if TYPE_CHECKING:
+    from bioblend.galaxy import GalaxyInstance
 
 
 class QuotaClient(Client):
     module = "quotas"
 
-    def __init__(self, galaxy_instance):
+    def __init__(self, galaxy_instance: "GalaxyInstance") -> None:
         super().__init__(galaxy_instance)
 
-    def get_quotas(self, deleted=False):
+    def get_quotas(self, deleted=False) -> List[Any]:
         """
         Get a list of quotas
 
@@ -32,7 +43,7 @@ class QuotaClient(Client):
         """
         return self._get(deleted=deleted)
 
-    def show_quota(self, quota_id, deleted=False):
+    def show_quota(self, quota_id: str, deleted=False) -> Dict[str, Any]:
         """
         Display information on a quota
 
@@ -59,7 +70,16 @@ class QuotaClient(Client):
         """
         return self._get(id=quota_id, deleted=deleted)
 
-    def create_quota(self, name, description, amount, operation, default="no", in_users=None, in_groups=None):
+    def create_quota(
+        self,
+        name: str,
+        description: str,
+        amount: str,
+        operation: str,
+        default: str = "no",
+        in_users: List[str] = None,
+        in_groups: List[str] = None,
+    ) -> Dict[str, Any]:
         """
         Create a new quota
 
@@ -96,7 +116,7 @@ class QuotaClient(Client):
              'id': '386f14984287a0f7',
              'name': 'Testing'}
         """
-        payload = {
+        payload: Dict[str, Any] = {
             "name": name,
             "description": description,
             "amount": amount,
@@ -113,15 +133,16 @@ class QuotaClient(Client):
 
     def update_quota(
         self,
-        quota_id,
-        name=None,
-        description=None,
-        amount=None,
-        operation=None,
-        default="no",
-        in_users=None,
-        in_groups=None,
-    ):
+        quota_id: str,
+        name: str = None,
+        description: str = None,
+        amount: str = None,
+        operation: str = None,
+        default: str = "no",
+        in_users: List[str] = None,
+        in_groups: List[str] = None,
+    ) -> str:
+
         """
         Update an existing quota
 
@@ -162,7 +183,7 @@ class QuotaClient(Client):
 
             "Quota 'Testing-A' has been renamed to 'Testing-B'; Quota 'Testing-e' is now '-100.0 GB'; Quota 'Testing-B' is now the default for unregistered users"
         """
-        payload = {"default": default}
+        payload: Dict[str, Any] = {"default": default}
         if name:
             payload["name"] = name
 
@@ -183,7 +204,7 @@ class QuotaClient(Client):
 
         return self._put(id=quota_id, payload=payload)
 
-    def delete_quota(self, quota_id):
+    def delete_quota(self, quota_id: str) -> str:
         """
         Delete a quota
 
@@ -200,7 +221,7 @@ class QuotaClient(Client):
         """
         return self._delete(id=quota_id)
 
-    def undelete_quota(self, quota_id):
+    def undelete_quota(self, quota_id: str) -> str:
         """
         Undelete a quota
 
