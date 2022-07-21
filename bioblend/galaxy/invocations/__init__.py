@@ -455,7 +455,7 @@ class InvocationClient(Client):
                     f"Invocation {invocation_id} is still in non-terminal state {state} after {maxwait} s"
                 )
 
-    def _invocation_step_url(self, invocation_id, step_id: str) -> str:
+    def _invocation_step_url(self, invocation_id: str, step_id: str) -> str:
         return "/".join((self._make_url(invocation_id), "steps", step_id))
 
 
