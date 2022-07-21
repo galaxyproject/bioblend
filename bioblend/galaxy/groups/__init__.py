@@ -178,7 +178,7 @@ class GroupsClient(Client):
         url = "/".join((self._make_url(group_id), "roles", role_id))
         return self._put(url=url)
 
-    def delete_group_user(self, group_id: str, user_id: str) -> Dict[str, str]:
+    def delete_group_user(self, group_id: str, user_id: str) -> Dict[str, Any]:
         """
         Remove a user from the given group.
 
