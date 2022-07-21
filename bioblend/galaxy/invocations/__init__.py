@@ -27,6 +27,7 @@ INVOCATION_TERMINAL_STATES = {"cancelled", "failed", "scheduled"}
 
 
 class InvocationClient(Client):
+    gi: "GalaxyInstance"
     module = "invocations"
 
     def __init__(self, galaxy_instance: "GalaxyInstance") -> None:
