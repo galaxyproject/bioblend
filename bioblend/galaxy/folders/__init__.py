@@ -9,6 +9,8 @@ from typing import (
     Union,
 )
 
+from typing_extensions import Literal
+
 from bioblend.galaxy.client import Client
 
 if TYPE_CHECKING:
@@ -98,7 +100,7 @@ class FoldersClient(Client):
             payload["description"] = description
         return self._put(payload=payload, id=folder_id)
 
-    def get_permissions(self, folder_id: str, scope: str) -> Dict:
+    def get_permissions(self, folder_id: str, scope: Literal["current", "available"] = "current") -> Dict:
         """
         Get the permissions of a folder.
 
@@ -117,7 +119,7 @@ class FoldersClient(Client):
     def set_permissions(
         self,
         folder_id: str,
-        action: str = "set_permissions",
+        action: Literal["set_permissions"] = "set_permissions",
         add_ids: List[str] = None,
         manage_ids: List[str] = None,
         modify_ids: List[str] = None,
