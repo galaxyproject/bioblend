@@ -1,7 +1,6 @@
 """
 Contains possible interaction dealing with Galaxy tools.
 """
-import typing
 import warnings
 from os.path import basename
 from typing import (
@@ -9,7 +8,7 @@ from typing import (
     Dict,
     List,
     Optional,
-    Union,
+    TYPE_CHECKING,
 )
 
 from typing_extensions import Literal
@@ -18,7 +17,7 @@ from bioblend.galaxy.client import Client
 from bioblend.galaxyclient import UPLOAD_CHUNK_SIZE
 from bioblend.util import attach_file
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
     from bioblend.galaxy import GalaxyInstance
 
 from .inputs import InputsBuilder

@@ -5,13 +5,13 @@ import logging
 import os
 import shlex
 import time
-import typing
 import warnings
 from typing import (
     Any,
     Dict,
     List,
     Optional,
+    TYPE_CHECKING,
     Union,
 )
 from urllib.parse import urljoin
@@ -22,7 +22,7 @@ import bioblend
 from bioblend import TimeoutException
 from bioblend.galaxy.client import Client
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
     from bioblend.galaxy import GalaxyInstance
 
 log = logging.getLogger(__name__)

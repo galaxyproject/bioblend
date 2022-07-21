@@ -1,6 +1,6 @@
 import logging
 import time
-import typing
+from typing import TYPE_CHECKING
 
 from bioblend import (
     CHUNK_SIZE,
@@ -9,7 +9,7 @@ from bioblend import (
 from bioblend.galaxy.client import Client
 from bioblend.galaxy.datasets import TERMINAL_STATES
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
     from bioblend.galaxy import GalaxyInstance
 
 log = logging.getLogger(__name__)

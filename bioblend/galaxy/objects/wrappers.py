@@ -6,7 +6,6 @@ A basic object-oriented interface for Galaxy entities.
 
 import abc
 import json
-import typing
 from collections.abc import (
     Mapping,
     Sequence,
@@ -17,13 +16,14 @@ from typing import (
     Optional,
     Set,
     Tuple,
+    TYPE_CHECKING,
     Union,
 )
 
 import bioblend
 from bioblend.util import abstractclass
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
     from . import client
     from .galaxy_instance import GalaxyInstance
 
