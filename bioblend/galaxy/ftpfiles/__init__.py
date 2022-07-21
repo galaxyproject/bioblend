@@ -1,16 +1,24 @@
 """
 Contains possible interactions with the Galaxy FTP Files
 """
+from typing import (
+    List,
+    TYPE_CHECKING,
+)
+
 from bioblend.galaxy.client import Client
+
+if TYPE_CHECKING:
+    from bioblend.galaxy import GalaxyInstance
 
 
 class FTPFilesClient(Client):
     module = "ftp_files"
 
-    def __init__(self, galaxy_instance):
+    def __init__(self, galaxy_instance: "GalaxyInstance"):
         super().__init__(galaxy_instance)
 
-    def get_ftp_files(self, deleted=False):
+    def get_ftp_files(self, deleted: bool = False) -> List[dict]:
         """
         Get a list of local files.
 
