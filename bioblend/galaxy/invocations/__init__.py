@@ -412,7 +412,7 @@ class InvocationClient(Client):
         return self._get(url=url)
 
     def wait_for_invocation(
-        self, invocation_id: str, maxwait: int = 12000, interval: int = 3, check: bool = True
+        self, invocation_id: str, maxwait: float = 12000, interval: float = 3, check: bool = True
     ) -> Dict[str, Any]:
         """
         Wait until an invocation is in a terminal state.
