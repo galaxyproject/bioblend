@@ -11,7 +11,7 @@ class ConfigClient(Client):
     def __init__(self, galaxy_instance):
         super().__init__(galaxy_instance)
 
-    def get_config(self):
+    def get_config(self) -> dict:
         """
         Get a list of attributes about the Galaxy instance. More attributes will
         be present if the user is an admin.
@@ -36,7 +36,7 @@ class ConfigClient(Client):
         """
         return self._get()
 
-    def get_version(self):
+    def get_version(self) -> dict:
         """
         Get the current version of the Galaxy instance.
 
@@ -49,7 +49,7 @@ class ConfigClient(Client):
         url = self.gi.url + "/version"
         return self._get(url=url)
 
-    def whoami(self):
+    def whoami(self) -> dict:
         """
         Return information about the current authenticated user.
 
