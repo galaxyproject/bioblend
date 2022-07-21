@@ -5,8 +5,11 @@ import typing
 import warnings
 from os.path import basename
 from typing import (
+    Any,
+    Dict,
     List,
     Optional,
+    Union,
 )
 
 from bioblend.galaxy.client import Client
@@ -16,6 +19,8 @@ from bioblend.util import attach_file
 if typing.TYPE_CHECKING:
     from bioblend.galaxy import GalaxyInstance
 
+from .inputs import InputsBuilder
+
 
 class ToolClient(Client):
     gi: "GalaxyInstance"
@@ -24,7 +29,7 @@ class ToolClient(Client):
     def __init__(self, galaxy_instance: "GalaxyInstance"):
         super().__init__(galaxy_instance)
 
-    def get_tools(self, tool_id=None, name=None, trackster=None):
+    def get_tools(self, tool_id: str = None, name: str = None, trackster: bool = None) -> List[dict]:
         """
         Get all tools, or select a subset by specifying optional arguments for
         filtering (e.g. a tool name).
@@ -63,7 +68,7 @@ class ToolClient(Client):
             tools = [_ for _ in tools if _["name"] == name]
         return tools
 
-    def get_tool_panel(self):
+    def get_tool_panel(self) -> List[dict]:
         """
         Get a list of available tool elements in Galaxy's configured toolbox.
 
@@ -75,13 +80,13 @@ class ToolClient(Client):
         """
         return self._raw_get_tool(in_panel=True)
 
-    def _raw_get_tool(self, in_panel=None, trackster=None):
+    def _raw_get_tool(self, in_panel: bool = None, trackster: bool = None) -> List[dict]:
         params = {}
         params["in_panel"] = in_panel
         params["trackster"] = trackster
         return self._get(params=params)
 
-    def requirements(self, tool_id):
+    def requirements(self, tool_id: str) -> List[dict]:
         """
         Return the resolver status for a specific tool.
 
@@ -153,7 +158,7 @@ class ToolClient(Client):
         url = self._make_url(tool_id) + "/citations"
         return self._get(url=url)
 
-    def install_dependencies(self, tool_id):
+    def install_dependencies(self, tool_id: str) -> dict:
         """
         Install dependencies for a given tool via a resolver.
         This works only for Conda currently.
@@ -187,7 +192,7 @@ class ToolClient(Client):
         url = self._make_url(tool_id) + "/dependencies"
         return self._delete(url=url)
 
-    def show_tool(self, tool_id, io_details=False, link_details=False):
+    def show_tool(self, tool_id: str, io_details: bool = False, link_details: bool = False) -> dict:
         """
         Get details of a given tool.
 
@@ -208,7 +213,7 @@ class ToolClient(Client):
         params["link_details"] = link_details
         return self._get(id=tool_id, params=params)
 
-    def build(self, tool_id, inputs=None, tool_version=None, history_id=None):
+    def build(self, tool_id: str, inputs: dict = None, tool_version: str = None, history_id: str = None) -> dict:
         """
         This method returns the tool model, which includes an updated input parameter array for the given tool,
         based on user-defined "inputs".
@@ -306,7 +311,7 @@ class ToolClient(Client):
             }
 
         """
-        params = {}
+        params: Dict[Any, Any] = {}
 
         if inputs:
             params["inputs"] = inputs
@@ -321,7 +326,10 @@ class ToolClient(Client):
 
         return self._post(payload=params, url=url)
 
-    def run_tool(self, history_id, tool_id, tool_inputs, input_format="legacy"):
+    def run_tool(
+        self, history_id: str, tool_id: str, tool_inputs: Union[InputsBuilder, dict], input_format: str = "legacy"
+    ) -> dict:
+
         """
         Runs tool specified by ``tool_id`` in history indicated
         by ``history_id`` with inputs from ``dict`` ``tool_inputs``.
@@ -394,13 +402,14 @@ class ToolClient(Client):
         You can also check the examples in `Galaxy's API test suite
         <https://github.com/galaxyproject/galaxy/blob/dev/lib/galaxy_test/api/test_tools.py>`_.
         """
-        payload = {}
+        payload: Dict[str, Union[str, Dict, int, float]] = {}
         payload["history_id"] = history_id
         payload["tool_id"] = tool_id
         payload["input_format"] = input_format
-        try:
+
+        if isinstance(tool_inputs, InputsBuilder):
             payload["inputs"] = tool_inputs.to_dict()
-        except AttributeError:
+        else:
             payload["inputs"] = tool_inputs
         return self._post(payload)
 
@@ -412,7 +421,7 @@ class ToolClient(Client):
         metadata: Optional[dict] = None,
         chunk_size: Optional[int] = UPLOAD_CHUNK_SIZE,
         **keywords,
-    ):
+    ) -> dict:
         """
         Upload the file specified by ``path`` to the history specified by
         ``history_id``.
@@ -477,7 +486,7 @@ class ToolClient(Client):
             finally:
                 payload["files_0|file_data"].close()
 
-    def post_to_fetch(self, path: str, history_id: str, session_id: str, **keywords):
+    def post_to_fetch(self, path: str, history_id: str, session_id: str, **keywords) -> dict:
         """
         Make a POST request to the Fetch API after performing a tus upload.
 
@@ -503,7 +512,7 @@ class ToolClient(Client):
         url = "/".join((self.gi.url, "tools/fetch"))
         return self._post(payload, url=url)
 
-    def upload_from_ftp(self, path, history_id, **keywords):
+    def upload_from_ftp(self, path: str, history_id: str, **keywords):
         """
         Upload the file specified by ``path`` from the user's FTP directory to
         the history specified by ``history_id``.
@@ -523,7 +532,7 @@ class ToolClient(Client):
         payload["files_0|ftp_files"] = path
         return self._post(payload)
 
-    def paste_content(self, content, history_id, **kwds):
+    def paste_content(self, content: str, history_id: str, **kwds) -> dict:
         """
         Upload a string to a new dataset in the history specified by
         ``history_id``.
@@ -546,11 +555,11 @@ class ToolClient(Client):
 
     put_url = paste_content
 
-    def _upload_payload(self, history_id, **keywords):
-        payload = {}
+    def _upload_payload(self, history_id: str, **keywords) -> dict:
+        payload: Dict[str, Union[str, Dict, int, float]] = {}
         payload["history_id"] = history_id
         payload["tool_id"] = keywords.get("tool_id", "upload1")
-        tool_input = {}
+        tool_input: Dict[str, Union[str, Dict, int]] = {}
         tool_input["file_type"] = keywords.get("file_type", "auto")
         tool_input["dbkey"] = keywords.get("dbkey", "?")
         if not keywords.get("to_posix_lines", True):
