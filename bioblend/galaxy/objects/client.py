@@ -6,17 +6,19 @@ via their handles in :class:`~.galaxy_instance.GalaxyInstance`.
 """
 import abc
 import json
-import typing
 from collections.abc import (
     Mapping,
     Sequence,
 )
-from typing import List
+from typing import (
+    List,
+    TYPE_CHECKING,
+)
 
 import bioblend
 from . import wrappers
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
     from .galaxy_instance import GalaxyInstance
 
 

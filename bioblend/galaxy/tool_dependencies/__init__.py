@@ -1,6 +1,13 @@
 """
 Contains interactions dealing with Galaxy dependency resolvers.
 """
+from typing import (
+    List,
+    Optional,
+)
+
+from typing_extensions import Literal
+
 from bioblend.galaxy.client import Client
 
 
@@ -12,13 +19,13 @@ class ToolDependenciesClient(Client):
 
     def summarize_toolbox(
         self,
-        index=None,
-        tool_ids=None,
-        resolver_type=None,
-        include_containers=False,
-        container_type=None,
-        index_by="requirements",
-    ):
+        index: Optional[int] = None,
+        tool_ids: Optional[List[str]] = None,
+        resolver_type: Optional[str] = None,
+        include_containers: bool = False,
+        container_type: Optional[str] = None,
+        index_by: Literal["requirements", "tools"] = "requirements",
+    ) -> list:
         """
         Summarize requirements across toolbox (for Tool Management grid).
 

@@ -5,26 +5,29 @@ import logging
 import os
 import shlex
 import time
-import typing
 import warnings
 from typing import (
     Any,
     Dict,
     List,
     Optional,
+    TYPE_CHECKING,
     Union,
 )
 from urllib.parse import urljoin
+
+from typing_extensions import Literal
 
 import bioblend
 from bioblend import TimeoutException
 from bioblend.galaxy.client import Client
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
     from bioblend.galaxy import GalaxyInstance
 
 log = logging.getLogger(__name__)
 
+HdaLdda = Literal["hda", "ldda"]
 TERMINAL_STATES = {"ok", "empty", "error", "discarded", "failed_metadata"}
 # Non-terminal states are: 'new', 'upload', 'queued', 'running', 'paused', 'setting_metadata'
 
@@ -36,7 +39,7 @@ class DatasetClient(Client):
     def __init__(self, galaxy_instance: "GalaxyInstance"):
         super().__init__(galaxy_instance)
 
-    def show_dataset(self, dataset_id, deleted=False, hda_ldda="hda"):
+    def show_dataset(self, dataset_id: str, deleted: bool = False, hda_ldda: HdaLdda = "hda") -> dict:
         """
         Get details about a given dataset. This can be a history or a library dataset.
 
@@ -87,8 +90,13 @@ class DatasetClient(Client):
         return dataset, file_ext, r
 
     def download_dataset(
-        self, dataset_id, file_path=None, use_default_filename=True, require_ok_state=True, maxwait=12000
-    ):
+        self,
+        dataset_id: str,
+        file_path: str = None,
+        use_default_filename: bool = True,
+        require_ok_state: bool = True,
+        maxwait: float = 12000,
+    ) -> Union[bytes, str]:
         """
         Download a dataset to file or in memory. If the dataset state is not
         'ok', a ``DatasetStateException`` will be thrown, unless ``require_ok_state=False``.
@@ -313,7 +321,7 @@ class DatasetClient(Client):
             return "in", ",".join(param)
         raise Exception("Filter param is not of type ``str`` or ``list``")
 
-    def publish_dataset(self, dataset_id: str, published: bool = False):
+    def publish_dataset(self, dataset_id: str, published: bool = False) -> dict:
         """
         Make a dataset publicly available or private. For more fine-grained control (assigning different
         permissions to specific roles), use the ``update_permissions()`` method.
@@ -325,14 +333,14 @@ class DatasetClient(Client):
         :param published: Whether to make the dataset published (``True``) or private (``False``).
 
         :rtype: dict
-        :return: Current roles for all available permission types.
+        :return: Details of the updated dataset
 
         .. note::
           This method works only on Galaxy 19.05 or later.
         """
         payload: Dict[str, Any] = {"action": "remove_restrictions" if published else "make_private"}
         url = self._make_url(dataset_id) + "/permissions"
-        self.gi.datasets._put(url=url, payload=payload)
+        return self.gi.datasets._put(url=url, payload=payload)
 
     def update_permissions(
         self,
@@ -340,7 +348,7 @@ class DatasetClient(Client):
         access_ids: Optional[list] = None,
         manage_ids: Optional[list] = None,
         modify_ids: Optional[list] = None,
-    ):
+    ) -> dict:
         """
         Set access, manage or modify permissions for a dataset to a list of roles.
 
@@ -370,9 +378,9 @@ class DatasetClient(Client):
         if modify_ids:
             payload["modify"] = modify_ids
         url = self._make_url(dataset_id) + "/permissions"
-        self.gi.datasets._put(url=url, payload=payload)
+        return self.gi.datasets._put(url=url, payload=payload)
 
-    def wait_for_dataset(self, dataset_id, maxwait=12000, interval=3, check=True):
+    def wait_for_dataset(self, dataset_id: str, maxwait: float = 12000, interval: float = 3, check: bool = True):
         """
         Wait until a dataset is in a terminal state.
 

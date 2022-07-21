@@ -1,19 +1,19 @@
 """
 Contains possible interaction dealing with Galaxy tools.
 """
-import typing
 import warnings
 from os.path import basename
 from typing import (
     List,
     Optional,
+    TYPE_CHECKING,
 )
 
 from bioblend.galaxy.client import Client
 from bioblend.galaxyclient import UPLOAD_CHUNK_SIZE
 from bioblend.util import attach_file
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
     from bioblend.galaxy import GalaxyInstance
 
 
