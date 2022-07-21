@@ -327,7 +327,7 @@ class ToolClient(Client):
         return self._post(payload=params, url=url)
 
     def run_tool(
-        self, history_id: str, tool_id: str, tool_inputs: Union[InputsBuilder, dict], input_format: str = "legacy"
+        self, history_id: str, tool_id: str, tool_inputs: Union[InputsBuilder, dict], input_format: Literal["21.01", "legacy"] = "legacy"
     ) -> dict:
 
         """
