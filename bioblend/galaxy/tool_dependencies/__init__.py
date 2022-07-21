@@ -5,6 +5,7 @@ from typing import (
     List,
     Optional,
 )
+from typing_extensions import Literal
 
 from bioblend.galaxy.client import Client
 
@@ -22,7 +23,7 @@ class ToolDependenciesClient(Client):
         resolver_type: Optional[str] = None,
         include_containers: bool = False,
         container_type: Optional[str] = None,
-        index_by: str = "requirements",
+        index_by: Literal["requirements", "tools"] = "requirements",
     ) -> list:
         """
         Summarize requirements across toolbox (for Tool Management grid).
