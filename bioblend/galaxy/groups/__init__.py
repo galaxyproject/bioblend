@@ -146,7 +146,7 @@ class GroupsClient(Client):
         url = self._make_url(group_id) + "/roles"
         return self._get(url=url)
 
-    def add_group_user(self, group_id: str, user_id: str) -> Dict[str, str]:
+    def add_group_user(self, group_id: str, user_id: str) -> Dict[str, Any]:
         """
         Add a user to the given group.
 
