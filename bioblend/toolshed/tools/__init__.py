@@ -1,11 +1,11 @@
 """
 Interaction with a Tool Shed instance tools
 """
-import typing
+from typing import TYPE_CHECKING
 
 from bioblend.galaxy.client import Client
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
     from bioblend.toolshed import ToolShedInstance
 
 
