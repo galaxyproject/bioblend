@@ -2,6 +2,7 @@
 Contains possible interactions with the Galaxy Groups
 """
 from typing import (
+    Any,
     Dict,
     List,
     TYPE_CHECKING,
