@@ -19,7 +19,7 @@ class GroupsClient(Client):
     def __init__(self, galaxy_instance: "GalaxyInstance") -> None:
         super().__init__(galaxy_instance)
 
-    def get_groups(self) -> List[Dict[str, str]]:
+    def get_groups(self) -> List[Dict[str, Any]]:
         """
         Get all (not deleted) groups.
 
