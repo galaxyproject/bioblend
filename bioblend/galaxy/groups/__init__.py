@@ -60,7 +60,7 @@ class GroupsClient(Client):
 
     def create_group(
         self, group_name: str, user_ids: List[str] = None, role_ids: List[str] = None
-    ) -> List[Dict[str, str]]:
+    ) -> List[Dict[str, Any]]:
         """
         Create a new group.
 
