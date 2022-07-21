@@ -120,7 +120,7 @@ class GroupsClient(Client):
         payload = {"name": group_name, "user_ids": user_ids, "role_ids": role_ids}
         return self._put(payload=payload, id=group_id)
 
-    def get_group_users(self, group_id: str) -> List[Dict[str, str]]:
+    def get_group_users(self, group_id: str) -> List[Dict[str, Any]]:
         """
         Get the list of users associated to the given group.
 
