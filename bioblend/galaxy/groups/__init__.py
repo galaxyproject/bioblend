@@ -38,7 +38,7 @@ class GroupsClient(Client):
         """
         return self._get()
 
-    def show_group(self, group_id: str) -> Dict[str, str]:
+    def show_group(self, group_id: str) -> Dict[str, Any]:
         """
         Get details of a given group.
 
