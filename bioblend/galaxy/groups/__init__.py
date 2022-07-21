@@ -162,7 +162,7 @@ class GroupsClient(Client):
         url = "/".join((self._make_url(group_id), "users", user_id))
         return self._put(url=url)
 
-    def add_group_role(self, group_id: str, role_id: str) -> Dict[str, str]:
+    def add_group_role(self, group_id: str, role_id: str) -> Dict[str, Any]:
         """
         Add a role to the given group.
 
