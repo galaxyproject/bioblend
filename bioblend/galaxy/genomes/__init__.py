@@ -1,16 +1,28 @@
 """
 Contains possible interactions with the Galaxy Histories
 """
+from typing import (
+    Any,
+    Dict,
+    List,
+    TYPE_CHECKING,
+)
+
+from requests.models import Response
+
 from bioblend.galaxy.client import Client
+
+if TYPE_CHECKING:
+    from bioblend.galaxy import GalaxyInstance
 
 
 class GenomeClient(Client):
     module = "genomes"
 
-    def __init__(self, galaxy_instance):
+    def __init__(self, galaxy_instance: "GalaxyInstance") -> None:
         super().__init__(galaxy_instance)
 
-    def get_genomes(self):
+    def get_genomes(self) -> List[Any]:
         """
         Returns a list of installed genomes
 
@@ -20,7 +32,7 @@ class GenomeClient(Client):
         genomes = self._get()
         return genomes
 
-    def show_genome(self, id, num=None, chrom=None, low=None, high=None):
+    def show_genome(self, id: str, num: str = None, chrom: str = None, low: str = None, high: str = None) -> Response:
         """
         Returns information about build <id>
 
@@ -42,7 +54,7 @@ class GenomeClient(Client):
         :rtype: dict
         :return: Information about the genome build
         """
-        params = {}
+        params: Dict[str, str] = {}
         if num:
             params["num"] = num
         if chrom:
@@ -51,17 +63,17 @@ class GenomeClient(Client):
             params["low"] = low
         if high:
             params["high"] = high
-        return self._get(id, params)
+        return self._get(id=id, params=params)
 
     def install_genome(
         self,
         func="download",
         source=None,
-        dbkey=None,
-        ncbi_name=None,
-        ensembl_dbkey=None,
-        url_dbkey=None,
-        indexers=None,
+        dbkey: str = None,
+        ncbi_name: str = None,
+        ensembl_dbkey: str = None,
+        url_dbkey: str = None,
+        indexers: list = None,
     ):
         """
         Download and/or index a genome.
