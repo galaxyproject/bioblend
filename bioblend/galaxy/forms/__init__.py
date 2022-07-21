@@ -21,7 +21,7 @@ class FormsClient(Client):
     def __init__(self, galaxy_instance: "GalaxyInstance") -> None:
         super().__init__(galaxy_instance)
 
-    def get_forms(self) -> List[Dict[str, str]]:
+    def get_forms(self) -> List[Dict[str, Any]]:
         """
         Get the list of all forms.
 
@@ -40,7 +40,7 @@ class FormsClient(Client):
         """
         return self._get()
 
-    def show_form(self, form_id: str) -> Dict[str, Union[str, List[Any]]]:
+    def show_form(self, form_id: str) -> Dict[str, Any]:
         """
         Get details of a given form.
 
