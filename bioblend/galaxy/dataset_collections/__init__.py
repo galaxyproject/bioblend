@@ -1,6 +1,12 @@
 import logging
 import time
-import typing
+from typing import (
+    Any,
+    Dict,
+    List,
+    TYPE_CHECKING,
+    Union,
+)
 
 from bioblend import (
     CHUNK_SIZE,
@@ -9,14 +15,16 @@ from bioblend import (
 from bioblend.galaxy.client import Client
 from bioblend.galaxy.datasets import TERMINAL_STATES
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
     from bioblend.galaxy import GalaxyInstance
 
 log = logging.getLogger(__name__)
 
 
 class HasElements:
-    def __init__(self, name, type="list", elements=None):
+    def __init__(
+        self, name: str, type: str = "list", elements: Union[List[Dict[str, Any]], Dict[str, Any]] = None
+    ) -> None:
         self.name = name
         self.type = type
         if isinstance(elements, dict):
@@ -24,18 +32,18 @@ class HasElements:
         elif elements:
             self.elements = elements
 
-    def add(self, element):
+    def add(self, element: Dict[str, Any]) -> "HasElements":
         self.elements.append(element)
         return self
 
 
 class CollectionDescription(HasElements):
-    def to_dict(self):
+    def to_dict(self) -> Dict[str, Union[str, List[Any]]]:
         return dict(name=self.name, collection_type=self.type, element_identifiers=[e.to_dict() for e in self.elements])
 
 
 class CollectionElement(HasElements):
-    def to_dict(self):
+    def to_dict(self) -> Dict[str, Union[str, List[Any]]]:
         return dict(
             src="new_collection",
             name=self.name,
@@ -45,15 +53,15 @@ class CollectionElement(HasElements):
 
 
 class SimpleElement:
-    def __init__(self, value):
+    def __init__(self, value) -> None:
         self.value = value
 
-    def to_dict(self):
+    def to_dict(self) -> Dict[str, str]:
         return self.value
 
 
 class HistoryDatasetElement(SimpleElement):
-    def __init__(self, name, id):
+    def __init__(self, name: str, id: str) -> None:
         super().__init__(
             dict(
                 name=name,
@@ -64,7 +72,7 @@ class HistoryDatasetElement(SimpleElement):
 
 
 class HistoryDatasetCollectionElement(SimpleElement):
-    def __init__(self, name, id):
+    def __init__(self, name: str, id: str) -> None:
         super().__init__(
             dict(
                 name=name,
@@ -75,7 +83,7 @@ class HistoryDatasetCollectionElement(SimpleElement):
 
 
 class LibraryDatasetElement(SimpleElement):
-    def __init__(self, name, id):
+    def __init__(self, name: str, id: str) -> None:
         super().__init__(
             dict(
                 name=name,
@@ -86,10 +94,9 @@ class LibraryDatasetElement(SimpleElement):
 
 
 class DatasetCollectionClient(Client):
-    gi: "GalaxyInstance"
     module = "dataset_collections"
 
-    def __init__(self, galaxy_instance: "GalaxyInstance"):
+    def __init__(self, galaxy_instance: "GalaxyInstance") -> None:
         super().__init__(galaxy_instance)
 
     def show_dataset_collection(self, dataset_collection_id: str, instance_type: str = "history") -> dict:
