@@ -133,7 +133,7 @@ class GroupsClient(Client):
         url = self._make_url(group_id) + "/users"
         return self._get(url=url)
 
-    def get_group_roles(self, group_id: str) -> List[Dict[str, str]]:
+    def get_group_roles(self, group_id: str) -> List[Dict[str, Any]]:
         """
         Get the list of roles associated to the given group.
 
