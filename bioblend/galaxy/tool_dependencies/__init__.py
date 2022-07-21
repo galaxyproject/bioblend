@@ -5,6 +5,7 @@ from typing import (
     List,
     Optional,
 )
+
 from typing_extensions import Literal
 
 from bioblend.galaxy.client import Client
