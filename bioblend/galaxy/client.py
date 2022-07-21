@@ -6,8 +6,10 @@ should not use it directly.
 """
 
 import time
-import typing
-from typing import Optional
+from typing import (
+    Optional,
+    TYPE_CHECKING,
+)
 
 import requests
 
@@ -17,7 +19,7 @@ import bioblend
 # ConnectionError class was originally defined here
 from bioblend import ConnectionError  # noqa: I202
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
     from bioblend.galaxyclient import GalaxyClient
 
 
