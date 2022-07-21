@@ -313,7 +313,7 @@ class ToolClient(Client):
             }
 
         """
-        params: Dict[Any, Any] = {}
+        params: Dict[str, Union[str, Dict]] = {}
 
         if inputs:
             params["inputs"] = inputs
