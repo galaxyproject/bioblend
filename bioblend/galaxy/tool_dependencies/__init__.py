@@ -81,7 +81,7 @@ class ToolDependenciesClient(Client):
           the GUI and therefore is subject to breaking changes.
         """
         assert index_by in ["tools", "requirements"], "index_by must be one of 'tools' or 'requirements'."
-        params: dict = {
+        params = {
             "include_containers": str(include_containers),
             "index_by": index_by,
         }
@@ -94,5 +94,5 @@ class ToolDependenciesClient(Client):
         if container_type:
             params["container_type"] = container_type
 
-        url: str = "/".join((self._make_url(), "toolbox"))
+        url = "/".join((self._make_url(), "toolbox"))
         return self._get(url=url, params=params)
