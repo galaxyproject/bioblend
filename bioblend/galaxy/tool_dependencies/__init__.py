@@ -1,6 +1,11 @@
 """
 Contains interactions dealing with Galaxy dependency resolvers.
 """
+from typing import (
+    List,
+    Optional,
+)
+
 from bioblend.galaxy.client import Client
 
 
@@ -12,13 +17,13 @@ class ToolDependenciesClient(Client):
 
     def summarize_toolbox(
         self,
-        index=None,
-        tool_ids=None,
-        resolver_type=None,
-        include_containers=False,
-        container_type=None,
-        index_by="requirements",
-    ):
+        index: Optional[int] = None,
+        tool_ids: Optional[List[str]] = None,
+        resolver_type: Optional[str] = None,
+        include_containers: bool = False,
+        container_type: Optional[str] = None,
+        index_by: str = "requirements",
+    ) -> list:
         """
         Summarize requirements across toolbox (for Tool Management grid).
 
@@ -75,7 +80,7 @@ class ToolDependenciesClient(Client):
           the GUI and therefore is subject to breaking changes.
         """
         assert index_by in ["tools", "requirements"], "index_by must be one of 'tools' or 'requirements'."
-        params = {
+        params: dict = {
             "include_containers": str(include_containers),
             "index_by": index_by,
         }
@@ -88,5 +93,5 @@ class ToolDependenciesClient(Client):
         if container_type:
             params["container_type"] = container_type
 
-        url = "/".join((self._make_url(), "toolbox"))
+        url: str = "/".join((self._make_url(), "toolbox"))
         return self._get(url=url, params=params)
