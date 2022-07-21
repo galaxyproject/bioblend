@@ -42,7 +42,7 @@ class InvocationClient(Client):
         limit: int = None,
         view: str = "collection",
         step_details: bool = False,
-    ) -> List[Dict[str, str]]:
+    ) -> List[Dict[str, Any]]:
         """
         Get all workflow invocations, or select a subset by specifying optional
         arguments for filtering (e.g. a workflow ID).
