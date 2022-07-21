@@ -512,7 +512,7 @@ class ToolClient(Client):
         url = "/".join((self.gi.url, "tools/fetch"))
         return self._post(payload, url=url)
 
-    def upload_from_ftp(self, path: str, history_id: str, **keywords):
+    def upload_from_ftp(self, path: str, history_id: str, **keywords) -> dict:
         """
         Upload the file specified by ``path`` from the user's FTP directory to
         the history specified by ``history_id``.
