@@ -1,6 +1,12 @@
 import logging
 import time
-from typing import TYPE_CHECKING
+from typing import (
+    Any,
+    Dict,
+    List,
+    TYPE_CHECKING,
+    Union,
+)
 
 from bioblend import (
     CHUNK_SIZE,
@@ -16,26 +22,33 @@ log = logging.getLogger(__name__)
 
 
 class HasElements:
-    def __init__(self, name, type="list", elements=None):
+    def __init__(
+        self,
+        name: str,
+        type: str = "list",
+        elements: Union[List[Union["CollectionElement", "SimpleElement"]], Dict[str, Any]] = None,
+    ) -> None:
         self.name = name
         self.type = type
         if isinstance(elements, dict):
-            self.elements = [dict(name=key, id=value, src="hda") for key, value in elements.values()]
+            self.elements: List[Union["CollectionElement", "SimpleElement"]] = [
+                HistoryDatasetElement(name=key, id=value) for key, value in elements.values()
+            ]
         elif elements:
             self.elements = elements
 
-    def add(self, element):
+    def add(self, element: Union["CollectionElement", "SimpleElement"]) -> "HasElements":
         self.elements.append(element)
         return self
 
 
 class CollectionDescription(HasElements):
-    def to_dict(self):
+    def to_dict(self) -> Dict[str, Union[str, List]]:
         return dict(name=self.name, collection_type=self.type, element_identifiers=[e.to_dict() for e in self.elements])
 
 
 class CollectionElement(HasElements):
-    def to_dict(self):
+    def to_dict(self) -> Dict[str, Union[str, List]]:
         return dict(
             src="new_collection",
             name=self.name,
@@ -45,15 +58,15 @@ class CollectionElement(HasElements):
 
 
 class SimpleElement:
-    def __init__(self, value):
+    def __init__(self, value: Dict[str, str]) -> None:
         self.value = value
 
-    def to_dict(self):
+    def to_dict(self) -> Dict[str, str]:
         return self.value
 
 
 class HistoryDatasetElement(SimpleElement):
-    def __init__(self, name, id):
+    def __init__(self, name: str, id: str) -> None:
         super().__init__(
             dict(
                 name=name,
@@ -64,7 +77,7 @@ class HistoryDatasetElement(SimpleElement):
 
 
 class HistoryDatasetCollectionElement(SimpleElement):
-    def __init__(self, name, id):
+    def __init__(self, name: str, id: str) -> None:
         super().__init__(
             dict(
                 name=name,
@@ -75,7 +88,7 @@ class HistoryDatasetCollectionElement(SimpleElement):
 
 
 class LibraryDatasetElement(SimpleElement):
-    def __init__(self, name, id):
+    def __init__(self, name: str, id: str) -> None:
         super().__init__(
             dict(
                 name=name,
@@ -89,10 +102,10 @@ class DatasetCollectionClient(Client):
     gi: "GalaxyInstance"
     module = "dataset_collections"
 
-    def __init__(self, galaxy_instance: "GalaxyInstance"):
+    def __init__(self, galaxy_instance: "GalaxyInstance") -> None:
         super().__init__(galaxy_instance)
 
-    def show_dataset_collection(self, dataset_collection_id: str, instance_type: str = "history") -> dict:
+    def show_dataset_collection(self, dataset_collection_id: str, instance_type: str = "history") -> Dict[str, Any]:
         """
         Get details of a given dataset collection of the current user
 
@@ -111,7 +124,7 @@ class DatasetCollectionClient(Client):
         url = self._make_url(module_id=dataset_collection_id)
         return self._get(id=dataset_collection_id, url=url, params=params)
 
-    def download_dataset_collection(self, dataset_collection_id: str, file_path: str) -> dict:
+    def download_dataset_collection(self, dataset_collection_id: str, file_path: str) -> Dict[str, Any]:
         """
         Download a history dataset collection as an archive.
 
@@ -149,7 +162,7 @@ class DatasetCollectionClient(Client):
         interval: float = 3,
         proportion_complete: float = 1.0,
         check: bool = True,
-    ) -> dict:
+    ) -> Dict[str, Any]:
         """
         Wait until all or a specified proportion of elements of a dataset
         collection are in a terminal state.
@@ -189,7 +202,7 @@ class DatasetCollectionClient(Client):
 
         time_left = maxwait
         while True:
-            dataset_collection = self.gi.dataset_collections.show_dataset_collection(dataset_collection_id)
+            dataset_collection = self.show_dataset_collection(dataset_collection_id)
             states = [elem["object"]["state"] for elem in dataset_collection["elements"]]
             terminal_states = [state for state in states if state in TERMINAL_STATES]
             if set(terminal_states) not in [{"ok"}, set()]:

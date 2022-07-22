@@ -2,6 +2,7 @@ import os
 import tarfile
 import tempfile
 from inspect import signature
+from typing import Union
 from zipfile import ZipFile
 
 from bioblend.galaxy import dataset_collections
@@ -164,7 +165,7 @@ class TestGalaxyDatasetCollections(GalaxyTestBase.GalaxyTestBase):
         os.mkdir(extract_dir_path)
 
         if archive_type == "zip":
-            archive = ZipFile(archive_path)
+            archive: Union[ZipFile, tarfile.TarFile] = ZipFile(archive_path)
         elif archive_type == "tgz":
             archive = tarfile.open(archive_path)
 
@@ -183,7 +184,7 @@ class TestGalaxyDatasetCollections(GalaxyTestBase.GalaxyTestBase):
         for element in dataset_collection["elements"]:
             self.assertEqual(element["object"]["state"], "ok")
 
-    def _create_pair_in_history(self, history_id):
+    def _create_pair_in_history(self, history_id: str):
         dataset1_id = self._test_dataset(history_id)
         dataset2_id = self._test_dataset(history_id)
         collection_response = self.gi.histories.create_dataset_collection(
