@@ -1,16 +1,26 @@
 """
 Contains possible interactions with the Galaxy Roles
 """
+from typing import (
+    Any,
+    Dict,
+    List,
+    TYPE_CHECKING,
+)
+
 from bioblend.galaxy.client import Client
+
+if TYPE_CHECKING:
+    from bioblend.galaxy import GalaxyInstance
 
 
 class RolesClient(Client):
     module = "roles"
 
-    def __init__(self, galaxy_instance):
+    def __init__(self, galaxy_instance: "GalaxyInstance") -> None:
         super().__init__(galaxy_instance)
 
-    def get_roles(self):
+    def get_roles(self) -> List[Dict[str, Any]]:
         """
         Displays a collection (list) of roles.
 
@@ -29,7 +39,7 @@ class RolesClient(Client):
         """
         return self._get()
 
-    def show_role(self, role_id):
+    def show_role(self, role_id: str) -> Dict[str, Any]:
         """
         Display information on a single role
 
@@ -49,7 +59,9 @@ class RolesClient(Client):
         """
         return self._get(id=role_id)
 
-    def create_role(self, role_name, description, user_ids=None, group_ids=None):
+    def create_role(
+        self, role_name: str, description: str, user_ids: List[str] = None, group_ids: List[str] = None
+    ) -> Dict[str, Any]:
         """
         Create a new role.
 
