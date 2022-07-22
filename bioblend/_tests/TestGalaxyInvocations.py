@@ -140,6 +140,27 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
         history = self.gi.histories.show_history(rerun_invocation["history_id"], contents=True)
         self.assertEqual(len(history), 3)
 
+    @test_util.skip_unless_galaxy("release_21.05")
+    def test_rerun_and_remap_invocation(self):
+        path = test_util.get_abspath(os.path.join("data", "select_first.ga"))
+        wf = self.gi.workflows.import_workflow_from_local_path(path)
+        wf_inputs = {
+            "0": {"src": "hda", "id": self.dataset_id},
+            "1": "-1",
+        }
+        invocation_id = self.gi.workflows.invoke_workflow(wf["id"], inputs=wf_inputs, history_id=self.history_id)["id"]
+        self.gi.invocations.wait_for_invocation(invocation_id)
+        failed_datasets = self.gi.datasets.get_datasets(history_id=self.history_id, name="Select first on data 1")
+        failed_dataset = self.gi.datasets.wait_for_dataset(failed_datasets[0]["id"], check=False)
+        self.assertEqual(failed_dataset["state"], "error")
+
+        self.gi.invocations.rerun_invocation(invocation_id, remap=True)
+        for dataset in self.gi.datasets.get_datasets(history_id=self.history_id):
+            self.gi.datasets.wait_for_dataset(dataset["id"], check=False)
+
+        new_ok_jobs = self.gi.datasets.get_datasets(state="ok", history_id=self.history_id)
+        self.assertEqual(len(new_ok_jobs), 3)
+
     def _invoke_workflow(self):
         dataset = {"src": "hda", "id": self.dataset_id}
 

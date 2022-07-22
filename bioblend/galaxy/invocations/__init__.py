@@ -146,8 +146,9 @@ class InvocationClient(Client):
     def rerun_invocation(
         self,
         invocation_id: str,
+        remap: bool = False,
         inputs_update: Optional[dict] = None,
-        params_update: Optional[dict] = None,
+        params: Optional[dict] = None,
         history_id: Optional[str] = None,
         history_name: Optional[str] = None,
         import_inputs_to_history: bool = False,
@@ -163,15 +164,23 @@ class InvocationClient(Client):
         :type invocation_id: str
         :param invocation_id: Encoded workflow invocation ID to be rerun
 
+        :type remap: bool
+        :param remap: when ``True``, only failed jobs will be rerun. All other parameters
+          for this method will be ignored. Job output(s) will be remapped onto the dataset(s)
+          created by the original jobs; if other jobs were waiting for these jobs to finish
+          successfully, they will be resumed using the new outputs of the tool runs. When ``False``,
+          an entire new invocation will be created, using the other parameters specified.
+
         :type inputs_update: dict
-        :param inputs_update: If different datasets should be used to the original
+        :param inputs_update: If different datasets or parameters should be used to the original
           invocation, this should contain a mapping of workflow inputs to the new
           datasets and dataset collections.
 
-        :type params_update: dict
-        :param params_update: If different non-dataset tool parameters should be
+        :type params: dict
+        :param params: If different non-dataset tool parameters should be
           used to the original invocation, this should contain a mapping of the
-          new parameter values.
+          new parameter values. Runtime parameters should be specified through
+          ``inputs_update``.
 
         :type history_id: str
         :param history_id: The encoded history ID where to store the workflow
@@ -209,24 +218,47 @@ class InvocationClient(Client):
           Default is ``False``, but when setting parameters for a subworkflow,
           ``True`` is required.
 
-        :rtype: dict
-        :return: A dict describing the new workflow invocation.
+        :rtype: dict if ``remap=False``, or list if ``remap=True``
+        :return: A dict describing the new workflow invocation, or a list of remapped jobs.
 
         .. note::
           This method works only on Galaxy 21.01 or later.
         """
+        if remap:
+            errored_jobs = self.gi.jobs.get_jobs(state="error", invocation_id=invocation_id)
+            remap_failures = 0
+            rerun_jobs = []
+            for job in errored_jobs:
+                try:
+                    job = self.gi.jobs.rerun_job(job["id"], remap=True)
+                    rerun_jobs.append(job)
+                except ValueError:
+                    # should not occur, jobs from an invocation should always be remappable
+                    remap_failures += 1
+            if remap_failures:
+                raise ValueError(
+                    f"remap was set to True, but {remap_failures} out of {len(errored_jobs)} errored jobs could not be remapped."
+                )
+            return rerun_jobs
+
         invocation_details = self.show_invocation(invocation_id)
         workflow_id = invocation_details["workflow_id"]
         inputs = invocation_details["inputs"]
-        wf_params = invocation_details["input_step_parameters"]
+        step_ids_to_indices = {
+            step["workflow_step_id"]: step_index for step_index, step in enumerate(invocation_details["steps"])
+        }
+        inputs.update(
+            {
+                step_ids_to_indices[param["workflow_step_id"]]: param["parameter_value"]
+                for _, param in invocation_details["input_step_parameters"].items()
+            }
+        )
         if inputs_update:
             for inp, input_value in inputs_update.items():
                 inputs[inp] = input_value
-        if params_update:
-            for param, param_value in params_update.items():
-                wf_params[param] = param_value
-        payload = {"inputs": inputs, "params": wf_params}
-
+        payload = {"inputs": inputs}
+        if params:
+            payload["parameters"] = params
         if replacement_params:
             payload["replacement_params"] = replacement_params
         if history_id:
