@@ -1,16 +1,26 @@
 """
 Contains possible interactions with the Galaxy Forms
 """
+from typing import (
+    Any,
+    Dict,
+    List,
+    TYPE_CHECKING,
+)
+
 from bioblend.galaxy.client import Client
+
+if TYPE_CHECKING:
+    from bioblend.galaxy import GalaxyInstance
 
 
 class FormsClient(Client):
     module = "forms"
 
-    def __init__(self, galaxy_instance):
+    def __init__(self, galaxy_instance: "GalaxyInstance") -> None:
         super().__init__(galaxy_instance)
 
-    def get_forms(self):
+    def get_forms(self) -> List[Dict[str, Any]]:
         """
         Get the list of all forms.
 
@@ -29,7 +39,7 @@ class FormsClient(Client):
         """
         return self._get()
 
-    def show_form(self, form_id):
+    def show_form(self, form_id: str) -> Dict[str, Any]:
         """
         Get details of a given form.
 
@@ -51,15 +61,15 @@ class FormsClient(Client):
         """
         return self._get(id=form_id)
 
-    def create_form(self, form_xml_text):
+    def create_form(self, form_xml_text: str) -> str:
         """
         Create a new form.
 
-        :type   form_xml_text: str
-        :param  form_xml_text: Form xml to create a form on galaxy instance
+        :type form_xml_text: str
+        :param form_xml_text: Form xml to create a form on galaxy instance
 
-        :rtype:     str
-        :return:   Unique URL of newly created form with encoded id
+        :rtype: str
+        :return: Unique URL of newly created form with encoded id
         """
         payload = form_xml_text
         return self._post(payload=payload)
