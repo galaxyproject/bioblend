@@ -6,7 +6,6 @@ from typing import (
     Dict,
     List,
     TYPE_CHECKING,
-    Union,
 )
 
 from bioblend.galaxy.client import Client
