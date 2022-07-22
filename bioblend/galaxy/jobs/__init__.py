@@ -16,14 +16,14 @@ from typing_extensions import Literal
 from bioblend import TimeoutException
 from bioblend.galaxy.client import Client
 
+if TYPE_CHECKING:
+    from bioblend.galaxy import GalaxyInstance
+
 log = logging.getLogger(__name__)
 
 JOB_TERMINAL_STATES = {"deleted", "error", "ok"}
 # Job non-terminal states are: 'deleted_new', 'failed', 'new', 'paused',
 # 'queued', 'resubmitted', 'running', 'upload', 'waiting'
-
-if TYPE_CHECKING:
-    from bioblend.galaxy import GalaxyInstance
 
 
 class JobsClient(Client):
@@ -486,7 +486,9 @@ class JobsClient(Client):
         response = self._put(url=url, payload=payload)
         return response["active"]
 
-    def wait_for_job(self, job_id: str, maxwait: int = 12000, interval: int = 3, check: bool = True) -> Dict[str, Any]:
+    def wait_for_job(
+        self, job_id: str, maxwait: float = 12000, interval: float = 3, check: bool = True
+    ) -> Dict[str, Any]:
         """
         Wait until a job is in a terminal state.
 
