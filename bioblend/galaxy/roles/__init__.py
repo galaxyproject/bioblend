@@ -4,6 +4,7 @@ Contains possible interactions with the Galaxy Roles
 from typing import (
     Any,
     Dict,
+    List,
     TYPE_CHECKING,
 )
 
@@ -19,7 +20,7 @@ class RolesClient(Client):
     def __init__(self, galaxy_instance: "GalaxyInstance") -> None:
         super().__init__(galaxy_instance)
 
-    def get_roles(self):
+    def get_roles(self) -> List[Dict[str, Any]]:
         """
         Displays a collection (list) of roles.
 
@@ -59,7 +60,7 @@ class RolesClient(Client):
         return self._get(id=role_id)
 
     def create_role(
-        self, role_name: str, description: str, user_ids: list = None, group_ids: list = None
+        self, role_name: str, description: str, user_ids: List[str] = None, group_ids: List[str] = None
     ) -> Dict[str, Any]:
         """
         Create a new role.

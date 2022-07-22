@@ -11,6 +11,8 @@ from typing import (
     TYPE_CHECKING,
 )
 
+from typing_extensions import Literal
+
 from bioblend.galaxy.client import Client
 from bioblend.galaxy.datasets import (
     DatasetTimeoutException,
@@ -21,6 +23,8 @@ from bioblend.util import attach_file
 if TYPE_CHECKING:
     from bioblend.galaxy import GalaxyInstance
 
+LinkDataOnly = Literal["copy_files", "link_to_files"]
+
 log = logging.getLogger(__name__)
 
 
@@ -30,7 +34,7 @@ class LibraryClient(Client):
     def __init__(self, galaxy_instance: "GalaxyInstance") -> None:
         super().__init__(galaxy_instance)
 
-    def create_library(self, name: str, description: str = None, synopsis: str = None) -> dict:
+    def create_library(self, name: str, description: str = None, synopsis: str = None) -> Dict[str, Any]:
         """
         Create a data library with the properties defined in the arguments.
 
@@ -58,7 +62,7 @@ class LibraryClient(Client):
             payload["synopsis"] = synopsis
         return self._post(payload)
 
-    def delete_library(self, library_id: str) -> dict:
+    def delete_library(self, library_id: str) -> Dict[str, Any]:
         """
         Delete a data library.
 
@@ -82,7 +86,7 @@ class LibraryClient(Client):
         url = "/".join((self._make_url(library_id, contents=True), item_id))
         return self._get(url=url)
 
-    def delete_library_dataset(self, library_id: str, dataset_id: str, purged: bool = False) -> dict:
+    def delete_library_dataset(self, library_id: str, dataset_id: str, purged: bool = False) -> Dict[str, Any]:
         """
         Delete a library dataset in a data library.
 
@@ -107,7 +111,7 @@ class LibraryClient(Client):
         url = "/".join((self._make_url(library_id, contents=True), dataset_id))
         return self._delete(payload={"purged": purged}, url=url)
 
-    def update_library_dataset(self, dataset_id: str, **kwds) -> dict:
+    def update_library_dataset(self, dataset_id: str, **kwds) -> Dict[str, Any]:
         """
         Update library dataset metadata. Some of the attributes that can be
         modified are documented below.
@@ -136,7 +140,7 @@ class LibraryClient(Client):
         url = "/".join((self._make_url(), "datasets", dataset_id))
         return self._patch(payload=kwds, url=url)
 
-    def show_dataset(self, library_id: str, dataset_id: str) -> dict:
+    def show_dataset(self, library_id: str, dataset_id: str) -> Dict[str, Any]:
         """
         Get details about a given library dataset. The required ``library_id``
         can be obtained from the datasets's library content details.
@@ -153,7 +157,9 @@ class LibraryClient(Client):
         """
         return self._show_item(library_id, dataset_id)
 
-    def wait_for_dataset(self, library_id: str, dataset_id: str, maxwait: float = 12000, interval: float = 3) -> dict:
+    def wait_for_dataset(
+        self, library_id: str, dataset_id: str, maxwait: float = 12000, interval: float = 3
+    ) -> Dict[str, Any]:
         """
         Wait until the library dataset state is terminal ('ok', 'empty',
         'error', 'discarded' or 'failed_metadata').
@@ -200,7 +206,7 @@ class LibraryClient(Client):
                     f"Waited too long for dataset {dataset_id} in library {library_id} to complete"
                 )
 
-    def show_folder(self, library_id: str, folder_id: str) -> dict:
+    def show_folder(self, library_id: str, folder_id: str) -> Dict[str, Any]:
         """
         Get details about a given folder. The required ``folder_id`` can be
         obtained from the folder's library content details.
@@ -354,7 +360,7 @@ class LibraryClient(Client):
         """
         return self._get(id=library_id, contents=contents)
 
-    def _do_upload(self, library_id: str, **keywords) -> List:
+    def _do_upload(self, library_id: str, **keywords) -> List[Dict[str, Any]]:
         """
         Set up the POST request and do the actual data upload to a data library.
         This method should not be called directly but instead refer to the
@@ -409,7 +415,7 @@ class LibraryClient(Client):
         folder_id: str = None,
         file_type: str = "auto",
         dbkey: str = "?",
-        tags: List = None,
+        tags: List[str] = None,
     ) -> List[Dict[str, Any]]:
         """
         Upload a file to a library from a URL.
@@ -447,7 +453,7 @@ class LibraryClient(Client):
         folder_id: str = None,
         file_type: str = "auto",
         dbkey: str = "?",
-        tags: List = None,
+        tags: List[str] = None,
     ) -> List[Dict[str, Any]]:
         """
         Upload pasted_content to a data library as a new file.
@@ -485,7 +491,7 @@ class LibraryClient(Client):
         folder_id: str = None,
         file_type: str = "auto",
         dbkey: str = "?",
-        tags: List = None,
+        tags: List[str] = None,
     ) -> List[Dict[str, Any]]:
         """
         Read local file contents from file_local_path and upload data to a
@@ -529,11 +535,11 @@ class LibraryClient(Client):
         folder_id: str = None,
         file_type: str = "auto",
         dbkey: str = "?",
-        link_data_only: str = None,
+        link_data_only: LinkDataOnly = None,
         roles: str = "",
         preserve_dirs: bool = False,
         tag_using_filenames: bool = False,
-        tags: List = None,
+        tags: List[str] = None,
     ) -> List[Dict[str, Any]]:
         """
         Upload all files in the specified subdirectory of the Galaxy library
@@ -607,11 +613,11 @@ class LibraryClient(Client):
         folder_id: str = None,
         file_type: str = "auto",
         dbkey: str = "?",
-        link_data_only: str = None,
+        link_data_only: LinkDataOnly = None,
         roles: str = "",
         preserve_dirs: bool = False,
         tag_using_filenames: bool = False,
-        tags: List = None,
+        tags: List[str] = None,
     ) -> List[Dict[str, Any]]:
         """
         Upload a set of files already present on the filesystem of the Galaxy
@@ -736,11 +742,11 @@ class LibraryClient(Client):
     def set_library_permissions(
         self,
         library_id: str,
-        access_in: list = None,
-        modify_in: list = None,
-        add_in: list = None,
-        manage_in: list = None,
-    ):
+        access_in: List[str] = None,
+        modify_in: List[str] = None,
+        add_in: List[str] = None,
+        manage_in: List[str] = None,
+    ) -> Dict[str, Any]:
         """
         Set the permissions for a library. Note: it will override all security
         for this library even if you leave out a permission type.
@@ -776,7 +782,7 @@ class LibraryClient(Client):
         return self._post(payload, url=url)
 
     def set_dataset_permissions(
-        self, dataset_id: str, access_in: list = None, modify_in: list = None, manage_in: list = None
+        self, dataset_id: str, access_in: List[str] = None, modify_in: List[str] = None, manage_in: List[str] = None
     ) -> Dict[str, Any]:
         """
         Set the permissions for a dataset. Note: it will override all security
