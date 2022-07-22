@@ -4,7 +4,6 @@ Contains possible interaction dealing with Galaxy tools.
 import warnings
 from os.path import basename
 from typing import (
-    Any,
     Dict,
     List,
     Optional,
