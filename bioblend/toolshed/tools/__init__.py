@@ -1,7 +1,11 @@
 """
 Interaction with a Tool Shed instance tools
 """
-from typing import TYPE_CHECKING
+from typing import (
+    Any,
+    Dict,
+    TYPE_CHECKING,
+)
 
 from bioblend.galaxy.client import Client
 
@@ -13,10 +17,10 @@ class ToolShedToolClient(Client):
     gi: "ToolShedInstance"
     module = "tools"
 
-    def __init__(self, toolshed_instance: "ToolShedInstance"):
+    def __init__(self, toolshed_instance: "ToolShedInstance") -> None:
         super().__init__(toolshed_instance)
 
-    def search_tools(self, q, page=1, page_size=10):
+    def search_tools(self, q: str, page: int = 1, page_size: int = 10) -> Dict[str, Any]:
         """
         Search for tools in a Galaxy Tool Shed.
 
@@ -52,5 +56,5 @@ class ToolShedToolClient(Client):
              'page_size': '2',
              'total_results': '118'}
         """
-        params = dict(q=q, page=page, page_size=page_size)
+        params = {"q": q, "page": page, "page_size": page_size}
         return self._get(params=params)
