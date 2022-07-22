@@ -8,6 +8,7 @@ from typing import (
     List,
     Optional,
     TYPE_CHECKING,
+    Union,
 )
 
 from typing_extensions import Literal
