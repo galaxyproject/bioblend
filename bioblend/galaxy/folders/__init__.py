@@ -1,16 +1,29 @@
 """
 Contains possible interactions with the Galaxy library folders
 """
+from typing import (
+    Any,
+    Dict,
+    List,
+    TYPE_CHECKING,
+    Union,
+)
+
+from typing_extensions import Literal
+
 from bioblend.galaxy.client import Client
+
+if TYPE_CHECKING:
+    from bioblend.galaxy import GalaxyInstance
 
 
 class FoldersClient(Client):
     module = "folders"
 
-    def __init__(self, galaxy_instance):
+    def __init__(self, galaxy_instance: "GalaxyInstance") -> None:
         super().__init__(galaxy_instance)
 
-    def create_folder(self, parent_folder_id, name, description=None):
+    def create_folder(self, parent_folder_id: str, name: str, description: str = None) -> Dict[str, Any]:
         """
         Create a folder.
 
@@ -26,12 +39,12 @@ class FoldersClient(Client):
         :rtype: dict
         :return: details of the updated folder
         """
-        payload = {"name": name}
+        payload: Dict[str, str] = {"name": name}
         if description:
             payload["description"] = description
         return self._post(payload=payload, id=parent_folder_id)
 
-    def show_folder(self, folder_id, contents=False):
+    def show_folder(self, folder_id: str, contents: bool = False) -> Dict[str, Any]:
         """
         Display information about a folder.
 
@@ -48,7 +61,7 @@ class FoldersClient(Client):
 
         return self._get(id=folder_id, contents=contents)
 
-    def delete_folder(self, folder_id, undelete=False):
+    def delete_folder(self, folder_id: str, undelete: bool = False) -> Dict[str, Any]:
         """
         Marks the folder with the given ``id`` as `deleted` (or removes the
         `deleted` mark if the `undelete` param is True).
@@ -66,7 +79,7 @@ class FoldersClient(Client):
         payload = {"undelete": undelete}
         return self._delete(payload=payload, id=folder_id)
 
-    def update_folder(self, folder_id, name, description=None):
+    def update_folder(self, folder_id: str, name: str, description: str = None) -> Dict[str, Any]:
         """
         Update folder information.
 
@@ -87,7 +100,7 @@ class FoldersClient(Client):
             payload["description"] = description
         return self._put(payload=payload, id=folder_id)
 
-    def get_permissions(self, folder_id, scope):
+    def get_permissions(self, folder_id: str, scope: Literal["current", "available"] = "current") -> Dict[str, Any]:
         """
         Get the permissions of a folder.
 
@@ -103,7 +116,14 @@ class FoldersClient(Client):
         url = self._make_url(folder_id) + "/permissions"
         return self._get(url=url)
 
-    def set_permissions(self, folder_id, action="set_permissions", add_ids=None, manage_ids=None, modify_ids=None):
+    def set_permissions(
+        self,
+        folder_id: str,
+        action: Literal["set_permissions"] = "set_permissions",
+        add_ids: List[str] = None,
+        manage_ids: List[str] = None,
+        modify_ids: List[str] = None,
+    ) -> Dict[str, Any]:
         """
         Set the permissions of a folder.
 
@@ -126,7 +146,7 @@ class FoldersClient(Client):
         :return: dictionary including details of the folder
         """
         url = self._make_url(folder_id) + "/permissions"
-        payload = {"action": action}
+        payload: Dict[str, Union[str, List[str]]] = {"action": action}
         if add_ids:
             payload["add_ids[]"] = add_ids
         if manage_ids:
