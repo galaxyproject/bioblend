@@ -211,6 +211,8 @@ class InvocationStep(Wrapper):
         "workflow_step_uuid",
     )
     gi: "GalaxyInstance"
+    order_index: int
+    state: str
 
     @property
     def parent(self) -> Wrapper:
@@ -282,6 +284,10 @@ class Workflow(Wrapper):
     missing_ids: List
     steps: Dict
     POLLING_INTERVAL = 10  # for output state monitoring
+    source_ids: Set[str]
+    dag = Dict[str, Set[str]]
+    inv_dag: Dict[str, Set[str]]
+    input_labels_to_ids: Dict[str, Set[str]]
 
     def __init__(self, wf_dict: Dict[str, Any], gi: Optional["GalaxyInstance"] = None) -> None:
         super().__init__(wf_dict, gi=gi)
@@ -318,7 +324,7 @@ class Workflow(Wrapper):
         object.__setattr__(self, "sink_ids", tails - heads)
         object.__setattr__(self, "missing_ids", missing_ids)
 
-    def _get_dag(self) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+    def _get_dag(self) -> Tuple[Dict[str, Set[str]], Dict[str, Set[str]]]:
         """
         Return the workflow's DAG.
 
@@ -335,8 +341,8 @@ class Workflow(Wrapper):
 
           {'c': {'a', 'b'}, 'd': {'c'}, 'e': {'c'}, 'f': {'c'}}
         """
-        dag: Dict[str, Any] = {}
-        inv_dag: Dict[str, Any] = {}
+        dag: Dict[str, Set[str]] = {}
+        inv_dag: Dict[str, Set[str]] = {}
         for s in self.steps.values():
             for i in s.input_steps.values():
                 head, tail = i["source_step"], s.id
@@ -349,12 +355,13 @@ class Workflow(Wrapper):
         Return a topological sort of the workflow's DAG.
         """
         ids: List[str] = []
-        source_ids = self.source_ids.copy()
+        source_ids: Set[str] = self.source_ids.copy()
         inv_dag = {k: v.copy() for k, v in self.inv_dag.items()}
         while source_ids:
-            head = source_ids.pop()
+            head: str = source_ids.pop()
             ids.append(head)
-            for tail in self.dag.get(head, []):
+            tails: Set[str] = self.dag[head] if head in self.dag else set()
+            for tail in tails:
                 incoming = inv_dag[tail]
                 incoming.remove(head)
                 if not incoming:
@@ -465,15 +472,15 @@ class Workflow(Wrapper):
 
     def invoke(
         self,
-        inputs: Dict[str, Any] = None,
-        params: Dict[str, Any] = None,
-        history: Union[str, "HistoryDatasetCollectionAssociation"] = None,
+        inputs: Optional[Dict[str, Any]] = None,
+        params: Optional[Dict[str, Any]] = None,
+        history: Optional[Union[str, "HistoryDatasetCollectionAssociation"]] = None,
         import_inputs_to_history: bool = False,
-        replacement_params: Dict[str, Any] = None,
+        replacement_params: Optional[Dict[str, Any]] = None,
         allow_tool_state_corrections: bool = True,
         inputs_by: Literal[
-            "step_index|step_uuid", "step_index", "step_id", "step_uuid", "name"
-        ] = "step_index|step_uuid",
+            "step_index\\|step_uuid", "step_index", "step_id", "step_uuid", "name"
+        ] = "step_index\\|step_uuid",
         parameters_normalized: bool = False,
     ) -> "Invocation":
         """
@@ -677,7 +684,10 @@ class Invocation(Wrapper):
         return len(self.steps)
 
     def sorted_steps_by(
-        self, indices: List[int] = None, states: List[str] = None, step_ids: List[str] = None
+        self,
+        indices: Optional[List[int]] = None,
+        states: Optional[List[str]] = None,
+        step_ids: Optional[List[str]] = None,
     ) -> List[InvocationStep]:
         """
         Get steps for this invocation, or get a subset by specifying
@@ -695,7 +705,7 @@ class Invocation(Wrapper):
         :rtype: list of InvocationStep
         :param: invocation steps
         """
-        steps = self.steps
+        steps: List[InvocationStep] = self.steps
         if indices is not None:
             steps = filter(lambda step: step.order_index in indices, steps)
         if states is not None:
@@ -841,7 +851,7 @@ class Dataset(Wrapper, metaclass=abc.ABCMeta):
 
     @property
     @abc.abstractmethod
-    def _stream_url(self) -> None:
+    def _stream_url(self) -> str:
         """
         Return the URL to stream this dataset.
         """
@@ -854,7 +864,7 @@ class Dataset(Wrapper, metaclass=abc.ABCMeta):
         :type chunk_size: int
         :param chunk_size: read this amount of bytes at a time
         """
-        kwargs = {"stream": True}
+        kwargs: Dict[str, Any] = {"stream": True}
         if isinstance(self, LibraryDataset):
             kwargs["params"] = {"ld_ids%5B%5D": self.id}
         r = self.gi.gi.make_get_request(self._stream_url, **kwargs)
@@ -1150,7 +1160,10 @@ class DatasetContainer(Wrapper, metaclass=abc.ABCMeta):
     obj_gi_client: "client.ObjDatasetContainerClient"
 
     def __init__(
-        self, c_dict: Dict[str, Any], content_infos: List[ContentInfo] = None, gi: "GalaxyInstance" = None
+        self,
+        c_dict: Dict[str, Any],
+        content_infos: Optional[List[ContentInfo]] = None,
+        gi: Optional["GalaxyInstance"] = None,
     ) -> None:
         """
         :type content_infos: list of :class:`ContentInfo`
@@ -1206,7 +1219,7 @@ class DatasetContainer(Wrapper, metaclass=abc.ABCMeta):
         ds_dict = gi_client.show_dataset(self.id, ds_id)
         return self.DS_TYPE(ds_dict, self, gi=self.gi)
 
-    def get_datasets(self, name: str = None) -> Union[HistoryDatasetAssociation, LibraryDataset]:
+    def get_datasets(self, name: Optional[str] = None) -> List[Union[HistoryDatasetAssociation, LibraryDataset]]:
         """
         Get all datasets contained inside this dataset container.
 
@@ -1297,7 +1310,7 @@ class History(DatasetContainer):
         self.refresh()
         self.unmap()
 
-    def import_dataset(self, lds: LibraryDataset) -> HistoryDatasetAssociation:
+    def import_dataset(self, lds: LibraryDataset) -> Union[HistoryDatasetAssociation, LibraryDataset]:
         """
         Import a dataset into the history from a library.
 
@@ -1317,7 +1330,7 @@ class History(DatasetContainer):
         self.refresh()
         return self.get_dataset(res["id"])
 
-    def upload_file(self, path: str, **kwargs) -> HistoryDatasetAssociation:
+    def upload_file(self, path: str, **kwargs) -> Union[HistoryDatasetAssociation, LibraryDataset]:
         """
         Upload the file specified by ``path`` to this history.
 
@@ -1336,7 +1349,7 @@ class History(DatasetContainer):
 
     upload_dataset = upload_file
 
-    def upload_from_ftp(self, path: str, **kwargs) -> HistoryDatasetAssociation:
+    def upload_from_ftp(self, path: str, **kwargs) -> Union[HistoryDatasetAssociation, LibraryDataset]:
         """
         Upload the file specified by ``path`` from the user's FTP directory to
         this history.
@@ -1354,7 +1367,7 @@ class History(DatasetContainer):
         self.refresh()
         return self.get_dataset(out_dict["outputs"][0]["id"])
 
-    def paste_content(self, content: str, **kwargs) -> HistoryDatasetAssociation:
+    def paste_content(self, content: str, **kwargs) -> Union[HistoryDatasetAssociation, LibraryDataset]:
         """
         Upload a string to a new dataset in this history.
 
@@ -1377,7 +1390,7 @@ class History(DatasetContainer):
         include_hidden: bool = False,
         include_deleted: bool = False,
         wait: bool = False,
-        maxwait: int = None,
+        maxwait: Optional[int] = None,
     ) -> "History":
         """
         Start a job to create an export archive for this history.  See
@@ -1457,7 +1470,7 @@ class Library(DatasetContainer):
         self.refresh()
         self.unmap()
 
-    def _pre_upload(self, folder: "Folder") -> str:
+    def _pre_upload(self, folder: Optional["Folder"] = None) -> Optional[str]:
         """
         Return the id of the given folder, after sanity checking.
         """
@@ -1465,7 +1478,9 @@ class Library(DatasetContainer):
             raise RuntimeError("library is not mapped to a Galaxy object")
         return None if folder is None else folder.id
 
-    def upload_data(self, data: str, folder: "Folder" = None, **kwargs) -> LibraryDataset:
+    def upload_data(
+        self, data: str, folder: Optional["Folder"] = None, **kwargs
+    ) -> Union[HistoryDatasetAssociation, LibraryDataset]:
         """
         Upload data to this library.
 
@@ -1485,7 +1500,9 @@ class Library(DatasetContainer):
         self.refresh()
         return self.get_dataset(res[0]["id"])
 
-    def upload_from_url(self, url: str, folder: "Folder" = None, **kwargs) -> LibraryDataset:
+    def upload_from_url(
+        self, url: str, folder: Optional["Folder"] = None, **kwargs
+    ) -> Union[HistoryDatasetAssociation, LibraryDataset]:
         """
         Upload data to this library from the given URL.
 
@@ -1499,7 +1516,9 @@ class Library(DatasetContainer):
         self.refresh()
         return self.get_dataset(res[0]["id"])
 
-    def upload_from_local(self, path: str, folder: "Folder" = None, **kwargs) -> LibraryDataset:
+    def upload_from_local(
+        self, path: str, folder: Optional["Folder"] = None, **kwargs
+    ) -> Union[HistoryDatasetAssociation, LibraryDataset]:
         """
         Upload data to this library from a local file.
 
@@ -1516,10 +1535,10 @@ class Library(DatasetContainer):
     def upload_from_galaxy_fs(
         self,
         paths: Union[str, Iterable[str]],
-        folder: "Folder" = None,
+        folder: Optional["Folder"] = None,
         link_data_only: Literal["copy_files", "link_to_files"] = "copy_files",
         **kwargs,
-    ) -> List[LibraryDataset]:
+    ) -> List[Union[HistoryDatasetAssociation, LibraryDataset]]:
         """
         Upload data to this library from filesystem paths on the server.
 
@@ -1557,8 +1576,8 @@ class Library(DatasetContainer):
         return new_datasets
 
     def copy_from_dataset(
-        self, hda: HistoryDatasetAssociation, folder: "Folder" = None, message: str = ""
-    ) -> LibraryDataset:
+        self, hda: HistoryDatasetAssociation, folder: Optional["Folder"] = None, message: str = ""
+    ) -> Union[HistoryDatasetAssociation, LibraryDataset]:
         """
         Copy a history dataset into this library.
 
@@ -1572,7 +1591,9 @@ class Library(DatasetContainer):
         self.refresh()
         return self.get_dataset(res["library_dataset_id"])
 
-    def create_folder(self, name: str, description: str = None, base_folder: "Folder" = None) -> "Folder":
+    def create_folder(
+        self, name: str, description: Optional[str] = None, base_folder: Optional["Folder"] = None
+    ) -> "Folder":
         """
         Create a folder in this library.
 
@@ -1680,7 +1701,7 @@ class Tool(Wrapper):
 
     def run(
         self, inputs: Dict[str, Any], history: History, wait: bool = False, polling_interval: float = POLLING_INTERVAL
-    ) -> HistoryDatasetAssociation:
+    ) -> List[Union[HistoryDatasetAssociation, LibraryDataset]]:
         """
         Execute this tool in the given history with inputs from dict
         ``inputs``.
@@ -1712,7 +1733,7 @@ class Tool(Wrapper):
         """
         for k, v in inputs.items():
             if isinstance(v, Dataset):
-                inputs[k] = {"src": v.SRC, "id": v.id}
+                inputs[k] = {"src": v.SRC, "id": v.id}  # type: ignore
         out_dict = self.gi.gi.tools.run_tool(history.id, self.id, inputs)
         outputs = [history.get_dataset(_["id"]) for _ in out_dict["outputs"]]
         if wait:

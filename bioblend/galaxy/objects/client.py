@@ -39,7 +39,7 @@ class ObjClient(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def get_previews(self) -> List[Any]:
+    def get_previews(self) -> List[wrappers.LibraryPreview]:
         """
         Get a list of object previews.
 
@@ -84,7 +84,9 @@ class ObjClient(abc.ABC):
         else:
             return id_
 
-    def _get_dict(self, meth_name: str, reply: Union[Mapping, List[Any]] = None) -> Mapping:
+    def _get_dict(
+        self, meth_name: str, reply: Union[Mapping, List[Any]] = None
+    ) -> Union[Mapping[Any, Any], Dict[str, Any]]:
         if reply is None:
             raise RuntimeError(f"{meth_name}: no reply")
         elif isinstance(reply, Mapping):
