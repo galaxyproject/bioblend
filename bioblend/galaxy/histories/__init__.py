@@ -9,21 +9,25 @@ import typing
 import webbrowser
 from typing import (
     Any,
+    BinaryIO,
     Dict,
     List,
+    Optional,
     Pattern,
     Union,
 )
 from urllib.parse import urljoin
 
+from typing_extensions import Literal
+
 import bioblend
 from bioblend import ConnectionError
 from bioblend.galaxy.client import Client
+from bioblend.galaxy.dataset_collections import CollectionDescription
 from bioblend.util import attach_file
 
 if typing.TYPE_CHECKING:
     from bioblend.galaxy import GalaxyInstance
-    from bioblend.galaxy.dataset_collections import CollectionDescription
 
 log = logging.getLogger(__name__)
 
@@ -35,7 +39,7 @@ class HistoryClient(Client):
     def __init__(self, galaxy_instance: "GalaxyInstance"):
         super().__init__(galaxy_instance)
 
-    def create_history(self, name: str = None) -> dict:
+    def create_history(self, name: str = None) -> Dict[str, Any]:
         """
         Create a new history, optionally setting the ``name``.
 
@@ -50,14 +54,18 @@ class HistoryClient(Client):
             payload["name"] = name
         return self._post(payload)
 
-    def import_history(self, file_path: str = None, url: str = None) -> dict:
+    def import_history(self, file_path: str = None, url: str = None) -> Dict[str, Any]:
         """
         Import a history from an archive on disk or a URL.
 
         :type file_path: str
         :param file_path: Path to exported history archive on disk.
+
         :type url: str
         :param url: URL for an exported history archive
+
+        :rtype: dict
+        :return: Dictionary containing information about the imported history
         """
         if file_path:
             archive_file = attach_file(file_path)
@@ -71,10 +79,10 @@ class HistoryClient(Client):
         self,
         name: str = None,
         deleted: bool = False,
-        filter_user_published: str = None,
+        filter_user_published: Optional[bool] = None,
         get_all_published: bool = False,
         slug: str = None,
-    ) -> list:
+    ) -> List[Dict[str, Any]]:
         """
         Hidden method to be used by both get_histories() and get_published_histories()
         """
@@ -99,8 +107,13 @@ class HistoryClient(Client):
         return histories
 
     def get_histories(
-        self, history_id: str = None, name: str = None, deleted: bool = False, published: str = None, slug: str = None
-    ) -> list:
+        self,
+        history_id: str = None,
+        name: str = None,
+        deleted: bool = False,
+        published: Optional[bool] = None,
+        slug: str = None,
+    ) -> List[Dict[str, Any]]:
         """
         Get all histories, or select a subset by specifying optional arguments
         for filtering (e.g. a history name).
@@ -137,7 +150,9 @@ class HistoryClient(Client):
             name=name, deleted=deleted, filter_user_published=published, get_all_published=False, slug=slug
         )
 
-    def get_published_histories(self, name: str = None, deleted: bool = False, slug: str = None) -> list:
+    def get_published_histories(
+        self, name: str = None, deleted: bool = False, slug: str = None
+    ) -> List[Dict[str, Any]]:
         """
         Get all published histories (by any user), or select a subset by
         specifying optional arguments for filtering (e.g. a history name).
@@ -163,10 +178,10 @@ class HistoryClient(Client):
         self,
         history_id: str,
         contents: bool = False,
-        deleted: bool = None,
-        visible: bool = None,
-        details: bool = None,
-        types: list = None,
+        deleted: Optional[bool] = None,
+        visible: Optional[bool] = None,
+        details: str = None,
+        types: List[str] = None,
     ) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
         """
         Get details of a given history. By default, just get the history meta
@@ -211,7 +226,7 @@ class HistoryClient(Client):
             more extensive functionality for filtering and ordering the results.
 
         """
-        params: Dict[str, Union[bool, list]] = {}
+        params: Dict[str, Union[bool, list, str]] = {}
         if contents:
             if details:
                 params["details"] = details
@@ -282,7 +297,7 @@ class HistoryClient(Client):
         url = "/".join((self._make_url(history_id, contents=True), dataset_id))
         return self._get(url=url)
 
-    def show_dataset_collection(self, history_id: str, dataset_collection_id: str) -> dict:
+    def show_dataset_collection(self, history_id: str, dataset_collection_id: str) -> Dict[str, Any]:
         """
         Get details about a given history dataset collection.
 
@@ -324,9 +339,7 @@ class HistoryClient(Client):
             if name_filter is None or name_filter.match(h["name"])
         ]
 
-    def show_dataset_provenance(
-        self, history_id: str, dataset_id: str, follow: bool = False
-    ) -> Dict[str, Union[str, dict]]:
+    def show_dataset_provenance(self, history_id: str, dataset_id: str, follow: bool = False) -> Dict[str, Any]:
         """
         Get details related to how dataset was created (``id``, ``job_id``,
         ``tool_id``, ``stdout``, ``stderr``, ``parameters``, ``inputs``,
@@ -519,7 +532,9 @@ class HistoryClient(Client):
         }
         return self._post(payload, id=history_id, contents=True)
 
-    def create_dataset_collection(self, history_id: str, collection_description: "CollectionDescription") -> dict:
+    def create_dataset_collection(
+        self, history_id: str, collection_description: Union["CollectionDescription", Dict[str, Any]]
+    ) -> Dict[str, Any]:
         """
         Create a new dataset collection
 
@@ -542,22 +557,20 @@ class HistoryClient(Client):
         :rtype: dict
         :return: Information about the new HDCA
         """
-        try:
-            collection_description = collection_description.to_dict()
-        except AttributeError:
-            pass
-
-        assert isinstance(collection_description, dict)
+        if isinstance(collection_description, CollectionDescription):
+            collection_description_dict = collection_description.to_dict()
+        else:
+            collection_description_dict = collection_description
 
         payload = dict(
-            name=collection_description["name"],
+            name=collection_description_dict["name"],
             type="dataset_collection",
-            collection_type=collection_description["collection_type"],
-            element_identifiers=collection_description["element_identifiers"],
+            collection_type=collection_description_dict["collection_type"],
+            element_identifiers=collection_description_dict["element_identifiers"],
         )
         return self._post(payload, id=history_id, contents=True)
 
-    def delete_history(self, history_id: str, purge: bool = False) -> Dict[str, str]:
+    def delete_history(self, history_id: str, purge: bool = False) -> Dict[str, Any]:
         """
         Delete a history.
 
@@ -626,7 +639,7 @@ class HistoryClient(Client):
                 state["percent_complete"] = 0
         return state
 
-    def get_most_recently_used_history(self) -> dict:
+    def get_most_recently_used_history(self) -> Dict[str, Any]:
         """
         Returns the current user's most recently used history (not deleted).
 
@@ -710,7 +723,9 @@ class HistoryClient(Client):
         jeha_id = r["download_url"].rsplit("/", 1)[-1]
         return jeha_id
 
-    def download_history(self, history_id: str, jeha_id: str, outf, chunk_size: int = bioblend.CHUNK_SIZE) -> None:
+    def download_history(
+        self, history_id: str, jeha_id: str, outf: BinaryIO, chunk_size: int = bioblend.CHUNK_SIZE
+    ) -> None:
         """
         Download a history export archive.  Use :meth:`export_history`
         to create an export.
@@ -737,7 +752,9 @@ class HistoryClient(Client):
         for chunk in r.iter_content(chunk_size):
             outf.write(chunk)
 
-    def copy_dataset(self, history_id: str, dataset_id: str, source: str = "hda") -> Dict[str, str]:
+    def copy_dataset(
+        self, history_id: str, dataset_id: str, source: Literal["hda", "library", "library_folder"] = "hda"
+    ) -> Dict[str, Any]:
         """
         Copy a dataset to a history.
 
@@ -755,7 +772,9 @@ class HistoryClient(Client):
         """
         return self.copy_content(history_id, dataset_id, source)
 
-    def copy_content(self, history_id: str, content_id: str, source: str = "hda") -> Dict[str, str]:
+    def copy_content(
+        self, history_id: str, content_id: str, source: Literal["hda", "hdca", "library", "library_folder"] = "hda"
+    ) -> Dict[str, Any]:
         """
         Copy existing content (e.g. a dataset) to a history.
 
@@ -805,7 +824,7 @@ class HistoryClient(Client):
         url = urljoin(self.gi.base_url, f"history/switch_to_history?hist_id={history_id}")
         webbrowser.open_new_tab(url)
 
-    def get_extra_files(self, history_id: str, dataset_id: str) -> list:
+    def get_extra_files(self, history_id: str, dataset_id: str) -> List[str]:
         """
         Get extra files associated with a composite dataset, or an empty list if
         there are none.
