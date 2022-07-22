@@ -11,8 +11,11 @@ from collections.abc import (
     Sequence,
 )
 from typing import (
+    Any,
+    Dict,
     List,
     TYPE_CHECKING,
+    Union,
 )
 
 import bioblend
@@ -23,7 +26,7 @@ if TYPE_CHECKING:
 
 
 class ObjClient(abc.ABC):
-    def __init__(self, obj_gi: "GalaxyInstance"):
+    def __init__(self, obj_gi: "GalaxyInstance") -> None:
         self.obj_gi = obj_gi
         self.gi = self.obj_gi.gi
         self.log = bioblend.log
@@ -36,7 +39,7 @@ class ObjClient(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def get_previews(self) -> list:
+    def get_previews(self) -> List[Any]:
         """
         Get a list of object previews.
 
@@ -51,7 +54,7 @@ class ObjClient(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def list(self) -> list:
+    def list(self) -> List[Any]:
         """
         Get a list of objects.
 
@@ -63,7 +66,7 @@ class ObjClient(abc.ABC):
         """
         pass
 
-    def _select_id(self, id_=None, name=None):
+    def _select_id(self, id_: str = None, name: str = None) -> str:
         """
         Return the id that corresponds to the given id or name info.
         """
@@ -81,7 +84,7 @@ class ObjClient(abc.ABC):
         else:
             return id_
 
-    def _get_dict(self, meth_name, reply):
+    def _get_dict(self, meth_name: str, reply: Union[Mapping, List[Any]] = None) -> Mapping:
         if reply is None:
             raise RuntimeError(f"{meth_name}: no reply")
         elif isinstance(reply, Mapping):
@@ -93,7 +96,7 @@ class ObjClient(abc.ABC):
 
 
 class ObjDatasetContainerClient(ObjClient):
-    def _get_container(self, id_, ctype):
+    def _get_container(self, id_: str, ctype):
         show_fname = f"show_{ctype.__name__.lower()}"
         gi_client = getattr(self.gi, ctype.API_MODULE)
         show_f = getattr(gi_client, show_fname)
@@ -119,10 +122,10 @@ class ObjLibraryClient(ObjDatasetContainerClient):
     Interacts with Galaxy libraries.
     """
 
-    def __init__(self, obj_gi):
+    def __init__(self, obj_gi: "GalaxyInstance") -> None:
         super().__init__(obj_gi)
 
-    def create(self, name, description=None, synopsis=None):
+    def create(self, name: str, description: str = None, synopsis: str = None) -> wrappers.Library:
         """
         Create a data library with the properties defined in the arguments.
 
@@ -133,7 +136,7 @@ class ObjLibraryClient(ObjDatasetContainerClient):
         lib_info = self._get_dict("create_library", res)
         return self.get(lib_info["id"])
 
-    def get(self, id_) -> wrappers.Library:
+    def get(self, id_: str) -> wrappers.Library:
         """
         Retrieve the data library corresponding to the given id.
 
@@ -142,11 +145,11 @@ class ObjLibraryClient(ObjDatasetContainerClient):
         """
         return self._get_container(id_, wrappers.Library)
 
-    def get_previews(self, name=None, deleted=False):
+    def get_previews(self, name: str = None, deleted: bool = False) -> List[wrappers.LibraryPreview]:
         dicts = self.gi.libraries.get_libraries(name=name, deleted=deleted)
         return [wrappers.LibraryPreview(_, gi=self.obj_gi) for _ in dicts]
 
-    def list(self, name=None, deleted=False):
+    def list(self, name: str = None, deleted: bool = False) -> List[wrappers.Library]:
         """
         Get libraries owned by the user of this Galaxy instance.
 
@@ -166,7 +169,7 @@ class ObjLibraryClient(ObjDatasetContainerClient):
         else:
             return [self.get(_["id"]) for _ in dicts]
 
-    def delete(self, id_=None, name=None):
+    def delete(self, id_: str = None, name: str = None) -> None:
         """
         Delete the library with the given id or name.
 
@@ -187,10 +190,10 @@ class ObjHistoryClient(ObjDatasetContainerClient):
     Interacts with Galaxy histories.
     """
 
-    def __init__(self, obj_gi):
+    def __init__(self, obj_gi: "GalaxyInstance") -> None:
         super().__init__(obj_gi)
 
-    def create(self, name=None):
+    def create(self, name: str = None) -> wrappers.History:
         """
         Create a new Galaxy history, optionally setting its name.
 
@@ -201,7 +204,7 @@ class ObjHistoryClient(ObjDatasetContainerClient):
         hist_info = self._get_dict("create_history", res)
         return self.get(hist_info["id"])
 
-    def get(self, id_) -> wrappers.History:
+    def get(self, id_: str) -> wrappers.History:
         """
         Retrieve the history corresponding to the given id.
 
@@ -210,11 +213,11 @@ class ObjHistoryClient(ObjDatasetContainerClient):
         """
         return self._get_container(id_, wrappers.History)
 
-    def get_previews(self, name=None, deleted=False):
+    def get_previews(self, name: str = None, deleted: bool = False) -> List[Any]:
         dicts = self.gi.histories.get_histories(name=name, deleted=deleted)
         return [wrappers.HistoryPreview(_, gi=self.obj_gi) for _ in dicts]
 
-    def list(self, name=None, deleted=False):
+    def list(self, name: str = None, deleted: bool = False) -> List[wrappers.History]:
         """
         Get histories owned by the user of this Galaxy instance.
 
@@ -228,7 +231,7 @@ class ObjHistoryClient(ObjDatasetContainerClient):
         dicts = self.gi.histories.get_histories(name=name, deleted=deleted)
         return [self.get(_["id"]) for _ in dicts]
 
-    def delete(self, id_=None, name=None, purge=False):
+    def delete(self, id_: str = None, name: str = None, purge: bool = False) -> None:
         """
         Delete the history with the given id or name.
 
@@ -253,7 +256,7 @@ class ObjWorkflowClient(ObjClient):
     Interacts with Galaxy workflows.
     """
 
-    def import_new(self, src, publish=False):
+    def import_new(self, src: Union[str, Dict[str, Any]], publish: bool = False) -> wrappers.Workflow:
         """
         Imports a new workflow into Galaxy.
 
@@ -279,7 +282,7 @@ class ObjWorkflowClient(ObjClient):
         wf_info = self.gi.workflows.import_workflow_dict(wf_dict, publish)
         return self.get(wf_info["id"])
 
-    def import_shared(self, id_):
+    def import_shared(self, id_: str) -> wrappers.Workflow:
         """
         Imports a shared workflow to the user's space.
 
@@ -292,7 +295,7 @@ class ObjWorkflowClient(ObjClient):
         wf_info = self.gi.workflows.import_shared_workflow(id_)
         return self.get(wf_info["id"])
 
-    def get(self, id_) -> wrappers.Workflow:
+    def get(self, id_: str) -> wrappers.Workflow:
         """
         Retrieve the workflow corresponding to the given id.
 
@@ -304,12 +307,12 @@ class ObjWorkflowClient(ObjClient):
         return wrappers.Workflow(wf_dict, gi=self.obj_gi)
 
     # the 'deleted' option is not available for workflows
-    def get_previews(self, name=None, published=False):
+    def get_previews(self, name: str = None, published: bool = False) -> List[wrappers.WorkflowPreview]:
         dicts = self.gi.workflows.get_workflows(name=name, published=published)
         return [wrappers.WorkflowPreview(_, gi=self.obj_gi) for _ in dicts]
 
     # the 'deleted' option is not available for workflows
-    def list(self, name=None, published=False):
+    def list(self, name: str = None, published: bool = False) -> wrappers.Workflow:
         """
         Get workflows owned by the user of this Galaxy instance.
 
@@ -323,7 +326,7 @@ class ObjWorkflowClient(ObjClient):
         dicts = self.gi.workflows.get_workflows(name=name, published=published)
         return [self.get(_["id"]) for _ in dicts]
 
-    def delete(self, id_=None, name=None):
+    def delete(self, id_: str = None, name: str = None) -> None:
         """
         Delete the workflow with the given id or name.
 
@@ -344,7 +347,7 @@ class ObjInvocationClient(ObjClient):
     Interacts with Galaxy Invocations.
     """
 
-    def get(self, id_) -> wrappers.Invocation:
+    def get(self, id_: str) -> wrappers.Invocation:
         """
         Get an invocation by ID.
 
@@ -364,7 +367,9 @@ class ObjInvocationClient(ObjClient):
         inv_list = self.gi.invocations.get_invocations()
         return [wrappers.InvocationPreview(inv_dict, gi=self.obj_gi) for inv_dict in inv_list]
 
-    def list(self, workflow=None, history=None, include_terminal=True, limit=None) -> List[wrappers.Invocation]:
+    def list(
+        self, workflow: wrappers.Workflow = None, history: str = None, include_terminal: bool = True, limit: int = None
+    ) -> List[wrappers.Invocation]:
         """
         Get full listing of workflow invocations, or select a subset
         by specifying optional arguments for filtering (e.g. a workflow).
@@ -403,7 +408,7 @@ class ObjToolClient(ObjClient):
     Interacts with Galaxy tools.
     """
 
-    def get(self, id_, io_details=False, link_details=False) -> wrappers.Tool:
+    def get(self, id_: str, io_details: bool = False, link_details: bool = False) -> wrappers.Tool:
         """
         Retrieve the tool corresponding to the given id.
 
@@ -420,7 +425,7 @@ class ObjToolClient(ObjClient):
         tool_dict = self._get_dict("show_tool", res)
         return wrappers.Tool(tool_dict, gi=self.obj_gi)
 
-    def get_previews(self, name=None, trackster=None):
+    def get_previews(self, name: str = None, trackster: bool = False) -> List[wrappers.Tool]:
         """
         Get the list of tools installed on the Galaxy instance.
 
@@ -437,7 +442,7 @@ class ObjToolClient(ObjClient):
         return [wrappers.Tool(_, gi=self.obj_gi) for _ in dicts]
 
     # the 'deleted' option is not available for tools
-    def list(self, name=None, trackster=None):
+    def list(self, name: str = None, trackster: bool = False) -> wrappers.Tool:
         """
         Get the list of tools installed on the Galaxy instance.
 
@@ -467,7 +472,7 @@ class ObjJobClient(ObjClient):
     Interacts with Galaxy jobs.
     """
 
-    def get(self, id_, full_details=False) -> wrappers.Job:
+    def get(self, id_: str, full_details: bool = False) -> wrappers.Job:
         """
         Retrieve the job corresponding to the given id.
 
@@ -482,11 +487,11 @@ class ObjJobClient(ObjClient):
         job_dict = self._get_dict("show_job", res)
         return wrappers.Job(job_dict, gi=self.obj_gi)
 
-    def get_previews(self):
+    def get_previews(self) -> List[wrappers.JobPreview]:
         dicts = self.gi.jobs.get_jobs()
         return [wrappers.JobPreview(_, gi=self.obj_gi) for _ in dicts]
 
-    def list(self):
+    def list(self) -> List[wrappers.Job]:
         """
         Get the list of jobs of the current user.
 
@@ -523,10 +528,10 @@ class ObjDatasetClient(ObjClient):
         else:
             raise ValueError(f"Unsupported value for hda_ldda: {hda_ldda}")
 
-    def get_previews(self) -> list:
+    def get_previews(self) -> List[Any]:
         raise NotImplementedError()
 
-    def list(self) -> list:
+    def list(self) -> List[Any]:
         raise NotImplementedError()
 
 
@@ -547,8 +552,8 @@ class ObjDatasetCollectionClient(ObjClient):
         hist = self.obj_gi.histories.get(ds_dict["history_id"])
         return wrappers.HistoryDatasetCollectionAssociation(ds_dict, hist, gi=self.obj_gi)
 
-    def get_previews(self) -> list:
+    def get_previews(self) -> List[Any]:
         raise NotImplementedError()
 
-    def list(self) -> list:
+    def list(self) -> List[Any]:
         raise NotImplementedError()

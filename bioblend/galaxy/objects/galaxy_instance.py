@@ -7,10 +7,13 @@ import time
 import bioblend
 import bioblend.galaxy
 from bioblend.galaxy.datasets import TERMINAL_STATES
-from . import client
+from . import (
+    client,
+    wrappers,
+)
 
 
-def _get_error_info(hda):
+def _get_error_info(hda: wrappers.HistoryDatasetAssociation) -> str:
     msg = hda.id
     try:
         msg += f" ({hda.name}): "
@@ -43,7 +46,9 @@ class GalaxyInstance:
       histories = gi.histories.list()
     """
 
-    def __init__(self, url, api_key=None, email=None, password=None, verify=True):
+    def __init__(
+        self, url: str, api_key: str = None, email: str = None, password: str = None, verify: bool = True
+    ) -> None:
         self.gi = bioblend.galaxy.GalaxyInstance(url, api_key, email, password, verify)
         self.log = bioblend.log
         self.datasets = client.ObjDatasetClient(self)
@@ -55,7 +60,7 @@ class GalaxyInstance:
         self.tools = client.ObjToolClient(self)
         self.jobs = client.ObjJobClient(self)
 
-    def _wait_datasets(self, datasets, polling_interval, break_on_error=True):
+    def _wait_datasets(self, datasets, polling_interval: float, break_on_error: bool = True) -> None:
         """
         Wait for datasets to come out of the pending states.
 
