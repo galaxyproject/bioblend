@@ -3,16 +3,28 @@ Contains possible interaction dealing with Galaxy users.
 
 Most of these methods must be executed by a registered Galaxy admin user.
 """
+from typing import (
+    Any,
+    Dict,
+    List,
+    TYPE_CHECKING,
+)
+
 from bioblend.galaxy.client import Client
+
+if TYPE_CHECKING:
+    from bioblend.galaxy import GalaxyInstance
 
 
 class UserClient(Client):
     module = "users"
 
-    def __init__(self, galaxy_instance):
+    def __init__(self, galaxy_instance: "GalaxyInstance"):
         super().__init__(galaxy_instance)
 
-    def get_users(self, deleted=False, f_email=None, f_name=None, f_any=None):
+    def get_users(
+        self, deleted: bool = False, f_email: str = None, f_name: str = None, f_any: str = None
+    ) -> List[Dict[str, Any]]:
         """
         Get a list of all registered users. If ``deleted`` is set to ``True``,
         get a list of deleted users.
@@ -48,7 +60,7 @@ class UserClient(Client):
                      'url': '/api/users/dda47097d9189f15'}]
 
         """
-        params = {}
+        params: Dict[str, Any] = {}
         if f_email:
             params["f_email"] = f_email
         if f_name:
@@ -57,7 +69,7 @@ class UserClient(Client):
             params["f_any"] = f_any
         return self._get(deleted=deleted, params=params)
 
-    def show_user(self, user_id, deleted=False):
+    def show_user(self, user_id: str, deleted: bool = False) -> Dict[str, Any]:
         """
         Display information about a user.
 
@@ -72,7 +84,7 @@ class UserClient(Client):
         """
         return self._get(id=user_id, deleted=deleted)
 
-    def create_remote_user(self, user_email):
+    def create_remote_user(self, user_email: str) -> Dict[str, Any]:
         """
         Create a new Galaxy remote user.
 
@@ -90,11 +102,11 @@ class UserClient(Client):
         :rtype: dict
         :return: a dictionary containing information about the created user
         """
-        payload = {}
+        payload: Dict[str, Any] = {}
         payload["remote_user_email"] = user_email
         return self._post(payload)
 
-    def create_local_user(self, username, user_email, password):
+    def create_local_user(self, username: str, user_email: str, password: str) -> Dict[str, Any]:
         """
         Create a new Galaxy local user.
 
@@ -116,13 +128,13 @@ class UserClient(Client):
         :rtype: dict
         :return: a dictionary containing information about the created user
         """
-        payload = {}
+        payload: Dict[str, Any] = {}
         payload["username"] = username
         payload["email"] = user_email
         payload["password"] = password
         return self._post(payload)
 
-    def get_current_user(self):
+    def get_current_user(self) -> Dict[str, Any]:
         """
         Display information about the user associated with this Galaxy
         connection.
@@ -133,7 +145,7 @@ class UserClient(Client):
         url = self._make_url() + "/current"
         return self._get(url=url)
 
-    def create_user_apikey(self, user_id):
+    def create_user_apikey(self, user_id: str) -> str:
         """
         Create a new API key for a given user.
 
@@ -148,7 +160,7 @@ class UserClient(Client):
         payload["user_id"] = user_id
         return self._post(payload, url=url)
 
-    def delete_user(self, user_id, purge=False):
+    def delete_user(self, user_id: str, purge: bool = False) -> Dict[str, Any]:
         """
         Delete a user.
 
@@ -171,7 +183,7 @@ class UserClient(Client):
             params["purge"] = purge
         return self._delete(id=user_id, params=params)
 
-    def get_user_apikey(self, user_id):
+    def get_user_apikey(self, user_id: str) -> str:
         """
         Get the current API key for a given user.
 
@@ -184,7 +196,7 @@ class UserClient(Client):
         url = self._make_url(user_id) + "/api_key/inputs"
         return self._get(url=url)["inputs"][0]["value"]
 
-    def update_user(self, user_id, **kwds):
+    def update_user(self, user_id: str, **kwds) -> Dict[str, Any]:
         """
         Update user information. Some of the attributes that can be
         modified are documented below.
