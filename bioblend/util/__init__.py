@@ -31,7 +31,7 @@ class FileStream(NamedTuple):
         self.fd.close()
 
 
-def attach_file(path, name=None):
+def attach_file(path, name: str = None):
     """
     Attach a path to a request payload object.
 
@@ -47,6 +47,8 @@ def attach_file(path, name=None):
     """
     if name is None:
         name = os.path.basename(path)
+
+    attachment: "FileStream"
     attachment = FileStream(name, open(path, "rb"))
     return attachment
 
