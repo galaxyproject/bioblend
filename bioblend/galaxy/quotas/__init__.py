@@ -6,13 +6,18 @@ from typing import (
     Any,
     Dict,
     List,
+    Optional,
     TYPE_CHECKING,
 )
+
+from typing_extensions import Literal
 
 from bioblend.galaxy.client import Client
 
 if TYPE_CHECKING:
     from bioblend.galaxy import GalaxyInstance
+
+QuotaOperations = Literal["+", "-", "="]
 
 
 class QuotaClient(Client):
@@ -21,7 +26,7 @@ class QuotaClient(Client):
     def __init__(self, galaxy_instance: "GalaxyInstance") -> None:
         super().__init__(galaxy_instance)
 
-    def get_quotas(self, deleted=False) -> List[Any]:
+    def get_quotas(self, deleted=False) -> List[Dict[str, Any]]:
         """
         Get a list of quotas
 
@@ -43,7 +48,7 @@ class QuotaClient(Client):
         """
         return self._get(deleted=deleted)
 
-    def show_quota(self, quota_id: str, deleted=False) -> Dict[str, Any]:
+    def show_quota(self, quota_id: str, deleted: bool = False) -> Dict[str, Any]:
         """
         Display information on a quota
 
@@ -75,8 +80,8 @@ class QuotaClient(Client):
         name: str,
         description: str,
         amount: str,
-        operation: str,
-        default: str = "no",
+        operation: QuotaOperations,
+        default: Optional[Literal["no", "registered", "unregistered"]] = "no",
         in_users: List[str] = None,
         in_groups: List[str] = None,
     ) -> Dict[str, Any]:
@@ -137,7 +142,7 @@ class QuotaClient(Client):
         name: str = None,
         description: str = None,
         amount: str = None,
-        operation: str = None,
+        operation: QuotaOperations = None,
         default: str = "no",
         in_users: List[str] = None,
         in_groups: List[str] = None,
