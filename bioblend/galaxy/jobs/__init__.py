@@ -4,12 +4,20 @@ Contains possible interactions with the Galaxy Jobs
 import logging
 import time
 from typing import (
+    Any,
+    Dict,
     List,
     Optional,
+    TYPE_CHECKING,
 )
+
+from typing_extensions import Literal
 
 from bioblend import TimeoutException
 from bioblend.galaxy.client import Client
+
+if TYPE_CHECKING:
+    from bioblend.galaxy import GalaxyInstance
 
 log = logging.getLogger(__name__)
 
@@ -21,24 +29,24 @@ JOB_TERMINAL_STATES = {"deleted", "error", "ok"}
 class JobsClient(Client):
     module = "jobs"
 
-    def __init__(self, galaxy_instance):
+    def __init__(self, galaxy_instance: "GalaxyInstance") -> None:
         super().__init__(galaxy_instance)
 
     def get_jobs(
         self,
-        state=None,
-        history_id=None,
-        invocation_id=None,
-        tool_id=None,
-        workflow_id=None,
-        user_id=None,
-        date_range_min=None,
-        date_range_max=None,
-        limit=500,
-        offset=0,
-        user_details=False,
-        order_by=None,
-    ):
+        state: str = None,
+        history_id: str = None,
+        invocation_id: str = None,
+        tool_id: str = None,
+        workflow_id: str = None,
+        user_id: str = None,
+        date_range_min: str = None,
+        date_range_max: str = None,
+        limit: int = 500,
+        offset: int = 0,
+        user_details: bool = False,
+        order_by: Literal["create_time", "update_time"] = "update_time",
+    ) -> List[Dict[str, Any]]:
         """
         Get all jobs, or select a subset by specifying optional arguments for
         filtering (e.g. a state).
@@ -112,7 +120,7 @@ class JobsClient(Client):
           The following options work only on Galaxy 21.05 or later: ``user_id``,
           ``limit``, ``offset``, ``workflow_id``, ``invocation_id``.
         """
-        params = {"limit": limit, "offset": offset}
+        params: Dict[str, Any] = {"limit": limit, "offset": offset}
         if state:
             params["state"] = state
         if history_id:
@@ -135,7 +143,7 @@ class JobsClient(Client):
             params["order_by"] = order_by
         return self._get(params=params)
 
-    def show_job(self, job_id, full_details=False):
+    def show_job(self, job_id: str, full_details: bool = False) -> Dict[str, Any]:
         """
         Get details of a given job of the current user.
 
@@ -170,7 +178,7 @@ class JobsClient(Client):
 
         return self._get(id=job_id, params=params)
 
-    def _build_for_rerun(self, job_id):
+    def _build_for_rerun(self, job_id: str) -> Dict[str, Any]:
         """
         Get details of a given job that can be used to rerun the corresponding tool.
 
@@ -184,7 +192,9 @@ class JobsClient(Client):
         url = "/".join((self._make_url(job_id), "build_for_rerun"))
         return self._get(url=url)
 
-    def rerun_job(self, job_id, remap=False, tool_inputs_update=None, history_id=None):
+    def rerun_job(
+        self, job_id: str, remap: bool = False, tool_inputs_update: Dict[str, Any] = None, history_id: str = None
+    ) -> Dict[str, Any]:
         """
         Rerun a job.
 
@@ -260,7 +270,7 @@ class JobsClient(Client):
         """
         return self.show_job(job_id).get("state", "")
 
-    def search_jobs(self, tool_id: str, inputs: dict, state: Optional[str] = None) -> List[dict]:
+    def search_jobs(self, tool_id: str, inputs: Dict[str, Any], state: Optional[str] = None) -> List[Dict[str, Any]]:
         """
         Return jobs matching input parameters.
 
@@ -297,7 +307,7 @@ class JobsClient(Client):
         url = self._make_url() + "/search"
         return self._post(url=url, payload=job_info)
 
-    def get_metrics(self, job_id: str) -> List[dict]:
+    def get_metrics(self, job_id: str) -> List[Dict[str, Any]]:
         """
         Return job metrics for a given job.
 
@@ -317,7 +327,7 @@ class JobsClient(Client):
         url = self._make_url(module_id=job_id) + "/metrics"
         return self._get(url=url)
 
-    def cancel_job(self, job_id: str):
+    def cancel_job(self, job_id: str) -> bool:
         """
         Cancel a job, deleting output datasets.
 
@@ -330,7 +340,7 @@ class JobsClient(Client):
         """
         return self._delete(id=job_id)
 
-    def report_error(self, job_id: str, dataset_id: str, message: str, email: str = None) -> dict:
+    def report_error(self, job_id: str, dataset_id: str, message: str, email: str = None) -> Dict[str, Any]:
         """
         Report an error for a given job and dataset to the server administrators.
 
@@ -363,7 +373,7 @@ class JobsClient(Client):
         url = self._make_url(module_id=job_id) + "/error"
         return self._post(url=url, payload=payload)
 
-    def get_common_problems(self, job_id: str) -> dict:
+    def get_common_problems(self, job_id: str) -> Dict[str, Any]:
         """
         Query inputs and jobs for common potential problems that might
         have resulted in job failure.
@@ -380,7 +390,7 @@ class JobsClient(Client):
         url = self._make_url(module_id=job_id) + "/common_problems"
         return self._get(url=url)
 
-    def get_inputs(self, job_id: str) -> List[dict]:
+    def get_inputs(self, job_id: str) -> List[Dict[str, Any]]:
         """
         Get dataset inputs used by a job.
 
@@ -393,7 +403,7 @@ class JobsClient(Client):
         url = self._make_url(module_id=job_id) + "/inputs"
         return self._get(url=url)
 
-    def get_outputs(self, job_id: str) -> List[dict]:
+    def get_outputs(self, job_id: str) -> List[Dict[str, Any]]:
         """
         Get dataset outputs produced by a job.
 
@@ -406,7 +416,7 @@ class JobsClient(Client):
         url = self._make_url(module_id=job_id) + "/outputs"
         return self._get(url=url)
 
-    def resume_job(self, job_id: str) -> dict:
+    def resume_job(self, job_id: str) -> Dict[str, Any]:
         """
         Resume a job if it is paused.
 
@@ -422,7 +432,7 @@ class JobsClient(Client):
         url = self._make_url(module_id=job_id) + "/resume"
         return self._put(url=url)
 
-    def get_destination_params(self, job_id: str) -> dict:
+    def get_destination_params(self, job_id: str) -> Dict[str, Any]:
         """
         Get destination parameters for a job, describing
         the environment and location where the job is run.
@@ -456,7 +466,7 @@ class JobsClient(Client):
         response = self._get(url=url)
         return response["active"]
 
-    def update_job_lock(self, active=False) -> bool:
+    def update_job_lock(self, active: bool = False) -> bool:
         """
         Update the job lock status by setting ``active`` to either
         ``True`` or ``False``. If ``True``, all job dispatching will
@@ -476,7 +486,9 @@ class JobsClient(Client):
         response = self._put(url=url, payload=payload)
         return response["active"]
 
-    def wait_for_job(self, job_id, maxwait=12000, interval=3, check=True):
+    def wait_for_job(
+        self, job_id: str, maxwait: float = 12000, interval: float = 3, check: bool = True
+    ) -> Dict[str, Any]:
         """
         Wait until a job is in a terminal state.
 
