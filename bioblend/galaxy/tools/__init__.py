@@ -16,11 +16,10 @@ from typing_extensions import Literal
 from bioblend.galaxy.client import Client
 from bioblend.galaxyclient import UPLOAD_CHUNK_SIZE
 from bioblend.util import attach_file
+from .inputs import InputsBuilder
 
 if TYPE_CHECKING:
     from bioblend.galaxy import GalaxyInstance
-
-from .inputs import InputsBuilder
 
 
 class ToolClient(Client):
