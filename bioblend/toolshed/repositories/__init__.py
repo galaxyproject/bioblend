@@ -1,16 +1,24 @@
 """
 Interaction with a Tool Shed instance repositories
 """
-from typing import Optional
+from typing import (
+    Optional,
+    TYPE_CHECKING,
+)
+
+from typing_extensions import Literal
 
 from bioblend.galaxy.client import Client
 from bioblend.util import attach_file
+
+if TYPE_CHECKING:
+    from bioblend.toolshed import ToolShedInstance
 
 
 class ToolShedRepositoryClient(Client):
     module = "repositories"
 
-    def __init__(self, toolshed_instance):
+    def __init__(self, toolshed_instance: "ToolShedInstance"):
         super().__init__(toolshed_instance)
 
     def get_repositories(self):
@@ -44,7 +52,12 @@ class ToolShedRepositoryClient(Client):
         """
         return self._get()
 
-    def search_repositories(self, q, page=1, page_size=10):
+    def search_repositories(
+        self,
+        q: Optional[str] = None,
+        page: int = 1,
+        page_size: int = 10,
+    ) -> dict:
         """
         Search for repositories in a Galaxy Tool Shed.
 
@@ -100,7 +113,10 @@ class ToolShedRepositoryClient(Client):
         params = dict(q=q, page=page, page_size=page_size)
         return self._get(params=params)
 
-    def show_repository(self, toolShed_id):
+    def show_repository(
+        self,
+        toolShed_id: str,
+    ) -> dict:
         """
         Display information of a repository from Tool Shed
 
@@ -134,7 +150,11 @@ class ToolShedRepositoryClient(Client):
         """
         return self._get(id=toolShed_id)
 
-    def get_ordered_installable_revisions(self, name, owner):
+    def get_ordered_installable_revisions(
+        self,
+        name: str,
+        owner: str,
+    ) -> list:
         """
         Returns the ordered list of changeset revision hash strings that are
         associated with installable revisions. As in the changelog, the list is
@@ -155,7 +175,12 @@ class ToolShedRepositoryClient(Client):
 
         return r
 
-    def get_repository_revision_install_info(self, name, owner, changeset_revision):
+    def get_repository_revision_install_info(
+        self,
+        name: str,
+        owner: str,
+        changeset_revision: str,
+    ) -> list:
         """
         Return a list of dictionaries of metadata about a certain changeset
         revision for a single tool.
@@ -259,8 +284,12 @@ class ToolShedRepositoryClient(Client):
         return self._get(url=url, params=params)
 
     def repository_revisions(
-        self, downloadable=None, malicious=None, missing_test_components=None, includes_tools=None
-    ):
+        self,
+        downloadable: Optional[bool] = None,
+        malicious: Optional[bool] = None,
+        missing_test_components: Optional[bool] = None,
+        includes_tools: Optional[bool] = None,
+    ) -> list:
         """
         Returns a (possibly filtered) list of dictionaries that include
         information about all repository revisions. The following parameters can
@@ -328,7 +357,10 @@ class ToolShedRepositoryClient(Client):
             params["includes_tools"] = includes_tools
         return self._get(url=url, params=params)
 
-    def show_repository_revision(self, metadata_id):
+    def show_repository_revision(
+        self,
+        metadata_id: str,
+    ) -> dict:
         """
         Returns a dictionary that includes information about a specified
         repository revision.
@@ -364,7 +396,7 @@ class ToolShedRepositoryClient(Client):
         url = "/".join((self.gi.url, "repository_revisions", metadata_id))
         return self._get(url=url)
 
-    def update_repository(self, id, tar_ball_path, commit_message=None):
+    def update_repository(self, id: str, tar_ball_path: str, commit_message: Optional[str] = None) -> dict:
         """
         Update the contents of a Tool Shed repository with specified tar ball.
 
@@ -400,10 +432,10 @@ class ToolShedRepositoryClient(Client):
 
     def create_repository(
         self,
-        name,
-        synopsis,
-        description=None,
-        type="unrestricted",
+        name: str,
+        synopsis: str,
+        description: Optional[str] = None,
+        type: Literal["unrestricted", "repository_suite_definition", "tool_dependency_definition"] = "unrestricted",
         remote_repository_url=None,
         homepage_url=None,
         category_ids=None,
