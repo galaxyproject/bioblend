@@ -31,7 +31,7 @@ class FileStream(NamedTuple):
         self.fd.close()
 
 
-def attach_file(path, name: str = None):
+def attach_file(path: str, name: str = None):
     """
     Attach a path to a request payload object.
 
@@ -60,7 +60,7 @@ def abstractclass(decorated_cls):
     Adapted from https://stackoverflow.com/a/49013561/4503125
     """
 
-    def clsnew(cls, *args, **kwargs):
+    def clsnew(cls: "decorated_cls", *args, **kwargs):
         if cls is decorated_cls:
             raise TypeError(f"Can't instantiate abstract class {decorated_cls.__name__}")
         return super(decorated_cls, cls).__new__(cls)
