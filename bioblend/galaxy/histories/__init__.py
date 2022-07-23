@@ -69,9 +69,16 @@ class HistoryClient(Client):
         """
         if file_path:
             archive_file = attach_file(file_path)
-            payload = dict(archive_source="", archive_file=archive_file, archive_type="file")
+            payload: Dict[str, Any] = {
+                "archive_source": "",
+                "archive_file": archive_file,
+                "archive_type": "file",
+            }
         else:
-            payload = dict(archive_source=url, archive_type="url")
+            payload = {
+                "archive_source": url,
+                "archive_type": "url",
+            }
 
         return self._post(payload=payload, files_attached=file_path is not None)
 

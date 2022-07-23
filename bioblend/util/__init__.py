@@ -13,10 +13,10 @@ class Bunch:
     as a database class, thus the two become interchangeable as a data source.
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         self.__dict__.update(kwargs)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """
         Return the contents of the dict in a printable representation
         """
@@ -27,11 +27,11 @@ class FileStream(NamedTuple):
     name: str
     fd: IO
 
-    def close(self):
+    def close(self) -> None:
         self.fd.close()
 
 
-def attach_file(path, name=None):
+def attach_file(path: str, name: str = None) -> FileStream:
     """
     Attach a path to a request payload object.
 
@@ -47,8 +47,7 @@ def attach_file(path, name=None):
     """
     if name is None:
         name = os.path.basename(path)
-    attachment = FileStream(name, open(path, "rb"))
-    return attachment
+    return FileStream(name, open(path, "rb"))
 
 
 def abstractclass(decorated_cls):

@@ -426,7 +426,7 @@ class ToolShedRepositoryClient(Client):
         .. versionadded:: 0.5.2
         """
         url = self._make_url(id) + "/changeset_revision"
-        payload = {"file": attach_file(tar_ball_path)}
+        payload: Dict[str, Any] = {"file": attach_file(tar_ball_path)}
         if commit_message is not None:
             payload["commit_message"] = commit_message
         try:
