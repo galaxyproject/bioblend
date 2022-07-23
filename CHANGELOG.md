@@ -7,6 +7,9 @@
   ``GalaxyInstance`` to ``GalaxyClient``, so they are also available in
   ``ToolshedInstance``.
 
+* Remove unused methods from ``bioblend.config.Config``. If needed, use the
+  methods inherited from `configparser.ConfigParser` instead.
+
 * Added Code of Conduct for the project.
 
 * Improvements to type annotations, tests and documentation.
