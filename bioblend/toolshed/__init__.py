@@ -19,7 +19,7 @@ class ToolShedInstance(GalaxyClient):
         email: Optional[str] = None,
         password: Optional[str] = None,
         verify: bool = True,
-    ):
+    ) -> None:
         """
         A base representation of a connection to a ToolShed instance, identified
         by the ToolShed URL and user credentials.
