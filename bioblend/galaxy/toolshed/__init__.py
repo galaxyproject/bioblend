@@ -1,16 +1,27 @@
 """
 Interaction with a Galaxy Tool Shed.
 """
+
+from typing import (
+    Any,
+    Dict,
+    List,
+    TYPE_CHECKING,
+)
+
 from bioblend.galaxy.client import Client
+
+if TYPE_CHECKING:
+    from bioblend.galaxy import GalaxyInstance
 
 
 class ToolShedClient(Client):
     module = "tool_shed_repositories"
 
-    def __init__(self, galaxy_instance):
+    def __init__(self, galaxy_instance: "GalaxyInstance") -> None:
         super().__init__(galaxy_instance)
 
-    def get_repositories(self):
+    def get_repositories(self) -> List[Dict[str, Any]]:
         """
         Get the list of all installed Tool Shed repositories on this Galaxy instance.
 
@@ -35,7 +46,7 @@ class ToolShedClient(Client):
         """
         return self._get()
 
-    def show_repository(self, toolShed_id):
+    def show_repository(self, toolShed_id: str) -> Dict[str, Any]:
         """
         Get details of a given Tool Shed repository as it is installed on this
         Galaxy instance.
@@ -61,16 +72,16 @@ class ToolShedClient(Client):
 
     def install_repository_revision(
         self,
-        tool_shed_url,
-        name,
-        owner,
-        changeset_revision,
-        install_tool_dependencies=False,
-        install_repository_dependencies=False,
-        install_resolver_dependencies=False,
-        tool_panel_section_id=None,
-        new_tool_panel_section_label=None,
-    ):
+        tool_shed_url: str,
+        name: str,
+        owner: str,
+        changeset_revision: str,
+        install_tool_dependencies: bool = False,
+        install_repository_dependencies: bool = False,
+        install_resolver_dependencies: bool = False,
+        tool_panel_section_id: str = None,
+        new_tool_panel_section_label: str = None,
+    ) -> Dict[str, Any]:
         """
         Install a specified repository revision from a specified Tool Shed into
         this Galaxy instance. This example demonstrates installation of a repository
@@ -132,7 +143,7 @@ class ToolShedClient(Client):
                                              that should be created and the repository
                                              installed into.
         """
-        payload = {}
+        payload: Dict[str, Any] = {}
         payload["tool_shed_url"] = tool_shed_url
         payload["name"] = name
         payload["owner"] = owner
@@ -148,7 +159,9 @@ class ToolShedClient(Client):
         url = self._make_url() + "/new/install_repository_revision"
         return self._post(url=url, payload=payload)
 
-    def uninstall_repository_revision(self, name, owner, changeset_revision, tool_shed_url, remove_from_disk=True):
+    def uninstall_repository_revision(
+        self, name: str, owner: str, changeset_revision: str, tool_shed_url: str, remove_from_disk: bool = True
+    ) -> Dict[str, Any]:
         """
         Uninstalls a specified repository revision from this Galaxy instance.
 
@@ -172,7 +185,7 @@ class ToolShedClient(Client):
         :rtype: dict
         :return: If successful, a dictionary with a message noting the removal
         """
-        payload = {
+        payload: Dict[str, Any] = {
             "tool_shed_url": tool_shed_url,
             "name": name,
             "owner": owner,
