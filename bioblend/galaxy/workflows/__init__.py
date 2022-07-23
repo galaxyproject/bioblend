@@ -21,7 +21,7 @@ if typing.TYPE_CHECKING:
 class WorkflowClient(Client):
     module = "workflows"
 
-    def __init__(self, galaxy_instance: "GalaxyInstance"):
+    def __init__(self, galaxy_instance: "GalaxyInstance") -> None:
         super().__init__(galaxy_instance)
 
     # the 'deleted' option is not available for workflows
@@ -95,7 +95,7 @@ class WorkflowClient(Client):
 
         return self._get(id=workflow_id, params=params)
 
-    def get_workflow_inputs(self, workflow_id: str, label: str) -> list:
+    def get_workflow_inputs(self, workflow_id: str, label: str) -> List[str]:
         """
         Get a list of workflow input IDs that match the given label.
         If no input matches the given label, an empty list is returned.
