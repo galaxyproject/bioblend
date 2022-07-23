@@ -1,16 +1,28 @@
 """
 Interaction with a Tool Shed instance categories
 """
+from typing import (
+    Any,
+    Dict,
+    List,
+    TYPE_CHECKING,
+)
+
+from typing_extensions import Literal
+
 from bioblend.galaxy.client import Client
+
+if TYPE_CHECKING:
+    from bioblend.toolshed import ToolShedInstance
 
 
 class ToolShedCategoryClient(Client):
     module = "categories"
 
-    def __init__(self, toolshed_instance):
+    def __init__(self, toolshed_instance: "ToolShedInstance") -> None:
         super().__init__(toolshed_instance)
 
-    def get_categories(self, deleted=False):
+    def get_categories(self, deleted: bool = False) -> List[Dict[str, Any]]:
         """
         Returns a list of dictionaries that contain descriptions of the
         repository categories found on the given Tool Shed instance.
@@ -35,7 +47,7 @@ class ToolShedCategoryClient(Client):
         """
         return self._get(deleted=deleted)
 
-    def show_category(self, category_id):
+    def show_category(self, category_id: str) -> Dict[str, Any]:
         """
         Get details of a given category.
 
@@ -47,7 +59,9 @@ class ToolShedCategoryClient(Client):
         """
         return self._get(id=category_id)
 
-    def get_repositories(self, category_id, sort_key="name", sort_order="asc"):
+    def get_repositories(
+        self, category_id: str, sort_key: Literal["name", "owner"] = "name", sort_order: Literal["asc", "desc"] = "asc"
+    ) -> Dict[str, Any]:
         """
         Returns a dictionary of information for a repository category including
         a list of repositories belonging to the category.
@@ -107,7 +121,7 @@ class ToolShedCategoryClient(Client):
              'url': '/api/categories/589548af7e391bcf'}
         """
 
-        params = {}
+        params: Dict[str, Any] = {}
         if sort_key:
             params.update({"sort_key": sort_key})
         if sort_order:
