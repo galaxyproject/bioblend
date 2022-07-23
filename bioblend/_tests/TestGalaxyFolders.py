@@ -1,3 +1,8 @@
+from typing import (
+    Dict,
+    List,
+)
+
 from . import GalaxyTestBase
 
 FOO_DATA = "foo\nbar\n"
@@ -41,7 +46,7 @@ class TestGalaxyFolders(GalaxyTestBase.GalaxyTestBase):
         self.assertEqual(self.folder["description"], "new-description")
 
     def test_get_set_permissions(self):
-        empty_permission = {
+        empty_permission: Dict[str, List] = {
             "add_library_item_role_list": [],
             "modify_folder_role_list": [],
             "manage_folder_role_list": [],

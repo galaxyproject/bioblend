@@ -13,6 +13,7 @@ from typing import (
     Dict,
     List,
     Optional,
+    overload,
     Pattern,
     Union,
 )
@@ -39,7 +40,7 @@ class HistoryClient(Client):
     def __init__(self, galaxy_instance: "GalaxyInstance"):
         super().__init__(galaxy_instance)
 
-    def create_history(self, name: str = None) -> Dict[str, Any]:
+    def create_history(self, name: Optional[str] = None) -> Dict[str, Any]:
         """
         Create a new history, optionally setting the ``name``.
 
@@ -54,7 +55,7 @@ class HistoryClient(Client):
             payload["name"] = name
         return self._post(payload)
 
-    def import_history(self, file_path: str = None, url: str = None) -> Dict[str, Any]:
+    def import_history(self, file_path: Optional[str] = None, url: Optional[str] = None) -> Dict[str, Any]:
         """
         Import a history from an archive on disk or a URL.
 
@@ -84,11 +85,11 @@ class HistoryClient(Client):
 
     def _get_histories(
         self,
-        name: str = None,
+        name: Optional[str] = None,
         deleted: bool = False,
         filter_user_published: Optional[bool] = None,
         get_all_published: bool = False,
-        slug: str = None,
+        slug: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """
         Hidden method to be used by both get_histories() and get_published_histories()
@@ -115,11 +116,11 @@ class HistoryClient(Client):
 
     def get_histories(
         self,
-        history_id: str = None,
-        name: str = None,
+        history_id: Optional[str] = None,
+        name: Optional[str] = None,
         deleted: bool = False,
         published: Optional[bool] = None,
-        slug: str = None,
+        slug: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """
         Get all histories, or select a subset by specifying optional arguments
@@ -158,7 +159,7 @@ class HistoryClient(Client):
         )
 
     def get_published_histories(
-        self, name: str = None, deleted: bool = False, slug: str = None
+        self, name: Optional[str] = None, deleted: bool = False, slug: Optional[str] = None
     ) -> List[Dict[str, Any]]:
         """
         Get all published histories (by any user), or select a subset by
@@ -181,14 +182,34 @@ class HistoryClient(Client):
             name=name, deleted=deleted, filter_user_published=None, get_all_published=True, slug=slug
         )
 
+    @overload
+    def show_history(
+        self,
+        history_id: str,
+        contents: Literal[False] = False,
+    ) -> Dict[str, Any]:
+        ...
+
+    @overload
+    def show_history(
+        self,
+        history_id: str,
+        contents: Literal[True],
+        deleted: Optional[bool] = None,
+        visible: Optional[bool] = None,
+        details: Optional[str] = None,
+        types: Optional[List[str]] = None,
+    ) -> List[Dict[str, Any]]:
+        ...
+
     def show_history(
         self,
         history_id: str,
         contents: bool = False,
         deleted: Optional[bool] = None,
         visible: Optional[bool] = None,
-        details: str = None,
-        types: List[str] = None,
+        details: Optional[str] = None,
+        types: Optional[List[str]] = None,
     ) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
         """
         Get details of a given history. By default, just get the history meta
@@ -320,7 +341,9 @@ class HistoryClient(Client):
         url = "/".join((self._make_url(history_id, contents=True), "dataset_collections", dataset_collection_id))
         return self._get(url=url)
 
-    def show_matching_datasets(self, history_id: str, name_filter: Pattern[str] = None) -> List[Dict[str, Any]]:
+    def show_matching_datasets(
+        self, history_id: str, name_filter: Optional[Pattern[str]] = None
+    ) -> List[Dict[str, Any]]:
         """
         Get dataset details for matching datasets within a history.
 
@@ -339,7 +362,6 @@ class HistoryClient(Client):
         if isinstance(name_filter, str):
             name_filter = re.compile(name_filter + "$")
         history_content = self.show_history(history_id, contents=True)
-        assert isinstance(history_content, list)
         return [
             self.show_dataset(history_id, h["id"])
             for h in history_content
@@ -629,13 +651,11 @@ class HistoryClient(Client):
             'state_details' = Contains individual statistics for various dataset states.
             'percent_complete' = The overall number of datasets processed to completion.
         """
-        state: Dict[str, Any] = {}
-
         history = self.show_history(history_id)
 
-        assert isinstance(history, dict)
-
-        state["state"] = history["state"]
+        state: Dict[str, Any] = {
+            "state": history["state"],
+        }
 
         if history.get("state_details") is not None:
             state["state_details"] = history["state_details"]
@@ -663,7 +683,7 @@ class HistoryClient(Client):
         include_hidden: bool = False,
         include_deleted: bool = False,
         wait: bool = False,
-        maxwait: float = None,
+        maxwait: Optional[float] = None,
     ) -> str:
         """
         Start a job to create an export archive for the given history.

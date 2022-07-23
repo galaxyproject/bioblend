@@ -5,6 +5,7 @@ from typing import (
     Any,
     Dict,
     List,
+    Optional,
     TYPE_CHECKING,
     Union,
 )
@@ -23,7 +24,7 @@ class FoldersClient(Client):
     def __init__(self, galaxy_instance: "GalaxyInstance") -> None:
         super().__init__(galaxy_instance)
 
-    def create_folder(self, parent_folder_id: str, name: str, description: str = None) -> Dict[str, Any]:
+    def create_folder(self, parent_folder_id: str, name: str, description: Optional[str] = None) -> Dict[str, Any]:
         """
         Create a folder.
 
@@ -79,7 +80,7 @@ class FoldersClient(Client):
         payload = {"undelete": undelete}
         return self._delete(payload=payload, id=folder_id)
 
-    def update_folder(self, folder_id: str, name: str, description: str = None) -> Dict[str, Any]:
+    def update_folder(self, folder_id: str, name: str, description: Optional[str] = None) -> Dict[str, Any]:
         """
         Update folder information.
 
@@ -111,7 +112,7 @@ class FoldersClient(Client):
         :param scope: scope of permissions, either 'current' or 'available'
 
         :rtype: dict
-        :return: dictionary including details of the folder
+        :return: dictionary including details of the folder permissions
         """
         url = self._make_url(folder_id) + "/permissions"
         return self._get(url=url)
@@ -120,9 +121,9 @@ class FoldersClient(Client):
         self,
         folder_id: str,
         action: Literal["set_permissions"] = "set_permissions",
-        add_ids: List[str] = None,
-        manage_ids: List[str] = None,
-        modify_ids: List[str] = None,
+        add_ids: Optional[List[str]] = None,
+        manage_ids: Optional[List[str]] = None,
+        modify_ids: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
         """
         Set the permissions of a folder.

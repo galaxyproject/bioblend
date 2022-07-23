@@ -11,6 +11,7 @@ from typing import (
     Dict,
     List,
     Optional,
+    overload,
     TYPE_CHECKING,
     Union,
 )
@@ -89,10 +90,32 @@ class DatasetClient(Client):
         r.raise_for_status()
         return dataset, file_ext, r
 
+    @overload
     def download_dataset(
         self,
         dataset_id: str,
-        file_path: str = None,
+        file_path: None = None,
+        use_default_filename: bool = True,
+        require_ok_state: bool = True,
+        maxwait: float = 12000,
+    ) -> bytes:
+        ...
+
+    @overload
+    def download_dataset(
+        self,
+        dataset_id: str,
+        file_path: str,
+        use_default_filename: bool = True,
+        require_ok_state: bool = True,
+        maxwait: float = 12000,
+    ) -> str:
+        ...
+
+    def download_dataset(
+        self,
+        dataset_id: str,
+        file_path: Optional[str] = None,
         use_default_filename: bool = True,
         require_ok_state: bool = True,
         maxwait: float = 12000,
@@ -180,10 +203,10 @@ class DatasetClient(Client):
         tool_id: Optional[str] = None,
         tag: Optional[str] = None,
         history_id: Optional[str] = None,
-        create_time_min: str = None,
-        create_time_max: str = None,
-        update_time_min: str = None,
-        update_time_max: str = None,
+        create_time_min: Optional[str] = None,
+        create_time_max: Optional[str] = None,
+        update_time_min: Optional[str] = None,
+        update_time_max: Optional[str] = None,
         order: str = "create_time-dsc",
     ) -> List[dict]:
         """

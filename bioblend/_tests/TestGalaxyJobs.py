@@ -5,6 +5,8 @@ from datetime import (
 )
 from operator import itemgetter
 
+from typing_extensions import Literal
+
 from bioblend.galaxy.tools.inputs import (
     dataset,
     inputs,
@@ -121,8 +123,8 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
         self.assertEqual(history_contents[2]["state"], "paused")
 
         # resume the paused step job
-        resumed_job = self.gi.jobs.resume_job(job_steps[-1]["job_id"])
-        self.assertEqual(resumed_job[0]["name"], "out_file1")
+        resumed_outputs = self.gi.jobs.resume_job(job_steps[-1]["job_id"])
+        self.assertEqual(resumed_outputs[0]["name"], "out_file1")
         # the following does not pass stably - the job goes back to paused too quickly
         # history_contents_resumed = self.gi.histories.show_history(self.history_id, contents=True)
         # self.assertNotEqual(history_contents_resumed[2]['state'], 'paused')
@@ -226,7 +228,7 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
         job_state = self.gi.jobs.show_job(job_id)["state"]
         self.assertTrue(job_state, "deleted")
 
-    def _run_tool(self, input_format: str = "legacy") -> dict:
+    def _run_tool(self, input_format: Literal["21.01", "legacy"] = "legacy") -> dict:
         tool_inputs = {
             "num_lines": "1",
             "input": {"src": "hda", "id": self.dataset_id},

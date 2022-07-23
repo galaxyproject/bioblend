@@ -34,14 +34,14 @@ class JobsClient(Client):
 
     def get_jobs(
         self,
-        state: str = None,
-        history_id: str = None,
-        invocation_id: str = None,
-        tool_id: str = None,
-        workflow_id: str = None,
-        user_id: str = None,
-        date_range_min: str = None,
-        date_range_max: str = None,
+        state: Optional[str] = None,
+        history_id: Optional[str] = None,
+        invocation_id: Optional[str] = None,
+        tool_id: Optional[str] = None,
+        workflow_id: Optional[str] = None,
+        user_id: Optional[str] = None,
+        date_range_min: Optional[str] = None,
+        date_range_max: Optional[str] = None,
         limit: int = 500,
         offset: int = 0,
         user_details: bool = False,
@@ -193,7 +193,11 @@ class JobsClient(Client):
         return self._get(url=url)
 
     def rerun_job(
-        self, job_id: str, remap: bool = False, tool_inputs_update: Dict[str, Any] = None, history_id: str = None
+        self,
+        job_id: str,
+        remap: bool = False,
+        tool_inputs_update: Optional[Dict[str, Any]] = None,
+        history_id: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
         Rerun a job.
@@ -340,7 +344,7 @@ class JobsClient(Client):
         """
         return self._delete(id=job_id)
 
-    def report_error(self, job_id: str, dataset_id: str, message: str, email: str = None) -> Dict[str, Any]:
+    def report_error(self, job_id: str, dataset_id: str, message: str, email: Optional[str] = None) -> Dict[str, Any]:
         """
         Report an error for a given job and dataset to the server administrators.
 
@@ -416,15 +420,15 @@ class JobsClient(Client):
         url = self._make_url(module_id=job_id) + "/outputs"
         return self._get(url=url)
 
-    def resume_job(self, job_id: str) -> Dict[str, Any]:
+    def resume_job(self, job_id: str) -> List[Dict[str, Any]]:
         """
         Resume a job if it is paused.
 
         :type job_id: str
         :param job_id: job ID
 
-        :rtype: dict
-        :return: dict containing output dataset associations
+        :rtype: list of dicts
+        :return: list of dictionaries containing output dataset associations
 
         .. note::
           This method works only on Galaxy 18.09 or later.

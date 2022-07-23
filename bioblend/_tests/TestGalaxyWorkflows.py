@@ -3,6 +3,11 @@ import os
 import shutil
 import tempfile
 import time
+from typing import (
+    Any,
+    Dict,
+    List,
+)
 
 from bioblend import ConnectionError
 from . import (
@@ -114,7 +119,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
 
     def test_import_export_workflow_from_local_path(self):
         with self.assertRaises(TypeError):
-            self.gi.workflows.import_workflow_from_local_path(None)
+            self.gi.workflows.import_workflow_from_local_path(None)  # type: ignore[arg-type]
         path = test_util.get_abspath(os.path.join("data", "paste_columns.ga"))
         imported_wf = self.gi.workflows.import_workflow_from_local_path(path)
         self.assertIsInstance(imported_wf, dict)
@@ -123,7 +128,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         self.assertFalse(imported_wf["deleted"])
         self.assertFalse(imported_wf["published"])
         with self.assertRaises(TypeError):
-            self.gi.workflows.export_workflow_to_local_path(None, None, None)
+            self.gi.workflows.export_workflow_to_local_path(None, None, None)  # type: ignore[arg-type]
         export_dir = tempfile.mkdtemp(prefix="bioblend_test_")
         try:
             self.gi.workflows.export_workflow_to_local_path(imported_wf["id"], export_dir)
@@ -276,7 +281,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
 
     @test_util.skip_unless_galaxy("release_21.01")
     def test_refactor_workflow(self):
-        actions = [
+        actions: List[Dict[str, Any]] = [
             {"action_type": "add_input", "type": "data", "label": "foo"},
             {"action_type": "update_step_label", "label": "bar", "step": {"label": "foo"}},
         ]

@@ -30,7 +30,9 @@ class ToolClient(Client):
     def __init__(self, galaxy_instance: "GalaxyInstance"):
         super().__init__(galaxy_instance)
 
-    def get_tools(self, tool_id: str = None, name: str = None, trackster: bool = None) -> List[Dict[str, Any]]:
+    def get_tools(
+        self, tool_id: Optional[str] = None, name: Optional[str] = None, trackster: Optional[bool] = None
+    ) -> List[Dict[str, Any]]:
         """
         Get all tools, or select a subset by specifying optional arguments for
         filtering (e.g. a tool name).
@@ -81,10 +83,11 @@ class ToolClient(Client):
         """
         return self._raw_get_tool(in_panel=True)
 
-    def _raw_get_tool(self, in_panel: bool = None, trackster: bool = None) -> List[Dict[str, Any]]:
-        params = {}
-        params["in_panel"] = in_panel
-        params["trackster"] = trackster
+    def _raw_get_tool(self, in_panel: Optional[bool] = None, trackster: Optional[bool] = None) -> List[Dict[str, Any]]:
+        params = {
+            "in_panel": in_panel,
+            "trackster": trackster,
+        }
         return self._get(params=params)
 
     def requirements(self, tool_id: str) -> List[Dict[str, Any]]:
@@ -159,7 +162,7 @@ class ToolClient(Client):
         url = self._make_url(tool_id) + "/citations"
         return self._get(url=url)
 
-    def install_dependencies(self, tool_id: str) -> Dict[str, Any]:
+    def install_dependencies(self, tool_id: str) -> List[Dict[str, Any]]:
         """
         Install dependencies for a given tool via a resolver.
         This works only for Conda currently.
@@ -167,8 +170,8 @@ class ToolClient(Client):
         :type tool_id: str
         :param tool_id: id of the requested tool
 
-        :rtype: dict
-        :return: Tool requirement status
+        :rtype: list of dicts
+        :return: List of tool requirement status dictionaries
 
         .. note::
           This method works only if the user is a Galaxy admin.
@@ -209,13 +212,18 @@ class ToolClient(Client):
         :rtype: dict
         :return: Information about the tool's interface
         """
-        params = {}
-        params["io_details"] = io_details
-        params["link_details"] = link_details
+        params = {
+            "io_details": io_details,
+            "link_details": link_details,
+        }
         return self._get(id=tool_id, params=params)
 
     def build(
-        self, tool_id: str, inputs: Dict[str, Any] = None, tool_version: str = None, history_id: str = None
+        self,
+        tool_id: str,
+        inputs: Optional[Dict[str, Any]] = None,
+        tool_version: Optional[str] = None,
+        history_id: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
         This method returns the tool model, which includes an updated input parameter array for the given tool,
@@ -409,10 +417,11 @@ class ToolClient(Client):
         You can also check the examples in `Galaxy's API test suite
         <https://github.com/galaxyproject/galaxy/blob/dev/lib/galaxy_test/api/test_tools.py>`_.
         """
-        payload: Dict[str, Union[str, Dict]] = {}
-        payload["history_id"] = history_id
-        payload["tool_id"] = tool_id
-        payload["input_format"] = input_format
+        payload: Dict[str, Union[str, Dict]] = {
+            "history_id": history_id,
+            "tool_id": tool_id,
+            "input_format": input_format,
+        }
 
         if isinstance(tool_inputs, InputsBuilder):
             payload["inputs"] = tool_inputs.to_dict()
@@ -563,21 +572,22 @@ class ToolClient(Client):
     put_url = paste_content
 
     def _upload_payload(self, history_id: str, **keywords) -> Dict[str, Any]:
-        payload: Dict[str, Union[str, Dict]] = {}
-        payload["history_id"] = history_id
-        payload["tool_id"] = keywords.get("tool_id", "upload1")
-        tool_input: Dict[str, Any] = {}
-        tool_input["file_type"] = keywords.get("file_type", "auto")
-        tool_input["dbkey"] = keywords.get("dbkey", "?")
+        tool_input: Dict[str, Any] = {
+            "file_type": keywords.get("file_type", "auto"),
+            "dbkey": keywords.get("dbkey", "?"),
+            "files_0|type": "upload_dataset",
+        }
         if not keywords.get("to_posix_lines", True):
             tool_input["files_0|to_posix_lines"] = False
         elif keywords.get("space_to_tab", False):
             tool_input["files_0|space_to_tab"] = "Yes"
         if "file_name" in keywords:
             tool_input["files_0|NAME"] = keywords["file_name"]
-        tool_input["files_0|type"] = "upload_dataset"
-        payload["inputs"] = tool_input
-        return payload
+        return {
+            "history_id": history_id,
+            "tool_id": keywords.get("tool_id", "upload1"),
+            "inputs": tool_input,
+        }
 
     def _fetch_payload(self, path: str, history_id: str, session_id: str, **keywords) -> dict:
         file_name = keywords.get("file_name", basename(path))

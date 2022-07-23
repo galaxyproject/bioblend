@@ -8,6 +8,7 @@ from typing import (
     Any,
     Dict,
     List,
+    Optional,
     TYPE_CHECKING,
 )
 
@@ -34,7 +35,9 @@ class LibraryClient(Client):
     def __init__(self, galaxy_instance: "GalaxyInstance") -> None:
         super().__init__(galaxy_instance)
 
-    def create_library(self, name: str, description: str = None, synopsis: str = None) -> Dict[str, Any]:
+    def create_library(
+        self, name: str, description: Optional[str] = None, synopsis: Optional[str] = None
+    ) -> Dict[str, Any]:
         """
         Create a data library with the properties defined in the arguments.
 
@@ -233,7 +236,7 @@ class LibraryClient(Client):
         return l["root_folder_id"]
 
     def create_folder(
-        self, library_id: str, folder_name: str, description: str = None, base_folder_id: str = None
+        self, library_id: str, folder_name: str, description: Optional[str] = None, base_folder_id: Optional[str] = None
     ) -> List[Dict[str, Any]]:
         """
         Create a folder in a library.
@@ -258,15 +261,18 @@ class LibraryClient(Client):
         if base_folder_id is None:
             base_folder_id = self._get_root_folder_id(library_id)
         # Compose the payload
-        payload = {}
-        payload["name"] = folder_name
-        payload["folder_id"] = base_folder_id
-        payload["create_type"] = "folder"
+        payload = {
+            "name": folder_name,
+            "folder_id": base_folder_id,
+            "create_type": "folder",
+        }
         if description is not None:
             payload["description"] = description
         return self._post(payload, id=library_id, contents=True)
 
-    def get_folders(self, library_id: str, folder_id: str = None, name: str = None) -> List[Dict[str, Any]]:
+    def get_folders(
+        self, library_id: str, folder_id: Optional[str] = None, name: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
         """
         Get all the folders in a library, or select a subset by specifying a
         folder name for filtering.
@@ -306,7 +312,9 @@ class LibraryClient(Client):
             folders = [_ for _ in library_contents if _["type"] == "folder"]
         return folders
 
-    def get_libraries(self, library_id: str = None, name: str = None, deleted: bool = False) -> List[Dict[str, Any]]:
+    def get_libraries(
+        self, library_id: Optional[str] = None, name: Optional[str] = None, deleted: Optional[bool] = False
+    ) -> List[Dict[str, Any]]:
         """
         Get all libraries, or select a subset by specifying optional arguments
         for filtering (e.g. a library name).
@@ -366,56 +374,57 @@ class LibraryClient(Client):
         This method should not be called directly but instead refer to the
         methods specific for the desired type of data upload.
         """
-        folder_id = keywords.get("folder_id", None)
+        folder_id = keywords.get("folder_id")
         if folder_id is None:
             folder_id = self._get_root_folder_id(library_id)
         files_attached = False
         # Compose the payload dict
-        payload = {}
-        payload["folder_id"] = folder_id
-        payload["file_type"] = keywords.get("file_type", "auto")
-        payload["dbkey"] = keywords.get("dbkey", "?")
-        payload["create_type"] = "file"
-        if keywords.get("roles", None):
+        payload = {
+            "folder_id": folder_id,
+            "file_type": keywords.get("file_type", "auto"),
+            "dbkey": keywords.get("dbkey", "?"),
+            "create_type": "file",
+            "tag_using_filenames": keywords.get("tag_using_filenames", False),
+            "preserve_dirs": keywords.get("preserve_dirs", False),
+        }
+        if keywords.get("roles"):
             payload["roles"] = keywords["roles"]
-        if keywords.get("link_data_only", None) and keywords["link_data_only"] != "copy_files":
+        if keywords.get("link_data_only") and keywords["link_data_only"] != "copy_files":
             payload["link_data_only"] = "link_to_files"
-        payload["tag_using_filenames"] = keywords.get("tag_using_filenames", False)
         if keywords.get("tags"):
             payload["tags"] = keywords["tags"]
-        payload["preserve_dirs"] = keywords.get("preserve_dirs", False)
         # upload options
-        if keywords.get("file_url", None) is not None:
+        if keywords.get("file_url") is not None:
             payload["upload_option"] = "upload_file"
             payload["files_0|url_paste"] = keywords["file_url"]
-        elif keywords.get("pasted_content", None) is not None:
+        elif keywords.get("pasted_content") is not None:
             payload["upload_option"] = "upload_file"
             payload["files_0|url_paste"] = keywords["pasted_content"]
-        elif keywords.get("server_dir", None) is not None:
+        elif keywords.get("server_dir") is not None:
             payload["upload_option"] = "upload_directory"
             payload["server_dir"] = keywords["server_dir"]
-        elif keywords.get("file_local_path", None) is not None:
+        elif keywords.get("file_local_path") is not None:
             payload["upload_option"] = "upload_file"
             payload["files_0|file_data"] = attach_file(keywords["file_local_path"])
             files_attached = True
-        elif keywords.get("filesystem_paths", None) is not None:
+        elif keywords.get("filesystem_paths") is not None:
             payload["upload_option"] = "upload_paths"
             payload["filesystem_paths"] = keywords["filesystem_paths"]
 
         try:
             return self._post(payload, id=library_id, contents=True, files_attached=files_attached)
         finally:
-            if payload.get("files_0|file_data", None) is not None:
+            if payload.get("files_0|file_data") is not None:
                 payload["files_0|file_data"].close()
 
     def upload_file_from_url(
         self,
         library_id: str,
         file_url: str,
-        folder_id: str = None,
+        folder_id: Optional[str] = None,
         file_type: str = "auto",
         dbkey: str = "?",
-        tags: List[str] = None,
+        tags: Optional[List[str]] = None,
     ) -> List[Dict[str, Any]]:
         """
         Upload a file to a library from a URL.
@@ -450,10 +459,10 @@ class LibraryClient(Client):
         self,
         library_id: str,
         pasted_content: str,
-        folder_id: str = None,
+        folder_id: Optional[str] = None,
         file_type: str = "auto",
         dbkey: str = "?",
-        tags: List[str] = None,
+        tags: Optional[List[str]] = None,
     ) -> List[Dict[str, Any]]:
         """
         Upload pasted_content to a data library as a new file.
@@ -488,10 +497,10 @@ class LibraryClient(Client):
         self,
         library_id: str,
         file_local_path: str,
-        folder_id: str = None,
+        folder_id: Optional[str] = None,
         file_type: str = "auto",
         dbkey: str = "?",
-        tags: List[str] = None,
+        tags: Optional[List[str]] = None,
     ) -> List[Dict[str, Any]]:
         """
         Read local file contents from file_local_path and upload data to a
@@ -532,14 +541,14 @@ class LibraryClient(Client):
         self,
         library_id: str,
         server_dir: str,
-        folder_id: str = None,
+        folder_id: Optional[str] = None,
         file_type: str = "auto",
         dbkey: str = "?",
-        link_data_only: LinkDataOnly = None,
+        link_data_only: Optional[LinkDataOnly] = None,
         roles: str = "",
         preserve_dirs: bool = False,
         tag_using_filenames: bool = False,
-        tags: List[str] = None,
+        tags: Optional[List[str]] = None,
     ) -> List[Dict[str, Any]]:
         """
         Upload all files in the specified subdirectory of the Galaxy library
@@ -610,14 +619,14 @@ class LibraryClient(Client):
         self,
         library_id: str,
         filesystem_paths: str,
-        folder_id: str = None,
+        folder_id: Optional[str] = None,
         file_type: str = "auto",
         dbkey: str = "?",
-        link_data_only: LinkDataOnly = None,
+        link_data_only: Optional[LinkDataOnly] = None,
         roles: str = "",
         preserve_dirs: bool = False,
         tag_using_filenames: bool = False,
-        tags: List[str] = None,
+        tags: Optional[List[str]] = None,
     ) -> List[Dict[str, Any]]:
         """
         Upload a set of files already present on the filesystem of the Galaxy
@@ -683,7 +692,7 @@ class LibraryClient(Client):
         )
 
     def copy_from_dataset(
-        self, library_id: str, dataset_id: str, folder_id: str = None, message: str = ""
+        self, library_id: str, dataset_id: str, folder_id: Optional[str] = None, message: str = ""
     ) -> Dict[str, Any]:
         """
         Copy a Galaxy dataset into a library.
@@ -706,11 +715,12 @@ class LibraryClient(Client):
         """
         if folder_id is None:
             folder_id = self._get_root_folder_id(library_id)
-        payload = {}
-        payload["folder_id"] = folder_id
-        payload["create_type"] = "file"
-        payload["from_hda_id"] = dataset_id
-        payload["ldda_message"] = message
+        payload = {
+            "folder_id": folder_id,
+            "create_type": "file",
+            "from_hda_id": dataset_id,
+            "ldda_message": message,
+        }
         return self._post(payload, id=library_id, contents=True)
 
     def get_library_permissions(self, library_id: str) -> Dict[str, Any]:
@@ -742,10 +752,10 @@ class LibraryClient(Client):
     def set_library_permissions(
         self,
         library_id: str,
-        access_in: List[str] = None,
-        modify_in: List[str] = None,
-        add_in: List[str] = None,
-        manage_in: List[str] = None,
+        access_in: Optional[List[str]] = None,
+        modify_in: Optional[List[str]] = None,
+        add_in: Optional[List[str]] = None,
+        manage_in: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
         """
         Set the permissions for a library. Note: it will override all security
@@ -769,7 +779,7 @@ class LibraryClient(Client):
         :rtype: dict
         :return: General information about the library
         """
-        payload = {}
+        payload: Dict[str, List[str]] = {}
         if access_in:
             payload["LIBRARY_ACCESS_in"] = access_in
         if modify_in:
@@ -782,7 +792,11 @@ class LibraryClient(Client):
         return self._post(payload, url=url)
 
     def set_dataset_permissions(
-        self, dataset_id: str, access_in: List[str] = None, modify_in: List[str] = None, manage_in: List[str] = None
+        self,
+        dataset_id: str,
+        access_in: Optional[List[str]] = None,
+        modify_in: Optional[List[str]] = None,
+        manage_in: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
         """
         Set the permissions for a dataset. Note: it will override all security
@@ -803,14 +817,15 @@ class LibraryClient(Client):
         :rtype: dict
         :return: dictionary with all applicable permissions' values
         """
-        payload: Dict[str, Any] = {}
+        # we need here to define an action
+        payload: Dict[str, Any] = {
+            "action": "set_permissions",
+        }
         if access_in:
             payload["access_ids[]"] = access_in
         if modify_in:
             payload["modify_ids[]"] = modify_in
         if manage_in:
             payload["manage_ids[]"] = manage_in
-        # we need here to define an action
-        payload["action"] = "set_permissions"
         url = "/".join((self._make_url(), "datasets", dataset_id, "permissions"))
         return self._post(payload, url=url)

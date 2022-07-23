@@ -5,7 +5,7 @@ import random
 import string
 import unittest
 
-import bioblend
+import bioblend.galaxy
 
 NO_CLOUDMAN_MESSAGE = "CloudMan required and no CloudMan AMI configured."
 NO_GALAXY_MESSAGE = "Externally configured Galaxy required, but not found. Set BIOBLEND_GALAXY_URL and BIOBLEND_GALAXY_API_KEY to run this test."
