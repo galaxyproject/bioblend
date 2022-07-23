@@ -1,16 +1,26 @@
 """
 Contains possible interactions with the Galaxy visualization
 """
+from typing import (
+    Any,
+    Dict,
+    List,
+    TYPE_CHECKING,
+)
+
 from bioblend.galaxy.client import Client
+
+if TYPE_CHECKING:
+    from bioblend.galaxy import GalaxyInstance
 
 
 class VisualClient(Client):
     module = "visualizations"
 
-    def __init__(self, galaxy_instance):
+    def __init__(self, galaxy_instance: "GalaxyInstance") -> None:
         super().__init__(galaxy_instance)
 
-    def get_visualizations(self):
+    def get_visualizations(self) -> List[Dict[str, Any]]:
         """
         Get the list of all visualizations.
 
@@ -31,7 +41,7 @@ class VisualClient(Client):
         """
         return self._get()
 
-    def show_visualization(self, visual_id):
+    def show_visualization(self, visual_id: str) -> Dict[str, Any]:
         """
         Get details of a given visualization.
 
