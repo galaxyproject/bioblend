@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 class VisualClient(Client):
     module = "visualizations"
 
-    def __init__(self, galaxy_instance: "GalaxyInstance"):
+    def __init__(self, galaxy_instance: "GalaxyInstance") -> None:
         super().__init__(galaxy_instance)
 
     def get_visualizations(self) -> List[Dict[str, Any]]:

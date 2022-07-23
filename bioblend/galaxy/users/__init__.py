@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 class UserClient(Client):
     module = "users"
 
-    def __init__(self, galaxy_instance: "GalaxyInstance"):
+    def __init__(self, galaxy_instance: "GalaxyInstance") -> None:
         super().__init__(galaxy_instance)
 
     def get_users(
@@ -31,7 +31,6 @@ class UserClient(Client):
 
         :type deleted: bool
         :param deleted: Whether to include deleted users
-
 
         :type f_email: str
         :param f_email: filter for user emails. The filter will be active for
@@ -102,8 +101,9 @@ class UserClient(Client):
         :rtype: dict
         :return: a dictionary containing information about the created user
         """
-        payload: Dict[str, Any] = {}
-        payload["remote_user_email"] = user_email
+        payload = {
+            "remote_user_email": user_email,
+        }
         return self._post(payload)
 
     def create_local_user(self, username: str, user_email: str, password: str) -> Dict[str, Any]:
@@ -128,10 +128,11 @@ class UserClient(Client):
         :rtype: dict
         :return: a dictionary containing information about the created user
         """
-        payload: Dict[str, Any] = {}
-        payload["username"] = username
-        payload["email"] = user_email
-        payload["password"] = password
+        payload = {
+            "username": username,
+            "email": user_email,
+            "password": password,
+        }
         return self._post(payload)
 
     def get_current_user(self) -> Dict[str, Any]:
@@ -156,8 +157,9 @@ class UserClient(Client):
         :return: the API key for the user
         """
         url = self._make_url(user_id) + "/api_key"
-        payload = {}
-        payload["user_id"] = user_id
+        payload = {
+            "user_id": user_id,
+        }
         return self._post(payload, url=url)
 
     def delete_user(self, user_id: str, purge: bool = False) -> Dict[str, Any]:
