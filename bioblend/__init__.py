@@ -1,6 +1,11 @@
 import contextlib
 import logging
+import logging.config
 import os
+from typing import (
+    Optional,
+    Union,
+)
 
 from bioblend.config import (
     BioBlendConfigLocations,
@@ -22,14 +27,14 @@ except Exception:
 config = Config()
 
 
-def get_version():
+def get_version() -> str:
     """
     Returns a string with the current version of the library (e.g., "0.2.0")
     """
     return __version__
 
 
-def init_logging():
+def init_logging() -> None:
     """
     Initialize BioBlend's logging from a configuration file.
     """
@@ -39,7 +44,7 @@ def init_logging():
 
 
 class NullHandler(logging.Handler):
-    def emit(self, record):
+    def emit(self, record) -> None:
         pass
 
 
@@ -59,7 +64,9 @@ init_logging()
 #   bioblend.set_stream_logger(__name__)
 
 
-def set_file_logger(name, filepath, level=logging.INFO, format_string=None):
+def set_file_logger(
+    name: str, filepath: str, level: Union[int, str] = logging.INFO, format_string: Optional[str] = None
+) -> None:
     global log
     if not format_string:
         format_string = default_format_string
@@ -73,7 +80,7 @@ def set_file_logger(name, filepath, level=logging.INFO, format_string=None):
     log = logger
 
 
-def set_stream_logger(name, level=logging.DEBUG, format_string=None):
+def set_stream_logger(name: str, level: Union[int, str] = logging.DEBUG, format_string: Optional[str] = None) -> None:
     global log
     if not format_string:
         format_string = default_format_string
@@ -96,13 +103,15 @@ class ConnectionError(Exception):
     @see: body attribute to see the content of the http response
     """
 
-    def __init__(self, message, body=None, status_code=None):
+    def __init__(
+        self, message: str, body: Optional[Union[bytes, str]] = None, status_code: Optional[int] = None
+    ) -> None:
         super().__init__(message)
         self.body = body
         self.status_code = status_code
 
-    def __str__(self):
-        return f"{self.args[0]}: {self.body}"
+    def __str__(self) -> str:
+        return f"{self.args[0]}: {self.body!s}"
 
 
 class TimeoutException(Exception):
