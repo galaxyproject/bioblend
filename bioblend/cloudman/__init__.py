@@ -81,12 +81,12 @@ class VMLaunchException(Exception):
 class CloudManConfig:
     def __init__(
         self,
-        access_key: str = None,
-        secret_key: str = None,
-        cluster_name: str = None,
-        image_id: str = None,
+        access_key: Optional[str] = None,
+        secret_key: Optional[str] = None,
+        cluster_name: Optional[str] = None,
+        image_id: Optional[str] = None,
         instance_type: str = "m1.medium",
-        password: str = None,
+        password: Optional[str] = None,
         cloud_metadata: "Bunch" = None,
         cluster_type: str = None,
         galaxy_data_option: str = "",
