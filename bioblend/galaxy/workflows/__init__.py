@@ -25,7 +25,9 @@ class WorkflowClient(Client):
         super().__init__(galaxy_instance)
 
     # the 'deleted' option is not available for workflows
-    def get_workflows(self, workflow_id: str = None, name: str = None, published: bool = False) -> List[Dict[str, Any]]:
+    def get_workflows(
+        self, workflow_id: Optional[str] = None, name: Optional[str] = None, published: bool = False
+    ) -> List[Dict[str, Any]]:
         """
         Get all workflows, or select a subset by specifying optional arguments
         for filtering (e.g. a workflow name).
@@ -70,7 +72,7 @@ class WorkflowClient(Client):
             workflows = [_ for _ in workflows if _["name"] == name]
         return workflows
 
-    def show_workflow(self, workflow_id: str, version: str = None) -> Dict[str, Any]:
+    def show_workflow(self, workflow_id: str, version: Optional[int] = None) -> Dict[str, Any]:
         """
         Display information needed to run a workflow.
 
@@ -200,7 +202,7 @@ class WorkflowClient(Client):
         url = self._make_url()
         return self._post(url=url, payload=payload)
 
-    def export_workflow_dict(self, workflow_id: str, version: int = None) -> Dict[str, Any]:
+    def export_workflow_dict(self, workflow_id: str, version: Optional[int] = None) -> Dict[str, Any]:
         """
         Exports a workflow.
 
@@ -703,9 +705,9 @@ class WorkflowClient(Client):
         self,
         history_id: str,
         workflow_name: str,
-        job_ids: List[str] = None,
-        dataset_hids: List[str] = None,
-        dataset_collection_hids: List[str] = None,
+        job_ids: Optional[List[str]] = None,
+        dataset_hids: Optional[List[str]] = None,
+        dataset_collection_hids: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
         """
         Extract a workflow from a history.
