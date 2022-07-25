@@ -94,8 +94,8 @@ class CloudManConfig:
         key_name: str = "cloudman_key_pair",
         security_groups: List[str] = None,
         placement: str = "",
-        kernel_id: str = None,
-        ramdisk_id: str = None,
+        kernel_id: Optional[str] = None,
+        ramdisk_id: Optional[str] = None,
         block_until_ready: bool = False,
         **kwargs,
     ):
