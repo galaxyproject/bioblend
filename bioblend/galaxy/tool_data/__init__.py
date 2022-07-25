@@ -1,16 +1,26 @@
 """
 Contains possible interactions with the Galaxy Tool data tables
 """
+from typing import (
+    Any,
+    Dict,
+    List,
+    TYPE_CHECKING,
+)
+
 from bioblend.galaxy.client import Client
+
+if TYPE_CHECKING:
+    from bioblend.galaxy import GalaxyInstance
 
 
 class ToolDataClient(Client):
     module = "tool_data"
 
-    def __init__(self, galaxy_instance):
+    def __init__(self, galaxy_instance: "GalaxyInstance") -> None:
         super().__init__(galaxy_instance)
 
-    def get_data_tables(self):
+    def get_data_tables(self) -> List[Dict[str, Any]]:
         """
         Get the list of all data tables.
 
@@ -23,7 +33,7 @@ class ToolDataClient(Client):
         """
         return self._get()
 
-    def show_data_table(self, data_table_id):
+    def show_data_table(self, data_table_id: str) -> Dict[str, Any]:
         """
         Get details of a given data table.
 
@@ -45,7 +55,7 @@ class ToolDataClient(Client):
         """
         return self._get(id=data_table_id)
 
-    def reload_data_table(self, data_table_id):
+    def reload_data_table(self, data_table_id: str) -> Dict[str, Any]:
         """
         Reload a data table.
 
@@ -67,7 +77,7 @@ class ToolDataClient(Client):
         url = self._make_url(data_table_id) + "/reload"
         return self._get(url=url)
 
-    def delete_data_table(self, data_table_id, values):
+    def delete_data_table(self, data_table_id: str, values: str) -> Dict[str, Any]:
         """
         Delete an item from a data table.
 
