@@ -44,7 +44,7 @@ class Client:
     def set_get_retry_delay(cls, value):
         raise AttributeError("Deprecated method, please use gi's `get_retry_delay` property")
 
-    def __init__(self, galaxy_instance: "GalaxyClient"):
+    def __init__(self, galaxy_instance: "GalaxyClient") -> None:
         """
         A generic Client interface defining the common fields.
 
@@ -55,7 +55,7 @@ class Client:
         """
         self.gi = galaxy_instance
 
-    def _make_url(self, module_id: Optional[str] = None, deleted: bool = False, contents: bool = False):
+    def _make_url(self, module_id: Optional[str] = None, deleted: bool = False, contents: bool = False) -> str:
         """
         Compose a URL based on the provided arguments.
 
@@ -139,7 +139,15 @@ class Client:
                 bioblend.log.warning(msg)
                 time.sleep(retry_delay)
 
-    def _post(self, payload=None, id=None, deleted=False, contents=None, url=None, files_attached=False):
+    def _post(
+        self,
+        payload: Optional[dict] = None,
+        id: Optional[str] = None,
+        deleted: bool = False,
+        contents: bool = False,
+        url: Optional[str] = None,
+        files_attached: bool = False,
+    ):
         """
         Do a generic POST request, composing the url from the contents of the
         arguments. Alternatively, an explicit ``url`` can be provided to use
@@ -159,7 +167,13 @@ class Client:
             url = self._make_url(module_id=id, deleted=deleted, contents=contents)
         return self.gi.make_post_request(url, payload=payload, files_attached=files_attached)
 
-    def _put(self, payload=None, id=None, url=None, params=None):
+    def _put(
+        self,
+        payload: Optional[dict] = None,
+        id: Optional[str] = None,
+        url: Optional[str] = None,
+        params: Optional[dict] = None,
+    ):
         """
         Do a generic PUT request, composing the url from the contents of the
         arguments. Alternatively, an explicit ``url`` can be provided to use
@@ -174,7 +188,13 @@ class Client:
             url = self._make_url(module_id=id)
         return self.gi.make_put_request(url, payload=payload, params=params)
 
-    def _patch(self, payload=None, id=None, url=None, params=None):
+    def _patch(
+        self,
+        payload: Optional[dict] = None,
+        id: Optional[str] = None,
+        url: Optional[str] = None,
+        params: Optional[dict] = None,
+    ):
         """
         Do a generic PATCH request, composing the url from the contents of the
         arguments. Alternatively, an explicit ``url`` can be provided to use
@@ -189,7 +209,15 @@ class Client:
             url = self._make_url(module_id=id)
         return self.gi.make_patch_request(url, payload=payload, params=params)
 
-    def _delete(self, payload=None, id=None, deleted=False, contents=None, url=None, params=None):
+    def _delete(
+        self,
+        payload: Optional[dict] = None,
+        id: Optional[str] = None,
+        deleted: bool = False,
+        contents: bool = False,
+        url: Optional[str] = None,
+        params: Optional[dict] = None,
+    ):
         """
         Do a generic DELETE request, composing the url from the contents of the
         arguments. Alternatively, an explicit ``url`` can be provided to use
