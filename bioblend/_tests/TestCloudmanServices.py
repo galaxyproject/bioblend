@@ -2,6 +2,8 @@
 Tests the functionality of the Blend CloudMan API. These tests require working
 credentials to supported cloud infrastructure.
 """
+import contextlib
+
 from bioblend.cloudman import (
     CloudManConfig,
     CloudManInstance,
@@ -14,10 +16,12 @@ from . import (
 
 @test_util.skip_unless_cloudman()
 class TestCloudmanServices(CloudmanTestBase.CloudmanTestBase):
+    cmi: CloudManInstance
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.cfg = CloudManConfig(
+        cfg = CloudManConfig(
             cls.access_key,
             cls.secret_key,
             cls.cluster_name,
@@ -26,7 +30,14 @@ class TestCloudmanServices(CloudmanTestBase.CloudmanTestBase):
             cls.password,
             cloud_metadata=cls.cloud_metadata,
         )
-        cls.cmi = CloudManInstance.launch_instance(cls.cfg)
+        cls.cmi = CloudManInstance.launch_instance(cfg)
+
+    @classmethod
+    @test_util.skip_unless_cloudman()
+    def tearDownClass(cls):
+        with contextlib.suppress(Exception):
+            # TODO: cloudman's terminate method has a bug. Needs fix
+            cls.cmi.terminate(delete_cluster=True)
 
     def setUp(self):
         self.cmi = self.__class__.cmi
