@@ -36,7 +36,7 @@ class GalaxyClient:
         password: Optional[str] = None,
         verify: bool = True,
         timeout: Optional[float] = None,
-    ):
+    ) -> None:
         """
         :param verify: Whether to verify the server's TLS certificate
         :type verify: bool
@@ -117,7 +117,7 @@ class GalaxyClient:
             raise ValueError(f"Retry delay must be >= 0 (got: {value})")
         self._get_retry_delay = value
 
-    def make_get_request(self, url: str, **kwargs):
+    def make_get_request(self, url: str, **kwargs) -> requests.Response:
         """
         Make a GET request using the provided ``url``.
 
@@ -156,7 +156,7 @@ class GalaxyClient:
         :return: The decoded response.
         """
 
-        def my_dumps(d):
+        def my_dumps(d: dict) -> dict:
             """
             Apply ``json.dumps()`` to the values of the dict ``d`` if they are
             not of type ``FileStream``.
@@ -207,7 +207,9 @@ class GalaxyClient:
             status_code=r.status_code,
         )
 
-    def make_delete_request(self, url: str, payload: Optional[dict] = None, params: Optional[dict] = None):
+    def make_delete_request(
+        self, url: str, payload: Optional[dict] = None, params: Optional[dict] = None
+    ) -> requests.Response:
         """
         Make a DELETE request using the provided ``url`` and the optional
         arguments.

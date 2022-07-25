@@ -61,15 +61,17 @@ class FormsClient(Client):
         """
         return self._get(id=form_id)
 
-    def create_form(self, form_xml_text: str) -> str:
+    def create_form(self, form_xml_text: str) -> List[Dict[str, Any]]:
         """
         Create a new form.
 
         :type form_xml_text: str
         :param form_xml_text: Form xml to create a form on galaxy instance
 
-        :rtype: str
-        :return: Unique URL of newly created form with encoded id
+        :rtype: list of dicts
+        :return: List with a single dictionary describing the created form
         """
-        payload = form_xml_text
+        payload = {
+            "xml_text": form_xml_text,
+        }
         return self._post(payload=payload)
