@@ -2,7 +2,6 @@
 Tests the functionality of the Blend CloudMan API. These tests require working
 credentials to supported cloud infrastructure.
 """
-import contextlib
 import os
 import unittest
 
@@ -11,6 +10,14 @@ from . import test_util
 
 
 class CloudmanTestBase(unittest.TestCase):
+    access_key: str
+    secret_key: str
+    cluster_name: str
+    ami_id: str
+    instance_type: str
+    password: str
+    cloud_metadata: Bunch
+
     @classmethod
     @test_util.skip_unless_cloudman()
     def setUpClass(cls):
@@ -59,10 +66,3 @@ class CloudmanTestBase(unittest.TestCase):
             cls.ami_id = os.environ["BIOBLEND_AMI_ID"]
             cls.instance_type = "m1.small"
             cls.password = "password"
-
-    @classmethod
-    @test_util.skip_unless_cloudman()
-    def tearDownClass(cls):
-        with contextlib.suppress(Exception):
-            # TODO: cloudman's terminate method has a bug. Needs fix
-            cls.cmi.terminate(delete_cluster=True)
