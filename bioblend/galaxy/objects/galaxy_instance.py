@@ -3,6 +3,7 @@ A representation of a Galaxy instance based on oo wrappers.
 """
 
 import time
+from typing import Optional
 
 import bioblend
 import bioblend.galaxy
@@ -16,8 +17,7 @@ from . import (
 def _get_error_info(hda: wrappers.HistoryDatasetAssociation) -> str:
     msg = hda.id
     try:
-        msg += f" ({hda.name}): "
-        msg += hda.wrapped["misc_info"]
+        msg += f" ({hda.name}): {hda.misc_info}"
     except Exception:  # avoid 'error while generating an error report'
         msg += ": error"
     return msg
@@ -47,7 +47,12 @@ class GalaxyInstance:
     """
 
     def __init__(
-        self, url: str, api_key: str = None, email: str = None, password: str = None, verify: bool = True
+        self,
+        url: str,
+        api_key: Optional[str] = None,
+        email: Optional[str] = None,
+        password: Optional[str] = None,
+        verify: bool = True,
     ) -> None:
         self.gi = bioblend.galaxy.GalaxyInstance(url, api_key, email, password, verify)
         self.log = bioblend.log

@@ -9,8 +9,8 @@ import typing
 import webbrowser
 from typing import (
     Any,
-    BinaryIO,
     Dict,
+    IO,
     List,
     Optional,
     overload,
@@ -751,7 +751,7 @@ class HistoryClient(Client):
         return jeha_id
 
     def download_history(
-        self, history_id: str, jeha_id: str, outf: BinaryIO, chunk_size: int = bioblend.CHUNK_SIZE
+        self, history_id: str, jeha_id: str, outf: IO[bytes], chunk_size: int = bioblend.CHUNK_SIZE
     ) -> None:
         """
         Download a history export archive.  Use :meth:`export_history`

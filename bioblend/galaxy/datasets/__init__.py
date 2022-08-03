@@ -12,11 +12,13 @@ from typing import (
     List,
     Optional,
     overload,
+    Tuple,
     TYPE_CHECKING,
     Union,
 )
 from urllib.parse import urljoin
 
+from requests import Response
 from typing_extensions import Literal
 
 import bioblend
@@ -40,7 +42,7 @@ class DatasetClient(Client):
     def __init__(self, galaxy_instance: "GalaxyInstance"):
         super().__init__(galaxy_instance)
 
-    def show_dataset(self, dataset_id: str, deleted: bool = False, hda_ldda: HdaLdda = "hda") -> dict:
+    def show_dataset(self, dataset_id: str, deleted: bool = False, hda_ldda: HdaLdda = "hda") -> Dict[str, Any]:
         """
         Get details about a given dataset. This can be a history or a library dataset.
 
@@ -64,7 +66,7 @@ class DatasetClient(Client):
 
     def _initiate_download(
         self, dataset_id: str, stream_content: bool, require_ok_state: bool = True, maxwait: float = 12000
-    ):
+    ) -> Tuple[Dict[str, Any], str, Response]:
         dataset = self.wait_for_dataset(dataset_id, maxwait=maxwait, check=False)
         if not dataset["state"] == "ok":
             message = f"Dataset state is not 'ok'. Dataset id: {dataset_id}, current state: {dataset['state']}"
@@ -208,7 +210,7 @@ class DatasetClient(Client):
         update_time_min: Optional[str] = None,
         update_time_max: Optional[str] = None,
         order: str = "create_time-dsc",
-    ) -> List[dict]:
+    ) -> List[Dict[str, Any]]:
         """
         Get the latest datasets, or select another subset by specifying optional
         arguments for filtering (e.g. a history ID).
@@ -289,7 +291,7 @@ class DatasetClient(Client):
             params["history_id"] = history_id
 
         q: List[str] = []
-        qv: List[Any] = []
+        qv = []
 
         if name:
             q.append("name")
@@ -344,7 +346,7 @@ class DatasetClient(Client):
             return "in", ",".join(param)
         raise Exception("Filter param is not of type ``str`` or ``list``")
 
-    def publish_dataset(self, dataset_id: str, published: bool = False) -> dict:
+    def publish_dataset(self, dataset_id: str, published: bool = False) -> Dict[str, Any]:
         """
         Make a dataset publicly available or private. For more fine-grained control (assigning different
         permissions to specific roles), use the ``update_permissions()`` method.
@@ -403,7 +405,9 @@ class DatasetClient(Client):
         url = self._make_url(dataset_id) + "/permissions"
         return self.gi.datasets._put(url=url, payload=payload)
 
-    def wait_for_dataset(self, dataset_id: str, maxwait: float = 12000, interval: float = 3, check: bool = True):
+    def wait_for_dataset(
+        self, dataset_id: str, maxwait: float = 12000, interval: float = 3, check: bool = True
+    ) -> Dict[str, Any]:
         """
         Wait until a dataset is in a terminal state.
 
