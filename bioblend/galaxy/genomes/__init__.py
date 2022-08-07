@@ -4,7 +4,7 @@ Contains possible interactions with the Galaxy Histories
 from typing import (
     Any,
     Dict,
-    List,
+    Optional,
     TYPE_CHECKING,
 )
 
@@ -20,7 +20,7 @@ class GenomeClient(Client):
     def __init__(self, galaxy_instance: "GalaxyInstance") -> None:
         super().__init__(galaxy_instance)
 
-    def get_genomes(self) -> List[Any]:
+    def get_genomes(self) -> list:
         """
         Returns a list of installed genomes
 
@@ -30,7 +30,14 @@ class GenomeClient(Client):
         genomes = self._get()
         return genomes
 
-    def show_genome(self, id: str, num: str = None, chrom: str = None, low: str = None, high: str = None) -> dict:
+    def show_genome(
+        self,
+        id: str,
+        num: Optional[str] = None,
+        chrom: Optional[str] = None,
+        low: Optional[str] = None,
+        high: Optional[str] = None,
+    ) -> Dict[str, Any]:
         """
         Returns information about build <id>
 
@@ -67,11 +74,11 @@ class GenomeClient(Client):
         self,
         func="download",
         source=None,
-        dbkey: str = None,
-        ncbi_name: str = None,
-        ensembl_dbkey: str = None,
-        url_dbkey: str = None,
-        indexers: list = None,
+        dbkey: Optional[str] = None,
+        ncbi_name: Optional[str] = None,
+        ensembl_dbkey: Optional[str] = None,
+        url_dbkey: Optional[str] = None,
+        indexers: Optional[list] = None,
     ):
         """
         Download and/or index a genome.

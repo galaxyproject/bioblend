@@ -11,16 +11,28 @@ from collections.abc import (
     Sequence,
 )
 from typing import (
+    Any,
+    Callable,
+    ClassVar,
     Dict,
+    Generic,
+    IO,
+    Iterable,
+    Iterator,
     List,
     Optional,
     Set,
     Tuple,
+    Type,
     TYPE_CHECKING,
+    TypeVar,
     Union,
 )
 
+from typing_extensions import Literal
+
 import bioblend
+from bioblend.galaxy.workflows import InputsBy
 from bioblend.util import abstractclass
 
 if TYPE_CHECKING:
@@ -50,6 +62,8 @@ __all__ = (
     "WorkflowPreview",
 )
 
+WrapperSubtype = TypeVar("WrapperSubtype", bound="Wrapper")
+
 
 @abstractclass
 class Wrapper:
@@ -69,10 +83,13 @@ class Wrapper:
     BASE_ATTRS: Tuple[str, ...] = ("id",)
     gi: Optional["GalaxyInstance"]
     id: str
+    is_modified: bool
     wrapped: dict
     _cached_parent: Optional["Wrapper"]
 
-    def __init__(self, wrapped: dict, parent: Optional["Wrapper"] = None, gi: Optional["GalaxyInstance"] = None):
+    def __init__(
+        self, wrapped: Dict[str, Any], parent: Optional["Wrapper"] = None, gi: Optional["GalaxyInstance"] = None
+    ) -> None:
         """
         :type wrapped: dict
         :param wrapped: JSON-serializable dictionary
@@ -105,25 +122,25 @@ class Wrapper:
         return self._cached_parent
 
     @property
-    def is_mapped(self):
+    def is_mapped(self) -> bool:
         """
         ``True`` if this wrapper is mapped to an actual Galaxy entity.
         """
         return self.id is not None
 
-    def unmap(self):
+    def unmap(self) -> None:
         """
         Disconnect this wrapper from Galaxy.
         """
         object.__setattr__(self, "id", None)
 
-    def clone(self):
+    def clone(self: WrapperSubtype) -> WrapperSubtype:
         """
         Return an independent copy of this wrapper.
         """
         return self.__class__(self.wrapped)
 
-    def touch(self):
+    def touch(self) -> None:
         """
         Mark this wrapper as having been modified since its creation.
         """
@@ -131,29 +148,28 @@ class Wrapper:
         if self.parent:
             self.parent.touch()
 
-    def to_json(self):
+    def to_json(self) -> str:
         """
         Return a JSON dump of this wrapper.
         """
         return json.dumps(self.wrapped)
 
     @classmethod
-    def from_json(cls, jdef):
+    def from_json(cls: Type[WrapperSubtype], jdef: str) -> WrapperSubtype:
         """
         Build a new wrapper from a JSON dump.
         """
         return cls(json.loads(jdef))
 
     # FIXME: things like self.x[0] = 'y' do NOT call self.__setattr__
-    def __setattr__(self, name, value):
+    def __setattr__(self, name: str, value: str) -> None:
         if name not in self.wrapped:
             raise AttributeError("can't set attribute")
-        else:
-            self.wrapped[name] = value
-            object.__setattr__(self, name, value)
-            self.touch()
+        self.wrapped[name] = value
+        object.__setattr__(self, name, value)
+        self.touch()
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"{self.__class__.__name__}({self.wrapped!r})"
 
 
@@ -175,11 +191,12 @@ class Step(Wrapper):
         "tool_version",
         "type",
     )
+    input_steps: Dict[str, Dict]
     type: str
     tool_id: str
     tool_inputs: Dict
 
-    def __init__(self, step_dict, parent):
+    def __init__(self, step_dict: Dict[str, Any], parent: Wrapper) -> None:
         super().__init__(step_dict, parent=parent, gi=parent.gi)
         try:
             stype = step_dict["type"]
@@ -204,7 +221,15 @@ class InvocationStep(Wrapper):
         "workflow_step_label",
         "workflow_step_uuid",
     )
+    action: Optional[object]
     gi: "GalaxyInstance"
+    job_id: str
+    order_index: int
+    state: str
+    update_time: str
+    workflow_step_id: str
+    workflow_step_label: str
+    workflow_step_uuid: str
 
     @property
     def parent(self) -> Wrapper:
@@ -212,7 +237,7 @@ class InvocationStep(Wrapper):
         assert ret is not None
         return ret
 
-    def __init__(self, wrapped: dict, parent: Wrapper, gi: "GalaxyInstance"):
+    def __init__(self, wrapped: Dict[str, Any], parent: Wrapper, gi: "GalaxyInstance") -> None:
         super().__init__(wrapped, parent, gi)
 
     def refresh(self) -> "InvocationStep":
@@ -225,7 +250,7 @@ class InvocationStep(Wrapper):
         self.__init__(step_dict, parent=self.parent, gi=self.gi)  # type: ignore[misc]
         return self
 
-    def get_outputs(self):
+    def get_outputs(self) -> Dict[str, "HistoryDatasetAssociation"]:
         """
         Get the output datasets of the invocation step
 
@@ -234,12 +259,9 @@ class InvocationStep(Wrapper):
         """
         if not hasattr(self, "outputs"):
             self.refresh()
-        outputs = {}
-        for name, out_dict in self.wrapped["outputs"].items():
-            outputs[name] = self.gi.datasets.get(out_dict["id"])
-        return outputs
+        return {name: self.gi.datasets.get(out_dict["id"]) for name, out_dict in self.wrapped["outputs"].items()}
 
-    def get_output_collections(self):
+    def get_output_collections(self) -> Dict[str, "HistoryDatasetCollectionAssociation"]:
         """
         Get the output dataset collections of the invocation step
 
@@ -248,10 +270,10 @@ class InvocationStep(Wrapper):
         """
         if not hasattr(self, "output_collections"):
             self.refresh()
-        output_collections = {}
-        for name, out_coll_dict in self.wrapped["output_collections"].items():
-            output_collections[name] = self.gi.dataset_collections.get(out_coll_dict["id"])
-        return output_collections
+        return {
+            name: self.gi.dataset_collections.get(out_coll_dict["id"])
+            for name, out_coll_dict in self.wrapped["output_collections"].items()
+        }
 
 
 class Workflow(Wrapper):
@@ -272,18 +294,29 @@ class Workflow(Wrapper):
         "steps",
         "tags",
     )
-    inputs: Dict
+    dag: Dict[str, Set[str]]
+    deleted: bool
+    input_labels_to_ids: Dict[str, Set[str]]
+    inputs: Dict[str, Dict]
+    inv_dag: Dict[str, Set[str]]
     missing_ids: List
-    steps: Dict
+    name: str
+    owner: str
     POLLING_INTERVAL = 10  # for output state monitoring
+    published: bool
+    sink_ids: Set[str]
+    source_ids: Set[str]
+    steps: Dict
+    tags: List[str]
+    tool_labels_to_ids: Dict[str, Set[str]]
 
-    def __init__(self, wf_dict: dict, gi: Optional["GalaxyInstance"] = None):
+    def __init__(self, wf_dict: Dict[str, Any], gi: Optional["GalaxyInstance"] = None) -> None:
         super().__init__(wf_dict, gi=gi)
-        missing_ids = []
         if gi:
             tools_list_by_id = [t.id for t in gi.tools.get_previews()]
         else:
             tools_list_by_id = []
+        missing_ids = []
         tool_labels_to_ids: Dict[str, Set[str]] = {}
         for k, v in self.steps.items():
             # convert step ids to str for consistency with outer keys
@@ -312,7 +345,7 @@ class Workflow(Wrapper):
         object.__setattr__(self, "sink_ids", tails - heads)
         object.__setattr__(self, "missing_ids", missing_ids)
 
-    def _get_dag(self):
+    def _get_dag(self) -> Tuple[Dict[str, Set[str]], Dict[str, Set[str]]]:
         """
         Return the workflow's DAG.
 
@@ -329,25 +362,28 @@ class Workflow(Wrapper):
 
           {'c': {'a', 'b'}, 'd': {'c'}, 'e': {'c'}, 'f': {'c'}}
         """
-        dag, inv_dag = {}, {}
+        dag: Dict[str, Set[str]] = {}
+        inv_dag: Dict[str, Set[str]] = {}
         for s in self.steps.values():
+            assert isinstance(s, Step)
             for i in s.input_steps.values():
                 head, tail = i["source_step"], s.id
                 dag.setdefault(head, set()).add(tail)
                 inv_dag.setdefault(tail, set()).add(head)
         return dag, inv_dag
 
-    def sorted_step_ids(self):
+    def sorted_step_ids(self) -> List[str]:
         """
         Return a topological sort of the workflow's DAG.
         """
-        ids = []
+        ids: List[str] = []
         source_ids = self.source_ids.copy()
         inv_dag = {k: v.copy() for k, v in self.inv_dag.items()}
         while source_ids:
             head = source_ids.pop()
             ids.append(head)
-            for tail in self.dag.get(head, []):
+            tails: Set[str] = self.dag[head] if head in self.dag else set()
+            for tail in tails:
                 incoming = inv_dag[tail]
                 incoming.remove(head)
                 if not incoming:
@@ -355,42 +391,42 @@ class Workflow(Wrapper):
         return ids
 
     @property
-    def data_input_ids(self):
+    def data_input_ids(self) -> Set[str]:
         """
         Return the ids of data input steps for this workflow.
         """
         return {id_ for id_, s in self.steps.items() if s.type == "data_input"}
 
     @property
-    def data_collection_input_ids(self):
+    def data_collection_input_ids(self) -> Set[str]:
         """
         Return the ids of data collection input steps for this workflow.
         """
         return {id_ for id_, s in self.steps.items() if s.type == "data_collection_input"}
 
     @property
-    def parameter_input_ids(self):
+    def parameter_input_ids(self) -> Set[str]:
         """
         Return the ids of parameter input steps for this workflow.
         """
         return {id_ for id_, s in self.steps.items() if s.type == "parameter_input"}
 
     @property
-    def tool_ids(self):
+    def tool_ids(self) -> Set[str]:
         """
         Return the ids of tool steps for this workflow.
         """
         return {id_ for id_, s in self.steps.items() if s.type == "tool"}
 
     @property
-    def input_labels(self):
+    def input_labels(self) -> Set[str]:
         """
         Return the labels of this workflow's input steps.
         """
         return set(self.input_labels_to_ids)
 
     @property
-    def is_runnable(self):
+    def is_runnable(self) -> bool:
         """
         Return True if the workflow can be run on Galaxy.
 
@@ -400,7 +436,7 @@ class Workflow(Wrapper):
         return not self.missing_ids
 
     @staticmethod
-    def _convert_input_map(input_map: dict) -> dict:
+    def _convert_input_map(input_map: Dict[str, Any]) -> Dict[str, Any]:
         """
         Convert ``input_map`` to the format required by the Galaxy web API.
 
@@ -421,20 +457,20 @@ class Workflow(Wrapper):
                     LibraryDataset,
                 ),
             ):
-                ret[key] = {"id": value.id, "src": value.SRC}  # type: ignore
+                ret[key] = {"id": value.id, "src": value.SRC}
             else:
                 ret[key] = value
         return ret
 
-    def preview(self):
-        getf = self.gi.workflows.get_previews
+    # I think we should deprecate this method - NS
+    def preview(self) -> "WorkflowPreview":
+        assert self.gi is not None
         try:
-            p = [_ for _ in getf(published=True) if _.id == self.id][0]
+            return [_ for _ in self.gi.workflows.get_previews(published=True) if _.id == self.id][0]
         except IndexError:
             raise ValueError(f"no object for id {self.id}")
-        return p
 
-    def export(self) -> dict:
+    def export(self) -> Dict[str, Any]:
         """
         Export a re-importable representation of the workflow.
 
@@ -444,7 +480,7 @@ class Workflow(Wrapper):
         assert self.gi is not None
         return self.gi.gi.workflows.export_workflow_dict(self.id)
 
-    def delete(self):
+    def delete(self) -> None:
         """
         Delete this workflow.
 
@@ -458,14 +494,14 @@ class Workflow(Wrapper):
 
     def invoke(
         self,
-        inputs=None,
-        params=None,
-        history=None,
-        import_inputs_to_history=None,
-        replacement_params=None,
-        allow_tool_state_corrections=True,
-        inputs_by=None,
-        parameters_normalized=False,
+        inputs: Optional[Dict[str, Any]] = None,
+        params: Optional[Dict[str, Any]] = None,
+        history: Optional[Union[str, "History"]] = None,
+        import_inputs_to_history: bool = False,
+        replacement_params: Optional[Dict[str, Any]] = None,
+        allow_tool_state_corrections: bool = True,
+        inputs_by: Optional[InputsBy] = None,
+        parameters_normalized: bool = False,
     ) -> "Invocation":
         """
         Invoke the workflow. This will cause a workflow to be scheduled
@@ -633,14 +669,19 @@ class Invocation(Wrapper):
         "workflow_id",
     )
     gi: "GalaxyInstance"
+    history_id: str
+    state: str
     steps: List[InvocationStep]
+    update_time: str
+    uuid: str
+    workflow_id: str
 
-    def __init__(self, inv_dict: dict, gi: "GalaxyInstance"):
+    def __init__(self, inv_dict: Dict[str, Any], gi: "GalaxyInstance") -> None:
         super().__init__(inv_dict, gi=gi)
         self.steps = [InvocationStep(step, parent=self, gi=gi) for step in inv_dict["steps"]]
         self.inputs = [{**v, "label": k} for k, v in inv_dict["inputs"].items()]
 
-    def sorted_step_ids(self):
+    def sorted_step_ids(self) -> List[str]:
         """
         Get the step IDs sorted based on this order index.
 
@@ -649,7 +690,7 @@ class Invocation(Wrapper):
         """
         return [step.id for step in sorted(self.steps, key=lambda step: step.order_index)]
 
-    def step_states(self):
+    def step_states(self) -> Set[str]:
         """
         Get the set of step states for this invocation.
 
@@ -658,7 +699,7 @@ class Invocation(Wrapper):
         """
         return {step.state for step in self.steps}
 
-    def number_of_steps(self):
+    def number_of_steps(self) -> int:
         """
         Get the number of steps for this invocation.
 
@@ -667,7 +708,12 @@ class Invocation(Wrapper):
         """
         return len(self.steps)
 
-    def sorted_steps_by(self, indices=None, states=None, step_ids=None):
+    def sorted_steps_by(
+        self,
+        indices: Optional[Iterable[int]] = None,
+        states: Optional[Iterable[Union[str, None]]] = None,
+        step_ids: Optional[Iterable[str]] = None,
+    ) -> List[InvocationStep]:
         """
         Get steps for this invocation, or get a subset by specifying
         optional parameters for filtering.
@@ -684,7 +730,7 @@ class Invocation(Wrapper):
         :rtype: list of InvocationStep
         :param: invocation steps
         """
-        steps = self.steps
+        steps: Union[List[InvocationStep], filter] = self.steps
         if indices is not None:
             steps = filter(lambda step: step.order_index in indices, steps)
         if states is not None:
@@ -693,7 +739,7 @@ class Invocation(Wrapper):
             steps = filter(lambda step: step.id in step_ids, steps)
         return sorted(steps, key=lambda step: step.order_index)
 
-    def cancel(self):
+    def cancel(self) -> None:
         """
         Cancel this invocation.
 
@@ -713,14 +759,14 @@ class Invocation(Wrapper):
         self.__init__(inv_dict, gi=self.gi)  # type: ignore[misc]
         return self
 
-    def run_step_actions(self, steps: List[InvocationStep], actions):
+    def run_step_actions(self, steps: List[InvocationStep], actions: List[object]) -> None:
         """
         Run actions for active steps of this invocation.
 
         :type steps: list of InvocationStep
         :param steps: list of steps to run actions on
 
-        :type actions: list of str
+        :type actions: list of objects
         :param actions: list of actions to run
 
         .. note::
@@ -737,7 +783,7 @@ class Invocation(Wrapper):
         for step, step_dict in zip(steps, step_dict_list):
             step.__init__(step_dict, parent=self, gi=self.gi)  # type: ignore[misc]
 
-    def summary(self):
+    def summary(self) -> Dict[str, Any]:
         """
         Get a summary for this invocation.
 
@@ -746,7 +792,7 @@ class Invocation(Wrapper):
         """
         return self.gi.gi.invocations.get_invocation_summary(self.id)
 
-    def step_jobs_summary(self):
+    def step_jobs_summary(self) -> List[Dict[str, Any]]:
         """
         Get a summary for this invocation's step jobs.
 
@@ -755,7 +801,7 @@ class Invocation(Wrapper):
         """
         return self.gi.gi.invocations.get_invocation_step_jobs_summary(self.id)
 
-    def report(self):
+    def report(self) -> Dict[str, Any]:
         """
         Get a dictionary containing a Markdown report for this invocation.
 
@@ -764,7 +810,7 @@ class Invocation(Wrapper):
         """
         return self.gi.gi.invocations.get_invocation_report(self.id)
 
-    def save_report_pdf(self, file_path, chunk_size=bioblend.CHUNK_SIZE):
+    def save_report_pdf(self, file_path: str, chunk_size: int = bioblend.CHUNK_SIZE) -> None:
         """
         Download a PDF report for this invocation.
 
@@ -776,7 +822,7 @@ class Invocation(Wrapper):
         """
         self.gi.gi.invocations.get_invocation_report_pdf(self.id, file_path, chunk_size)
 
-    def biocompute_object(self):
+    def biocompute_object(self) -> Dict[str, Any]:
         """
         Get a BioCompute object for this invocation.
 
@@ -785,7 +831,7 @@ class Invocation(Wrapper):
         """
         return self.gi.gi.invocations.get_invocation_biocompute_object(self.id)
 
-    def wait(self, maxwait: int = 12000, interval: int = 3, check: bool = True):
+    def wait(self, maxwait: float = 12000, interval: float = 3, check: bool = True) -> None:
         """
         Wait for this invocation to reach a terminal state.
 
@@ -805,6 +851,9 @@ class Invocation(Wrapper):
         self.__init__(inv_dict, gi=self.gi)  # type: ignore[misc]
 
 
+DatasetSubtype = TypeVar("DatasetSubtype", bound="Dataset")
+
+
 class Dataset(Wrapper, metaclass=abc.ABCMeta):
     """
     Abstract base class for Galaxy datasets.
@@ -821,29 +870,31 @@ class Dataset(Wrapper, metaclass=abc.ABCMeta):
         "state",
     )
     container: "DatasetContainer"
+    genome_build: str
     gi: "GalaxyInstance"
+    misc_info: str
+    name: str
     POLLING_INTERVAL = 1  # for state monitoring
 
-    def __init__(self, ds_dict, container: "DatasetContainer", gi: "GalaxyInstance"):
+    def __init__(self, ds_dict: Dict[str, Any], container: "DatasetContainer", gi: "GalaxyInstance") -> None:
         super().__init__(ds_dict, gi=gi)
         object.__setattr__(self, "container", container)
 
     @property
     @abc.abstractmethod
-    def _stream_url(self):
+    def _stream_url(self) -> str:
         """
         Return the URL to stream this dataset.
         """
-        pass
 
-    def get_stream(self, chunk_size=bioblend.CHUNK_SIZE):
+    def get_stream(self, chunk_size: int = bioblend.CHUNK_SIZE) -> Iterator[bytes]:
         """
         Open dataset for reading and return an iterator over its contents.
 
         :type chunk_size: int
         :param chunk_size: read this amount of bytes at a time
         """
-        kwargs = {"stream": True}
+        kwargs: Dict[str, Any] = {"stream": True}
         if isinstance(self, LibraryDataset):
             kwargs["params"] = {"ld_ids%5B%5D": self.id}
         r = self.gi.gi.make_get_request(self._stream_url, **kwargs)
@@ -854,7 +905,7 @@ class Dataset(Wrapper, metaclass=abc.ABCMeta):
         r.raise_for_status()
         return r.iter_content(chunk_size)  # FIXME: client can't close r
 
-    def peek(self, chunk_size=bioblend.CHUNK_SIZE):
+    def peek(self, chunk_size: int = bioblend.CHUNK_SIZE) -> bytes:
         """
         Open dataset for reading and return the first chunk.
 
@@ -865,7 +916,7 @@ class Dataset(Wrapper, metaclass=abc.ABCMeta):
         except StopIteration:
             return b""
 
-    def download(self, file_object, chunk_size=bioblend.CHUNK_SIZE):
+    def download(self, file_object: IO[bytes], chunk_size: int = bioblend.CHUNK_SIZE) -> None:
         """
         Open dataset for reading and save its contents to ``file_object``.
 
@@ -877,7 +928,7 @@ class Dataset(Wrapper, metaclass=abc.ABCMeta):
         for chunk in self.get_stream(chunk_size=chunk_size):
             file_object.write(chunk)
 
-    def get_contents(self, chunk_size=bioblend.CHUNK_SIZE):
+    def get_contents(self, chunk_size: int = bioblend.CHUNK_SIZE) -> bytes:
         """
         Open dataset for reading and return its **full** contents.
 
@@ -885,7 +936,7 @@ class Dataset(Wrapper, metaclass=abc.ABCMeta):
         """
         return b"".join(self.get_stream(chunk_size=chunk_size))
 
-    def refresh(self) -> "Dataset":
+    def refresh(self: DatasetSubtype) -> DatasetSubtype:
         """
         Re-fetch the attributes pertaining to this object.
 
@@ -896,7 +947,7 @@ class Dataset(Wrapper, metaclass=abc.ABCMeta):
         self.__init__(ds_dict, self.container, self.gi)  # type: ignore[misc]
         return self
 
-    def wait(self, polling_interval=POLLING_INTERVAL, break_on_error=True):
+    def wait(self, polling_interval: float = POLLING_INTERVAL, break_on_error: bool = True) -> None:
         """
         Wait for this dataset to come out of the pending states.
 
@@ -923,13 +974,16 @@ class HistoryDatasetAssociation(Dataset):
 
     BASE_ATTRS = Dataset.BASE_ATTRS + ("annotation", "deleted", "purged", "tags", "visible")
     SRC = "hda"
+    annotation: str
+    deleted: bool
+    purged: bool
 
     @property
-    def _stream_url(self):
+    def _stream_url(self) -> str:
         base_url = self.gi.gi.histories._make_url(module_id=self.container.id, contents=True)
         return f"{base_url}/{self.id}/display"
 
-    def get_stream(self, chunk_size=bioblend.CHUNK_SIZE):
+    def get_stream(self, chunk_size: int = bioblend.CHUNK_SIZE) -> Iterator[bytes]:
         """
         Open dataset for reading and return an iterator over its contents.
 
@@ -968,7 +1022,7 @@ class HistoryDatasetAssociation(Dataset):
         self.__init__(res, self.container, gi=self.gi)  # type: ignore[misc]
         return self
 
-    def delete(self, purge=False):
+    def delete(self, purge: bool = False) -> None:
         """
         Delete this history dataset.
 
@@ -985,6 +1039,9 @@ class HistoryDatasetAssociation(Dataset):
         self.refresh()
 
 
+DatasetCollectionSubtype = TypeVar("DatasetCollectionSubtype", bound="DatasetCollection")
+
+
 class DatasetCollection(Wrapper, metaclass=abc.ABCMeta):
     """
     Abstract base class for Galaxy dataset collections.
@@ -998,13 +1055,17 @@ class DatasetCollection(Wrapper, metaclass=abc.ABCMeta):
     )
     container: Union["DatasetCollection", "History"]
     API_MODULE = "dataset_collections"
+    collection_type: str
+    deleted: bool
     gi: "GalaxyInstance"
 
-    def __init__(self, dsc_dict, container, gi: "GalaxyInstance"):
+    def __init__(
+        self, dsc_dict: Dict[str, Any], container: Union["DatasetCollection", "History"], gi: "GalaxyInstance"
+    ) -> None:
         super().__init__(dsc_dict, gi=gi)
         object.__setattr__(self, "container", container)
 
-    def refresh(self) -> "DatasetCollection":
+    def refresh(self: DatasetCollectionSubtype) -> DatasetCollectionSubtype:
         """
         Re-fetch the attributes pertaining to this object.
 
@@ -1016,8 +1077,10 @@ class DatasetCollection(Wrapper, metaclass=abc.ABCMeta):
         return self
 
     @abc.abstractmethod
-    def delete(self):
-        pass
+    def delete(self) -> None:
+        """
+        Delete this dataset collection.
+        """
 
 
 class HistoryDatasetCollectionAssociation(DatasetCollection):
@@ -1027,11 +1090,9 @@ class HistoryDatasetCollectionAssociation(DatasetCollection):
 
     BASE_ATTRS = DatasetCollection.BASE_ATTRS + ("tags", "visible", "elements")
     SRC = "hdca"
+    elements: List[Dict]
 
-    def delete(self):
-        """
-        Delete this dataset collection.
-        """
+    def delete(self) -> None:
         self.gi.gi.histories.delete_dataset_collection(self.container.id, self.id)
         self.container.refresh()
         self.refresh()
@@ -1044,7 +1105,7 @@ class LibRelatedDataset(Dataset):
     """
 
     @property
-    def _stream_url(self):
+    def _stream_url(self) -> str:
         base_url = self.gi.gi.libraries._make_url()
         return f"{base_url}/datasets/download/uncompressed"
 
@@ -1065,7 +1126,7 @@ class LibraryDataset(LibRelatedDataset):
 
     SRC = "ld"
 
-    def delete(self, purged=False):
+    def delete(self, purged: bool = False) -> None:
         """
         Delete this library dataset.
 
@@ -1122,7 +1183,10 @@ class HistoryContentInfo(ContentInfo):
     BASE_ATTRS = ContentInfo.BASE_ATTRS + ("deleted", "state", "visible")
 
 
-class DatasetContainer(Wrapper, metaclass=abc.ABCMeta):
+DatasetContainerSubtype = TypeVar("DatasetContainerSubtype", bound="DatasetContainer")
+
+
+class DatasetContainer(Wrapper, Generic[DatasetSubtype], metaclass=abc.ABCMeta):
     """
     Abstract base class for dataset containers (histories and libraries).
     """
@@ -1132,11 +1196,20 @@ class DatasetContainer(Wrapper, metaclass=abc.ABCMeta):
         "name",
     )
     API_MODULE: str
+    CONTENT_INFO_TYPE: Type[ContentInfo]
+    DS_TYPE: ClassVar[Callable]
     content_infos: List[ContentInfo]
+    deleted: bool
     gi: "GalaxyInstance"
+    name: str
     obj_gi_client: "client.ObjDatasetContainerClient"
 
-    def __init__(self, c_dict, content_infos=None, gi: "GalaxyInstance" = None):
+    def __init__(
+        self,
+        c_dict: Dict[str, Any],
+        content_infos: Optional[List[ContentInfo]] = None,
+        gi: Optional["GalaxyInstance"] = None,
+    ) -> None:
         """
         :type content_infos: list of :class:`ContentInfo`
         :param content_infos: info objects for the container's contents
@@ -1148,13 +1221,14 @@ class DatasetContainer(Wrapper, metaclass=abc.ABCMeta):
         object.__setattr__(self, "obj_gi_client", getattr(self.gi, self.API_MODULE))
 
     @property
-    def dataset_ids(self):
+    def dataset_ids(self) -> List[str]:
         """
         Return the ids of the contained datasets.
         """
         return [_.id for _ in self.content_infos if _.type == "file"]
 
-    def preview(self):
+    # I think we should deprecate this method - NS
+    def preview(self) -> "DatasetContainerPreview":
         getf = self.obj_gi_client.get_previews
         # self.state could be stale: check both regular and deleted containers
         try:
@@ -1166,7 +1240,7 @@ class DatasetContainer(Wrapper, metaclass=abc.ABCMeta):
                 raise ValueError(f"no object for id {self.id}")
         return p
 
-    def refresh(self) -> "DatasetContainer":
+    def refresh(self: DatasetContainerSubtype) -> DatasetContainerSubtype:
         """
         Re-fetch the attributes pertaining to this object.
 
@@ -1176,7 +1250,7 @@ class DatasetContainer(Wrapper, metaclass=abc.ABCMeta):
         self.__init__(fresh.wrapped, content_infos=fresh.content_infos, gi=self.gi)  # type: ignore[misc]
         return self
 
-    def get_dataset(self, ds_id):
+    def get_dataset(self, ds_id: str) -> DatasetSubtype:
         """
         Retrieve the dataset corresponding to the given id.
 
@@ -1191,7 +1265,7 @@ class DatasetContainer(Wrapper, metaclass=abc.ABCMeta):
         ds_dict = gi_client.show_dataset(self.id, ds_id)
         return self.DS_TYPE(ds_dict, self, gi=self.gi)
 
-    def get_datasets(self, name=None):
+    def get_datasets(self, name: Optional[str] = None) -> List[DatasetSubtype]:
         """
         Get all datasets contained inside this dataset container.
 
@@ -1217,7 +1291,7 @@ class DatasetContainer(Wrapper, metaclass=abc.ABCMeta):
         return [self.get_dataset(_) for _ in ds_ids]
 
 
-class History(DatasetContainer):
+class History(DatasetContainer[HistoryDatasetAssociation]):
     """
     Maps to a Galaxy history.
     """
@@ -1234,8 +1308,11 @@ class History(DatasetContainer):
     DSC_TYPE = HistoryDatasetCollectionAssociation
     CONTENT_INFO_TYPE = HistoryContentInfo
     API_MODULE = "histories"
+    annotation: str
+    published: bool
+    tags: List[str]
 
-    def update(self, **kwds):
+    def update(self, **kwds) -> "History":
         """
         Update history metadata information. Some of the attributes that can be
         modified are documented below.
@@ -1266,7 +1343,7 @@ class History(DatasetContainer):
         self.refresh()
         return self
 
-    def delete(self, purge=False):
+    def delete(self, purge: bool = False) -> None:
         """
         Delete this history.
 
@@ -1282,7 +1359,7 @@ class History(DatasetContainer):
         self.refresh()
         self.unmap()
 
-    def import_dataset(self, lds):
+    def import_dataset(self, lds: LibraryDataset) -> HistoryDatasetAssociation:
         """
         Import a dataset into the history from a library.
 
@@ -1302,7 +1379,7 @@ class History(DatasetContainer):
         self.refresh()
         return self.get_dataset(res["id"])
 
-    def upload_file(self, path, **kwargs):
+    def upload_file(self, path: str, **kwargs) -> HistoryDatasetAssociation:
         """
         Upload the file specified by ``path`` to this history.
 
@@ -1321,7 +1398,7 @@ class History(DatasetContainer):
 
     upload_dataset = upload_file
 
-    def upload_from_ftp(self, path, **kwargs):
+    def upload_from_ftp(self, path: str, **kwargs) -> HistoryDatasetAssociation:
         """
         Upload the file specified by ``path`` from the user's FTP directory to
         this history.
@@ -1339,7 +1416,7 @@ class History(DatasetContainer):
         self.refresh()
         return self.get_dataset(out_dict["outputs"][0]["id"])
 
-    def paste_content(self, content, **kwargs):
+    def paste_content(self, content: str, **kwargs) -> HistoryDatasetAssociation:
         """
         Upload a string to a new dataset in this history.
 
@@ -1356,7 +1433,14 @@ class History(DatasetContainer):
         self.refresh()
         return self.get_dataset(out_dict["outputs"][0]["id"])
 
-    def export(self, gzip=True, include_hidden=False, include_deleted=False, wait=False, maxwait=None):
+    def export(
+        self,
+        gzip: bool = True,
+        include_hidden: bool = False,
+        include_deleted: bool = False,
+        wait: bool = False,
+        maxwait: Optional[int] = None,
+    ) -> str:
         """
         Start a job to create an export archive for this history.  See
         :meth:`~bioblend.galaxy.histories.HistoryClient.export_history`
@@ -1371,7 +1455,7 @@ class History(DatasetContainer):
             maxwait=maxwait,
         )
 
-    def download(self, jeha_id, outf, chunk_size=bioblend.CHUNK_SIZE):
+    def download(self, jeha_id: str, outf: IO[bytes], chunk_size: int = bioblend.CHUNK_SIZE):
         """
         Download an export archive for this history.  Use :meth:`export`
         to create an export and get the required ``jeha_id``.  See
@@ -1380,7 +1464,9 @@ class History(DatasetContainer):
         """
         return self.gi.gi.histories.download_history(self.id, jeha_id, outf, chunk_size=chunk_size)
 
-    def create_dataset_collection(self, collection_description):
+    def create_dataset_collection(
+        self, collection_description: bioblend.galaxy.dataset_collections.CollectionDescription
+    ) -> "HistoryDatasetCollectionAssociation":
         """
         Create a new dataset collection in the history by providing a collection description.
 
@@ -1394,7 +1480,7 @@ class History(DatasetContainer):
         self.refresh()
         return self.get_dataset_collection(dataset_collection["id"])
 
-    def get_dataset_collection(self, dsc_id):
+    def get_dataset_collection(self, dsc_id: str) -> "HistoryDatasetCollectionAssociation":
         """
         Retrieve the dataset collection corresponding to the given id.
 
@@ -1408,7 +1494,7 @@ class History(DatasetContainer):
         return self.DSC_TYPE(dsc_dict, self, gi=self.gi)
 
 
-class Library(DatasetContainer):
+class Library(DatasetContainer[LibraryDataset]):
     """
     Maps to a Galaxy library.
     """
@@ -1417,15 +1503,17 @@ class Library(DatasetContainer):
     DS_TYPE = LibraryDataset
     CONTENT_INFO_TYPE = LibraryContentInfo
     API_MODULE = "libraries"
+    description: str
+    synopsis: str
 
     @property
-    def folder_ids(self):
+    def folder_ids(self) -> List[str]:
         """
         Return the ids of the contained folders.
         """
         return [_.id for _ in self.content_infos if _.type == "folder"]
 
-    def delete(self):
+    def delete(self) -> None:
         """
         Delete this library.
         """
@@ -1433,7 +1521,7 @@ class Library(DatasetContainer):
         self.refresh()
         self.unmap()
 
-    def _pre_upload(self, folder):
+    def _pre_upload(self, folder: Optional["Folder"]) -> Optional[str]:
         """
         Return the id of the given folder, after sanity checking.
         """
@@ -1441,7 +1529,7 @@ class Library(DatasetContainer):
             raise RuntimeError("library is not mapped to a Galaxy object")
         return None if folder is None else folder.id
 
-    def upload_data(self, data, folder=None, **kwargs):
+    def upload_data(self, data: str, folder: Optional["Folder"] = None, **kwargs) -> LibraryDataset:
         """
         Upload data to this library.
 
@@ -1461,7 +1549,7 @@ class Library(DatasetContainer):
         self.refresh()
         return self.get_dataset(res[0]["id"])
 
-    def upload_from_url(self, url, folder=None, **kwargs):
+    def upload_from_url(self, url: str, folder: Optional["Folder"] = None, **kwargs) -> LibraryDataset:
         """
         Upload data to this library from the given URL.
 
@@ -1475,7 +1563,7 @@ class Library(DatasetContainer):
         self.refresh()
         return self.get_dataset(res[0]["id"])
 
-    def upload_from_local(self, path, folder=None, **kwargs):
+    def upload_from_local(self, path: str, folder: Optional["Folder"] = None, **kwargs) -> LibraryDataset:
         """
         Upload data to this library from a local file.
 
@@ -1489,7 +1577,13 @@ class Library(DatasetContainer):
         self.refresh()
         return self.get_dataset(res[0]["id"])
 
-    def upload_from_galaxy_fs(self, paths, folder=None, link_data_only=None, **kwargs):
+    def upload_from_galaxy_fs(
+        self,
+        paths: Union[str, Iterable[str]],
+        folder: Optional["Folder"] = None,
+        link_data_only: Literal["copy_files", "link_to_files"] = "copy_files",
+        **kwargs,
+    ) -> List[LibraryDataset]:
         """
         Upload data to this library from filesystem paths on the server.
 
@@ -1522,11 +1616,12 @@ class Library(DatasetContainer):
             raise RuntimeError("upload_from_galaxy_filesystem: no reply")
         if not isinstance(res, Sequence):
             raise RuntimeError(f"upload_from_galaxy_filesystem: unexpected reply: {res!r}")
-        new_datasets = [self.get_dataset(ds_info["id"]) for ds_info in res]
         self.refresh()
-        return new_datasets
+        return [self.get_dataset(ds_info["id"]) for ds_info in res]
 
-    def copy_from_dataset(self, hda, folder=None, message=""):
+    def copy_from_dataset(
+        self, hda: HistoryDatasetAssociation, folder: Optional["Folder"] = None, message: str = ""
+    ) -> LibraryDataset:
         """
         Copy a history dataset into this library.
 
@@ -1540,7 +1635,9 @@ class Library(DatasetContainer):
         self.refresh()
         return self.get_dataset(res["library_dataset_id"])
 
-    def create_folder(self, name, description=None, base_folder=None):
+    def create_folder(
+        self, name: str, description: Optional[str] = None, base_folder: Optional["Folder"] = None
+    ) -> "Folder":
         """
         Create a folder in this library.
 
@@ -1562,7 +1659,7 @@ class Library(DatasetContainer):
         self.refresh()
         return self.get_folder(res[0]["id"])
 
-    def get_folder(self, f_id):
+    def get_folder(self, f_id: str) -> "Folder":
         """
         Retrieve the folder corresponding to the given id.
 
@@ -1573,7 +1670,7 @@ class Library(DatasetContainer):
         return Folder(f_dict, self, gi=self.gi)
 
     @property
-    def root_folder(self):
+    def root_folder(self) -> "Folder":
         """
         The root folder of this library.
 
@@ -1595,10 +1692,12 @@ class Folder(Wrapper):
         "name",
     )
     container: Library
+    description: str
     gi: "GalaxyInstance"
+    name: str
     _cached_parent: Optional["Folder"]
 
-    def __init__(self, f_dict, container, gi: "GalaxyInstance"):
+    def __init__(self, f_dict: Dict[str, Any], container: Library, gi: "GalaxyInstance") -> None:
         super().__init__(f_dict, gi=gi)
         object.__setattr__(self, "container", container)
 
@@ -1644,9 +1743,12 @@ class Tool(Wrapper):
         "name",
         "version",
     )
+    gi: "GalaxyInstance"
     POLLING_INTERVAL = 10  # for output state monitoring
 
-    def run(self, inputs, history, wait=False, polling_interval=POLLING_INTERVAL):
+    def run(
+        self, inputs: Dict[str, Any], history: History, wait: bool = False, polling_interval: float = POLLING_INTERVAL
+    ) -> List[HistoryDatasetAssociation]:
         """
         Execute this tool in the given history with inputs from dict
         ``inputs``.
@@ -1678,7 +1780,7 @@ class Tool(Wrapper):
         """
         for k, v in inputs.items():
             if isinstance(v, Dataset):
-                inputs[k] = {"src": v.SRC, "id": v.id}
+                inputs[k] = {"src": v.SRC, "id": v.id}  # type: ignore
         out_dict = self.gi.gi.tools.run_tool(history.id, self.id, inputs)
         outputs = [history.get_dataset(_["id"]) for _ in out_dict["outputs"]]
         if wait:
@@ -1692,6 +1794,9 @@ class Job(Wrapper):
     """
 
     BASE_ATTRS = Wrapper.BASE_ATTRS + ("state",)
+
+
+DatasetContainerPreviewSubtype = TypeVar("DatasetContainerPreviewSubtype", bound="DatasetContainerPreview")
 
 
 @abstractclass
@@ -1767,6 +1872,11 @@ class InvocationPreview(Wrapper):
         "uuid",
         "workflow_id",
     )
+    history_id: str
+    state: str
+    update_time: str
+    uuid: str
+    workflow_id: str
 
 
 class JobPreview(Wrapper):

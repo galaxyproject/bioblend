@@ -9,6 +9,14 @@ import tempfile
 import unittest
 import uuid
 from ssl import SSLError
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    Set,
+    Union,
+)
 from urllib.error import URLError
 from urllib.request import urlopen
 
@@ -74,7 +82,7 @@ SAMPLE_WF_DICT = {
     "tags": [],
     "url": "/api/workflows/9005c5112febe774",
 }
-SAMPLE_INV_DICT = {
+SAMPLE_INV_DICT: Dict[str, Any] = {
     "history_id": "2f94e8ae9edff68a",
     "id": "df7a1f0c02a5b08e",
     "inputs": {"0": {"id": "a7db2fac67043c7e", "src": "hda", "uuid": "7932ffe0-2340-4952-8857-dbaa50f1f46a"}},
@@ -138,6 +146,8 @@ def upload_from_fs(lib, bnames, **kwargs):
 
 class MockWrapper(wrappers.Wrapper):
     BASE_ATTRS = ("a", "b")
+    a: int
+    b: List[int]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -145,7 +155,7 @@ class MockWrapper(wrappers.Wrapper):
 
 class TestWrapper(unittest.TestCase):
     def setUp(self):
-        self.d = {"a": 1, "b": [2, 3], "c": {"x": 4}}
+        self.d: Dict[str, Any] = {"a": 1, "b": [2, 3], "c": {"x": 4}}
         with self.assertRaises(TypeError):
             wrappers.Wrapper(self.d)
         self.w = MockWrapper(self.d)
@@ -160,9 +170,9 @@ class TestWrapper(unittest.TestCase):
         self.assertEqual(self.d["a"], 1)
         self.assertEqual(self.d["b"][0], 2)
         with self.assertRaises(AttributeError):
-            self.w.foo
+            self.w.foo  # type: ignore[attr-defined]
         with self.assertRaises(AttributeError):
-            self.w.foo = 0
+            self.w.foo = 0  # type: ignore[assignment]
 
     def test_taint(self):
         self.assertFalse(self.w.is_modified)
@@ -184,7 +194,7 @@ class TestWrapper(unittest.TestCase):
         w = MockWrapper(self.d, parent=parent)
         self.assertIs(w.parent, parent)
         with self.assertRaises(AttributeError):
-            w.parent = 0
+            w.parent = 0  # type: ignore[assignment,misc]
 
 
 @test_util.skip_unless_galaxy()
@@ -216,7 +226,7 @@ class TestWorkflow(GalaxyObjectsTestBase):
         self.assertEqual(self.wf.sink_ids, {"573"})
 
     def test_dag(self):
-        inv_dag = {}
+        inv_dag: Dict[str, Set[str]] = {}
         for h, tails in self.wf.dag.items():
             for t in tails:
                 inv_dag.setdefault(str(t), set()).add(h)
@@ -233,6 +243,7 @@ class TestWorkflow(GalaxyObjectsTestBase):
 
     def test_steps(self):
         steps = SAMPLE_WF_DICT["steps"]
+        assert isinstance(steps, dict)
         for sid, s in self.wf.steps.items():
             self.assertIsInstance(s, wrappers.Step)
             self.assertEqual(s.id, sid)
@@ -264,6 +275,12 @@ class TestWorkflow(GalaxyObjectsTestBase):
 
 @test_util.skip_unless_galaxy("release_19.09")
 class TestInvocation(GalaxyObjectsTestBase):
+    dataset: wrappers.HistoryDatasetAssociation
+    history: wrappers.History
+    inv: wrappers.Invocation
+    workflow: wrappers.Workflow
+    workflow_pause: wrappers.Workflow
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -290,6 +307,7 @@ class TestInvocation(GalaxyObjectsTestBase):
 
     def test_initialize_steps(self):
         for step, step_dict in zip(self.inv.steps, SAMPLE_INV_DICT["steps"]):
+            assert isinstance(step_dict, dict)
             self.assertIsInstance(step, wrappers.InvocationStep)
             self.assertIs(step.parent, self.inv)
             self.assertEqual(step.id, step_dict["id"])
@@ -397,6 +415,10 @@ class TestInvocation(GalaxyObjectsTestBase):
 
 @test_util.skip_unless_galaxy("release_19.09")
 class TestObjInvocationClient(GalaxyObjectsTestBase):
+    history: wrappers.History
+    inv: wrappers.Invocation
+    workflow: wrappers.Workflow
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -559,9 +581,9 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
     def test_get_workflows(self):
         self._test_multi_get("workflows")
 
-    def _normalized_functions(self, obj_type):
+    def _normalized_functions(self, obj_type: str):
         if obj_type == "libraries":
-            create = self.gi.libraries.create
+            create: Callable = self.gi.libraries.create
             del_kwargs = {}
         elif obj_type == "histories":
             create = self.gi.histories.create
@@ -577,7 +599,7 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
             del_kwargs = {}
         return create, del_kwargs
 
-    def _test_multi_get(self, obj_type):
+    def _test_multi_get(self, obj_type: str):
         obj_gi_client = getattr(self.gi, obj_type)
         create, del_kwargs = self._normalized_functions(obj_type)
 
@@ -669,6 +691,7 @@ class TestLibrary(GalaxyObjectsTestBase):
         self.assertEqual(folder.name, name)
         self.assertEqual(folder.description, desc)
         self.assertIs(folder.container, self.lib)
+        assert folder.parent is not None
         self.assertEqual(folder.parent.id, self.lib.root_folder.id)
         self.assertEqual(len(self.lib.content_infos), 2)
         self.assertEqual(len(self.lib.folder_ids), 2)
@@ -960,7 +983,7 @@ class TestRunWorkflow(GalaxyObjectsTestBase):
     def _test(self, existing_hist=False, params=False):
         hist_name = f"test_{uuid.uuid4().hex}"
         if existing_hist:
-            hist = self.gi.histories.create(hist_name)
+            hist: Union[str, wrappers.History] = self.gi.histories.create(hist_name)
         else:
             hist = hist_name
         if params:
@@ -981,7 +1004,7 @@ class TestRunWorkflow(GalaxyObjectsTestBase):
         exp_rows = zip(*(_.splitlines() for _ in self.contents))
         exp_res = ("\n".join(sep.join(t) for t in exp_rows) + "\n").encode()
         self.assertEqual(res, exp_res)
-        if existing_hist:
+        if isinstance(hist, wrappers.History):  # i.e. existing_hist == True
             self.assertEqual(out_hist.id, hist.id)
         out_hist.delete(purge=True)
 

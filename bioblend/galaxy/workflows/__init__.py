@@ -12,10 +12,14 @@ from typing import (
     Optional,
 )
 
+from typing_extensions import Literal
+
 from bioblend.galaxy.client import Client
 
 if typing.TYPE_CHECKING:
     from bioblend.galaxy import GalaxyInstance
+
+InputsBy = Literal["step_index|step_uuid", "step_index", "step_id", "step_uuid", "name"]  # type: ignore[name-defined]
 
 
 class WorkflowClient(Client):
@@ -293,7 +297,7 @@ class WorkflowClient(Client):
         import_inputs_to_history: bool = False,
         replacement_params: Optional[dict] = None,
         allow_tool_state_corrections: bool = False,
-        inputs_by: Optional[str] = None,
+        inputs_by: Optional[InputsBy] = None,
         parameters_normalized: bool = False,
     ) -> dict:
         """

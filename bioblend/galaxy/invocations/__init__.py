@@ -16,6 +16,7 @@ from bioblend import (
     TimeoutException,
 )
 from bioblend.galaxy.client import Client
+from bioblend.galaxy.workflows import InputsBy
 
 if TYPE_CHECKING:
     from bioblend.galaxy import GalaxyInstance
@@ -153,7 +154,7 @@ class InvocationClient(Client):
         import_inputs_to_history: bool = False,
         replacement_params: Optional[dict] = None,
         allow_tool_state_corrections: bool = False,
-        inputs_by: Optional[str] = None,
+        inputs_by: Optional[InputsBy] = None,
         parameters_normalized: bool = False,
     ) -> Dict[str, Any]:
         """

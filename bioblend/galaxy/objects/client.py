@@ -6,16 +6,24 @@ via their handles in :class:`~.galaxy_instance.GalaxyInstance`.
 """
 import abc
 import json
-from collections.abc import (
-    Mapping,
-    Sequence,
-)
+from collections.abc import Sequence
 from typing import (
+    Any,
+    cast,
+    Dict,
+    Generic,
     List,
+    Optional,
+    overload,
+    Type,
     TYPE_CHECKING,
+    Union,
 )
 
+from typing_extensions import Literal
+
 import bioblend
+from bioblend.galaxy.datasets import HdaLdda
 from . import wrappers
 
 if TYPE_CHECKING:
@@ -23,7 +31,7 @@ if TYPE_CHECKING:
 
 
 class ObjClient(abc.ABC):
-    def __init__(self, obj_gi: "GalaxyInstance"):
+    def __init__(self, obj_gi: "GalaxyInstance") -> None:
         self.obj_gi = obj_gi
         self.gi = self.obj_gi.gi
         self.log = bioblend.log
@@ -33,10 +41,9 @@ class ObjClient(abc.ABC):
         """
         Retrieve the object corresponding to the given id.
         """
-        pass
 
     @abc.abstractmethod
-    def get_previews(self) -> list:
+    def get_previews(self, **kwargs) -> list:
         """
         Get a list of object previews.
 
@@ -48,7 +55,6 @@ class ObjClient(abc.ABC):
         :rtype: list
         :return: a list of object previews
         """
-        pass
 
     @abc.abstractmethod
     def list(self) -> list:
@@ -61,9 +67,8 @@ class ObjClient(abc.ABC):
         :rtype: list
         :return: a list of objects
         """
-        pass
 
-    def _select_id(self, id_=None, name=None):
+    def _select_id(self, id_: Optional[str] = None, name: Optional[str] = None) -> str:
         """
         Return the id that corresponds to the given id or name info.
         """
@@ -74,17 +79,17 @@ class ObjClient(abc.ABC):
         if id_ is None:
             id_list = [_.id for _ in self.get_previews(name=name)]
             if len(id_list) > 1:
-                raise ValueError("Ambiguous name")
+                raise ValueError(f"Ambiguous name '{name}'")
             if not id_list:
-                raise ValueError("name not found")
+                raise ValueError(f"Name '{name}' not found")
             return id_list[0]
         else:
             return id_
 
-    def _get_dict(self, meth_name, reply):
+    def _get_dict(self, meth_name: str, reply: Optional[Union[Dict[str, Any], List[Dict[str, Any]]]]) -> Dict[str, Any]:
         if reply is None:
             raise RuntimeError(f"{meth_name}: no reply")
-        elif isinstance(reply, Mapping):
+        elif isinstance(reply, dict):
             return reply
         try:
             return reply[0]
@@ -92,37 +97,49 @@ class ObjClient(abc.ABC):
             raise RuntimeError(f"{meth_name}: unexpected reply: {reply!r}")
 
 
-class ObjDatasetContainerClient(ObjClient):
-    def _get_container(self, id_, ctype):
-        show_fname = f"show_{ctype.__name__.lower()}"
-        gi_client = getattr(self.gi, ctype.API_MODULE)
-        show_f = getattr(gi_client, show_fname)
-        res = show_f(id_)
-        cdict = self._get_dict(show_fname, res)
-        cdict["id"] = id_  # overwrite unencoded id
-        c_infos = show_f(id_, contents=True)
+class ObjDatasetContainerClient(
+    ObjClient, Generic[wrappers.DatasetContainerSubtype, wrappers.DatasetContainerPreviewSubtype]
+):
+    CONTAINER_TYPE: Type[wrappers.DatasetContainer]
+    CONTAINER_PREVIEW_TYPE: Type[wrappers.DatasetContainerPreview]
+
+    def __init__(self, obj_gi: "GalaxyInstance") -> None:
+        super().__init__(obj_gi=obj_gi)
+        gi_client = getattr(self.gi, self.CONTAINER_TYPE.API_MODULE)
+        get_fname = f"get_{self.CONTAINER_TYPE.API_MODULE}"
+        self._get_f = getattr(gi_client, get_fname)
+        show_fname = f"show_{self.CONTAINER_TYPE.__name__.lower()}"
+        self._show_f = getattr(gi_client, show_fname)
+
+    def get_previews(
+        self, name: Optional[str] = None, deleted: bool = False, **kwargs
+    ) -> List[wrappers.DatasetContainerPreviewSubtype]:
+        dicts = self._get_f(name=name, deleted=deleted, **kwargs)
+        return [
+            cast(wrappers.DatasetContainerPreviewSubtype, self.CONTAINER_PREVIEW_TYPE(_, gi=self.obj_gi)) for _ in dicts
+        ]
+
+    def get(self, id_: str) -> wrappers.DatasetContainerSubtype:
+        """
+        Retrieve the dataset container corresponding to the given id.
+        """
+        cdict = self._show_f(id_)
+        c_infos = self._show_f(id_, contents=True)
         if not isinstance(c_infos, Sequence):
-            raise RuntimeError(f"{show_fname}: unexpected reply: {c_infos!r}")
-        c_infos = [ctype.CONTENT_INFO_TYPE(_) for _ in c_infos]
-        return ctype(cdict, content_infos=c_infos, gi=self.obj_gi)
-
-    @abc.abstractmethod
-    def get(self, id_: str) -> wrappers.DatasetContainer:
-        """
-        Retrieve the dataset corresponding to the given id.
-        """
-        pass
+            raise RuntimeError(f"{self._show_f.__name__}: unexpected reply: {c_infos!r}")
+        c_infos = [self.CONTAINER_TYPE.CONTENT_INFO_TYPE(_) for _ in c_infos]
+        return cast(wrappers.DatasetContainerSubtype, self.CONTAINER_TYPE(cdict, content_infos=c_infos, gi=self.obj_gi))
 
 
-class ObjLibraryClient(ObjDatasetContainerClient):
+class ObjLibraryClient(ObjDatasetContainerClient[wrappers.Library, wrappers.LibraryPreview]):
     """
     Interacts with Galaxy libraries.
     """
 
-    def __init__(self, obj_gi):
-        super().__init__(obj_gi)
+    CONTAINER_TYPE = wrappers.Library
+    CONTAINER_PREVIEW_TYPE = wrappers.LibraryPreview
 
-    def create(self, name, description=None, synopsis=None):
+    def create(self, name: str, description: Optional[str] = None, synopsis: Optional[str] = None) -> wrappers.Library:
         """
         Create a data library with the properties defined in the arguments.
 
@@ -133,20 +150,7 @@ class ObjLibraryClient(ObjDatasetContainerClient):
         lib_info = self._get_dict("create_library", res)
         return self.get(lib_info["id"])
 
-    def get(self, id_) -> wrappers.Library:
-        """
-        Retrieve the data library corresponding to the given id.
-
-        :rtype: :class:`~.wrappers.Library`
-        :return: the library corresponding to ``id_``
-        """
-        return self._get_container(id_, wrappers.Library)
-
-    def get_previews(self, name=None, deleted=False):
-        dicts = self.gi.libraries.get_libraries(name=name, deleted=deleted)
-        return [wrappers.LibraryPreview(_, gi=self.obj_gi) for _ in dicts]
-
-    def list(self, name=None, deleted=False):
+    def list(self, name: Optional[str] = None, deleted: bool = False) -> List[wrappers.Library]:
         """
         Get libraries owned by the user of this Galaxy instance.
 
@@ -166,7 +170,7 @@ class ObjLibraryClient(ObjDatasetContainerClient):
         else:
             return [self.get(_["id"]) for _ in dicts]
 
-    def delete(self, id_=None, name=None):
+    def delete(self, id_: Optional[str] = None, name: Optional[str] = None) -> None:
         """
         Delete the library with the given id or name.
 
@@ -178,19 +182,19 @@ class ObjLibraryClient(ObjDatasetContainerClient):
         """
         id_ = self._select_id(id_=id_, name=name)
         res = self.gi.libraries.delete_library(id_)
-        if not isinstance(res, Mapping):
+        if not isinstance(res, dict):
             raise RuntimeError(f"delete_library: unexpected reply: {res!r}")
 
 
-class ObjHistoryClient(ObjDatasetContainerClient):
+class ObjHistoryClient(ObjDatasetContainerClient[wrappers.History, wrappers.HistoryPreview]):
     """
     Interacts with Galaxy histories.
     """
 
-    def __init__(self, obj_gi):
-        super().__init__(obj_gi)
+    CONTAINER_TYPE = wrappers.History
+    CONTAINER_PREVIEW_TYPE = wrappers.HistoryPreview
 
-    def create(self, name=None):
+    def create(self, name: Optional[str] = None) -> wrappers.History:
         """
         Create a new Galaxy history, optionally setting its name.
 
@@ -201,20 +205,7 @@ class ObjHistoryClient(ObjDatasetContainerClient):
         hist_info = self._get_dict("create_history", res)
         return self.get(hist_info["id"])
 
-    def get(self, id_) -> wrappers.History:
-        """
-        Retrieve the history corresponding to the given id.
-
-        :rtype: :class:`~.wrappers.History`
-        :return: the history corresponding to ``id_``
-        """
-        return self._get_container(id_, wrappers.History)
-
-    def get_previews(self, name=None, deleted=False):
-        dicts = self.gi.histories.get_histories(name=name, deleted=deleted)
-        return [wrappers.HistoryPreview(_, gi=self.obj_gi) for _ in dicts]
-
-    def list(self, name=None, deleted=False):
+    def list(self, name: Optional[str] = None, deleted: bool = False) -> List[wrappers.History]:
         """
         Get histories owned by the user of this Galaxy instance.
 
@@ -228,7 +219,7 @@ class ObjHistoryClient(ObjDatasetContainerClient):
         dicts = self.gi.histories.get_histories(name=name, deleted=deleted)
         return [self.get(_["id"]) for _ in dicts]
 
-    def delete(self, id_=None, name=None, purge=False):
+    def delete(self, id_: Optional[str] = None, name: Optional[str] = None, purge: bool = False) -> None:
         """
         Delete the history with the given id or name.
 
@@ -244,7 +235,7 @@ class ObjHistoryClient(ObjDatasetContainerClient):
         """
         id_ = self._select_id(id_=id_, name=name)
         res = self.gi.histories.delete_history(id_, purge=purge)
-        if not isinstance(res, Mapping):
+        if not isinstance(res, dict):
             raise RuntimeError(f"delete_history: unexpected reply: {res!r}")
 
 
@@ -253,7 +244,7 @@ class ObjWorkflowClient(ObjClient):
     Interacts with Galaxy workflows.
     """
 
-    def import_new(self, src, publish=False):
+    def import_new(self, src: Union[str, Dict[str, Any]], publish: bool = False) -> wrappers.Workflow:
         """
         Imports a new workflow into Galaxy.
 
@@ -269,7 +260,7 @@ class ObjWorkflowClient(ObjClient):
         :rtype: :class:`~.wrappers.Workflow`
         :return: the workflow just imported
         """
-        if isinstance(src, Mapping):
+        if isinstance(src, dict):
             wf_dict = src
         else:
             try:
@@ -279,7 +270,7 @@ class ObjWorkflowClient(ObjClient):
         wf_info = self.gi.workflows.import_workflow_dict(wf_dict, publish)
         return self.get(wf_info["id"])
 
-    def import_shared(self, id_):
+    def import_shared(self, id_: str) -> wrappers.Workflow:
         """
         Imports a shared workflow to the user's space.
 
@@ -292,7 +283,7 @@ class ObjWorkflowClient(ObjClient):
         wf_info = self.gi.workflows.import_shared_workflow(id_)
         return self.get(wf_info["id"])
 
-    def get(self, id_) -> wrappers.Workflow:
+    def get(self, id_: str) -> wrappers.Workflow:
         """
         Retrieve the workflow corresponding to the given id.
 
@@ -304,12 +295,14 @@ class ObjWorkflowClient(ObjClient):
         return wrappers.Workflow(wf_dict, gi=self.obj_gi)
 
     # the 'deleted' option is not available for workflows
-    def get_previews(self, name=None, published=False):
-        dicts = self.gi.workflows.get_workflows(name=name, published=published)
+    def get_previews(
+        self, name: Optional[str] = None, published: bool = False, **kwargs
+    ) -> List[wrappers.WorkflowPreview]:
+        dicts = self.gi.workflows.get_workflows(name=name, published=published, **kwargs)
         return [wrappers.WorkflowPreview(_, gi=self.obj_gi) for _ in dicts]
 
     # the 'deleted' option is not available for workflows
-    def list(self, name=None, published=False):
+    def list(self, name: Optional[str] = None, published: bool = False) -> List[wrappers.Workflow]:
         """
         Get workflows owned by the user of this Galaxy instance.
 
@@ -323,7 +316,7 @@ class ObjWorkflowClient(ObjClient):
         dicts = self.gi.workflows.get_workflows(name=name, published=published)
         return [self.get(_["id"]) for _ in dicts]
 
-    def delete(self, id_=None, name=None):
+    def delete(self, id_: Optional[str] = None, name: Optional[str] = None) -> None:
         """
         Delete the workflow with the given id or name.
 
@@ -344,7 +337,7 @@ class ObjInvocationClient(ObjClient):
     Interacts with Galaxy Invocations.
     """
 
-    def get(self, id_) -> wrappers.Invocation:
+    def get(self, id_: str) -> wrappers.Invocation:
         """
         Get an invocation by ID.
 
@@ -354,17 +347,23 @@ class ObjInvocationClient(ObjClient):
         inv_dict = self.gi.invocations.show_invocation(id_)
         return wrappers.Invocation(inv_dict, self.obj_gi)
 
-    def get_previews(self) -> List[wrappers.InvocationPreview]:
+    def get_previews(self, **kwargs) -> List[wrappers.InvocationPreview]:
         """
         Get previews of all invocations.
 
         :rtype: list of InvocationPreview
         :param: previews of invocations
         """
-        inv_list = self.gi.invocations.get_invocations()
+        inv_list = self.gi.invocations.get_invocations(**kwargs)
         return [wrappers.InvocationPreview(inv_dict, gi=self.obj_gi) for inv_dict in inv_list]
 
-    def list(self, workflow=None, history=None, include_terminal=True, limit=None) -> List[wrappers.Invocation]:
+    def list(
+        self,
+        workflow: Optional[wrappers.Workflow] = None,
+        history: Optional[wrappers.History] = None,
+        include_terminal: bool = True,
+        limit: Optional[int] = None,
+    ) -> List[wrappers.Invocation]:
         """
         Get full listing of workflow invocations, or select a subset
         by specifying optional arguments for filtering (e.g. a workflow).
@@ -373,7 +372,7 @@ class ObjInvocationClient(ObjClient):
         :param workflow: Include only invocations associated with
           this workflow
 
-        :type history: str
+        :type history: wrappers.History
         :param history: Include only invocations associated with
           this history
 
@@ -403,7 +402,7 @@ class ObjToolClient(ObjClient):
     Interacts with Galaxy tools.
     """
 
-    def get(self, id_, io_details=False, link_details=False) -> wrappers.Tool:
+    def get(self, id_: str, io_details: bool = False, link_details: bool = False) -> wrappers.Tool:
         """
         Retrieve the tool corresponding to the given id.
 
@@ -420,7 +419,7 @@ class ObjToolClient(ObjClient):
         tool_dict = self._get_dict("show_tool", res)
         return wrappers.Tool(tool_dict, gi=self.obj_gi)
 
-    def get_previews(self, name=None, trackster=None):
+    def get_previews(self, name: Optional[str] = None, trackster: bool = False, **kwargs) -> List[wrappers.Tool]:
         """
         Get the list of tools installed on the Galaxy instance.
 
@@ -433,11 +432,11 @@ class ObjToolClient(ObjClient):
 
         :rtype: list of :class:`~.wrappers.Tool`
         """
-        dicts = self.gi.tools.get_tools(name=name, trackster=trackster)
+        dicts = self.gi.tools.get_tools(name=name, trackster=trackster, **kwargs)
         return [wrappers.Tool(_, gi=self.obj_gi) for _ in dicts]
 
     # the 'deleted' option is not available for tools
-    def list(self, name=None, trackster=None):
+    def list(self, name: Optional[str] = None, trackster: bool = False) -> List[wrappers.Tool]:
         """
         Get the list of tools installed on the Galaxy instance.
 
@@ -467,7 +466,7 @@ class ObjJobClient(ObjClient):
     Interacts with Galaxy jobs.
     """
 
-    def get(self, id_, full_details=False) -> wrappers.Job:
+    def get(self, id_: str, full_details: bool = False) -> wrappers.Job:
         """
         Retrieve the job corresponding to the given id.
 
@@ -482,11 +481,11 @@ class ObjJobClient(ObjClient):
         job_dict = self._get_dict("show_job", res)
         return wrappers.Job(job_dict, gi=self.obj_gi)
 
-    def get_previews(self):
-        dicts = self.gi.jobs.get_jobs()
+    def get_previews(self, **kwargs) -> List[wrappers.JobPreview]:
+        dicts = self.gi.jobs.get_jobs(**kwargs)
         return [wrappers.JobPreview(_, gi=self.obj_gi) for _ in dicts]
 
-    def list(self):
+    def list(self) -> List[wrappers.Job]:
         """
         Get the list of jobs of the current user.
 
@@ -501,7 +500,15 @@ class ObjDatasetClient(ObjClient):
     Interacts with Galaxy datasets.
     """
 
-    def get(self, id_: str, hda_ldda: str = "hda") -> wrappers.Dataset:
+    @overload
+    def get(self, id_: str, hda_ldda: Literal["hda"] = "hda") -> wrappers.HistoryDatasetAssociation:
+        ...
+
+    @overload
+    def get(self, id_: str, hda_ldda: Literal["ldda"]) -> wrappers.LibraryDatasetDatasetAssociation:
+        ...
+
+    def get(self, id_: str, hda_ldda: HdaLdda = "hda") -> wrappers.Dataset:
         """
         Retrieve the dataset corresponding to the given id.
 
@@ -523,7 +530,7 @@ class ObjDatasetClient(ObjClient):
         else:
             raise ValueError(f"Unsupported value for hda_ldda: {hda_ldda}")
 
-    def get_previews(self) -> list:
+    def get_previews(self, **kwargs) -> list:
         raise NotImplementedError()
 
     def list(self) -> list:
@@ -547,7 +554,7 @@ class ObjDatasetCollectionClient(ObjClient):
         hist = self.obj_gi.histories.get(ds_dict["history_id"])
         return wrappers.HistoryDatasetCollectionAssociation(ds_dict, hist, gi=self.obj_gi)
 
-    def get_previews(self) -> list:
+    def get_previews(self, **kwargs) -> list:
         raise NotImplementedError()
 
     def list(self) -> list:
