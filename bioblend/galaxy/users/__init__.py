@@ -198,7 +198,7 @@ class UserClient(Client):
         url = self._make_url(user_id) + "/api_key/inputs"
         return self._get(url=url)["inputs"][0]["value"]
 
-    def update_user(self, user_id: str, **kwds) -> Dict[str, Any]:
+    def update_user(self, user_id: str, **kwargs: Any) -> Dict[str, Any]:
         """
         Update user information. Some of the attributes that can be
         modified are documented below.
@@ -216,4 +216,4 @@ class UserClient(Client):
         :return: details of the updated user
         """
         url = self._make_url(user_id) + "/information/inputs"
-        return self._put(url=url, payload=kwds, id=user_id)
+        return self._put(url=url, payload=kwargs, id=user_id)

@@ -1,6 +1,8 @@
 """
 A base representation of an instance of Galaxy
 """
+from typing import Optional
+
 from bioblend.galaxy import (
     config,
     dataset_collections,
@@ -29,7 +31,14 @@ from bioblend.galaxyclient import GalaxyClient
 
 
 class GalaxyInstance(GalaxyClient):
-    def __init__(self, url, key=None, email=None, password=None, verify=True):
+    def __init__(
+        self,
+        url: str,
+        key: Optional[str] = None,
+        email: Optional[str] = None,
+        password: Optional[str] = None,
+        verify: bool = True,
+    ) -> None:
         """
         A base representation of a connection to a Galaxy instance, identified
         by the server URL and user credentials.
@@ -96,7 +105,7 @@ class GalaxyInstance(GalaxyClient):
         self.folders = folders.FoldersClient(self)
         self.tool_dependencies = tool_dependencies.ToolDependenciesClient(self)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """
         A nicer representation of this GalaxyInstance object
         """

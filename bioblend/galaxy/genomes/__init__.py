@@ -8,6 +8,8 @@ from typing import (
     TYPE_CHECKING,
 )
 
+from typing_extensions import Literal
+
 from bioblend.galaxy.client import Client
 
 if TYPE_CHECKING:
@@ -72,17 +74,22 @@ class GenomeClient(Client):
 
     def install_genome(
         self,
-        func="download",
-        source=None,
+        func: Literal["download", "index"] = "download",
+        source: Optional[str] = None,
         dbkey: Optional[str] = None,
         ncbi_name: Optional[str] = None,
         ensembl_dbkey: Optional[str] = None,
         url_dbkey: Optional[str] = None,
         indexers: Optional[list] = None,
-    ):
+    ) -> Dict[str, Any]:
         """
         Download and/or index a genome.
 
+        :type func: str
+        :param func: Allowed values: 'download', Download and index; 'index', Index only
+
+        :type source: str
+        :param source: Data source for this build. Can be: UCSC, Ensembl, NCBI, URL
 
         :type dbkey: str
         :param dbkey: DB key of the build to download, ignored unless 'UCSC' is specified as the source
@@ -96,21 +103,15 @@ class GenomeClient(Client):
         :type url_dbkey: str
         :param url_dbkey: DB key to use for this build, ignored unless URL is specified as the source
 
-        :type source: str
-        :param source: Data source for this build. Can be: UCSC, Ensembl, NCBI, URL
-
         :type indexers: list
         :param indexers: POST array of indexers to run after downloading (indexers[] = first, indexers[] = second, ...)
-
-        :type func: str
-        :param func: Allowed values: 'download', Download and index; 'index', Index only
 
         :rtype: dict
         :return: dict( status: 'ok', job: <job ID> )
                  If error:
                  dict( status: 'error', error: <error message> )
         """
-        payload = {}
+        payload: Dict[str, Any] = {}
         if source:
             payload["source"] = source
         if func:

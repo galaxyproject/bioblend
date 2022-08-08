@@ -7,6 +7,7 @@ should not use it directly.
 
 import time
 from typing import (
+    Any,
     Optional,
     TYPE_CHECKING,
 )
@@ -29,19 +30,19 @@ class Client:
     gi: "GalaxyClient"
 
     @classmethod
-    def max_get_retries(cls):
+    def max_get_retries(cls) -> None:
         raise AttributeError("Deprecated method, please use gi's `max_get_attempts` property")
 
     @classmethod
-    def set_max_get_retries(cls, value):
+    def set_max_get_retries(cls, value: int) -> None:
         raise AttributeError("Deprecated method, please use gi's `max_get_attempts` property")
 
     @classmethod
-    def get_retry_delay(cls):
+    def get_retry_delay(cls) -> None:
         raise AttributeError("Deprecated method, please use gi's `get_retry_delay` property")
 
     @classmethod
-    def set_get_retry_delay(cls, value):
+    def set_get_retry_delay(cls, value: float) -> None:
         raise AttributeError("Deprecated method, please use gi's `get_retry_delay` property")
 
     def __init__(self, galaxy_instance: "GalaxyClient") -> None:
@@ -87,7 +88,7 @@ class Client:
         url: Optional[str] = None,
         params: Optional[dict] = None,
         json: bool = True,
-    ):
+    ) -> Any:
         """
         Do a GET request, composing the URL from ``id``, ``deleted`` and
         ``contents``.  Alternatively, an explicit ``url`` can be provided.
@@ -147,7 +148,7 @@ class Client:
         contents: bool = False,
         url: Optional[str] = None,
         files_attached: bool = False,
-    ):
+    ) -> Any:
         """
         Do a generic POST request, composing the url from the contents of the
         arguments. Alternatively, an explicit ``url`` can be provided to use
@@ -173,7 +174,7 @@ class Client:
         id: Optional[str] = None,
         url: Optional[str] = None,
         params: Optional[dict] = None,
-    ):
+    ) -> Any:
         """
         Do a generic PUT request, composing the url from the contents of the
         arguments. Alternatively, an explicit ``url`` can be provided to use
@@ -194,7 +195,7 @@ class Client:
         id: Optional[str] = None,
         url: Optional[str] = None,
         params: Optional[dict] = None,
-    ):
+    ) -> Any:
         """
         Do a generic PATCH request, composing the url from the contents of the
         arguments. Alternatively, an explicit ``url`` can be provided to use
@@ -217,7 +218,7 @@ class Client:
         contents: bool = False,
         url: Optional[str] = None,
         params: Optional[dict] = None,
-    ):
+    ) -> Any:
         """
         Do a generic DELETE request, composing the url from the contents of the
         arguments. Alternatively, an explicit ``url`` can be provided to use

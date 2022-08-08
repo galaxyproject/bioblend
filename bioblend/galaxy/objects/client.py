@@ -43,7 +43,7 @@ class ObjClient(abc.ABC):
         """
 
     @abc.abstractmethod
-    def get_previews(self, **kwargs) -> list:
+    def get_previews(self, **kwargs: Any) -> list:
         """
         Get a list of object previews.
 
@@ -112,7 +112,7 @@ class ObjDatasetContainerClient(
         self._show_f = getattr(gi_client, show_fname)
 
     def get_previews(
-        self, name: Optional[str] = None, deleted: bool = False, **kwargs
+        self, name: Optional[str] = None, deleted: bool = False, **kwargs: Any
     ) -> List[wrappers.DatasetContainerPreviewSubtype]:
         dicts = self._get_f(name=name, deleted=deleted, **kwargs)
         return [
@@ -296,7 +296,7 @@ class ObjWorkflowClient(ObjClient):
 
     # the 'deleted' option is not available for workflows
     def get_previews(
-        self, name: Optional[str] = None, published: bool = False, **kwargs
+        self, name: Optional[str] = None, published: bool = False, **kwargs: Any
     ) -> List[wrappers.WorkflowPreview]:
         dicts = self.gi.workflows.get_workflows(name=name, published=published, **kwargs)
         return [wrappers.WorkflowPreview(_, gi=self.obj_gi) for _ in dicts]
@@ -347,7 +347,7 @@ class ObjInvocationClient(ObjClient):
         inv_dict = self.gi.invocations.show_invocation(id_)
         return wrappers.Invocation(inv_dict, self.obj_gi)
 
-    def get_previews(self, **kwargs) -> List[wrappers.InvocationPreview]:
+    def get_previews(self, **kwargs: Any) -> List[wrappers.InvocationPreview]:
         """
         Get previews of all invocations.
 
@@ -419,7 +419,7 @@ class ObjToolClient(ObjClient):
         tool_dict = self._get_dict("show_tool", res)
         return wrappers.Tool(tool_dict, gi=self.obj_gi)
 
-    def get_previews(self, name: Optional[str] = None, trackster: bool = False, **kwargs) -> List[wrappers.Tool]:
+    def get_previews(self, name: Optional[str] = None, trackster: bool = False, **kwargs: Any) -> List[wrappers.Tool]:
         """
         Get the list of tools installed on the Galaxy instance.
 
@@ -481,7 +481,7 @@ class ObjJobClient(ObjClient):
         job_dict = self._get_dict("show_job", res)
         return wrappers.Job(job_dict, gi=self.obj_gi)
 
-    def get_previews(self, **kwargs) -> List[wrappers.JobPreview]:
+    def get_previews(self, **kwargs: Any) -> List[wrappers.JobPreview]:
         dicts = self.gi.jobs.get_jobs(**kwargs)
         return [wrappers.JobPreview(_, gi=self.obj_gi) for _ in dicts]
 
@@ -530,7 +530,7 @@ class ObjDatasetClient(ObjClient):
         else:
             raise ValueError(f"Unsupported value for hda_ldda: {hda_ldda}")
 
-    def get_previews(self, **kwargs) -> list:
+    def get_previews(self, **kwargs: Any) -> list:
         raise NotImplementedError()
 
     def list(self) -> list:
@@ -554,7 +554,7 @@ class ObjDatasetCollectionClient(ObjClient):
         hist = self.obj_gi.histories.get(ds_dict["history_id"])
         return wrappers.HistoryDatasetCollectionAssociation(ds_dict, hist, gi=self.obj_gi)
 
-    def get_previews(self, **kwargs) -> list:
+    def get_previews(self, **kwargs: Any) -> list:
         raise NotImplementedError()
 
     def list(self) -> list:

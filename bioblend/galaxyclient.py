@@ -9,7 +9,10 @@ import base64
 import contextlib
 import json
 import logging
-from typing import Optional
+from typing import (
+    Any,
+    Optional,
+)
 from urllib.parse import urljoin
 
 import requests
@@ -117,7 +120,7 @@ class GalaxyClient:
             raise ValueError(f"Retry delay must be >= 0 (got: {value})")
         self._get_retry_delay = value
 
-    def make_get_request(self, url: str, **kwargs) -> requests.Response:
+    def make_get_request(self, url: str, **kwargs: Any) -> requests.Response:
         """
         Make a GET request using the provided ``url``.
 
@@ -141,7 +144,7 @@ class GalaxyClient:
 
     def make_post_request(
         self, url: str, payload: Optional[dict] = None, params: Optional[dict] = None, files_attached: bool = False
-    ):
+    ) -> Any:
         """
         Make a POST request using the provided ``url`` and ``payload``.
         The ``payload`` must be a dict that contains the request values.
@@ -238,7 +241,7 @@ class GalaxyClient:
         )
         return r
 
-    def make_put_request(self, url: str, payload: Optional[dict] = None, params: Optional[dict] = None):
+    def make_put_request(self, url: str, payload: Optional[dict] = None, params: Optional[dict] = None) -> Any:
         """
         Make a PUT request using the provided ``url`` with required payload.
 
@@ -274,7 +277,7 @@ class GalaxyClient:
             status_code=r.status_code,
         )
 
-    def make_patch_request(self, url: str, payload: Optional[dict] = None, params: Optional[dict] = None):
+    def make_patch_request(self, url: str, payload: Optional[dict] = None, params: Optional[dict] = None) -> Any:
         """
         Make a PATCH request using the provided ``url`` with required payload.
 
@@ -384,7 +387,7 @@ class GalaxyClient:
         return self._key
 
 
-def _tus_uploader_session_id(self) -> str:
+def _tus_uploader_session_id(self: tusclient.uploader.Uploader) -> str:
     return self.url.rsplit("/", 1)[1]
 
 

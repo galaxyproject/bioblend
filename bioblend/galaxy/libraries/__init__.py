@@ -82,7 +82,7 @@ class LibraryClient(Client):
         """
         return self._delete(id=library_id)
 
-    def _show_item(self, library_id, item_id):
+    def _show_item(self, library_id: str, item_id: str) -> Dict[str, Any]:
         """
         Get details about a given library item.
         """
@@ -114,7 +114,7 @@ class LibraryClient(Client):
         url = "/".join((self._make_url(library_id, contents=True), dataset_id))
         return self._delete(payload={"purged": purged}, url=url)
 
-    def update_library_dataset(self, dataset_id: str, **kwds) -> Dict[str, Any]:
+    def update_library_dataset(self, dataset_id: str, **kwargs: Any) -> Dict[str, Any]:
         """
         Update library dataset metadata. Some of the attributes that can be
         modified are documented below.
@@ -141,7 +141,7 @@ class LibraryClient(Client):
         :return: details of the updated dataset
         """
         url = "/".join((self._make_url(), "datasets", dataset_id))
-        return self._patch(payload=kwds, url=url)
+        return self._patch(payload=kwargs, url=url)
 
     def show_dataset(self, library_id: str, dataset_id: str) -> Dict[str, Any]:
         """
@@ -368,48 +368,48 @@ class LibraryClient(Client):
         """
         return self._get(id=library_id, contents=contents)
 
-    def _do_upload(self, library_id: str, **keywords) -> List[Dict[str, Any]]:
+    def _do_upload(self, library_id: str, **kwargs: Any) -> List[Dict[str, Any]]:
         """
         Set up the POST request and do the actual data upload to a data library.
         This method should not be called directly but instead refer to the
         methods specific for the desired type of data upload.
         """
-        folder_id = keywords.get("folder_id")
+        folder_id = kwargs.get("folder_id")
         if folder_id is None:
             folder_id = self._get_root_folder_id(library_id)
         files_attached = False
         # Compose the payload dict
         payload = {
             "folder_id": folder_id,
-            "file_type": keywords.get("file_type", "auto"),
-            "dbkey": keywords.get("dbkey", "?"),
+            "file_type": kwargs.get("file_type", "auto"),
+            "dbkey": kwargs.get("dbkey", "?"),
             "create_type": "file",
-            "tag_using_filenames": keywords.get("tag_using_filenames", False),
-            "preserve_dirs": keywords.get("preserve_dirs", False),
+            "tag_using_filenames": kwargs.get("tag_using_filenames", False),
+            "preserve_dirs": kwargs.get("preserve_dirs", False),
         }
-        if keywords.get("roles"):
-            payload["roles"] = keywords["roles"]
-        if keywords.get("link_data_only") and keywords["link_data_only"] != "copy_files":
+        if kwargs.get("roles"):
+            payload["roles"] = kwargs["roles"]
+        if kwargs.get("link_data_only") and kwargs["link_data_only"] != "copy_files":
             payload["link_data_only"] = "link_to_files"
-        if keywords.get("tags"):
-            payload["tags"] = keywords["tags"]
+        if kwargs.get("tags"):
+            payload["tags"] = kwargs["tags"]
         # upload options
-        if keywords.get("file_url") is not None:
+        if kwargs.get("file_url") is not None:
             payload["upload_option"] = "upload_file"
-            payload["files_0|url_paste"] = keywords["file_url"]
-        elif keywords.get("pasted_content") is not None:
+            payload["files_0|url_paste"] = kwargs["file_url"]
+        elif kwargs.get("pasted_content") is not None:
             payload["upload_option"] = "upload_file"
-            payload["files_0|url_paste"] = keywords["pasted_content"]
-        elif keywords.get("server_dir") is not None:
+            payload["files_0|url_paste"] = kwargs["pasted_content"]
+        elif kwargs.get("server_dir") is not None:
             payload["upload_option"] = "upload_directory"
-            payload["server_dir"] = keywords["server_dir"]
-        elif keywords.get("file_local_path") is not None:
+            payload["server_dir"] = kwargs["server_dir"]
+        elif kwargs.get("file_local_path") is not None:
             payload["upload_option"] = "upload_file"
-            payload["files_0|file_data"] = attach_file(keywords["file_local_path"])
+            payload["files_0|file_data"] = attach_file(kwargs["file_local_path"])
             files_attached = True
-        elif keywords.get("filesystem_paths") is not None:
+        elif kwargs.get("filesystem_paths") is not None:
             payload["upload_option"] = "upload_paths"
-            payload["filesystem_paths"] = keywords["filesystem_paths"]
+            payload["filesystem_paths"] = kwargs["filesystem_paths"]
 
         try:
             return self._post(payload, id=library_id, contents=True, files_attached=files_attached)

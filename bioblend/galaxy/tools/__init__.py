@@ -27,7 +27,7 @@ class ToolClient(Client):
     gi: "GalaxyInstance"
     module = "tools"
 
-    def __init__(self, galaxy_instance: "GalaxyInstance"):
+    def __init__(self, galaxy_instance: "GalaxyInstance") -> None:
         super().__init__(galaxy_instance)
 
     def get_tools(
@@ -436,7 +436,7 @@ class ToolClient(Client):
         storage: Optional[str] = None,
         metadata: Optional[dict] = None,
         chunk_size: Optional[int] = UPLOAD_CHUNK_SIZE,
-        **keywords,
+        **kwargs: Any,
     ) -> Dict[str, Any]:
         """
         Upload the file specified by ``path`` to the history specified by
@@ -491,18 +491,18 @@ class ToolClient(Client):
             # Use the tus protocol
             uploader = self.gi.get_tus_uploader(path, storage=storage, metadata=metadata, chunk_size=chunk_size)
             uploader.upload()
-            return self.post_to_fetch(path, history_id, uploader.session_id, **keywords)
+            return self.post_to_fetch(path, history_id, uploader.session_id, **kwargs)
         else:
-            if "file_name" not in keywords:
-                keywords["file_name"] = basename(path)
-            payload = self._upload_payload(history_id, **keywords)
-            payload["files_0|file_data"] = attach_file(path, name=keywords["file_name"])
+            if "file_name" not in kwargs:
+                kwargs["file_name"] = basename(path)
+            payload = self._upload_payload(history_id, **kwargs)
+            payload["files_0|file_data"] = attach_file(path, name=kwargs["file_name"])
             try:
                 return self._post(payload, files_attached=True)
             finally:
                 payload["files_0|file_data"].close()
 
-    def post_to_fetch(self, path: str, history_id: str, session_id: str, **keywords) -> Dict[str, Any]:
+    def post_to_fetch(self, path: str, history_id: str, session_id: str, **kwargs: Any) -> Dict[str, Any]:
         """
         Make a POST request to the Fetch API after performing a tus upload.
 
@@ -524,11 +524,11 @@ class ToolClient(Client):
         :rtype: dict
         :return: Information about the created upload job
         """
-        payload = self._fetch_payload(path, history_id, session_id, **keywords)
+        payload = self._fetch_payload(path, history_id, session_id, **kwargs)
         url = "/".join((self.gi.url, "tools/fetch"))
         return self._post(payload, url=url)
 
-    def upload_from_ftp(self, path: str, history_id: str, **keywords) -> Dict[str, Any]:
+    def upload_from_ftp(self, path: str, history_id: str, **kwargs: Any) -> Dict[str, Any]:
         """
         Upload the file specified by ``path`` from the user's FTP directory to
         the history specified by ``history_id``.
@@ -544,11 +544,11 @@ class ToolClient(Client):
         :rtype: dict
         :return: Information about the created upload job
         """
-        payload = self._upload_payload(history_id, **keywords)
+        payload = self._upload_payload(history_id, **kwargs)
         payload["files_0|ftp_files"] = path
         return self._post(payload)
 
-    def paste_content(self, content: str, history_id: str, **kwds) -> Dict[str, Any]:
+    def paste_content(self, content: str, history_id: str, **kwargs: Any) -> Dict[str, Any]:
         """
         Upload a string to a new dataset in the history specified by
         ``history_id``.
@@ -565,38 +565,38 @@ class ToolClient(Client):
 
         See :meth:`upload_file` for the optional parameters.
         """
-        payload = self._upload_payload(history_id, **kwds)
+        payload = self._upload_payload(history_id, **kwargs)
         payload["files_0|url_paste"] = content
         return self._post(payload, files_attached=False)
 
     put_url = paste_content
 
-    def _upload_payload(self, history_id: str, **keywords) -> Dict[str, Any]:
+    def _upload_payload(self, history_id: str, **kwargs: Any) -> Dict[str, Any]:
         tool_input: Dict[str, Any] = {
-            "file_type": keywords.get("file_type", "auto"),
-            "dbkey": keywords.get("dbkey", "?"),
+            "file_type": kwargs.get("file_type", "auto"),
+            "dbkey": kwargs.get("dbkey", "?"),
             "files_0|type": "upload_dataset",
         }
-        if not keywords.get("to_posix_lines", True):
+        if not kwargs.get("to_posix_lines", True):
             tool_input["files_0|to_posix_lines"] = False
-        elif keywords.get("space_to_tab", False):
+        elif kwargs.get("space_to_tab", False):
             tool_input["files_0|space_to_tab"] = "Yes"
-        if "file_name" in keywords:
-            tool_input["files_0|NAME"] = keywords["file_name"]
+        if "file_name" in kwargs:
+            tool_input["files_0|NAME"] = kwargs["file_name"]
         return {
             "history_id": history_id,
-            "tool_id": keywords.get("tool_id", "upload1"),
+            "tool_id": kwargs.get("tool_id", "upload1"),
             "inputs": tool_input,
         }
 
-    def _fetch_payload(self, path: str, history_id: str, session_id: str, **keywords) -> dict:
-        file_name = keywords.get("file_name", basename(path))
+    def _fetch_payload(self, path: str, history_id: str, session_id: str, **kwargs: Any) -> dict:
+        file_name = kwargs.get("file_name", basename(path))
         element = {
             "src": "files",
-            "ext": keywords.get("file_type", "auto"),
-            "dbkey": keywords.get("dbkey", "?"),
-            "to_posix_lines": keywords.get("to_posix_lines", True),
-            "space_to_tab": keywords.get("space_to_tab", False),
+            "ext": kwargs.get("file_type", "auto"),
+            "dbkey": kwargs.get("dbkey", "?"),
+            "to_posix_lines": kwargs.get("to_posix_lines", True),
+            "space_to_tab": kwargs.get("space_to_tab", False),
             "name": file_name,
         }
         payload = {
@@ -608,6 +608,6 @@ class ToolClient(Client):
                 }
             ],
             "files_0|file_data": {"session_id": session_id, "name": file_name},
-            "auto_decompress": keywords.get("auto_decompress", False),
+            "auto_decompress": kwargs.get("auto_decompress", False),
         }
         return payload

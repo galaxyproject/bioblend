@@ -4,17 +4,21 @@ Contains interactions dealing with Galaxy dependency resolvers.
 from typing import (
     List,
     Optional,
+    TYPE_CHECKING,
 )
 
 from typing_extensions import Literal
 
 from bioblend.galaxy.client import Client
 
+if TYPE_CHECKING:
+    from bioblend.galaxy import GalaxyInstance
+
 
 class ToolDependenciesClient(Client):
     module = "dependency_resolvers"
 
-    def __init__(self, galaxy_instance):
+    def __init__(self, galaxy_instance: "GalaxyInstance") -> None:
         super().__init__(galaxy_instance)
 
     def summarize_toolbox(

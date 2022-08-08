@@ -875,6 +875,7 @@ class Dataset(Wrapper, metaclass=abc.ABCMeta):
     misc_info: str
     name: str
     POLLING_INTERVAL = 1  # for state monitoring
+    state: str
 
     def __init__(self, ds_dict: Dict[str, Any], container: "DatasetContainer", gi: "GalaxyInstance") -> None:
         super().__init__(ds_dict, gi=gi)
@@ -996,7 +997,7 @@ class HistoryDatasetAssociation(Dataset):
         )
         return r.iter_content(chunk_size)  # FIXME: client can't close r
 
-    def update(self, **kwds) -> "HistoryDatasetAssociation":
+    def update(self, **kwargs: Any) -> "HistoryDatasetAssociation":
         """
         Update this history dataset metadata. Some of the attributes that can be
         modified are documented below.
@@ -1016,7 +1017,7 @@ class HistoryDatasetAssociation(Dataset):
         :type visible: bool
         :param visible: Mark or unmark history dataset as visible
         """
-        res = self.gi.gi.histories.update_dataset(self.container.id, self.id, **kwds)
+        res = self.gi.gi.histories.update_dataset(self.container.id, self.id, **kwargs)
         # Refresh also the history because the dataset may have been (un)deleted
         self.container.refresh()
         self.__init__(res, self.container, gi=self.gi)  # type: ignore[misc]
@@ -1137,7 +1138,7 @@ class LibraryDataset(LibRelatedDataset):
         self.container.refresh()
         self.refresh()
 
-    def update(self, **kwds) -> "LibraryDataset":
+    def update(self, **kwargs: Any) -> "LibraryDataset":
         """
         Update this library dataset metadata. Some of the attributes that can be
         modified are documented below.
@@ -1148,7 +1149,7 @@ class LibraryDataset(LibRelatedDataset):
         :type genome_build: str
         :param genome_build: Replace history dataset genome build (dbkey)
         """
-        res = self.gi.gi.libraries.update_library_dataset(self.id, **kwds)
+        res = self.gi.gi.libraries.update_library_dataset(self.id, **kwargs)
         self.container.refresh()
         self.__init__(res, self.container, gi=self.gi)  # type: ignore[misc]
         return self
@@ -1312,7 +1313,7 @@ class History(DatasetContainer[HistoryDatasetAssociation]):
     published: bool
     tags: List[str]
 
-    def update(self, **kwds) -> "History":
+    def update(self, **kwargs: Any) -> "History":
         """
         Update history metadata information. Some of the attributes that can be
         modified are documented below.
@@ -1339,7 +1340,7 @@ class History(DatasetContainer[HistoryDatasetAssociation]):
         :param tags: Replace history tags with the given list
         """
         # TODO: wouldn't it be better if name and annotation were attributes?
-        self.gi.gi.histories.update_history(self.id, **kwds)
+        self.gi.gi.histories.update_history(self.id, **kwargs)
         self.refresh()
         return self
 
@@ -1379,7 +1380,7 @@ class History(DatasetContainer[HistoryDatasetAssociation]):
         self.refresh()
         return self.get_dataset(res["id"])
 
-    def upload_file(self, path: str, **kwargs) -> HistoryDatasetAssociation:
+    def upload_file(self, path: str, **kwargs: Any) -> HistoryDatasetAssociation:
         """
         Upload the file specified by ``path`` to this history.
 
@@ -1398,7 +1399,7 @@ class History(DatasetContainer[HistoryDatasetAssociation]):
 
     upload_dataset = upload_file
 
-    def upload_from_ftp(self, path: str, **kwargs) -> HistoryDatasetAssociation:
+    def upload_from_ftp(self, path: str, **kwargs: Any) -> HistoryDatasetAssociation:
         """
         Upload the file specified by ``path`` from the user's FTP directory to
         this history.
@@ -1416,7 +1417,7 @@ class History(DatasetContainer[HistoryDatasetAssociation]):
         self.refresh()
         return self.get_dataset(out_dict["outputs"][0]["id"])
 
-    def paste_content(self, content: str, **kwargs) -> HistoryDatasetAssociation:
+    def paste_content(self, content: str, **kwargs: Any) -> HistoryDatasetAssociation:
         """
         Upload a string to a new dataset in this history.
 
@@ -1455,7 +1456,7 @@ class History(DatasetContainer[HistoryDatasetAssociation]):
             maxwait=maxwait,
         )
 
-    def download(self, jeha_id: str, outf: IO[bytes], chunk_size: int = bioblend.CHUNK_SIZE):
+    def download(self, jeha_id: str, outf: IO[bytes], chunk_size: int = bioblend.CHUNK_SIZE) -> None:
         """
         Download an export archive for this history.  Use :meth:`export`
         to create an export and get the required ``jeha_id``.  See
@@ -1529,7 +1530,7 @@ class Library(DatasetContainer[LibraryDataset]):
             raise RuntimeError("library is not mapped to a Galaxy object")
         return None if folder is None else folder.id
 
-    def upload_data(self, data: str, folder: Optional["Folder"] = None, **kwargs) -> LibraryDataset:
+    def upload_data(self, data: str, folder: Optional["Folder"] = None, **kwargs: Any) -> LibraryDataset:
         """
         Upload data to this library.
 
@@ -1549,7 +1550,7 @@ class Library(DatasetContainer[LibraryDataset]):
         self.refresh()
         return self.get_dataset(res[0]["id"])
 
-    def upload_from_url(self, url: str, folder: Optional["Folder"] = None, **kwargs) -> LibraryDataset:
+    def upload_from_url(self, url: str, folder: Optional["Folder"] = None, **kwargs: Any) -> LibraryDataset:
         """
         Upload data to this library from the given URL.
 
@@ -1563,7 +1564,7 @@ class Library(DatasetContainer[LibraryDataset]):
         self.refresh()
         return self.get_dataset(res[0]["id"])
 
-    def upload_from_local(self, path: str, folder: Optional["Folder"] = None, **kwargs) -> LibraryDataset:
+    def upload_from_local(self, path: str, folder: Optional["Folder"] = None, **kwargs: Any) -> LibraryDataset:
         """
         Upload data to this library from a local file.
 
@@ -1582,7 +1583,7 @@ class Library(DatasetContainer[LibraryDataset]):
         paths: Union[str, Iterable[str]],
         folder: Optional["Folder"] = None,
         link_data_only: Literal["copy_files", "link_to_files"] = "copy_files",
-        **kwargs,
+        **kwargs: Any,
     ) -> List[LibraryDataset]:
         """
         Upload data to this library from filesystem paths on the server.

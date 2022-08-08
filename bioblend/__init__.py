@@ -44,7 +44,7 @@ def init_logging() -> None:
 
 
 class NullHandler(logging.Handler):
-    def emit(self, record) -> None:
+    def emit(self, record: logging.LogRecord) -> None:
         pass
 
 

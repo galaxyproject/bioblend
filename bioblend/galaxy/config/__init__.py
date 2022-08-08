@@ -2,13 +2,18 @@
 Contains possible interaction dealing with Galaxy configuration.
 
 """
+from typing import TYPE_CHECKING
+
 from bioblend.galaxy.client import Client
+
+if TYPE_CHECKING:
+    from bioblend.galaxy import GalaxyInstance
 
 
 class ConfigClient(Client):
     module = "configuration"
 
-    def __init__(self, galaxy_instance):
+    def __init__(self, galaxy_instance: "GalaxyInstance") -> None:
         super().__init__(galaxy_instance)
 
     def get_config(self) -> dict:

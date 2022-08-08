@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 class FTPFilesClient(Client):
     module = "ftp_files"
 
-    def __init__(self, galaxy_instance: "GalaxyInstance"):
+    def __init__(self, galaxy_instance: "GalaxyInstance") -> None:
         super().__init__(galaxy_instance)
 
     def get_ftp_files(self, deleted: bool = False) -> List[dict]:

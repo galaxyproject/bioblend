@@ -37,7 +37,7 @@ class HistoryClient(Client):
     gi: "GalaxyInstance"
     module = "histories"
 
-    def __init__(self, galaxy_instance: "GalaxyInstance"):
+    def __init__(self, galaxy_instance: "GalaxyInstance") -> None:
         super().__init__(galaxy_instance)
 
     def create_history(self, name: Optional[str] = None) -> Dict[str, Any]:
@@ -406,7 +406,7 @@ class HistoryClient(Client):
         url = "/".join((self._make_url(history_id, contents=True), dataset_id, "provenance"))
         return self._get(url=url)
 
-    def update_history(self, history_id: str, **kwds) -> Dict[str, Any]:
+    def update_history(self, history_id: str, **kwargs: Any) -> Dict[str, Any]:
         """
         Update history metadata information. Some of the attributes that can be
         modified are documented below.
@@ -441,9 +441,9 @@ class HistoryClient(Client):
         .. versionchanged:: 0.8.0
             Changed the return value from the status code (type int) to a dict.
         """
-        return self._put(payload=kwds, id=history_id)
+        return self._put(payload=kwargs, id=history_id)
 
-    def update_dataset(self, history_id: str, dataset_id: str, **kwds) -> Dict[str, Any]:
+    def update_dataset(self, history_id: str, dataset_id: str, **kwargs: Any) -> Dict[str, Any]:
         """
         Update history dataset metadata. Some of the attributes that can be
         modified are documented below.
@@ -483,9 +483,9 @@ class HistoryClient(Client):
             Changed the return value from the status code (type int) to a dict.
         """
         url = "/".join((self._make_url(history_id, contents=True), dataset_id))
-        return self._put(payload=kwds, url=url)
+        return self._put(payload=kwargs, url=url)
 
-    def update_dataset_collection(self, history_id: str, dataset_collection_id: str, **kwds) -> Dict[str, Any]:
+    def update_dataset_collection(self, history_id: str, dataset_collection_id: str, **kwargs: Any) -> Dict[str, Any]:
         """
         Update history dataset collection metadata. Some of the attributes that
         can be modified are documented below.
@@ -513,7 +513,7 @@ class HistoryClient(Client):
             Changed the return value from the status code (type int) to a dict.
         """
         url = "/".join((self._make_url(history_id, contents=True), "dataset_collections", dataset_collection_id))
-        return self._put(payload=kwds, url=url)
+        return self._put(payload=kwargs, url=url)
 
     def create_history_tag(self, history_id: str, tag: str) -> Dict[str, Any]:
         """

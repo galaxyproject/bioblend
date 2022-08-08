@@ -1,7 +1,10 @@
 import os
 from typing import (
+    Any,
     IO,
     NamedTuple,
+    Type,
+    TypeVar,
 )
 
 
@@ -13,7 +16,7 @@ class Bunch:
     as a database class, thus the two become interchangeable as a data source.
     """
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         self.__dict__.update(kwargs)
 
     def __repr__(self) -> str:
@@ -50,19 +53,24 @@ def attach_file(path: str, name: str = None) -> FileStream:
     return FileStream(name, open(path, "rb"))
 
 
-def abstractclass(decorated_cls):
+T = TypeVar("T")
+
+
+def abstractclass(decorated_cls: Type[T]) -> Type[T]:
     """
     Decorator that marks a class as abstract even without any abstract method
 
     Adapted from https://stackoverflow.com/a/49013561/4503125
     """
 
-    def clsnew(cls, *args, **kwargs):
+    def clsnew(cls: Type[T], *args: Any, **kwargs: Any) -> T:
+        # assert issubclass(cls, decorated_cls)
         if cls is decorated_cls:
-            raise TypeError(f"Can't instantiate abstract class {decorated_cls.__name__}")
-        return super(decorated_cls, cls).__new__(cls)
+            cls_name = getattr(decorated_cls, "__name__", str(decorated_cls))
+            raise TypeError(f"Can't instantiate abstract class {cls_name}")
+        return super(decorated_cls, cls).__new__(cls)  # type: ignore[misc]
 
-    decorated_cls.__new__ = clsnew
+    decorated_cls.__new__ = clsnew  # type: ignore[assignment]
     return decorated_cls
 
 

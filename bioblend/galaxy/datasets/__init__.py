@@ -39,7 +39,7 @@ class DatasetClient(Client):
     gi: "GalaxyInstance"
     module = "datasets"
 
-    def __init__(self, galaxy_instance: "GalaxyInstance"):
+    def __init__(self, galaxy_instance: "GalaxyInstance") -> None:
         super().__init__(galaxy_instance)
 
     def show_dataset(self, dataset_id: str, deleted: bool = False, hda_ldda: HdaLdda = "hda") -> Dict[str, Any]:
@@ -337,10 +337,10 @@ class DatasetClient(Client):
 
         return self._get(params=params)
 
-    def _param_to_filter(self, param):
-        if type(param) is str:
+    def _param_to_filter(self, param: Union[str, List[str]]) -> Tuple[str, str]:
+        if isinstance(param, str):
             return "eq", param
-        if type(param) is list:
+        if isinstance(param, list):
             if len(param) == 1:
                 return "eq", param.pop()
             return "in", ",".join(param)

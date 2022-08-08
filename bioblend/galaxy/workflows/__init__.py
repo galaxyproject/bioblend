@@ -3,20 +3,20 @@ Contains possible interactions with the Galaxy Workflows
 """
 import json
 import os
-import typing
 import warnings
 from typing import (
     Any,
     Dict,
     List,
     Optional,
+    TYPE_CHECKING,
 )
 
 from typing_extensions import Literal
 
 from bioblend.galaxy.client import Client
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
     from bioblend.galaxy import GalaxyInstance
 
 InputsBy = Literal["step_index|step_uuid", "step_index", "step_id", "step_uuid", "name"]  # type: ignore[name-defined]
@@ -257,7 +257,7 @@ class WorkflowClient(Client):
         with open(file_local_path, "w") as fp:
             json.dump(workflow_dict, fp)
 
-    def update_workflow(self, workflow_id: str, **kwds) -> Dict[str, Any]:
+    def update_workflow(self, workflow_id: str, **kwargs: Any) -> Dict[str, Any]:
         """
         Update a given workflow.
 
@@ -285,7 +285,7 @@ class WorkflowClient(Client):
         :rtype: dict
         :return: Dictionary representing the updated workflow
         """
-        return self._put(payload=kwds, id=workflow_id)
+        return self._put(payload=kwargs, id=workflow_id)
 
     def invoke_workflow(
         self,
@@ -620,7 +620,9 @@ class WorkflowClient(Client):
         url = self._invocation_step_url(workflow_id, invocation_id, step_id)
         return self._get(url=url)
 
-    def run_invocation_step_action(self, workflow_id: str, invocation_id: str, step_id: str, action: Any):
+    def run_invocation_step_action(
+        self, workflow_id: str, invocation_id: str, step_id: str, action: Any
+    ) -> Dict[str, Any]:
         """Execute an action for an active workflow invocation step. The
         nature of this action and what is expected will vary based on the
         the type of workflow step (the only currently valid action is True/False
@@ -643,7 +645,7 @@ class WorkflowClient(Client):
         :return: Representation of the workflow invocation step
         """
         url = self._invocation_step_url(workflow_id, invocation_id, step_id)
-        payload: Dict[str, Any] = {"action": action}
+        payload = {"action": action}
         return self._put(payload=payload, url=url)
 
     def delete_workflow(self, workflow_id: str) -> str:

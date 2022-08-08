@@ -3,7 +3,11 @@ A representation of a Galaxy instance based on oo wrappers.
 """
 
 import time
-from typing import Optional
+from typing import (
+    Iterable,
+    List,
+    Optional,
+)
 
 import bioblend
 import bioblend.galaxy
@@ -14,10 +18,10 @@ from . import (
 )
 
 
-def _get_error_info(hda: wrappers.HistoryDatasetAssociation) -> str:
-    msg = hda.id
+def _get_error_info(dataset: wrappers.Dataset) -> str:
+    msg = dataset.id
     try:
-        msg += f" ({hda.name}): {hda.misc_info}"
+        msg += f" ({dataset.name}): {dataset.misc_info}"
     except Exception:  # avoid 'error while generating an error report'
         msg += ": error"
     return msg
@@ -65,7 +69,9 @@ class GalaxyInstance:
         self.tools = client.ObjToolClient(self)
         self.jobs = client.ObjJobClient(self)
 
-    def _wait_datasets(self, datasets, polling_interval: float, break_on_error: bool = True) -> None:
+    def _wait_datasets(
+        self, datasets: Iterable[wrappers.Dataset], polling_interval: float, break_on_error: bool = True
+    ) -> None:
         """
         Wait for datasets to come out of the pending states.
 
@@ -88,7 +94,7 @@ class GalaxyInstance:
           times) during the execution.
         """
 
-        def poll(ds_list):
+        def poll(ds_list: Iterable[wrappers.Dataset]) -> List[wrappers.Dataset]:
             pending = []
             for ds in ds_list:
                 ds.refresh()

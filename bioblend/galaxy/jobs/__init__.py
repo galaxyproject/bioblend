@@ -237,14 +237,13 @@ class JobsClient(Client):
                 raise ValueError("remap was set to True, but this job is not remappable.")
             job_inputs["rerun_remap_job_id"] = job_id
 
-        def update_inputs(inputs, tool_inputs_update):
-            # recursively update inputs with tool_inputs_update
+        def update_inputs(inputs: Dict[str, Any], tool_inputs_update: Dict[str, Any]) -> None:
+            """Recursively update inputs with tool_inputs_update"""
             for input_param, input_value in tool_inputs_update.items():
-                if type(input_value) is dict:
+                if isinstance(input_value, dict):
                     update_inputs(inputs[input_param], input_value)
                 else:
                     inputs[input_param] = input_value
-            return inputs
 
         if tool_inputs_update:
             update_inputs(job_inputs, tool_inputs_update)
