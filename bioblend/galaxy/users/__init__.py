@@ -198,6 +198,23 @@ class UserClient(Client):
         url = self._make_url(user_id) + "/api_key/inputs"
         return self._get(url=url)["inputs"][0]["value"]
 
+    def get_or_create_user_apikey(self, user_id: str) -> str:
+        """
+        Get the current API key for a given user, creating one if it doesn't
+        exist yet.
+
+        :type user_id: str
+        :param user_id: encoded user ID
+
+        :rtype: str
+        :return: the API key for the user
+
+        .. note::
+          This method works only on Galaxy 21.01 or later.
+        """
+        url = self._make_url(user_id) + "/api_key"
+        return self._get(url=url)
+
     def update_user(self, user_id: str, **kwargs: Any) -> Dict[str, Any]:
         """
         Update user information. Some of the attributes that can be

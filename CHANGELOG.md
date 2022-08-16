@@ -7,6 +7,8 @@
   ``GalaxyInstance`` to ``GalaxyClient``, so they are also available in
   ``ToolshedInstance``.
 
+* Added ``get_or_create_user_apikey()`` method to ``UserClient``.
+
 * Remove unused methods from ``bioblend.config.Config``. If needed, use the
   methods inherited from `configparser.ConfigParser` instead.
 

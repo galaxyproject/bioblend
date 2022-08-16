@@ -84,7 +84,7 @@ def skip_unless_galaxy(min_release=None):
                 galaxy_user = galaxy_user_email.split("@", 1)[0]
                 galaxy_password = "".join(random.choice(string.ascii_uppercase + string.digits) for _ in range(20))
 
-                # Create a new user and get a new API key for her
+                # Create a new user
                 new_user = gi.users.create_local_user(galaxy_user, galaxy_user_email, galaxy_password)
             galaxy_user_id = new_user["id"]
 
@@ -112,7 +112,7 @@ def skip_unless_tool(tool_id):
 
             return method(has_gi, *args, **kwargs)
 
-        # Must preserve method name so nose can detect and report tests by
+        # Must preserve method name so pytest can detect and report tests by
         # name.
         wrapped_method.__name__ = method.__name__
         return wrapped_method

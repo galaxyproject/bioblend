@@ -3,7 +3,10 @@ Tests the functionality of the Blend CloudMan API. These tests require working
 credentials to supported cloud infrastructure.
 """
 import bioblend.galaxy
-from . import GalaxyTestBase
+from . import (
+    GalaxyTestBase,
+    test_util,
+)
 
 
 class TestGalaxyUsers(GalaxyTestBase.GalaxyTestBase):
@@ -88,3 +91,12 @@ class TestGalaxyUsers(GalaxyTestBase.GalaxyTestBase):
 
         if self.gi.config.get_config()["allow_user_deletion"]:
             self.gi.users.delete_user(user["id"])
+
+    def test_get_user_apikey(self):
+        user_id = self.gi.users.get_current_user()["id"]
+        assert self.gi.users.get_user_apikey(user_id)
+
+    @test_util.skip_unless_galaxy("release_21.01")
+    def test_get_or_create_user_apikey(self):
+        user_id = self.gi.users.get_current_user()["id"]
+        assert self.gi.users.get_or_create_user_apikey(user_id)
