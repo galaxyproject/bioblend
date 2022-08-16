@@ -90,6 +90,7 @@ class HistoryClient(Client):
         filter_user_published: Optional[bool] = None,
         get_all_published: bool = False,
         slug: Optional[str] = None,
+        all: Optional[bool] = False,
     ) -> List[Dict[str, Any]]:
         """
         Hidden method to be used by both get_histories() and get_published_histories()
@@ -106,6 +107,8 @@ class HistoryClient(Client):
         if slug is not None:
             params.setdefault("q", []).append("slug")
             params.setdefault("qv", []).append(slug)
+        if all:
+            params.setdefault("all", True)
 
         url = "/".join((self._make_url(), "published")) if get_all_published else None
         histories = self._get(url=url, params=params)
@@ -121,6 +124,7 @@ class HistoryClient(Client):
         deleted: bool = False,
         published: Optional[bool] = None,
         slug: Optional[str] = None,
+        all: Optional[bool] = False,
     ) -> List[Dict[str, Any]]:
         """
         Get all histories, or select a subset by specifying optional arguments
@@ -155,7 +159,7 @@ class HistoryClient(Client):
                 "The history_id parameter has been removed, use the show_history() method to view details of a history for which you know the ID.",
             )
         return self._get_histories(
-            name=name, deleted=deleted, filter_user_published=published, get_all_published=False, slug=slug
+            name=name, deleted=deleted, filter_user_published=published, get_all_published=False, slug=slug, all=all
         )
 
     def get_published_histories(
