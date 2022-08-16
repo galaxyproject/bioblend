@@ -71,13 +71,8 @@ def skip_unless_galaxy(min_release=None):
                 galaxy_user_id = user["id"]
                 break
 
+        config = gi.config.get_config()
         if galaxy_user_id is None:
-            try:
-                config = gi.config.get_config()
-            except Exception:
-                # If older Galaxy for instance just assume use_remote_user is False.
-                config = {}
-
             if config.get("use_remote_user", False):
                 new_user = gi.users.create_remote_user(galaxy_user_email)
             else:
@@ -88,7 +83,12 @@ def skip_unless_galaxy(min_release=None):
                 new_user = gi.users.create_local_user(galaxy_user, galaxy_user_email, galaxy_password)
             galaxy_user_id = new_user["id"]
 
-        api_key = gi.users.create_user_apikey(galaxy_user_id)
+        if config["version_major"] >= "21.01":
+            api_key = gi.users.get_or_create_user_apikey(galaxy_user_id)
+        else:
+            api_key = gi.users.get_user_apikey(galaxy_user_id)
+            if not api_key or api_key == "Not available.":
+                api_key = gi.users.create_user_apikey(galaxy_user_id)
         os.environ["BIOBLEND_GALAXY_API_KEY"] = api_key
 
     if "BIOBLEND_GALAXY_API_KEY" not in os.environ:

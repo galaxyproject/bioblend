@@ -193,7 +193,8 @@ class UserClient(Client):
         :param user_id: encoded user ID
 
         :rtype: str
-        :return: the API key for the user
+        :return: the API key for the user, or 'Not available.' if it doesn't
+          exist yet.
         """
         url = self._make_url(user_id) + "/api_key/inputs"
         return self._get(url=url)["inputs"][0]["value"]
