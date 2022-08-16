@@ -5,7 +5,10 @@ import shutil
 import tarfile
 import tempfile
 
-import bioblend.galaxy
+from bioblend import (
+    ConnectionError,
+    galaxy,
+)
 from . import (
     GalaxyTestBase,
     test_util,
@@ -52,7 +55,7 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
         published_histories = self.gi.histories.get_histories(published=True)
         self.assertTrue(any(h["id"] == self.history["id"] for h in published_histories))
         # Verify that get_published_histories as an anonymous user also returns the test history
-        anonymous_gi = bioblend.galaxy.GalaxyInstance(url=self.gi.base_url, key=None)
+        anonymous_gi = galaxy.GalaxyInstance(url=self.gi.base_url, key=None)
         published_histories = anonymous_gi.histories.get_published_histories()
         self.assertTrue(any(h["id"] == self.history["id"] for h in published_histories))
         history_from_slug = anonymous_gi.histories.get_published_histories(slug=updated_hist["slug"])
@@ -77,6 +80,20 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
         # and we can uncomment the following test.
         # deleted_history = self.gi.histories.get_histories(deleted=True)
         # self.assertGreaterEqual(len(all_histories), len(deleted_history))
+
+    @test_util.skip_unless_galaxy("release_20.01")
+    def test_other_users_histories(self):
+        username = "newuser4"
+        user_id = self.gi.users.create_local_user(username, f"{username}@example.org", "secret")["id"]
+        user_api_key = self.gi.users.create_user_apikey(user_id)
+        user_gi = galaxy.GalaxyInstance(url=self.gi.base_url, key=user_api_key)
+        # Normal users cannot use the `all` parameter
+        with self.assertRaises(ConnectionError):
+            other_user_histories = user_gi.histories.get_histories(all=True)
+        user_history_id = user_gi.histories.create_history(name=f"History for {username}")["id"]
+        # Get all users' histories from an admin account
+        other_user_histories = self.gi.histories.get_histories(all=True)
+        self.assertIn(user_history_id, [h["id"] for h in other_user_histories])
 
     def test_show_history(self):
         history_data = self.gi.histories.show_history(self.history["id"])

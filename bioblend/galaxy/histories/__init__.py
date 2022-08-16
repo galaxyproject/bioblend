@@ -97,7 +97,7 @@ class HistoryClient(Client):
         """
         assert not (filter_user_published is not None and get_all_published)
 
-        params: Dict[str, list] = {}
+        params: Dict[str, Any] = {}
         if deleted:
             params.setdefault("q", []).append("deleted")
             params.setdefault("qv", []).append(deleted)
@@ -108,7 +108,7 @@ class HistoryClient(Client):
             params.setdefault("q", []).append("slug")
             params.setdefault("qv", []).append(slug)
         if all:
-            params.setdefault("all", True)
+            params["all"] = True
 
         url = "/".join((self._make_url(), "published")) if get_all_published else None
         histories = self._get(url=url, params=params)
@@ -146,6 +146,11 @@ class HistoryClient(Client):
 
         :type slug: str
         :param slug: History slug to filter on
+
+        :type all: bool
+        :param all: Whether to include histories from other users. This
+          parameter works only on Galaxy 20.01 or later and can be specified
+          only if the user is a Galaxy admin.
 
         :rtype: list
         :return: List of history dicts.

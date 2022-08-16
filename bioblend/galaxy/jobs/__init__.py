@@ -117,7 +117,7 @@ class JobsClient(Client):
               'update_time': '2014-03-01T16:05:39.558458'}]
 
         .. note::
-          The following options work only on Galaxy 21.05 or later: ``user_id``,
+          The following parameters work only on Galaxy 21.05 or later: ``user_id``,
           ``limit``, ``offset``, ``workflow_id``, ``invocation_id``.
         """
         params: Dict[str, Any] = {"limit": limit, "offset": offset}

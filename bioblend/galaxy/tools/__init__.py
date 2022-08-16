@@ -484,8 +484,8 @@ class ToolClient(Client):
         :return: Information about the created upload job
 
         .. note::
-          The following options work only on Galaxy 22.01 or later: ``storage``,
-          ``metadata``, ``chunk_size``, ``auto_decompress``.
+          The following parameters work only on Galaxy 22.01 or later:
+          ``storage``, ``metadata``, ``chunk_size``, ``auto_decompress``.
         """
         if self.gi.config.get_version()["version_major"] >= "22.01":
             # Use the tus protocol
