@@ -1291,6 +1291,12 @@ class DatasetContainer(Wrapper, Generic[DatasetSubtype], metaclass=abc.ABCMeta):
             ds_ids = [_.id for _ in self.content_infos if _.name == name]
         return [self.get_dataset(_) for _ in ds_ids]
 
+    @abc.abstractmethod
+    def delete(self) -> None:
+        """
+        Delete this dataset container.
+        """
+
 
 class History(DatasetContainer[HistoryDatasetAssociation]):
     """

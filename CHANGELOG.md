@@ -12,6 +12,9 @@
 * Remove unused methods from ``bioblend.config.Config``. If needed, use the
   methods inherited from `configparser.ConfigParser` instead.
 
+* BioBlend.objects: Added ``delete()`` abstract method to ``DatasetContainer``
+  class.
+
 * Added Code of Conduct for the project.
 
 * Improvements to type annotations, tests and documentation.
