@@ -1,7 +1,7 @@
 ### BioBlend v
 
-* Deprecated ``max_get_retries``, ``set_max_get_retries``, ``get_retry_delay``
-  and ``set_get_retry_delay`` methods of ``Client``.
+* Deprecated ``max_get_retries()``, ``set_max_get_retries()``,
+  ``get_retry_delay()`` and ``set_get_retry_delay()`` methods of ``Client``.
 
 * Moved ``max_get_attempts`` and ``get_retry_delay`` properties from
   ``GalaxyInstance`` to ``GalaxyClient``, so they are also available in
@@ -17,7 +17,13 @@
 
 * Added Code of Conduct for the project.
 
-* Improvements to type annotations, tests and documentation.
+* Finished the full type annotation of the library (thanks to
+  [cat-bro](https://github.com/cat-bro),
+  [Fabio Cumbo](https://github.com/cumbof),
+  [Jayadev Joshi](https://github.com/jaidevjoshi83),
+  [thepineapplepirate](https://github.com/thepineapplepirate)).
+
+* Improvements to tests and documentation.
 
 ### BioBlend v0.18.0 - 2022-07-07
 
