@@ -1,11 +1,3 @@
-To run the cloud tests, the following environment variables must be set:
-
-BIOBLEND_ACCESS_KEY = <your cloud access key>
-BIOBLEND_SECRET_KEY = <your cloud secret key>
-BIOBLEND_CLOUD_TYPE = <cloud type: EC2, NECTAR etc.>
-BIOBLEND_AMI_ID =  <machine image id for cloudman>
-
-
 To run Galaxy tests, the following environment variables must be set:
 
 BIOBLEND_GALAXY_API_KEY = <web API key of a running Galaxy instance>

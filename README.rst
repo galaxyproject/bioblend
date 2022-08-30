@@ -11,8 +11,7 @@
    :target: https://gitter.im/galaxyproject/bioblend?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 
 
-BioBlend is a Python library for interacting with `Galaxy`_ and  `CloudMan`_
-APIs.
+BioBlend is a Python library for interacting with the `Galaxy`_ API.
 
 BioBlend is supported and tested on:
 
@@ -23,5 +22,4 @@ Full docs are available at https://bioblend.readthedocs.io/ with a quick library
 overview also available in `ABOUT.rst <./ABOUT.rst>`_.
 
 .. References/hyperlinks used above
-.. _CloudMan: https://galaxyproject.org/cloudman/
 .. _Galaxy: https://galaxyproject.org/
