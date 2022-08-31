@@ -1,7 +1,3 @@
-"""
-Tests the functionality of the Blend CloudMan API. These tests require working
-credentials to supported cloud infrastructure.
-"""
 import bioblend.galaxy
 from . import (
     GalaxyTestBase,

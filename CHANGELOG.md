@@ -1,5 +1,8 @@
 ### BioBlend v
 
+* Drop support for deprecated CloudMan, see
+  https://galaxyproject.org/blog/2021-10-sunsetting-cloudlaunch/
+
 * Deprecated ``max_get_retries()``, ``set_max_get_retries()``,
   ``get_retry_delay()`` and ``set_get_retry_delay()`` methods of ``Client``.
 

@@ -94,18 +94,6 @@ API used to interact with the Galaxy Toolshed, including repository management.
 
     api_docs/toolshed/*
 
-CloudMan API
-~~~~~~~~~~~~
-
-API used to manipulate the instantiated infrastructure. For example, scale the
-size of the compute cluster, get infrastructure status, get service status.
-
-.. toctree::
-    :maxdepth: 2
-    :glob:
-
-    api_docs/cloudman/*
-
 Configuration
 =============
 BioBlend allows library-wide configuration to be set in external files.
