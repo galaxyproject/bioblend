@@ -13,6 +13,7 @@ from collections.abc import (
 from typing import (
     Any,
     Callable,
+    cast,
     ClassVar,
     Dict,
     Generic,
@@ -193,8 +194,9 @@ class Step(Wrapper):
     )
     input_steps: Dict[str, Dict]
     type: str
-    tool_id: str
+    tool_id: Optional[str]
     tool_inputs: Dict
+    tool_version: Optional[str]
 
     def __init__(self, step_dict: Dict[str, Any], parent: Wrapper) -> None:
         super().__init__(step_dict, parent=parent, gi=parent.gi)
@@ -306,7 +308,7 @@ class Workflow(Wrapper):
     published: bool
     sink_ids: Set[str]
     source_ids: Set[str]
-    steps: Dict
+    steps: Dict[str, Step]
     tags: List[str]
     tool_labels_to_ids: Dict[str, Set[str]]
 
@@ -319,15 +321,17 @@ class Workflow(Wrapper):
         missing_ids = []
         tool_labels_to_ids: Dict[str, Set[str]] = {}
         for k, v in self.steps.items():
+            step_dict = cast(Dict[str, Any], v)
             # convert step ids to str for consistency with outer keys
-            v["id"] = str(v["id"])
-            for i in v["input_steps"].values():
+            step_dict["id"] = str(step_dict["id"])
+            for i in step_dict["input_steps"].values():
                 i["source_step"] = str(i["source_step"])
-            step = Step(v, self)
+            step = Step(step_dict, self)
             self.steps[k] = step
             if step.type == "tool":
                 if not step.tool_inputs or step.tool_id not in tools_list_by_id:
                     missing_ids.append(k)
+                assert step.tool_id
                 tool_labels_to_ids.setdefault(step.tool_id, set()).add(step.id)
         input_labels_to_ids: Dict[str, Set[str]] = {}
         for id_, d in self.inputs.items():

@@ -535,7 +535,7 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
         for wf in wf1, wf2:
             self._check_and_del_workflow(wf)
 
-    def _check_and_del_workflow(self, wf, check_is_public=False):
+    def _check_and_del_workflow(self, wf: wrappers.Workflow, check_is_public: bool = False):
         # Galaxy appends additional text to imported workflow names
         self.assertTrue(wf.name.startswith("paste_columns"))
         self.assertEqual(type(wf.owner), str)
