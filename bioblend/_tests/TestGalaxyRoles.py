@@ -17,10 +17,10 @@ class TestGalaxyRoles(GalaxyTestBase.GalaxyTestBase):
     def test_get_roles(self):
         roles = self.gi.roles.get_roles()
         for role in roles:
-            self.assertIsNotNone(role["id"])
-            self.assertIsNotNone(role["name"])
+            assert role["id"] is not None
+            assert role["name"] is not None
 
     def test_create_role(self):
-        self.assertEqual(self.role["name"], self.name)
-        self.assertEqual(self.role["description"], self.description)
-        self.assertIsNotNone(self.role["id"])
+        assert self.role["name"] == self.name
+        assert self.role["description"] == self.description
+        assert self.role["id"] is not None

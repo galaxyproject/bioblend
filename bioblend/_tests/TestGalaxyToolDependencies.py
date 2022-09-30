@@ -11,20 +11,20 @@ class TestGalaxyToolDependencies(GalaxyTestBase.GalaxyTestBase):
     @test_util.skip_unless_galaxy("release_20.01")
     def test_summarize_toolbox(self):
         toolbox_summary = self.gi.tool_dependencies.summarize_toolbox()
-        self.assertTrue(isinstance(toolbox_summary, list))
-        self.assertGreater(len(toolbox_summary), 0)
+        assert isinstance(toolbox_summary, list)
+        assert len(toolbox_summary) > 0
 
         toolbox_summary_by_tool = self.gi.tool_dependencies.summarize_toolbox(index_by="tools")
-        self.assertTrue(isinstance(toolbox_summary_by_tool, list))
-        self.assertGreater(len(toolbox_summary_by_tool), 0)
-        self.assertTrue(isinstance(toolbox_summary_by_tool[0], dict))
-        self.assertTrue("tool_ids" in toolbox_summary_by_tool[0])
-        self.assertTrue(isinstance(toolbox_summary_by_tool[0]["tool_ids"], list))
+        assert isinstance(toolbox_summary_by_tool, list)
+        assert len(toolbox_summary_by_tool) > 0
+        assert isinstance(toolbox_summary_by_tool[0], dict)
+        assert "tool_ids" in toolbox_summary_by_tool[0]
+        assert isinstance(toolbox_summary_by_tool[0]["tool_ids"], list)
         tool_id = toolbox_summary_by_tool[0]["tool_ids"][0]
 
         toolbox_summary_select_tool_ids = self.gi.tool_dependencies.summarize_toolbox(
             index_by="tools", tool_ids=[tool_id]
         )
-        self.assertTrue(isinstance(toolbox_summary_select_tool_ids, list))
-        self.assertEqual(len(toolbox_summary_select_tool_ids), 1)
-        self.assertEqual(toolbox_summary_select_tool_ids[0]["tool_ids"][0], tool_id)
+        assert isinstance(toolbox_summary_select_tool_ids, list)
+        assert len(toolbox_summary_select_tool_ids) == 1
+        assert toolbox_summary_select_tool_ids[0]["tool_ids"][0] == tool_id

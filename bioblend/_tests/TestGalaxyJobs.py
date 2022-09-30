@@ -33,7 +33,7 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
         tool_output = self.gi.tools.run_tool(history_id=self.history_id, tool_id="cat1", tool_inputs=tool_inputs)
         job_id = tool_output["jobs"][0]["id"]
         job = self.gi.jobs.wait_for_job(job_id)
-        self.assertEqual(job["state"], "ok")
+        assert job["state"] == "ok"
 
     @test_util.skip_unless_tool("random_lines1")
     def test_get_jobs(self):
@@ -41,17 +41,17 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
         self._run_tool()
 
         jobs = self.gi.jobs.get_jobs(tool_id="random_lines1", history_id=self.history_id)
-        self.assertEqual(len(jobs), 2)
+        assert len(jobs) == 2
         jobs = self.gi.jobs.get_jobs(history_id=self.history_id, state="failed")
-        self.assertEqual(len(jobs), 0)
+        assert len(jobs) == 0
         yesterday = datetime.today() - timedelta(days=1)
         jobs = self.gi.jobs.get_jobs(date_range_max=yesterday.strftime("%Y-%m-%d"), history_id=self.history_id)
-        self.assertEqual(len(jobs), 0)
+        assert len(jobs) == 0
         tomorrow = datetime.today() + timedelta(days=1)
         jobs = self.gi.jobs.get_jobs(date_range_min=tomorrow.strftime("%Y-%m-%d"))
-        self.assertEqual(len(jobs), 0)
+        assert len(jobs) == 0
         jobs = self.gi.jobs.get_jobs(date_range_min=datetime.today().strftime("%Y-%m-%d"), history_id=self.history_id)
-        self.assertEqual(len(jobs), 3)
+        assert len(jobs) == 3
 
     @test_util.skip_unless_galaxy("release_21.05")
     def test_get_jobs_with_filtering(self):
@@ -74,17 +74,17 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
         self.gi.invocations.wait_for_invocation(invocation2["id"])
 
         all_jobs = self.gi.jobs.get_jobs(history_id=self.history_id, order_by="create_time")
-        self.assertEqual(len(all_jobs), 3)
+        assert len(all_jobs) == 3
         job1_id = all_jobs[1]["id"]
         jobs = self.gi.jobs.get_jobs(history_id=self.history_id, limit=1, offset=1, order_by="create_time")
-        self.assertEqual(len(jobs), 1)
-        self.assertEqual(jobs[0]["id"], job1_id)
+        assert len(jobs) == 1
+        assert jobs[0]["id"] == job1_id
         jobs = self.gi.jobs.get_jobs(invocation_id=invocation1["id"])
-        self.assertEqual(len(jobs), 1)
+        assert len(jobs) == 1
         job_id_inv = jobs[0]["id"]
         jobs = self.gi.jobs.get_jobs(workflow_id=workflow_id)
-        self.assertEqual(len(jobs), 2)
-        self.assertIn(job_id_inv, [job["id"] for job in jobs])
+        assert len(jobs) == 2
+        assert job_id_inv in [job["id"] for job in jobs]
 
     @test_util.skip_unless_galaxy("release_21.01")
     @test_util.skip_unless_tool("random_lines1")
@@ -95,7 +95,7 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
         rerun_output = self.gi.jobs.rerun_job(original_job_id)
         original_output_content = self.gi.datasets.download_dataset(original_output["outputs"][0]["id"])
         rerun_output_content = self.gi.datasets.download_dataset(rerun_output["outputs"][0]["id"])
-        self.assertEqual(rerun_output_content, original_output_content)
+        assert rerun_output_content == original_output_content
 
     @test_util.skip_unless_galaxy("release_21.01")
     @test_util.skip_unless_tool("Show beginning1")
@@ -118,16 +118,16 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
             raise Exception("The job should have failed")
 
         history_contents = self.gi.histories.show_history(self.history_id, contents=True)
-        self.assertEqual(len(history_contents), 3)
-        self.assertEqual(history_contents[1]["state"], "error")
-        self.assertEqual(history_contents[2]["state"], "paused")
+        assert len(history_contents) == 3
+        assert history_contents[1]["state"] == "error"
+        assert history_contents[2]["state"] == "paused"
 
         # resume the paused step job
         resumed_outputs = self.gi.jobs.resume_job(job_steps[-1]["job_id"])
-        self.assertEqual(resumed_outputs[0]["name"], "out_file1")
+        assert resumed_outputs[0]["name"] == "out_file1"
         # the following does not pass stably - the job goes back to paused too quickly
         # history_contents_resumed = self.gi.histories.show_history(self.history_id, contents=True)
-        # self.assertNotEqual(history_contents_resumed[2]['state'], 'paused')
+        # assert history_contents_resumed[2]["state"] != "paused"
 
         # now rerun and remap with correct input param
         failed_job_id = self.gi.datasets.show_dataset(history_contents[1]["id"])["creating_job"]
@@ -141,8 +141,8 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
         self.gi.jobs.wait_for_job(new_job_id)
         self.gi.jobs.resume_job(last_job_id)  # last_job can get stuck on paused - resume it in case
         self.gi.jobs.wait_for_job(last_job_id)
-        self.assertEqual(last_dataset["hid"], 3)
-        self.assertEqual(last_dataset["id"], history_contents[2]["id"])
+        assert last_dataset["hid"] == 3
+        assert last_dataset["id"] == history_contents[2]["id"]
         self._wait_and_verify_dataset(last_dataset["id"], b"line 1\tline 1\n")
 
     @test_util.skip_unless_galaxy("release_19.05")
@@ -150,20 +150,20 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
     def test_get_common_problems(self):
         job_id = self._run_tool()["jobs"][0]["id"]
         response = self.gi.jobs.get_common_problems(job_id)
-        self.assertEqual(response, {"has_duplicate_inputs": False, "has_empty_inputs": True})
+        assert response == {"has_duplicate_inputs": False, "has_empty_inputs": True}
 
     @test_util.skip_unless_tool("random_lines1")
     def test_get_inputs(self):
         job_id = self._run_tool()["jobs"][0]["id"]
         response = self.gi.jobs.get_inputs(job_id)
-        self.assertEqual(response, [{"name": "input", "dataset": {"src": "hda", "id": self.dataset_id}}])
+        assert response == [{"name": "input", "dataset": {"src": "hda", "id": self.dataset_id}}]
 
     @test_util.skip_unless_tool("random_lines1")
     def test_get_outputs(self):
         output = self._run_tool()
         job_id, output_id = output["jobs"][0]["id"], output["outputs"][0]["id"]
         response = self.gi.jobs.get_outputs(job_id)
-        self.assertEqual(response, [{"name": "out_file1", "dataset": {"src": "hda", "id": output_id}}])
+        assert response == [{"name": "out_file1", "dataset": {"src": "hda", "id": output_id}}]
 
     @test_util.skip_unless_galaxy("release_20.05")
     @test_util.skip_unless_tool("random_lines1")
@@ -174,9 +174,9 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
         # in https://github.com/galaxyproject/galaxy/commit/3e7f03cd1f229b8c9421ade02002728a33e131d8
         self.gi.jobs.wait_for_job(job_id)
         response = self.gi.jobs.get_destination_params(job_id)
-        self.assertIn("Runner", response)
-        self.assertIn("Runner Job ID", response)
-        self.assertIn("Handler", response)
+        assert "Runner" in response
+        assert "Runner Job ID" in response
+        assert "Handler" in response
 
     @test_util.skip_unless_galaxy("release_18.01")
     @test_util.skip_unless_tool("random_lines1")
@@ -189,7 +189,7 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
             "seed_source|seed": "asdf",
         }
         response = self.gi.jobs.search_jobs("random_lines1", inputs)
-        self.assertIn(job_id, [job["id"] for job in response])
+        assert job_id in [job["id"] for job in response]
 
     @test_util.skip_unless_galaxy("release_20.01")
     @test_util.skip_unless_tool("random_lines1")
@@ -198,29 +198,26 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
         job_id, output_id = output["jobs"][0]["id"], output["outputs"][0]["id"]
         response = self.gi.jobs.report_error(job_id, output_id, "Test error")
         # expected response when the Galaxy server does not have mail configured
-        self.assertEqual(
-            response,
-            {
-                "messages": [
-                    [
-                        "An error occurred sending the report by email: Mail is not configured for this Galaxy instance",
-                        "danger",
-                    ]
+        assert response == {
+            "messages": [
+                [
+                    "An error occurred sending the report by email: Mail is not configured for this Galaxy instance",
+                    "danger",
                 ]
-            },
-        )
+            ]
+        }
 
     @test_util.skip_unless_galaxy("release_20.05")
     def test_show_job_lock(self):
         status = self.gi.jobs.show_job_lock()
-        self.assertFalse(status)
+        assert not status
 
     @test_util.skip_unless_galaxy("release_20.05")
     def test_update_job_lock(self):
         status = self.gi.jobs.update_job_lock(active=True)
-        self.assertTrue(status)
+        assert status
         status = self.gi.jobs.update_job_lock(active=False)
-        self.assertFalse(status)
+        assert not status
 
     @test_util.skip_unless_galaxy("release_18.01")
     def test_cancel_job(self):

@@ -9,6 +9,8 @@ from typing import (
     List,
 )
 
+import pytest
+
 from bioblend import ConnectionError
 from . import (
     GalaxyTestBase,
@@ -26,10 +28,10 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         history_id = self.gi.histories.create_history(name="TestWorkflowState")["id"]
 
         invocations = self.gi.workflows.get_invocations(workflow_id)
-        self.assertEqual(len(invocations), 0)
+        assert len(invocations) == 0
 
         # Try invalid invocation (no input)
-        with self.assertRaises(ConnectionError):
+        with pytest.raises(ConnectionError):
             self.gi.workflows.invoke_workflow(workflow["id"])
 
         dataset1_id = self._test_dataset(history_id)
@@ -37,11 +39,11 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
             workflow["id"],
             inputs={"0": {"src": "hda", "id": dataset1_id}},
         )
-        self.assertEqual(invocation["state"], "new")
+        assert invocation["state"] == "new"
         invocation_id = invocation["id"]
         invocations = self.gi.workflows.get_invocations(workflow_id)
-        self.assertEqual(len(invocations), 1)
-        self.assertEqual(invocations[0]["id"], invocation_id)
+        assert len(invocations) == 1
+        assert invocations[0]["id"] == invocation_id
 
         def invocation_steps_by_order_index():
             invocation = self.gi.workflows.show_invocation(workflow_id, invocation_id)
@@ -53,15 +55,13 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
             time.sleep(0.5)
 
         invocation = self.gi.workflows.show_invocation(workflow_id, invocation_id)
-        self.assertEqual(invocation["state"], "ready")
+        assert invocation["state"] == "ready"
 
         steps = invocation_steps_by_order_index()
         pause_step = steps[2]
-        self.assertIsNone(
-            self.gi.workflows.show_invocation_step(workflow_id, invocation_id, pause_step["id"])["action"]
-        )
+        assert self.gi.workflows.show_invocation_step(workflow_id, invocation_id, pause_step["id"])["action"] is None
         self.gi.workflows.run_invocation_step_action(workflow_id, invocation_id, pause_step["id"], action=True)
-        self.assertTrue(self.gi.workflows.show_invocation_step(workflow_id, invocation_id, pause_step["id"])["action"])
+        assert self.gi.workflows.show_invocation_step(workflow_id, invocation_id, pause_step["id"])["action"]
         for _ in range(20):
             invocation = self.gi.workflows.show_invocation(workflow_id, invocation_id)
             if invocation["state"] == "scheduled":
@@ -70,7 +70,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
             time.sleep(0.5)
 
         invocation = self.gi.workflows.show_invocation(workflow_id, invocation_id)
-        self.assertEqual(invocation["state"], "scheduled")
+        assert invocation["state"] == "scheduled"
 
     @test_util.skip_unless_galaxy("release_19.01")
     def test_invoke_workflow_parameters_normalized(self):
@@ -78,7 +78,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         workflow_id = self.gi.workflows.import_workflow_from_local_path(path)["id"]
         history_id = self.gi.histories.create_history(name="TestWorkflowInvokeParametersNormalized")["id"]
         dataset_id = self._test_dataset(history_id)
-        with self.assertRaises(ConnectionError):
+        with pytest.raises(ConnectionError):
             self.gi.workflows.invoke_workflow(
                 workflow_id, inputs={"0": {"src": "hda", "id": dataset_id}}, params={"1": {"1|2": "comma"}}
             )
@@ -99,7 +99,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         dataset1_id = self._test_dataset(history_id)
 
         invocations = self.gi.workflows.get_invocations(workflow_id)
-        self.assertEqual(len(invocations), 0)
+        assert len(invocations) == 0
 
         invocation = self.gi.workflows.invoke_workflow(
             workflow["id"],
@@ -107,92 +107,92 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         )
         invocation_id = invocation["id"]
         invocations = self.gi.workflows.get_invocations(workflow_id)
-        self.assertEqual(len(invocations), 1)
-        self.assertEqual(invocations[0]["id"], invocation_id)
+        assert len(invocations) == 1
+        assert invocations[0]["id"] == invocation_id
 
         invocation = self.gi.workflows.show_invocation(workflow_id, invocation_id)
-        self.assertIn(invocation["state"], ["new", "ready"])
+        assert invocation["state"] in ["new", "ready"]
 
         self.gi.workflows.cancel_invocation(workflow_id, invocation_id)
         invocation = self.gi.workflows.show_invocation(workflow_id, invocation_id)
-        self.assertEqual(invocation["state"], "cancelled")
+        assert invocation["state"] == "cancelled"
 
     def test_import_export_workflow_from_local_path(self):
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             self.gi.workflows.import_workflow_from_local_path(None)  # type: ignore[arg-type]
         path = test_util.get_abspath(os.path.join("data", "paste_columns.ga"))
         imported_wf = self.gi.workflows.import_workflow_from_local_path(path)
-        self.assertIsInstance(imported_wf, dict)
-        self.assertEqual(imported_wf["name"], "paste_columns")
-        self.assertTrue(imported_wf["url"].startswith("/api/workflows/"))
-        self.assertFalse(imported_wf["deleted"])
-        self.assertFalse(imported_wf["published"])
-        with self.assertRaises(TypeError):
+        assert isinstance(imported_wf, dict)
+        assert imported_wf["name"] == "paste_columns"
+        assert imported_wf["url"].startswith("/api/workflows/")
+        assert not imported_wf["deleted"]
+        assert not imported_wf["published"]
+        with pytest.raises(TypeError):
             self.gi.workflows.export_workflow_to_local_path(None, None, None)  # type: ignore[arg-type]
         export_dir = tempfile.mkdtemp(prefix="bioblend_test_")
         try:
             self.gi.workflows.export_workflow_to_local_path(imported_wf["id"], export_dir)
             dir_contents = os.listdir(export_dir)
-            self.assertEqual(len(dir_contents), 1)
+            assert len(dir_contents) == 1
             export_path = os.path.join(export_dir, dir_contents[0])
             with open(export_path) as f:
                 exported_wf_dict = json.load(f)
         finally:
             shutil.rmtree(export_dir)
-        self.assertIsInstance(exported_wf_dict, dict)
+        assert isinstance(exported_wf_dict, dict)
 
     def test_import_publish_workflow_from_local_path(self):
         path = test_util.get_abspath(os.path.join("data", "paste_columns.ga"))
         imported_wf = self.gi.workflows.import_workflow_from_local_path(path, publish=True)
-        self.assertIsInstance(imported_wf, dict)
-        self.assertFalse(imported_wf["deleted"])
-        self.assertTrue(imported_wf["published"])
+        assert isinstance(imported_wf, dict)
+        assert not imported_wf["deleted"]
+        assert imported_wf["published"]
 
     def test_import_export_workflow_dict(self):
         path = test_util.get_abspath(os.path.join("data", "paste_columns.ga"))
         with open(path) as f:
             wf_dict = json.load(f)
         imported_wf = self.gi.workflows.import_workflow_dict(wf_dict)
-        self.assertIsInstance(imported_wf, dict)
-        self.assertEqual(imported_wf["name"], "paste_columns")
-        self.assertTrue(imported_wf["url"].startswith("/api/workflows/"))
-        self.assertFalse(imported_wf["deleted"])
-        self.assertFalse(imported_wf["published"])
+        assert isinstance(imported_wf, dict)
+        assert imported_wf["name"] == "paste_columns"
+        assert imported_wf["url"].startswith("/api/workflows/")
+        assert not imported_wf["deleted"]
+        assert not imported_wf["published"]
         exported_wf_dict = self.gi.workflows.export_workflow_dict(imported_wf["id"])
-        self.assertIsInstance(exported_wf_dict, dict)
+        assert isinstance(exported_wf_dict, dict)
 
     def test_import_publish_workflow_dict(self):
         path = test_util.get_abspath(os.path.join("data", "paste_columns.ga"))
         with open(path) as f:
             wf_dict = json.load(f)
         imported_wf = self.gi.workflows.import_workflow_dict(wf_dict, publish=True)
-        self.assertIsInstance(imported_wf, dict)
-        self.assertFalse(imported_wf["deleted"])
-        self.assertTrue(imported_wf["published"])
+        assert isinstance(imported_wf, dict)
+        assert not imported_wf["deleted"]
+        assert imported_wf["published"]
 
     def test_get_workflows(self):
         path = test_util.get_abspath(os.path.join("data", "paste_columns.ga"))
         workflow = self.gi.workflows.import_workflow_from_local_path(path)
         all_wfs = self.gi.workflows.get_workflows()
-        self.assertGreater(len(all_wfs), 0)
+        assert len(all_wfs) > 0
         wfs_with_name = self.gi.workflows.get_workflows(name=workflow["name"])
         wf_list = [w for w in wfs_with_name if w["id"] == workflow["id"]]
-        self.assertEqual(len(wf_list), 1)
+        assert len(wf_list) == 1
         wf_data = wf_list[0]
         if "create_time" in workflow:  # Galaxy >= 20.01
-            self.assertEqual(wf_data["create_time"], workflow["create_time"])
+            assert wf_data["create_time"] == workflow["create_time"]
         else:  # Galaxy <= 22.01
-            self.assertEqual(wf_data["url"], workflow["url"])
+            assert wf_data["url"] == workflow["url"]
 
     def test_show_workflow(self):
         path = test_util.get_abspath(os.path.join("data", "paste_columns.ga"))
         wf = self.gi.workflows.import_workflow_from_local_path(path)
         wf_data = self.gi.workflows.show_workflow(wf["id"])
-        self.assertEqual(wf_data["id"], wf["id"])
-        self.assertEqual(wf_data["name"], wf["name"])
-        self.assertEqual(wf_data["url"], wf["url"])
-        self.assertEqual(len(wf_data["steps"]), 3)
-        self.assertIsNotNone(wf_data["inputs"])
+        assert wf_data["id"] == wf["id"]
+        assert wf_data["name"] == wf["name"]
+        assert wf_data["url"] == wf["url"]
+        assert len(wf_data["steps"]) == 3
+        assert wf_data["inputs"] is not None
 
     @test_util.skip_unless_galaxy("release_18.05")
     def test_update_workflow_name(self):
@@ -200,17 +200,17 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         wf = self.gi.workflows.import_workflow_from_local_path(path)
         new_name = "new name"
         updated_wf = self.gi.workflows.update_workflow(wf["id"], name=new_name)
-        self.assertEqual(updated_wf["name"], new_name)
+        assert updated_wf["name"] == new_name
 
     @test_util.skip_unless_galaxy("release_21.01")
     def test_update_workflow_published(self):
         path = test_util.get_abspath(os.path.join("data", "paste_columns.ga"))
         wf = self.gi.workflows.import_workflow_from_local_path(path)
-        self.assertFalse(wf["published"])
+        assert not wf["published"]
         updated_wf = self.gi.workflows.update_workflow(wf["id"], published=True)
-        self.assertTrue(updated_wf["published"])
+        assert updated_wf["published"]
         updated_wf = self.gi.workflows.update_workflow(wf["id"], published=False)
-        self.assertFalse(updated_wf["published"])
+        assert not updated_wf["published"]
 
     @test_util.skip_unless_galaxy(
         "release_19.09"
@@ -219,18 +219,18 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         path = test_util.get_abspath(os.path.join("data", "paste_columns.ga"))
         wf = self.gi.workflows.import_workflow_from_local_path(path)
         wf_data = self.gi.workflows.show_workflow(wf["id"])
-        self.assertEqual(wf_data["version"], 0)
+        assert wf_data["version"] == 0
         new_name = "new name"
         self.gi.workflows.update_workflow(wf["id"], name=new_name)
         updated_wf = self.gi.workflows.show_workflow(wf["id"])
-        self.assertEqual(updated_wf["name"], new_name)
-        self.assertEqual(updated_wf["version"], 1)
+        assert updated_wf["name"] == new_name
+        assert updated_wf["version"] == 1
         updated_wf = self.gi.workflows.show_workflow(wf["id"], version=0)
-        self.assertEqual(updated_wf["name"], "paste_columns")
-        self.assertEqual(updated_wf["version"], 0)
+        assert updated_wf["name"] == "paste_columns"
+        assert updated_wf["version"] == 0
         updated_wf = self.gi.workflows.show_workflow(wf["id"], version=1)
-        self.assertEqual(updated_wf["name"], new_name)
-        self.assertEqual(updated_wf["version"], 1)
+        assert updated_wf["name"] == new_name
+        assert updated_wf["version"] == 1
 
     @test_util.skip_unless_galaxy("release_19.09")
     def test_extract_workflow_from_history(self):
@@ -262,22 +262,22 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
             dataset_hids=dataset_hids,
         )
         wf2 = self.gi.workflows.show_workflow(wf2["id"])
-        self.assertEqual(wf2["name"], new_workflow_name)
-        self.assertEqual(len(wf1["steps"]), len(wf2["steps"]))
+        assert wf2["name"] == new_workflow_name
+        assert len(wf1["steps"]) == len(wf2["steps"])
         for i in range(len(wf1["steps"])):
-            self.assertEqual(wf1["steps"][str(i)]["type"], wf2["steps"][str(i)]["type"])
-            self.assertEqual(wf1["steps"][str(i)]["tool_id"], wf2["steps"][str(i)]["tool_id"])
+            assert wf1["steps"][str(i)]["type"] == wf2["steps"][str(i)]["type"]
+            assert wf1["steps"][str(i)]["tool_id"] == wf2["steps"][str(i)]["tool_id"]
 
     @test_util.skip_unless_galaxy("release_18.09")
     def test_show_versions(self):
         path = test_util.get_abspath(os.path.join("data", "paste_columns.ga"))
         wf = self.gi.workflows.import_workflow_from_local_path(path)
         versions = self.gi.workflows.show_versions(wf["id"])
-        self.assertEqual(len(versions), 1)
+        assert len(versions) == 1
         version = versions[0]
-        self.assertEqual(version["version"], 0)
-        self.assertTrue("update_time" in version)
-        self.assertTrue("steps" in version)
+        assert version["version"] == 0
+        assert "update_time" in version
+        assert "steps" in version
 
     @test_util.skip_unless_galaxy("release_21.01")
     def test_refactor_workflow(self):
@@ -288,8 +288,8 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         path = test_util.get_abspath(os.path.join("data", "paste_columns.ga"))
         wf = self.gi.workflows.import_workflow_from_local_path(path)
         response = self.gi.workflows.refactor_workflow(wf["id"], actions, dry_run=True)
-        self.assertEqual(len(response["action_executions"]), len(actions))
-        self.assertEqual(response["dry_run"], True)
+        assert len(response["action_executions"]) == len(actions)
+        assert response["dry_run"] is True
         updated_steps = response["workflow"]["steps"]
-        self.assertEqual(len(updated_steps), 4)
-        self.assertEqual({step["label"] for step in updated_steps.values()}, {"bar", None, "Input 1", "Input 2"})
+        assert len(updated_steps) == 4
+        assert {step["label"] for step in updated_steps.values()} == {"bar", None, "Input 1", "Input 2"}

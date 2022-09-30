@@ -25,11 +25,11 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
 
         invocation_id = invocation["id"]
         invocations = self.gi.invocations.get_invocations()
-        self.assertEqual(len(invocations), 1)
-        self.assertEqual(invocations[0]["id"], invocation_id)
+        assert len(invocations) == 1
+        assert invocations[0]["id"] == invocation_id
         self.gi.invocations.cancel_invocation(invocation_id)
         invocation = self.gi.invocations.show_invocation(invocation_id)
-        self.assertEqual(invocation["state"], "cancelled")
+        assert invocation["state"] == "cancelled"
 
     @test_util.skip_unless_galaxy("release_20.01")
     def test_get_invocations(self):
@@ -55,20 +55,20 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
         # Test filtering by workflow ID
         for wf_id, expected_invoc_num in {self.workflow_id: 2, workflow2_id: 1}.items():
             invocs = self.gi.invocations.get_invocations(workflow_id=wf_id)
-            self.assertEqual(len(invocs), expected_invoc_num)
+            assert len(invocs) == expected_invoc_num
             for invoc in invocs:
-                self.assertEqual(invoc["workflow_id"], wf_id)
+                assert invoc["workflow_id"] == wf_id
 
         # Test filtering by history ID
         for hist_id, expected_invoc_num in {self.history_id: 1, hist2_id: 2}.items():
             invocs = self.gi.invocations.get_invocations(history_id=hist_id)
-            self.assertEqual(len(invocs), expected_invoc_num)
+            assert len(invocs) == expected_invoc_num
             for invoc in invocs:
-                self.assertEqual(invoc["history_id"], hist_id)
+                assert invoc["history_id"] == hist_id
 
         # Test limiting
         limit_invocs = self.gi.invocations.get_invocations(limit=2)
-        self.assertEqual(len(limit_invocs), 2)
+        assert len(limit_invocs) == 2
 
         self.gi.histories.delete_history(hist2_id, purge=True)
 
@@ -90,17 +90,17 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
 
         self.gi.invocations.wait_for_invocation(invocation["id"])
         biocompute_object = self.gi.invocations.get_invocation_biocompute_object(invocation["id"])
-        self.assertEqual(len(biocompute_object["description_domain"]["pipeline_steps"]), 1)
+        assert len(biocompute_object["description_domain"]["pipeline_steps"]) == 1
 
     @test_util.skip_unless_galaxy("release_19.09")
     def test_get_invocation_jobs_summary(self):
         invocation = self._invoke_workflow()
         self.gi.invocations.wait_for_invocation(invocation["id"])
         jobs_summary = self.gi.invocations.get_invocation_summary(invocation["id"])
-        self.assertEqual(jobs_summary["populated_state"], "ok")
+        assert jobs_summary["populated_state"] == "ok"
         step_jobs_summary = self.gi.invocations.get_invocation_step_jobs_summary(invocation["id"])
-        self.assertEqual(len(step_jobs_summary), 1)
-        self.assertEqual(step_jobs_summary[0]["populated_state"], "ok")
+        assert len(step_jobs_summary) == 1
+        assert step_jobs_summary[0]["populated_state"] == "ok"
 
     @test_util.skip_unless_galaxy("release_19.09")
     @test_util.skip_unless_tool("cat1")
@@ -126,9 +126,9 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
             time.sleep(0.5)
         steps = invocation_steps_by_order_index()
         pause_step = steps[2]
-        self.assertIsNone(self.gi.invocations.show_invocation_step(invocation_id, pause_step["id"])["action"])
+        assert self.gi.invocations.show_invocation_step(invocation_id, pause_step["id"])["action"] is None
         self.gi.invocations.run_invocation_step_action(invocation_id, pause_step["id"], action=True)
-        self.assertTrue(self.gi.invocations.show_invocation_step(invocation_id, pause_step["id"])["action"])
+        assert self.gi.invocations.show_invocation_step(invocation_id, pause_step["id"])["action"]
         self.gi.invocations.wait_for_invocation(invocation["id"])
 
     @test_util.skip_unless_galaxy("release_21.01")
@@ -138,7 +138,7 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
         rerun_invocation = self.gi.invocations.rerun_invocation(invocation["id"], import_inputs_to_history=True)
         self.gi.invocations.wait_for_invocation(rerun_invocation["id"])
         history = self.gi.histories.show_history(rerun_invocation["history_id"], contents=True)
-        self.assertEqual(len(history), 3)
+        assert len(history) == 3
 
     def _invoke_workflow(self):
         dataset = {"src": "hda", "id": self.dataset_id}

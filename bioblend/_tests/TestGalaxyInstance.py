@@ -5,6 +5,8 @@ import os
 import time
 import unittest
 
+import pytest
+
 from bioblend import ConnectionError
 from bioblend.galaxy import GalaxyInstance
 from . import test_util
@@ -17,11 +19,11 @@ class TestGalaxyInstance(unittest.TestCase):
 
     def test_set_max_get_attempts(self):
         self.gi.max_get_attempts = 3
-        self.assertEqual(3, self.gi.max_get_attempts)
+        assert 3 == self.gi.max_get_attempts
 
     def test_set_retry_delay(self):
         self.gi.get_retry_delay = 5.0
-        self.assertEqual(5.0, self.gi.get_retry_delay)
+        assert 5.0 == self.gi.get_retry_delay
 
     def test_get_retry(self):
         # We set the client to try twice, with a delay of 5 seconds between
@@ -30,16 +32,14 @@ class TestGalaxyInstance(unittest.TestCase):
         self.gi.max_get_attempts = 3
         self.gi.get_retry_delay = 2
         start = time.time()
-        with self.assertRaises(ConnectionError):
+        with pytest.raises(ConnectionError):
             self.gi.libraries.get_libraries()
         end = time.time()
         duration = end - start
-        self.assertGreater(
-            duration, self.gi.get_retry_delay * (self.gi.max_get_attempts - 1), "Didn't seem to retry long enough"
-        )
+        assert duration > self.gi.get_retry_delay * (self.gi.max_get_attempts - 1), "Didn't seem to retry long enough"
 
     def test_missing_scheme_fake_url(self):
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             GalaxyInstance("localhost:56789", key="whatever")
 
     @test_util.skip_unless_galaxy()

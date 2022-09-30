@@ -1,6 +1,8 @@
 import shutil
 import tempfile
 
+import pytest
+
 from bioblend import (
     ConnectionError,
     galaxy,
@@ -24,16 +26,15 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
 
     @test_util.skip_unless_galaxy("release_19.05")
     def test_show_nonexistent_dataset(self):
-        with self.assertRaises(ConnectionError):
+        with pytest.raises(ConnectionError):
             self.gi.datasets.show_dataset("nonexistent_id")
 
     def test_show_dataset(self):
         self.gi.datasets.show_dataset(self.dataset_id)
 
     def test_download_dataset(self):
-        with self.assertRaises(Exception) as ctx:
+        with pytest.raises((TypeError, ConnectionError)):
             self.gi.datasets.download_dataset(None)  # type: ignore[arg-type,call-overload]
-        self.assertIsInstance(ctx.exception, (TypeError, ConnectionError))
         expected_contents = ("\n".join(self.dataset_contents.splitlines()) + "\n").encode()
         # download_dataset() with file_path=None is already tested in TestGalaxyTools.test_paste_content()
         # self._wait_and_verify_dataset(self.dataset_id, expected_contents)
@@ -42,9 +43,9 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
             downloaded_dataset = self.gi.datasets.download_dataset(
                 self.dataset_id, file_path=tempdir, maxwait=GalaxyTestBase.BIOBLEND_TEST_JOB_TIMEOUT * 2
             )
-            self.assertTrue(downloaded_dataset.startswith(tempdir))
+            assert downloaded_dataset.startswith(tempdir)
             with open(downloaded_dataset, "rb") as f:
-                self.assertEqual(f.read(), expected_contents)
+                assert f.read() == expected_contents
         finally:
             shutil.rmtree(tempdir)
         with tempfile.NamedTemporaryFile(prefix="bioblend_test_") as f:
@@ -54,123 +55,123 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
                 use_default_filename=False,
                 maxwait=GalaxyTestBase.BIOBLEND_TEST_JOB_TIMEOUT,
             )
-            self.assertEqual(download_filename, f.name)
+            assert download_filename == f.name
             f.flush()
-            self.assertEqual(f.read(), expected_contents)
+            assert f.read() == expected_contents
 
     @test_util.skip_unless_galaxy("release_19.05")
     def test_get_datasets(self):
         datasets = self.gi.datasets.get_datasets()
         dataset_ids = [dataset["id"] for dataset in datasets]
-        self.assertIn(self.dataset_id, dataset_ids)
+        assert self.dataset_id in dataset_ids
 
     @test_util.skip_unless_galaxy("release_19.05")
     def test_get_datasets_history(self):
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id)
-        self.assertEqual(len(datasets), 1)
+        assert len(datasets) == 1
 
     @test_util.skip_unless_galaxy("release_19.05")
     def test_get_datasets_limit_offset(self):
         datasets = self.gi.datasets.get_datasets(limit=1)
-        self.assertEqual(len(datasets), 1)
+        assert len(datasets) == 1
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id, offset=1)
-        self.assertEqual(datasets, [])
+        assert datasets == []
 
     @test_util.skip_unless_galaxy("release_19.05")
     def test_get_datasets_name(self):
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id, name="Pasted Entry")
-        self.assertEqual(len(datasets), 1)
+        assert len(datasets) == 1
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id, name="Wrong Name")
-        self.assertEqual(datasets, [])
+        assert datasets == []
 
     @test_util.skip_unless_galaxy("release_20.05")
     def test_get_datasets_time(self):
         dataset = self.gi.datasets.show_dataset(self.dataset_id)
         ct = dataset["create_time"]
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id, create_time_min=ct)
-        self.assertEqual(len(datasets), 1)
+        assert len(datasets) == 1
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id, create_time_max=ct)
-        self.assertEqual(len(datasets), 1)
+        assert len(datasets) == 1
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id, create_time_min="2100-01-01T00:00:00")
-        self.assertEqual(datasets, [])
+        assert datasets == []
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id, create_time_max="2000-01-01T00:00:00")
-        self.assertEqual(datasets, [])
+        assert datasets == []
 
         ut = dataset["update_time"]
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id, update_time_min=ut)
-        self.assertEqual(len(datasets), 1)
+        assert len(datasets) == 1
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id, update_time_max=ut)
-        self.assertEqual(len(datasets), 1)
+        assert len(datasets) == 1
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id, update_time_min="2100-01-01T00:00:00")
-        self.assertEqual(datasets, [])
+        assert datasets == []
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id, update_time_max="2000-01-01T00:00:00")
-        self.assertEqual(datasets, [])
+        assert datasets == []
 
     @test_util.skip_unless_galaxy("release_20.05")
     def test_get_datasets_extension(self):
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id, extension="txt")
-        self.assertEqual(len(datasets), 1)
+        assert len(datasets) == 1
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id, extension="bam")
-        self.assertEqual(datasets, [])
+        assert datasets == []
 
     @test_util.skip_unless_galaxy("release_22.01")
     def test_get_datasets_extension_list(self):
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id, extension=["bam", "txt"])
-        self.assertEqual(len(datasets), 1)
+        assert len(datasets) == 1
 
     @test_util.skip_unless_galaxy("release_20.05")
     def test_get_datasets_state(self):
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id, state="ok")
-        self.assertEqual(len(datasets), 1)
+        assert len(datasets) == 1
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id, state="queued")
-        self.assertEqual(datasets, [])
-        with self.assertRaises(ConnectionError):
+        assert datasets == []
+        with pytest.raises(ConnectionError):
             self.gi.datasets.get_datasets(history_id=self.history_id, state="nonexistent_state")
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id, state=["ok", "queued"])
-        self.assertEqual(len(datasets), 1)
+        assert len(datasets) == 1
 
     @test_util.skip_unless_galaxy("release_20.05")
     def test_get_datasets_visible(self):
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id, visible=True)
-        self.assertEqual(len(datasets), 1)
+        assert len(datasets) == 1
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id, visible=False)
-        self.assertEqual(len(datasets), 0)
+        assert len(datasets) == 0
 
     @test_util.skip_unless_galaxy("release_19.05")
     def test_get_datasets_ordering(self):
         self.dataset_id2 = self._test_dataset(self.history_id, contents=self.dataset_contents)
         self.gi.datasets.wait_for_dataset(self.dataset_id2)
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id, order="create_time-dsc")
-        self.assertEqual(datasets[0]["id"], self.dataset_id2)
+        assert datasets[0]["id"] == self.dataset_id2
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id, order="create_time-asc")
-        self.assertEqual(datasets[0]["id"], self.dataset_id)
+        assert datasets[0]["id"] == self.dataset_id
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id, order="hid-dsc")
-        self.assertEqual(datasets[0]["id"], self.dataset_id2)
+        assert datasets[0]["id"] == self.dataset_id2
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id, order="hid-asc")
-        self.assertEqual(datasets[0]["id"], self.dataset_id)
+        assert datasets[0]["id"] == self.dataset_id
 
     @test_util.skip_unless_galaxy("release_19.05")
     def test_get_datasets_deleted(self):
         deleted_datasets = self.gi.datasets.get_datasets(history_id=self.history_id, deleted=True)
-        self.assertEqual(deleted_datasets, [])
+        assert deleted_datasets == []
         self.gi.histories.delete_dataset(self.history_id, self.dataset_id)
         deleted_datasets = self.gi.datasets.get_datasets(history_id=self.history_id, deleted=True)
-        self.assertEqual(len(deleted_datasets), 1)
+        assert len(deleted_datasets) == 1
         purged_datasets = self.gi.datasets.get_datasets(history_id=self.history_id, purged=True)
-        self.assertEqual(purged_datasets, [])
+        assert purged_datasets == []
         self.gi.histories.delete_dataset(self.history_id, self.dataset_id, purge=True)
         purged_datasets = self.gi.datasets.get_datasets(history_id=self.history_id, purged=True)
-        self.assertEqual(len(purged_datasets), 1)
+        assert len(purged_datasets) == 1
 
     @test_util.skip_unless_galaxy("release_19.05")
     def test_get_datasets_tool_id_and_tag(self):
         cat1_datasets = self.gi.datasets.get_datasets(history_id=self.history_id, tool_id="cat1")
-        self.assertEqual(cat1_datasets, [])
+        assert cat1_datasets == []
         upload1_datasets = self.gi.datasets.get_datasets(history_id=self.history_id, tool_id="upload1")
-        self.assertEqual(len(upload1_datasets), 1)
+        assert len(upload1_datasets) == 1
         self.gi.histories.update_dataset(self.history_id, self.dataset_id, tags=["test"])
         tagged_datasets = self.gi.datasets.get_datasets(history_id=self.history_id, tag="test")
-        self.assertEqual(len(tagged_datasets), 1)
+        assert len(tagged_datasets) == 1
 
     def test_wait_for_dataset(self):
         history_id = self.gi.histories.create_history(name="TestWaitForDataset")["id"]
@@ -178,7 +179,7 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
         dataset_id = self._test_dataset(history_id, contents=dataset_contents)
 
         dataset = self.gi.datasets.wait_for_dataset(dataset_id)
-        self.assertEqual(dataset["state"], "ok")
+        assert dataset["state"] == "ok"
 
         self.gi.histories.delete_history(history_id, purge=True)
 
@@ -192,17 +193,17 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
         sharing_role = self.gi.roles.create_role("sharing_role", "sharing_role", [user_id, admin_user_id])["id"]
 
         self.gi.datasets.publish_dataset(self.dataset_id, published=False)
-        with self.assertRaises(ConnectionError):
+        with pytest.raises(ConnectionError):
             anonymous_gi.datasets.show_dataset(self.dataset_id)
         self.gi.datasets.publish_dataset(self.dataset_id, published=True)
         # now dataset is public, i.e. accessible to anonymous users
-        self.assertEqual(anonymous_gi.datasets.show_dataset(self.dataset_id)["id"], self.dataset_id)
+        assert anonymous_gi.datasets.show_dataset(self.dataset_id)["id"] == self.dataset_id
         self.gi.datasets.publish_dataset(self.dataset_id, published=False)
 
-        with self.assertRaises(ConnectionError):
+        with pytest.raises(ConnectionError):
             user_gi.datasets.show_dataset(self.dataset_id)
         self.gi.datasets.update_permissions(self.dataset_id, access_ids=[sharing_role], manage_ids=[sharing_role])
-        self.assertEqual(user_gi.datasets.show_dataset(self.dataset_id)["id"], self.dataset_id)
+        assert user_gi.datasets.show_dataset(self.dataset_id)["id"] == self.dataset_id
         # anonymous access now fails because sharing is only with the shared user role
-        with self.assertRaises(ConnectionError):
+        with pytest.raises(ConnectionError):
             anonymous_gi.datasets.show_dataset(self.dataset_id)
