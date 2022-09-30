@@ -9,7 +9,7 @@ from . import test_util
 @test_util.skip_unless_toolshed()
 class TestToolshed(unittest.TestCase):
     def setUp(self):
-        toolshed_url = os.environ.get("BIOBLEND_TOOLSHED_URL", "https://testtoolshed.g2.bx.psu.edu/")
+        toolshed_url = os.environ["BIOBLEND_TOOLSHED_URL"]
         self.ts = bioblend.toolshed.ToolShedInstance(url=toolshed_url)
 
     def test_categories_client(self):
