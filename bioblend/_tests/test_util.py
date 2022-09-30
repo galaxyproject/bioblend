@@ -8,11 +8,6 @@ import unittest
 import bioblend.galaxy
 
 NO_GALAXY_MESSAGE = "Externally configured Galaxy required, but not found. Set BIOBLEND_GALAXY_URL and BIOBLEND_GALAXY_API_KEY to run this test."
-NO_TOOLSHED_MESSAGE = (
-    "Externally configured ToolShed required, but not found. Set BIOBLEND_TOOLSHED_URL to run this test."
-)
-OLD_GALAXY_RELEASE = "Testing on Galaxy %s, but need %s to run this test."
-MISSING_TOOL_MESSAGE = "Externally configured Galaxy instance requires tool %s to run test."
 
 
 def skip_unless_toolshed():
@@ -20,7 +15,9 @@ def skip_unless_toolshed():
     to run the tests is not provided.
     """
     if "BIOBLEND_TOOLSHED_URL" not in os.environ:
-        return unittest.skip(NO_TOOLSHED_MESSAGE)
+        return unittest.skip(
+            "Externally configured ToolShed required, but not found. Set BIOBLEND_TOOLSHED_URL (e.g. to https://testtoolshed.g2.bx.psu.edu/ ) to run this test."
+        )
     return lambda f: f
 
 
@@ -36,7 +33,7 @@ def skip_unless_galaxy(min_release=None):
             if not min_release.startswith("release_"):
                 raise Exception("min_release should start with 'release_'")
             if galaxy_release[8:] < min_release[8:]:
-                return unittest.skip(OLD_GALAXY_RELEASE % (galaxy_release, min_release))
+                return unittest.skip(f"Testing on Galaxy {galaxy_release}, but need {min_release} to run this test.")
 
     if "BIOBLEND_GALAXY_URL" not in os.environ:
         return unittest.skip(NO_GALAXY_MESSAGE)
@@ -97,7 +94,7 @@ def skip_unless_tool(tool_id):
             # In panels by default, so flatten out sections...
             tool_ids = [_["id"] for _ in tools]
             if tool_id not in tool_ids:
-                raise unittest.SkipTest(MISSING_TOOL_MESSAGE % tool_id)
+                raise unittest.SkipTest(f"Externally configured Galaxy instance requires tool {tool_id} to run test.")
 
             return method(has_gi, *args, **kwargs)
 
