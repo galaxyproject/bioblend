@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 
 log = logging.getLogger(__name__)
 
-JOB_TERMINAL_STATES = {"deleted", "error", "ok"}
+JOB_TERMINAL_STATES = {"deleted", "deleting", "error", "ok"}
 # Job non-terminal states are: 'deleted_new', 'failed', 'new', 'paused',
 # 'queued', 'resubmitted', 'running', 'upload', 'waiting'
 

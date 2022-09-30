@@ -225,8 +225,9 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
     @test_util.skip_unless_galaxy("release_18.01")
     def test_cancel_job(self):
         job_id = self._run_tool()["jobs"][0]["id"]
-        job_state = self.gi.jobs.show_job(job_id)["state"]
-        self.assertTrue(job_state, "deleted")
+        self.gi.jobs.cancel_job(job_id)
+        job = self.gi.jobs.wait_for_job(job_id, check=False)
+        assert job["state"] in ("deleted", "deleting")
 
     def _run_tool(self, input_format: Literal["21.01", "legacy"] = "legacy") -> dict:
         tool_inputs = {
