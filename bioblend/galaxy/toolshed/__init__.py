@@ -6,6 +6,7 @@ from typing import (
     Any,
     Dict,
     List,
+    Optional,
     TYPE_CHECKING,
 )
 
@@ -79,8 +80,8 @@ class ToolShedClient(Client):
         install_tool_dependencies: bool = False,
         install_repository_dependencies: bool = False,
         install_resolver_dependencies: bool = False,
-        tool_panel_section_id: str = None,
-        new_tool_panel_section_label: str = None,
+        tool_panel_section_id: Optional[str] = None,
+        new_tool_panel_section_label: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
         Install a specified repository revision from a specified Tool Shed into

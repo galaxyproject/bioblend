@@ -3,6 +3,7 @@ from typing import (
     Any,
     IO,
     NamedTuple,
+    Optional,
     Type,
     TypeVar,
 )
@@ -16,7 +17,7 @@ class FileStream(NamedTuple):
         self.fd.close()
 
 
-def attach_file(path: str, name: str = None) -> FileStream:
+def attach_file(path: str, name: Optional[str] = None) -> FileStream:
     """
     Attach a path to a request payload object.
 

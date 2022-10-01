@@ -82,8 +82,8 @@ class QuotaClient(Client):
         amount: str,
         operation: QuotaOperations,
         default: Optional[Literal["no", "registered", "unregistered"]] = "no",
-        in_users: List[str] = None,
-        in_groups: List[str] = None,
+        in_users: Optional[List[str]] = None,
+        in_groups: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
         """
         Create a new quota
@@ -139,13 +139,13 @@ class QuotaClient(Client):
     def update_quota(
         self,
         quota_id: str,
-        name: str = None,
-        description: str = None,
-        amount: str = None,
-        operation: QuotaOperations = None,
+        name: Optional[str] = None,
+        description: Optional[str] = None,
+        amount: Optional[str] = None,
+        operation: Optional[QuotaOperations] = None,
         default: str = "no",
-        in_users: List[str] = None,
-        in_groups: List[str] = None,
+        in_users: Optional[List[str]] = None,
+        in_groups: Optional[List[str]] = None,
     ) -> str:
 
         """

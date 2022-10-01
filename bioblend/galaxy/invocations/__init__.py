@@ -36,11 +36,11 @@ class InvocationClient(Client):
 
     def get_invocations(
         self,
-        workflow_id: str = None,
-        history_id: str = None,
-        user_id: str = None,
+        workflow_id: Optional[str] = None,
+        history_id: Optional[str] = None,
+        user_id: Optional[str] = None,
         include_terminal: bool = True,
-        limit: int = None,
+        limit: Optional[int] = None,
         view: str = "collection",
         step_details: bool = False,
     ) -> List[Dict[str, Any]]:

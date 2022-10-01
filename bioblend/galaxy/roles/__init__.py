@@ -5,6 +5,7 @@ from typing import (
     Any,
     Dict,
     List,
+    Optional,
     TYPE_CHECKING,
 )
 
@@ -60,7 +61,11 @@ class RolesClient(Client):
         return self._get(id=role_id)
 
     def create_role(
-        self, role_name: str, description: str, user_ids: List[str] = None, group_ids: List[str] = None
+        self,
+        role_name: str,
+        description: str,
+        user_ids: Optional[List[str]] = None,
+        group_ids: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
         """
         Create a new role.

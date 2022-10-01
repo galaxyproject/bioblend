@@ -5,6 +5,7 @@ from typing import (
     Any,
     Dict,
     List,
+    Optional,
     TYPE_CHECKING,
 )
 
@@ -60,7 +61,7 @@ class GroupsClient(Client):
         return self._get(id=group_id)
 
     def create_group(
-        self, group_name: str, user_ids: List[str] = None, role_ids: List[str] = None
+        self, group_name: str, user_ids: Optional[List[str]] = None, role_ids: Optional[List[str]] = None
     ) -> List[Dict[str, Any]]:
         """
         Create a new group.
@@ -91,7 +92,11 @@ class GroupsClient(Client):
         return self._post(payload)
 
     def update_group(
-        self, group_id: str, group_name: str = None, user_ids: List[str] = None, role_ids: List[str] = None
+        self,
+        group_id: str,
+        group_name: Optional[str] = None,
+        user_ids: Optional[List[str]] = None,
+        role_ids: Optional[List[str]] = None,
     ) -> None:
         """
         Update a group.

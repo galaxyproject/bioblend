@@ -440,9 +440,9 @@ class ToolShedRepositoryClient(Client):
         synopsis: str,
         description: Optional[str] = None,
         type: Literal["unrestricted", "repository_suite_definition", "tool_dependency_definition"] = "unrestricted",
-        remote_repository_url: str = None,
-        homepage_url: str = None,
-        category_ids: List[str] = None,
+        remote_repository_url: Optional[str] = None,
+        homepage_url: Optional[str] = None,
+        category_ids: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
         """
         Create a new repository in a Tool Shed.
@@ -515,7 +515,7 @@ class ToolShedRepositoryClient(Client):
         description: Optional[str] = None,
         remote_repository_url: Optional[str] = None,
         homepage_url: Optional[str] = None,
-        category_ids: List[str] = None,
+        category_ids: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
         """
         Update metadata of a Tool Shed repository.

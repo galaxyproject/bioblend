@@ -7,6 +7,7 @@ from typing import (
     Any,
     Dict,
     List,
+    Optional,
     TYPE_CHECKING,
 )
 
@@ -23,7 +24,11 @@ class UserClient(Client):
         super().__init__(galaxy_instance)
 
     def get_users(
-        self, deleted: bool = False, f_email: str = None, f_name: str = None, f_any: str = None
+        self,
+        deleted: bool = False,
+        f_email: Optional[str] = None,
+        f_name: Optional[str] = None,
+        f_any: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """
         Get a list of all registered users. If ``deleted`` is set to ``True``,

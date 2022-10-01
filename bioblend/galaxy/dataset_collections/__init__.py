@@ -4,6 +4,7 @@ from typing import (
     Any,
     Dict,
     List,
+    Optional,
     TYPE_CHECKING,
     Union,
 )
@@ -26,7 +27,7 @@ class HasElements:
         self,
         name: str,
         type: str = "list",
-        elements: Union[List[Union["CollectionElement", "SimpleElement"]], Dict[str, Any]] = None,
+        elements: Optional[Union[List[Union["CollectionElement", "SimpleElement"]], Dict[str, Any]]] = None,
     ) -> None:
         self.name = name
         self.type = type

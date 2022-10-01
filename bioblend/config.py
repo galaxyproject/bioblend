@@ -1,6 +1,9 @@
 import configparser
 import os
-from typing import IO
+from typing import (
+    IO,
+    Optional,
+)
 
 BioBlendConfigPath = "/etc/bioblend.cfg"
 BioBlendConfigLocations = [BioBlendConfigPath]
@@ -18,7 +21,7 @@ class Config(configparser.ConfigParser):
     * Individual user: ``~/.bioblend`` (which works on both Windows and Unix)
     """
 
-    def __init__(self, path: str = None, fp: IO[str] = None, do_load: bool = True) -> None:
+    def __init__(self, path: Optional[str] = None, fp: Optional[IO[str]] = None, do_load: bool = True) -> None:
         super().__init__({"working_dir": "/mnt/pyami", "debug": "0"})
         if do_load:
             if path:
