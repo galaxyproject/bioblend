@@ -492,8 +492,7 @@ class WorkflowClient(Client):
             payload["allow_tool_state_corrections"] = allow_tool_state_corrections
         if inputs_by is not None:
             payload["inputs_by"] = inputs_by
-        if not require_exact_tool_versions:
-            payload["require_exact_tool_versions"] = require_exact_tool_versions
+        payload["require_exact_tool_versions"] = require_exact_tool_versions
         if parameters_normalized:
             payload["parameters_normalized"] = parameters_normalized
         url = self._invocations_url(workflow_id)
