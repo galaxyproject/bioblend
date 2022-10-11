@@ -1,6 +1,10 @@
 import contextlib
 import os
 import time
+from typing import (
+    Any,
+    Dict,
+)
 
 from . import (
     GalaxyTestBase,
@@ -116,7 +120,7 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
         )
         invocation_id = invocation["id"]
 
-        def invocation_steps_by_order_index():
+        def invocation_steps_by_order_index() -> Dict[int, Dict[str, Any]]:
             invocation = self.gi.invocations.show_invocation(invocation_id)
             return {s["order_index"]: s for s in invocation["steps"]}
 
@@ -140,7 +144,7 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
         history = self.gi.histories.show_history(rerun_invocation["history_id"], contents=True)
         assert len(history) == 3
 
-    def _invoke_workflow(self):
+    def _invoke_workflow(self) -> Dict[str, Any]:
         dataset = {"src": "hda", "id": self.dataset_id}
 
         return self.gi.workflows.invoke_workflow(

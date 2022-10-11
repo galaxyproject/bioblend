@@ -1,6 +1,10 @@
 """
 """
 import os
+from typing import (
+    Any,
+    Dict,
+)
 
 from bioblend.galaxy.tools.inputs import (
     conditional,
@@ -151,7 +155,9 @@ class TestGalaxyTools(GalaxyTestBase.GalaxyTestBase):
         citations = self.gi.tools.get_citations("sra_source")
         assert len(citations) == 2
 
-    def _wait_for_and_verify_upload(self, tool_output, file_name, fn, expected_dbkey="?"):
+    def _wait_for_and_verify_upload(
+        self, tool_output: Dict[str, Any], file_name: str, fn: str, expected_dbkey: str = "?"
+    ) -> None:
         assert len(tool_output["outputs"]) == 1
         output = tool_output["outputs"][0]
         assert output["name"] == file_name

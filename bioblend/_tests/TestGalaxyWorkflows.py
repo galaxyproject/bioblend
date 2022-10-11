@@ -45,7 +45,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         assert len(invocations) == 1
         assert invocations[0]["id"] == invocation_id
 
-        def invocation_steps_by_order_index():
+        def invocation_steps_by_order_index() -> Dict[int, Dict[str, Any]]:
             invocation = self.gi.workflows.show_invocation(workflow_id, invocation_id)
             return {s["order_index"]: s for s in invocation["steps"]}
 

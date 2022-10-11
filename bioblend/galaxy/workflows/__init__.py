@@ -300,7 +300,7 @@ class WorkflowClient(Client):
         inputs_by: Optional[InputsBy] = None,
         parameters_normalized: bool = False,
         require_exact_tool_versions: bool = True,
-    ) -> dict:
+    ) -> Dict[str, Any]:
         """
         Invoke the workflow identified by ``workflow_id``. This will
         cause a workflow to be scheduled and return an object describing

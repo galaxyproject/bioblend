@@ -12,6 +12,7 @@ from ssl import SSLError
 from typing import (
     Any,
     Callable,
+    Collection,
     Dict,
     Iterable,
     List,
@@ -125,7 +126,7 @@ SAMPLE_INV_DICT: Dict[str, Any] = {
 }
 
 
-def is_reachable(url):
+def is_reachable(url: str) -> bool:
     res = None
     try:
         res = urlopen(url, timeout=5)
@@ -209,7 +210,7 @@ class GalaxyObjectsTestBase(unittest.TestCase):
     gi: galaxy_instance.GalaxyInstance
 
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         galaxy_key = os.environ["BIOBLEND_GALAXY_API_KEY"]
         galaxy_url = os.environ["BIOBLEND_GALAXY_URL"]
         cls.gi = galaxy_instance.GalaxyInstance(galaxy_url, galaxy_key)
@@ -286,7 +287,7 @@ class TestInvocation(GalaxyObjectsTestBase):
     workflow_pause: wrappers.Workflow
 
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         super().setUpClass()
         cls.inv = wrappers.Invocation(SAMPLE_INV_DICT, gi=cls.gi)
         with open(SAMPLE_FN) as f:
@@ -409,7 +410,7 @@ class TestInvocation(GalaxyObjectsTestBase):
         biocompute_object = inv.biocompute_object()
         assert len(biocompute_object["description_domain"]["pipeline_steps"]) == 1
 
-    def _obj_invoke_workflow(self):
+    def _obj_invoke_workflow(self) -> wrappers.Invocation:
         return self.workflow.invoke(
             inputs={"Input 1": self.dataset, "Input 2": self.dataset},
             history=self.history,
@@ -424,7 +425,7 @@ class TestObjInvocationClient(GalaxyObjectsTestBase):
     workflow: wrappers.Workflow
 
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         super().setUpClass()
         with open(SAMPLE_FN) as f:
             cls.workflow = cls.gi.workflows.import_new(f.read())
@@ -608,7 +609,7 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
         obj_gi_client = getattr(self.gi, obj_type)
         create, del_kwargs = self._normalized_functions(obj_type)
 
-        def ids(seq):
+        def ids(seq: Iterable[wrappers.Wrapper]) -> Set[str]:
             return {_.id for _ in seq}
 
         names = [f"test_{uuid.uuid4().hex}" for _ in range(2)]
@@ -704,7 +705,7 @@ class TestLibrary(GalaxyObjectsTestBase):
         retrieved = self.lib.get_folder(folder.id)
         assert folder.id == retrieved.id
 
-    def _check_datasets(self, dss):
+    def _check_datasets(self, dss: Collection[wrappers.LibraryDataset]) -> None:
         assert len(dss) == len(self.lib.dataset_ids)
         assert {_.id for _ in dss} == set(self.lib.dataset_ids)
         for ds in dss:
@@ -828,7 +829,7 @@ class TestHistory(GalaxyObjectsTestBase):
         h = self.gi.histories.get(hist_id)
         assert h.deleted
 
-    def _check_dataset(self, hda):
+    def _check_dataset(self, hda: wrappers.HistoryDatasetAssociation) -> None:
         assert isinstance(hda, wrappers.HistoryDatasetAssociation)
         assert hda.container is self.hist
         assert len(self.hist.dataset_ids) == 1
@@ -912,7 +913,7 @@ class TestHistory(GalaxyObjectsTestBase):
         hdca.delete()
         assert hdca.deleted
 
-    def _create_collection_description(self):
+    def _create_collection_description(self) -> None:
         self.dataset1 = self.hist.paste_content(FOO_DATA)
         self.dataset2 = self.hist.paste_content(FOO_DATA_2)
         self.collection_description = dataset_collections.CollectionDescription(
@@ -985,13 +986,13 @@ class TestRunWorkflow(GalaxyObjectsTestBase):
         self.wf.delete()
         self.lib.delete()
 
-    def _test(self, existing_hist=False, params=False):
+    def _test(self, existing_hist: bool = False, pass_params: bool = False) -> None:
         hist_name = f"test_{uuid.uuid4().hex}"
         if existing_hist:
             hist: Union[str, wrappers.History] = self.gi.histories.create(hist_name)
         else:
             hist = hist_name
-        if params:
+        if pass_params:
             params = {"Paste1": {"delimiter": "U"}}
             sep = "_"  # 'U' maps to '_' in the paste tool
         else:
@@ -1013,14 +1014,14 @@ class TestRunWorkflow(GalaxyObjectsTestBase):
             assert out_hist.id == hist.id
         out_hist.delete(purge=True)
 
-    def test_existing_history(self):
+    def test_existing_history(self) -> None:
         self._test(existing_hist=True)
 
-    def test_new_history(self):
+    def test_new_history(self) -> None:
         self._test(existing_hist=False)
 
-    def test_params(self):
-        self._test(params=True)
+    def test_params(self) -> None:
+        self._test(pass_params=True)
 
 
 @test_util.skip_unless_galaxy("release_19.09")
@@ -1070,30 +1071,3 @@ class TestJob(GalaxyObjectsTestBase):
             assert job.id == job_prev.id
         for job in self.gi.jobs.list():
             assert isinstance(job, wrappers.Job)
-
-
-def suite():
-    loader = unittest.TestLoader()
-    s = unittest.TestSuite()
-    s.addTests(
-        [
-            loader.loadTestsFromTestCase(c)
-            for c in (
-                TestWrapper,
-                TestWorkflow,
-                TestGalaxyInstance,
-                TestLibrary,
-                TestLDContents,
-                TestHistory,
-                TestHDAContents,
-                TestRunWorkflow,
-            )
-        ]
-    )
-    return s
-
-
-if __name__ == "__main__":
-    tests = suite()
-    RUNNER = unittest.TextTestRunner(verbosity=2)
-    RUNNER.run(tests)

@@ -14,7 +14,7 @@ import bioblend.galaxy
 NO_GALAXY_MESSAGE = "Externally configured Galaxy required, but not found. Set BIOBLEND_GALAXY_URL and BIOBLEND_GALAXY_API_KEY to run this test."
 
 
-def skip_unless_toolshed():
+def skip_unless_toolshed() -> Callable:
     """Decorate tests with this to skip the test if a URL for a ToolShed
     to run the tests is not provided.
     """
@@ -87,7 +87,7 @@ def skip_unless_galaxy(min_release: Optional[str] = None) -> Callable:
     return lambda f: f
 
 
-def skip_unless_tool(tool_id):
+def skip_unless_tool(tool_id: str) -> Callable:
     """Decorate a Galaxy test method as requiring a specific tool,
     skip the test case if the tool is unavailable.
     """
