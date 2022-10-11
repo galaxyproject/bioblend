@@ -299,6 +299,7 @@ class WorkflowClient(Client):
         allow_tool_state_corrections: bool = False,
         inputs_by: Optional[InputsBy] = None,
         parameters_normalized: bool = False,
+        require_exact_tool_versions: bool = True,
     ) -> dict:
         """
         Invoke the workflow identified by ``workflow_id``. This will
@@ -363,6 +364,11 @@ class WorkflowClient(Client):
           to ensure everything is referenced by a numeric step ID. Default is
           ``False``, but when setting ``params`` for a subworkflow, ``True`` is
           required.
+
+        :type require_exact_tool_versions: bool
+        :param require_exact_tool_versions: Whether invocation should fail if
+          Galaxy does not have the exact tool versions. Default is ``True``.
+          Parameter does not any effect for Galaxy versions < 22.05.
 
         :rtype: dict
         :return: A dict containing the workflow invocation describing the
@@ -492,6 +498,7 @@ class WorkflowClient(Client):
             payload["allow_tool_state_corrections"] = allow_tool_state_corrections
         if inputs_by is not None:
             payload["inputs_by"] = inputs_by
+        payload["require_exact_tool_versions"] = require_exact_tool_versions
         if parameters_normalized:
             payload["parameters_normalized"] = parameters_normalized
         url = self._invocations_url(workflow_id)
