@@ -4,6 +4,10 @@ import os
 import random
 import string
 import unittest
+from typing import (
+    Callable,
+    Optional,
+)
 
 import bioblend.galaxy
 
@@ -21,7 +25,7 @@ def skip_unless_toolshed():
     return lambda f: f
 
 
-def skip_unless_galaxy(min_release=None):
+def skip_unless_galaxy(min_release: Optional[str] = None) -> Callable:
     """Decorate tests with this to skip the test if Galaxy is not
     configured.
     """
