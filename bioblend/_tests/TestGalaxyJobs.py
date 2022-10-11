@@ -227,16 +227,4 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
         assert job["state"] in ("deleted", "deleting")
 
     def _run_tool(self, input_format: Literal["21.01", "legacy"] = "legacy") -> dict:
-        tool_inputs = {
-            "num_lines": "1",
-            "input": {"src": "hda", "id": self.dataset_id},
-        }
-        if input_format == "21.01":
-            tool_inputs.update({"seed_source": {"seed_source_selector": "set_seed", "seed": "asdf"}})
-        else:
-            # legacy format
-            tool_inputs.update({"seed_source|seed_source_selector": "set_seed", "seed_source|seed": "asdf"})
-
-        return self.gi.tools.run_tool(
-            history_id=self.history_id, tool_id="random_lines1", tool_inputs=tool_inputs, input_format=input_format
-        )
+        return super()._run_random_lines1(self.history_id, self.dataset_id, input_format=input_format)

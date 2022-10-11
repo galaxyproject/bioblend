@@ -140,12 +140,26 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
         assert not dataset["deleted"]
         assert dataset["visible"]
 
-    def test_show_dataset_provenance(self):
+    @test_util.skip_unless_galaxy("release_22.01")
+    def test_show_dataset_provenance(self) -> None:
+        MINIMAL_PROV_KEYS = ("id", "uuid")
+        OTHER_PROV_KEYS = ("job_id", "parameters", "stderr", "stdout", "tool_id")
+        ALL_PROV_KEYS = MINIMAL_PROV_KEYS + OTHER_PROV_KEYS
         history_id = self.history["id"]
         dataset1_id = self._test_dataset(history_id)
-        prov = self.gi.histories.show_dataset_provenance(history_id, dataset1_id)
-        for key in ["id", "job_id", "parameters", "stderr", "stdout", "tool_id"]:
+        dataset2_id = self._run_random_lines1(history_id, dataset1_id)["outputs"][0]["id"]
+        prov = self.gi.histories.show_dataset_provenance(history_id, dataset2_id)
+        for key in ALL_PROV_KEYS:
             assert key in prov
+        for key in MINIMAL_PROV_KEYS:
+            assert key in prov["parameters"]["input"]
+        for key in OTHER_PROV_KEYS:
+            assert key not in prov["parameters"]["input"]
+        recursive_prov = self.gi.histories.show_dataset_provenance(history_id, dataset2_id, follow=True)
+        for key in ALL_PROV_KEYS:
+            assert key in recursive_prov
+        for key in ALL_PROV_KEYS:
+            assert key in recursive_prov["parameters"]["input"]
 
     def test_delete_dataset(self):
         history_id = self.history["id"]

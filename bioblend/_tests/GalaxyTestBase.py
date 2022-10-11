@@ -1,6 +1,11 @@
 import os
 import unittest
-from typing import Any
+from typing import (
+    Any,
+    Dict,
+)
+
+from typing_extensions import Literal
 
 import bioblend
 from bioblend.galaxy import GalaxyInstance
@@ -30,3 +35,19 @@ class GalaxyTestBase(unittest.TestCase):
     ) -> None:
         dataset_contents = self.gi.datasets.download_dataset(dataset_id, maxwait=timeout_seconds)
         assert dataset_contents == expected_contents
+
+    def _run_random_lines1(
+        self, history_id: str, dataset_id: str, input_format: Literal["21.01", "legacy"] = "legacy"
+    ) -> Dict[str, Any]:
+        tool_inputs = {
+            "num_lines": "1",
+            "input": {"src": "hda", "id": dataset_id},
+        }
+        if input_format == "21.01":
+            tool_inputs.update({"seed_source": {"seed_source_selector": "set_seed", "seed": "asdf"}})
+        else:
+            # legacy format
+            tool_inputs.update({"seed_source|seed_source_selector": "set_seed", "seed_source|seed": "asdf"})
+        return self.gi.tools.run_tool(
+            history_id=history_id, tool_id="random_lines1", tool_inputs=tool_inputs, input_format=input_format
+        )

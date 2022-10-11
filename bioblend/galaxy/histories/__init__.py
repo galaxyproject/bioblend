@@ -426,7 +426,8 @@ class HistoryClient(Client):
              'uuid': '5c0c43f5-8d93-44bd-939d-305e82f213c6'}
         """
         url = "/".join((self._make_url(history_id, contents=True), dataset_id, "provenance"))
-        return self._get(url=url)
+        params = {"follow": follow}
+        return self._get(url=url, params=params)
 
     def update_history(self, history_id: str, **kwargs: Any) -> Dict[str, Any]:
         """

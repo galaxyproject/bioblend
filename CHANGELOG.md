@@ -12,8 +12,19 @@
 
 * Added ``get_or_create_user_apikey()`` method to ``UserClient``.
 
+* Added ``require_exact_tool_versions`` parameter to
+  ``WorkflowClient.invoke_workflow()`` method (thanks to
+  [cat-bro](https://github.com/cat-bro)).
+
 * Remove unused methods from ``bioblend.config.Config``. If needed, use the
   methods inherited from `configparser.ConfigParser` instead.
+
+* Allowed any 2XX HTTP response status code in ``Client._delete()`` to correctly
+  support history purging via Celery (thanks to
+  [Nolan Woods](https://github.com/innovate-invent)).
+
+* Fixed bug in ``HistoryClient.show_dataset_provenance()`` where the ``follow``
+  parameter was not passed to the Galaxy API.
 
 * BioBlend.objects: Added ``delete()`` abstract method to ``DatasetContainer``
   class.
