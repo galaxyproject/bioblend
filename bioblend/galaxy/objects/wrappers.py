@@ -1130,6 +1130,7 @@ class LibraryDataset(LibRelatedDataset):
     """
 
     SRC = "ld"
+    file_name: str
 
     def delete(self, purged: bool = False) -> None:
         """

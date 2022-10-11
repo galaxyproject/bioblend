@@ -13,14 +13,17 @@ from typing import (
     Any,
     Callable,
     Dict,
+    Iterable,
     List,
     Set,
+    Tuple,
     Union,
 )
 from urllib.error import URLError
 from urllib.request import urlopen
 
 import pytest
+from typing_extensions import Literal
 
 import bioblend
 from bioblend.galaxy import dataset_collections
@@ -133,7 +136,9 @@ def is_reachable(url):
     return True
 
 
-def upload_from_fs(lib, bnames, **kwargs):
+def upload_from_fs(
+    lib: wrappers.Library, bnames: Iterable[str], **kwargs: Any
+) -> Tuple[List[wrappers.LibraryDataset], List[str]]:
     tempdir = tempfile.mkdtemp(prefix="bioblend_test_")
     try:
         fnames = [os.path.join(tempdir, _) for _ in bnames]
@@ -151,7 +156,7 @@ class MockWrapper(wrappers.Wrapper):
     a: int
     b: List[int]
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
 
 
@@ -534,7 +539,7 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
         for wf in wf1, wf2:
             self._check_and_del_workflow(wf)
 
-    def _check_and_del_workflow(self, wf: wrappers.Workflow, check_is_public: bool = False):
+    def _check_and_del_workflow(self, wf: wrappers.Workflow, check_is_public: bool = False) -> None:
         # Galaxy appends additional text to imported workflow names
         assert wf.name.startswith("paste_columns")
         assert len(wf.steps) == 3
@@ -579,7 +584,9 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
     def test_get_workflows(self):
         self._test_multi_get("workflows")
 
-    def _normalized_functions(self, obj_type: str):
+    def _normalized_functions(
+        self, obj_type: Literal["histories", "libraries", "workflows"]
+    ) -> Tuple[Callable, Dict[str, Any]]:
         if obj_type == "libraries":
             create: Callable = self.gi.libraries.create
             del_kwargs = {}
@@ -597,7 +604,7 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
             del_kwargs = {}
         return create, del_kwargs
 
-    def _test_multi_get(self, obj_type: str):
+    def _test_multi_get(self, obj_type: Literal["histories", "libraries", "workflows"]) -> None:
         obj_gi_client = getattr(self.gi, obj_type)
         create, del_kwargs = self._normalized_functions(obj_type)
 
@@ -638,7 +645,7 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
         self._test_delete_by_name("workflows")
         self._test_delete_by_ambiguous_name("workflows")
 
-    def _test_delete_by_name(self, obj_type):
+    def _test_delete_by_name(self, obj_type: Literal["histories", "libraries", "workflows"]) -> None:
         obj_gi_client = getattr(self.gi, obj_type)
         create, del_kwargs = self._normalized_functions(obj_type)
         name = f"test_{uuid.uuid4().hex}"
@@ -650,7 +657,7 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
         prevs = [_ for _ in obj_gi_client.get_previews(name=name) if not _.deleted]
         assert len(prevs) == 0
 
-    def _test_delete_by_ambiguous_name(self, obj_type):
+    def _test_delete_by_ambiguous_name(self, obj_type: Literal["histories", "libraries", "workflows"]) -> None:
         obj_gi_client = getattr(self.gi, obj_type)
         create, del_kwargs = self._normalized_functions(obj_type)
         name = f"test_{uuid.uuid4().hex}"

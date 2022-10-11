@@ -1,5 +1,6 @@
 import os
 import unittest
+from typing import Any
 
 import bioblend
 from bioblend.galaxy import GalaxyInstance
@@ -20,8 +21,8 @@ class GalaxyTestBase(unittest.TestCase):
         galaxy_url = os.environ["BIOBLEND_GALAXY_URL"]
         cls.gi = GalaxyInstance(url=galaxy_url, key=galaxy_key)
 
-    def _test_dataset(self, history_id: str, contents: str = "1\t2\t3", **kwds) -> str:
-        tool_output = self.gi.tools.paste_content(contents, history_id, **kwds)
+    def _test_dataset(self, history_id: str, contents: str = "1\t2\t3", **kwargs: Any) -> str:
+        tool_output = self.gi.tools.paste_content(contents, history_id, **kwargs)
         return tool_output["outputs"][0]["id"]
 
     def _wait_and_verify_dataset(self, dataset_id, expected_contents, timeout_seconds=BIOBLEND_TEST_JOB_TIMEOUT):
