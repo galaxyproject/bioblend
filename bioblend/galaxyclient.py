@@ -128,11 +128,6 @@ class GalaxyClient:
 
         If ``verify`` is not provided, ``self.verify`` will be used.
 
-        If the ``params`` are not provided, use ``default_params`` class field.
-        If params are provided and the provided dict does not have ``key`` key,
-        the default ``self.key`` value will be included in what's passed to
-        the server via the request.
-
         :rtype: requests.Response
         :return: the response object.
         """
@@ -150,11 +145,6 @@ class GalaxyClient:
         The ``payload`` must be a dict that contains the request values.
         The payload dict may contain file handles (in which case the files_attached
         flag must be set to true).
-
-        If the ``params`` are not provided, use ``default_params`` class field.
-        If params are provided and the provided dict does not have ``key`` key,
-        the default ``self.key`` value will be included in what's passed to
-        the server via the request.
 
         :return: The decoded response.
         """
@@ -216,11 +206,6 @@ class GalaxyClient:
         """
         Make a DELETE request using the provided ``url`` and the optional
         arguments.
-
-        If the ``params`` are not provided, use ``default_params`` class field.
-        If params are provided and the provided dict does not have ``key`` key,
-        the default ``self.key`` value will be included in what's passed to
-        the server via the request.
 
         :type payload: dict
         :param payload: a JSON-serializable dictionary
@@ -369,8 +354,8 @@ class GalaxyClient:
             headers = self.json_headers.copy()
             headers["Authorization"] = authorization
             auth_url = f"{self.url}/authenticate/baseauth"
-            # make_post_request uses default_params, which uses this and
-            # sets wrong headers - so using lower level method.
+            # Use lower level method instead of make_get_request() because we
+            # need the additional Authorization header.
             r = requests.get(
                 auth_url,
                 headers=headers,
