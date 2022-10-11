@@ -351,7 +351,7 @@ class HistoryClient(Client):
         return self._get(url=url)
 
     def show_matching_datasets(
-        self, history_id: str, name_filter: Optional[Pattern[str]] = None
+        self, history_id: str, name_filter: Optional[Union[str, Pattern[str]]] = None
     ) -> List[Dict[str, Any]]:
         """
         Get dataset details for matching datasets within a history.
