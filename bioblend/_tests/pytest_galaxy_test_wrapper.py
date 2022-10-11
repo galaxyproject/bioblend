@@ -10,7 +10,7 @@ import sys
 try:
     import pytest
 except ImportError:
-    pytest = None  # type: ignore
+    pytest = None
 
 DIRECTORY = os.path.abspath(os.path.dirname(__file__))
 BIOBLEND_TEST_SUITE = os.environ.get("BIOBLEND_TEST_SUITE", "full")
