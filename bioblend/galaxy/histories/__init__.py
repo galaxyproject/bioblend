@@ -383,10 +383,9 @@ class HistoryClient(Client):
         """
         if isinstance(name_filter, str):
             name_filter = re.compile(name_filter + "$")
-        history_content = self.show_history(history_id, contents=True)
         return [
             self.show_dataset(history_id, h["id"])
-            for h in history_content
+            for h in self.show_history(history_id, contents=True)
             if name_filter is None or name_filter.match(h["name"])
         ]
 

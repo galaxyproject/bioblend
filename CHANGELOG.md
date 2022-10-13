@@ -1,7 +1,10 @@
-### BioBlend v
+### BioBlend v1.0.0 - 2022-10-13
 
 * Drop support for deprecated CloudMan, see
   https://galaxyproject.org/blog/2021-10-sunsetting-cloudlaunch/
+
+* Added dependency on ``typing-extensions`` package, removed dependencies on
+  ``boto`` and ``pyyaml``.
 
 * Deprecated ``max_get_retries()``, ``set_max_get_retries()``,
   ``get_retry_delay()`` and ``set_get_retry_delay()`` methods of ``Client``.
@@ -11,6 +14,9 @@
   ``ToolshedInstance``.
 
 * Added ``get_or_create_user_apikey()`` method to ``UserClient``.
+
+* Added ``all`` parameter to ``HistoryClient.get_histories()`` method (thanks to
+  [Paprikant](https://github.com/Paprikant)).
 
 * Added ``require_exact_tool_versions`` parameter to
   ``WorkflowClient.invoke_workflow()`` method (thanks to
@@ -26,8 +32,11 @@
   support history purging via Celery (thanks to
   [Nolan Woods](https://github.com/innovate-invent)).
 
+* Fixed bug in ``FormsClient.create_form()`` where the ``form_xml_text``
+  argument was not passed correctly to the Galaxy API.
+
 * Fixed bug in ``HistoryClient.show_dataset_provenance()`` where the ``follow``
-  parameter was not passed to the Galaxy API.
+  argument was not passed to the Galaxy API.
 
 * BioBlend.objects: Added ``delete()`` abstract method to ``DatasetContainer``
   class.
@@ -125,9 +134,9 @@
 * Pass the API key for all requests as the ``x-api-key`` header instead of as a
   parameter (thanks to [rikeshi](https://github.com/rikeshi)).
 
-* Try prepending https:// and http:// if the scheme is missing in the ``url``
-  parameter of ``GalaxyClient``, i.e. when initialising a Galaxy or ToolShed
-  instance.
+* Try prepending "https://" and "http://" if the scheme is missing in the
+  ``url`` argument passed to ``GalaxyClient``, i.e. when initialising a Galaxy
+  or ToolShed instance.
 
 * Added a new ``dataset_collections`` attribute to ``GalaxyInstance`` objects,
   which is an instance of the new ``DatasetCollectionClient``. This new module
@@ -341,15 +350,15 @@
 * Added ``maxwait`` parameter to ``HistoryClient.export_history()`` and
   ``History.export()`` methods.
 
-* Fixed handling of ``type`` parameter in ``HistoryClient.show_history()``
+* Fixed handling of ``type`` argument in ``HistoryClient.show_history()``
   (thanks to [Marius van den Beek](https://github.com/mvdbeek)).
 
-* Fixed handling of ``deleted`` parameter in ``LibraryClient.get_libraries()``
+* Fixed handling of ``deleted`` argument in ``LibraryClient.get_libraries()``
   (thanks to [Luke Sargent](https://github.com/luke-c-sargent), reported by
   [Katie](https://github.com/emartchenko)).
 
 * Fixed ``LibraryClient.wait_for_dataset()`` when ``maxwait`` or ``interval``
-  parameters are of type ``float``.
+  arguments are of type ``float``.
 
 * Unify JSON-encoding of non-file parameters of POST requests inside
   ``GalaxyClient.make_post_request()``.
@@ -483,7 +492,7 @@
   Galaxy API request (thanks to @DamCorreia).
 
 * Fixed ``HistoryClient.update_history()`` and ``History.update()`` methods
-  when ``name`` parameter is not specified.
+  when ``name`` argument is not specified.
 
 * Added warning if content size differs from content-length header in
   ``DatasetClient.download_dataset()``.
@@ -571,7 +580,7 @@
 * Updated CloudmanLauncher's ``launch`` method to accept ``subnet_id``
   parameter, for VPC support (thanks to Matthew Ralston).
 
-* Properly pass extra parameters to cloud instance userdata.
+* Properly pass extra arguments to cloud instance userdata.
 
 * Updated placement finding methods and `get_clusters_pd` method to return a
   dict vs. lists so error messages can be included.

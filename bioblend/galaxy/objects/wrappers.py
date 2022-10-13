@@ -386,8 +386,7 @@ class Workflow(Wrapper):
         while source_ids:
             head = source_ids.pop()
             ids.append(head)
-            tails: Set[str] = self.dag[head] if head in self.dag else set()
-            for tail in tails:
+            for tail in self.dag.get(head, set()):
                 incoming = inv_dag[tail]
                 incoming.remove(head)
                 if not incoming:
