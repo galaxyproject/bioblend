@@ -16,6 +16,9 @@
   ``WorkflowClient.invoke_workflow()`` method (thanks to
   [cat-bro](https://github.com/cat-bro)).
 
+* Added ``name`` and ``owner`` parameters to
+  ``ToolShedRepositoryClient.get_repositories()``.
+
 * Remove unused methods from ``bioblend.config.Config``. If needed, use the
   methods inherited from `configparser.ConfigParser` instead.
 

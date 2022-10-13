@@ -25,9 +25,16 @@ class ToolShedRepositoryClient(Client):
     def __init__(self, toolshed_instance: "ToolShedInstance") -> None:
         super().__init__(toolshed_instance)
 
-    def get_repositories(self) -> List[Dict[str, Any]]:
+    def get_repositories(self, name: Optional[str] = None, owner: Optional[str] = None) -> List[Dict[str, Any]]:
         """
-        Get a list of all the repositories in a Galaxy Tool Shed.
+        Get all repositories in a Galaxy Tool Shed, or select a subset by
+        specifying optional arguments for filtering (e.g. a repository name).
+
+        :type name: str
+        :param name: Repository name to filter on.
+
+        :type owner: str
+        :param owner: Repository owner to filter on.
 
         :rtype: list
         :return: Returns a list of dictionaries containing information about
@@ -54,7 +61,12 @@ class ToolShedRepositoryClient(Client):
           Changed method name from ``get_tools`` to ``get_repositories`` to
           better align with the Tool Shed concepts.
         """
-        return self._get()
+        params = {}
+        if name:
+            params["name"] = name
+        if owner:
+            params["owner"] = owner
+        return self._get(params=params)
 
     def search_repositories(
         self,

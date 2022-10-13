@@ -36,13 +36,18 @@ class TestToolshed(unittest.TestCase):
         assert len(repositories) > 5000
         assert repositories[0]["model_class"] == "Repository"
 
+        repositories = self.ts.repositories.get_repositories(name="bam_to_sam", owner="devteam")
+        assert len(repositories) == 1
+        bam_to_sam_repo = repositories[0]
+        assert bam_to_sam_repo["name"] == "bam_to_sam"
+        assert bam_to_sam_repo["owner"] == "devteam"
+
         # search_repositories
         samtools_search = self.ts.repositories.search_repositories("samtools", page_size=5)
         assert int(samtools_search["total_results"]) > 20
         assert len(samtools_search["hits"]) == 5
 
         # show_repository
-        bam_to_sam_repo = [r for r in repositories if r["name"] == "bam_to_sam"][0]
         show_bam_to_sam_repo = self.ts.repositories.show_repository(bam_to_sam_repo["id"])
         assert "SAM" in show_bam_to_sam_repo["long_description"]
 
