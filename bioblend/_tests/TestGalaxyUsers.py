@@ -43,18 +43,18 @@ class TestGalaxyUsers(GalaxyTestBase.GalaxyTestBase):
         # this test only on a disposable Galaxy instance!
         if self.gi.config.get_config()["use_remote_user"]:
             self.skipTest("This Galaxy instance is not configured to use local users")
-        username = test_util.random_string()
-        new_user_email = f"{username}@example.org"
+        new_username = test_util.random_string()
+        new_user_email = f"{new_username}@example.org"
         password = test_util.random_string(20)
-        user = self.gi.users.create_local_user(username, new_user_email, password)
-        assert user["username"] == username
-        assert user["email"] == new_user_email
+        new_user = self.gi.users.create_local_user(new_username, new_user_email, password)
+        assert new_user["username"] == new_username
+        assert new_user["email"] == new_user_email
         # test a BioBlend GalaxyInstance can be created using username+password
         user_gi = bioblend.galaxy.GalaxyInstance(url=self.gi.base_url, email=new_user_email, password=password)
         assert user_gi.users.get_current_user()["email"] == new_user_email
         # test deletion
         if self.gi.config.get_config()["allow_user_deletion"]:
-            deleted_user = self.gi.users.delete_user(user["id"])
+            deleted_user = self.gi.users.delete_user(new_user["id"])
             assert deleted_user["email"] == new_user_email
             assert deleted_user["deleted"]
 
@@ -72,28 +72,55 @@ class TestGalaxyUsers(GalaxyTestBase.GalaxyTestBase):
         # this test only on a disposable Galaxy instance!
         if self.gi.config.get_config()["use_remote_user"]:
             self.skipTest("This Galaxy instance is not configured to use local users")
-        username = test_util.random_string()
-        new_user_email = f"{username}@example.org"
-        user = self.gi.users.create_local_user(username, new_user_email, test_util.random_string(20))
-        assert user["username"] == username
-        assert user["email"] == new_user_email
-
-        updated_user_email = "updateduser@example.org"
-        updated_username = "updateduser"
-        user_id = user["id"]
-        self.gi.users.update_user(user_id, username=updated_username, email=updated_user_email)
-        user = self.gi.users.show_user(user_id)
-        assert user["username"] == updated_username
-        assert user["email"] == updated_user_email
+        new_username = test_util.random_string()
+        new_user = self.gi.users.create_local_user(
+            new_username, f"{new_username}@example.org", test_util.random_string(20)
+        )
+        new_user_id = new_user["id"]
+        updated_username = test_util.random_string()
+        updated_user_email = f"{updated_username}@example.org"
+        self.gi.users.update_user(new_user_id, username=updated_username, email=updated_user_email)
+        updated_user = self.gi.users.show_user(new_user_id)
+        assert updated_user["username"] == updated_username
+        assert updated_user["email"] == updated_user_email
 
         if self.gi.config.get_config()["allow_user_deletion"]:
-            self.gi.users.delete_user(user["id"])
+            self.gi.users.delete_user(new_user_id)
 
     def test_get_user_apikey(self):
+        # Test getting the API key of the current user, which surely has one
         user_id = self.gi.users.get_current_user()["id"]
-        assert self.gi.users.get_user_apikey(user_id)
+        apikey = self.gi.users.get_user_apikey(user_id)
+        assert apikey and apikey != "Not available."
+        # Test getting the API key of a new user, which doesn't have one
+        new_username = test_util.random_string()
+        new_user_id = self.gi.users.create_local_user(
+            new_username, f"{new_username}@example.org", test_util.random_string(20)
+        )["id"]
+        assert self.gi.users.get_user_apikey(new_user_id) == "Not available."
 
     @test_util.skip_unless_galaxy("release_21.01")
     def test_get_or_create_user_apikey(self):
+        # Check that get_or_create_user_apikey() doesn't regenerate an existing API key
         user_id = self.gi.users.get_current_user()["id"]
-        assert self.gi.users.get_or_create_user_apikey(user_id)
+        apikey = self.gi.users.get_user_apikey(user_id)
+        assert self.gi.users.get_or_create_user_apikey(user_id) == apikey
+        # Check that get_or_create_user_apikey() generates an API key for a new user
+        new_username = test_util.random_string()
+        new_user_id = self.gi.users.create_local_user(
+            new_username, f"{new_username}@example.org", test_util.random_string(20)
+        )["id"]
+        new_apikey = self.gi.users.get_or_create_user_apikey(new_user_id)
+        assert new_apikey and new_apikey != "Not available."
+
+    def test_create_user_apikey(self):
+        # Test creating an API key for a new user
+        new_username = test_util.random_string()
+        new_user_id = self.gi.users.create_local_user(
+            new_username, f"{new_username}@example.org", test_util.random_string(20)
+        )["id"]
+        new_apikey = self.gi.users.create_user_apikey(new_user_id)
+        assert new_apikey and new_apikey != "Not available."
+        # Test regenerating an API key for a user that already has one
+        regenerated_apikey = self.gi.users.create_user_apikey(new_user_id)
+        assert regenerated_apikey and regenerated_apikey not in (new_apikey, "Not available.")

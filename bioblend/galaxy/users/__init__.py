@@ -11,6 +11,7 @@ from typing import (
     TYPE_CHECKING,
 )
 
+from bioblend import ConnectionError
 from bioblend.galaxy.client import Client
 
 if TYPE_CHECKING:
@@ -201,8 +202,17 @@ class UserClient(Client):
         :return: the API key for the user, or 'Not available.' if it doesn't
           exist yet.
         """
-        url = self._make_url(user_id) + "/api_key/inputs"
-        return self._get(url=url)["inputs"][0]["value"]
+        try:
+            url = self._make_url(user_id) + "/api_key/detailed"
+            return self._get(url=url)["key"]
+        except ConnectionError as e:
+            if e.status_code == 204:
+                return "Not available."
+            elif e.status_code != 404:
+                raise
+            # Galaxy 22.05 or earlier
+            url = self._make_url(user_id) + "/api_key/inputs"
+            return self._get(url=url)["inputs"][0]["value"]
 
     def get_or_create_user_apikey(self, user_id: str) -> str:
         """

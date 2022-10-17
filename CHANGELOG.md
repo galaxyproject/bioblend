@@ -1,3 +1,7 @@
+### BioBlend v
+
+* Improvements to tests
+
 ### BioBlend v1.0.0 - 2022-10-13
 
 * Drop support for deprecated CloudMan, see
