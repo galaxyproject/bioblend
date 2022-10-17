@@ -62,15 +62,15 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Cache pip dir
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.cache/pip
           key: pip-cache-${{ matrix.tox_env }}-${{ matrix.galaxy_version }}
       - name: Calculate Python version for BioBlend from tox_env
         id: get_bioblend_python_version
-        run: echo "::set-output name=bioblend_python_version::$(echo "${{ matrix.tox_env }}" | sed -e 's/^py\([3-9]\)\([0-9]\+\)/\1.\2/')"
+        run: echo "bioblend_python_version=$(echo "${{ matrix.tox_env }}" | sed -e 's/^py\([3-9]\)\([0-9]\+\)/\1.\2/')" >> $GITHUB_OUTPUT
       - name: Set up Python for BioBlend
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ steps.get_bioblend_python_version.outputs.bioblend_python_version }}
       - name: Install tox
@@ -93,9 +93,9 @@ jobs:
             release_22.0* | dev )
               galaxy_python_version=3.7
           esac
-          echo "::set-output name=galaxy_python_version::$galaxy_python_version"
+          echo "galaxy_python_version=$galaxy_python_version" >> $GITHUB_OUTPUT
       - name: Set up Python for Galaxy
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ steps.get_galaxy_python_version.outputs.galaxy_python_version }}
       - name: Run tests
