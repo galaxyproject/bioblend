@@ -85,8 +85,10 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
 
     @test_util.skip_unless_galaxy("release_20.01")
     def test_other_users_histories(self):
-        username = "newuser4"
-        user_id = self.gi.users.create_local_user(username, f"{username}@example.org", "secret")["id"]
+        username = test_util.random_string()
+        user_id = self.gi.users.create_local_user(username, f"{username}@example.org", test_util.random_string(20))[
+            "id"
+        ]
         user_api_key = self.gi.users.create_user_apikey(user_id)
         user_gi = galaxy.GalaxyInstance(url=self.gi.base_url, key=user_api_key)
         # Normal users cannot use the `all` parameter

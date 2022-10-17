@@ -14,6 +14,10 @@ import bioblend.galaxy
 NO_GALAXY_MESSAGE = "Externally configured Galaxy required, but not found. Set BIOBLEND_GALAXY_URL and BIOBLEND_GALAXY_API_KEY to run this test."
 
 
+def random_string(length: int = 8) -> str:
+    return "".join(random.choice(string.ascii_lowercase) for _ in range(length))
+
+
 def skip_unless_toolshed() -> Callable:
     """Decorate tests with this to skip the test if a URL for a ToolShed
     to run the tests is not provided.
@@ -50,10 +54,7 @@ def skip_unless_galaxy(min_release: Optional[str] = None) -> Callable:
         if "BIOBLEND_GALAXY_USER_EMAIL" in os.environ:
             galaxy_user_email = os.environ["BIOBLEND_GALAXY_USER_EMAIL"]
         else:
-            galaxy_user_email = (
-                "".join(random.choice(string.ascii_uppercase + string.digits) for _ in range(5))
-                + "@localhost.localdomain"
-            )
+            galaxy_user_email = f"{random_string()}@localhost.localdomain"
 
         galaxy_user_id = None
         for user in gi.users.get_users():
@@ -67,7 +68,7 @@ def skip_unless_galaxy(min_release: Optional[str] = None) -> Callable:
                 new_user = gi.users.create_remote_user(galaxy_user_email)
             else:
                 galaxy_user = galaxy_user_email.split("@", 1)[0]
-                galaxy_password = "".join(random.choice(string.ascii_uppercase + string.digits) for _ in range(20))
+                galaxy_password = random_string(20)
 
                 # Create a new user
                 new_user = gi.users.create_local_user(galaxy_user, galaxy_user_email, galaxy_password)
