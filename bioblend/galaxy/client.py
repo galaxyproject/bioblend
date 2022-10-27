@@ -227,13 +227,15 @@ class Client:
         :type payload: dict
         :param payload: additional parameters to send in the body of the request
 
-        :return: The decoded response.
+        :return: The decoded response or None.
         """
         if not url:
             url = self._make_url(module_id=id, deleted=deleted, contents=contents)
         r = self.gi.make_delete_request(url, payload=payload, params=params)
-        if 200 <= r.status_code < 300:
+        if 200 <= r.status_code < 203:
             return r.json()
+        elif 203 <= r.status_code < 300:
+            return None
         # @see self.body for HTTP response body
         raise ConnectionError(
             f"Unexpected HTTP status code: {r.status_code}",

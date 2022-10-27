@@ -655,21 +655,18 @@ class WorkflowClient(Client):
         payload = {"action": action}
         return self._put(payload=payload, url=url)
 
-    def delete_workflow(self, workflow_id: str) -> str:
+    def delete_workflow(self, workflow_id: str) -> None:
         """
         Delete a workflow identified by `workflow_id`.
 
         :type workflow_id: str
         :param workflow_id: Encoded workflow ID
 
-        :rtype: str
-        :return: A message about the deletion
-
         .. warning::
-            Deleting a workflow is irreversible - all workflow data
-            will be permanently deleted.
+            Deleting a workflow is irreversible in Galaxy versions < 23.01 - all
+            workflow data will be permanently deleted.
         """
-        return self._delete(id=workflow_id)
+        self._delete(id=workflow_id)
 
     def refactor_workflow(
         self, workflow_id: str, actions: List[Dict[str, Any]], dry_run: bool = False

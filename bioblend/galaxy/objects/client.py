@@ -327,9 +327,7 @@ class ObjWorkflowClient(ObjClient):
           the workflow will be permanently deleted.
         """
         id_ = self._select_id(id_=id_, name=name)
-        res = self.gi.workflows.delete_workflow(id_)
-        if not isinstance(res, str):
-            raise RuntimeError(f"delete_workflow: unexpected reply: {res!r}")
+        self.gi.workflows.delete_workflow(id_)
 
 
 class ObjInvocationClient(ObjClient):

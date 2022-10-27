@@ -2,6 +2,9 @@
 
 * Added support for Python 3.11.
 
+* Modified ``delete_workflow()`` method of ``WorkflowClient`` to return
+  ``None`` instead of a string.
+
 * Improvements to tests
 
 ### BioBlend v1.0.0 - 2022-10-13
