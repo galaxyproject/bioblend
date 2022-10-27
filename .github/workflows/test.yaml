@@ -52,7 +52,7 @@ jobs:
           - release_17.09
         include:
           - os: ubuntu-latest
-            tox_env: py310
+            tox_env: py311
             galaxy_version: dev
           # Cannot test on macOS because service containers are not supported
           # yet: https://github.community/t/github-actions-services-available-on-others-vms/16916

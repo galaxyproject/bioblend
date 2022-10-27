@@ -1,5 +1,7 @@
 ### BioBlend v
 
+* Added support for Python 3.11.
+
 * Improvements to tests
 
 ### BioBlend v1.0.0 - 2022-10-13
