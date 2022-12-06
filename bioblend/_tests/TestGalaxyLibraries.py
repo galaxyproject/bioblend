@@ -1,5 +1,4 @@
 import os
-import shutil
 import tempfile
 
 from . import (
@@ -55,43 +54,51 @@ class TestGalaxyLibraries(GalaxyTestBase.GalaxyTestBase):
         assert self.library["name"] == library_data["name"]
 
     def test_upload_file_from_url(self):
-        self.gi.libraries.upload_file_from_url(
-            self.library["id"], "https://zenodo.org/record/582600/files/wildtype.fna?download=1"
-        )
+        url = "https://zenodo.org/record/582600/files/wildtype.fna?download=1"
+        ret = self.gi.libraries.upload_file_from_url(self.library["id"], url)
+        assert len(ret) == 1
+        ldda_dict = ret[0]
+        assert ldda_dict["name"] == url
 
     def test_upload_file_contents(self):
-        self.gi.libraries.upload_file_contents(self.library["id"], FOO_DATA)
+        ret = self.gi.libraries.upload_file_contents(self.library["id"], FOO_DATA)
+        assert len(ret) == 1
+        ldda_dict = ret[0]
+        assert ldda_dict["name"] == "Pasted Entry"
 
     def test_upload_file_from_local_path(self):
         with tempfile.NamedTemporaryFile(mode="w", prefix="bioblend_test_") as f:
             f.write(FOO_DATA)
             f.flush()
-            self.gi.libraries.upload_file_from_local_path(self.library["id"], f.name)
+            filename = f.name
+            ret = self.gi.libraries.upload_file_from_local_path(self.library["id"], filename)
+        assert len(ret) == 1
+        ldda_dict = ret[0]
+        assert ldda_dict["name"] == os.path.basename(filename)
 
-    def test_upload_file_from_server(self):
-        pass
+    # def test_upload_file_from_server(self):
+    #     pass
 
     def test_upload_from_galaxy_filesystem(self):
         bnames = [f"f{i}.txt" for i in range(2)]
-        tempdir = tempfile.mkdtemp(prefix="bioblend_test_")
-        try:
+        with tempfile.TemporaryDirectory() as tempdir:
             fnames = [os.path.join(tempdir, _) for _ in bnames]
             for fn in fnames:
                 with open(fn, "w") as f:
                     f.write(FOO_DATA)
             filesystem_paths = "\n".join(fnames)
             ret = self.gi.libraries.upload_from_galaxy_filesystem(self.library["id"], filesystem_paths)
-            for dataset_dict in ret:
+            for fn, dataset_dict in zip(fnames, ret):
                 dataset = self.gi.libraries.wait_for_dataset(self.library["id"], dataset_dict["id"])
                 assert dataset["state"] == "ok"
+                assert dataset["name"] == os.path.basename(fn)
             ret = self.gi.libraries.upload_from_galaxy_filesystem(
                 self.library["id"], filesystem_paths, link_data_only="link_to_files"
             )
-            for dataset_dict in ret:
+            for fn, dataset_dict in zip(fnames, ret):
                 dataset = self.gi.libraries.wait_for_dataset(self.library["id"], dataset_dict["id"])
                 assert dataset["state"] == "ok"
-        finally:
-            shutil.rmtree(tempdir)
+                assert dataset["name"] == os.path.basename(fn)
 
     def test_copy_from_dataset(self):
         history = self.gi.histories.create_history()

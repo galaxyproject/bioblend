@@ -232,8 +232,8 @@ class LibraryClient(Client):
         :type library_id: str
         :param library_id: library id to find root of
         """
-        l = self.show_library(library_id=library_id)
-        return l["root_folder_id"]
+        library_dict = self.show_library(library_id=library_id)
+        return library_dict["root_folder_id"]
 
     def create_folder(
         self, library_id: str, folder_name: str, description: Optional[str] = None, base_folder_id: Optional[str] = None
@@ -671,7 +671,8 @@ class LibraryClient(Client):
         :param tags: A list of tags to add to the datasets
 
         :rtype: list
-        :return: List with a single dictionary containing information about the LDDA
+        :return: List of dictionaries containing information about each uploaded
+          LDDA.
 
         .. note::
           This method works only if the Galaxy instance has the
