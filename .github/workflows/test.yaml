@@ -85,10 +85,15 @@ jobs:
               galaxy_python_version=2.7
               ;;
             release_20.0* )
-              galaxy_python_version=3.5
+              # The minimum Python supported version by these releases is 3.5,
+              # but the setup-python GitHub action dropped support for it on
+              # Ubuntu 22.04, see https://github.com/actions/setup-python/issues/544#issuecomment-1332535877
+              galaxy_python_version=3.7
               ;;
             release_21.0* )
-              galaxy_python_version=3.6
+              # The minimum Python supported version by these releases is 3.6,
+              # but same as above.
+              galaxy_python_version=3.7
               ;;
             release_22.0* | dev )
               galaxy_python_version=3.7
