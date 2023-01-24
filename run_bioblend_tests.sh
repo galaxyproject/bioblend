@@ -102,7 +102,8 @@ echo "Created temporary directory $TEMP_DIR"
 mkdir "${TEMP_DIR}/config" "${TEMP_DIR}/database"
 printf "<?xml version=\"1.0\"?>\n<toolbox tool_path=\"%s\">\n</toolbox>\n" "$TEMP_DIR/shed_tools" > "$TEMP_DIR/config/shed_tool_conf.xml"
 # Export BIOBLEND_ environment variables to be used in BioBlend tests
-export BIOBLEND_GALAXY_MASTER_API_KEY=$(LC_ALL=C tr -dc A-Za-z0-9 < /dev/urandom | head -c 32)
+BIOBLEND_GALAXY_MASTER_API_KEY=$(LC_ALL=C tr -dc A-Za-z0-9 < /dev/urandom | head -c 32)
+export BIOBLEND_GALAXY_MASTER_API_KEY
 export BIOBLEND_GALAXY_USER_EMAIL="${USER}@localhost.localdomain"
 DATABASE_CONNECTION=${DATABASE_CONNECTION:-"sqlite:///${TEMP_DIR}/database/universe.sqlite?isolation_level=IMMEDIATE"}
 # Update psycopg2 requirement to a version compatible with glibc 2.26 for Galaxy releases 16.01-18.01, see https://github.com/psycopg/psycopg2-wheels/issues/2
@@ -120,6 +121,12 @@ else
     # and the `--wait` option does not work any more.
     # Export GALAXY_CONFIG_FILE environment variable to be used by run.sh
     export GALAXY_CONFIG_FILE="${TEMP_DIR}/config/galaxy.yml"
+    if [ -f test/functional/tools/samples_tool_conf.xml ]; then
+        # Galaxy 22.05 or earlier
+        TEST_TOOLS_CONF_FILE=test/functional/tools/samples_tool_conf.xml
+    else
+        TEST_TOOLS_CONF_FILE=test/functional/tools/sample_tool_conf.xml
+    fi
     eval "echo \"$(cat "${BIOBLEND_DIR}/tests/template_galaxy.yml")\"" > "${GALAXY_CONFIG_FILE}"
     export GRAVITY_STATE_DIR="${TEMP_DIR}/database/gravity"
     ./run.sh --daemon
