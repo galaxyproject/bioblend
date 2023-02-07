@@ -144,7 +144,7 @@ else
     done
     while true; do
         sleep 1
-        if grep -q "serving on http://127.0.0.1:${GALAXY_PORT}" "${GRAVITY_STATE_DIR}/log/gunicorn.log"; then
+        if grep -q "[Ss]erving on http://127.0.0.1:${GALAXY_PORT}" "${GRAVITY_STATE_DIR}/log/gunicorn.log"; then
             break
         else
             echo 'Galaxy not serving yet'
