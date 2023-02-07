@@ -27,12 +27,12 @@ with open("small.ga") as f:
 # Select the "Orione SupMat" library
 
 library_name = "Orione SupMat"
-l = get_one(gi.libraries.list(name=library_name))
+library = get_one(gi.libraries.list(name=library_name))
 
 # Select the input dataset
 
 ds_name = "/RNA-Seq - Listeria monocytogenes/Listeria_monocytogenes_EGD_e_uid61583/NC_003210.rnt"
-ld = get_one(l.get_datasets(name=ds_name))
+ld = get_one(library.get_datasets(name=ds_name))
 input_map = {"input_tsv": ld}
 
 # Run the workflow on a new history with the selected dataset as

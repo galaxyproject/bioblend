@@ -30,12 +30,12 @@ h = gi.histories.create(history_name)
 # Select the "Orione SupMat" library
 
 library_name = "Orione SupMat"
-l = get_one(gi.libraries.list(name=library_name))
+library = get_one(gi.libraries.list(name=library_name))
 
 # Select the "/Metagenomics/MetagenomicsDataset.fq" dataset
 
 ds_name = "/Metagenomics/MetagenomicsDataset.fq"
-input_map = {"Input Dataset": h.import_dataset(get_one(l.get_datasets(name=ds_name)))}
+input_map = {"Input Dataset": h.import_dataset(get_one(library.get_datasets(name=ds_name)))}
 
 # Select the blastn step
 

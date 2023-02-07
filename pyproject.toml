@@ -9,3 +9,11 @@ target-version = ['py37']
 
 [tool.darker]
 isort = true
+
+[tool.ruff]
+select = ["E", "F", "B", "UP"]
+target-version = "py37"
+# Exceptions:
+# B9 flake8-bugbear opinionated warnings
+# E501 is line length (delegated to black)
+ignore = ["B9", "E501"]

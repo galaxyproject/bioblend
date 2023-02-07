@@ -41,14 +41,14 @@ iw_details = common.get(API_KEY, f"{API_URL}/workflows/{iw['id']}")
 
 library_name = "Orione SupMat"
 libraries = common.get(API_KEY, f"{API_URL}/libraries")
-l = [_ for _ in libraries if _["name"] == library_name]
-assert len(l) == 1
-l = l[0]
+filtered_libraries = [_ for _ in libraries if _["name"] == library_name]
+assert len(filtered_libraries) == 1
+library = filtered_libraries[0]
 
 # Select the "/Metagenomics/MetagenomicsDataset.fq" dataset
 
 ds_name = "/Metagenomics/MetagenomicsDataset.fq"
-contents = common.get(API_KEY, f"{API_URL}/libraries/{l['id']}/contents")
+contents = common.get(API_KEY, f"{API_URL}/libraries/{library['id']}/contents")
 ld = [_ for _ in contents if _["type"] == "file" and _["name"] == ds_name]
 assert len(ld) == 1
 ld = ld[0]

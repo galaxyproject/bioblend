@@ -26,7 +26,7 @@ class TestGalaxyLibraries(GalaxyTestBase.GalaxyTestBase):
 
     def test_get_libraries(self):
         libraries_with_name = self.gi.libraries.get_libraries(name=self.name)
-        assert len([l for l in libraries_with_name if l["id"] == self.library["id"]]) == 1
+        assert len([lib for lib in libraries_with_name if lib["id"] == self.library["id"]]) == 1
 
         deleted_name = "deleted test library"
         deleted_library_id = self.gi.libraries.create_library(
@@ -34,19 +34,19 @@ class TestGalaxyLibraries(GalaxyTestBase.GalaxyTestBase):
         )["id"]
         self.gi.libraries.delete_library(deleted_library_id)
         deleted_libraries_with_name = self.gi.libraries.get_libraries(name=deleted_name, deleted=True)
-        assert len([l for l in deleted_libraries_with_name if l["id"] == deleted_library_id]) == 1
+        assert len([lib for lib in deleted_libraries_with_name if lib["id"] == deleted_library_id]) == 1
 
         all_non_deleted_libraries = self.gi.libraries.get_libraries(deleted=False)
-        assert len([l for l in all_non_deleted_libraries if l["id"] == self.library["id"]]) == 1
-        assert [l for l in all_non_deleted_libraries if l["id"] == deleted_library_id] == []
+        assert len([lib for lib in all_non_deleted_libraries if lib["id"] == self.library["id"]]) == 1
+        assert [lib for lib in all_non_deleted_libraries if lib["id"] == deleted_library_id] == []
 
         all_deleted_libraries = self.gi.libraries.get_libraries(deleted=True)
-        assert [l for l in all_deleted_libraries if l["id"] == self.library["id"]] == []
-        assert len([l for l in all_deleted_libraries if l["id"] == deleted_library_id]) == 1
+        assert [lib for lib in all_deleted_libraries if lib["id"] == self.library["id"]] == []
+        assert len([lib for lib in all_deleted_libraries if lib["id"] == deleted_library_id]) == 1
 
         all_libraries = self.gi.libraries.get_libraries(deleted=None)
-        assert len([l for l in all_libraries if l["id"] == self.library["id"]]) == 1
-        assert len([l for l in all_libraries if l["id"] == deleted_library_id]) == 1
+        assert len([lib for lib in all_libraries if lib["id"] == self.library["id"]]) == 1
+        assert len([lib for lib in all_libraries if lib["id"] == deleted_library_id]) == 1
 
     def test_show_library(self):
         library_data = self.gi.libraries.show_library(self.library["id"])

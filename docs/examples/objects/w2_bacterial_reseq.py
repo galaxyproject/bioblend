@@ -29,7 +29,7 @@ h = gi.histories.create(history_name)
 # Select the "Orione SupMat" library
 
 library_name = "Orione SupMat"
-l = get_one(gi.libraries.list(name=library_name))
+library = get_one(gi.libraries.list(name=library_name))
 
 # Select the datasets
 
@@ -43,7 +43,9 @@ input_labels = [
     "Reverse Reads",
     "Reference Genome",
 ]
-input_map = {label: h.import_dataset(get_one(l.get_datasets(name=name))) for name, label in zip(ds_names, input_labels)}
+input_map = {
+    label: h.import_dataset(get_one(library.get_datasets(name=name))) for name, label in zip(ds_names, input_labels)
+}
 
 # Set custom parameters for the "check_contigs" and "sspace" tools
 
