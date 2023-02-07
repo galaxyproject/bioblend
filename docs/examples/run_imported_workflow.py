@@ -58,7 +58,7 @@ print("Importing data")
 
 dataset_ids = []
 filenames = {}
-for (file1, file2) in import_file_pairs:
+for file1, file2 in import_file_pairs:
     dataset1 = gi.libraries.upload_file_from_url(library, file1, file_type="fastqsanger")
     dataset2 = gi.libraries.upload_file_from_url(library, file2, file_type="fastqsanger")
     id1, id2 = dataset1[0]["id"], dataset2[0]["id"]
@@ -82,7 +82,7 @@ input2 = gi.workflows.get_workflow_inputs(workflow, label="Input fastq readpair-
 # For each pair of datasets we imported, run the imported workflow
 # For each input we need to build a datamap dict with 'src' set to 'ld', as we stored our data in a Galaxy Library
 
-for (data1, data2) in dataset_ids:
+for data1, data2 in dataset_ids:
     print(f"Initiating workflow run on files {filenames[data1]}, {filenames[data2]}")
     datamap = {
         input1: {"src": "ld", "id": data1},

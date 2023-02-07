@@ -344,7 +344,6 @@ class ToolClient(Client):
         tool_inputs: Union[InputsBuilder, dict],
         input_format: Literal["21.01", "legacy"] = "legacy",
     ) -> Dict[str, Any]:
-
         """
         Runs tool specified by ``tool_id`` in history indicated
         by ``history_id`` with inputs from ``dict`` ``tool_inputs``.

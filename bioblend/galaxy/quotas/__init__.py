@@ -147,7 +147,6 @@ class QuotaClient(Client):
         in_users: Optional[List[str]] = None,
         in_groups: Optional[List[str]] = None,
     ) -> str:
-
         """
         Update an existing quota
 
