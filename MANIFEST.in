@@ -4,5 +4,6 @@ graft bioblend/_tests
 graft docs
 
 global-exclude *.swp *.pyc .gitignore
+global-include bioblend/py.typed
 
 include *.rst CITATION LICENSE
