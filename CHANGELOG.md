@@ -1,6 +1,6 @@
 ### BioBlend v
 
-* Added support for Python 3.11.
+* Added support for Python 3.11. Added support for Galaxy release 23.0.
 
 * Modified ``delete_workflow()`` method of ``WorkflowClient`` to return
   ``None`` instead of a string.
