@@ -73,7 +73,7 @@ class DatasetClient(Client):
             if require_ok_state:
                 raise DatasetStateException(message)
             else:
-                warnings.warn(message, DatasetStateWarning)
+                warnings.warn(message, DatasetStateWarning, stacklevel=2)
 
         file_ext = dataset.get("file_ext")
         # Resort to 'data' when Galaxy returns an empty or temporary extension
@@ -453,7 +453,7 @@ class DatasetStateException(Exception):
     pass
 
 
-class DatasetStateWarning(Warning):
+class DatasetStateWarning(UserWarning):
     pass
 
 
