@@ -1,11 +1,28 @@
-### BioBlend v
+### BioBlend v1.1.0 - 2023-02-21
 
 * Added support for Python 3.11. Added support for Galaxy release 23.0.
+
+* Using the deprecated ``folder_id`` parameter of the
+  ``LibraryClient.get_folders()`` method now raises a ``ValueError`` exception.
+
+* Using the deprecated ``library_id`` parameter of the
+  ``LibraryClient.get_libraries()`` method now raises a ``ValueError``
+  exception.
+
+* Using the deprecated ``tool_id`` parameter of the ``ToolClient.get_tools()``
+  method now raises a ``ValueError`` exception.
+
+* Using the deprecated ``workflow_id`` parameter of the
+  ``WorkflowClient.get_workflows()`` method now raises a ``ValueError``
+  exception.
 
 * Modified ``delete_workflow()`` method of ``WorkflowClient`` to return
   ``None`` instead of a string.
 
-* Improvements to tests
+* Add ``py.typed`` marker file to distributed packages (as per PEP 561) to
+  declare type checking support.
+
+* Improvements to tests and documentation.
 
 ### BioBlend v1.0.0 - 2022-10-13
 

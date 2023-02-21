@@ -1,7 +1,6 @@
 """
 Contains possible interaction dealing with Galaxy tools.
 """
-import warnings
 from os.path import basename
 from typing import (
     Any,
@@ -37,13 +36,6 @@ class ToolClient(Client):
         Get all tools, or select a subset by specifying optional arguments for
         filtering (e.g. a tool name).
 
-        :type tool_id: str
-        :param tool_id: id of the requested tool
-
-          .. deprecated:: 0.16.0
-             To get details of a tool for which you know the ID, use the much
-             more efficient :meth:`show_tool` instead.
-
         :type name: str
         :param name: Tool name to filter on.
 
@@ -55,19 +47,17 @@ class ToolClient(Client):
         :return: List of tool descriptions.
 
         .. seealso:: bioblend.galaxy.toolshed.get_repositories()
+
+        .. versionchanged:: 1.1.0
+           Using the deprecated ``tool_id`` parameter now raises a
+           ``ValueError`` exception.
         """
         if tool_id is not None:
-            warnings.warn(
-                "The tool_id parameter is deprecated, use the show_tool() method to view details of a tool for which you know the ID.",
-                category=FutureWarning,
+            raise ValueError(
+                "The tool_id parameter has been removed, use the show_tool() method to view details of a tool for which you know the ID."
             )
-        if tool_id is not None and name is not None:
-            raise ValueError("Provide only one argument between name or tool_id, but not both")
         tools = self._raw_get_tool(in_panel=False, trackster=trackster)
-        if tool_id is not None:
-            tool = next((_ for _ in tools if _["id"] == tool_id), None)
-            tools = [tool] if tool is not None else []
-        elif name is not None:
+        if name is not None:
             tools = [_ for _ in tools if _["name"] == name]
         return tools
 

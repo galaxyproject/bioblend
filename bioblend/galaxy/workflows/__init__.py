@@ -3,7 +3,6 @@ Contains possible interactions with the Galaxy Workflows
 """
 import json
 import os
-import warnings
 from typing import (
     Any,
     Dict,
@@ -36,13 +35,6 @@ class WorkflowClient(Client):
         Get all workflows, or select a subset by specifying optional arguments
         for filtering (e.g. a workflow name).
 
-        :type workflow_id: str
-        :param workflow_id: Encoded workflow ID
-
-          .. deprecated:: 0.16.0
-             To get details of a workflow for which you know the ID, use the
-             much more efficient :meth:`show_workflow` instead.
-
         :type name: str
         :param name: Workflow name to filter on.
 
@@ -57,22 +49,19 @@ class WorkflowClient(Client):
                      'name': 'Simple',
                      'url': '/api/workflows/92c56938c2f9b315'}]
 
+        .. versionchanged:: 1.1.0
+           Using the deprecated ``workflow_id`` parameter now raises a
+           ``ValueError`` exception.
         """
         if workflow_id is not None:
-            warnings.warn(
-                "The workflow_id parameter is deprecated, use the show_workflow() method to view details of a workflow for which you know the ID.",
-                category=FutureWarning,
+            raise ValueError(
+                "The workflow_id parameter has been removed, use the show_workflow() method to view details of a workflow for which you know the ID."
             )
-        if workflow_id is not None and name is not None:
-            raise ValueError("Provide only one argument between name or workflow_id, but not both")
         params: Dict[str, Any] = {}
         if published:
             params["show_published"] = True
         workflows = self._get(params=params)
-        if workflow_id is not None:
-            workflow = next((_ for _ in workflows if _["id"] == workflow_id), None)
-            workflows = [workflow] if workflow is not None else []
-        elif name is not None:
+        if name is not None:
             workflows = [_ for _ in workflows if _["name"] == name]
         return workflows
 

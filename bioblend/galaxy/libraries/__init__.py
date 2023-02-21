@@ -3,7 +3,6 @@ Contains possible interactions with the Galaxy Data Libraries
 """
 import logging
 import time
-import warnings
 from typing import (
     Any,
     Dict,
@@ -280,13 +279,6 @@ class LibraryClient(Client):
         :type library_id: str
         :param library_id: library id to use
 
-        :type folder_id: str
-        :param folder_id: filter for folder by folder id
-
-          .. deprecated:: 0.16.0
-             To get details of a folder for which you know the ID, use the much
-             more efficient :meth:`show_folder` instead.
-
         :type name: str
         :param name: Folder name to filter on. For ``name`` specify the full
                      path of the folder starting from the library's root
@@ -294,19 +286,17 @@ class LibraryClient(Client):
 
         :rtype: list
         :return: list of dicts each containing basic information about a folder
+
+        .. versionchanged:: 1.1.0
+           Using the deprecated ``folder_id`` parameter now raises a
+           ``ValueError`` exception.
         """
         if folder_id is not None:
-            warnings.warn(
-                "The folder_id parameter is deprecated, use the show_folder() method to view details of a folder for which you know the ID.",
-                category=FutureWarning,
+            raise ValueError(
+                "The folder_id parameter has been removed, use the show_folder() method to view details of a folder for which you know the ID."
             )
-        if folder_id is not None and name is not None:
-            raise ValueError("Provide only one argument between name or folder_id, but not both")
         library_contents = self.show_library(library_id=library_id, contents=True)
-        if folder_id is not None:
-            folder = next((_ for _ in library_contents if _["type"] == "folder" and _["id"] == folder_id), None)
-            folders = [folder] if folder is not None else []
-        elif name is not None:
+        if name is not None:
             folders = [_ for _ in library_contents if _["type"] == "folder" and _["name"] == name]
         else:
             folders = [_ for _ in library_contents if _["type"] == "folder"]
@@ -319,13 +309,6 @@ class LibraryClient(Client):
         Get all libraries, or select a subset by specifying optional arguments
         for filtering (e.g. a library name).
 
-        :type library_id: str
-        :param library_id: filter for library by library id
-
-          .. deprecated:: 0.16.0
-             To get details of a library for which you know the ID, use the much
-             more efficient :meth:`show_library` instead.
-
         :type name: str
         :param name: Library name to filter on.
 
@@ -336,18 +319,16 @@ class LibraryClient(Client):
 
         :rtype: list
         :return: list of dicts each containing basic information about a library
+
+        .. versionchanged:: 1.1.0
+           Using the deprecated ``library_id`` parameter now raises a
+           ``ValueError`` exception.
         """
         if library_id is not None:
-            warnings.warn(
-                "The library_id parameter is deprecated, use the show_library() method to view details of a library for which you know the ID.",
-                category=FutureWarning,
+            raise ValueError(
+                "The library_id parameter has been removed, use the show_library() method to view details of a library for which you know the ID."
             )
-        if library_id is not None and name is not None:
-            raise ValueError("Provide only one argument between name or library_id, but not both")
         libraries = self._get(params={"deleted": deleted})
-        if library_id is not None:
-            library = next((_ for _ in libraries if _["id"] == library_id), None)
-            libraries = [library] if library is not None else []
         if name is not None:
             libraries = [_ for _ in libraries if _["name"] == name]
         return libraries
