@@ -287,7 +287,7 @@ class LibraryClient(Client):
         :rtype: list
         :return: list of dicts each containing basic information about a folder
 
-        .. versionchanged:: 1.1.0
+        .. versionchanged:: 1.1.1
            Using the deprecated ``folder_id`` parameter now raises a
            ``ValueError`` exception.
         """
@@ -320,7 +320,7 @@ class LibraryClient(Client):
         :rtype: list
         :return: list of dicts each containing basic information about a library
 
-        .. versionchanged:: 1.1.0
+        .. versionchanged:: 1.1.1
            Using the deprecated ``library_id`` parameter now raises a
            ``ValueError`` exception.
         """

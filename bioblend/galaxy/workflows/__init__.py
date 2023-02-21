@@ -49,7 +49,7 @@ class WorkflowClient(Client):
                      'name': 'Simple',
                      'url': '/api/workflows/92c56938c2f9b315'}]
 
-        .. versionchanged:: 1.1.0
+        .. versionchanged:: 1.1.1
            Using the deprecated ``workflow_id`` parameter now raises a
            ``ValueError`` exception.
         """

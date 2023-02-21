@@ -1,4 +1,7 @@
-### BioBlend v1.1.0 - 2023-02-21
+### BioBlend v1.1.1 - 2023-02-21
+
+* Same as BioBlend v1.1.0, briefly released with wrong version number 1.0.1 on
+  GitHub, PyPI and Bioconda.
 
 * Added support for Python 3.11. Added support for Galaxy release 23.0.
 

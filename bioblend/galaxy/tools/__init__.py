@@ -48,7 +48,7 @@ class ToolClient(Client):
 
         .. seealso:: bioblend.galaxy.toolshed.get_repositories()
 
-        .. versionchanged:: 1.1.0
+        .. versionchanged:: 1.1.1
            Using the deprecated ``tool_id`` parameter now raises a
            ``ValueError`` exception.
         """
