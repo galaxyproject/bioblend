@@ -333,6 +333,7 @@ class ToolClient(Client):
         tool_id: str,
         tool_inputs: Union[InputsBuilder, dict],
         input_format: Literal["21.01", "legacy"] = "legacy",
+        data_manager_mode: Optional[Literal["populate", "dry_run", "bundle"]] = None,
     ) -> Dict[str, Any]:
         """
         Runs tool specified by ``tool_id`` in history indicated
@@ -343,6 +344,16 @@ class ToolClient(Client):
 
         :type tool_id: str
         :param tool_id: ID of the tool to be run
+
+        :type data_manager_mode: str
+        :param data_manager_mode: Possible values are 'populate', 'dry_run' and 'bundle'.
+
+          'populate' is the default behavior for data manager tools and results in tool data table
+          files being updated after the data manager job completes.
+
+          'dry_run' will skip any processing after the data manager job completes
+
+          'bundle' will create a data manager bundle that can be imported on other Galaxy servers.
 
         :type tool_inputs: dict
         :param tool_inputs: dictionary of input datasets and parameters
@@ -416,6 +427,10 @@ class ToolClient(Client):
             payload["inputs"] = tool_inputs.to_dict()
         else:
             payload["inputs"] = tool_inputs
+
+        if data_manager_mode:
+            payload["data_manager_mode"] = data_manager_mode
+
         return self._post(payload)
 
     def upload_file(
