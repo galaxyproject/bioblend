@@ -6,25 +6,20 @@ from typing import (
     Optional,
 )
 
-from typing_extensions import Literal
-
 from bioblend.galaxy.client import Client
 
 
 class ContainerResolutionClient(Client):
     module = "container_resolvers"
 
-    def __init__(self, galaxy_instance):
-        super().__init__(galaxy_instance)
-
-    def get_container_resolvers(self):
-        """ GET /api/container_resolvers """
+    def get_container_resolvers(self) -> list:
+        """GET /api/container_resolvers"""
         url = self._make_url()
         return self._get(url=url)
 
-    def show_container_resolver(self, index: int):
-        """ GET /api/container_resolvers/<index> """
-        url = f'{self._make_url()}/{index}'
+    def show_container_resolver(self, index: int) -> dict:
+        """GET /api/container_resolvers/<index>"""
+        url = f"{self._make_url()}/{index}"
         return self._get(url=url)
 
     def resolve(
@@ -52,7 +47,7 @@ class ContainerResolutionClient(Client):
         :type container_type: str
         :param container_type: restrict to specified container type
 
-        :type requirements_only: 
+        :type requirements_only: bool
         :param requirements_only: ignore tool containers, properties - just search based on tool requirements set to True to mimic default behavior of tool dependency API.
 
         :type install: bool
@@ -61,7 +56,7 @@ class ContainerResolutionClient(Client):
         :rtype: dict
         TODO: example
         """
-        params ={}
+        params = {}
         if tool_id:
             params["tool_id"] = tool_id
         if resolver_type:
@@ -87,7 +82,7 @@ class ContainerResolutionClient(Client):
     ) -> dict:
         """
         Apply resolve() to each tool in the toolbox and return the results as a list.
-        See documentation for resolve() for a description of parameters that can be 
+        See documentation for resolve() for a description of parameters that can be
         consumed and a description of the resulting items.
 
         :type index: int
@@ -103,13 +98,16 @@ class ContainerResolutionClient(Client):
         :type container_type: str
         :param container_type: restrict to specified container type
 
+        :type requirements_only: bool
+        :param requirements_only: ignore tool containers, properties - just search based on tool requirements set to True to mimic default behavior of tool dependency API.
+
         :type install: bool
         :param install: allow installation of new containers (for build_mulled containers) the way job resolution will operate, defaults to False
 
         :rtype: dict
         TODO: example
         """
-        params ={}
+        params = {}
         if tool_ids:
             params["tool_ids"] = ",".join(tool_ids)
         if resolver_type:
@@ -122,7 +120,7 @@ class ContainerResolutionClient(Client):
             url = "/".join((self._make_url(), str(index), "toolbox"))
         else:
             url = "/".join((self._make_url(), "toolbox"))
-        return self._get(url=url, payload=params)
+        return self._get(url=url, params=params)
 
     def resolve_toolbox_with_install(
         self,
@@ -134,7 +132,7 @@ class ContainerResolutionClient(Client):
         install: bool = False,
     ) -> list:
         """
-        Summarize requirements across toolbox (for Tool Management grid).
+        Do the resolution of dependencies like resolve_toolbox(), but allow building and installing new containers.
 
         :type index: int
         :param index: index of the dependency resolver with respect to
@@ -148,6 +146,9 @@ class ContainerResolutionClient(Client):
 
         :type container_type: str
         :param container_type: restrict to specified container type
+
+        :type requirements_only: bool
+        :param requirements_only: ignore tool containers, properties - just search based on tool requirements set to True to mimic default behavior of tool dependency API.
 
         :type install: bool
         :param install: allow installation of new containers (for build_mulled* containers) the way job resolution will operate, defaults to False
@@ -178,7 +179,7 @@ class ContainerResolutionClient(Client):
             'version': None},
         'tool_id': 'toolshed.g2.bx.psu.edu/repos/bgruening/canu/canu/2.2+galaxy0'}]
         """
-        params ={}
+        params = {}
         if tool_ids:
             params["tool_ids"] = ",".join(tool_ids)
         if resolver_type:
