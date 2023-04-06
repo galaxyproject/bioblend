@@ -28,3 +28,11 @@ class TestGalaxyToolDependencies(GalaxyTestBase.GalaxyTestBase):
         assert isinstance(toolbox_summary_select_tool_ids, list)
         assert len(toolbox_summary_select_tool_ids) == 1
         assert toolbox_summary_select_tool_ids[0]["tool_ids"][0] == tool_id
+
+    def test_unused_dependency_paths(self):
+        unused_paths = self.gi.tool_dependencies.unused_dependency_paths()
+        assert isinstance(unused_paths, list)
+        assert len(unused_paths) == 0
+
+    def test_delete_unused_dependency_paths(self):
+        self.gi.tool_dependencies.delete_unused_dependency_paths(paths=[])

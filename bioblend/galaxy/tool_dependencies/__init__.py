@@ -2,6 +2,8 @@
 Contains interactions dealing with Galaxy dependency resolvers.
 """
 from typing import (
+    Any,
+    Dict,
     List,
     Optional,
     TYPE_CHECKING,
@@ -101,3 +103,22 @@ class ToolDependenciesClient(Client):
 
         url = "/".join((self._make_url(), "toolbox"))
         return self._get(url=url, params=params)
+
+    def unused_dependency_paths(self) -> List[str]:
+        """
+        List unused dependencies
+        """
+        url = "/".join((self._make_url(), "unused_paths"))
+        return self._get(url=url)
+
+    def delete_unused_dependency_paths(self, paths: List[str]) -> None:
+        """
+        Delete unused paths
+
+        :type paths: list
+        :param paths: paths to delete
+
+        """
+        payload: Dict[str, Any] = {"paths": paths}
+        url = "/".join((self._make_url(), "unused_paths"))
+        self._put(url=url, payload=payload)
