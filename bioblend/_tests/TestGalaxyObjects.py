@@ -178,7 +178,7 @@ class TestWrapper(unittest.TestCase):
         assert self.d["a"] == 1
         assert self.d["b"][0] == 2
         with pytest.raises(AttributeError):
-            self.w.foo  # type: ignore[attr-defined]
+            _ = self.w.foo  # type: ignore[attr-defined]
         with pytest.raises(AttributeError):
             self.w.foo = 0  # type: ignore[assignment]
 
