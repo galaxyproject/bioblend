@@ -183,8 +183,6 @@ class ContainerResolutionClient(Client):
         :type requirements_only: bool
         :param requirements_only: ignore tool containers, properties - just search based on tool requirements set to True to mimic default behavior of tool dependency API.
 
-        :type install: bool
-        :param install: allow installation of new containers (for build_mulled* containers) the way job resolution will operate, defaults to False
 
         :rtype: list of dicts
         :returns: dictified descriptions of the dependencies, with attribute
