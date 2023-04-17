@@ -162,7 +162,6 @@ class ContainerResolutionClient(Client):
         resolver_type: Optional[str] = None,
         container_type: Optional[str] = None,
         requirements_only: bool = False,
-        install: bool = False,
     ) -> list:
         """
         Do the resolution of dependencies like resolve_toolbox(), but allow building and installing new containers.
