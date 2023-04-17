@@ -57,8 +57,8 @@ class ContainerResolutionClient(Client):
 
     def resolve(
         self,
+        tool_id: str,
         index: Optional[int] = None,
-        tool_id: str = None,
         resolver_type: Optional[str] = None,
         container_type: Optional[str] = None,
         requirements_only: bool = False,
