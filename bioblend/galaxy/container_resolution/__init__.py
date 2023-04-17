@@ -63,8 +63,8 @@ class ContainerResolutionClient(Client):
             params["resolver_type"] = resolver_type
         if container_type:
             params["container_type"] = container_type
-        params["requirements_only"] = requirements_only
-        params["install"] = install
+        params["requirements_only"] = str(requirements_only)
+        params["install"] = str(install)
         if index is not None:
             url = "/".join((self._make_url(), str(index), "resolve"))
         else:
