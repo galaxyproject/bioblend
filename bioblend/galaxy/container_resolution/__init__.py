@@ -13,12 +13,45 @@ class ContainerResolutionClient(Client):
     module = "container_resolvers"
 
     def get_container_resolvers(self) -> list:
-        """GET /api/container_resolvers"""
+        """
+        List container resolvers
+
+        :rtype: list
+        return: List of container resolvers
+
+        For example:
+        [{'builds_on_resolution': False,
+          'can_uninstall_dependencies': False,
+          'model_class': 'CachedExplicitSingularityContainerResolver',
+          'resolver_type': 'cached_explicit_singularity'},
+        {'builds_on_resolution': False,
+          'can_uninstall_dependencies': False,
+          'model_class': 'CachedMulledSingularityContainerResolver',
+          'resolver_type': 'cached_mulled_singularity'},
+        {'builds_on_resolution': False,
+          'can_uninstall_dependencies': False,
+          'model_class': 'MulledSingularityContainerResolver',
+          'resolver_type': 'mulled_singularity'}] {'builds_on_resolution': False,
+        """
         url = self._make_url()
         return self._get(url=url)
 
     def show_container_resolver(self, index: int) -> dict:
-        """GET /api/container_resolvers/<index>"""
+        """
+        Show container resolver
+
+        :type index: int
+        :param index: index of the dependency resolver with respect to
+            the dependency resolvers config file
+
+        :rtype: dict
+        return: Dict of properties of a given container resolver
+
+        {'builds_on_resolution': False,
+        'can_uninstall_dependencies': False,
+        'model_class': 'CachedMulledSingularityContainerResolver',
+        'resolver_type': 'cached_mulled_singularity'}
+        """
         url = f"{self._make_url()}/{index}"
         return self._get(url=url)
 
