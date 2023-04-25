@@ -1,3 +1,7 @@
+### Bioblend v
+
+* Dropped support for Galaxy releases 17.09-19.01.
+
 ### BioBlend v1.1.1 - 2023-02-21
 
 * Same as BioBlend v1.1.0, briefly released with wrong version number 1.0.1 on

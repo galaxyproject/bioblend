@@ -4,7 +4,7 @@ interacting with the `Galaxy`_ API.
 BioBlend is supported and tested on:
 
 - Python 3.7 - 3.11
-- Galaxy release 17.09 and later.
+- Galaxy release 19.05 and later.
 
 BioBlend's goal is to make it easier to script and automate the running of
 Galaxy analyses and administering of a Galaxy server.

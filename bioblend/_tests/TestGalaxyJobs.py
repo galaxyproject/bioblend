@@ -178,7 +178,6 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
         assert "Runner Job ID" in response
         assert "Handler" in response
 
-    @test_util.skip_unless_galaxy("release_18.01")
     @test_util.skip_unless_tool("random_lines1")
     def test_search_jobs(self):
         job_id = self._run_tool()["jobs"][0]["id"]
@@ -219,7 +218,6 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
         status = self.gi.jobs.update_job_lock(active=False)
         assert not status
 
-    @test_util.skip_unless_galaxy("release_18.01")
     def test_cancel_job(self):
         job_id = self._run_tool()["jobs"][0]["id"]
         self.gi.jobs.cancel_job(job_id)

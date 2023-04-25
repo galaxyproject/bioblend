@@ -502,7 +502,6 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
             wf = self.gi.workflows.import_new(f.read())
         self._check_and_del_workflow(wf)
 
-    @test_util.skip_unless_galaxy("release_19.01")
     def test_workflow_parameter_input(self):
         with open(SAMPLE_WF_PARAMETER_INPUT_FN) as f:
             self.gi.workflows.import_new(f.read())

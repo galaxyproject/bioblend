@@ -14,9 +14,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     services:
       postgres:
-        # Use PostgreSQL 11 to workaround https://github.com/sqlalchemy/sqlalchemy/issues/4919
-        # for Galaxy 18.05, 18.09 and 19.01
-        image: postgres:11
+        image: postgres
         # Provide the password for postgres
         env:
           POSTGRES_PASSWORD: postgres
@@ -46,11 +44,6 @@ jobs:
           - release_20.01
           - release_19.09
           - release_19.05
-          - release_19.01
-          - release_18.09
-          - release_18.05
-          - release_18.01
-          - release_17.09
         include:
           - os: ubuntu-latest
             tox_env: py311
@@ -82,13 +75,14 @@ jobs:
         id: get_galaxy_python_version
         run: |
           case ${{ matrix.galaxy_version }} in
-            release_17.09 | release_18.0* | release_19.0* )
-              galaxy_python_version=2.7
-              ;;
-            release_20.0* )
-              # The minimum Python supported version by these releases is 3.5,
-              # but the setup-python GitHub action dropped support for it on
-              # Ubuntu 22.04, see https://github.com/actions/setup-python/issues/544#issuecomment-1332535877
+            release_19.05 | release_19.09 | release_20.0* )
+              # The minimum Python version supported by the 19.05 and 19.09
+              # releases is 2.7, but virtualenv dropped support for creating
+              # Python <3.7 environments in v20.22.0 .
+              # The minimum Python version supported by the 20.0* releases is
+              # 3.5, but the setup-python GitHub action dropped support for
+              # Python 3.5 and 3.6 on Ubuntu 22.04, see
+              # https://github.com/actions/setup-python/issues/544#issuecomment-1332535877
               galaxy_python_version=3.7
               ;;
             release_21.0* )

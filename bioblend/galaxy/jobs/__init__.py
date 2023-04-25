@@ -297,9 +297,6 @@ class JobsClient(Client):
         .. versionchanged:: 0.16.0
           Replaced the ``job_info`` parameter with separate ``tool_id``,
           ``inputs`` and ``state``.
-
-        .. note::
-          This method works only on Galaxy 18.01 or later.
         """
         job_info = {
             "tool_id": tool_id,
@@ -428,9 +425,6 @@ class JobsClient(Client):
 
         :rtype: list of dicts
         :return: list of dictionaries containing output dataset associations
-
-        .. note::
-          This method works only on Galaxy 18.09 or later.
         """
         url = self._make_url(module_id=job_id) + "/resume"
         return self._put(url=url)

@@ -106,8 +106,8 @@ BIOBLEND_GALAXY_MASTER_API_KEY=$(LC_ALL=C tr -dc A-Za-z0-9 < /dev/urandom | head
 export BIOBLEND_GALAXY_MASTER_API_KEY
 export BIOBLEND_GALAXY_USER_EMAIL="${USER}@localhost.localdomain"
 DATABASE_CONNECTION=${DATABASE_CONNECTION:-"sqlite:///${TEMP_DIR}/database/universe.sqlite?isolation_level=IMMEDIATE"}
-# Update psycopg2 requirement to a version compatible with glibc 2.26 for Galaxy releases 16.01-18.01, see https://github.com/psycopg/psycopg2-wheels/issues/2
-sed -i.bak -e 's/psycopg2==2.6.1/psycopg2==2.7.3.1/' lib/galaxy/dependencies/conditional-requirements.txt
+# Update psycopg2 requirement to a version that doesn't use 2to3 for Galaxy release 19.05, see https://github.com/psycopg/psycopg2/issues/1419
+sed -i.bak -e 's/psycopg2-binary==2.7.4/psycopg2-binary==2.8.4/' lib/galaxy/dependencies/conditional-requirements.txt
 # Start Galaxy and wait for successful server start
 export GALAXY_SKIP_CLIENT_BUILD=1
 if grep -q wait_arg_set run.sh ; then

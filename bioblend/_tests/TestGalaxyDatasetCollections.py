@@ -10,10 +10,7 @@ from typing import (
 from zipfile import ZipFile
 
 from bioblend.galaxy import dataset_collections
-from . import (
-    GalaxyTestBase,
-    test_util,
-)
+from . import GalaxyTestBase
 
 
 class TestGalaxyDatasetCollections(GalaxyTestBase.GalaxyTestBase):
@@ -153,7 +150,6 @@ class TestGalaxyDatasetCollections(GalaxyTestBase.GalaxyTestBase):
             for key in element1["object"].keys():
                 assert key in element2["object"].keys()
 
-    @test_util.skip_unless_galaxy("release_18.01")
     def test_download_dataset_collection(self):
         history_id = self.gi.histories.create_history(name="TestDatasetCollectionDownload")["id"]
         dataset_collection_id = self._create_pair_in_history(history_id)["id"]

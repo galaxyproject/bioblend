@@ -886,9 +886,6 @@ class HistoryClient(Client):
 
         :rtype: list
         :return: List of extra files
-
-        .. note::
-          This method works only on Galaxy 19.01 or later.
         """
         url = "/".join((self._make_url(history_id, contents=True), dataset_id, "extra_files"))
         return self._get(url=url)
