@@ -231,10 +231,11 @@ class UserClient(Client):
         url = self._make_url(user_id) + "/api_key"
         return self._get(url=url)
 
-    def update_user(self, user_id: str, **kwargs: Any) -> Dict[str, Any]:
+    def update_user(self, user_id: str, update_data: dict = {}, **kwargs: Any) -> Dict[str, Any]:
         """
-        Update user information. Some of the attributes that can be
-        modified are documented below.
+        Update user information. You can either pass a dict of all attributes you want to change, or provide them as kwargs.
+        For attributes that cannot be expressed as a kwarg (extra_user_preferences use a | sign) pass them as update_data.
+        Some of the attributes that can be modified are documented below.
 
         :type user_id: str
         :param user_id: encoded user ID
@@ -248,5 +249,6 @@ class UserClient(Client):
         :rtype: dict
         :return: details of the updated user
         """
+        update_data.update(kwargs)
         url = self._make_url(user_id) + "/information/inputs"
-        return self._put(url=url, payload=kwargs, id=user_id)
+        return self._put(url=url, payload=update_data, id=user_id)
