@@ -233,8 +233,11 @@ class UserClient(Client):
 
     def update_user(self, user_id: str, user_data: Optional[Dict] = None, **kwargs: Any) -> Dict[str, Any]:
         """
-        Update user information. You can either pass a dict of all attributes you want to change, or provide them as kwargs.
-        For attributes that cannot be expressed as a kwarg (extra_user_preferences use a | sign) pass them as update_data.
+        Update user information. You can either pass the attributes you want to
+        change in the user_data dictionary, or provide them separately as
+        keyword arguments.
+        For attributes that cannot be expressed as keywords (e.g.
+        extra_user_preferences use a `|` sign), pass them in user_data.
 
         :type user_id: str
         :param user_id: encoded user ID
