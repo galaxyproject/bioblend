@@ -119,7 +119,7 @@ class LibraryClient(Client):
         modified are documented below.
 
         :type dataset_id: str
-        :param dataset_id: id of the dataset to be deleted
+        :param dataset_id: id of the dataset to be updated
 
         :type name: str
         :param name: Replace library dataset name with the given string
