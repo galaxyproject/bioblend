@@ -88,6 +88,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
             parameters_normalized=True,
         )
 
+    @test_util.skip_unless_galaxy("release_19.09")
     @test_util.skip_unless_tool("cat1")
     @test_util.skip_unless_tool("cat")
     def test_cancelling_workflow_scheduling(self):
@@ -113,7 +114,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         assert invocation["state"] in ["new", "ready"]
 
         self.gi.workflows.cancel_invocation(workflow_id, invocation_id)
-        invocation = self.gi.workflows.show_invocation(workflow_id, invocation_id)
+        invocation = self.gi.invocations.wait_for_invocation(invocation_id, check=False)
         assert invocation["state"] == "cancelled"
 
     def test_import_export_workflow_from_local_path(self):
