@@ -205,7 +205,7 @@ class LibraryClient(Client):
                 time_left -= interval
             else:
                 raise DatasetTimeoutException(
-                    f"Waited too long for dataset {dataset_id} in library {library_id} to complete"
+                    f"Dataset {dataset_id} in library {library_id} is still in non-terminal state {state} after {maxwait} s"
                 )
 
     def show_folder(self, library_id: str, folder_id: str) -> Dict[str, Any]:
