@@ -1,5 +1,6 @@
 """
 Contains interactions dealing with Galaxy container resolvers.
+Works only with Galaxy > 22.01
 """
 from typing import (
     List,
