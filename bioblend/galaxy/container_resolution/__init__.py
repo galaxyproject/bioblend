@@ -87,7 +87,19 @@ class ContainerResolutionClient(Client):
         :param install: allow installation of new containers (for build_mulled containers) the way job resolution will operate, defaults to False
 
         :rtype: dict
-        TODO: example
+
+        For example:
+        {
+            'requirements': [{'name': 'pyarrow', 'specs': [], 'type': 'package', 'version': '4.0.1'}],
+            'status': {
+                'cacheable': False,
+                'container_description': {'identifier': 'quay.io/biocontainers/pyarrow:4.0.1', 'resolve_dependencies': False, 'shell': '/bin/bash', 'type': 'docker'},
+                'container_resolver': {'builds_on_resolution': False, 'can_uninstall_dependencies': False, 'model_class': 'MulledDockerContainerResolver', 'resolver_type': 'mulled'},
+                'dependency_type': 'docker',
+                ...
+            },
+            'tool_id': 'CONVERTER_parquet_to_csv'
+        }
         """
         params = {}
         if tool_id:
@@ -112,7 +124,7 @@ class ContainerResolutionClient(Client):
         container_type: Optional[str] = None,
         requirements_only: bool = False,
         install: bool = False,
-    ) -> dict:
+    ) -> list:
         """
         Apply resolve() to each tool in the toolbox and return the results as a list.
         See documentation for resolve() for a description of parameters that can be
@@ -137,8 +149,9 @@ class ContainerResolutionClient(Client):
         :type install: bool
         :param install: allow installation of new containers (for build_mulled containers) the way job resolution will operate, defaults to False
 
-        :rtype: dict
-        TODO: example
+        :rtype: list
+          For example::
+        [{'tool_id': 'upload1', 'status': {'model_class': 'NullDependency', 'dependency_type': None, 'exact': True, 'name': None, 'version': None, 'cacheable': False}, 'requirements': []}, ...]
         """
         params = {}
         if tool_ids:
