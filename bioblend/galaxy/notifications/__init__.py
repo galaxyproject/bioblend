@@ -25,10 +25,12 @@ class NotificationClient(Client):
 
     def get_notification_status(self, since: datetime) -> Dict[str, Union[int, List[Any]]]:
         """
-        Returns the current status summary of the user's notifications
+        Fetches the current status summary of the user's notifications
         since a particular date.
+
         :type since: datetime
         :param since: Retrieval of the notifications starts from this point in time
+
         :return: A dictionary containing the current status summary of notifications.
         :rtype: dict
         """
