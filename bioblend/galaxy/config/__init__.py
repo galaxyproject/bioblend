@@ -72,3 +72,13 @@ class ConfigClient(Client):
         """
         url = self.gi.url + "/whoami"
         return self._get(url=url)
+
+    def reload_toolbox(self) -> None:
+        """
+        Reload the Galaxy toolbox (but not individual tools)
+
+        :rtype: None
+        :return: None
+        """
+        url = f"{self._make_url()}/toolbox"
+        return self._put(url=url)

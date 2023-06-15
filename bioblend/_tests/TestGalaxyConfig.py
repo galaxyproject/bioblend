@@ -16,3 +16,7 @@ class TestGalaxyConfig(GalaxyTestBase.GalaxyTestBase):
         response = self.gi.config.whoami()
         assert isinstance(response, dict)
         assert "username" in response.keys()
+
+    def test_reload_toolbox(self):
+        response = self.gi.config.reload_toolbox()
+        assert response is None
