@@ -73,7 +73,7 @@ class ConfigClient(Client):
         url = self.gi.url + "/whoami"
         return self._get(url=url)
 
-    def reload_toolbox(self) -> dict:
+    def reload_toolbox(self) -> None:
         """
         Reload the Galaxy toolbox (but not individual tools)
 
