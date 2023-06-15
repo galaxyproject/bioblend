@@ -42,7 +42,7 @@ master_doc = "index"
 
 # General information about the project.
 project = "BioBlend"
-copyright = "2012-2016, Enis Afgan"
+copyright = "2012-2023, Galaxy Project"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -192,7 +192,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-    ("index", "BioBlend.tex", "BioBlend Documentation", "Enis Afgan", "manual"),
+    ("index", "BioBlend.tex", "BioBlend Documentation", "Galaxy Project", "manual"),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -220,7 +220,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [("index", "bioblend", "BioBlend Documentation", ["Enis Afgan"], 1)]
+man_pages = [("index", "bioblend", "BioBlend Documentation", ["Galaxy Project"], 1)]
 
 # If true, show URL addresses after external links.
 # man_show_urls = False
@@ -236,7 +236,7 @@ texinfo_documents = [
         "index",
         "BioBlend",
         "BioBlend Documentation",
-        "Enis Afgan",
+        "Galaxy Project",
         "BioBlend",
         "One line description of project.",
         "Miscellaneous",
