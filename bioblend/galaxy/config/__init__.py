@@ -80,5 +80,5 @@ class ConfigClient(Client):
         :rtype: None
         :return: None
         """
-        url = self.gi.url + "/toolbox"
+        url = f"{self._make_url()}/toolbox"
         return self._put(url=url)
