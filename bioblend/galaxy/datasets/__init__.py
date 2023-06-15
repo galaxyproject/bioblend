@@ -16,7 +16,6 @@ from typing import (
     TYPE_CHECKING,
     Union,
 )
-from urllib.parse import urljoin
 
 from requests import Response
 from typing_extensions import Literal
@@ -86,7 +85,7 @@ class DatasetClient(Client):
         # does not work when using REMOTE_USER with access disabled to
         # everything but /api without auth
         download_url = dataset["download_url"] + "?to_ext=" + file_ext
-        url = urljoin(self.gi.base_url, download_url)
+        url = f"{self.gi.base_url}{download_url}"
 
         r = self.gi.make_get_request(url, stream=stream_content)
         r.raise_for_status()

@@ -17,7 +17,6 @@ from typing import (
     Pattern,
     Union,
 )
-from urllib.parse import urljoin
 
 from typing_extensions import Literal
 
@@ -870,7 +869,7 @@ class HistoryClient(Client):
           any such tab is recommended.
         """
 
-        url = urljoin(self.gi.base_url, f"history/switch_to_history?hist_id={history_id}")
+        url = f"{self.gi.base_url}/history/switch_to_history?hist_id={history_id}"
         webbrowser.open_new_tab(url)
 
     def get_extra_files(self, history_id: str, dataset_id: str) -> List[str]:

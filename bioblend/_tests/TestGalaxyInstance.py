@@ -17,6 +17,14 @@ class TestGalaxyInstance(unittest.TestCase):
         # "connect" to a fake Galaxy instance
         self.gi = GalaxyInstance("http://localhost:56789", key="whatever")
 
+    def test_url_attribute(self):
+        assert self.gi.base_url == "http://localhost:56789"
+        assert self.gi.url == "http://localhost:56789/api"
+        # Test instance served at a subdirectory
+        gi = GalaxyInstance("http://localhost:56789/galaxy/", key="whatever")
+        assert gi.base_url == "http://localhost:56789/galaxy"
+        assert gi.url == "http://localhost:56789/galaxy/api"
+
     def test_set_max_get_attempts(self):
         self.gi.max_get_attempts = 3
         assert 3 == self.gi.max_get_attempts

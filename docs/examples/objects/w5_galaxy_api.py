@@ -1,14 +1,13 @@
 import json
 import os
 import sys
-from urllib.parse import urljoin
 
 # This example, provided for comparison with w5_metagenomics.py,
 # contains the code required to run the metagenomics workflow
 # *without* BioBlend.
 
-URL = os.getenv("GALAXY_URL", "https://orione.crs4.it")
-API_URL = urljoin(URL, "api")
+URL = os.getenv("GALAXY_URL", "https://orione.crs4.it").rstrip("/")
+API_URL = f"{URL}/api"
 API_KEY = os.getenv("GALAXY_API_KEY", "YOUR_API_KEY")
 if API_KEY == "YOUR_API_KEY":
     sys.exit("API_KEY not set, see the README.txt file")

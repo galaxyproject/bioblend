@@ -13,7 +13,6 @@ from typing import (
     Any,
     Optional,
 )
-from urllib.parse import urljoin
 
 import requests
 import tusclient.client
@@ -66,9 +65,9 @@ class GalaxyClient:
             else:
                 raise ValueError(f"Missing scheme in url {url}")
             url = found_scheme + url
+        self.base_url = url.rstrip("/")
         # All of Galaxy's and ToolShed's API's are rooted at <url>/api so make that the url
-        self.base_url = url
-        self.url = urljoin(url, "api")
+        self.url = f"{self.base_url}/api"
         # If key has been supplied, use it; otherwise just set email and
         # password and grab user's key before first request.
         if key:
