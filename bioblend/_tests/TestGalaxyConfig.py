@@ -19,4 +19,4 @@ class TestGalaxyConfig(GalaxyTestBase.GalaxyTestBase):
 
     def test_reload_toolbox(self):
         response = self.gi.config.reload_toolbox()
-        assert isinstance(response, None)
+        assert response is None
