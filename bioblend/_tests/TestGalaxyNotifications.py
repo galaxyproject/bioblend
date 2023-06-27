@@ -1,4 +1,13 @@
-from datetime import datetime
+from ast import Dict
+from datetime import (
+    datetime,
+    timedelta,
+)
+from typing import (
+    Any,
+    List,
+    Optional,
+)
 
 from . import (
     GalaxyTestBase,
@@ -60,3 +69,77 @@ class TestGalaxyNotifications(GalaxyTestBase.GalaxyTestBase):
         new_items_preferences = preferences["preferences"]["new_shared_item"]
         assert new_items_preferences["enabled"] is False
         assert new_items_preferences["channels"]["push"] is False
+
+    def _send_test_broadcast_notification(
+        self,
+        subject: Optional[str] = None,
+        message: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """
+        This is a helper function for sending a test notification.
+
+        :type galaxy_instance: GalaxyInstance
+        param galaxy_instance: The GalaxyInstance making the call
+
+        :type subject: str
+        param subject: Purpose of the notification
+
+        :type message: str
+        param message: Actual content of the notification.
+
+        :rtype: dict
+        :return: A dictionary containing the current status
+                 summary of notifications
+        """
+        broadcast = self.gi.notifications.broadcast_notification(
+            source="notifications_test",
+            message=message or "Testing Message",
+            subject=subject or "Testing Subject",
+            action_links={
+                "link_1": "https://link1.de",
+                "link_2": "https://link2.de",
+            },
+            variant="info",
+            expiration_time=(datetime.utcnow() + timedelta(days=1)),
+        )
+        return broadcast
+
+    def _create_local_test_user(self, password: str) -> Dict[str, Any]:
+        new_username = test_util.random_string()
+        new_user_email = f"{new_username}@example.org"
+        new_user = self.gi.users.create_local_user(new_username, new_user_email, password)
+        return new_user
+
+    def _send_test_notification_to(
+        self,
+        user_ids: List[str],
+        subject: Optional[str] = None,
+        message: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """
+        This is a helper function for sending a test notification.
+
+        :type galaxy_instance: GalaxyInstance
+        param galaxy_instance: The GalaxyInstance making the call
+
+        :type user_ids: list
+        param user_ids: List of user IDs of users to receive the notification.
+
+        :type subject: str
+        param subject: Purpose of the notification
+
+        :type message: str
+        param message: Actual content of the notification.
+
+        :rtype: dict
+        :return: A dictionary containing the current status summary of notifications.
+        """
+        notification = self.gi.notifications.send_notification(
+            source="notifications_test",
+            subject=subject or "Testing Subject",
+            message=message or "Testing Message",
+            variant="info",
+            user_ids=user_ids,
+            expiration_time=(datetime.utcnow() + timedelta(days=1)),
+        )
+        return notification
