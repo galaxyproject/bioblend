@@ -301,6 +301,101 @@ class TestGalaxyNotifications(GalaxyTestBase.GalaxyTestBase):
         assert notification_2["seen_time"] is None
         assert notification_2["deleted"] is False
 
+    @test_util.skip_unless_galaxy("release_23.1")
+    def test_update_broadcasted_notification(self):
+        # WARNING: This test sends notifications
+        # and only admins can send them
+
+        # Broadcast a notification
+        created_response = self._send_test_broadcast_notification(
+            subject="test_update_broadcasted_notification subject",
+            message="test_update_broadcasted_notification message",
+        )
+        broadcast_id = created_response["notification"]["id"]
+        broadcast = self.gi.notifications.get_broadcasted(broadcast_id)
+
+        # this is how the content is supposed to look before the update
+        assert broadcast["category"] == "broadcast"
+        assert broadcast["content"]["subject"] == "test_update_broadcasted_notification subject"
+        assert broadcast["content"]["message"] == "test_update_broadcasted_notification message"
+        assert broadcast["content"]["action_links"][0]["action_name"] == "link_1"
+        assert broadcast["content"]["action_links"][0]["link"] == "https://link1.de"
+        assert broadcast["content"]["action_links"][1]["action_name"] == "link_2"
+        assert broadcast["content"]["action_links"][1]["link"] == "https://link2.de"
+
+        publication_time = broadcast["publication_time"]
+        expiration_time = broadcast["expiration_time"]
+
+        # update only source and variant of the broadcast
+        self.gi.notifications.update_broadcasted_notification(
+            notification_id=broadcast_id,
+            update_content=False,
+            source="test_update_broadcast",
+            variant="urgent",
+        )
+        broadcast = self.gi.notifications.get_broadcasted(broadcast_id)
+
+        # check the updated content
+        assert broadcast["variant"] == "urgent"
+        assert broadcast["source"] == "test_update_broadcast"
+        # the content which has not be updated should be the same as before
+        assert broadcast["content"]["subject"] == "test_update_broadcasted_notification subject"
+        assert broadcast["content"]["message"] == "test_update_broadcasted_notification message"
+        assert broadcast["content"]["action_links"][0]["action_name"] == "link_1"
+        assert broadcast["content"]["action_links"][0]["link"] == "https://link1.de"
+        assert broadcast["content"]["action_links"][1]["action_name"] == "link_2"
+        assert broadcast["content"]["action_links"][1]["link"] == "https://link2.de"
+        assert broadcast["publication_time"] == publication_time
+        assert broadcast["expiration_time"] == expiration_time
+
+        publication_time_new = datetime.utcnow()
+        expiration_time_new = datetime.utcnow() + timedelta(days=2)
+
+        # update only publication and expiration date of the broadcast
+        self.gi.notifications.update_broadcasted_notification(
+            notification_id=broadcast_id,
+            update_content=False,
+            publication_time=publication_time_new,
+            expiration_time=expiration_time_new,
+        )
+        broadcast = self.gi.notifications.get_broadcasted(broadcast_id)
+
+        # check the updated content
+        assert broadcast["publication_time"] == publication_time_new.isoformat()
+        assert broadcast["expiration_time"] == expiration_time_new.isoformat()
+
+        # update the actual content of the broadcast
+        self.gi.notifications.update_broadcasted_notification(
+            notification_id=broadcast_id,
+            update_content=True,
+            message="updating_content_test",
+            subject="updating_content_test",
+            action_links={"updated_link": "http://update.de"},
+        )
+        broadcast = self.gi.notifications.get_broadcasted(broadcast_id)
+
+        # check the updated content
+        assert broadcast["content"]["subject"] == "updating_content_test"
+        assert broadcast["content"]["message"] == "updating_content_test"
+        assert broadcast["content"]["action_links"][0]["action_name"] == "updated_link"
+        assert broadcast["content"]["action_links"][0]["link"] == "http://update.de"
+        assert len(broadcast["content"]["action_links"]) == 1
+
+        # update the message and subject of the broadcast
+        # this should set action links to None
+        self.gi.notifications.update_broadcasted_notification(
+            notification_id=broadcast_id,
+            update_content=True,
+            message="updating_content_test_new",
+            subject="updating_content_test_new",
+        )
+        broadcast = self.gi.notifications.get_broadcasted(broadcast_id)
+
+        # check the updated content
+        assert broadcast["content"]["subject"] == "updating_content_test_new"
+        assert broadcast["content"]["message"] == "updating_content_test_new"
+        assert broadcast["content"]["action_links"] is None
+
     def _send_test_broadcast_notification(
         self,
         subject: Optional[str] = None,
