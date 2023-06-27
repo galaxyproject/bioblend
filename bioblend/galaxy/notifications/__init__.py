@@ -33,3 +33,13 @@ class NotificationClient(Client):
         """
         url = self._make_url() + f"/status?since={since}"
         return self._get(url=url)
+
+    def get_notification_preferences(self) -> Dict[str, Any]:
+        """
+        Returns the current user's preferences for notifications.
+        Anonymous users cannot have notification preferences.
+        :rtype: dict
+        :return: The notification preferences
+        """
+        url = self._make_url("preferences")
+        return self._get(url=url)
