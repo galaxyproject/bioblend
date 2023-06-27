@@ -194,6 +194,28 @@ class TestGalaxyNotifications(GalaxyTestBase.GalaxyTestBase):
         assert created_response_4[1]["content"]["message"] == "test_notification_status 3"
 
     @test_util.skip_unless_galaxy("release_23.1")
+    def test_get_broadcasted(self):
+        # WARNING: This test sends notifications
+        # and only admins can send them
+        if not self.gi.config.get_config()["enable_notification_system"]:
+            self.skipTest("This Galaxy instance is not configured to use notifications.")
+        if not self.gi.users.get_current_user()["is_admin"]:
+            self.skipTest("This tests requires the current user to be an admin, which is not the case.")
+
+        # broad cast test notification
+        created_response = self._send_test_broadcast_notification(message="test_notification_status")
+        broadcast_id = created_response["notification"]["id"]
+        broadcast = self.gi.notifications.get_broadcasted(broadcast_id)
+
+        # check the content of the request
+        assert broadcast["category"] == "broadcast"
+        assert broadcast["content"]["message"] == "test_notification_status"
+
+        # check the second action link
+        assert broadcast["content"]["action_links"][1]["action_name"] == "link_2"
+        assert broadcast["content"]["action_links"][1]["link"] == "https://link2.de"
+
+    @test_util.skip_unless_galaxy("release_23.1")
     def test_show_notification(self):
         # WARNING: This test sends notifications
         # and only admins can send them
