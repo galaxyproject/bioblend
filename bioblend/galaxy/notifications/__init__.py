@@ -6,8 +6,11 @@ from datetime import datetime
 from typing import (
     Any,
     Dict,
+    Optional,
     TYPE_CHECKING,
 )
+
+from typing_extensions import Literal
 
 from bioblend.galaxy.client import Client
 
@@ -86,3 +89,109 @@ class NotificationClient(Client):
             }
         }
         return self._put(url=url, payload=payload)
+
+    def broadcast_notification(
+        self,
+        source: str,
+        variant: Literal["info", "urgent", "warning"],
+        subject: str,
+        message: str,
+        action_links: Optional[Dict[str, str]] = None,
+        publication_time: Optional[datetime] = None,
+        expiration_time: Optional[datetime] = None,
+    ) -> Dict[str, Any]:
+        """
+        Broadcasts a notification to every user in the system.
+
+        Broadcasted notifications are a special kind of notification that are
+        always accessible to all users, including anonymous users.
+        They are typically used to display important information such as:
+        - maintenance
+        - windows
+        - new features.
+        These notifications are displayed differently from regular
+        notifications, usually in a banner at the top or bottom of the page.
+
+        Broadcasted notifications can include action links that are displayed
+        as buttons.
+        This allows users to easily perform tasks such as filling out surveys,
+        accepting legal agreements or accessing new tutorials.
+
+        Some key features of broadcasted notifications include:
+
+        - They are not associated with a specific user, so they cannot be
+        deleted or marked as read.
+        - They can be scheduled to be displayed in the future or to expire
+        after a certain time.
+        - By default, broadcasted notifications are published immediately and
+        expire six months after publication.
+        - Only admins can create, edit, reschedule, or expire broadcasted
+        notifications as needed.
+
+
+        :type source: str
+        :param source: Source of the broadcast. Represents the agent that
+        created the broadcast.
+        E.g. 'galaxy' or 'admin'.
+
+        :type variant: str
+        :param variant: Variant of the broadcast. Represents the intent or
+        relevance of the broadcast.
+        Available variants:
+            - 'info'
+            - 'urgent'
+            - 'warning'
+
+
+        :type subject: str
+        :param subject: Purpose of the broadcast
+
+        :type message: str
+        :param message: Actual content of the broadcast.
+
+        :type action_links: dict
+        :param action_links: Optional action links (buttons) to be displayed
+        in the notification.
+        Keys must be the title of the links and the value must be the link.
+        Links must be urls, otherwise the request will not be accepted.
+
+        :type publication_time: datetime
+        :param publication_time: Time when the broadcast was published.
+        Notifications can be created and then published at a later time.
+        Will default to the moment the broadcast is sent.
+
+        :type expiration_time: datetime
+        :param expiration_time: Time when the broadcast will expire.
+        If not set, the broadcast will expire 6 months later.
+        Expired broadcast will be permanently deleted.
+
+        :rtype: dict
+        :return: A Summary of the broadcast sent.
+        """
+        broadcast: Dict[str, Any] = {}
+        content: Dict[str, Any] = {"category": "broadcast", "subject": subject, "message": message}
+
+        # format the action links(if there are any) for the payload
+        if action_links:
+            links = []
+            for k, v in action_links.items():
+                # make sure the links are valid URLs
+                if v[:7] != "http://" and v[:8] != "https://":
+                    raise ValueError(f"Link {v} is not a valid URL.")
+                links.append({"action_name": k, "link": v})
+            content["action_links"] = links
+
+        # create the payload
+        broadcast["content"] = content
+        broadcast = {
+            "source": source,
+            "variant": variant,
+            "category": "broadcast",
+            "content": content,
+        }
+        if expiration_time:
+            broadcast["expiration_time"] = str(expiration_time)
+        if publication_time:
+            broadcast["publication_time"] = str(publication_time)
+        url = self._make_url("broadcast")
+        return self._post(payload=broadcast, url=url)
