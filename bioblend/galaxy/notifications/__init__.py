@@ -6,6 +6,7 @@ from datetime import datetime
 from typing import (
     Any,
     Dict,
+    List,
     Optional,
     TYPE_CHECKING,
 )
@@ -89,6 +90,90 @@ class NotificationClient(Client):
             }
         }
         return self._put(url=url, payload=payload)
+
+    def send_notification(
+        self,
+        source: str,
+        variant: Literal["info", "urgent", "warning"],
+        subject: str,
+        message: str,
+        publication_time: Optional[datetime] = None,
+        expiration_time: Optional[datetime] = None,
+        user_ids: Optional[List[str]] = None,
+        group_ids: Optional[List[str]] = None,
+        role_ids: Optional[List[str]] = None,
+    ) -> Dict[str, Any]:
+        """
+        Sends a notification to a list of recipients (users, groups or roles).
+
+        :type source: str
+        :param source: Source of the notification.
+        Represents the agent that created the notification.
+        E.g. 'galaxy' or 'admin'.
+
+        :type variant: message_variants
+        :param variant: Variant of the notification.
+        Represents the intent or relevance of the notification.
+        Available variants:
+            - 'info'
+            - 'urgent'
+            - 'warning'
+
+        :type subject: str
+        :param subject: Purpose of the notification
+
+        :type message: str
+        :param message: Actual content of the notification.
+
+        :type publication_time: datetime
+        :param publication_time: Time when the notification was published.
+        Notifications can be created and then published at a later time.
+        Will default to the moment the notification is sent.
+
+        :type expiration_time: datetime
+        :param expiration_time: Time when the notification will expire.
+        If not set, the notification will expire 6 months later.
+        Expired notifications will be permanently deleted.
+
+        :type user_ids: List[str]
+        :param user_ids: IDs of users to receive the notification.
+
+        :type group_ids: List[str]
+        :param group_ids: IDs of groups to receive the notification.
+
+        :type role_ids: List[str]
+        :param role_ids: IDs of roles to receive the notification.
+
+        :rtype: dict
+        :return: A summary of notification sent.
+        """
+
+        # validate the broadcast has receivers
+        if user_ids == group_ids == role_ids == []:
+            raise ValueError("The message has no recipients.")
+
+        # create the payload
+        recipients = {
+            "user_ids": user_ids or [],
+            "group_ids": group_ids or [],
+            "role_ids": role_ids or [],
+        }
+        content = {
+            "source": source,
+            "variant": variant,
+            "category": "message",
+            "content": {
+                "category": "message",
+                "subject": subject,
+                "message": message,
+            },
+        }
+        if expiration_time:
+            content["expiration_time"] = str(expiration_time)
+        if publication_time:
+            content["publication_time"] = str(publication_time)
+        notification = {"recipients": recipients, "notification": content}
+        return self._post(payload=notification)
 
     def broadcast_notification(
         self,
