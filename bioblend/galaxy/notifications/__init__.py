@@ -409,6 +409,60 @@ class NotificationClient(Client):
         notification = {"recipients": recipients, "notification": content}
         return self._post(payload=notification)
 
+    def delete_user_notification(
+        self,
+        notification_id: str,
+    ) -> str:
+        """
+        Deletes a notification received by the user.
+        When a notification is deleted, it is not immediately removed
+        from the database, but marked as deleted.
+        - It will not be returned in the list of notifications,
+        but admins can still access it as long as it is not expired.
+        - It will be eventually removed from the database by a background task
+        after the expiration time.
+        - Deleted notifications will be permanently deleted when the
+        expiration time is reached even if they were marked as favorite.
+
+        :type notification_id: str
+        :param notification_id: ID of the notification
+
+        :rtype: str
+        :return: A verification that the deletion was successful
+        """
+        url = self._make_url(notification_id)
+        self._delete(url=url)
+        return "Notification successfully deleted."
+
+    def delete_user_notifications(
+        self,
+        notification_ids: List[str],
+    ) -> Dict[str, int]:
+        """
+        Deletes a list of notifications with the requested values in a single
+        request.
+        When a notification is deleted, it is not immediately removed from the
+        database, but marked as deleted.
+
+        - It will not be returned in the list of notifications, but admins can
+        still access it as long as it is not expired.
+        - It will be eventually removed from the database by a background task
+        after the expiration time.
+        - Deleted notifications will be permanently deleted when the
+        expiration time is reached even if they were marked as favorite.
+
+        :type notification_ids: list
+        :param since: IDs of the messages, which are to be deleted
+
+        :rtype: dict
+        :return: How many notifications got deleted
+        """
+        payload = {
+            "notification_ids": notification_ids,
+        }
+        url = self._make_url()
+        return self._delete(url=url, payload=payload)
+
     def broadcast_notification(
         self,
         source: str,
