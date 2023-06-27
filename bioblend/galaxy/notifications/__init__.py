@@ -132,6 +132,72 @@ class NotificationClient(Client):
         url = self._make_url() + f"/{notification_id}"
         return self._get(url=url)
 
+    def update_user_notification(
+        self,
+        notification_id: str,
+        seen: bool,
+        deleted: bool,
+    ) -> str:
+        """
+        Updates the state of a notification received by the user.
+
+        :type notification_id: str
+        :param notification_id: ID of the notification
+
+        :type seen: bool
+        :param seen: Mark notification as seen. When set to true the field is
+        set to the current datetime
+
+        :type favorite: bool
+        :param favorite: Mark notification as favorite
+
+        :type deleted: bool
+        :param deleted: Mark notification as deleted
+
+        :rtype: str
+        :return: A verification that the update was successful
+        """
+        url = self._make_url(notification_id)
+        payload = {"seen": seen, "deleted": deleted}
+
+        # Returns a 204, so feedback for the user is manually created
+        self._put(url=url, payload=payload)
+        return "Notification successfully updated."
+
+    def update_user_notifications(
+        self,
+        notification_ids: List[str],
+        seen: bool,
+        deleted: bool,
+    ) -> Dict[str, int]:
+        """
+        Updates a list of notifications with the requested values
+        in a single request.
+
+        :type notification_ids: list
+        :param since: IDs of the messages, which are to be updated
+
+        :type seen: bool
+        :param seen: Mark the message as seen. When set to true the field is
+        set to the current datetime
+
+        :type favorite: bool
+        :param seen: Mark the message as favorite
+
+        :type delete: bool
+        :param seen: Mark the message as deleted
+
+        :rtype: dict
+        :return: How many notifications got updated
+        """
+
+        # create the payload for updating the notifications
+        payload = {
+            "notification_ids": notification_ids,
+            "changes": {"seen": seen, "deleted": deleted},
+        }
+        return self._put(payload=payload)
+
     def send_notification(
         self,
         source: str,
