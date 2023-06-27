@@ -261,6 +261,8 @@ class GalaxyClient:
                     body=r.content,
                     status_code=r.status_code,
                 )
+        elif r.status_code == 204:
+            return {}
         # @see self.body for HTTP response body
         raise ConnectionError(
             f"Unexpected HTTP status code: {r.status_code}",
