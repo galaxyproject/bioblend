@@ -116,6 +116,22 @@ class NotificationClient(Client):
         params = {"limit": limit, "offset": offset}
         return self._get(params=params)
 
+    def show_notification(
+        self,
+        notification_id: str,
+    ) -> Dict[str, Any]:
+        """
+        Displays information about a notification received by the user.
+
+        :type notification_id: str
+        :param notification_id: ID of the notification
+
+        :rtype: dict
+        :return: The notification
+        """
+        url = self._make_url() + f"/{notification_id}"
+        return self._get(url=url)
+
     def send_notification(
         self,
         source: str,
