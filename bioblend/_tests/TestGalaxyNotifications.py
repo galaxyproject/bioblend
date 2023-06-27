@@ -9,6 +9,8 @@ from typing import (
     Optional,
 )
 
+
+from bioblend.galaxy import GalaxyInstance
 from . import (
     GalaxyTestBase,
     test_util,
@@ -16,6 +18,75 @@ from . import (
 
 
 class TestGalaxyNotifications(GalaxyTestBase.GalaxyTestBase):
+    @test_util.skip_unless_galaxy("release_23.1")
+    def test_notification_status(self):
+        # WARNING: This test includes user creation
+        # and only admins can create users
+        # WARNING: Users cannot be purged through the Galaxy API, so execute
+        # this test only on a disposable Galaxy instance
+        # WARNING: This test sends notifications
+        # and only admins can send them
+        if self.gi.config.get_config()["use_remote_user"]:
+            self.skipTest("This Galaxy instance is not configured to use local users.")
+        if not self.gi.config.get_config()["enable_notification_system"]:
+            self.skipTest("This Galaxy instance is not configured to use notifications.")
+        if not self.gi.users.get_current_user()["is_admin"]:
+            self.skipTest("This tests requires the current user to be an admin, which is not the case.")
+
+        # user creation for the test
+        user1 = self._create_local_test_user(password="password")
+        user2 = self._create_local_test_user(password="password")
+
+        # creating galaxy instances for test
+        user1_gi = GalaxyInstance(
+            url=self.gi.base_url,
+            email=user1["email"],
+            password="password",
+        )
+        user2_gi = GalaxyInstance(
+            url=self.gi.base_url,
+            email=user2["email"],
+            password="password",
+        )
+
+        # get the time before creating notifications
+        before_creation = datetime.utcnow()
+
+        # Only user1 will receive this notification
+        created_response_1 = self._send_test_notification_to(
+            [user1["id"]],
+            message="test_notification_status 1",
+        )
+        assert created_response_1["total_notifications_sent"] == 1
+
+        # Both user1 and user2 will receive this notification
+        created_response_2 = self._send_test_notification_to(
+            [user1["id"], user2["id"]],
+            message="test_notification_status 2",
+        )
+        assert created_response_2["total_notifications_sent"] == 2
+
+        # All users will receive this broadcasted notification
+        self._send_test_broadcast_notification(message="test_notification_status 3")
+
+        # user 1 should have received both messages and the broadcast
+        status = user1_gi.notifications.get_notification_status(since=before_creation)
+        assert status["total_unread_count"] == 2
+        status_notifications = status["notifications"]
+        assert len(status_notifications) == 2
+        assert status_notifications[0]["content"]["message"] == "test_notification_status 1"
+        assert len(status["broadcasts"]) == 1
+        assert status["broadcasts"][0]["content"]["message"] == "test_notification_status 3"
+
+        # user 2 should have received the second messages and the broadcast
+        status = user2_gi.notifications.get_notification_status(since=before_creation)
+        assert status["total_unread_count"] == 1
+        status_notifications = status["notifications"]
+        assert len(status_notifications) == 1
+        assert status_notifications[0]["content"]["message"] == "test_notification_status 2"
+        assert len(status["broadcasts"]) == 1
+        assert status["broadcasts"][0]["content"]["message"] == "test_notification_status 3"
+
     @test_util.skip_unless_galaxy("release_23.1")
     def test_empty_notification_status(self):
         if not self.gi.config.get_config()["enable_notification_system"]:
