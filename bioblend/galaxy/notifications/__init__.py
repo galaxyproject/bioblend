@@ -198,6 +198,121 @@ class NotificationClient(Client):
         }
         return self._put(payload=payload)
 
+    def update_broadcasted_notification(
+        self,
+        notification_id: str,
+        update_content: bool,
+        source: Optional[str] = None,
+        variant: Optional[Literal["info", "urgent", "warning"]] = None,
+        subject: Optional[str] = None,
+        message: Optional[str] = None,
+        action_links: Optional[Dict[str, str]] = None,
+        publication_time: Optional[datetime] = None,
+        expiration_time: Optional[datetime] = None,
+    ) -> str:
+        """
+        Updates the state of a broadcasted notification.
+
+        :type notification_ids: str
+        :param since: ID of the broadcast, which is to be updated
+
+        :type update_content: bool
+        :param update_content: Indicates if the content will be updated.
+        If set to true subject and message are required.
+
+        :type source: str
+        :param source: Source of the broadcast. Represents the agent that
+        created the broadcast.
+        E.g. 'galaxy' or 'admin'.
+
+        :type variant: str
+        :param variant: Variant of the broadcast. Represents the intent or
+        relevance of the broadcast.
+        Available variants:
+            - 'info'
+            - 'urgent'
+            - 'warning'
+
+        :type subject: str
+        :param subject: Purpose of the broadcast, which is a part of the
+        content of the message
+
+        :type action_links: dict
+        :param action_links: Optional action links (buttons) to be displayed
+        in the notification, which are a part of the content of the message.
+        Keys must be the title of the links and the value must be the link.
+        Links must be urls, otherwise the request will not be accepted.
+
+        :type message: str
+        :param message: Message of the broadcast, which is a part of the
+        content of the message.
+
+        :type publication_time: datetime
+        :param publication_time: Time when the broadcast was published.
+        Broadcasts can be created and then published at a later time.
+        Will default to the moment the broadcast is sent.
+
+        :type expiration_time: datetime
+        :param expiration_time: Time when the broadcast will expire.
+        If not set, the broadcast will expire 6 months later.
+        Expired broadcasts will be permanently deleted.
+
+        :rtype: str
+        :return: A verification that the update was successful
+        """
+        broadcast: Dict[str, Any] = {}
+        content: Dict[str, Any] = {}
+
+        # catch cases where nothing is set to be updated
+        if not (update_content or source or variant or publication_time or expiration_time):
+            raise ValueError("Please specify at least one value to update for notifications.")
+
+        # catch case where content is not marked to be updated
+        # but content input was given
+        if not update_content and (subject or message or action_links):
+            raise ValueError("Please set update_content to true to update the content.")
+        if update_content:
+            if not (subject and message):
+                raise ValueError("If Content is to be updated, both subject and message must be specified.")
+            content = {"category": "broadcast", "subject": subject, "message": message}
+            if action_links:
+                links = []
+                for k, v in action_links.items():
+                    if v[:7] != "http://" and v[:8] != "https://":
+                        raise ValueError(f"Link {v} is not a valid URL.")
+                    links.append({"action_name": k, "link": v})
+                content["action_links"] = links
+            broadcast["content"] = content
+        if source:
+            broadcast["source"] = source
+        if variant:
+            broadcast["variant"] = variant
+        if expiration_time:
+            broadcast["expiration_time"] = str(expiration_time)
+        if publication_time:
+            broadcast["publication_time"] = str(publication_time)
+        url = self._make_url("broadcast") + f"/{notification_id}"
+        self._put(payload=broadcast, url=url)
+        return "Broadcast successfully updated"
+
+    def get_broadcasted(
+        self,
+        notification_id: str,
+    ) -> Dict[str, Any]:
+        """
+        Returns the information of a specific broadcasted notification.
+        Only Admin users can access inactive notifications (scheduled or
+        recently expired).
+
+        :type notification_id: str
+        :param notification_id: ID of the broadcasted message
+
+        :rtype: dict
+        :return: The broadcast
+        """
+        url = self._make_url("broadcast") + f"/{notification_id}"
+        return self._get(url=url)
+
     def send_notification(
         self,
         source: str,
