@@ -43,3 +43,46 @@ class NotificationClient(Client):
         """
         url = self._make_url("preferences")
         return self._get(url=url)
+
+    def update_notification_preferences(
+        self,
+        message_notifications: bool,
+        push_notifications_message: bool,
+        new_item_notifications: bool,
+        push_notifications_new_items: bool,
+    ) -> Dict[str, Any]:
+        """
+        Updates the user's notifications preferences.
+        Enable/disable notifications for a particular type (category)
+        or enable/disable a particular channel on each category.
+        Channels available:
+            - push notifications
+        Anonymous users cannot have notification preferences.
+        They will receive only broadcasted notifications.
+        :type message_notifications: bool
+        :param message_notifications: Receive message notifications
+        :type push_notifications_message: bool
+        :param push_notifications_message: Receive push notifications in the
+        browser for this category
+        :type new_item_notifications: bool
+        :param new_item_notifications: Receive notification when someone
+        shares item with you
+        :type push_notifications_new_items: bool
+        :param push_notifications_new_items: Receive push notifications in the
+        browser for this category
+        :rtype: dict
+        :return: Notification preferences of the user.
+        """
+        url = self._make_url("preferences")
+
+        # create the payload for updating the preferences
+        payload = {
+            "preferences": {
+                "message": {"enabled": message_notifications, "channels": {"push": push_notifications_message}},
+                "new_shared_item": {
+                    "enabled": new_item_notifications,
+                    "channels": {"push": push_notifications_new_items},
+                },
+            }
+        }
+        return self._put(url=url, payload=payload)
