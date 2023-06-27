@@ -220,6 +220,87 @@ class TestGalaxyNotifications(GalaxyTestBase.GalaxyTestBase):
         # check that the content is correct
         assert notification["content"]["message"] == "test_notification_status"
 
+    @test_util.skip_unless_galaxy("release_23.1")
+    def test_update_notifications(self):
+        # WARNING: This test includes user creation
+        # and only admins can create users
+        # WARNING: Users cannot be purged through the Galaxy API, so execute
+        # this test only on a disposable Galaxy instance
+        # WARNING: This test sends notifications
+        # and only admins can send them
+        if not self.gi.config.get_config()["enable_notification_system"]:
+            self.skipTest("This Galaxy instance is not configured to use notifications.")
+        if not self.gi.users.get_current_user()["is_admin"]:
+            self.skipTest("This tests requires the current user to be an admin, which is not the case.")
+
+        # user creation for the test
+        user = self._create_local_test_user(password="password")
+
+        # creating galaxy instance for user 1
+        user_gi = GalaxyInstance(url=self.gi.base_url, email=user["email"], password="password")
+
+        # send the test notifications and save their ids
+        notification_1_id = self._send_test_notification_to([user["id"]], message="test_notification_status 1")[
+            "notification"
+        ]["id"]
+        notification_2_id = self._send_test_notification_to([user["id"]], message="test_notification_status 2")[
+            "notification"
+        ]["id"]
+
+        # fetch the notifications
+        notification_1 = user_gi.notifications.show_notification(notification_1_id)
+        notification_2 = user_gi.notifications.show_notification(notification_2_id)
+
+        # the default status values should all be set to False/None
+        assert notification_1["seen_time"] is None
+        assert notification_1["deleted"] is False
+        assert notification_2["seen_time"] is None
+        assert notification_2["deleted"] is False
+
+        # update the notification one at a time
+        notification_request_1 = user_gi.notifications.update_user_notification(
+            notification_1_id, seen=True, deleted=False
+        )
+        notification_request_2 = user_gi.notifications.update_user_notification(
+            notification_2_id, seen=True, deleted=False
+        )
+
+        # check their response
+        assert notification_request_1 == "Notification successfully updated."
+        assert notification_request_2 == "Notification successfully updated."
+
+        # fetch the updated notifications
+        notification_1 = user_gi.notifications.show_notification(notification_1_id)
+        notification_2 = user_gi.notifications.show_notification(notification_2_id)
+
+        # favorite should be updated
+        assert notification_1["seen_time"] is not None
+        assert notification_1["deleted"] is False
+
+        # seen should be set updated
+        assert notification_2["seen_time"] is not None
+        assert notification_2["deleted"] is False
+
+        # update the notification both at once
+        notification_request_3 = user_gi.notifications.update_user_notifications(
+            [notification_1_id, notification_2_id],
+            seen=False,
+            deleted=False,
+        )
+
+        # 2 messages should have been updated now
+        assert notification_request_3["updated_count"] == 2
+
+        # fetch the updated notifications
+        notification_1 = user_gi.notifications.show_notification(notification_1_id)
+        notification_2 = user_gi.notifications.show_notification(notification_2_id)
+
+        # all values should now be set to false
+        assert notification_1["seen_time"] is None
+        assert notification_1["deleted"] is False
+        assert notification_2["seen_time"] is None
+        assert notification_2["deleted"] is False
+
     def _send_test_broadcast_notification(
         self,
         subject: Optional[str] = None,
