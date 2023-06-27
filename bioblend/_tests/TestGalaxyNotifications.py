@@ -140,6 +140,59 @@ class TestGalaxyNotifications(GalaxyTestBase.GalaxyTestBase):
         assert new_items_preferences["enabled"] is False
         assert new_items_preferences["channels"]["push"] is False
 
+    @test_util.skip_unless_galaxy("release_23.1")
+    def test_get_user_notifications(self):
+        # WARNING: This test sends notifications
+        # and only admins can send them
+        if not self.gi.config.get_config()["enable_notification_system"]:
+            self.skipTest("This Galaxy instance is not configured to use notifications.")
+        if not self.gi.users.get_current_user()["is_admin"]:
+            self.skipTest("This tests requires the current user to be an admin, which is not the case.")
+
+        # send the notifications
+        user_id = [self.gi.users.get_current_user()["id"]]
+        self._send_test_notification_to(user_id, message="test_notification_status 1")
+        self._send_test_notification_to(user_id, message="test_notification_status 2")
+        self._send_test_notification_to(user_id, message="test_notification_status 3")
+
+        # this should fetch all the notifications
+        created_response_1 = self.gi.notifications.get_user_notifications()
+
+        # this should fetch only the first notification send
+        created_response_2 = self.gi.notifications.get_user_notifications(limit=1)
+
+        # this should fetch only the second notification send
+        created_response_3 = self.gi.notifications.get_user_notifications(limit=1, offset=1)
+
+        # this should fetch the second and third notifications send
+        created_response_4 = self.gi.notifications.get_user_notifications(offset=1)
+
+        # this should fetch nothing, because the first 3 matches are skipped
+        # and there are only 3 messages in total
+        created_response_5 = self.gi.notifications.get_user_notifications(offset=3)
+
+        # check the amount of messages returned
+        assert len(created_response_1) == 3
+        assert len(created_response_2) == 1
+        assert len(created_response_3) == 1
+        assert len(created_response_4) == 2
+        assert len(created_response_5) == 0
+
+        # check the content of the first request
+        assert created_response_1[0]["content"]["message"] == "test_notification_status 1"
+        assert created_response_1[1]["content"]["message"] == "test_notification_status 2"
+        assert created_response_1[2]["content"]["message"] == "test_notification_status 3"
+
+        # check the content of the second request
+        assert created_response_2[0]["content"]["message"] == "test_notification_status 1"
+
+        # check the content of the third request
+        assert created_response_3[0]["content"]["message"] == "test_notification_status 2"
+
+        # check the content of the fourth request
+        assert created_response_4[0]["content"]["message"] == "test_notification_status 2"
+        assert created_response_4[1]["content"]["message"] == "test_notification_status 3"
+
     def _send_test_broadcast_notification(
         self,
         subject: Optional[str] = None,
