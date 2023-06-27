@@ -91,6 +91,31 @@ class NotificationClient(Client):
         }
         return self._put(url=url, payload=payload)
 
+    def get_user_notifications(
+        self,
+        limit: Optional[int] = 20,
+        offset: Optional[int] = None,
+    ) -> List[Dict[str, Any]]:
+        """
+        Returns the list of notifications associated with the user.
+        Anonymous users cannot receive personal notifications,
+        only broadcasted notifications.
+
+        You can use the `limit` and `offset` parameters
+        to paginate through the notifications.
+
+        :type limit: int
+        :param limit: Limits the amount of messages returned.
+
+        :type offset: int
+        :param offset: Skips the first ... messages.
+
+        :rtype: list
+        :return: All notifications of the user
+        """
+        params = {"limit": limit, "offset": offset}
+        return self._get(params=params)
+
     def send_notification(
         self,
         source: str,
