@@ -346,6 +346,44 @@ class TestGalaxyNotifications(GalaxyTestBase.GalaxyTestBase):
         assert notification_2["deleted"] is False
 
     @test_util.skip_unless_galaxy("release_23.1")
+    def test_delete_notifications(self):
+        # WARNING: This test includes user creation
+        # and only admins can create users
+        # WARNING: Users cannot be purged through the Galaxy API, so execute
+        # this test only on a disposable Galaxy instance
+        # WARNING: This test sends notifications
+        # and only admins can send them
+        if not self.gi.config.get_config()["enable_notification_system"]:
+            self.skipTest("This Galaxy instance is not configured to use notifications.")
+        if not self.gi.users.get_current_user()["is_admin"]:
+            self.skipTest("This tests requires the current user to be an admin, which is not the case.")
+
+        # user creation for the test
+        user = self._create_local_test_user(password="password")
+
+        # creating galaxy instance for user 1
+        user_gi = GalaxyInstance(url=self.gi.base_url, email=user["email"], password="password")
+
+        # send the test notifications and save their ids
+        notification_1_id = self._send_test_notification_to([user["id"]], message="test_notification_status 1")[
+            "notification"
+        ]["id"]
+        notification_2_id = self._send_test_notification_to([user["id"]], message="test_notification_status 2")[
+            "notification"
+        ]["id"]
+        notification_3_id = self._send_test_notification_to([user["id"]], message="test_notification_status 3")[
+            "notification"
+        ]["id"]
+
+        # delete a single notifications
+        response_1 = user_gi.notifications.delete_user_notification(notification_id=notification_1_id)
+        assert response_1 == "Notification successfully deleted."
+
+        # delete 2 notifications at once
+        response_2 = user_gi.notifications.delete_user_notifications([notification_2_id, notification_3_id])
+        assert response_2["updated_count"] == 2
+
+    @test_util.skip_unless_galaxy("release_23.1")
     def test_update_broadcasted_notification(self):
         # WARNING: This test sends notifications
         # and only admins can send them
