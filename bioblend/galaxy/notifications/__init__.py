@@ -313,6 +313,18 @@ class NotificationClient(Client):
         url = self._make_url("broadcast") + f"/{notification_id}"
         return self._get(url=url)
 
+    def get_all_broadcasted(self) -> List[Dict[str, Any]]:
+        """
+        Returns all currently active broadcasted notifications.
+        Only Admin users can access inactive notifications, which are
+        scheduled or recently expired.
+
+        :rtype: list
+        :return: A list containing broadcasts
+        """
+        url = self._make_url("broadcast")
+        return self._get(url=url)
+
     def send_notification(
         self,
         source: str,
