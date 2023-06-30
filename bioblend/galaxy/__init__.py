@@ -5,6 +5,7 @@ from typing import Optional
 
 from bioblend.galaxy import (
     config,
+    container_resolution,
     dataset_collections,
     datasets,
     datatypes,
@@ -93,6 +94,7 @@ class GalaxyInstance(GalaxyClient):
         self.toolshed = toolshed.ToolShedClient(self)
         self.toolShed = self.toolshed  # historical alias
         self.config = config.ConfigClient(self)
+        self.container_resolution = container_resolution.ContainerResolutionClient(self)
         self.visual = visual.VisualClient(self)
         self.quotas = quotas.QuotaClient(self)
         self.groups = groups.GroupsClient(self)
