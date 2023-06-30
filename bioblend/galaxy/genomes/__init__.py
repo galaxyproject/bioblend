@@ -4,11 +4,10 @@ Contains possible interactions with the Galaxy Histories
 from typing import (
     Any,
     Dict,
+    Literal,
     Optional,
     TYPE_CHECKING,
 )
-
-from typing_extensions import Literal
 
 from bioblend.galaxy.client import Client
 

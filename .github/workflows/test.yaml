@@ -30,7 +30,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        tox_env: [py37]
+        tox_env: [py38]
         galaxy_version:
           - dev
           - release_23.1
@@ -52,7 +52,7 @@ jobs:
           # Cannot test on macOS because service containers are not supported
           # yet: https://github.community/t/github-actions-services-available-on-others-vms/16916
           # - os: macos-latest
-          #   tox_env: py37
+          #   tox_env: py38
           #   galaxy_version: dev
     steps:
       - uses: actions/checkout@v3

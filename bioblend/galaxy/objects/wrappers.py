@@ -21,6 +21,7 @@ from typing import (
     Iterable,
     Iterator,
     List,
+    Literal,
     Optional,
     Set,
     Tuple,
@@ -29,8 +30,6 @@ from typing import (
     TypeVar,
     Union,
 )
-
-from typing_extensions import Literal
 
 import bioblend
 from bioblend.galaxy.workflows import InputsBy

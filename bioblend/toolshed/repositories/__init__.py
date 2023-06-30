@@ -5,12 +5,11 @@ from typing import (
     Any,
     Dict,
     List,
+    Literal,
     Optional,
     TYPE_CHECKING,
     Union,
 )
-
-from typing_extensions import Literal
 
 from bioblend.galaxy.client import Client
 from bioblend.util import attach_file
