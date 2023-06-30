@@ -1,5 +1,5 @@
 """
-Test functions in bioblend.galaxy.tool_dependencies
+Test functions in bioblend.galaxy.container_resolution
 """
 from . import (
     GalaxyTestBase,

@@ -13,7 +13,7 @@ from bioblend.config import (
 )
 
 # Current version of the library
-__version__ = "1.1.1"
+__version__ = "1.2.0"
 
 # default chunk size (in bytes) for reading remote data
 try:

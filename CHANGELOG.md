@@ -1,6 +1,36 @@
-### Bioblend v
+### Bioblend v1.2.0 - 2023-06-30
 
-* Dropped support for Galaxy releases 17.09-19.01.
+* Dropped support for Galaxy releases 17.09-19.01. Added support for Galaxy
+  release 23.1.
+
+* Added a new ``container_resolution`` attribute to ``GalaxyInstance`` objects,
+  which is an instance of the new ``ContainerResolutionClient``. This new module
+  can be used to list container resolvers, and to resolve (and install) tool
+  requirements against specified container resolvers (thanks to
+  [cat-bro](https://github.com/cat-bro) and
+  [Matthias Bernt](https://github.com/bernt-matthias)).
+
+* Added ``reload_toolbox()`` method to ``ConfigClient`` (thanks to
+  [Anthony Bretaudeau](https://github.com/abretaud)).
+
+* Added ``delete_unused_dependency_paths()`` and ``unused_dependency_paths()``
+  methods to ``ToolDependenciesClient`` (thanks to
+  [Matthias Bernt](https://github.com/bernt-matthias)).
+
+* Added ``data_manager_mode`` parameter to ``ToolClient.run_tool()`` method
+  (thanks to [Marius van den Beek](https://github.com/mvdbeek)).
+
+* Added ``user_data`` parameter to ``UserClient.update_user()`` method
+  (thanks to [Uwe Winter](https://github.com/uwwint)).
+
+* Fixed bug in ``DatasetClient.download_dataset()`` and BioBlend.objects
+  ``HistoryDatasetAssociation.get_stream()`` where the wrong download URL was
+  generated if the Galaxy instance is served at a subdirectory (reported by
+  [Anil Thanki](https://github.com/anilthanki)).
+
+* Improvements to tests and documentation (thanks to
+  [kxk302](https://github.com/kxk302) and
+  [Simon Bray](https://github.com/simonbray)).
 
 ### BioBlend v1.1.1 - 2023-02-21
 
@@ -26,14 +56,14 @@
 * Modified ``delete_workflow()`` method of ``WorkflowClient`` to return
   ``None`` instead of a string.
 
-* Add ``py.typed`` marker file to distributed packages (as per PEP 561) to
+* Added ``py.typed`` marker file to distributed packages (as per PEP 561) to
   declare type checking support.
 
 * Improvements to tests and documentation.
 
 ### BioBlend v1.0.0 - 2022-10-13
 
-* Drop support for deprecated CloudMan, see
+* Dropped support for deprecated CloudMan, see
   https://galaxyproject.org/blog/2021-10-sunsetting-cloudlaunch/
 
 * Added dependency on ``typing-extensions`` package, removed dependencies on
