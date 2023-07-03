@@ -4,8 +4,7 @@ from datetime import (
     timedelta,
 )
 from operator import itemgetter
-
-from typing_extensions import Literal
+from typing import Literal
 
 from bioblend.galaxy.tools.inputs import (
     dataset,

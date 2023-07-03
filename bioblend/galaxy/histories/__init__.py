@@ -12,13 +12,12 @@ from typing import (
     Dict,
     IO,
     List,
+    Literal,
     Optional,
     overload,
     Pattern,
     Union,
 )
-
-from typing_extensions import Literal
 
 import bioblend
 from bioblend import ConnectionError

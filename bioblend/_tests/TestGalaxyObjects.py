@@ -16,6 +16,7 @@ from typing import (
     Dict,
     Iterable,
     List,
+    Literal,
     Set,
     Tuple,
     Union,
@@ -24,7 +25,6 @@ from urllib.error import URLError
 from urllib.request import urlopen
 
 import pytest
-from typing_extensions import Literal
 
 import bioblend
 from bioblend.galaxy import dataset_collections

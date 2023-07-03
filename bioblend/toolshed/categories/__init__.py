@@ -5,10 +5,9 @@ from typing import (
     Any,
     Dict,
     List,
+    Literal,
     TYPE_CHECKING,
 )
-
-from typing_extensions import Literal
 
 from bioblend.galaxy.client import Client
 

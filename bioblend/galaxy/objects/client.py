@@ -13,14 +13,13 @@ from typing import (
     Dict,
     Generic,
     List,
+    Literal,
     Optional,
     overload,
     Type,
     TYPE_CHECKING,
     Union,
 )
-
-from typing_extensions import Literal
 
 import bioblend
 from bioblend.galaxy.datasets import HdaLdda

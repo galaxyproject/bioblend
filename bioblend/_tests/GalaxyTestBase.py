@@ -3,9 +3,8 @@ import unittest
 from typing import (
     Any,
     Dict,
+    Literal,
 )
-
-from typing_extensions import Literal
 
 import bioblend
 from bioblend.galaxy import GalaxyInstance

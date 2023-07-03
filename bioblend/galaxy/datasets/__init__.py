@@ -10,6 +10,7 @@ from typing import (
     Any,
     Dict,
     List,
+    Literal,
     Optional,
     overload,
     Tuple,
@@ -18,7 +19,6 @@ from typing import (
 )
 
 from requests import Response
-from typing_extensions import Literal
 
 import bioblend
 from bioblend import TimeoutException
