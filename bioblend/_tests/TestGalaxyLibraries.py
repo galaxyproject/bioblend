@@ -1,5 +1,9 @@
 import os
 import tempfile
+from typing import (
+    Any,
+    List,
+)
 
 from . import (
     GalaxyTestBase,
@@ -7,6 +11,18 @@ from . import (
 )
 
 FOO_DATA = "foo\nbar\n"
+
+
+def listify(item: Any) -> List:
+    # Slightly simplified version of listify() from
+    # https://github.com/galaxyproject/galaxy/blob/dev/lib/galaxy/util/__init__.py
+    if not item:
+        return []
+    elif isinstance(item, (list, tuple)):
+        return list(item)
+    elif isinstance(item, str) and item.count(","):
+        return [token.strip() for token in item.split(",")]
+    return [item]
 
 
 class TestGalaxyLibraries(GalaxyTestBase.GalaxyTestBase):
@@ -151,15 +167,15 @@ class TestGalaxyLibraries(GalaxyTestBase.GalaxyTestBase):
     def test_upload_file_contents_with_tags(self):
         datasets = self.gi.libraries.upload_file_contents(self.library["id"], FOO_DATA, tags=["name:foobar", "barfoo"])
         dataset_show = self.gi.libraries.show_dataset(self.library["id"], datasets[0]["id"])
-        assert dataset_show["tags"] == "name:foobar, barfoo"
+        assert listify(dataset_show["tags"]) == ["name:foobar", "barfoo"]
 
     @test_util.skip_unless_galaxy("release_19.09")
     def test_update_dataset_tags(self):
         datasets = self.gi.libraries.upload_file_contents(self.library["id"], FOO_DATA)
         dataset_show = self.gi.libraries.show_dataset(self.library["id"], datasets[0]["id"])
-        assert dataset_show["tags"] == ""
+        assert listify(dataset_show["tags"]) == []
 
         updated_dataset = self.gi.libraries.update_library_dataset(datasets[0]["id"], tags=["name:foobar", "barfoo"])
         dataset_show = self.gi.libraries.show_dataset(self.library["id"], updated_dataset["id"])
 
-        assert dataset_show["tags"] == "name:foobar, barfoo"
+        assert listify(dataset_show["tags"]) == ["name:foobar", "barfoo"]
