@@ -152,9 +152,6 @@ class NotificationClient(Client):
         :param seen: Mark notification as seen. When set to true the field is
         set to the current datetime
 
-        :type favorite: bool
-        :param favorite: Mark notification as favorite
-
         :type deleted: bool
         :param deleted: Mark notification as deleted
 
@@ -184,9 +181,6 @@ class NotificationClient(Client):
         :type seen: bool
         :param seen: Mark the message as seen. When set to true the field is
         set to the current datetime
-
-        :type favorite: bool
-        :param seen: Mark the message as favorite
 
         :type delete: bool
         :param seen: Mark the message as deleted
