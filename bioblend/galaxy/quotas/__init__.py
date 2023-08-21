@@ -142,7 +142,7 @@ class QuotaClient(Client):
         description: Optional[str] = None,
         amount: Optional[str] = None,
         operation: Optional[QuotaOperations] = None,
-        default: str = "no",
+        default: Optional[str] = None,
         in_users: Optional[List[str]] = None,
         in_groups: Optional[List[str]] = None,
     ) -> str:
@@ -172,7 +172,7 @@ class QuotaClient(Client):
                         are ``no``, ``unregistered``, ``registered``.
                         Calling this method with ``default="no"`` on a
                         non-default quota will throw an error. Not
-                        passing this parameter is equivalent to passing ``no``.
+                        passing this parameter will leave the default state as it is.
 
         :type in_users: list of str
         :param in_users: A list of user IDs or user emails.
@@ -186,7 +186,11 @@ class QuotaClient(Client):
 
             "Quota 'Testing-A' has been renamed to 'Testing-B'; Quota 'Testing-e' is now '-100.0 GB'; Quota 'Testing-B' is now the default for unregistered users"
         """
-        payload: Dict[str, Any] = {"default": default}
+        payload: Dict[str, Any] = {}
+
+        if default:
+            payload["default"] = default
+
         if name:
             payload["name"] = name
 
