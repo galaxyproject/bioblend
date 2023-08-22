@@ -44,6 +44,31 @@ class TestGalaxyQuotas(GalaxyTestBase.GalaxyTestBase):
         assert quota["operation"] == "-"
         assert quota["description"] == "asdf"
 
+    def test_update_quota_nondefault(self):
+        """
+        try to update a non-default quota (and leave it non-default)
+        """
+        # 1st make it non-default
+        response = self.gi.quotas.update_quota(
+            self.quota["id"],
+            name=self.quota_name,
+            description="testing",
+            default="no",
+            operation="=",
+            amount="100 GB",
+        )
+        assert f"has been renamed to '{self.quota_name}'" in response
+        assert f"Quota '{self.quota_name}' is no longer the default for registered users." in response
+
+        # update it leaving it non-default
+        response = self.gi.quotas.update_quota(
+            self.quota["id"],
+            name=self.quota_name + "-updated",
+        )
+        assert f"""Quota '{self.quota_name}' has been renamed to '{self.quota_name}-updated'""" in response
+        quota = self.gi.quotas.show_quota(self.quota["id"])
+        assert quota["default"] == "no"
+
     def test_delete_undelete_quota(self):
         self.gi.quotas.update_quota(self.quota["id"], default="no")
         response = self.gi.quotas.delete_quota(self.quota["id"])
