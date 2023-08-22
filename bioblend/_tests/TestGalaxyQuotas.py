@@ -64,7 +64,8 @@ class TestGalaxyQuotas(GalaxyTestBase.GalaxyTestBase):
         response = self.gi.quotas.update_quota(
             self.quota["id"],
             name=self.quota_name + "-updated",
-        )
+            default = None, 
+        ) 
         assert f"""Quota '{self.quota_name}' has been renamed to '{self.quota_name}-updated'""" in response
         quota = self.gi.quotas.show_quota(self.quota["id"])
         assert quota["default"] == "no"
