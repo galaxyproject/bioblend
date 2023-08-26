@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 
 class NotificationClient(Client):
     """
-    This endpoint only works on Galaxy 23.01 or later.
+    This endpoint only works on Galaxy 23.1 or later.
     """
 
     module = "notifications"
