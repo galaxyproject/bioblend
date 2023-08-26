@@ -96,9 +96,9 @@ class TestGalaxyNotifications(GalaxyTestBase.GalaxyTestBase):
         status = self.gi.notifications.get_notification_status(since=now)
 
         # check the datatype
-        assert type(status["total_unread_count"]) == int
-        assert type(status["broadcasts"]) == list
-        assert type(status["notifications"]) == list
+        assert isinstance(status["total_unread_count"], int)
+        assert isinstance(status["broadcasts"], list)
+        assert isinstance(status["notifications"], list)
 
         # check if the notification is really empty
         assert status["total_unread_count"] == 0
