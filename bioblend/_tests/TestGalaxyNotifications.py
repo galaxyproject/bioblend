@@ -387,6 +387,10 @@ class TestGalaxyNotifications(GalaxyTestBase.GalaxyTestBase):
     def test_update_broadcasted_notification(self):
         # WARNING: This test sends notifications
         # and only admins can send them
+        if not self.gi.config.get_config()["enable_notification_system"]:
+            self.skipTest("This Galaxy instance is not configured to use notifications.")
+        if not self.gi.users.get_current_user()["is_admin"]:
+            self.skipTest("This tests requires the current user to be an admin, which is not the case.")
 
         # Broadcast a notification
         created_response = self._send_test_broadcast_notification(
