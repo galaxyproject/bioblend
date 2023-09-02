@@ -108,7 +108,8 @@ class GalaxyInstance(GalaxyClient):
         self.tool_data = tool_data.ToolDataClient(self)
         self.folders = folders.FoldersClient(self)
         self.tool_dependencies = tool_dependencies.ToolDependenciesClient(self)
-        self.session = session
+        if session is not None:
+            self.session = session
 
     def __repr__(self) -> str:
         """

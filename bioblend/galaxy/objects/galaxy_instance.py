@@ -70,7 +70,8 @@ class GalaxyInstance:
         self.invocations = client.ObjInvocationClient(self)
         self.tools = client.ObjToolClient(self)
         self.jobs = client.ObjJobClient(self)
-        self.session = session
+        if session is not None:
+            self.session = session
 
     def _wait_datasets(
         self, datasets: Iterable[wrappers.Dataset], polling_interval: float, break_on_error: bool = True
