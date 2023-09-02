@@ -3,6 +3,7 @@ A base representation of an instance of Galaxy
 """
 from typing import Optional
 
+import requests
 from bioblend.galaxy import (
     config,
     container_resolution,
@@ -39,6 +40,7 @@ class GalaxyInstance(GalaxyClient):
         email: Optional[str] = None,
         password: Optional[str] = None,
         verify: bool = True,
+        session: requests.sessions.Session() = None,
     ) -> None:
         """
         A base representation of a connection to a Galaxy instance, identified
@@ -106,6 +108,7 @@ class GalaxyInstance(GalaxyClient):
         self.tool_data = tool_data.ToolDataClient(self)
         self.folders = folders.FoldersClient(self)
         self.tool_dependencies = tool_dependencies.ToolDependenciesClient(self)
+        self.session = session
 
     def __repr__(self) -> str:
         """

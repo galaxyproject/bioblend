@@ -11,6 +11,7 @@ from typing import (
 
 import bioblend
 import bioblend.galaxy
+import requests
 from bioblend.galaxy.datasets import TERMINAL_STATES
 from . import (
     client,
@@ -57,6 +58,7 @@ class GalaxyInstance:
         email: Optional[str] = None,
         password: Optional[str] = None,
         verify: bool = True,
+        session: requests.sessions.Session() = None,
     ) -> None:
         self.gi = bioblend.galaxy.GalaxyInstance(url, api_key, email, password, verify)
         self.log = bioblend.log
@@ -68,6 +70,7 @@ class GalaxyInstance:
         self.invocations = client.ObjInvocationClient(self)
         self.tools = client.ObjToolClient(self)
         self.jobs = client.ObjJobClient(self)
+        self.session = session
 
     def _wait_datasets(
         self, datasets: Iterable[wrappers.Dataset], polling_interval: float, break_on_error: bool = True

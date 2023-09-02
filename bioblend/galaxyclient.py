@@ -38,6 +38,7 @@ class GalaxyClient:
         password: Optional[str] = None,
         verify: bool = True,
         timeout: Optional[float] = None,
+        session: requests.sessions.Session() = None,
     ) -> None:
         """
         :param verify: Whether to verify the server's TLS certificate
@@ -133,7 +134,7 @@ class GalaxyClient:
         headers = self.json_headers
         kwargs.setdefault("timeout", self.timeout)
         kwargs.setdefault("verify", self.verify)
-        r = requests.get(url, headers=headers, **kwargs)
+        r = self.session.get(url, headers=headers, **kwargs)
         return r
 
     def make_post_request(
