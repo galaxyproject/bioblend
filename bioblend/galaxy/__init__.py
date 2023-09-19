@@ -4,6 +4,7 @@ A base representation of an instance of Galaxy
 from typing import Optional
 
 import requests
+
 from bioblend.galaxy import (
     config,
     container_resolution,

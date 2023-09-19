@@ -3,15 +3,13 @@ Cookie handler for Authelia authentication using the Galaxy API
 """
 
 import getpass
+import logging as log
 import sys
-
 from http.cookiejar import LWPCookieJar
 from pathlib import Path
 from pprint import pprint
-import logging as log
 
 import requests
-
 from galaxy_api import *
 
 AUTH_HOSTNAME = "auth.service.org"

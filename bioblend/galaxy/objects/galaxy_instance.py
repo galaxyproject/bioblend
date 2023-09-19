@@ -9,9 +9,10 @@ from typing import (
     Optional,
 )
 
+import requests
+
 import bioblend
 import bioblend.galaxy
-import requests
 from bioblend.galaxy.datasets import TERMINAL_STATES
 from . import (
     client,
