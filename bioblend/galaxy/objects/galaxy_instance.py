@@ -59,9 +59,9 @@ class GalaxyInstance:
         email: Optional[str] = None,
         password: Optional[str] = None,
         verify: bool = True,
-        session: requests.sessions.Session() = None,
+        session: Optional[requests.Session()] = None,
     ) -> None:
-        self.gi = bioblend.galaxy.GalaxyInstance(url, api_key, email, password, verify)
+        self.gi = bioblend.galaxy.GalaxyInstance(url, api_key, email, password, verify, session=session)
         self.log = bioblend.log
         self.datasets = client.ObjDatasetClient(self)
         self.dataset_collections = client.ObjDatasetCollectionClient(self)
@@ -71,8 +71,6 @@ class GalaxyInstance:
         self.invocations = client.ObjInvocationClient(self)
         self.tools = client.ObjToolClient(self)
         self.jobs = client.ObjJobClient(self)
-        if session is not None:
-            self.session = session
 
     def _wait_datasets(
         self, datasets: Iterable[wrappers.Dataset], polling_interval: float, break_on_error: bool = True

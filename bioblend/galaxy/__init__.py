@@ -41,7 +41,7 @@ class GalaxyInstance(GalaxyClient):
         email: Optional[str] = None,
         password: Optional[str] = None,
         verify: bool = True,
-        session: requests.sessions.Session() = None,
+        session: Optional[requests.Session()] = None,
     ) -> None:
         """
         A base representation of a connection to a Galaxy instance, identified
@@ -84,7 +84,7 @@ class GalaxyInstance(GalaxyClient):
         :param verify: Whether to verify the server's TLS certificate
         :type verify: bool
         """
-        super().__init__(url, key, email, password, verify=verify)
+        super().__init__(url, key, email, password, verify=verify, session=session)
         self.libraries = libraries.LibraryClient(self)
         self.histories = histories.HistoryClient(self)
         self.workflows = workflows.WorkflowClient(self)
@@ -109,8 +109,6 @@ class GalaxyInstance(GalaxyClient):
         self.tool_data = tool_data.ToolDataClient(self)
         self.folders = folders.FoldersClient(self)
         self.tool_dependencies = tool_dependencies.ToolDependenciesClient(self)
-        if session is not None:
-            self.session = session
 
     def __repr__(self) -> str:
         """
