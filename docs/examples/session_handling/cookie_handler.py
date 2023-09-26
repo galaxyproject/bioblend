@@ -9,7 +9,10 @@ from pathlib import Path
 from pprint import pprint
 
 import requests
-from galaxy_api import get_inputs, get_workflows
+from galaxy_api import (
+    get_inputs,
+    get_workflows,
+)
 
 AUTH_HOSTNAME = "auth.service.org"
 API_HOSTNAME = "galaxy.service.org"
