@@ -41,7 +41,7 @@ class GalaxyInstance(GalaxyClient):
         email: Optional[str] = None,
         password: Optional[str] = None,
         verify: bool = True,
-        session: Optional[requests.Session()] = None,
+        session: requests.Session() = None,
     ) -> None:
         """
         A base representation of a connection to a Galaxy instance, identified

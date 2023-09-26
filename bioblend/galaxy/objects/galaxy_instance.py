@@ -59,7 +59,7 @@ class GalaxyInstance:
         email: Optional[str] = None,
         password: Optional[str] = None,
         verify: bool = True,
-        session: Optional[requests.Session()] = None,
+        session: requests.Session() = None,
     ) -> None:
         self.gi = bioblend.galaxy.GalaxyInstance(url, api_key, email, password, verify, session=session)
         self.log = bioblend.log

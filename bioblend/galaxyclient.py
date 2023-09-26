@@ -38,7 +38,7 @@ class GalaxyClient:
         password: Optional[str] = None,
         verify: bool = True,
         timeout: Optional[float] = None,
-        session: Optional[requests.Session()] = None,
+        session: requests.Session() = None,
     ) -> None:
         """
         :param verify: Whether to verify the server's TLS certificate
