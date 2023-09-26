@@ -3,14 +3,13 @@ Cookie handler for Authelia authentication using the Galaxy API
 """
 
 import getpass
-import logging as log
 import sys
 from http.cookiejar import LWPCookieJar
 from pathlib import Path
 from pprint import pprint
 
 import requests
-from galaxy_api import *
+from galaxy_api import get_inputs, get_workflows
 
 AUTH_HOSTNAME = "auth.service.org"
 API_HOSTNAME = "galaxy.service.org"
@@ -62,7 +61,7 @@ def prompt_authentication():
         session.cookies = cookie_jar
         session.verify = True
 
-        auth = session.post(f"https://{AUTH_HOSTNAME}/api/firstfactor", json=login_body)
+        session.post(f"https://{AUTH_HOSTNAME}/api/firstfactor", json=login_body)
 
         response = session.get(f"https://{AUTH_HOSTNAME}/api/user/info")
         if response.status_code != 200:
