@@ -29,6 +29,7 @@ class TestGalaxyDatasetCollections(GalaxyTestBase.GalaxyTestBase):
                     dataset_collections.HistoryDatasetElement(name="sample3", id=dataset3_id),
                 ],
             ),
+            copy_elements=False,
         )
         assert collection_response["name"] == "MyDatasetList"
         assert collection_response["collection_type"] == "list"
@@ -70,6 +71,7 @@ class TestGalaxyDatasetCollections(GalaxyTestBase.GalaxyTestBase):
                     ),
                 ],
             ),
+            copy_elements=False,
         )
         assert collection_response["name"] == "MyListOfPairedDatasets"
         assert collection_response["collection_type"] == "list:paired"
@@ -197,5 +199,6 @@ class TestGalaxyDatasetCollections(GalaxyTestBase.GalaxyTestBase):
                     dataset_collections.HistoryDatasetElement(name="reverse", id=dataset2_id),
                 ],
             ),
+            copy_elements=False,
         )
         return collection_response

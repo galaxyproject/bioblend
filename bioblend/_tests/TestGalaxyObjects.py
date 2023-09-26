@@ -898,7 +898,7 @@ class TestHistory(GalaxyObjectsTestBase):
 
     def test_create_dataset_collection(self):
         self._create_collection_description()
-        hdca = self.hist.create_dataset_collection(self.collection_description)
+        hdca = self.hist.create_dataset_collection(self.collection_description, copy_elements=False)
         assert isinstance(hdca, wrappers.HistoryDatasetCollectionAssociation)
         assert hdca.collection_type == "list"
         assert hdca.container is self.hist
@@ -908,7 +908,7 @@ class TestHistory(GalaxyObjectsTestBase):
 
     def test_delete_dataset_collection(self):
         self._create_collection_description()
-        hdca = self.hist.create_dataset_collection(self.collection_description)
+        hdca = self.hist.create_dataset_collection(self.collection_description, copy_elements=False)
         hdca.delete()
         assert hdca.deleted
 
@@ -1045,7 +1045,7 @@ class TestRunDatasetCollectionWorkflow(GalaxyObjectsTestBase):
                 dataset_collections.HistoryDatasetElement(name="sample2", id=dataset2.id),
             ],
         )
-        dataset_collection = self.hist.create_dataset_collection(collection_description)
+        dataset_collection = self.hist.create_dataset_collection(collection_description, copy_elements=False)
         assert len(self.hist.content_infos) == 3
         input_map = {"0": dataset_collection, "1": dataset1}
         inv = self.wf.invoke(input_map, history=self.hist)

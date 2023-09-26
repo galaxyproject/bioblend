@@ -1475,7 +1475,9 @@ class History(DatasetContainer[HistoryDatasetAssociation]):
         return self.gi.gi.histories.download_history(self.id, jeha_id, outf, chunk_size=chunk_size)
 
     def create_dataset_collection(
-        self, collection_description: bioblend.galaxy.dataset_collections.CollectionDescription
+        self,
+        collection_description: bioblend.galaxy.dataset_collections.CollectionDescription,
+        copy_elements: bool = True,
     ) -> "HistoryDatasetCollectionAssociation":
         """
         Create a new dataset collection in the history by providing a collection description.
@@ -1483,10 +1485,16 @@ class History(DatasetContainer[HistoryDatasetAssociation]):
         :type collection_description: bioblend.galaxy.dataset_collections.CollectionDescription
         :param collection_description: a description of the dataset collection
 
+        :type copy_elements: bool
+        :param copy_elements: Whether to make a copy of the elements of the
+          collection being created
+
         :rtype: :class:`~.HistoryDatasetCollectionAssociation`
         :return: the new dataset collection
         """
-        dataset_collection = self.gi.gi.histories.create_dataset_collection(self.id, collection_description)
+        dataset_collection = self.gi.gi.histories.create_dataset_collection(
+            self.id, collection_description, copy_elements=copy_elements
+        )
         self.refresh()
         return self.get_dataset_collection(dataset_collection["id"])
 

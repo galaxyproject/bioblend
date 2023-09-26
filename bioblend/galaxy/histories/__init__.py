@@ -582,7 +582,10 @@ class HistoryClient(Client):
         return self._post(payload, id=history_id, contents=True)
 
     def create_dataset_collection(
-        self, history_id: str, collection_description: Union["CollectionDescription", Dict[str, Any]]
+        self,
+        history_id: str,
+        collection_description: Union["CollectionDescription", Dict[str, Any]],
+        copy_elements: bool = True,
     ) -> Dict[str, Any]:
         """
         Create a new dataset collection
@@ -603,6 +606,10 @@ class HistoryClient(Client):
                                       'src': 'hda'}],
              'name': 'My collection list'}
 
+        :type copy_elements: bool
+        :param copy_elements: Whether to make a copy of the elements of the
+          collection being created
+
         :rtype: dict
         :return: Information about the new HDCA
         """
@@ -616,6 +623,7 @@ class HistoryClient(Client):
             type="dataset_collection",
             collection_type=collection_description_dict["collection_type"],
             element_identifiers=collection_description_dict["element_identifiers"],
+            copy_elements=copy_elements,
         )
         return self._post(payload, id=history_id, contents=True)
 
