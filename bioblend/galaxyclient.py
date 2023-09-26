@@ -48,6 +48,11 @@ class GalaxyClient:
         """
         self.verify = verify
         self.timeout = timeout
+
+        if session is None:
+            session = requests.Session()
+        self.session = session
+
         # Make sure the URL scheme is defined (otherwise requests will not work)
         if not url.lower().startswith("http"):
             found_scheme = None
@@ -55,18 +60,11 @@ class GalaxyClient:
             for scheme in ("https://", "http://"):
                 log.warning(f"Missing scheme in url, trying with {scheme}")
                 with contextlib.suppress(requests.RequestException):
-                    if session is not None:
-                        r = session.get(
-                            scheme + url,
-                            timeout=self.timeout,
-                            verify=self.verify,
-                        )
-                    else:
-                        r = requests.get(
-                            scheme + url,
-                            timeout=self.timeout,
-                            verify=self.verify,
-                        )
+                    r = session.get(
+                        scheme + url,
+                        timeout=self.timeout,
+                        verify=self.verify,
+                    )
                     r.raise_for_status()
                     found_scheme = scheme
                     break
@@ -91,8 +89,6 @@ class GalaxyClient:
         self._max_get_attempts = 1
         # Delay in seconds between subsequent retries.
         self._get_retry_delay = 10.0
-        # Add session to the client if provided
-        self.session = session
 
     @property
     def max_get_attempts(self) -> int:
@@ -143,10 +139,7 @@ class GalaxyClient:
         headers = self.json_headers
         kwargs.setdefault("timeout", self.timeout)
         kwargs.setdefault("verify", self.verify)
-        if self.session is not None:
-            r = self.session.get(url, headers=headers, **kwargs)
-        else:
-            r = requests.get(url, headers=headers, **kwargs)
+        r = self.session.get(url, headers=headers, **kwargs)
         return r
 
     def make_post_request(
@@ -186,26 +179,15 @@ class GalaxyClient:
             data = json.dumps(payload) if payload is not None else None
             headers = self.json_headers
             post_params = params
-        if self.session is not None:
-            r = self.session.post(
-                url,
-                params=post_params,
-                data=data,
-                headers=headers,
-                timeout=self.timeout,
-                allow_redirects=False,
-                verify=self.verify,
-            )
-        else:
-            r = requests.post(
-                url,
-                params=post_params,
-                data=data,
-                headers=headers,
-                timeout=self.timeout,
-                allow_redirects=False,
-                verify=self.verify,
-            )
+        r = self.session.post(
+            url,
+            params=post_params,
+            data=data,
+            headers=headers,
+            timeout=self.timeout,
+            allow_redirects=False,
+            verify=self.verify,
+        )
         if r.status_code == 200:
             try:
                 return r.json()
@@ -237,26 +219,15 @@ class GalaxyClient:
         """
         data = json.dumps(payload) if payload is not None else None
         headers = self.json_headers
-        if self.session is not None:
-            r = self.session.delete(
-                url,
-                params=params,
-                data=data,
-                headers=headers,
-                timeout=self.timeout,
-                allow_redirects=False,
-                verify=self.verify,
-            )
-        else:
-            r = requests.delete(
-                url,
-                params=params,
-                data=data,
-                headers=headers,
-                timeout=self.timeout,
-                allow_redirects=False,
-                verify=self.verify,
-            )
+        r = self.session.delete(
+            url,
+            params=params,
+            data=data,
+            headers=headers,
+            timeout=self.timeout,
+            allow_redirects=False,
+            verify=self.verify,
+        )
         return r
 
     def make_put_request(self, url: str, payload: Optional[dict] = None, params: Optional[dict] = None) -> Any:
@@ -270,26 +241,15 @@ class GalaxyClient:
         """
         data = json.dumps(payload) if payload is not None else None
         headers = self.json_headers
-        if self.session is not None:
-            r = self.session.put(
-                url,
-                params=params,
-                data=data,
-                headers=headers,
-                timeout=self.timeout,
-                allow_redirects=False,
-                verify=self.verify,
-            )
-        else:
-            r = requests.put(
-                url,
-                params=params,
-                data=data,
-                headers=headers,
-                timeout=self.timeout,
-                allow_redirects=False,
-                verify=self.verify,
-            )
+        r = self.session.put(
+            url,
+            params=params,
+            data=data,
+            headers=headers,
+            timeout=self.timeout,
+            allow_redirects=False,
+            verify=self.verify,
+        )
         if r.status_code == 200:
             try:
                 return r.json()
@@ -317,26 +277,15 @@ class GalaxyClient:
         """
         data = json.dumps(payload) if payload is not None else None
         headers = self.json_headers
-        if self.session is not None:
-            r = self.session.patch(
-                url,
-                params=params,
-                data=data,
-                headers=headers,
-                timeout=self.timeout,
-                allow_redirects=False,
-                verify=self.verify,
-            )
-        else:
-            r = requests.patch(
-                url,
-                params=params,
-                data=data,
-                headers=headers,
-                timeout=self.timeout,
-                allow_redirects=False,
-                verify=self.verify,
-            )
+        r = self.session.patch(
+            url,
+            params=params,
+            data=data,
+            headers=headers,
+            timeout=self.timeout,
+            allow_redirects=False,
+            verify=self.verify,
+        )
         if r.status_code == 200:
             try:
                 return r.json()
@@ -411,20 +360,12 @@ class GalaxyClient:
             auth_url = f"{self.url}/authenticate/baseauth"
             # Use lower level method instead of make_get_request() because we
             # need the additional Authorization header.
-            if self.session is not None:
-                r = self.session.get(
-                    auth_url,
-                    headers=headers,
-                    timeout=self.timeout,
-                    verify=self.verify,
-                )
-            else:
-                r = requests.get(
-                    auth_url,
-                    headers=headers,
-                    timeout=self.timeout,
-                    verify=self.verify,
-                )
+            r = self.session.get(
+                auth_url,
+                headers=headers,
+                timeout=self.timeout,
+                verify=self.verify,
+            )
             if r.status_code != 200:
                 raise Exception("Failed to authenticate user.")
             response = r.json()
