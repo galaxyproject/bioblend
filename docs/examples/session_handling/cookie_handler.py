@@ -57,7 +57,7 @@ def prompt_authentication():
         "targetURL": API_HOSTNAME,
     }
 
-    with requests.sessions.Session() as session:
+    with requests.Session() as session:
         session.cookies = cookie_jar
         session.verify = True
 
@@ -75,7 +75,7 @@ def prompt_authentication():
 def run_examples():
     GALAXY_KEY = "user_api_key"
     WORKFLOW_NAME = "workflow_name"
-    with requests.sessions.Session() as session:
+    with requests.Session() as session:
         session.cookies = cookie_jar
 
         print("Running demo to demonstrate how to use the Galaxy API with Authelia")
