@@ -16,8 +16,8 @@ from . import (
 )
 
 
+@test_util.skip_unless_galaxy("release_23.1")
 class TestGalaxyNotifications(GalaxyTestBase.GalaxyTestBase):
-    @test_util.skip_unless_galaxy("release_23.1")
     def test_notification_status(self):
         # WARNING: This test includes user creation
         # and only admins can create users
@@ -86,7 +86,6 @@ class TestGalaxyNotifications(GalaxyTestBase.GalaxyTestBase):
         assert len(status["broadcasts"]) == 1
         assert status["broadcasts"][0]["content"]["message"] == "test_notification_status 3"
 
-    @test_util.skip_unless_galaxy("release_23.1")
     def test_empty_notification_status(self):
         if not self.gi.config.get_config()["enable_notification_system"]:
             self.skipTest("This Galaxy instance is not configured to use notifications.")
@@ -105,7 +104,6 @@ class TestGalaxyNotifications(GalaxyTestBase.GalaxyTestBase):
         assert status["broadcasts"] == []
         assert status["notifications"] == []
 
-    @test_util.skip_unless_galaxy("release_23.1")
     def test_notification_preferences(self):
         if not self.gi.config.get_config()["enable_notification_system"]:
             self.skipTest("This Galaxy instance is not configured to use notifications.")
@@ -140,7 +138,6 @@ class TestGalaxyNotifications(GalaxyTestBase.GalaxyTestBase):
         assert new_items_preferences["enabled"] is False
         assert new_items_preferences["channels"]["push"] is False
 
-    @test_util.skip_unless_galaxy("release_23.1")
     def test_get_user_notifications(self):
         # WARNING: This test sends notifications
         # and only admins can send them
@@ -193,7 +190,6 @@ class TestGalaxyNotifications(GalaxyTestBase.GalaxyTestBase):
         assert created_response_4[0]["content"]["message"] == "test_notification_status 2"
         assert created_response_4[1]["content"]["message"] == "test_notification_status 3"
 
-    @test_util.skip_unless_galaxy("release_23.1")
     def test_get_broadcasted(self):
         # WARNING: This test sends notifications
         # and only admins can send them
@@ -215,7 +211,6 @@ class TestGalaxyNotifications(GalaxyTestBase.GalaxyTestBase):
         assert broadcast["content"]["action_links"][1]["action_name"] == "link_2"
         assert broadcast["content"]["action_links"][1]["link"] == "https://link2.de"
 
-    @test_util.skip_unless_galaxy("release_23.1")
     def test_get_all_broadcasted(self):
         # WARNING: This test sends notifications
         # and only admins can send them
@@ -237,7 +232,6 @@ class TestGalaxyNotifications(GalaxyTestBase.GalaxyTestBase):
         assert broadcasts[0]["content"]["message"] == "test_notification_status 1"
         assert broadcasts[1]["content"]["message"] == "test_notification_status 2"
 
-    @test_util.skip_unless_galaxy("release_23.1")
     def test_show_notification(self):
         # WARNING: This test sends notifications
         # and only admins can send them
@@ -264,7 +258,6 @@ class TestGalaxyNotifications(GalaxyTestBase.GalaxyTestBase):
         # check that the content is correct
         assert notification["content"]["message"] == "test_notification_status"
 
-    @test_util.skip_unless_galaxy("release_23.1")
     def test_update_notifications(self):
         # WARNING: This test includes user creation
         # and only admins can create users
@@ -345,7 +338,6 @@ class TestGalaxyNotifications(GalaxyTestBase.GalaxyTestBase):
         assert notification_2["seen_time"] is None
         assert notification_2["deleted"] is False
 
-    @test_util.skip_unless_galaxy("release_23.1")
     def test_delete_notifications(self):
         # WARNING: This test includes user creation
         # and only admins can create users
@@ -383,7 +375,6 @@ class TestGalaxyNotifications(GalaxyTestBase.GalaxyTestBase):
         response_2 = user_gi.notifications.delete_user_notifications([notification_2_id, notification_3_id])
         assert response_2["updated_count"] == 2
 
-    @test_util.skip_unless_galaxy("release_23.1")
     def test_update_broadcasted_notification(self):
         # WARNING: This test sends notifications
         # and only admins can send them
