@@ -33,9 +33,11 @@ class NotificationClient(Client):
         """
         Returns the current status summary of the user's notifications
         since a particular date.
+
         :type since: datetime
         :param since: Retrieval of the notifications starts from this point
-        in time
+          in time
+
         :rtype: dict
         :return: Current status summary of notifications.
         """
@@ -46,6 +48,7 @@ class NotificationClient(Client):
         """
         Returns the current user's preferences for notifications.
         Anonymous users cannot have notification preferences.
+
         :rtype: dict
         :return: The notification preferences
         """
@@ -61,23 +64,31 @@ class NotificationClient(Client):
     ) -> Dict[str, Any]:
         """
         Updates the user's notifications preferences.
+
         Enable/disable notifications for a particular type (category)
         or enable/disable a particular channel on each category.
         Channels available:
-            - push notifications
+
+        - push notifications
+
         Anonymous users cannot have notification preferences.
         They will receive only broadcasted notifications.
+
         :type message_notifications: bool
-        :param message_notifications: Receive message notifications
+        :param message_notifications: Whether to receive message notifications
+
         :type push_notifications_message: bool
-        :param push_notifications_message: Receive push notifications in the
-        browser for this category
+        :param push_notifications_message: Whether to receive push notifications
+          in the browser for this category
+
         :type new_item_notifications: bool
-        :param new_item_notifications: Receive notification when someone
-        shares item with you
+        :param new_item_notifications: Whether to receive notification when
+          someone shares item with you
+
         :type push_notifications_new_items: bool
-        :param push_notifications_new_items: Receive push notifications in the
-        browser for this category
+        :param push_notifications_new_items: Whether to receive push
+          notifications in the browser for this category
+
         :rtype: dict
         :return: Notification preferences of the user.
         """
@@ -150,7 +161,7 @@ class NotificationClient(Client):
 
         :type seen: bool
         :param seen: Mark notification as seen. When set to true the field is
-        set to the current datetime
+          set to the current datetime
 
         :type deleted: bool
         :param deleted: Mark notification as deleted
@@ -172,15 +183,14 @@ class NotificationClient(Client):
         deleted: bool,
     ) -> Dict[str, int]:
         """
-        Updates a list of notifications with the requested values
-        in a single request.
+        Updates a list of notifications in a single request.
 
         :type notification_ids: list
         :param since: IDs of the messages, which are to be updated
 
         :type seen: bool
         :param seen: Mark the message as seen. When set to true the field is
-        set to the current datetime
+          set to the current datetime
 
         :type delete: bool
         :param seen: Mark the message as deleted
@@ -216,44 +226,43 @@ class NotificationClient(Client):
 
         :type update_content: bool
         :param update_content: Indicates if the content will be updated.
-        If set to true subject and message are required.
+          If set to True, subject and message are required.
 
         :type source: str
         :param source: Source of the broadcast. Represents the agent that
-        created the broadcast.
-        E.g. 'galaxy' or 'admin'.
+          created the broadcast, e.g. 'galaxy' or 'admin'.
 
         :type variant: str
         :param variant: Variant of the broadcast. Represents the intent or
-        relevance of the broadcast.
-        Available variants:
-            - 'info'
-            - 'urgent'
-            - 'warning'
+          relevance of the broadcast. Available variants:
+
+          - 'info'
+          - 'urgent'
+          - 'warning'
 
         :type subject: str
         :param subject: Purpose of the broadcast, which is a part of the
-        content of the message
+          content of the message.
 
         :type action_links: dict
         :param action_links: Optional action links (buttons) to be displayed
-        in the notification, which are a part of the content of the message.
-        Keys must be the title of the links and the value must be the link.
-        Links must be urls, otherwise the request will not be accepted.
+          in the notification, which are a part of the content of the message.
+          Keys must be the title of the links and the value must be the link.
+          Links must be URLs, otherwise the request will not be accepted.
 
         :type message: str
         :param message: Message of the broadcast, which is a part of the
-        content of the message.
+          content of the message.
 
         :type publication_time: datetime
         :param publication_time: Time when the broadcast was published.
-        Broadcasts can be created and then published at a later time.
-        Will default to the moment the broadcast is sent.
+          Broadcasts can be created and then published at a later time.
+          Will default to the moment the broadcast is sent.
 
         :type expiration_time: datetime
         :param expiration_time: Time when the broadcast will expire.
-        If not set, the broadcast will expire 6 months later.
-        Expired broadcasts will be permanently deleted.
+          If not set, the broadcast will expire 6 months later.
+          Expired broadcasts will be permanently deleted.
 
         :rtype: str
         :return: A verification that the update was successful
@@ -339,17 +348,16 @@ class NotificationClient(Client):
         Sends a notification to a list of recipients (users, groups or roles).
 
         :type source: str
-        :param source: Source of the notification.
-        Represents the agent that created the notification.
-        E.g. 'galaxy' or 'admin'.
+        :param source: Source of the notification. Represents the agent that
+          created the notification, e.g. 'galaxy' or 'admin'.
 
         :type variant: message_variants
-        :param variant: Variant of the notification.
-        Represents the intent or relevance of the notification.
-        Available variants:
-            - 'info'
-            - 'urgent'
-            - 'warning'
+        :param variant: Variant of the notification. Represents the intent or
+          relevance of the notification. Available variants:
+
+          - 'info'
+          - 'urgent'
+          - 'warning'
 
         :type subject: str
         :param subject: Purpose of the notification
@@ -359,13 +367,13 @@ class NotificationClient(Client):
 
         :type publication_time: datetime
         :param publication_time: Time when the notification was published.
-        Notifications can be created and then published at a later time.
-        Will default to the moment the notification is sent.
+          Notifications can be created and then published at a later time.
+          Will default to the moment the notification is sent.
 
         :type expiration_time: datetime
         :param expiration_time: Time when the notification will expire.
-        If not set, the notification will expire 6 months later.
-        Expired notifications will be permanently deleted.
+          If not set, the notification will expire 6 months later.
+          Expired notifications will be permanently deleted.
 
         :type user_ids: List[str]
         :param user_ids: IDs of users to receive the notification.
@@ -413,14 +421,16 @@ class NotificationClient(Client):
     ) -> str:
         """
         Deletes a notification received by the user.
+
         When a notification is deleted, it is not immediately removed
         from the database, but marked as deleted.
+
         - It will not be returned in the list of notifications,
-        but admins can still access it as long as it is not expired.
+          but admins can still access it as long as it is not expired.
         - It will be eventually removed from the database by a background task
-        after the expiration time.
+          after the expiration time.
         - Deleted notifications will be permanently deleted when the
-        expiration time is reached even if they were marked as favorite.
+          expiration time is reached even if they were marked as favorite.
 
         :type notification_id: str
         :param notification_id: ID of the notification
@@ -437,17 +447,17 @@ class NotificationClient(Client):
         notification_ids: List[str],
     ) -> Dict[str, int]:
         """
-        Deletes a list of notifications with the requested values in a single
-        request.
+        Deletes a list of notifications in a single request.
+
         When a notification is deleted, it is not immediately removed from the
         database, but marked as deleted.
 
         - It will not be returned in the list of notifications, but admins can
-        still access it as long as it is not expired.
+          still access it as long as it is not expired.
         - It will be eventually removed from the database by a background task
-        after the expiration time.
+          after the expiration time.
         - Deleted notifications will be permanently deleted when the
-        expiration time is reached even if they were marked as favorite.
+          expiration time is reached even if they were marked as favorite.
 
         :type notification_ids: list
         :param since: IDs of the messages, which are to be deleted
@@ -477,9 +487,11 @@ class NotificationClient(Client):
         Broadcasted notifications are a special kind of notification that are
         always accessible to all users, including anonymous users.
         They are typically used to display important information such as:
+
         - maintenance
         - windows
         - new features.
+
         These notifications are displayed differently from regular
         notifications, usually in a banner at the top or bottom of the page.
 
@@ -491,28 +503,25 @@ class NotificationClient(Client):
         Some key features of broadcasted notifications include:
 
         - They are not associated with a specific user, so they cannot be
-        deleted or marked as read.
+          deleted or marked as read.
         - They can be scheduled to be displayed in the future or to expire
-        after a certain time.
+          after a certain time.
         - By default, broadcasted notifications are published immediately and
-        expire six months after publication.
+          expire six months after publication.
         - Only admins can create, edit, reschedule, or expire broadcasted
-        notifications as needed.
-
+          notifications as needed.
 
         :type source: str
         :param source: Source of the broadcast. Represents the agent that
-        created the broadcast.
-        E.g. 'galaxy' or 'admin'.
+          created the broadcast, e.g. 'galaxy' or 'admin'.
 
         :type variant: str
         :param variant: Variant of the broadcast. Represents the intent or
-        relevance of the broadcast.
-        Available variants:
-            - 'info'
-            - 'urgent'
-            - 'warning'
+          relevance of the broadcast. Available variants:
 
+          - 'info'
+          - 'urgent'
+          - 'warning'
 
         :type subject: str
         :param subject: Purpose of the broadcast
@@ -522,19 +531,19 @@ class NotificationClient(Client):
 
         :type action_links: dict
         :param action_links: Optional action links (buttons) to be displayed
-        in the notification.
-        Keys must be the title of the links and the value must be the link.
-        Links must be urls, otherwise the request will not be accepted.
+          in the notification. Keys must be the title of the links and the value
+          must be the link. Links must be URLs, otherwise the request will not
+          be accepted.
 
         :type publication_time: datetime
         :param publication_time: Time when the broadcast was published.
-        Notifications can be created and then published at a later time.
-        Will default to the moment the broadcast is sent.
+          Notifications can be created and then published at a later time.
+          Will default to the moment the broadcast is sent.
 
         :type expiration_time: datetime
         :param expiration_time: Time when the broadcast will expire.
-        If not set, the broadcast will expire 6 months later.
-        Expired broadcast will be permanently deleted.
+          If not set, the broadcast will expire 6 months later.
+          Expired broadcast will be permanently deleted.
 
         :rtype: dict
         :return: A Summary of the broadcast sent.
