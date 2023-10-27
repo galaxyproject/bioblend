@@ -38,6 +38,7 @@ class GalaxyClient:
         password: Optional[str] = None,
         verify: bool = True,
         timeout: Optional[float] = None,
+        session: Optional[requests.Session] = None,
     ) -> None:
         """
         :param verify: Whether to verify the server's TLS certificate
@@ -47,6 +48,11 @@ class GalaxyClient:
         """
         self.verify = verify
         self.timeout = timeout
+
+        if session is None:
+            session = requests.Session()
+        self.session = session
+
         # Make sure the URL scheme is defined (otherwise requests will not work)
         if not url.lower().startswith("http"):
             found_scheme = None
@@ -54,7 +60,7 @@ class GalaxyClient:
             for scheme in ("https://", "http://"):
                 log.warning(f"Missing scheme in url, trying with {scheme}")
                 with contextlib.suppress(requests.RequestException):
-                    r = requests.get(
+                    r = session.get(
                         scheme + url,
                         timeout=self.timeout,
                         verify=self.verify,
@@ -133,7 +139,7 @@ class GalaxyClient:
         headers = self.json_headers
         kwargs.setdefault("timeout", self.timeout)
         kwargs.setdefault("verify", self.verify)
-        r = requests.get(url, headers=headers, **kwargs)
+        r = self.session.get(url, headers=headers, **kwargs)
         return r
 
     def make_post_request(
@@ -173,8 +179,7 @@ class GalaxyClient:
             data = json.dumps(payload) if payload is not None else None
             headers = self.json_headers
             post_params = params
-
-        r = requests.post(
+        r = self.session.post(
             url,
             params=post_params,
             data=data,
@@ -214,7 +219,7 @@ class GalaxyClient:
         """
         data = json.dumps(payload) if payload is not None else None
         headers = self.json_headers
-        r = requests.delete(
+        r = self.session.delete(
             url,
             params=params,
             data=data,
@@ -236,7 +241,7 @@ class GalaxyClient:
         """
         data = json.dumps(payload) if payload is not None else None
         headers = self.json_headers
-        r = requests.put(
+        r = self.session.put(
             url,
             params=params,
             data=data,
@@ -272,7 +277,7 @@ class GalaxyClient:
         """
         data = json.dumps(payload) if payload is not None else None
         headers = self.json_headers
-        r = requests.patch(
+        r = self.session.patch(
             url,
             params=params,
             data=data,
@@ -355,7 +360,7 @@ class GalaxyClient:
             auth_url = f"{self.url}/authenticate/baseauth"
             # Use lower level method instead of make_get_request() because we
             # need the additional Authorization header.
-            r = requests.get(
+            r = self.session.get(
                 auth_url,
                 headers=headers,
                 timeout=self.timeout,

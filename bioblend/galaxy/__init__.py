@@ -3,6 +3,8 @@ A base representation of an instance of Galaxy
 """
 from typing import Optional
 
+import requests
+
 from bioblend.galaxy import (
     config,
     container_resolution,
@@ -39,6 +41,7 @@ class GalaxyInstance(GalaxyClient):
         email: Optional[str] = None,
         password: Optional[str] = None,
         verify: bool = True,
+        session: Optional[requests.Session] = None,
     ) -> None:
         """
         A base representation of a connection to a Galaxy instance, identified
@@ -81,7 +84,7 @@ class GalaxyInstance(GalaxyClient):
         :param verify: Whether to verify the server's TLS certificate
         :type verify: bool
         """
-        super().__init__(url, key, email, password, verify=verify)
+        super().__init__(url, key, email, password, verify=verify, session=session)
         self.libraries = libraries.LibraryClient(self)
         self.histories = histories.HistoryClient(self)
         self.workflows = workflows.WorkflowClient(self)

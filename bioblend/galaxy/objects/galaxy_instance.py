@@ -9,6 +9,8 @@ from typing import (
     Optional,
 )
 
+import requests
+
 import bioblend
 import bioblend.galaxy
 from bioblend.galaxy.datasets import TERMINAL_STATES
@@ -57,8 +59,9 @@ class GalaxyInstance:
         email: Optional[str] = None,
         password: Optional[str] = None,
         verify: bool = True,
+        session: Optional[requests.Session] = None,
     ) -> None:
-        self.gi = bioblend.galaxy.GalaxyInstance(url, api_key, email, password, verify)
+        self.gi = bioblend.galaxy.GalaxyInstance(url, api_key, email, password, verify, session=session)
         self.log = bioblend.log
         self.datasets = client.ObjDatasetClient(self)
         self.dataset_collections = client.ObjDatasetCollectionClient(self)
