@@ -88,6 +88,10 @@ class HistoryClient(Client):
         filter_user_published: Optional[bool] = None,
         get_all_published: bool = False,
         slug: Optional[str] = None,
+        create_time_min: Optional[str] = None,
+        create_time_max: Optional[str] = None,
+        update_time_min: Optional[str] = None,
+        update_time_max: Optional[str] = None,
         all: Optional[bool] = False,
     ) -> List[Dict[str, Any]]:
         """
@@ -105,6 +109,18 @@ class HistoryClient(Client):
         if slug is not None:
             params.setdefault("q", []).append("slug")
             params.setdefault("qv", []).append(slug)
+        if create_time_min:
+            params.setdefault("q", []).append("create_time-ge")
+            params.setdefault("qv", []).append(create_time_min)
+        if create_time_max:
+            params.setdefault("q", []).append("create_time-le")
+            params.setdefault("qv", []).append(create_time_max)
+        if update_time_min:
+            params.setdefault("q", []).append("update_time-ge")
+            params.setdefault("qv", []).append(update_time_min)
+        if update_time_max:
+            params.setdefault("q", []).append("update_time-le")
+            params.setdefault("qv", []).append(update_time_max)
         if all:
             params["all"] = True
 
@@ -122,6 +138,10 @@ class HistoryClient(Client):
         deleted: bool = False,
         published: Optional[bool] = None,
         slug: Optional[str] = None,
+        create_time_min: Optional[str] = None,
+        create_time_max: Optional[str] = None,
+        update_time_min: Optional[str] = None,
+        update_time_max: Optional[str] = None,
         all: Optional[bool] = False,
     ) -> List[Dict[str, Any]]:
         """
@@ -145,6 +165,22 @@ class HistoryClient(Client):
         :type slug: str
         :param slug: History slug to filter on
 
+        :type create_time_min: str
+        :param create_time_min: Return histories created after the provided
+          time and date, which should be formatted as ``YYYY-MM-DDTHH-MM-SS``.
+
+        :type create_time_max: str
+        :param create_time_max: Return histories created before the provided
+          time and date, which should be formatted as ``YYYY-MM-DDTHH-MM-SS``.
+
+        :type update_time_min: str
+        :param update_time_min: Return histories last updated after the provided
+          time and date, which should be formatted as ``YYYY-MM-DDTHH-MM-SS``.
+
+        :type update_time_max: str
+        :param update_time_max: Return histories last updated before the provided
+          time and date, which should be formatted as ``YYYY-MM-DDTHH-MM-SS``.
+
         :type all: bool
         :param all: Whether to include histories from other users. This
           parameter works only on Galaxy 20.01 or later and can be specified
@@ -162,11 +198,27 @@ class HistoryClient(Client):
                 "The history_id parameter has been removed, use the show_history() method to view details of a history for which you know the ID.",
             )
         return self._get_histories(
-            name=name, deleted=deleted, filter_user_published=published, get_all_published=False, slug=slug, all=all
+            name=name,
+            deleted=deleted,
+            filter_user_published=published,
+            get_all_published=False,
+            slug=slug,
+            all=all,
+            create_time_min=create_time_min,
+            create_time_max=create_time_max,
+            update_time_min=update_time_min,
+            update_time_max=update_time_max,
         )
 
     def get_published_histories(
-        self, name: Optional[str] = None, deleted: bool = False, slug: Optional[str] = None
+        self,
+        name: Optional[str] = None,
+        deleted: bool = False,
+        slug: Optional[str] = None,
+        create_time_min: Optional[str] = None,
+        create_time_max: Optional[str] = None,
+        update_time_min: Optional[str] = None,
+        update_time_max: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """
         Get all published histories (by any user), or select a subset by
@@ -182,11 +234,35 @@ class HistoryClient(Client):
         :type slug: str
         :param slug: History slug to filter on
 
+        :type create_time_min: str
+        :param create_time_min: Return histories created after the provided
+          time and date, which should be formatted as ``YYYY-MM-DDTHH-MM-SS``.
+
+        :type create_time_max: str
+        :param create_time_max: Return histories created before the provided
+          time and date, which should be formatted as ``YYYY-MM-DDTHH-MM-SS``.
+
+        :type update_time_min: str
+        :param update_time_min: Return histories last updated after the provided
+          time and date, which should be formatted as ``YYYY-MM-DDTHH-MM-SS``.
+
+        :type update_time_max: str
+        :param update_time_max: Return histories last updated before the provided
+          time and date, which should be formatted as ``YYYY-MM-DDTHH-MM-SS``.
+
         :rtype: list
         :return: List of history dicts.
         """
         return self._get_histories(
-            name=name, deleted=deleted, filter_user_published=None, get_all_published=True, slug=slug
+            name=name,
+            deleted=deleted,
+            filter_user_published=None,
+            get_all_published=True,
+            slug=slug,
+            create_time_min=create_time_min,
+            create_time_max=create_time_max,
+            update_time_min=update_time_min,
+            update_time_max=update_time_max,
         )
 
     @overload

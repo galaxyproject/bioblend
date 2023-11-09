@@ -73,6 +73,17 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
         histories = self.gi.histories.get_histories(name=self.default_history_name)
         assert len([h for h in histories if h["id"] == self.history["id"]]) == 1
 
+        # Test for time filters. We expect all histories to have been created an updated within the last few minutes
+        new_histories = self.gi.histories.get_histories(
+            create_time_min="2023-07-04T11:00:01", update_time_min="2023-08-06T11:00:05"
+        )
+        assert len(new_histories) == len(all_histories)
+
+        old_histories = self.gi.histories.get_histories(
+            create_time_max="2023-07-04T11:00:01", update_time_max="2023-08-06T11:00:05"
+        )
+        assert len(old_histories) == 0
+
         # TODO: check whether deleted history is returned correctly
         # At the moment, get_histories() returns only not-deleted histories
         # and get_histories(deleted=True) returns only deleted histories,
