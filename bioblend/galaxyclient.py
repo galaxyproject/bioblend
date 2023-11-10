@@ -34,6 +34,7 @@ class GalaxyClient:
         self,
         url: str,
         key: Optional[str] = None,
+        token: Optional[str] = None,
         email: Optional[str] = None,
         password: Optional[str] = None,
         *,
@@ -73,13 +74,18 @@ class GalaxyClient:
         # password and grab user's key before first request.
         if key:
             self._key: Optional[str] = key
+        elif token:
+            self.token: Optional[str] = token
         else:
             self._key = None
             self.email = email
             self.password = password
         self.json_headers: dict = {"Content-Type": "application/json"}
         # json_headers needs to be set before key can be defined, otherwise authentication with email/password causes an error
-        self.json_headers["x-api-key"] = self.key
+        if token:
+            self.json_headers["Authorization"] = f"Bearer {self.token}"
+        else:
+            self.json_headers["x-api-key"] = self.key
         # Number of attempts before giving up on a GET request.
         self._max_get_attempts = 1
         # Delay in seconds between subsequent retries.
