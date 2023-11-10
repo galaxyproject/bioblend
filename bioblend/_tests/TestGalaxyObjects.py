@@ -213,7 +213,7 @@ class GalaxyObjectsTestBase(unittest.TestCase):
     def setUpClass(cls) -> None:
         galaxy_key = os.environ["BIOBLEND_GALAXY_API_KEY"]
         galaxy_url = os.environ["BIOBLEND_GALAXY_URL"]
-        cls.gi = galaxy_instance.GalaxyInstance(galaxy_url, galaxy_key)
+        cls.gi = galaxy_instance.GalaxyInstance(galaxy_url, api_key=galaxy_key)
 
 
 class TestWorkflow(GalaxyObjectsTestBase):

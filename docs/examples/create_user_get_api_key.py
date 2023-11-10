@@ -18,7 +18,7 @@ galaxy_url = sys.argv[1]
 galaxy_api_key = sys.argv[2]
 
 # Initiating Galaxy connection
-gi = bioblend.galaxy.GalaxyInstance(galaxy_url, galaxy_api_key)
+gi = bioblend.galaxy.GalaxyInstance(galaxy_url, key=galaxy_api_key)
 
 # Create a new user and get a new API key for her
 new_user = gi.users.create_local_user(sys.argv[3], sys.argv[4], sys.argv[5])

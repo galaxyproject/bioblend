@@ -1,4 +1,10 @@
-### Bioblend v1.2.0 - 2023-06-30
+### BioBlend v
+
+* Parameters after ``password`` in the ``__init__()`` method of the
+  ``GalaxyClient``, ``GalaxyInstance`` and ``ToolShedInstance`` classes are now
+  keyword-only.
+
+### BioBlend v1.2.0 - 2023-06-30
 
 * Dropped support for Galaxy releases 17.09-19.01. Added support for Galaxy
   release 23.1.

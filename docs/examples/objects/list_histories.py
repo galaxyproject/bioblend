@@ -16,7 +16,7 @@ galaxy_key = sys.argv[2]
 
 print("Initiating Galaxy connection")
 
-gi = GalaxyInstance(galaxy_url, galaxy_key)
+gi = GalaxyInstance(galaxy_url, api_key=galaxy_key)
 
 print("Retrieving History list")
 

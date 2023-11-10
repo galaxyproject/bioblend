@@ -49,7 +49,7 @@ def skip_unless_galaxy(min_release: Optional[str] = None) -> Callable:
     if "BIOBLEND_GALAXY_API_KEY" not in os.environ and "BIOBLEND_GALAXY_MASTER_API_KEY" in os.environ:
         galaxy_url = os.environ["BIOBLEND_GALAXY_URL"]
         galaxy_master_api_key = os.environ["BIOBLEND_GALAXY_MASTER_API_KEY"]
-        gi = bioblend.galaxy.GalaxyInstance(galaxy_url, galaxy_master_api_key)
+        gi = bioblend.galaxy.GalaxyInstance(galaxy_url, key=galaxy_master_api_key)
 
         if "BIOBLEND_GALAXY_USER_EMAIL" in os.environ:
             galaxy_user_email = os.environ["BIOBLEND_GALAXY_USER_EMAIL"]

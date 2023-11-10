@@ -9,7 +9,7 @@ URL = "https://orione.crs4.it"
 API_KEY = os.getenv("GALAXY_API_KEY", "YOUR_API_KEY")
 if API_KEY == "YOUR_API_KEY":
     sys.exit("API_KEY not set, see the README.txt file")
-gi = GalaxyInstance(URL, API_KEY)
+gi = GalaxyInstance(URL, api_key=API_KEY)
 
 # Select "W2 - Bacterial re-sequencing | Paired-end" from published workflows
 

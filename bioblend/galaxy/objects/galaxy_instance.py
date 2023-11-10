@@ -45,8 +45,8 @@ class GalaxyInstance:
 
     Example: get a list of all histories for a user with API key 'foo'::
 
-      from bioblend.galaxy.objects import *
-      gi = GalaxyInstance('http://127.0.0.1:8080', 'foo')
+      from bioblend.galaxy.objects import GalaxyInstance
+      gi = GalaxyInstance('http://127.0.0.1:8080', api_key='foo')
       histories = gi.histories.list()
     """
 
@@ -56,9 +56,10 @@ class GalaxyInstance:
         api_key: Optional[str] = None,
         email: Optional[str] = None,
         password: Optional[str] = None,
+        *,
         verify: bool = True,
     ) -> None:
-        self.gi = bioblend.galaxy.GalaxyInstance(url, api_key, email, password, verify)
+        self.gi = bioblend.galaxy.GalaxyInstance(url, key=api_key, email=email, password=password, verify=verify)
         self.log = bioblend.log
         self.datasets = client.ObjDatasetClient(self)
         self.dataset_collections = client.ObjDatasetCollectionClient(self)

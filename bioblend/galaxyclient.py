@@ -36,6 +36,7 @@ class GalaxyClient:
         key: Optional[str] = None,
         email: Optional[str] = None,
         password: Optional[str] = None,
+        *,
         verify: bool = True,
         timeout: Optional[float] = None,
     ) -> None:
