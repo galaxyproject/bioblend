@@ -1,6 +1,10 @@
 import json
 import os
 import sys
+from typing import (
+    Any,
+    Dict,
+)
 
 from common import get_one  # noqa:I100,I201
 
@@ -51,7 +55,7 @@ input_map = {
 lengths = {"19", "23", "29"}
 ws_ids = iw.tool_labels_to_ids["velveth"]
 assert len(ws_ids) == len(lengths)
-params = {id_: {"hash_length": v} for id_, v in zip(ws_ids, lengths)}
+params: Dict[str, Any] = {id_: {"hash_length": v} for id_, v in zip(ws_ids, lengths)}
 
 # Set the "ins_length" runtime parameter to the same value for the 3
 # "velvetg" steps
@@ -70,7 +74,8 @@ params["toolshed.g2.bx.psu.edu/repos/edward-kirton/abyss_toolsuite/abyss/1.0.0"]
 
 # Run the workflow on a new history with the selected datasets as inputs
 
-outputs, out_hist = iw.run(input_map, h, params=params)
+inv = iw.invoke(input_map, params=params, history=h, inputs_by="name")
+out_hist = gi.histories.get(inv.history_id)
 assert out_hist.name == history_name
 
 print(f"Running workflow: {iw.name} [{iw.id}]")

@@ -1827,6 +1827,8 @@ class DatasetContainerPreview(Wrapper):
         "deleted",
         "name",
     )
+    deleted: bool
+    name: str
 
 
 class LibraryPreview(DatasetContainerPreview):
@@ -1872,6 +1874,12 @@ class WorkflowPreview(Wrapper):
         "show_in_tool_panel",
         "tags",
     )
+    deleted: bool
+    name: str
+    owner: str
+    published: bool
+    show_in_tool_panel: bool
+    tags: List[str]
 
 
 class InvocationPreview(Wrapper):
@@ -1884,7 +1892,6 @@ class InvocationPreview(Wrapper):
 
     BASE_ATTRS = Wrapper.BASE_ATTRS + (
         "history_id",
-        "id",
         "state",
         "update_time",
         "uuid",

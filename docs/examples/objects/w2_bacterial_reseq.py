@@ -56,7 +56,8 @@ params = {
 
 # Run the workflow on a new history with the selected datasets as inputs
 
-outputs, out_hist = iw.run(input_map, h, params=params)
+inv = iw.invoke(input_map, params=params, history=h, inputs_by="name")
+out_hist = gi.histories.get(inv.history_id)
 assert out_hist.name == history_name
 
 print(f"Running workflow: {iw.name} [{iw.id}]")

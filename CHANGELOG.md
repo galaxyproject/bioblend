@@ -4,6 +4,9 @@
   ``GalaxyClient``, ``GalaxyInstance`` and ``ToolShedInstance`` classes are now
   keyword-only.
 
+* Classes defined in ``bioblend.galaxy.objects.wrappers`` are no more
+  re-exported by ``bioblend.galaxy.objects``.
+
 ### BioBlend v1.2.0 - 2023-06-30
 
 * Dropped support for Galaxy releases 17.09-19.01. Added support for Galaxy

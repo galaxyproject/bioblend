@@ -52,7 +52,8 @@ ws_parameters = ws.tool_inputs.copy()
 
 params = {tool_id: {"db_opts": json.loads(ws_parameters["db_opts"])}}
 params[tool_id]["db_opts"]["database"] = "16SMicrobial-20131106"
-outputs, out_hist = iw.run(input_map, h, params=params)
+inv = iw.invoke(input_map, params=params, history=h, inputs_by="name")
+out_hist = gi.histories.get(inv.history_id)
 assert out_hist.name == history_name
 
 print(f"Running workflow: {iw.name} [{iw.id}]")

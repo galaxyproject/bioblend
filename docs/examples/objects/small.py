@@ -42,13 +42,15 @@ input_map = {"input_tsv": ld}
 history_name = "get_col output"
 params = {"Cut1": {"columnList": "c2"}}
 print(f"Running workflow: {wf.name} [{wf.id}]")
-outputs, out_hist = wf.run(input_map, history_name, params=params, wait=True)
+inv = wf.invoke(input_map, params=params, history=history_name, inputs_by="name")
+out_hist = gi.histories.get(inv.history_id)
+inv.wait()
 print("Job has finished")
 assert out_hist.name == history_name
 print(f"Output history: {out_hist.name} [{out_hist.id}]")
 
 # Save results to local disk
-out_ds = get_one([_ for _ in outputs if _.name == "Cut on data 1"])
-with tempfile.NamedTemporaryFile(prefix="bioblend_", delete=False) as f:
-    out_ds.download(f)
+out_ds = get_one(out_hist.get_datasets(name="Cut on data 1"))
+with tempfile.NamedTemporaryFile(prefix="bioblend_", delete=False) as tmp_f:
+    out_ds.download(tmp_f)
 print(f'Output downloaded to "{f.name}"')

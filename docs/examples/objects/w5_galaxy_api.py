@@ -2,44 +2,41 @@ import json
 import os
 import sys
 
+import requests
+
 # This example, provided for comparison with w5_metagenomics.py,
 # contains the code required to run the metagenomics workflow
 # *without* BioBlend.
 
 URL = os.getenv("GALAXY_URL", "https://orione.crs4.it").rstrip("/")
 API_URL = f"{URL}/api"
-API_KEY = os.getenv("GALAXY_API_KEY", "YOUR_API_KEY")
-if API_KEY == "YOUR_API_KEY":
+API_KEY = os.getenv("GALAXY_API_KEY")
+if not API_KEY:
     sys.exit("API_KEY not set, see the README.txt file")
-
-# Clone the galaxy git repository and replace
-# YOUR_GALAXY_PATH with the clone's local path in the following code, e.g.:
-#   cd /tmp
-#   git clone https://github.com/galaxyproject/galaxy
-#   GALAXY_PATH = '/tmp/galaxy'
-
-GALAXY_PATH = "YOUR_GALAXY_PATH"
-sys.path.insert(1, os.path.join(GALAXY_PATH, "scripts/api"))
-import common  # noqa: E402,I100,I202
+headers = {"Content-Type": "application/json", "x-api-key": API_KEY}
 
 # Select "W5 - Metagenomics" from published workflows
 
 workflow_name = "W5 - Metagenomics"
-workflows = common.get(API_KEY, f"{API_URL}/workflows?show_published=True")
-w = [_ for _ in workflows if _["published"] and _["name"] == workflow_name]
-assert len(w) == 1
-w = w[0]
+r = requests.get(f"{API_URL}/workflows", params={"show_published": True}, headers=headers)
+workflows = r.json()
+filtered_workflows = [_ for _ in workflows if _["published"] and _["name"] == workflow_name]
+assert len(filtered_workflows) == 1
+w = filtered_workflows[0]
 
 # Import the workflow to user space
 
 data = {"workflow_id": w["id"]}
-iw = common.post(API_KEY, f"{API_URL}/workflows/import", data)
-iw_details = common.get(API_KEY, f"{API_URL}/workflows/{iw['id']}")
+r = requests.post(f"{API_URL}/workflows/import", data=json.dumps(data), headers=headers)
+iw = r.json()
+r = requests.get(f"{API_URL}/workflows/{iw['id']}", headers=headers)
+iw_details = r.json()
 
 # Select the "Orione SupMat" library
 
 library_name = "Orione SupMat"
-libraries = common.get(API_KEY, f"{API_URL}/libraries")
+r = requests.get(f"{API_URL}/libraries", headers=headers)
+libraries = r.json()
 filtered_libraries = [_ for _ in libraries if _["name"] == library_name]
 assert len(filtered_libraries) == 1
 library = filtered_libraries[0]
@@ -47,16 +44,17 @@ library = filtered_libraries[0]
 # Select the "/Metagenomics/MetagenomicsDataset.fq" dataset
 
 ds_name = "/Metagenomics/MetagenomicsDataset.fq"
-contents = common.get(API_KEY, f"{API_URL}/libraries/{library['id']}/contents")
-ld = [_ for _ in contents if _["type"] == "file" and _["name"] == ds_name]
-assert len(ld) == 1
-ld = ld[0]
+r = requests.get(f"{API_URL}/libraries/{library['id']}/contents", headers=headers)
+contents = r.json()
+filtered_contents = [_ for _ in contents if _["type"] == "file" and _["name"] == ds_name]
+assert len(filtered_contents) == 1
+ld = filtered_contents[0]
 
 # Select the blastn step
 
-ws = [_ for _ in iw_details["steps"].values() if _["tool_id"] and "blastn" in _["tool_id"]]
-assert len(ws) == 1
-ws = ws[0]
+filtered_wf_steps = [_ for _ in iw_details["steps"].values() if _["tool_id"] and "blastn" in _["tool_id"]]
+assert len(filtered_wf_steps) == 1
+ws = filtered_wf_steps[0]
 tool_id = ws["tool_id"]
 
 # Get (a copy of) the parameters dict for the selected step
@@ -78,7 +76,8 @@ assert len(iw_details["inputs"]) == 1
 input_step_id = iw_details["inputs"].keys()[0]
 data["ds_map"] = {input_step_id: {"src": "ld", "id": ld["id"]}}
 data["history"] = history_name
-r_dict = common.post(API_KEY, f"{API_URL}/workflows", data)
+r = requests.post(f"{API_URL}/workflows", data=json.dumps(data), headers=headers)
+r_dict = r.json()
 
 print(f"Running workflow: {iw['name']} [{iw['id']}]")
 print(f"Output history: {history_name} [{r_dict['history']}]")
