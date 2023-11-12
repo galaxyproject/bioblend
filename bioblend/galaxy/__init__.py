@@ -40,6 +40,7 @@ class GalaxyInstance(GalaxyClient):
         email: Optional[str] = None,
         password: Optional[str] = None,
         *,
+        token: Optional[str] = None,
         verify: bool = True,
         user_agent: Optional[str] = None,
     ) -> None:
@@ -81,10 +82,16 @@ class GalaxyInstance(GalaxyClient):
         :param password: Password of Galaxy account corresponding to the above
                          e-mail address. Ignored if key is supplied directly.
 
+        :type token: str
+        :param token: An OIDC access token obtained from an OIDC provider
+                      configured in `oidc_backends_config.xml`. Can be used
+                      as a substitue for an API key. You must make sure the access
+                      token has not expired when making an API call.
+
         :param verify: Whether to verify the server's TLS certificate
         :type verify: bool
         """
-        super().__init__(url, key=key, email=email, password=password, verify=verify, user_agent=user_agent)
+        super().__init__(url, key=key, email=email, password=password, token=token, verify=verify, user_agent=user_agent)
         self.libraries = libraries.LibraryClient(self)
         self.histories = histories.HistoryClient(self)
         self.workflows = workflows.WorkflowClient(self)
