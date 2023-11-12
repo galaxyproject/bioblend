@@ -34,10 +34,10 @@ class GalaxyClient:
         self,
         url: str,
         key: Optional[str] = None,
-        token: Optional[str] = None,
         email: Optional[str] = None,
         password: Optional[str] = None,
         *,
+        token: Optional[str] = None,
         verify: bool = True,
         timeout: Optional[float] = None,
     ) -> None:
