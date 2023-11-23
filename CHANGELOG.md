@@ -7,6 +7,8 @@
 * Classes defined in ``bioblend.galaxy.objects.wrappers`` are no more
   re-exported by ``bioblend.galaxy.objects``.
 
+* Added support for the new "cancelling" invocation state.
+
 ### BioBlend v1.2.0 - 2023-06-30
 
 * Dropped support for Galaxy releases 17.09-19.01. Added support for Galaxy

@@ -19,21 +19,24 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
         self.workflow_id = self.gi.workflows.import_workflow_from_local_path(path)["id"]
         self.history_id = self.gi.histories.create_history(name="TestGalaxyInvocations")["id"]
         self.dataset_id = self._test_dataset(self.history_id)
+        path = test_util.get_abspath(os.path.join("data", "test_workflow_pause.ga"))
+        self.pause_workflow_id = self.gi.workflows.import_workflow_from_local_path(path)["id"]
 
     def tearDown(self):
         self.gi.histories.delete_history(self.history_id, purge=True)
 
     @test_util.skip_unless_galaxy("release_19.09")
     def test_cancel_invocation(self):
-        invocation = self._invoke_workflow()
-
+        invocation = self._invoke_pause_workflow()
         invocation_id = invocation["id"]
         invocations = self.gi.invocations.get_invocations()
-        assert len(invocations) == 1
-        assert invocations[0]["id"] == invocation_id
-        self.gi.invocations.cancel_invocation(invocation_id)
+        assert invocation_id in [inv["id"] for inv in invocations]
+
         invocation = self.gi.invocations.show_invocation(invocation_id)
-        assert invocation["state"] == "cancelled"
+        assert invocation["state"] in ["new", "ready"]
+
+        invocation = self.gi.invocations.cancel_invocation(invocation_id)
+        assert invocation["state"] in ["cancelled", "cancelling"]
 
     @test_util.skip_unless_galaxy("release_20.01")
     def test_get_invocations(self):
@@ -111,14 +114,7 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
     @test_util.skip_unless_tool("cat1")
     @test_util.skip_unless_tool("cat")
     def test_workflow_scheduling(self):
-        path = test_util.get_abspath(os.path.join("data", "test_workflow_pause.ga"))
-        workflow = self.gi.workflows.import_workflow_from_local_path(path)
-
-        invocation = self.gi.workflows.invoke_workflow(
-            workflow["id"],
-            inputs={"0": {"src": "hda", "id": self.dataset_id}},
-            history_id=self.history_id,
-        )
+        invocation = self._invoke_pause_workflow()
         invocation_id = invocation["id"]
 
         def invocation_steps_by_order_index() -> Dict[int, Dict[str, Any]]:
@@ -153,4 +149,11 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
             inputs={"Input 1": dataset, "Input 2": dataset},
             history_id=self.history_id,
             inputs_by="name",
+        )
+
+    def _invoke_pause_workflow(self) -> Dict[str, Any]:
+        return self.gi.workflows.invoke_workflow(
+            self.pause_workflow_id,
+            inputs={"0": {"src": "hda", "id": self.dataset_id}},
+            history_id=self.history_id,
         )

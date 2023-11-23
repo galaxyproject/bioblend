@@ -355,7 +355,7 @@ class TestInvocation(GalaxyObjectsTestBase):
     def test_cancel(self):
         inv = self._obj_invoke_workflow()
         inv.cancel()
-        assert inv.state == "cancelled"
+        assert inv.state in ["cancelled", "cancelling"]
 
     def test_wait(self):
         inv = self._obj_invoke_workflow()

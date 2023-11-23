@@ -102,20 +102,18 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         assert len(invocations) == 0
 
         invocation = self.gi.workflows.invoke_workflow(
-            workflow["id"],
+            workflow_id,
             inputs={"0": {"src": "hda", "id": dataset1_id}},
         )
         invocation_id = invocation["id"]
         invocations = self.gi.workflows.get_invocations(workflow_id)
-        assert len(invocations) == 1
-        assert invocations[0]["id"] == invocation_id
+        assert invocation_id in [inv["id"] for inv in invocations]
 
         invocation = self.gi.workflows.show_invocation(workflow_id, invocation_id)
         assert invocation["state"] in ["new", "ready"]
 
-        self.gi.workflows.cancel_invocation(workflow_id, invocation_id)
-        invocation = self.gi.invocations.wait_for_invocation(invocation_id, check=False)
-        assert invocation["state"] == "cancelled"
+        invocation = self.gi.workflows.cancel_invocation(workflow_id, invocation_id)
+        assert invocation["state"] in ["cancelled", "cancelling"]
 
     def test_import_export_workflow_from_local_path(self):
         with pytest.raises(TypeError):
