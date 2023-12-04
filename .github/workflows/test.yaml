@@ -33,6 +33,7 @@ jobs:
         tox_env: [py38]
         galaxy_version:
           - dev
+          - release_23.2
           - release_23.1
           - release_23.0
           - release_22.05
