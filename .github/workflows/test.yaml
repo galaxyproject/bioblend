@@ -92,8 +92,12 @@ jobs:
               # but same as above.
               galaxy_python_version=3.7
               ;;
-            release_22.0* | release_23.* | dev )
+            release_22.0* | release_23.* )
               galaxy_python_version=3.7
+              ;;
+            dev )
+              galaxy_python_version=3.8
+              ;;
           esac
           echo "galaxy_python_version=$galaxy_python_version" >> $GITHUB_OUTPUT
       - name: Set up Python for Galaxy
