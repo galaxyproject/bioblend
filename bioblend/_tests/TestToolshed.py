@@ -26,8 +26,18 @@ class TestToolshed(unittest.TestCase):
         # get_repositories
         repositories = self.ts.categories.get_repositories(visualization_category_id)
         repositories_reversed = self.ts.categories.get_repositories(visualization_category_id, sort_order="desc")
-        assert repositories["repositories"][0]["model_class"] == "Repository"
         assert len(repositories["repositories"]) > 200
+        assert {
+            "deprecated",
+            "description",
+            "homepage_url",
+            "id",
+            "name",
+            "owner",
+            "remote_repository_url",
+            "type",
+            "update_time",
+        } <= set(repositories["repositories"][0].keys())
         assert repositories["repositories"][0] == repositories_reversed["repositories"][-1]
 
     def test_repositories_client(self):
