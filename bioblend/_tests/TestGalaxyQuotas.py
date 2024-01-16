@@ -18,6 +18,7 @@ class TestGalaxyQuotas(GalaxyTestBase.GalaxyTestBase):
 
     def test_create_quota(self):
         quota = self.gi.quotas.show_quota(self.quota["id"])
+        assert quota["id"] == self.quota["id"]
         assert quota["name"] == self.quota_name
         assert quota["bytes"] == 107374182400
         assert quota["operation"] == "="
@@ -39,6 +40,7 @@ class TestGalaxyQuotas(GalaxyTestBase.GalaxyTestBase):
         assert f"""Quota '{self.quota_name}' has been renamed to '{self.quota_name}-new'""" in response
 
         quota = self.gi.quotas.show_quota(self.quota["id"])
+        assert quota["id"] == self.quota["id"]
         assert quota["name"] == self.quota_name + "-new"
         assert quota["bytes"] == 10995116277
         assert quota["operation"] == "-"
