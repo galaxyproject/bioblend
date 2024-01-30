@@ -1,6 +1,7 @@
 """
 Tests on the GalaxyInstance object itself.
 """
+
 import os
 import time
 import unittest

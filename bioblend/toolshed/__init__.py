@@ -1,6 +1,7 @@
 """
 A base representation of an instance of Tool Shed
 """
+
 from typing import Optional
 
 from bioblend.galaxyclient import GalaxyClient

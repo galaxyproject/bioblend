@@ -1,6 +1,7 @@
 """
 A base representation of an instance of Galaxy
 """
+
 from typing import Optional
 
 from bioblend.galaxy import (

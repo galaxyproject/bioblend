@@ -1,6 +1,7 @@
 """
 Contains possible interactions with the Galaxy Workflows
 """
+
 import json
 import os
 from typing import (

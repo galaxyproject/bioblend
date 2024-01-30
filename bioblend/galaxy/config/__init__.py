@@ -2,6 +2,7 @@
 Contains possible interaction dealing with Galaxy configuration.
 
 """
+
 from typing import TYPE_CHECKING
 
 from bioblend.galaxy.client import Client

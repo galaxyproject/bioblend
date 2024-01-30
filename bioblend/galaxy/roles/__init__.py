@@ -1,6 +1,7 @@
 """
 Contains possible interactions with the Galaxy Roles
 """
+
 from typing import (
     Any,
     Dict,

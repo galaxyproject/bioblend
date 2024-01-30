@@ -4,6 +4,7 @@ Clients for interacting with specific Galaxy entity types.
 Classes in this module should not be instantiated directly, but used
 via their handles in :class:`~.galaxy_instance.GalaxyInstance`.
 """
+
 import abc
 import json
 from collections.abc import Sequence
@@ -498,12 +499,10 @@ class ObjDatasetClient(ObjClient):
     """
 
     @overload
-    def get(self, id_: str, hda_ldda: Literal["hda"] = "hda") -> wrappers.HistoryDatasetAssociation:
-        ...
+    def get(self, id_: str, hda_ldda: Literal["hda"] = "hda") -> wrappers.HistoryDatasetAssociation: ...
 
     @overload
-    def get(self, id_: str, hda_ldda: Literal["ldda"]) -> wrappers.LibraryDatasetDatasetAssociation:
-        ...
+    def get(self, id_: str, hda_ldda: Literal["ldda"]) -> wrappers.LibraryDatasetDatasetAssociation: ...
 
     def get(self, id_: str, hda_ldda: HdaLdda = "hda") -> wrappers.Dataset:
         """

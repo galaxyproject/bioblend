@@ -5,6 +5,7 @@ This class is primarily a helper for the library and user code
 should not use it directly.
 A base representation of an instance
 """
+
 import base64
 import contextlib
 import json

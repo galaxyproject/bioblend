@@ -3,6 +3,7 @@ Contains possible interaction dealing with Galaxy users.
 
 Most of these methods must be executed by a registered Galaxy admin user.
 """
+
 from typing import (
     Any,
     Dict,

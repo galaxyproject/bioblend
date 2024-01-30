@@ -1,6 +1,7 @@
 """
 Contains possible interactions with the Galaxy Tool data tables
 """
+
 from typing import (
     Any,
     Dict,

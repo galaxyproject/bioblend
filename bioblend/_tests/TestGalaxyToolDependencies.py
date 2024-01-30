@@ -1,6 +1,7 @@
 """
 Test functions in bioblend.galaxy.tool_dependencies
 """
+
 from . import (
     GalaxyTestBase,
     test_util,

@@ -1,6 +1,7 @@
 """
 Contains possible interactions with the Galaxy Histories
 """
+
 import logging
 import re
 import sys
@@ -270,8 +271,7 @@ class HistoryClient(Client):
         self,
         history_id: str,
         contents: Literal[False] = False,
-    ) -> Dict[str, Any]:
-        ...
+    ) -> Dict[str, Any]: ...
 
     @overload
     def show_history(
@@ -282,8 +282,7 @@ class HistoryClient(Client):
         visible: Optional[bool] = None,
         details: Optional[str] = None,
         types: Optional[List[str]] = None,
-    ) -> List[Dict[str, Any]]:
-        ...
+    ) -> List[Dict[str, Any]]: ...
 
     # Fallback in case the caller provides a regular bool as contents
     @overload

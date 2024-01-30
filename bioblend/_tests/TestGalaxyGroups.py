@@ -1,6 +1,7 @@
 """
 WARNING: only admins can operate on groups!
 """
+
 import uuid
 
 from . import GalaxyTestBase

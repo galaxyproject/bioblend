@@ -1,6 +1,7 @@
 """
 Contains possible interactions with the Galaxy Datasets
 """
+
 import logging
 import os
 import shlex
@@ -99,8 +100,7 @@ class DatasetClient(Client):
         use_default_filename: bool = True,
         require_ok_state: bool = True,
         maxwait: float = 12000,
-    ) -> bytes:
-        ...
+    ) -> bytes: ...
 
     @overload
     def download_dataset(
@@ -110,8 +110,7 @@ class DatasetClient(Client):
         use_default_filename: bool = True,
         require_ok_state: bool = True,
         maxwait: float = 12000,
-    ) -> str:
-        ...
+    ) -> str: ...
 
     def download_dataset(
         self,

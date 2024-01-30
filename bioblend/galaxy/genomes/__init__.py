@@ -1,6 +1,7 @@
 """
 Contains possible interactions with the Galaxy Histories
 """
+
 from typing import (
     Any,
     Dict,

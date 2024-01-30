@@ -1,6 +1,7 @@
 """
 Contains interactions dealing with Galaxy dependency resolvers.
 """
+
 from typing import (
     Any,
     Dict,

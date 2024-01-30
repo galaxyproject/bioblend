@@ -1,6 +1,7 @@
 """
 Contains possible interactions with the Galaxy library folders
 """
+
 from typing import (
     Any,
     Dict,

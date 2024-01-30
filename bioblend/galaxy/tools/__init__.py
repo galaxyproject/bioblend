@@ -1,6 +1,7 @@
 """
 Contains possible interaction dealing with Galaxy tools.
 """
+
 from os.path import basename
 from typing import (
     Any,

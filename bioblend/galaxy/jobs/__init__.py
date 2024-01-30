@@ -1,6 +1,7 @@
 """
 Contains possible interactions with the Galaxy Jobs
 """
+
 import logging
 import time
 from typing import (

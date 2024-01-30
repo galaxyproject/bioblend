@@ -1,6 +1,7 @@
 """
 Contains possible interactions with the Galaxy FTP Files
 """
+
 from typing import (
     List,
     TYPE_CHECKING,

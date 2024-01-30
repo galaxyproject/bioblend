@@ -1,6 +1,7 @@
 """
 Contains possible interactions with the Galaxy Datatype
 """
+
 from typing import (
     Dict,
     List,

@@ -1,6 +1,7 @@
 """
 Test functions in bioblend.galaxy.container_resolution
 """
+
 from . import (
     GalaxyTestBase,
     test_util,
