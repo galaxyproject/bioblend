@@ -93,7 +93,7 @@ class HistoryClient(Client):
         create_time_max: Optional[str] = None,
         update_time_min: Optional[str] = None,
         update_time_max: Optional[str] = None,
-        view: Optional[str] = "summary",
+        view: Optional[str] = None,
         keys: Optional[List[str]] = None,
         limit: Optional[int] = None,
         offset: Optional[int] = None,
@@ -155,7 +155,7 @@ class HistoryClient(Client):
         create_time_max: Optional[str] = None,
         update_time_min: Optional[str] = None,
         update_time_max: Optional[str] = None,
-        view: Optional[str] = 'summary',
+        view: Optional[str] = None,
         keys: Optional[List[str]] = None,
         limit: Optional[int] = None,
         offset: Optional[int] = None,
@@ -205,7 +205,7 @@ class HistoryClient(Client):
 
         :type view: str
         :param view: Options are 'summary' or 'detailed'. This defaults to 'summary'.
-          Setting view to 'detailed' results in a larger number of fields returned. 
+          Setting view to 'detailed' results in a larger number of fields returned.
 
         :type keys: List[str]
         :param keys: List of fields to return
@@ -316,6 +316,7 @@ class HistoryClient(Client):
         visible: Optional[bool] = None,
         details: Optional[str] = None,
         types: Optional[List[str]] = None,
+        keys: Optional[List[str]] = None,
     ) -> List[Dict[str, Any]]: ...
 
     # Fallback in case the caller provides a regular bool as contents
@@ -328,6 +329,7 @@ class HistoryClient(Client):
         visible: Optional[bool] = None,
         details: Optional[str] = None,
         types: Optional[List[str]] = None,
+        keys: Optional[List[str]] = None,
     ) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
         pass
 
@@ -339,6 +341,7 @@ class HistoryClient(Client):
         visible: Optional[bool] = None,
         details: Optional[str] = None,
         types: Optional[List[str]] = None,
+        keys: Optional[List[str]] = None,
     ) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
         """
         Get details of a given history. By default, just get the history meta
@@ -374,6 +377,9 @@ class HistoryClient(Client):
           ``['dataset_collection']``,  return only dataset collections. If not
           set, no filtering is applied.
 
+        :type keys: List[str]
+        :param keys: List of fields to return
+
         :rtype: dict or list of dicts
         :return: details of the given history or list of dataset info
 
@@ -393,6 +399,8 @@ class HistoryClient(Client):
                 params["visible"] = visible
             if types is not None:
                 params["types"] = types
+        if keys:
+            params["keys"] = ",".join(keys)
         return self._get(id=history_id, contents=contents, params=params)
 
     def delete_dataset(self, history_id: str, dataset_id: str, purge: bool = False) -> None:
