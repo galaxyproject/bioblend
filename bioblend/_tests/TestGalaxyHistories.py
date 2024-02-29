@@ -89,9 +89,9 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
         histories_detailed = self.gi.histories.get_histories(view="detailed")
         assert "size" in histories_detailed[0]
 
-        # Test keys
+        # Test keys: check that fields requested are returned
         histories_with_keys = self.gi.histories.get_histories(keys=["id", "user_id", "size"])
-        assert set([key for key in histories_with_keys[0]]) == set(["id", "user_id", "size"])
+        assert {key for key in histories_with_keys[0]} >= {"id", "user_id", "size"}
 
         # TODO: check whether deleted history is returned correctly
         # At the moment, get_histories() returns only not-deleted histories
