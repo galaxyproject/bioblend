@@ -93,6 +93,10 @@ class HistoryClient(Client):
         create_time_max: Optional[str] = None,
         update_time_min: Optional[str] = None,
         update_time_max: Optional[str] = None,
+        view: Optional[str] = "summary",
+        keys: Optional[List[str]] = None,
+        limit: Optional[int] = None,
+        offset: Optional[int] = None,
         all: Optional[bool] = False,
     ) -> List[Dict[str, Any]]:
         """
@@ -124,6 +128,14 @@ class HistoryClient(Client):
             params.setdefault("qv", []).append(update_time_max)
         if all:
             params["all"] = True
+        if view:
+            params["view"] = view
+        if keys:
+            params["keys"] = ",".join(keys)
+        if limit:
+            params["limit"] = limit
+        if offset:
+            params["offset"] = offset
 
         url = "/".join((self._make_url(), "published")) if get_all_published else None
         histories = self._get(url=url, params=params)
@@ -143,6 +155,10 @@ class HistoryClient(Client):
         create_time_max: Optional[str] = None,
         update_time_min: Optional[str] = None,
         update_time_max: Optional[str] = None,
+        view: Optional[str] = 'summary',
+        keys: Optional[List[str]] = None,
+        limit: Optional[int] = None,
+        offset: Optional[int] = None,
         all: Optional[bool] = False,
     ) -> List[Dict[str, Any]]:
         """
@@ -187,6 +203,20 @@ class HistoryClient(Client):
           parameter works only on Galaxy 20.01 or later and can be specified
           only if the user is a Galaxy admin.
 
+        :type view: str
+        :param view: Options are 'summary' or 'detailed'. This defaults to 'summary'.
+          Setting view to 'detailed' results in a larger number of fields returned. 
+
+        :type keys: List[str]
+        :param keys: List of fields to return
+
+        :type limit: int
+        :param limit: How many items to return (upper bound).
+
+        :type offset: int
+        :param offset: skip the first ( offset - 1 ) items and begin returning
+          at the Nth item.
+
         :rtype: list
         :return: List of history dicts.
 
@@ -205,6 +235,10 @@ class HistoryClient(Client):
             get_all_published=False,
             slug=slug,
             all=all,
+            view=view,
+            keys=keys,
+            limit=limit,
+            offset=offset,
             create_time_min=create_time_min,
             create_time_max=create_time_max,
             update_time_min=update_time_min,
