@@ -93,6 +93,7 @@ class HistoryClient(Client):
         create_time_max: Optional[str] = None,
         update_time_min: Optional[str] = None,
         update_time_max: Optional[str] = None,
+        all: Optional[bool] = False,
         view: Optional[Literal["summary", "detailed"]] = None,
         keys: Optional[List[str]] = None,
         limit: Optional[int] = None,
