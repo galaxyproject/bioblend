@@ -160,7 +160,6 @@ class HistoryClient(Client):
         keys: Optional[List[str]] = None,
         limit: Optional[int] = None,
         offset: Optional[int] = None,
-        all: Optional[bool] = False,
     ) -> List[Dict[str, Any]]:
         """
         Get all histories, or select a subset by specifying optional arguments
