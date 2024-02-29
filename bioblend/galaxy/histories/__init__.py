@@ -97,7 +97,6 @@ class HistoryClient(Client):
         keys: Optional[List[str]] = None,
         limit: Optional[int] = None,
         offset: Optional[int] = None,
-        all: Optional[bool] = False,
     ) -> List[Dict[str, Any]]:
         """
         Hidden method to be used by both get_histories() and get_published_histories()
