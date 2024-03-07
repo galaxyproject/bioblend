@@ -33,6 +33,7 @@ jobs:
         tox_env: [py38]
         galaxy_version:
           - dev
+          - release_24.0
           - release_23.2
           - release_23.1
           - release_23.0
@@ -77,7 +78,7 @@ jobs:
         id: get_galaxy_python_version
         run: |
           case ${{ matrix.galaxy_version }} in
-            release_19.05 | release_19.09 | release_20.0* )
+            release_19.05 | release_19.09 | release_20.0? )
               # The minimum Python version supported by the 19.05 and 19.09
               # releases is 2.7, but virtualenv dropped support for creating
               # Python <3.7 environments in v20.22.0 .
@@ -87,15 +88,15 @@ jobs:
               # https://github.com/actions/setup-python/issues/544#issuecomment-1332535877
               galaxy_python_version=3.7
               ;;
-            release_21.0* )
+            release_21.0? )
               # The minimum Python supported version by these releases is 3.6,
               # but same as above.
               galaxy_python_version=3.7
               ;;
-            release_22.0* | release_23.* )
+            release_22.0? | release_23.? )
               galaxy_python_version=3.7
               ;;
-            dev )
+            release_24.? | dev )
               galaxy_python_version=3.8
               ;;
           esac
