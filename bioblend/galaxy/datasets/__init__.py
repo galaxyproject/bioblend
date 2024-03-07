@@ -42,7 +42,7 @@ class DatasetClient(Client):
     def __init__(self, galaxy_instance: "GalaxyInstance") -> None:
         super().__init__(galaxy_instance)
 
-    def show_dataset(self, dataset_id: str, deleted: bool = False, hda_ldda: HdaLdda = "hda") -> Dict[str, Any]:
+    def show_dataset(self, dataset_id: str, hda_ldda: HdaLdda = "hda") -> Dict[str, Any]:
         """
         Get details about a given dataset. This can be a history or a library dataset.
 
@@ -62,7 +62,7 @@ class DatasetClient(Client):
         params = dict(
             hda_ldda=hda_ldda,
         )
-        return self._get(id=dataset_id, deleted=deleted, params=params)
+        return self._get(id=dataset_id, params=params)
 
     def _initiate_download(
         self, dataset_id: str, stream_content: bool, require_ok_state: bool = True, maxwait: float = 12000

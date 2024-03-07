@@ -30,7 +30,13 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
             self.gi.datasets.show_dataset("nonexistent_id")
 
     def test_show_dataset(self):
-        self.gi.datasets.show_dataset(self.dataset_id)
+        dataset = self.gi.datasets.show_dataset(self.dataset_id)
+        assert dataset["id"] == self.dataset_id
+        assert not dataset["deleted"]
+        self.gi.histories.delete_dataset(self.history_id, self.dataset_id)
+        dataset = self.gi.datasets.show_dataset(self.dataset_id)
+        assert dataset["id"] == self.dataset_id
+        assert dataset["deleted"]
 
     def test_download_dataset(self):
         with pytest.raises((TypeError, ConnectionError)):
