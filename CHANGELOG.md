@@ -3,6 +3,8 @@
 * Dropped support for Python 3.7. Added support for Python 3.12. Added support
   for Galaxy releases 23.2 and 24.0.
 
+* Dropped broken ``deleted`` parameter of ``DatasetClient.show_dataset()``.
+
 * Parameters after ``password`` in the ``__init__()`` method of the
   ``GalaxyClient``, ``GalaxyInstance`` and ``ToolShedInstance`` classes are now
   keyword-only.

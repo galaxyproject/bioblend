@@ -49,9 +49,6 @@ class DatasetClient(Client):
         :type dataset_id: str
         :param dataset_id: Encoded dataset ID
 
-        :type deleted: bool
-        :param deleted: Whether to return results for a deleted dataset
-
         :type hda_ldda: str
         :param hda_ldda: Whether to show a history dataset ('hda' - the default) or library
                          dataset ('ldda').
