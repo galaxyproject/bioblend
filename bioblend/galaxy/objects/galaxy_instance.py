@@ -57,9 +57,12 @@ class GalaxyInstance:
         email: Optional[str] = None,
         password: Optional[str] = None,
         *,
+        token: Optional[str] = None,
         verify: bool = True,
     ) -> None:
-        self.gi = bioblend.galaxy.GalaxyInstance(url, key=api_key, email=email, password=password, verify=verify)
+        self.gi = bioblend.galaxy.GalaxyInstance(
+            url, key=api_key, email=email, password=password, token=token, verify=verify
+        )
         self.log = bioblend.log
         self.datasets = client.ObjDatasetClient(self)
         self.dataset_collections = client.ObjDatasetCollectionClient(self)
