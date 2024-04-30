@@ -194,7 +194,7 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
     def test_purge_dataset(self):
         history_id = self.history["id"]
         dataset1_id = self._test_dataset(history_id)
-        self.gi.histories.delete_dataset(history_id, dataset1_id, purge=True)
+        self.gi.histories.delete_dataset(history_id, dataset1_id, purge=True, wait=True)
         dataset = self.gi.histories.show_dataset(history_id, dataset1_id)
         assert dataset["deleted"]
         assert dataset["purged"]

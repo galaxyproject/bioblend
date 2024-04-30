@@ -144,7 +144,6 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
         assert last_dataset["id"] == history_contents[2]["id"]
         self._wait_and_verify_dataset(last_dataset["id"], b"line 1\tline 1\n")
 
-    @test_util.skip_unless_galaxy("release_19.05")
     @test_util.skip_unless_tool("random_lines1")
     def test_get_common_problems(self):
         job_id = self._run_tool()["jobs"][0]["id"]

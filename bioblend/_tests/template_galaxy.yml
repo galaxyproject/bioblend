@@ -17,3 +17,4 @@ galaxy:
   master_api_key: $BIOBLEND_GALAXY_MASTER_API_KEY
   enable_quotas: true
   cleanup_job: onsuccess
+  enable_celery_tasks: true

@@ -3,6 +3,9 @@
 * Dropped support for Python 3.7. Added support for Python 3.12. Added support
   for Galaxy releases 23.2 and 24.0.
 
+* Added ``wait`` parameter to ``HistoryClient.delete_dataset()`` and
+  ``HistoryDatasetAssociation.delete()`` methods.
+
 * Dropped broken ``deleted`` parameter of ``DatasetClient.show_dataset()``.
 
 * Parameters after ``password`` in the ``__init__()`` method of the
@@ -12,7 +15,13 @@
 * Classes defined in ``bioblend.galaxy.objects.wrappers`` are no more
   re-exported by ``bioblend.galaxy.objects``.
 
+* ``DatasetTimeoutException`` and ``DatasetCollectionTimeoutException`` are now
+  aliases for ``TimeoutException`` instead of subclasses.
+
 * Added support for the new "cancelling" invocation state.
+
+* Fixed ``InvocationClient.get_invocation_biocompute_object()`` method on
+  upcoming Galaxy 24.1 .
 
 ### BioBlend v1.2.0 - 2023-06-30
 

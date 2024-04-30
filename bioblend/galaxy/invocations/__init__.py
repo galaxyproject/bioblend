@@ -3,7 +3,6 @@ Contains possible interactions with the Galaxy workflow invocations
 """
 
 import logging
-import time
 from typing import (
     Any,
     Dict,
@@ -14,7 +13,9 @@ from typing import (
 
 from bioblend import (
     CHUNK_SIZE,
-    TimeoutException,
+    ConnectionError,
+    NotReady,
+    wait_on,
 )
 from bioblend.galaxy.client import Client
 from bioblend.galaxy.workflows import InputsBy
@@ -400,18 +401,66 @@ class InvocationClient(Client):
             for chunk in r.iter_content(chunk_size):
                 outf.write(chunk)
 
-    def get_invocation_biocompute_object(self, invocation_id: str) -> Dict[str, Any]:
+    # TODO: Move to a new ``bioblend.galaxy.short_term_storage`` module
+    def _wait_for_short_term_storage(
+        self, storage_request_id: str, maxwait: float = 60, interval: float = 3
+    ) -> Dict[str, Any]:
+        """
+        Wait until a short term storage request is ready
+
+        :type storage_request_id: str
+        :param storage_request_id: Storage request ID to wait for.
+
+        :type maxwait: float
+        :param maxwait: Total time (in seconds) to wait for the storage request
+          to become ready. After this time, a ``TimeoutException`` will be
+          raised.
+
+        :type interval: float
+        :param interval: Time (in seconds) to wait between 2 consecutive checks.
+
+        :rtype: dict
+        :return: The short term storage request.
+        """
+        url = f"{self.gi.url}/short_term_storage/{storage_request_id}"
+        is_ready_url = f"{url}/ready"
+
+        def check_and_get_short_term_storage() -> Dict[str, Any]:
+            if self._get(url=is_ready_url):
+                return self._get(url=url)
+            raise NotReady(f"Storage request {storage_request_id} is not ready")
+
+        return wait_on(check_and_get_short_term_storage, maxwait=maxwait, interval=interval)
+
+    def get_invocation_biocompute_object(self, invocation_id: str, maxwait: float = 1200) -> Dict[str, Any]:
         """
         Get a BioCompute object for an invocation.
 
         :type invocation_id: str
         :param invocation_id: Encoded workflow invocation ID
 
+        :type maxwait: float
+        :param maxwait: Total time (in seconds) to wait for the BioCompute
+          object to become ready. After this time, a ``TimeoutException`` will
+          be raised.
+
         :rtype: dict
         :return: The BioCompute object
         """
-        url = self._make_url(invocation_id) + "/biocompute"
-        return self._get(url=url)
+        url = self._make_url(invocation_id) + "/prepare_store_download"
+        payload = {"model_store_format": "bco.json"}
+        try:
+            psd = self._post(url=url, payload=payload)
+        except ConnectionError as e:
+            if e.status_code not in (400, 404):
+                raise
+            # Galaxy release_22.05 and earlier
+            url = self._make_url(invocation_id) + "/biocompute"
+            return self._get(url=url)
+        else:
+            storage_request_id = psd["storage_request_id"]
+            url = f"{self.gi.url}/short_term_storage/{storage_request_id}/ready"
+            return self._wait_for_short_term_storage(storage_request_id, maxwait=maxwait)
 
     def wait_for_invocation(
         self, invocation_id: str, maxwait: float = 12000, interval: float = 3, check: bool = True
@@ -424,8 +473,8 @@ class InvocationClient(Client):
 
         :type maxwait: float
         :param maxwait: Total time (in seconds) to wait for the invocation state
-          to become terminal. If the invocation state is not terminal within
-          this time, a ``TimeoutException`` will be raised.
+          to become terminal. After this time, a ``TimeoutException`` will be
+          raised.
 
         :type interval: float
         :param interval: Time (in seconds) to wait between 2 consecutive checks.
@@ -437,27 +486,17 @@ class InvocationClient(Client):
         :rtype: dict
         :return: Details of the workflow invocation.
         """
-        assert maxwait >= 0
-        assert interval > 0
 
-        time_left = maxwait
-        while True:
+        def check_and_get_invocation() -> Dict[str, Any]:
             invocation = self.gi.invocations.show_invocation(invocation_id)
             state = invocation["state"]
             if state in INVOCATION_TERMINAL_STATES:
                 if check and state != "scheduled":
                     raise Exception(f"Invocation {invocation_id} is in terminal state {state}")
                 return invocation
-            if time_left > 0:
-                log.info(
-                    "Invocation %s is in non-terminal state %s. Will wait %s more s", invocation_id, state, time_left
-                )
-                time.sleep(min(time_left, interval))
-                time_left -= interval
-            else:
-                raise TimeoutException(
-                    f"Invocation {invocation_id} is still in non-terminal state {state} after {maxwait} s"
-                )
+            raise NotReady(f"Invocation {invocation_id} is in non-terminal state {state}")
+
+        return wait_on(check_and_get_invocation, maxwait=maxwait, interval=interval)
 
     def _invocation_step_url(self, invocation_id: str, step_id: str) -> str:
         return "/".join((self._make_url(invocation_id), "steps", step_id))

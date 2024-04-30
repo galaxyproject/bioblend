@@ -21,7 +21,11 @@ from typing import (
 )
 
 import bioblend
-from bioblend import ConnectionError
+from bioblend import (
+    ConnectionError,
+    NotReady,
+    wait_on,
+)
 from bioblend.galaxy.client import Client
 from bioblend.galaxy.dataset_collections import CollectionDescription
 from bioblend.util import attach_file
@@ -403,7 +407,7 @@ class HistoryClient(Client):
             params["keys"] = ",".join(keys)
         return self._get(id=history_id, contents=contents, params=params)
 
-    def delete_dataset(self, history_id: str, dataset_id: str, purge: bool = False) -> None:
+    def delete_dataset(self, history_id: str, dataset_id: str, purge: bool = False, wait: bool = False) -> None:
         """
         Mark corresponding dataset as deleted.
 
@@ -416,6 +420,8 @@ class HistoryClient(Client):
         :type purge: bool
         :param purge: if ``True``, also purge (permanently delete) the dataset
 
+        :param wait: Whether to wait for the dataset to be purged.
+
         :rtype: None
         :return: None
 
@@ -426,9 +432,17 @@ class HistoryClient(Client):
         """
         url = "/".join((self._make_url(history_id, contents=True), dataset_id))
         payload = {}
-        if purge is True:
-            payload["purge"] = purge
+        if purge:
+            payload["purge"] = True
         self._delete(payload=payload, url=url)
+        if purge and wait:
+
+            def check_dataset_purged() -> None:
+                dataset = self.show_dataset(history_id, dataset_id)
+                if not dataset["purged"]:
+                    raise NotReady(f"Dataset {dataset_id} in library {history_id} is not purged")
+
+            wait_on(check_dataset_purged)
 
     def delete_dataset_collection(self, history_id: str, dataset_collection_id: str) -> None:
         """

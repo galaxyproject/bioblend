@@ -3,7 +3,6 @@ Contains possible interactions with the Galaxy Data Libraries
 """
 
 import logging
-import time
 from typing import (
     Any,
     Dict,
@@ -13,11 +12,12 @@ from typing import (
     TYPE_CHECKING,
 )
 
-from bioblend.galaxy.client import Client
-from bioblend.galaxy.datasets import (
-    DatasetTimeoutException,
-    TERMINAL_STATES,
+from bioblend import (
+    NotReady,
+    wait_on,
 )
+from bioblend.galaxy.client import Client
+from bioblend.galaxy.datasets import TERMINAL_STATES
 from bioblend.util import attach_file
 
 if TYPE_CHECKING:
@@ -174,8 +174,8 @@ class LibraryClient(Client):
 
         :type maxwait: float
         :param maxwait: Total time (in seconds) to wait for the dataset state to
-          become terminal. If the dataset state is not terminal within this
-          time, a ``DatasetTimeoutException`` will be thrown.
+          become terminal. After this time, a ``TimeoutException`` will be
+          raised.
 
         :type interval: float
         :param interval: Time (in seconds) to wait between 2 consecutive checks.
@@ -184,29 +184,15 @@ class LibraryClient(Client):
         :return: A dictionary containing information about the dataset in the
           library
         """
-        assert maxwait >= 0
-        assert interval > 0
 
-        time_left = maxwait
-        while True:
+        def check_and_get_library_dataset() -> Dict[str, Any]:
             dataset = self.show_dataset(library_id, dataset_id)
             state = dataset["state"]
             if state in TERMINAL_STATES:
                 return dataset
-            if time_left > 0:
-                log.info(
-                    "Dataset %s in library %s is in non-terminal state %s. Will wait %i more s",
-                    dataset_id,
-                    library_id,
-                    state,
-                    time_left,
-                )
-                time.sleep(min(time_left, interval))
-                time_left -= interval
-            else:
-                raise DatasetTimeoutException(
-                    f"Dataset {dataset_id} in library {library_id} is still in non-terminal state {state} after {maxwait} s"
-                )
+            raise NotReady(f"Dataset {dataset_id} in library {library_id} is in non-terminal state {state}")
+
+        return wait_on(check_and_get_library_dataset, maxwait=maxwait, interval=interval)
 
     def show_folder(self, library_id: str, folder_id: str) -> Dict[str, Any]:
         """

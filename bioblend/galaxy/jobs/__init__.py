@@ -3,7 +3,6 @@ Contains possible interactions with the Galaxy Jobs
 """
 
 import logging
-import time
 from typing import (
     Any,
     Dict,
@@ -13,7 +12,10 @@ from typing import (
     TYPE_CHECKING,
 )
 
-from bioblend import TimeoutException
+from bioblend import (
+    NotReady,
+    wait_on,
+)
 from bioblend.galaxy.client import Client
 
 if TYPE_CHECKING:
@@ -494,8 +496,8 @@ class JobsClient(Client):
 
         :type maxwait: float
         :param maxwait: Total time (in seconds) to wait for the job state to
-          become terminal. If the job state is not terminal within this time, a
-          ``TimeoutException`` will be raised.
+          become terminal. After this time, a ``TimeoutException`` will be
+          raised.
 
         :type interval: float
         :param interval: Time (in seconds) to wait between 2 consecutive checks.
@@ -506,20 +508,14 @@ class JobsClient(Client):
         :rtype: dict
         :return: Details of the given job.
         """
-        assert maxwait >= 0
-        assert interval > 0
 
-        time_left = maxwait
-        while True:
+        def check_and_get_job() -> Dict[str, Any]:
             job = self.show_job(job_id)
             state = job["state"]
             if state in JOB_TERMINAL_STATES:
                 if check and state != "ok":
                     raise Exception(f"Job {job_id} is in terminal state {state}")
                 return job
-            if time_left > 0:
-                log.info("Job %s is in non-terminal state %s. Will wait %s more s", job_id, state, time_left)
-                time.sleep(min(time_left, interval))
-                time_left -= interval
-            else:
-                raise TimeoutException(f"Job {job_id} is still in non-terminal state {state} after {maxwait} s")
+            raise NotReady(f"Job {job_id} is in non-terminal state {state}")
+
+        return wait_on(check_and_get_job, maxwait=maxwait, interval=interval)

@@ -2,8 +2,11 @@ import contextlib
 import logging
 import logging.config
 import os
+import time
 from typing import (
+    Callable,
     Optional,
+    TypeVar,
     Union,
 )
 
@@ -116,3 +119,38 @@ class ConnectionError(Exception):
 
 class TimeoutException(Exception):
     pass
+
+
+class NotReady(Exception):
+    pass
+
+
+T = TypeVar("T")
+
+
+def wait_on(func: Callable[[], T], maxwait: float = 60, interval: float = 3) -> T:
+    """
+    Wait until a function returns without raising a NotReady exception
+
+    :param func: function to wait on. It should accept no parameters.
+
+    :param maxwait: Total time (in seconds) to wait for the function to return
+      without raising a NotReady exception. After this time, a
+      ``TimeoutException`` will be raised.
+
+    :param interval: Time (in seconds) to wait between 2 consecutive checks.
+    """
+    assert maxwait >= 0
+    assert interval > 0
+
+    time_left = maxwait
+    while True:
+        try:
+            return func()
+        except NotReady as e:
+            if time_left > 0:
+                log.info("%s. Will wait %s more s", e, time_left)
+                time.sleep(min(time_left, interval))
+                time_left -= interval
+            else:
+                raise TimeoutException(f"{e} after {maxwait} s")

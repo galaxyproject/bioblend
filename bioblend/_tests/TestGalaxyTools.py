@@ -125,7 +125,6 @@ class TestGalaxyTools(GalaxyTestBase.GalaxyTestBase):
         # TODO: Wait for results and verify it has 3 lines - 1 2 3, 4 5 6,
         # and 7 8 9.
 
-    @test_util.skip_unless_galaxy("release_19.05")
     @test_util.skip_unless_tool("CONVERTER_fasta_to_bowtie_color_index")
     def test_tool_dependency_install(self):
         installed_dependencies = self.gi.tools.install_dependencies("CONVERTER_fasta_to_bowtie_color_index")

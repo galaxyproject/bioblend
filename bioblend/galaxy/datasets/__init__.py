@@ -5,7 +5,6 @@ Contains possible interactions with the Galaxy Datasets
 import logging
 import os
 import shlex
-import time
 import warnings
 from typing import (
     Any,
@@ -21,8 +20,12 @@ from typing import (
 
 from requests import Response
 
-import bioblend
-from bioblend import TimeoutException
+from bioblend import (
+    CHUNK_SIZE,
+    NotReady,
+    TimeoutException,
+    wait_on,
+)
 from bioblend.galaxy.client import Client
 
 if TYPE_CHECKING:
@@ -144,8 +147,8 @@ class DatasetClient(Client):
 
         :type maxwait: float
         :param maxwait: Total time (in seconds) to wait for the dataset state to
-          become terminal. If the dataset state is not terminal within this
-          time, a ``DatasetTimeoutException`` will be thrown.
+          become terminal. After this time, a ``TimeoutException`` will be
+          raised.
 
         :rtype: bytes or str
         :return: If a ``file_path`` argument is not provided, returns the file
@@ -180,7 +183,7 @@ class DatasetClient(Client):
                 file_local_path = file_path
 
             with open(file_local_path, "wb") as fp:
-                for chunk in r.iter_content(chunk_size=bioblend.CHUNK_SIZE):
+                for chunk in r.iter_content(chunk_size=CHUNK_SIZE):
                     if chunk:
                         fp.write(chunk)
 
@@ -411,8 +414,7 @@ class DatasetClient(Client):
 
         :type maxwait: float
         :param maxwait: Total time (in seconds) to wait for the dataset state to
-          become terminal. If the dataset state is not terminal within this
-          time, a ``DatasetTimeoutException`` will be raised.
+          become terminal. After this time, a ``TimeoutException`` will be raised.
 
         :type interval: float
         :param interval: Time (in seconds) to wait between 2 consecutive checks.
@@ -423,25 +425,17 @@ class DatasetClient(Client):
         :rtype: dict
         :return: Details of the given dataset.
         """
-        assert maxwait >= 0
-        assert interval > 0
 
-        time_left = maxwait
-        while True:
+        def check_and_get_dataset() -> Dict[str, Any]:
             dataset = self.show_dataset(dataset_id)
             state = dataset["state"]
             if state in TERMINAL_STATES:
                 if check and state != "ok":
                     raise Exception(f"Dataset {dataset_id} is in terminal state {state}")
                 return dataset
-            if time_left > 0:
-                log.info("Dataset %s is in non-terminal state %s. Will wait %s more s", dataset_id, state, time_left)
-                time.sleep(min(time_left, interval))
-                time_left -= interval
-            else:
-                raise DatasetTimeoutException(
-                    f"Dataset {dataset_id} is still in non-terminal state {state} after {maxwait} s"
-                )
+            raise NotReady(f"Dataset {dataset_id} is in non-terminal state {state}")
+
+        return wait_on(check_and_get_dataset, maxwait=maxwait, interval=interval)
 
 
 class DatasetStateException(Exception):
@@ -452,5 +446,5 @@ class DatasetStateWarning(UserWarning):
     pass
 
 
-class DatasetTimeoutException(TimeoutException):
-    pass
+# Unused, just for backward compatibility
+DatasetTimeoutException = TimeoutException

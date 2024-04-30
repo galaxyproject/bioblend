@@ -1,5 +1,4 @@
 import logging
-import time
 from typing import (
     Any,
     Dict,
@@ -11,7 +10,9 @@ from typing import (
 
 from bioblend import (
     CHUNK_SIZE,
+    NotReady,
     TimeoutException,
+    wait_on,
 )
 from bioblend.galaxy.client import Client
 from bioblend.galaxy.datasets import TERMINAL_STATES
@@ -176,9 +177,8 @@ class DatasetCollectionClient(Client):
 
         :type maxwait: float
         :param maxwait: Total time (in seconds) to wait for the dataset
-          states in the dataset collection to become terminal. If not
-          all datasets are in a terminal state within this time, a
-          ``DatasetCollectionTimeoutException`` will be raised.
+          states in the dataset collection to become terminal. After this time,
+          a ``TimeoutException`` will be raised.
 
         :type interval: float
         :param interval: Time (in seconds) to wait between two consecutive checks.
@@ -200,12 +200,9 @@ class DatasetCollectionClient(Client):
         :rtype: dict
         :return: Details of the given dataset collection.
         """
-        assert maxwait >= 0
-        assert interval > 0
         assert 0 <= proportion_complete <= 1
 
-        time_left = maxwait
-        while True:
+        def check_and_get_dataset_collection() -> Dict[str, Any]:
             dataset_collection = self.show_dataset_collection(dataset_collection_id)
             states = [elem["object"]["state"] for elem in dataset_collection["elements"]]
             terminal_states = [state for state in states if state in TERMINAL_STATES]
@@ -217,24 +214,15 @@ class DatasetCollectionClient(Client):
             proportion = len(terminal_states) / len(states)
             if proportion >= proportion_complete:
                 return dataset_collection
-            if time_left > 0:
-                log.info(
-                    "The dataset collection %s has %s out of %s datasets in a terminal state. Will wait %s more s",
-                    dataset_collection_id,
-                    len(terminal_states),
-                    len(states),
-                    time_left,
-                )
-                time.sleep(min(time_left, interval))
-                time_left -= interval
-            else:
-                raise DatasetCollectionTimeoutException(
-                    f"Less than {proportion_complete * 100}% of datasets in the dataset collection is in a terminal state after {maxwait} s"
-                )
+            raise NotReady(
+                f"The dataset collection {dataset_collection_id} has only {proportion * 100}% of datasets in a terminal state"
+            )
+
+        return wait_on(check_and_get_dataset_collection, maxwait=maxwait, interval=interval)
 
 
-class DatasetCollectionTimeoutException(TimeoutException):
-    pass
+# Unused, for backward compatibility
+DatasetCollectionTimeoutException = TimeoutException
 
 
 __all__ = (
