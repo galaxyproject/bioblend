@@ -1218,6 +1218,7 @@ class DatasetContainer(Wrapper, Generic[DatasetSubtype], metaclass=abc.ABCMeta):
         :type content_infos: list of :class:`ContentInfo`
         :param content_infos: info objects for the container's contents
         """
+        assert gi is not None
         super().__init__(c_dict, gi=gi)
         if content_infos is None:
             content_infos = []
