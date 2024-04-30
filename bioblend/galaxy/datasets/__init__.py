@@ -435,7 +435,7 @@ class DatasetClient(Client):
                     raise Exception(f"Dataset {dataset_id} is in terminal state {state}")
                 return dataset
             if time_left > 0:
-                log.info(f"Dataset {dataset_id} is in non-terminal state {state}. Will wait {time_left} more s")
+                log.info("Dataset %s is in non-terminal state %s. Will wait %s more s", dataset_id, state, time_left)
                 time.sleep(min(time_left, interval))
                 time_left -= interval
             else:

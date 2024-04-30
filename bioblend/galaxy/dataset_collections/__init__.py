@@ -219,7 +219,11 @@ class DatasetCollectionClient(Client):
                 return dataset_collection
             if time_left > 0:
                 log.info(
-                    f"The dataset collection {dataset_collection_id} has {len(terminal_states)} out of {len(states)} datasets in a terminal state. Will wait {time_left} more s"
+                    "The dataset collection %s has %s out of %s datasets in a terminal state. Will wait %s more s",
+                    dataset_collection_id,
+                    len(terminal_states),
+                    len(states),
+                    time_left,
                 )
                 time.sleep(min(time_left, interval))
                 time_left -= interval

@@ -449,7 +449,9 @@ class InvocationClient(Client):
                     raise Exception(f"Invocation {invocation_id} is in terminal state {state}")
                 return invocation
             if time_left > 0:
-                log.info(f"Invocation {invocation_id} is in non-terminal state {state}. Will wait {time_left} more s")
+                log.info(
+                    "Invocation %s is in non-terminal state %s. Will wait %s more s", invocation_id, state, time_left
+                )
                 time.sleep(min(time_left, interval))
                 time_left -= interval
             else:

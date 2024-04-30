@@ -518,7 +518,7 @@ class JobsClient(Client):
                     raise Exception(f"Job {job_id} is in terminal state {state}")
                 return job
             if time_left > 0:
-                log.info(f"Job {job_id} is in non-terminal state {state}. Will wait {time_left} more s")
+                log.info("Job %s is in non-terminal state %s. Will wait %s more s", job_id, state, time_left)
                 time.sleep(min(time_left, interval))
                 time_left -= interval
             else:
