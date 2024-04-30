@@ -11,8 +11,10 @@ target-version = ['py38']
 isort = true
 
 [tool.ruff]
-select = ["E", "F", "B", "UP"]
 target-version = "py38"
+
+[tool.ruff.lint]
+select = ["E", "F", "B", "UP"]
 # Exceptions:
 # B9 flake8-bugbear opinionated warnings
 # E501 is line length (delegated to black)
