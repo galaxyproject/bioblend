@@ -14,7 +14,7 @@ isort = true
 target-version = "py38"
 
 [tool.ruff.lint]
-select = ["E", "F", "B", "UP"]
+select = ["E", "F", "B", "C4", "UP"]
 # Exceptions:
 # B9 flake8-bugbear opinionated warnings
 # E501 is line length (delegated to black)

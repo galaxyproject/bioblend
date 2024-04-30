@@ -56,9 +56,9 @@ class DatasetClient(Client):
         :rtype: dict
         :return: Information about the HDA or LDDA
         """
-        params = dict(
-            hda_ldda=hda_ldda,
-        )
+        params = {
+            "hda_ldda": hda_ldda,
+        }
         return self._get(id=dataset_id, params=params)
 
     def _initiate_download(

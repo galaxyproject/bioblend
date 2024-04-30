@@ -45,17 +45,21 @@ class HasElements:
 
 class CollectionDescription(HasElements):
     def to_dict(self) -> Dict[str, Union[str, List]]:
-        return dict(name=self.name, collection_type=self.type, element_identifiers=[e.to_dict() for e in self.elements])
+        return {
+            "name": self.name,
+            "collection_type": self.type,
+            "element_identifiers": [e.to_dict() for e in self.elements],
+        }
 
 
 class CollectionElement(HasElements):
     def to_dict(self) -> Dict[str, Union[str, List]]:
-        return dict(
-            src="new_collection",
-            name=self.name,
-            collection_type=self.type,
-            element_identifiers=[e.to_dict() for e in self.elements],
-        )
+        return {
+            "src": "new_collection",
+            "name": self.name,
+            "collection_type": self.type,
+            "element_identifiers": [e.to_dict() for e in self.elements],
+        }
 
 
 class SimpleElement:
@@ -69,33 +73,33 @@ class SimpleElement:
 class HistoryDatasetElement(SimpleElement):
     def __init__(self, name: str, id: str) -> None:
         super().__init__(
-            dict(
-                name=name,
-                src="hda",
-                id=id,
-            )
+            {
+                "name": name,
+                "src": "hda",
+                "id": id,
+            }
         )
 
 
 class HistoryDatasetCollectionElement(SimpleElement):
     def __init__(self, name: str, id: str) -> None:
         super().__init__(
-            dict(
-                name=name,
-                src="hdca",
-                id=id,
-            )
+            {
+                "name": name,
+                "src": "hdca",
+                "id": id,
+            }
         )
 
 
 class LibraryDatasetElement(SimpleElement):
     def __init__(self, name: str, id: str) -> None:
         super().__init__(
-            dict(
-                name=name,
-                src="ldda",
-                id=id,
-            )
+            {
+                "name": name,
+                "src": "ldda",
+                "id": id,
+            }
         )
 
 

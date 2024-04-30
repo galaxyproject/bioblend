@@ -126,7 +126,7 @@ class ToolShedRepositoryClient(Client):
              'page_size': '2',
              'total_results': '64'}
         """
-        params = dict(q=q, page=page, page_size=page_size)
+        params = {"q": q, "page": page, "page_size": page_size}
         return self._get(params=params)
 
     def show_repository(

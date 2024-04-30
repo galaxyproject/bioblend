@@ -735,13 +735,13 @@ class HistoryClient(Client):
         else:
             collection_description_dict = collection_description
 
-        payload = dict(
-            name=collection_description_dict["name"],
-            type="dataset_collection",
-            collection_type=collection_description_dict["collection_type"],
-            element_identifiers=collection_description_dict["element_identifiers"],
-            copy_elements=copy_elements,
-        )
+        payload = {
+            "name": collection_description_dict["name"],
+            "type": "dataset_collection",
+            "collection_type": collection_description_dict["collection_type"],
+            "element_identifiers": collection_description_dict["element_identifiers"],
+            "copy_elements": copy_elements,
+        }
         return self._post(payload, id=history_id, contents=True)
 
     def delete_history(self, history_id: str, purge: bool = False) -> Dict[str, Any]:
