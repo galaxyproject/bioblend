@@ -52,11 +52,16 @@ class TestGalaxyUsers(GalaxyTestBase.GalaxyTestBase):
         # test a BioBlend GalaxyInstance can be created using username+password
         user_gi = bioblend.galaxy.GalaxyInstance(url=self.gi.base_url, email=new_user_email, password=password)
         assert user_gi.users.get_current_user()["email"] == new_user_email
-        # test deletion
+        # test deletion and purging
         if self.gi.config.get_config()["allow_user_deletion"]:
             deleted_user = self.gi.users.delete_user(new_user["id"])
             assert deleted_user["email"] == new_user_email
             assert deleted_user["deleted"]
+
+            purged_user = self.gi.users.delete_user(new_user["id"], purge=True)
+            assert purged_user["email"] == new_user_email
+            assert purged_user["deleted"]
+            assert purged_user["purged"]
 
     def test_get_current_user(self):
         user = self.gi.users.get_current_user()
@@ -84,8 +89,11 @@ class TestGalaxyUsers(GalaxyTestBase.GalaxyTestBase):
         assert updated_user["username"] == updated_username
         assert updated_user["email"] == updated_user_email
 
+        # delete user after test (if possile), also tests purging without prior deletion
         if self.gi.config.get_config()["allow_user_deletion"]:
-            self.gi.users.delete_user(new_user_id)
+            purged_user = self.gi.users.delete_user(new_user_id, purge=True)
+            assert purged_user["deleted"]
+            assert purged_user["purged"]
 
     def test_get_user_apikey(self):
         # Test getting the API key of the current user, which surely has one
