@@ -93,11 +93,11 @@ class HistoryClient(Client):
         filter_user_published: Optional[bool] = None,
         get_all_published: bool = False,
         slug: Optional[str] = None,
+        all: Optional[bool] = False,
         create_time_min: Optional[str] = None,
         create_time_max: Optional[str] = None,
         update_time_min: Optional[str] = None,
         update_time_max: Optional[str] = None,
-        all: Optional[bool] = False,
         view: Optional[Literal["summary", "detailed"]] = None,
         keys: Optional[List[str]] = None,
         limit: Optional[int] = None,
@@ -118,6 +118,8 @@ class HistoryClient(Client):
         if slug is not None:
             params.setdefault("q", []).append("slug")
             params.setdefault("qv", []).append(slug)
+        if all:
+            params["all"] = True
         if create_time_min:
             params.setdefault("q", []).append("create_time-ge")
             params.setdefault("qv", []).append(create_time_min)
@@ -130,8 +132,6 @@ class HistoryClient(Client):
         if update_time_max:
             params.setdefault("q", []).append("update_time-le")
             params.setdefault("qv", []).append(update_time_max)
-        if all:
-            params["all"] = True
         if view:
             params["view"] = view
         if keys:
@@ -155,11 +155,11 @@ class HistoryClient(Client):
         deleted: bool = False,
         published: Optional[bool] = None,
         slug: Optional[str] = None,
+        all: Optional[bool] = False,
         create_time_min: Optional[str] = None,
         create_time_max: Optional[str] = None,
         update_time_min: Optional[str] = None,
         update_time_max: Optional[str] = None,
-        all: Optional[bool] = False,
         view: Optional[Literal["summary", "detailed"]] = None,
         keys: Optional[List[str]] = None,
         limit: Optional[int] = None,
@@ -186,6 +186,11 @@ class HistoryClient(Client):
         :type slug: str
         :param slug: History slug to filter on
 
+        :type all: bool
+        :param all: Whether to include histories from other users. This
+          parameter works only on Galaxy 20.01 or later and can be specified
+          only if the user is a Galaxy admin.
+
         :type create_time_min: str
         :param create_time_min: Return histories created after the provided
           time and date, which should be formatted as ``YYYY-MM-DDTHH-MM-SS``.
@@ -201,11 +206,6 @@ class HistoryClient(Client):
         :type update_time_max: str
         :param update_time_max: Return histories last updated before the provided
           time and date, which should be formatted as ``YYYY-MM-DDTHH-MM-SS``.
-
-        :type all: bool
-        :param all: Whether to include histories from other users. This
-          parameter works only on Galaxy 20.01 or later and can be specified
-          only if the user is a Galaxy admin.
 
         :type view: str
         :param view: Options are 'summary' or 'detailed'. This defaults to 'summary'.
@@ -239,14 +239,14 @@ class HistoryClient(Client):
             get_all_published=False,
             slug=slug,
             all=all,
-            view=view,
-            keys=keys,
-            limit=limit,
-            offset=offset,
             create_time_min=create_time_min,
             create_time_max=create_time_max,
             update_time_min=update_time_min,
             update_time_max=update_time_max,
+            view=view,
+            keys=keys,
+            limit=limit,
+            offset=offset,
         )
 
     def get_published_histories(

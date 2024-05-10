@@ -4,7 +4,19 @@
   for Galaxy releases 23.2 and 24.0.
 
 * Added ``wait`` parameter to ``HistoryClient.delete_dataset()`` and
-  ``HistoryDatasetAssociation.delete()`` methods.
+  BioBlend.objects ``HistoryDatasetAssociation.delete()`` methods.
+
+* Added ``create_time_min``, ``create_time_max``, ``update_time_min``,
+  ``update_time_max``, ``view``, ``keys``, ``limit`` and ``offset`` parameters
+  to ``HistoryClient.get_histories()`` (thanks to
+  [cat-bro](https://github.com/cat-bro)).
+
+* Added ``create_time_min``, ``create_time_max``, ``update_time_min`` and
+  ``update_time_max`` parameters to ``HistoryClient.get_published_histories()``
+  (thanks to [cat-bro](https://github.com/cat-bro)).
+
+* Added ``keys`` parameter to ``HistoryClient.show_history()`` (thanks to
+  [cat-bro](https://github.com/cat-bro)).
 
 * Dropped broken ``deleted`` parameter of ``DatasetClient.show_dataset()``.
 
