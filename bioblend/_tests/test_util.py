@@ -10,6 +10,8 @@ from typing import (
     Optional,
 )
 
+import requests
+
 import bioblend.galaxy
 
 NO_GALAXY_MESSAGE = "Externally configured Galaxy required, but not found. Set BIOBLEND_GALAXY_URL and BIOBLEND_GALAXY_API_KEY to run this test."
@@ -17,6 +19,14 @@ NO_GALAXY_MESSAGE = "Externally configured Galaxy required, but not found. Set B
 
 def random_string(length: int = 8) -> str:
     return "".join(random.choice(string.ascii_lowercase) for _ in range(length))
+
+
+def is_site_up(url: str) -> bool:
+    try:
+        response = requests.get(url, timeout=10)
+        return response.status_code == 200
+    except Exception:
+        return False
 
 
 def skip_unless_toolshed() -> Callable:
@@ -27,6 +37,9 @@ def skip_unless_toolshed() -> Callable:
         return unittest.skip(
             "Externally configured ToolShed required, but not found. Set BIOBLEND_TOOLSHED_URL (e.g. to https://testtoolshed.g2.bx.psu.edu/ ) to run this test."
         )
+    toolshed_url = os.environ["BIOBLEND_TOOLSHED_URL"]
+    if not is_site_up(toolshed_url):
+        return unittest.skip(f"Configured ToolShed [{toolshed_url}] appears to be down")
     return lambda f: f
 
 
