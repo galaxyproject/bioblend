@@ -1,3 +1,6 @@
+### BioBlend v
+
+
 ### BioBlend v1.3.0 - 2024-05-12
 
 * Dropped support for Python 3.7. Added support for Python 3.12. Added support
@@ -39,7 +42,7 @@
 * Fixed ``InvocationClient.get_invocation_biocompute_object()`` method on
   upcoming Galaxy 24.1 .
 
-* * Improvements to linting and tests (thanks to
+* Improvements to linting and tests (thanks to
   [Matthias Bernt](https://github.com/bernt-matthias)).
 
 ### BioBlend v1.2.0 - 2023-06-30
