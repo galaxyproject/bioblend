@@ -1,5 +1,6 @@
 ### BioBlend v
 
+* Added support for Galaxy release 24.1.
 
 ### BioBlend v1.3.0 - 2024-05-12
 
