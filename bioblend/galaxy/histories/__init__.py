@@ -218,8 +218,8 @@ class HistoryClient(Client):
         :param limit: How many items to return (upper bound).
 
         :type offset: int
-        :param offset: skip the first ( offset - 1 ) items and begin returning
-          at the Nth item.
+        :param offset: skip the first (offset) items and begin returning
+          at item at index offset (i.e. start with the element offset+1).
 
         :rtype: list
         :return: List of history dicts.
