@@ -33,7 +33,7 @@ class HasElements:
         self.name = name
         self.type = type
         if isinstance(elements, dict):
-            self.elements: List[Union["CollectionElement", "SimpleElement"]] = [
+            self.elements: List[Union[CollectionElement, SimpleElement]] = [
                 HistoryDatasetElement(name=key, id=value) for key, value in elements.values()
             ]
         elif elements:
