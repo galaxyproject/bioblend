@@ -73,7 +73,7 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
         # Test limit and offset
         first = self.gi.histories.get_histories(limit=1)
         others = self.gi.histories.get_histories(offset=1)
-        assert len(others) > 0  # guess the test makes more sense with at least 2 histories
+        assert len(first) == 1
         assert [h["id"] for h in all_histories] == [h["id"] for h in first] + [h["id"] for h in others]
 
         out_of_limit = self.gi.histories.get_histories(offset=1000000)
