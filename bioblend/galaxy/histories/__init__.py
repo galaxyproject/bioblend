@@ -219,7 +219,7 @@ class HistoryClient(Client):
 
         :type offset: int
         :param offset: skip the first (offset) items and begin returning
-          at item at index offset (i.e. start with the element offset+1).
+          items at index offset (i.e. start with the element offset+1).
 
         :rtype: list
         :return: List of history dicts.
