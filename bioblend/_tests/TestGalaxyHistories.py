@@ -70,6 +70,15 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
         all_histories = self.gi.histories.get_histories()
         assert len(all_histories) > 0
 
+        # Test limit and offset
+        first = self.gi.histories.get_histories(limit=1)
+        others = self.gi.histories.get_histories(offset=1)
+        assert len(others) > 0  # guess the test makes more sense with at least 2 histories
+        assert [h["id"] for h in all_histories] == [h["id"] for h in first] + [h["id"] for h in others]
+
+        out_of_limit = self.gi.histories.get_histories(offset=1000000)
+        assert out_of_limit == []
+
         # Check whether id is present, when searched by name
         histories = self.gi.histories.get_histories(name=self.default_history_name)
         assert len([h for h in histories if h["id"] == self.history["id"]]) == 1
