@@ -103,7 +103,32 @@ class TestGalaxyUsers(GalaxyTestBase.GalaxyTestBase):
             purged_user = self.gi.users.delete_user(new_user_id, purge=True)
             assert purged_user["deleted"]
             assert purged_user["purged"]
-            assert False
+
+    @test_util.skip_unless_galaxy("release_19.09")  # for user purging
+    def test_direct_purge(self):
+        """
+        test purgung without prior deletion
+        """
+        # WARNING: only admins can create users!
+        if self.gi.config.get_config()["use_remote_user"]:
+            self.skipTest("This Galaxy instance is not configured to use local users")
+        new_username = test_util.random_string()
+        new_user = self.gi.users.create_local_user(
+            new_username, f"{new_username}@example.org", test_util.random_string(20)
+        )
+        new_user_id = new_user["id"]
+        updated_username = test_util.random_string()
+        updated_user_email = f"{updated_username}@example.org"
+        self.gi.users.update_user(new_user_id, username=updated_username, email=updated_user_email)
+        updated_user = self.gi.users.show_user(new_user_id)
+        assert updated_user["username"] == updated_username
+        assert updated_user["email"] == updated_user_email
+
+        # delete and purge user after test (if possile)
+        if self.gi.config.get_config()["allow_user_deletion"]:
+            purged_user = self.gi.users.delete_user(new_user_id, purge=True)
+            assert purged_user["deleted"]
+            assert purged_user["purged"]
 
     def test_get_user_apikey(self):
         # Test getting the API key of the current user, which surely has one
