@@ -103,6 +103,7 @@ class TestGalaxyUsers(GalaxyTestBase.GalaxyTestBase):
             purged_user = self.gi.users.delete_user(new_user_id, purge=True)
             assert purged_user["deleted"]
             assert purged_user["purged"]
+            assert False
 
     def test_get_user_apikey(self):
         # Test getting the API key of the current user, which surely has one
