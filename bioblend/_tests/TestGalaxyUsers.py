@@ -129,8 +129,6 @@ class TestGalaxyUsers(GalaxyTestBase.GalaxyTestBase):
         with pytest.raises(ConnectionError):
             self.gi.users.delete_user(new_user_id, purge=True)
 
-#bioblend.ConnectionError: Unexpected HTTP status code: 400: {"err_msg":"User 'ionsmula@example.org' has not been deleted, so they cannot be purged.","err_code":0}
-
     def test_get_user_apikey(self):
         # Test getting the API key of the current user, which surely has one
         user_id = self.gi.users.get_current_user()["id"]
