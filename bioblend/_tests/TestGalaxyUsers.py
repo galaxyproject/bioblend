@@ -11,6 +11,7 @@ class TestGalaxyUsers(GalaxyTestBase.GalaxyTestBase):
         for user in users:
             assert user["id"] is not None
             assert user["email"] is not None
+            assert user["deleted"] is not None
 
     def test_show_user(self):
         current_user = self.gi.users.get_current_user()
