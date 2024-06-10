@@ -1,4 +1,9 @@
-import bioblend.galaxy
+import pytest
+
+from bioblend import (
+    ConnectionError,
+    galaxy,
+)
 from . import (
     GalaxyTestBase,
     test_util,
@@ -55,7 +60,7 @@ class TestGalaxyUsers(GalaxyTestBase.GalaxyTestBase):
         assert new_user["username"] == new_username
         assert new_user["email"] == new_user_email
         # test a BioBlend GalaxyInstance can be created using username+password
-        user_gi = bioblend.galaxy.GalaxyInstance(url=self.gi.base_url, email=new_user_email, password=password)
+        user_gi = galaxy.GalaxyInstance(url=self.gi.base_url, email=new_user_email, password=password)
         assert user_gi.users.get_current_user()["email"] == new_user_email
         # test deletion and purging
         if self.gi.config.get_config()["allow_user_deletion"]:
