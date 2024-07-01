@@ -54,7 +54,7 @@ class GalaxyClient:
             found_scheme = None
             # Try to guess the scheme, starting from the more secure
             for scheme in ("https://", "http://"):
-                log.warning(f"Missing scheme in url, trying with {scheme}")
+                log.warning("Missing scheme in url, trying with %s", scheme)
                 with contextlib.suppress(requests.RequestException):
                     r = requests.get(
                         scheme + url,

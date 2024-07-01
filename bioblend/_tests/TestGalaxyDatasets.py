@@ -24,7 +24,6 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
     def tearDown(self):
         self.gi.histories.delete_history(self.history_id, purge=True)
 
-    @test_util.skip_unless_galaxy("release_19.05")
     def test_show_nonexistent_dataset(self):
         with pytest.raises(ConnectionError):
             self.gi.datasets.show_dataset("nonexistent_id")
@@ -65,25 +64,21 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
             f.flush()
             assert f.read() == expected_contents
 
-    @test_util.skip_unless_galaxy("release_19.05")
     def test_get_datasets(self):
         datasets = self.gi.datasets.get_datasets()
         dataset_ids = [dataset["id"] for dataset in datasets]
         assert self.dataset_id in dataset_ids
 
-    @test_util.skip_unless_galaxy("release_19.05")
     def test_get_datasets_history(self):
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id)
         assert len(datasets) == 1
 
-    @test_util.skip_unless_galaxy("release_19.05")
     def test_get_datasets_limit_offset(self):
         datasets = self.gi.datasets.get_datasets(limit=1)
         assert len(datasets) == 1
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id, offset=1)
         assert datasets == []
 
-    @test_util.skip_unless_galaxy("release_19.05")
     def test_get_datasets_name(self):
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id, name="Pasted Entry")
         assert len(datasets) == 1
@@ -143,7 +138,6 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id, visible=False)
         assert len(datasets) == 0
 
-    @test_util.skip_unless_galaxy("release_19.05")
     def test_get_datasets_ordering(self):
         self.dataset_id2 = self._test_dataset(self.history_id, contents=self.dataset_contents)
         self.gi.datasets.wait_for_dataset(self.dataset_id2)
@@ -156,7 +150,6 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
         datasets = self.gi.datasets.get_datasets(history_id=self.history_id, order="hid-asc")
         assert datasets[0]["id"] == self.dataset_id
 
-    @test_util.skip_unless_galaxy("release_19.05")
     def test_get_datasets_deleted(self):
         deleted_datasets = self.gi.datasets.get_datasets(history_id=self.history_id, deleted=True)
         assert deleted_datasets == []
@@ -165,11 +158,10 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
         assert len(deleted_datasets) == 1
         purged_datasets = self.gi.datasets.get_datasets(history_id=self.history_id, purged=True)
         assert purged_datasets == []
-        self.gi.histories.delete_dataset(self.history_id, self.dataset_id, purge=True)
+        self.gi.histories.delete_dataset(self.history_id, self.dataset_id, purge=True, wait=True)
         purged_datasets = self.gi.datasets.get_datasets(history_id=self.history_id, purged=True)
         assert len(purged_datasets) == 1
 
-    @test_util.skip_unless_galaxy("release_19.05")
     def test_get_datasets_tool_id_and_tag(self):
         cat1_datasets = self.gi.datasets.get_datasets(history_id=self.history_id, tool_id="cat1")
         assert cat1_datasets == []
@@ -189,7 +181,6 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
 
         self.gi.histories.delete_history(history_id, purge=True)
 
-    @test_util.skip_unless_galaxy("release_19.05")
     def test_dataset_permissions(self):
         admin_user_id = self.gi.users.get_current_user()["id"]
         username = test_util.random_string()

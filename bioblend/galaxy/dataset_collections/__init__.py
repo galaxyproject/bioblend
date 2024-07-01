@@ -1,5 +1,4 @@
 import logging
-import time
 from typing import (
     Any,
     Dict,
@@ -11,7 +10,9 @@ from typing import (
 
 from bioblend import (
     CHUNK_SIZE,
+    NotReady,
     TimeoutException,
+    wait_on,
 )
 from bioblend.galaxy.client import Client
 from bioblend.galaxy.datasets import TERMINAL_STATES
@@ -32,7 +33,7 @@ class HasElements:
         self.name = name
         self.type = type
         if isinstance(elements, dict):
-            self.elements: List[Union["CollectionElement", "SimpleElement"]] = [
+            self.elements: List[Union[CollectionElement, SimpleElement]] = [
                 HistoryDatasetElement(name=key, id=value) for key, value in elements.values()
             ]
         elif elements:
@@ -45,17 +46,21 @@ class HasElements:
 
 class CollectionDescription(HasElements):
     def to_dict(self) -> Dict[str, Union[str, List]]:
-        return dict(name=self.name, collection_type=self.type, element_identifiers=[e.to_dict() for e in self.elements])
+        return {
+            "name": self.name,
+            "collection_type": self.type,
+            "element_identifiers": [e.to_dict() for e in self.elements],
+        }
 
 
 class CollectionElement(HasElements):
     def to_dict(self) -> Dict[str, Union[str, List]]:
-        return dict(
-            src="new_collection",
-            name=self.name,
-            collection_type=self.type,
-            element_identifiers=[e.to_dict() for e in self.elements],
-        )
+        return {
+            "src": "new_collection",
+            "name": self.name,
+            "collection_type": self.type,
+            "element_identifiers": [e.to_dict() for e in self.elements],
+        }
 
 
 class SimpleElement:
@@ -69,33 +74,33 @@ class SimpleElement:
 class HistoryDatasetElement(SimpleElement):
     def __init__(self, name: str, id: str) -> None:
         super().__init__(
-            dict(
-                name=name,
-                src="hda",
-                id=id,
-            )
+            {
+                "name": name,
+                "src": "hda",
+                "id": id,
+            }
         )
 
 
 class HistoryDatasetCollectionElement(SimpleElement):
     def __init__(self, name: str, id: str) -> None:
         super().__init__(
-            dict(
-                name=name,
-                src="hdca",
-                id=id,
-            )
+            {
+                "name": name,
+                "src": "hdca",
+                "id": id,
+            }
         )
 
 
 class LibraryDatasetElement(SimpleElement):
     def __init__(self, name: str, id: str) -> None:
         super().__init__(
-            dict(
-                name=name,
-                src="ldda",
-                id=id,
-            )
+            {
+                "name": name,
+                "src": "ldda",
+                "id": id,
+            }
         )
 
 
@@ -172,9 +177,8 @@ class DatasetCollectionClient(Client):
 
         :type maxwait: float
         :param maxwait: Total time (in seconds) to wait for the dataset
-          states in the dataset collection to become terminal. If not
-          all datasets are in a terminal state within this time, a
-          ``DatasetCollectionTimeoutException`` will be raised.
+          states in the dataset collection to become terminal. After this time,
+          a ``TimeoutException`` will be raised.
 
         :type interval: float
         :param interval: Time (in seconds) to wait between two consecutive checks.
@@ -196,12 +200,9 @@ class DatasetCollectionClient(Client):
         :rtype: dict
         :return: Details of the given dataset collection.
         """
-        assert maxwait >= 0
-        assert interval > 0
         assert 0 <= proportion_complete <= 1
 
-        time_left = maxwait
-        while True:
+        def check_and_get_dataset_collection() -> Dict[str, Any]:
             dataset_collection = self.show_dataset_collection(dataset_collection_id)
             states = [elem["object"]["state"] for elem in dataset_collection["elements"]]
             terminal_states = [state for state in states if state in TERMINAL_STATES]
@@ -213,20 +214,15 @@ class DatasetCollectionClient(Client):
             proportion = len(terminal_states) / len(states)
             if proportion >= proportion_complete:
                 return dataset_collection
-            if time_left > 0:
-                log.info(
-                    f"The dataset collection {dataset_collection_id} has {len(terminal_states)} out of {len(states)} datasets in a terminal state. Will wait {time_left} more s"
-                )
-                time.sleep(min(time_left, interval))
-                time_left -= interval
-            else:
-                raise DatasetCollectionTimeoutException(
-                    f"Less than {proportion_complete * 100}% of datasets in the dataset collection is in a terminal state after {maxwait} s"
-                )
+            raise NotReady(
+                f"The dataset collection {dataset_collection_id} has only {proportion * 100}% of datasets in a terminal state"
+            )
+
+        return wait_on(check_and_get_dataset_collection, maxwait=maxwait, interval=interval)
 
 
-class DatasetCollectionTimeoutException(TimeoutException):
-    pass
+# Unused, for backward compatibility
+DatasetCollectionTimeoutException = TimeoutException
 
 
 __all__ = (

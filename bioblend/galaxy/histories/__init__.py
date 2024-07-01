@@ -21,7 +21,11 @@ from typing import (
 )
 
 import bioblend
-from bioblend import ConnectionError
+from bioblend import (
+    ConnectionError,
+    NotReady,
+    wait_on,
+)
 from bioblend.galaxy.client import Client
 from bioblend.galaxy.dataset_collections import CollectionDescription
 from bioblend.util import attach_file
@@ -89,11 +93,11 @@ class HistoryClient(Client):
         filter_user_published: Optional[bool] = None,
         get_all_published: bool = False,
         slug: Optional[str] = None,
+        all: Optional[bool] = False,
         create_time_min: Optional[str] = None,
         create_time_max: Optional[str] = None,
         update_time_min: Optional[str] = None,
         update_time_max: Optional[str] = None,
-        all: Optional[bool] = False,
         view: Optional[Literal["summary", "detailed"]] = None,
         keys: Optional[List[str]] = None,
         limit: Optional[int] = None,
@@ -114,6 +118,8 @@ class HistoryClient(Client):
         if slug is not None:
             params.setdefault("q", []).append("slug")
             params.setdefault("qv", []).append(slug)
+        if all:
+            params["all"] = True
         if create_time_min:
             params.setdefault("q", []).append("create_time-ge")
             params.setdefault("qv", []).append(create_time_min)
@@ -126,8 +132,6 @@ class HistoryClient(Client):
         if update_time_max:
             params.setdefault("q", []).append("update_time-le")
             params.setdefault("qv", []).append(update_time_max)
-        if all:
-            params["all"] = True
         if view:
             params["view"] = view
         if keys:
@@ -151,11 +155,11 @@ class HistoryClient(Client):
         deleted: bool = False,
         published: Optional[bool] = None,
         slug: Optional[str] = None,
+        all: Optional[bool] = False,
         create_time_min: Optional[str] = None,
         create_time_max: Optional[str] = None,
         update_time_min: Optional[str] = None,
         update_time_max: Optional[str] = None,
-        all: Optional[bool] = False,
         view: Optional[Literal["summary", "detailed"]] = None,
         keys: Optional[List[str]] = None,
         limit: Optional[int] = None,
@@ -182,6 +186,11 @@ class HistoryClient(Client):
         :type slug: str
         :param slug: History slug to filter on
 
+        :type all: bool
+        :param all: Whether to include histories from other users. This
+          parameter works only on Galaxy 20.01 or later and can be specified
+          only if the user is a Galaxy admin.
+
         :type create_time_min: str
         :param create_time_min: Return histories created after the provided
           time and date, which should be formatted as ``YYYY-MM-DDTHH-MM-SS``.
@@ -198,11 +207,6 @@ class HistoryClient(Client):
         :param update_time_max: Return histories last updated before the provided
           time and date, which should be formatted as ``YYYY-MM-DDTHH-MM-SS``.
 
-        :type all: bool
-        :param all: Whether to include histories from other users. This
-          parameter works only on Galaxy 20.01 or later and can be specified
-          only if the user is a Galaxy admin.
-
         :type view: str
         :param view: Options are 'summary' or 'detailed'. This defaults to 'summary'.
           Setting view to 'detailed' results in a larger number of fields returned.
@@ -214,8 +218,8 @@ class HistoryClient(Client):
         :param limit: How many items to return (upper bound).
 
         :type offset: int
-        :param offset: skip the first ( offset - 1 ) items and begin returning
-          at the Nth item.
+        :param offset: skip the first (offset) items and begin returning
+          items at index offset (i.e. start with the element offset+1).
 
         :rtype: list
         :return: List of history dicts.
@@ -235,14 +239,14 @@ class HistoryClient(Client):
             get_all_published=False,
             slug=slug,
             all=all,
-            view=view,
-            keys=keys,
-            limit=limit,
-            offset=offset,
             create_time_min=create_time_min,
             create_time_max=create_time_max,
             update_time_min=update_time_min,
             update_time_max=update_time_max,
+            view=view,
+            keys=keys,
+            limit=limit,
+            offset=offset,
         )
 
     def get_published_histories(
@@ -403,7 +407,7 @@ class HistoryClient(Client):
             params["keys"] = ",".join(keys)
         return self._get(id=history_id, contents=contents, params=params)
 
-    def delete_dataset(self, history_id: str, dataset_id: str, purge: bool = False) -> None:
+    def delete_dataset(self, history_id: str, dataset_id: str, purge: bool = False, wait: bool = False) -> None:
         """
         Mark corresponding dataset as deleted.
 
@@ -416,6 +420,8 @@ class HistoryClient(Client):
         :type purge: bool
         :param purge: if ``True``, also purge (permanently delete) the dataset
 
+        :param wait: Whether to wait for the dataset to be purged.
+
         :rtype: None
         :return: None
 
@@ -426,9 +432,17 @@ class HistoryClient(Client):
         """
         url = "/".join((self._make_url(history_id, contents=True), dataset_id))
         payload = {}
-        if purge is True:
-            payload["purge"] = purge
+        if purge:
+            payload["purge"] = True
         self._delete(payload=payload, url=url)
+        if purge and wait:
+
+            def check_dataset_purged() -> None:
+                dataset = self.show_dataset(history_id, dataset_id)
+                if not dataset["purged"]:
+                    raise NotReady(f"Dataset {dataset_id} in library {history_id} is not purged")
+
+            wait_on(check_dataset_purged)
 
     def delete_dataset_collection(self, history_id: str, dataset_collection_id: str) -> None:
         """
@@ -735,13 +749,13 @@ class HistoryClient(Client):
         else:
             collection_description_dict = collection_description
 
-        payload = dict(
-            name=collection_description_dict["name"],
-            type="dataset_collection",
-            collection_type=collection_description_dict["collection_type"],
-            element_identifiers=collection_description_dict["element_identifiers"],
-            copy_elements=copy_elements,
-        )
+        payload = {
+            "name": collection_description_dict["name"],
+            "type": "dataset_collection",
+            "collection_type": collection_description_dict["collection_type"],
+            "element_identifiers": collection_description_dict["element_identifiers"],
+            "copy_elements": copy_elements,
+        }
         return self._post(payload, id=history_id, contents=True)
 
     def delete_history(self, history_id: str, purge: bool = False) -> Dict[str, Any]:

@@ -18,3 +18,4 @@ galaxy:
   enable_quotas: true
   cleanup_job: onsuccess
   enable_notification_system: true
+  enable_celery_tasks: true

@@ -70,6 +70,15 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
         all_histories = self.gi.histories.get_histories()
         assert len(all_histories) > 0
 
+        # Test limit and offset
+        first = self.gi.histories.get_histories(limit=1)
+        others = self.gi.histories.get_histories(offset=1)
+        assert len(first) == 1
+        assert [h["id"] for h in all_histories] == [h["id"] for h in first] + [h["id"] for h in others]
+
+        out_of_limit = self.gi.histories.get_histories(offset=1000000)
+        assert out_of_limit == []
+
         # Check whether id is present, when searched by name
         histories = self.gi.histories.get_histories(name=self.default_history_name)
         assert len([h for h in histories if h["id"] == self.history["id"]]) == 1
@@ -91,7 +100,7 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
 
         # Test keys: check that fields requested are returned
         histories_with_keys = self.gi.histories.get_histories(keys=["id", "user_id", "size"])
-        assert {key for key in histories_with_keys[0]} >= {"id", "user_id", "size"}
+        assert set(histories_with_keys[0]) >= {"id", "user_id", "size"}
 
         # TODO: check whether deleted history is returned correctly
         # At the moment, get_histories() returns only not-deleted histories
@@ -194,7 +203,7 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
     def test_purge_dataset(self):
         history_id = self.history["id"]
         dataset1_id = self._test_dataset(history_id)
-        self.gi.histories.delete_dataset(history_id, dataset1_id, purge=True)
+        self.gi.histories.delete_dataset(history_id, dataset1_id, purge=True, wait=True)
         dataset = self.gi.histories.show_dataset(history_id, dataset1_id)
         assert dataset["deleted"]
         assert dataset["purged"]

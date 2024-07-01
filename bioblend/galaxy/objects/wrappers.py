@@ -1025,19 +1025,21 @@ class HistoryDatasetAssociation(Dataset):
         self.__init__(res, self.container, gi=self.gi)  # type: ignore[misc]
         return self
 
-    def delete(self, purge: bool = False) -> None:
+    def delete(self, purge: bool = False, wait: bool = False) -> None:
         """
         Delete this history dataset.
 
         :type purge: bool
         :param purge: if ``True``, also purge (permanently delete) the dataset
 
+        :param wait: Whether to wait for the dataset to be purged.
+
         .. note::
           The ``purge`` option works only if the Galaxy instance has the
           ``allow_user_dataset_purge`` option set to ``true`` in the
           ``config/galaxy.yml`` configuration file.
         """
-        self.gi.gi.histories.delete_dataset(self.container.id, self.id, purge=purge)
+        self.gi.gi.histories.delete_dataset(self.container.id, self.id, purge=purge, wait=wait)
         self.container.refresh()
         self.refresh()
 
@@ -1218,6 +1220,7 @@ class DatasetContainer(Wrapper, Generic[DatasetSubtype], metaclass=abc.ABCMeta):
         :type content_infos: list of :class:`ContentInfo`
         :param content_infos: info objects for the container's contents
         """
+        assert gi is not None
         super().__init__(c_dict, gi=gi)
         if content_infos is None:
             content_infos = []

@@ -64,7 +64,7 @@ class Param:
 class DatasetParam(Param):
     def __init__(self, value: Union[Dict[str, str], str], src: str = "hda") -> None:
         if not isinstance(value, dict):
-            value = dict(src=src, id=value)
+            value = {"src": src, "id": value}
         super().__init__(value)
 
 

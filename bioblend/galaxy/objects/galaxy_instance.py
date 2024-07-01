@@ -104,7 +104,7 @@ class GalaxyInstance:
                 if not ds.state:
                     self.log.warning("Dataset %s has an empty state", ds.id)
                 elif ds.state not in TERMINAL_STATES:
-                    self.log.info(f"Dataset {ds.id} is in non-terminal state {ds.state}")
+                    self.log.info("Dataset %s is in non-terminal state %s", ds.id, ds.state)
                     pending.append(ds)
             return pending
 

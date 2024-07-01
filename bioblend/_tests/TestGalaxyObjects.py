@@ -966,7 +966,7 @@ class TestHDAContents(GalaxyObjectsTestBase):
         assert not self.ds.purged
 
     def test_dataset_purge(self):
-        self.ds.delete(purge=True)
+        self.ds.delete(purge=True, wait=True)
         assert self.ds.deleted
         assert self.ds.purged
 
