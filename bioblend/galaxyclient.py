@@ -12,7 +12,9 @@ import json
 import logging
 from typing import (
     Any,
+    Dict,
     Optional,
+    Union,
 )
 
 import requests
@@ -78,7 +80,7 @@ class GalaxyClient:
             self._key = None
             self.email = email
             self.password = password
-        self.json_headers: dict = {"Content-Type": "application/json"}
+        self.json_headers: Dict[str, Union[str, bytes, None]] = {"Content-Type": "application/json"}
         # json_headers needs to be set before key can be defined, otherwise authentication with email/password causes an error
         self.json_headers["x-api-key"] = self.key
         # Number of attempts before giving up on a GET request.
@@ -330,15 +332,14 @@ class GalaxyClient:
         """
         headers = {"x-api-key": self.key}
         client = tusclient.client.TusClient(self.url + url, headers=headers)
-        if storage:
-            storage = tusclient.storage.filestorage.FileStorage(storage)
+        url_storage = tusclient.storage.filestorage.FileStorage(storage) if storage else None
         try:
             return client.uploader(
                 file_path=path,
                 chunk_size=chunk_size,
                 metadata=metadata,
-                store_url=storage is not None,
-                url_storage=storage,
+                store_url=url_storage is not None,
+                url_storage=url_storage,
             )
         except tusclient.exceptions.TusCommunicationError as exc:
             raise ConnectionError(
@@ -374,6 +375,7 @@ class GalaxyClient:
 
 
 def _tus_uploader_session_id(self: tusclient.uploader.Uploader) -> str:
+    assert self.url
     return self.url.rsplit("/", 1)[1]
 
 
