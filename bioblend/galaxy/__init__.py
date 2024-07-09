@@ -41,6 +41,7 @@ class GalaxyInstance(GalaxyClient):
         password: Optional[str] = None,
         *,
         verify: bool = True,
+        user_agent: Optional[str] = None,
     ) -> None:
         """
         A base representation of a connection to a Galaxy instance, identified
@@ -83,7 +84,7 @@ class GalaxyInstance(GalaxyClient):
         :param verify: Whether to verify the server's TLS certificate
         :type verify: bool
         """
-        super().__init__(url, key=key, email=email, password=password, verify=verify)
+        super().__init__(url, key=key, email=email, password=password, verify=verify, user_agent=user_agent)
         self.libraries = libraries.LibraryClient(self)
         self.histories = histories.HistoryClient(self)
         self.workflows = workflows.WorkflowClient(self)
