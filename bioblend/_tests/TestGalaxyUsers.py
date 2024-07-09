@@ -1,9 +1,7 @@
 import pytest
 
-from bioblend import (
-    ConnectionError,
-    galaxy,
-)
+from bioblend import ConnectionError
+from bioblend.galaxy import GalaxyInstance
 from . import (
     GalaxyTestBase,
     test_util,
@@ -60,7 +58,7 @@ class TestGalaxyUsers(GalaxyTestBase.GalaxyTestBase):
         assert new_user["username"] == new_username
         assert new_user["email"] == new_user_email
         # test a BioBlend GalaxyInstance can be created using username+password
-        user_gi = galaxy.GalaxyInstance(url=self.gi.base_url, email=new_user_email, password=password)
+        user_gi = GalaxyInstance(url=self.gi.base_url, email=new_user_email, password=password)
         assert user_gi.users.get_current_user()["email"] == new_user_email
         # test deletion and purging
         if self.gi.config.get_config()["allow_user_deletion"]:
@@ -112,7 +110,7 @@ class TestGalaxyUsers(GalaxyTestBase.GalaxyTestBase):
     @test_util.skip_unless_galaxy("release_19.09")  # for user purging
     def test_direct_purge(self):
         """
-        test purgung without prior deletion
+        Test purging without prior deletion
         """
         # WARNING: only admins can create users!
         if self.gi.config.get_config()["use_remote_user"]:
@@ -123,11 +121,9 @@ class TestGalaxyUsers(GalaxyTestBase.GalaxyTestBase):
         new_user = self.gi.users.create_local_user(
             new_username, f"{new_username}@example.org", test_util.random_string(20)
         )
-        new_user_id = new_user["id"]
-
-        # purge user fails if not deleted
+        # Purging a user fails if it's not deleted beforehand
         with pytest.raises(ConnectionError):
-            self.gi.users.delete_user(new_user_id, purge=True)
+            self.gi.users.delete_user(new_user["id"], purge=True)
 
     def test_get_user_apikey(self):
         # Test getting the API key of the current user, which surely has one
