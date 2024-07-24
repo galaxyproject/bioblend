@@ -67,7 +67,7 @@ class TestGalaxyQuotas(GalaxyTestBase.GalaxyTestBase):
         quota = self.gi.quotas.create_quota(name="non_default_quota", description="testing",
                 amount="100 GB",
                 operation="+",
-                in_users=[new_user['username']],
+                in_users=[new_user['id']],
             )
         self.gi.quotas.update_quota(quota["id"], default="no", amount="200 GB")
 
