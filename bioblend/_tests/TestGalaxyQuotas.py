@@ -52,3 +52,14 @@ class TestGalaxyQuotas(GalaxyTestBase.GalaxyTestBase):
         assert response == "Deleted 1 quotas: " + self.quota_name
         response = self.gi.quotas.undelete_quota(self.quota["id"])
         assert response == "Undeleted 1 quotas: " + self.quota_name
+
+
+    def test_update_non_default_quote(self):
+        user = self.gi.users.create_remote_user("test@test.test")
+        print(user)
+        quota = self.gi.quotas.create_quota(name="non_default_quota", description="testing",
+                amount="100 GB",
+                operation="+",
+                in_users=[user['username']],
+            )
+        self.gi.quotas.update_quota(quota["id"], default="no", amount="200 GB")
