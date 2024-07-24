@@ -69,7 +69,8 @@ class TestGalaxyQuotas(GalaxyTestBase.GalaxyTestBase):
                 operation="+",
                 in_users=[new_user['id']],
             )
-        self.gi.quotas.update_quota(quota["id"], default="no", amount="200 GB")
+        print(quota)
+        self.gi.quotas.update_quota(quota["id"], default=None, amount="200 GB")
 
         if self.gi.config.get_config()["allow_user_deletion"]:
             deleted_user = self.gi.users.delete_user(new_user["id"])
