@@ -1,6 +1,9 @@
 import uuid
 
-from . import GalaxyTestBase
+from . import (
+    GalaxyTestBase,
+    test_util,
+)
 
 
 class TestGalaxyQuotas(GalaxyTestBase.GalaxyTestBase):
@@ -53,13 +56,21 @@ class TestGalaxyQuotas(GalaxyTestBase.GalaxyTestBase):
         response = self.gi.quotas.undelete_quota(self.quota["id"])
         assert response == "Undeleted 1 quotas: " + self.quota_name
 
-
+    @test_util.skip_unless_galaxy("release_19.09")  # for user purging
     def test_update_non_default_quote(self):
-        user = self.gi.users.create_remote_user("test@test.test")
-        print(user)
+        new_username = test_util.random_string()
+        new_user_email = f"{new_username}@example.org"
+        password = test_util.random_string(20)
+        new_user = self.gi.users.create_local_user(new_username, new_user_email, password)
+        print(new_user)
+
         quota = self.gi.quotas.create_quota(name="non_default_quota", description="testing",
                 amount="100 GB",
                 operation="+",
-                in_users=[user['username']],
+                in_users=[new_user['username']],
             )
         self.gi.quotas.update_quota(quota["id"], default="no", amount="200 GB")
+
+        if self.gi.config.get_config()["allow_user_deletion"]:
+            deleted_user = self.gi.users.delete_user(new_user["id"])
+            purged_user = self.gi.users.delete_user(new_user["id"], purge=True)
