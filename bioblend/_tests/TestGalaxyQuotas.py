@@ -57,7 +57,9 @@ class TestGalaxyQuotas(GalaxyTestBase.GalaxyTestBase):
         assert response == "Undeleted 1 quotas: " + self.quota_name
 
     @test_util.skip_unless_galaxy("release_19.09")  # for user purging
-    def test_update_non_default_quote(self):
+    def test_update_non_default_quota(self):
+        if self.gi.config.get_config()["use_remote_user"]:
+            self.skipTest("This Galaxy instance is not configured to use local users")
         new_username = test_util.random_string()
         new_user_email = f"{new_username}@example.org"
         password = test_util.random_string(20)
@@ -73,5 +75,5 @@ class TestGalaxyQuotas(GalaxyTestBase.GalaxyTestBase):
         self.gi.quotas.update_quota(quota["id"], default=None, amount="200 GB")
 
         if self.gi.config.get_config()["allow_user_deletion"]:
-            deleted_user = self.gi.users.delete_user(new_user["id"])
-            purged_user = self.gi.users.delete_user(new_user["id"], purge=True)
+            self.gi.users.delete_user(new_user["id"])
+            self.gi.users.delete_user(new_user["id"], purge=True)
