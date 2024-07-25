@@ -18,7 +18,7 @@ from bioblend.galaxy.client import Client
 if TYPE_CHECKING:
     from bioblend.galaxy import GalaxyInstance
 
-InputsBy = Literal["step_index|step_uuid", "step_index", "step_id", "step_uuid", "name"]  # type: ignore[name-defined]
+InputsBy = Literal["step_index|step_uuid", "step_index", "step_id", "step_uuid", "name"]
 
 
 class WorkflowClient(Client):
