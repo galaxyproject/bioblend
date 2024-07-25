@@ -142,7 +142,7 @@ class QuotaClient(Client):
         name: Optional[str] = None,
         description: Optional[str] = None,
         amount: Optional[str] = None,
-        operation: Optional[QuotaOperations] = None,
+        operation: Optional[QuotaOperations] = "=",
         default: Optional[DefaultQuotaValues] = None,
         in_users: Optional[List[str]] = None,
         in_groups: Optional[List[str]] = None,
