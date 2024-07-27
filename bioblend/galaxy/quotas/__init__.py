@@ -17,6 +17,7 @@ if TYPE_CHECKING:
     from bioblend.galaxy import GalaxyInstance
 
 QuotaOperations = Literal["+", "-", "="]
+DefaultQuotaValues = Literal["no", "registered", "unregistered"]
 
 
 class QuotaClient(Client):
@@ -80,7 +81,7 @@ class QuotaClient(Client):
         description: str,
         amount: str,
         operation: QuotaOperations,
-        default: Optional[Literal["no", "registered", "unregistered"]] = "no",
+        default: Optional[DefaultQuotaValues] = "no",
         in_users: Optional[List[str]] = None,
         in_groups: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
@@ -101,8 +102,8 @@ class QuotaClient(Client):
 
         :type default: str
         :param default: Whether or not this is a default quota. Valid values
-                        are ``no``, ``unregistered``, ``registered``. None is
-                        equivalent to ``no``.
+                        are "no", "unregistered", "registered" and None. None is
+                        equivalent to "no".
 
         :type in_users: list of str
         :param in_users: A list of user IDs or user emails.
@@ -141,8 +142,8 @@ class QuotaClient(Client):
         name: Optional[str] = None,
         description: Optional[str] = None,
         amount: Optional[str] = None,
-        operation: Optional[QuotaOperations] = None,
-        default: str = "no",
+        operation: Optional[QuotaOperations] = "=",
+        default: Optional[DefaultQuotaValues] = None,
         in_users: Optional[List[str]] = None,
         in_groups: Optional[List[str]] = None,
     ) -> str:
@@ -169,10 +170,10 @@ class QuotaClient(Client):
 
         :type default: str
         :param default: Whether or not this is a default quota. Valid values
-                        are ``no``, ``unregistered``, ``registered``.
+                        are "no", "unregistered", "registered" and None.
                         Calling this method with ``default="no"`` on a
-                        non-default quota will throw an error. Not
-                        passing this parameter is equivalent to passing ``no``.
+                        non-default quota will throw an error. Passing None is
+                        equivalent to not changing the current status.
 
         :type in_users: list of str
         :param in_users: A list of user IDs or user emails.
