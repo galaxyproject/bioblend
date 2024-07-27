@@ -59,8 +59,8 @@ class TestGalaxyQuotas(GalaxyTestBase.GalaxyTestBase):
     @test_util.skip_unless_galaxy("release_19.09")  # for user purging
     def test_update_non_default_quota(self):
         """
-        test if a non default quota can be updated (needs to use default=None,
-        default="no" will fail)
+        Test updating a non default quota.
+        Needs to use `default=None` (which is the default), `default="no"` will fail.
         """
         if self.gi.config.get_config()["use_remote_user"]:
             self.skipTest("This Galaxy instance is not configured to use local users")
