@@ -748,13 +748,13 @@ class LibraryClient(Client):
         :return: General information about the library
         """
         payload: Dict[str, List[str]] = {}
-        if access_in:
+        if access_in is not None:
             payload["LIBRARY_ACCESS_in"] = access_in
-        if modify_in:
+        if modify_in is not None:
             payload["LIBRARY_MODIFY_in"] = modify_in
-        if add_in:
+        if add_in is not None:
             payload["LIBRARY_ADD_in"] = add_in
-        if manage_in:
+        if manage_in is not None:
             payload["LIBRARY_MANAGE_in"] = manage_in
         url = self._make_url(library_id) + "/permissions"
         return self._post(payload, url=url)
@@ -789,11 +789,11 @@ class LibraryClient(Client):
         payload: Dict[str, Any] = {
             "action": "set_permissions",
         }
-        if access_in:
+        if access_in is not None:
             payload["access_ids[]"] = access_in
-        if modify_in:
+        if modify_in is not None:
             payload["modify_ids[]"] = modify_in
-        if manage_in:
+        if manage_in is not None:
             payload["manage_ids[]"] = manage_in
         url = "/".join((self._make_url(), "datasets", dataset_id, "permissions"))
         return self._post(payload, url=url)
