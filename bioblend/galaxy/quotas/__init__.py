@@ -82,6 +82,7 @@ class QuotaClient(Client):
         amount: str,
         operation: QuotaOperations,
         default: Optional[DefaultQuotaValues] = "no",
+        quota_source_label: Optional[str] = None,
         in_users: Optional[List[str]] = None,
         in_groups: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
@@ -105,6 +106,9 @@ class QuotaClient(Client):
                         are "no", "unregistered", "registered" and None. None is
                         equivalent to "no".
 
+        :type quota_source_label: str
+        :param quota_source_label: If set, quota source label to apply this quota operation to. Otherwise, the default quota is used.
+
         :type in_users: list of str
         :param in_users: A list of user IDs or user emails.
 
@@ -127,6 +131,7 @@ class QuotaClient(Client):
             "amount": amount,
             "operation": operation,
             "default": default,
+            "quota_source_label": quota_source_label,
         }
         if in_users:
             payload["in_users"] = in_users
@@ -144,6 +149,7 @@ class QuotaClient(Client):
         amount: Optional[str] = None,
         operation: Optional[QuotaOperations] = "=",
         default: Optional[DefaultQuotaValues] = None,
+        quota_source_label: Optional[str] = None,
         in_users: Optional[List[str]] = None,
         in_groups: Optional[List[str]] = None,
     ) -> str:
@@ -175,6 +181,11 @@ class QuotaClient(Client):
                         non-default quota will throw an error. Passing None is
                         equivalent to not changing the current status.
 
+        :type default: str
+        :param default: Whether or not this is a default quota. Valid values
+                        are "no", "unregistered", "registered" and None. None is
+                        equivalent to "no".
+
         :type in_users: list of str
         :param in_users: A list of user IDs or user emails.
 
@@ -199,6 +210,9 @@ class QuotaClient(Client):
 
         if operation:
             payload["operation"] = operation
+
+        if quota_source_label:
+            payload["quota_source_label"] = quota_source_label
 
         if in_users:
             payload["in_users"] = in_users
