@@ -5,6 +5,9 @@
 * Added ``offset`` parameter to ``InvocationClient.get_invocations()`` and
   BioBlend.objects ``ObjInvocationClient.list()`` methods.
 
+* Added ``quota_source_label`` parameter to ``QuotaClient.create_quota()``
+  (thanks to [Matthias Bernt](https://github.com/bernt-matthias)).
+
 * Added ``style`` parameter to ``WorkflowClient.export_workflow_dict()`` method
   (thanks to [Marius van den Beek](https://github.com/mvdbeek)).
 
