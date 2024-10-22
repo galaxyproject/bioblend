@@ -62,7 +62,7 @@ BIOBLEND_DIR=$(get_abs_dirname "$(dirname "$0")")
 if ! command -v tox >/dev/null; then
     cd "${BIOBLEND_DIR}"
     if [ ! -d .venv ]; then
-        virtualenv -p python3 .venv
+        python3 -m venv .venv
     fi
     . .venv/bin/activate
     python3 -m pip install --upgrade "tox>=1.8.0"
@@ -88,10 +88,14 @@ else
     esac
 fi
 
-# Setup Galaxy virtualenv
+# Setup Galaxy virtual environment
 if [ -n "${GALAXY_PYTHON}" ]; then
     if [ ! -d .venv ]; then
-        virtualenv -p "${GALAXY_PYTHON}" .venv
+        if ! "${GALAXY_PYTHON}" -m venv .venv; then
+            echo "Creating the Python virtual environment for Galaxy using the venv standard library module failed."
+            echo "Trying with virtualenv now."
+            virtualenv -p "$GALAXY_PYTHON"  .venv
+        fi
     fi
     export GALAXY_PYTHON
 fi

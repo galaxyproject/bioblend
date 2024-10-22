@@ -8,14 +8,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
-      - name: Install dependencies
+      - name: Install tox
         run: |
-          python3 -m pip install --upgrade pip setuptools
-          python3 -m pip install --upgrade build twine
+          python3 -m pip install 'tox>=1.8.0'
       - name: Create and check sdist and wheel packages
-        run: |
-          python3 -m build
-          twine check dist/*
+        run: tox -e build
       - name: Publish to PyPI
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && github.repository_owner == 'galaxyproject'
         uses: pypa/gh-action-pypi-publish@release/v1

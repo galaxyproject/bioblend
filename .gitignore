@@ -41,5 +41,5 @@ cover
 # compiled docs
 docs/_build
 
-# Python virtualenv
+# Python virtual environment
 .venv
