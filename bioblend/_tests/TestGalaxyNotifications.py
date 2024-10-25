@@ -357,9 +357,9 @@ class TestGalaxyNotifications(GalaxyTestBase.GalaxyTestBase):
         user_gi = GalaxyInstance(url=self.gi.base_url, email=user["email"], password="password")
 
         # send the test notifications and save their ids
-        notification_1_id = self._send_test_notification_to([user["id"]], message="test_notification_status 1")[
-            "notification"
-        ]["id"]
+        notification_1 = self._send_test_notification_to([user["id"]], message="test_notification_status 1")
+        print(notification_1)
+        notification_1_id = notification_1["notification"]["id"]
         notification_2_id = self._send_test_notification_to([user["id"]], message="test_notification_status 2")[
             "notification"
         ]["id"]
