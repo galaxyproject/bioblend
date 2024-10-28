@@ -2,6 +2,7 @@ from datetime import (
     datetime,
     timedelta,
 )
+from packaging.version import Version
 from typing import (
     Any,
     Dict,
@@ -34,7 +35,11 @@ class TestGalaxyNotifications(GalaxyTestBase.GalaxyTestBase):
         if not self.gi.users.get_current_user()["is_admin"]:
             self.skipTest("This tests requires the current user to be an admin, which is not the case.")
 
-        task_based = self.gi.config.get_config()["enable_celery_tasks"]
+        # sending notifications are handled by tasks since 24.1 if celery is enabled
+        version = self.gi.config.get_config()["version_major"]
+        task_based = self.gi.config.get_config()["enable_celery_tasks"] and (
+            version == "dev" or Version(version) >= Version("24.1")
+        )
 
         # user creation for the test
         user1 = self._create_local_test_user(password="password")
@@ -150,7 +155,11 @@ class TestGalaxyNotifications(GalaxyTestBase.GalaxyTestBase):
         if not self.gi.users.get_current_user()["is_admin"]:
             self.skipTest("This tests requires the current user to be an admin, which is not the case.")
 
-        task_based = self.gi.config.get_config()["enable_celery_tasks"]
+        # sending notifications are handled by tasks since 24.1 if celery is enabled
+        version = self.gi.config.get_config()["version_major"]
+        task_based = self.gi.config.get_config()["enable_celery_tasks"] and (
+            version == "dev" or Version(version) >= Version("24.1")
+        )
 
         # send the notifications
         user_id = [self.gi.users.get_current_user()["id"]]
@@ -248,7 +257,12 @@ class TestGalaxyNotifications(GalaxyTestBase.GalaxyTestBase):
             self.skipTest("This Galaxy instance is not configured to use notifications.")
         if not self.gi.users.get_current_user()["is_admin"]:
             self.skipTest("This tests requires the current user to be an admin, which is not the case.")
-        task_based = self.gi.config.get_config()["enable_celery_tasks"]
+
+        # sending notifications are handled by tasks since 24.1 if celery is enabled
+        version = self.gi.config.get_config()["version_major"]
+        task_based = self.gi.config.get_config()["enable_celery_tasks"] and (
+            version == "dev" or Version(version) >= Version("24.1")
+        )
 
         # user creation for the test
         user = self._create_local_test_user(password="password")
@@ -280,7 +294,11 @@ class TestGalaxyNotifications(GalaxyTestBase.GalaxyTestBase):
             self.skipTest("This Galaxy instance is not configured to use notifications.")
         if not self.gi.users.get_current_user()["is_admin"]:
             self.skipTest("This tests requires the current user to be an admin, which is not the case.")
-        task_based = self.gi.config.get_config()["enable_celery_tasks"]
+        # sending notifications are handled by tasks since 24.1 if celery is enabled
+        version = self.gi.config.get_config()["version_major"]
+        task_based = self.gi.config.get_config()["enable_celery_tasks"] and (
+            version == "dev" or Version(version) >= Version("24.1")
+        )
 
         # user creation for the test
         user = self._create_local_test_user(password="password")
@@ -363,7 +381,11 @@ class TestGalaxyNotifications(GalaxyTestBase.GalaxyTestBase):
             self.skipTest("This Galaxy instance is not configured to use notifications.")
         if not self.gi.users.get_current_user()["is_admin"]:
             self.skipTest("This tests requires the current user to be an admin, which is not the case.")
-        task_based = self.gi.config.get_config()["enable_celery_tasks"]
+        # sending notifications are handled by tasks since 24.1 if celery is enabled
+        version = self.gi.config.get_config()["version_major"]
+        task_based = self.gi.config.get_config()["enable_celery_tasks"] and (
+            version == "dev" or Version(version) >= Version("24.1")
+        )
 
         # user creation for the test
         user = self._create_local_test_user(password="password")
