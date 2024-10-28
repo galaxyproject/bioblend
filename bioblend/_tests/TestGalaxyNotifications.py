@@ -9,6 +9,8 @@ from typing import (
     Optional,
 )
 
+from galaxy.tool_util.verify.wait import wait_on
+
 from bioblend.galaxy import GalaxyInstance
 from . import (
     GalaxyTestBase,
@@ -31,6 +33,8 @@ class TestGalaxyNotifications(GalaxyTestBase.GalaxyTestBase):
             self.skipTest("This Galaxy instance is not configured to use notifications.")
         if not self.gi.users.get_current_user()["is_admin"]:
             self.skipTest("This tests requires the current user to be an admin, which is not the case.")
+
+        task_based = self.gi.config.get_config()["enable_celery_tasks"]
 
         # user creation for the test
         user1 = self._create_local_test_user(password="password")
@@ -56,14 +60,14 @@ class TestGalaxyNotifications(GalaxyTestBase.GalaxyTestBase):
             [user1["id"]],
             message="test_notification_status 1",
         )
-        assert created_response_1["total_notifications_sent"] == 1
+        self._assert_notifications_sent(task_based, created_response_1, 1)
 
         # Both user1 and user2 will receive this notification
         created_response_2 = self._send_test_notification_to(
             [user1["id"], user2["id"]],
             message="test_notification_status 2",
         )
-        assert created_response_2["total_notifications_sent"] == 2
+        self._assert_notifications_sent(task_based, created_response_2, 2)
 
         # All users will receive this broadcasted notification
         self._send_test_broadcast_notification(message="test_notification_status 3")
@@ -146,11 +150,16 @@ class TestGalaxyNotifications(GalaxyTestBase.GalaxyTestBase):
         if not self.gi.users.get_current_user()["is_admin"]:
             self.skipTest("This tests requires the current user to be an admin, which is not the case.")
 
+        task_based = self.gi.config.get_config()["enable_celery_tasks"]
+
         # send the notifications
         user_id = [self.gi.users.get_current_user()["id"]]
-        self._send_test_notification_to(user_id, message="test_notification_status 1")
-        self._send_test_notification_to(user_id, message="test_notification_status 2")
-        self._send_test_notification_to(user_id, message="test_notification_status 3")
+        send_response = self._send_test_notification_to(user_id, message="test_notification_status 1")
+        self._assert_notifications_sent(task_based, send_response, 1)
+        send_response = self._send_test_notification_to(user_id, message="test_notification_status 2")
+        self._assert_notifications_sent(task_based, send_response, 1)
+        send_response = self._send_test_notification_to(user_id, message="test_notification_status 3")
+        self._assert_notifications_sent(task_based, send_response, 1)
 
         # this should fetch all the notifications
         created_response_1 = self.gi.notifications.get_user_notifications()
@@ -239,6 +248,7 @@ class TestGalaxyNotifications(GalaxyTestBase.GalaxyTestBase):
             self.skipTest("This Galaxy instance is not configured to use notifications.")
         if not self.gi.users.get_current_user()["is_admin"]:
             self.skipTest("This tests requires the current user to be an admin, which is not the case.")
+        task_based = self.gi.config.get_config()["enable_celery_tasks"]
 
         # user creation for the test
         user = self._create_local_test_user(password="password")
@@ -247,10 +257,11 @@ class TestGalaxyNotifications(GalaxyTestBase.GalaxyTestBase):
         user_gi = GalaxyInstance(url=self.gi.base_url, email=user["email"], password="password")
 
         # send the test notification
-        notification_response = self._send_test_notification_to([user["id"]], message="test_notification_status")[
-            "notification"
-        ]
-        notification_id = notification_response["id"]
+        send_response = self._send_test_notification_to([user["id"]], message="test_notification_status")
+        self._assert_notifications_sent(task_based, send_response, 1)
+
+        notifications = user_gi.notifications.get_user_notifications()
+        notification_id = notifications[0]["id"]
 
         # Fetch the notification
         notification = user_gi.notifications.show_notification(notification_id)
@@ -269,6 +280,7 @@ class TestGalaxyNotifications(GalaxyTestBase.GalaxyTestBase):
             self.skipTest("This Galaxy instance is not configured to use notifications.")
         if not self.gi.users.get_current_user()["is_admin"]:
             self.skipTest("This tests requires the current user to be an admin, which is not the case.")
+        task_based = self.gi.config.get_config()["enable_celery_tasks"]
 
         # user creation for the test
         user = self._create_local_test_user(password="password")
@@ -277,12 +289,14 @@ class TestGalaxyNotifications(GalaxyTestBase.GalaxyTestBase):
         user_gi = GalaxyInstance(url=self.gi.base_url, email=user["email"], password="password")
 
         # send the test notifications and save their ids
-        notification_1_id = self._send_test_notification_to([user["id"]], message="test_notification_status 1")[
-            "notification"
-        ]["id"]
-        notification_2_id = self._send_test_notification_to([user["id"]], message="test_notification_status 2")[
-            "notification"
-        ]["id"]
+        send_response = self._send_test_notification_to([user["id"]], message="test_notification_status 1")
+        self._assert_notifications_sent(task_based, send_response, 1)
+        send_response = self._send_test_notification_to([user["id"]], message="test_notification_status 2")
+        self._assert_notifications_sent(task_based, send_response, 1)
+
+        notifications = user_gi.notifications.get_user_notifications()
+        notification_1_id = notifications[0]["id"]
+        notification_2_id = notifications[1]["id"]
 
         # fetch the notifications
         notification_1 = user_gi.notifications.show_notification(notification_1_id)
@@ -349,6 +363,7 @@ class TestGalaxyNotifications(GalaxyTestBase.GalaxyTestBase):
             self.skipTest("This Galaxy instance is not configured to use notifications.")
         if not self.gi.users.get_current_user()["is_admin"]:
             self.skipTest("This tests requires the current user to be an admin, which is not the case.")
+        task_based = self.gi.config.get_config()["enable_celery_tasks"]
 
         # user creation for the test
         user = self._create_local_test_user(password="password")
@@ -357,15 +372,17 @@ class TestGalaxyNotifications(GalaxyTestBase.GalaxyTestBase):
         user_gi = GalaxyInstance(url=self.gi.base_url, email=user["email"], password="password")
 
         # send the test notifications and save their ids
-        notification_1 = self._send_test_notification_to([user["id"]], message="test_notification_status 1")
-        print(notification_1)
-        notification_1_id = notification_1["notification"]["id"]
-        notification_2_id = self._send_test_notification_to([user["id"]], message="test_notification_status 2")[
-            "notification"
-        ]["id"]
-        notification_3_id = self._send_test_notification_to([user["id"]], message="test_notification_status 3")[
-            "notification"
-        ]["id"]
+        send_response = self._send_test_notification_to([user["id"]], message="test_notification_status 1")
+        self._assert_notifications_sent(task_based, send_response, 1)
+        send_response = self._send_test_notification_to([user["id"]], message="test_notification_status 2")
+        self._assert_notifications_sent(task_based, send_response, 1)
+        send_response = self._send_test_notification_to([user["id"]], message="test_notification_status 3")
+        self._assert_notifications_sent(task_based, send_response, 1)
+
+        notifications = user_gi.notifications.get_user_notifications()
+        notification_1_id = notifications[0]["id"]
+        notification_2_id = notifications[1]["id"]
+        notification_3_id = notifications[2]["id"]
 
         # delete a single notifications
         response_1 = user_gi.notifications.delete_user_notification(notification_id=notification_1_id)
@@ -545,4 +562,16 @@ class TestGalaxyNotifications(GalaxyTestBase.GalaxyTestBase):
             user_ids=user_ids,
             expiration_time=(datetime.utcnow() + timedelta(days=1)),
         )
+        print(f"_send_test_notification_to {notification=}")
         return notification
+
+    def _assert_notifications_sent(self, task_based, response, expected_count: int = 0):
+        def task_success():
+            return None if self.gi.tasks.get_task_status(task_id) != "SUCCESS" else True
+
+        if task_based:
+            task_id = response["id"]
+            assert task_id is not None
+            wait_on(task_success, "Task successful", 60)
+        else:
+            assert response["total_notifications_sent"] == expected_count

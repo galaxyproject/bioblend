@@ -22,6 +22,7 @@ from bioblend.galaxy import (
     notifications,
     quotas,
     roles,
+    tasks,
     tool_data,
     tool_dependencies,
     tools,
@@ -111,6 +112,7 @@ class GalaxyInstance(GalaxyClient):
         self.folders = folders.FoldersClient(self)
         self.tool_dependencies = tool_dependencies.ToolDependenciesClient(self)
         self.notifications = notifications.NotificationClient(self)
+        self.tasks = tasks.TasksClient(self)
 
     def __repr__(self) -> str:
         """
