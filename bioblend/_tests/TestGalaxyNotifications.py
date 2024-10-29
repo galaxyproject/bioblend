@@ -2,7 +2,6 @@ from datetime import (
     datetime,
     timedelta,
 )
-from packaging.version import Version
 from typing import (
     Any,
     Dict,
@@ -11,6 +10,7 @@ from typing import (
 )
 
 from galaxy.tool_util.verify.wait import wait_on
+from packaging.version import Version
 
 from bioblend.galaxy import GalaxyInstance
 from . import (
