@@ -93,8 +93,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
     @test_util.skip_unless_tool("cat")
     def test_cancelling_workflow_scheduling(self):
         path = test_util.get_abspath(os.path.join("data", "test_workflow_pause.ga"))
-        workflow = self.gi.workflows.import_workflow_from_local_path(path)
-        workflow_id = workflow["id"]
+        workflow_id = self.gi.workflows.import_workflow_from_local_path(path)["id"]
         history_id = self.gi.histories.create_history(name="TestWorkflowState")["id"]
         dataset1_id = self._test_dataset(history_id)
 

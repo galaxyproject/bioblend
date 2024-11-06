@@ -20,7 +20,7 @@ class GalaxyTestBase(unittest.TestCase):
     gi: GalaxyInstance
 
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         galaxy_key = os.environ["BIOBLEND_GALAXY_API_KEY"]
         galaxy_url = os.environ["BIOBLEND_GALAXY_URL"]
         cls.gi = GalaxyInstance(url=galaxy_url, key=galaxy_key)
