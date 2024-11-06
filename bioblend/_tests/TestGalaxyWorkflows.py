@@ -188,6 +188,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         assert wf_data["id"] == wf["id"]
         assert wf_data["name"] == wf["name"]
         assert wf_data["url"] == wf["url"]
+        assert wf_data["version"] == 0
         assert len(wf_data["steps"]) == 3
         assert wf_data["inputs"] is not None
 
@@ -207,26 +208,6 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         assert updated_wf["published"]
         updated_wf = self.gi.workflows.update_workflow(wf["id"], published=False)
         assert not updated_wf["published"]
-
-    @test_util.skip_unless_galaxy(
-        "release_19.09"
-    )  # due to Galaxy bug fixed in https://github.com/galaxyproject/galaxy/pull/9014
-    def test_show_workflow_versions(self):
-        path = test_util.get_abspath(os.path.join("data", "paste_columns.ga"))
-        wf = self.gi.workflows.import_workflow_from_local_path(path)
-        wf_data = self.gi.workflows.show_workflow(wf["id"])
-        assert wf_data["version"] == 0
-        new_name = "new name"
-        self.gi.workflows.update_workflow(wf["id"], name=new_name)
-        updated_wf = self.gi.workflows.show_workflow(wf["id"])
-        assert updated_wf["name"] == new_name
-        assert updated_wf["version"] == 1
-        updated_wf = self.gi.workflows.show_workflow(wf["id"], version=0)
-        assert updated_wf["name"] == "paste_columns"
-        assert updated_wf["version"] == 0
-        updated_wf = self.gi.workflows.show_workflow(wf["id"], version=1)
-        assert updated_wf["name"] == new_name
-        assert updated_wf["version"] == 1
 
     @test_util.skip_unless_galaxy("release_19.09")
     def test_extract_workflow_from_history(self):
@@ -264,16 +245,6 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
             assert wf1["steps"][str(i)]["type"] == wf2["steps"][str(i)]["type"]
             assert wf1["steps"][str(i)]["tool_id"] == wf2["steps"][str(i)]["tool_id"]
 
-    def test_show_versions(self):
-        path = test_util.get_abspath(os.path.join("data", "paste_columns.ga"))
-        wf = self.gi.workflows.import_workflow_from_local_path(path)
-        versions = self.gi.workflows.show_versions(wf["id"])
-        assert len(versions) == 1
-        version = versions[0]
-        assert version["version"] == 0
-        assert "update_time" in version
-        assert "steps" in version
-
     @test_util.skip_unless_galaxy("release_21.01")
     def test_refactor_workflow(self):
         actions: List[Dict[str, Any]] = [
@@ -288,3 +259,62 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         updated_steps = response["workflow"]["steps"]
         assert len(updated_steps) == 4
         assert {step["label"] for step in updated_steps.values()} == {"bar", None, "Input 1", "Input 2"}
+
+
+class TestGalaxyWorkflowVersions(GalaxyTestBase.GalaxyTestBase):
+    new_name: str
+    workflow_id: str
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        super().setUpClass()
+        path = test_util.get_abspath(os.path.join("data", "paste_columns.ga"))
+        cls.workflow_id = cls.gi.workflows.import_workflow_from_local_path(path)["id"]
+        cls.new_name = "new name"
+        cls.gi.workflows.update_workflow(cls.workflow_id, name=cls.new_name)
+
+    @test_util.skip_unless_galaxy(
+        "release_19.09"
+    )  # due to Galaxy bug fixed in https://github.com/galaxyproject/galaxy/pull/9014
+    def test_show_workflow_versions(self):
+        updated_wf = self.gi.workflows.show_workflow(self.workflow_id)
+        assert updated_wf["name"] == self.new_name
+        assert updated_wf["version"] == 1
+        wf_v0 = self.gi.workflows.show_workflow(self.workflow_id, version=0)
+        assert wf_v0["name"] == "paste_columns"
+        assert wf_v0["version"] == 0
+        wf_v1 = self.gi.workflows.show_workflow(self.workflow_id, version=1)
+        assert updated_wf == wf_v1
+
+    def test_show_versions(self):
+        versions = self.gi.workflows.show_versions(self.workflow_id)
+        assert len(versions) == 2
+        for i, version in enumerate(versions):
+            assert version["version"] == i
+            assert "update_time" in version
+            assert "steps" in version
+
+    @test_util.skip_unless_galaxy(
+        "release_24.01"
+    )  # due to Galaxy bug fixed in https://github.com/galaxyproject/galaxy/pull/18378
+    def test_invoke_previous_version(self):
+        history_id = self.gi.histories.create_history(name="test_wf_invocation")["id"]
+        dataset1_id = self._test_dataset(history_id)
+        dataset = {"src": "hda", "id": dataset1_id}
+        invocation_id = self.gi.workflows.invoke_workflow(
+            self.workflow_id,
+            inputs={"Input 1": dataset, "Input 2": dataset},
+            history_id=history_id,
+            inputs_by="name",
+            version=0,
+        )["id"]
+        self.gi.invocations.wait_for_invocation(invocation_id)
+        # Try invalid invocation (wrong version)
+        with pytest.raises(ConnectionError):
+            self.gi.workflows.invoke_workflow(
+                self.workflow_id,
+                inputs={"Input 1": dataset, "Input 2": dataset},
+                history_id=history_id,
+                inputs_by="name",
+                version=2,
+            )

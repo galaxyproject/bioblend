@@ -289,6 +289,8 @@ class WorkflowClient(Client):
         inputs_by: Optional[InputsBy] = None,
         parameters_normalized: bool = False,
         require_exact_tool_versions: bool = True,
+        version: Optional[int] = None,
+        use_cached_job: bool = False,
     ) -> Dict[str, Any]:
         """
         Invoke the workflow identified by ``workflow_id``. This will
@@ -358,6 +360,14 @@ class WorkflowClient(Client):
         :param require_exact_tool_versions: Whether invocation should fail if
           Galaxy does not have the exact tool versions. Default is ``True``.
           Parameter does not any effect for Galaxy versions < 22.05.
+
+        :type version: int
+        :param version: The version of the workflow to invoke. If omitted or
+          None, the latest workflow version will be invoked.
+
+        :type use_cached_job: bool
+        :param use_cached_job: Whether to use cached jobs for the workflow
+          invocation.
 
         :rtype: dict
         :return: A dict containing the workflow invocation describing the
@@ -467,7 +477,12 @@ class WorkflowClient(Client):
           (which is stable across workflow imports) or the step UUID which is
           also stable.
         """
-        payload: Dict[str, Any] = {}
+        payload: Dict[str, Any] = {
+            "allow_tool_state_corrections": allow_tool_state_corrections,
+            "require_exact_tool_versions": require_exact_tool_versions,
+            "version": version,
+            "use_cached_job": use_cached_job,
+        }
         if inputs:
             payload["inputs"] = inputs
 
@@ -483,11 +498,8 @@ class WorkflowClient(Client):
             payload["history"] = history_name
         if not import_inputs_to_history:
             payload["no_add_to_history"] = True
-        if allow_tool_state_corrections:
-            payload["allow_tool_state_corrections"] = allow_tool_state_corrections
         if inputs_by is not None:
             payload["inputs_by"] = inputs_by
-        payload["require_exact_tool_versions"] = require_exact_tool_versions
         if parameters_normalized:
             payload["parameters_normalized"] = parameters_normalized
         url = self._invocations_url(workflow_id)

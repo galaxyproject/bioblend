@@ -2,6 +2,10 @@
 
 * Added support for Python 3.13. Added support for Galaxy release 24.1.
 
+* Added ``version`` and ``use_cached_job`` parameters to
+  ``WorkflowClient.invoke_workflow()`` method (reported by
+  [Bérénice Batut](https://github.com/bebatut)).
+
 ### BioBlend v1.3.0 - 2024-05-12
 
 * Dropped support for Python 3.7. Added support for Python 3.12. Added support
