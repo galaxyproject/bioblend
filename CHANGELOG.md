@@ -1,10 +1,21 @@
-### BioBlend v
+### BioBlend v1.4.0 - 2024-11-06
 
 * Added support for Python 3.13. Added support for Galaxy release 24.1.
+
+* Added ``user_agent`` parameter to the ``__init__()`` method of the
+  ``GalaxyClient``, ``GalaxyInstance`` and ``ToolShedInstance`` classes (thanks
+  to [Daniel Blankenberg](https://github.com/blankenberg)).
 
 * Added ``version`` and ``use_cached_job`` parameters to
   ``WorkflowClient.invoke_workflow()`` method (reported by
   [Bérénice Batut](https://github.com/bebatut)).
+
+* Changed the default values for the ``operation`` and ``default`` parameters of
+  the ``QuotaClient.update_quota()`` method (thanks to
+  [Matthias Bernt](https://github.com/bernt-matthias)).
+
+* Improvements to tests and documentation (thanks to
+  [Matthias Bernt](https://github.com/bernt-matthias)).
 
 ### BioBlend v1.3.0 - 2024-05-12
 
