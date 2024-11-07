@@ -181,10 +181,9 @@ class QuotaClient(Client):
                         non-default quota will throw an error. Passing None is
                         equivalent to not changing the current status.
 
-        :type default: str
-        :param default: Whether or not this is a default quota. Valid values
-                        are "no", "unregistered", "registered" and None. None is
-                        equivalent to "no".
+        :type quota_source_label: str
+        :param quota_source_label: If set, quota source label to apply this quota operation to. Otherwise, the default quota is used.
+
 
         :type in_users: list of str
         :param in_users: A list of user IDs or user emails.
