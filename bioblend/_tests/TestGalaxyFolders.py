@@ -3,7 +3,10 @@ from typing import (
     List,
 )
 
-from . import GalaxyTestBase
+from . import (
+    GalaxyTestBase,
+    test_util,
+)
 
 FOO_DATA = "foo\nbar\n"
 
@@ -35,6 +38,22 @@ class TestGalaxyFolders(GalaxyTestBase.GalaxyTestBase):
         assert "folder_contents" in f2
         assert "metadata" in f2
         assert self.name == f2["metadata"]["folder_name"]
+
+    @test_util.skip_unless_galaxy("release_21.05")
+    def test_show_folder_contents_limit(self):
+        subfolders = []
+        for i in range(12):
+            subfolders.append(self.gi.folders.create_folder(self.folder["id"], f"{self.name} {i}"))
+
+        # check defaults for limit and offset
+        f2 = self.gi.folders.show_folder(self.folder["id"], contents=True)
+        assert len(f2["folder_contents"]) == 10
+        assert f2["folder_contents"][0]["name"] == f"{self.name} 0"
+
+        # check non defaults
+        f2 = self.gi.folders.show_folder(self.folder["id"], contents=True, limit=1, offset=1)
+        assert len(f2["folder_contents"]) == 1
+        assert f2["folder_contents"][0]["name"] == f"{self.name} 1"
 
     def test_delete_folder(self):
         self.sub_folder = self.gi.folders.create_folder(self.folder["id"], self.name)

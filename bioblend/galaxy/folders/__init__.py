@@ -45,7 +45,9 @@ class FoldersClient(Client):
             payload["description"] = description
         return self._post(payload=payload, id=parent_folder_id)
 
-    def show_folder(self, folder_id: str, contents: bool = False) -> Dict[str, Any]:
+    def show_folder(
+        self, folder_id: str, contents: bool = False, limit: Optional[int] = 10, offset: Optional[int] = 0
+    ) -> Dict[str, Any]:
         """
         Display information about a folder.
 
@@ -56,11 +58,21 @@ class FoldersClient(Client):
         :param contents: True to get the contents of the folder, rather
           than just the folder details.
 
+        :type limit: int
+        :param limit: Maximum number of contents to return (default: 10).
+
+        :type offset: int
+        :param contents: Return contents from this specified position (default: 0).
+
         :rtype: dict
         :return: dictionary including details of the folder
         """
-
-        return self._get(id=folder_id, contents=contents)
+        params = {}
+        if limit:
+            params["limit"] = limit
+        if offset:
+            params["offset"] = offset
+        return self._get(id=folder_id, contents=contents, params=params)
 
     def delete_folder(self, folder_id: str, undelete: bool = False) -> Dict[str, Any]:
         """
