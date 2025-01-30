@@ -49,8 +49,8 @@ class FoldersClient(Client):
         self,
         folder_id: str,
         contents: bool = False,
-        limit: Optional[int] = 10,
-        offset: Optional[int] = 0,
+        limit: int = 10,
+        offset: int = 0,
         include_deleted: bool = False,
     ) -> Dict[str, Any]:
         """
@@ -75,11 +75,11 @@ class FoldersClient(Client):
         :rtype: dict
         :return: dictionary including details of the folder
         """
-        params: Dict[str, Any] = {"include_deleted": include_deleted}
-        if limit:
-            params["limit"] = limit
-        if offset:
-            params["offset"] = offset
+        params = {
+            "limit": limit,
+            "offset": offset,
+            "include_deleted": include_deleted,
+        }
         return self._get(id=folder_id, contents=contents, params=params)
 
     def delete_folder(self, folder_id: str, undelete: bool = False) -> Dict[str, Any]:
