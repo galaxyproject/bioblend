@@ -83,8 +83,9 @@ class TestGalaxyFolders(GalaxyTestBase.GalaxyTestBase):
         folder_info = self.gi.folders.show_folder(self.folder["id"], contents=True)
         assert len(folder_info["folder_contents"]) == 0
         assert folder_info["metadata"]["total_rows"] == 0
+        # show folders with contents=False does not respect include_deleted
         folder_info = self.gi.folders.show_folder(self.folder["id"])
-        assert folder_info["item_count"] == 0
+        assert folder_info["item_count"] == 2
 
         self.gi.histories.delete_history(history["id"])
 

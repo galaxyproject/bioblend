@@ -65,12 +65,15 @@ class FoldersClient(Client):
 
         :type limit: int
         :param limit: Maximum number of contents to return (default: 10).
+          Only considered for contents=True.
 
         :type offset: int
         :param contents: Return contents from this specified position (default: 0).
+          Only considered for contents=True.
 
         :type include_deleted: bool
         :param include_deleted: Returns also deleted contents.
+          Only considered for contents=True.
 
         :rtype: dict
         :return: dictionary including details of the folder
