@@ -77,9 +77,6 @@ class TestGalaxyFolders(GalaxyTestBase.GalaxyTestBase):
         folder_info = self.gi.folders.show_folder(self.folder["id"], contents=True)
         assert len(folder_info["folder_contents"]) == 0
 
-        # delete the library folder
-        self.gi.folders.delete_folder(subfolder["id"])
-        self.gi.histories.delete_dataset(history["id"], hda["id"])
         self.gi.histories.delete_history(history["id"])
 
     def test_delete_folder(self):
