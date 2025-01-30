@@ -53,6 +53,37 @@ class TestGalaxyFolders(GalaxyTestBase.GalaxyTestBase):
         assert len(f2["folder_contents"]) == 1
         assert f2["folder_contents"][0]["name"] == f"{self.name} 1"
 
+    def test_show_folder_contents_include_deleted(self):
+        history = self.gi.histories.create_history(name="Test History")
+        self._test_dataset(history["id"])
+        contents = self.gi.histories.show_history(history["id"], contents=True, types=["dataset"])
+        hda = contents[0]
+
+        # create 2 library data sets within a new folder in the library
+        subfolder = self.gi.folders.create_folder(self.folder["id"], f"{self.name}")
+        ldda1 = self.gi.libraries.copy_from_dataset(
+            library_id=self.library["id"], dataset_id=hda["id"], folder_id=subfolder["id"], message="Added HDA"
+        )
+        ldda2 = self.gi.libraries.copy_from_dataset(
+            library_id=self.library["id"], dataset_id=hda["id"], folder_id=subfolder["id"], message="Added HDA"
+        )
+        subfolder_info = self.gi.folders.show_folder(subfolder["id"], contents=True)
+        assert len(subfolder_info["folder_contents"]) == 2
+        assert subfolder_info["folder_contents"][0]["type"] == "file"
+
+        # delete the library datasets and check if include_deleted works
+        self.gi.libraries.delete_library_dataset(self.library["id"], ldda1["id"])
+        self.gi.libraries.delete_library_dataset(self.library["id"], ldda2["id"], purged=True)
+        subfolder_info = self.gi.folders.show_folder(subfolder["id"], contents=True, include_deleted=True)
+        assert len(subfolder_info["folder_contents"]) == 2
+        subfolder_info = self.gi.folders.show_folder(subfolder["id"], contents=True)
+        assert len(subfolder_info["folder_contents"]) == 0
+
+        # delete the library folder
+        self.gi.folders.delete_folder(subfolder["id"])
+        self.gi.histories.delete_dataset(history["id"], hda["id"])
+        self.gi.histories.delete_history(history["id"])
+
     def test_delete_folder(self):
         self.sub_folder = self.gi.folders.create_folder(self.folder["id"], self.name)
         self.gi.folders.delete_folder(self.sub_folder["id"])
