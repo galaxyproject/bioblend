@@ -73,9 +73,18 @@ class TestGalaxyFolders(GalaxyTestBase.GalaxyTestBase):
         self.gi.libraries.delete_library_dataset(self.library["id"], ldda1["id"])
         self.gi.libraries.delete_library_dataset(self.library["id"], ldda2["id"], purged=True)
         folder_info = self.gi.folders.show_folder(self.folder["id"], contents=True, include_deleted=True)
+        # check if there are 2 contents and the number is correct
         assert len(folder_info["folder_contents"]) == 2
+        assert folder_info["metadata"]["total_rows"] == 2
+        # if called without contents=True an item_count is reported .. lets also check this
+        folder_info = self.gi.folders.show_folder(self.folder["id"], include_deleted=True)
+        assert folder_info["item_count"] == 2
+
         folder_info = self.gi.folders.show_folder(self.folder["id"], contents=True)
         assert len(folder_info["folder_contents"]) == 0
+        assert folder_info["metadata"]["total_rows"] == 0
+        folder_info = self.gi.folders.show_folder(self.folder["id"])
+        assert folder_info["item_count"] == 0
 
         self.gi.histories.delete_history(history["id"])
 
