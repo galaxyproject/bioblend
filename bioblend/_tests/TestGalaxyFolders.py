@@ -41,9 +41,7 @@ class TestGalaxyFolders(GalaxyTestBase.GalaxyTestBase):
 
     @test_util.skip_unless_galaxy("release_21.05")
     def test_show_folder_contents_limit(self):
-        subfolders = []
-        for i in range(12):
-            subfolders.append(self.gi.folders.create_folder(self.folder["id"], f"{self.name} {i}"))
+        subfolders = [self.gi.folders.create_folder(self.folder["id"], f"{self.name} {i}") for i in range(12)]
 
         # check defaults for limit and offset
         f2 = self.gi.folders.show_folder(self.folder["id"], contents=True)
