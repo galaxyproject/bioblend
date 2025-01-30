@@ -46,7 +46,12 @@ class FoldersClient(Client):
         return self._post(payload=payload, id=parent_folder_id)
 
     def show_folder(
-        self, folder_id: str, contents: bool = False, limit: Optional[int] = 10, offset: Optional[int] = 0
+        self,
+        folder_id: str,
+        contents: bool = False,
+        limit: Optional[int] = 10,
+        offset: Optional[int] = 0,
+        include_deleted: bool = False,
     ) -> Dict[str, Any]:
         """
         Display information about a folder.
@@ -64,10 +69,13 @@ class FoldersClient(Client):
         :type offset: int
         :param contents: Return contents from this specified position (default: 0).
 
+        :type include_deleted: bool
+        :param include_deleted: Returns also deleted contents.
+
         :rtype: dict
         :return: dictionary including details of the folder
         """
-        params = {}
+        params: Dict[str, Any] = {"include_deleted": include_deleted}
         if limit:
             params["limit"] = limit
         if offset:
