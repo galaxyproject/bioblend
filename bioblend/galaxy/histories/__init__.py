@@ -323,20 +323,6 @@ class HistoryClient(Client):
         keys: Optional[List[str]] = None,
     ) -> List[Dict[str, Any]]: ...
 
-    # Fallback in case the caller provides a regular bool as contents
-    @overload
-    def show_history(
-        self,
-        history_id: str,
-        contents: bool = False,
-        deleted: Optional[bool] = None,
-        visible: Optional[bool] = None,
-        details: Optional[str] = None,
-        types: Optional[List[str]] = None,
-        keys: Optional[List[str]] = None,
-    ) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
-        pass
-
     def show_history(
         self,
         history_id: str,
