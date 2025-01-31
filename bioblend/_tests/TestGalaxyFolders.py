@@ -54,6 +54,7 @@ class TestGalaxyFolders(GalaxyTestBase.GalaxyTestBase):
         assert len(f2["folder_contents"]) == 1
         assert f2["folder_contents"][0]["name"] == f"{self.name} 1"
 
+    @test_util.skip_unless_galaxy("release_21.01")
     def test_show_folder_contents_include_deleted(self):
         history = self.gi.histories.create_history(name="Test History")
         hda_id = self._test_dataset(history["id"])
