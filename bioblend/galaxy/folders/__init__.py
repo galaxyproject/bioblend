@@ -5,6 +5,7 @@ Contains possible interactions with the Galaxy library folders
 from typing import (
     Any,
     Dict,
+    Iterable,
     List,
     Literal,
     Optional,
@@ -84,6 +85,40 @@ class FoldersClient(Client):
             "include_deleted": include_deleted,
         }
         return self._get(id=folder_id, contents=contents, params=params)
+
+    def contents(
+        self,
+        folder_id: str,
+        limit: int = 10,
+        include_deleted: bool = False,
+    ) -> Iterable[Dict[str, Any]]:
+        """
+        Iterate over folder contents.
+
+        :type folder_id: str
+        :param folder_id: the folder's encoded id, prefixed by 'F'
+
+        :type limit: int
+        :param limit: Batch size to be used internally (default: 10).
+
+        :type include_deleted: bool
+        :param include_deleted: Include also deleted contents.
+
+        :rtype: dict
+        :return: A generator for the folder contents
+        """
+        total_rows: Optional[int] = None
+        params = {
+            "limit": limit,
+            "offset": 0,
+            "include_deleted": include_deleted,
+        }
+
+        while total_rows is None or params["offset"] <= total_rows:
+            chunk = self._get(id=folder_id, contents=True, params=params)
+            total_rows = chunk["metadata"]["total_rows"]
+            yield from chunk["folder_contents"]
+            params["offset"] += limit
 
     def delete_folder(self, folder_id: str, undelete: bool = False) -> Dict[str, Any]:
         """
