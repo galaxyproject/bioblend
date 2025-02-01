@@ -55,17 +55,17 @@ class TestGalaxyFolders(GalaxyTestBase.GalaxyTestBase):
         assert f2["folder_contents"][0]["name"] == f"{self.name} 1"
 
     @test_util.skip_unless_galaxy("release_21.05")
-    def test_folder_contents(self):
+    def test_folder_contents_iter(self):
         for i in range(12):
             self.gi.folders.create_folder(self.folder["id"], f"{self.name} {i}")
 
         # check defaults for limit and offset
-        f2 = list(self.gi.folders.contents(self.folder["id"]))
+        f2 = list(self.gi.folders.contents_iter(self.folder["id"]))
         assert len(f2) == 12
         assert f2[0]["name"] == f"{self.name} 0"
 
         # check non defaults
-        f2 = list(self.gi.folders.contents(self.folder["id"], limit=1))
+        f2 = list(self.gi.folders.contents_iter(self.folder["id"], limit=1))
         assert len(f2) == 12
         assert f2[0]["name"] == f"{self.name} 0"
 

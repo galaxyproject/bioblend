@@ -86,7 +86,7 @@ class FoldersClient(Client):
         }
         return self._get(id=folder_id, contents=contents, params=params)
 
-    def contents(
+    def contents_iter(
         self,
         folder_id: str,
         limit: int = 10,
