@@ -2,6 +2,7 @@
 Contains possible interactions with the Galaxy library folders
 """
 
+import sys
 from typing import (
     Any,
     Dict,
@@ -107,14 +108,14 @@ class FoldersClient(Client):
         :rtype: dict
         :return: A generator for the folder contents
         """
-        total_rows: Optional[int] = None
+        total_rows = sys.maxsize
         params = {
             "limit": limit,
             "offset": 0,
             "include_deleted": include_deleted,
         }
 
-        while total_rows is None or params["offset"] <= total_rows:
+        while params["offset"] <= total_rows:
             chunk = self._get(id=folder_id, contents=True, params=params)
             total_rows = chunk["metadata"]["total_rows"]
             yield from chunk["folder_contents"]
