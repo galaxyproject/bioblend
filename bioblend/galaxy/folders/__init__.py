@@ -88,7 +88,7 @@ class FoldersClient(Client):
 
         :type offset: int
         :param contents: When ``contents=True``, number of items to skip. Return
-          contents starting with item offset+1.
+          contents starting from item offset+1.
 
         :type include_deleted: bool
         :param include_deleted: When ``contents=True``, whether to include
