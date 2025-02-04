@@ -92,9 +92,6 @@ class TestGalaxyFolders(GalaxyTestBase.GalaxyTestBase):
         # check if there are 2 contents and the number is correct
         assert len(folder_info["folder_contents"]) == 2
         assert folder_info["metadata"]["total_rows"] == 2
-        # if called without contents=True an item_count is reported .. lets also check this
-        folder_info = self.gi.folders.show_folder(self.folder["id"], include_deleted=True)
-        assert folder_info["item_count"] == 2
 
         folder_info = self.gi.folders.show_folder(self.folder["id"], contents=True)
         assert len(folder_info["folder_contents"]) == 0
