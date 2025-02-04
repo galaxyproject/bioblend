@@ -87,9 +87,8 @@ class JobsClient(Client):
         :param limit: Maximum number of jobs to return.
 
         :type offset: int
-        :param offset: Return jobs starting from this specified position.
-          For example, if ``limit`` is set to 100 and ``offset`` to 200,
-          jobs 200-299 will be returned.
+        :param offset: Number of jobs to skip. Return jobs starting from item
+          offset+1.
 
         :type user_details: bool
         :param user_details: If ``True`` and the user is an admin, add the user

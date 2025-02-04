@@ -1,3 +1,12 @@
+### BioBlend v
+
+* Added support for Galaxy release 24.2.
+
+* Added ``offset`` parameter to ``InvocationClient.get_invocations()`` and
+  BioBlend.objects ``ObjInvocationClient.list()`` methods.
+
+* Improvements to type annotations and documentation.
+
 ### BioBlend v1.4.0 - 2024-11-06
 
 * Added support for Python 3.13. Added support for Galaxy release 24.1.

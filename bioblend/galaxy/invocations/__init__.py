@@ -43,6 +43,8 @@ class InvocationClient(Client):
         user_id: Optional[str] = None,
         include_terminal: bool = True,
         limit: Optional[int] = None,
+        *,
+        offset: Optional[int] = None,
         view: str = "collection",
         step_details: bool = False,
     ) -> List[Dict[str, Any]]:
@@ -61,11 +63,15 @@ class InvocationClient(Client):
                         your own user ID if your are not an admin user.
 
         :type include_terminal: bool
-        :param include_terminal: Whether to include terminal states.
+        :param include_terminal: Whether to include invocations in terminal
+          state.
 
         :type limit: int
-        :param limit: Maximum number of invocations to return - if specified,
-                      the most recent invocations will be returned.
+        :param limit: Maximum number of invocations to return.
+
+        :type offset: int
+        :param offset: Number of invocations to skip. Return invocations
+           starting from item offset+1.
 
         :type view: str
         :param view: Level of detail to return per invocation, either
@@ -96,6 +102,8 @@ class InvocationClient(Client):
             params["user_id"] = user_id
         if limit is not None:
             params["limit"] = limit
+        if offset is not None:
+            params["offset"] = offset
         return self._get(params=params)
 
     def show_invocation(self, invocation_id: str) -> Dict[str, Any]:

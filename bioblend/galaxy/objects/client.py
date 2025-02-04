@@ -361,6 +361,7 @@ class ObjInvocationClient(ObjClient):
         history: Optional[wrappers.History] = None,
         include_terminal: bool = True,
         limit: Optional[int] = None,
+        offset: Optional[int] = None,
     ) -> List[wrappers.Invocation]:
         """
         Get full listing of workflow invocations, or select a subset
@@ -375,11 +376,14 @@ class ObjInvocationClient(ObjClient):
           this history
 
         :param include_terminal: bool
-        :param: Whether to include invocations in terminal states
+        :param: Whether to include invocations in terminal state.
 
         :type limit: int
-        :param limit: Maximum number of invocations to return - if specified,
-          the most recent invocations will be returned.
+        :param limit: Maximum number of invocations to return.
+
+        :type offset: int
+        :param offset: Number of invocations to skip. Return invocations
+           starting from item offset+1.
 
         :rtype: list of Invocation
         :param: invocation objects
@@ -389,6 +393,7 @@ class ObjInvocationClient(ObjClient):
             history_id=history.id if history else None,
             include_terminal=include_terminal,
             limit=limit,
+            offset=offset,
             view="element",
             step_details=True,
         )
