@@ -123,7 +123,7 @@ class FoldersClient(Client):
         :param folder_id: the folder's encoded id, prefixed by 'F'
 
         :type batch_size: int
-        :param limit: Batch size to be used internally.
+        :param batch_size: Batch size to be used internally.
 
         :type include_deleted: bool
         :param include_deleted: Whether to include deleted items.
@@ -139,7 +139,7 @@ class FoldersClient(Client):
             chunk = self._get(id=folder_id, contents=True, params=params)
             total_rows = chunk["metadata"]["total_rows"]
             yield from chunk["folder_contents"]
-            params["offset"] += limit
+            params["offset"] += batch_size
 
     def delete_folder(self, folder_id: str, undelete: bool = False) -> Dict[str, Any]:
         """
