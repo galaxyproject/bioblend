@@ -64,13 +64,6 @@ class DatasetClient(Client):
         }
         return self._get(id=dataset_id, params=params)
 
-    # def delete(self, dataset_ids, hda_ldda: HdaLdda = "hda", purge: bool = False) -> Dict[str, Any]:
-    #     datasets = []
-    #     for dataset_id in dataset_ids:
-    #         datasets.append({"src": hda_ldda, "id": dataset_id})
-    #     payload = {"datasets": datasets, "purge": purge}
-    #     return self._delete(payload=payload)
-
     def _initiate_download(
         self, dataset_id: str, stream_content: bool, require_ok_state: bool = True, maxwait: float = 12000
     ) -> Tuple[Dict[str, Any], str, Response]:
