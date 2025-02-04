@@ -65,7 +65,7 @@ class TestGalaxyFolders(GalaxyTestBase.GalaxyTestBase):
         assert f2[0]["name"] == f"{self.name} 0"
 
         # check non defaults
-        f2 = list(self.gi.folders.contents_iter(self.folder["id"], limit=1))
+        f2 = list(self.gi.folders.contents_iter(self.folder["id"], batch_size=1))
         assert len(f2) == 12
         assert f2[0]["name"] == f"{self.name} 0"
 
