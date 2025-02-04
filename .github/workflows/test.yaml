@@ -36,6 +36,10 @@ jobs:
             galaxy_python_version: '3.8'
           - os: ubuntu-latest
             tox_env: py38
+            galaxy_version: release_24.2
+            galaxy_python_version: '3.8'
+          - os: ubuntu-latest
+            tox_env: py38
             galaxy_version: release_24.1
             galaxy_python_version: '3.8'
           - os: ubuntu-latest
