@@ -2,12 +2,15 @@
 Contains possible interactions with the Galaxy library folders
 """
 
+import sys
 from typing import (
     Any,
     Dict,
+    Iterator,
     List,
     Literal,
     Optional,
+    overload,
     TYPE_CHECKING,
     Union,
 )
@@ -45,7 +48,31 @@ class FoldersClient(Client):
             payload["description"] = description
         return self._post(payload=payload, id=parent_folder_id)
 
-    def show_folder(self, folder_id: str, contents: bool = False) -> Dict[str, Any]:
+    @overload
+    def show_folder(
+        self,
+        folder_id: str,
+        contents: Literal[False] = False,
+    ) -> Dict[str, Any]: ...
+
+    @overload
+    def show_folder(
+        self,
+        folder_id: str,
+        contents: Literal[True],
+        limit: int = 10,
+        offset: int = 0,
+        include_deleted: bool = False,
+    ) -> Dict[str, Any]: ...
+
+    def show_folder(
+        self,
+        folder_id: str,
+        contents: bool = False,
+        limit: int = 10,
+        offset: int = 0,
+        include_deleted: bool = False,
+    ) -> Dict[str, Any]:
         """
         Display information about a folder.
 
@@ -56,11 +83,63 @@ class FoldersClient(Client):
         :param contents: True to get the contents of the folder, rather
           than just the folder details.
 
-        :rtype: dict
-        :return: dictionary including details of the folder
-        """
+        :type limit: int
+        :param limit: When ``contents=True``, maximum number of items to return.
 
-        return self._get(id=folder_id, contents=contents)
+        :type offset: int
+        :param contents: When ``contents=True``, number of items to skip. Return
+          contents starting from item offset+1.
+
+        :type include_deleted: bool
+        :param include_deleted: When ``contents=True``, whether to include
+          deleted items.
+
+        :rtype: dict
+        :return: dictionary including details of the folder.
+          For contents=False the dict contains infos on the folder.
+          For contents=True the dict contains the keys "metadata" (a dict with
+          infos on the folder) and "folder_contents" (a list of dicts with info
+          on the childs).
+
+        Notes: For iterating over folder contents there is also contents_iter.
+        """
+        params = {
+            "limit": limit,
+            "offset": offset,
+            "include_deleted": include_deleted,
+        }
+        return self._get(id=folder_id, contents=contents, params=params)
+
+    def contents_iter(
+        self,
+        folder_id: str,
+        batch_size: int = 10,
+        include_deleted: bool = False,
+    ) -> Iterator[Dict[str, Any]]:
+        """
+        Iterate over folder contents.
+
+        :type folder_id: str
+        :param folder_id: the folder's encoded id, prefixed by 'F'
+
+        :type batch_size: int
+        :param batch_size: Batch size to be used internally.
+
+        :type include_deleted: bool
+        :param include_deleted: Whether to include deleted items.
+        """
+        total_rows = sys.maxsize
+        params = {
+            "limit": batch_size,
+            "offset": 0,
+            "include_deleted": include_deleted,
+        }
+
+        while params["offset"] <= total_rows:
+            chunk = self._get(id=folder_id, contents=True, params=params)
+            total_rows = chunk["metadata"]["total_rows"]
+            yield from chunk["folder_contents"]
+            params["offset"] += batch_size
 
     def delete_folder(self, folder_id: str, undelete: bool = False) -> Dict[str, Any]:
         """
