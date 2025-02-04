@@ -126,7 +126,7 @@ class ToolClient(Client):
         :param tool_id: id of the requested tool
 
         :rtype: dict
-        :param: dict containing the id, name, and version of the reloaded tool.
+        :return: dict containing the id, name, and version of the reloaded tool.
           For example::
 
             {'message': {'id': 'toolshed.g2.bx.psu.edu/repos/lparsons/cutadapt/cutadapt/3.4+galaxy1',
@@ -147,7 +147,7 @@ class ToolClient(Client):
         :param tool_id: id of the requested tool
 
         :rtype: list of dicts
-        :param: list containing the citations
+        :return: list containing the citations
         """
         url = self._make_url(tool_id) + "/citations"
         return self._get(url=url)

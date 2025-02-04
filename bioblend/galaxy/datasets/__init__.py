@@ -277,7 +277,7 @@ class DatasetClient(Client):
           stacked as a comma-separated list of values, e.g. ``create_time-asc,hid-dsc``.
 
         :rtype: list
-        :param: A list of datasets
+        :return: A list of datasets
         """
         params: Dict[str, Any] = {
             "limit": limit,

@@ -340,7 +340,7 @@ class ObjInvocationClient(ObjClient):
         Get an invocation by ID.
 
         :rtype: Invocation
-        :param: invocation object
+        :return: invocation object
         """
         inv_dict = self.gi.invocations.show_invocation(id_)
         return wrappers.Invocation(inv_dict, self.obj_gi)
@@ -350,7 +350,7 @@ class ObjInvocationClient(ObjClient):
         Get previews of all invocations.
 
         :rtype: list of InvocationPreview
-        :param: previews of invocations
+        :return: previews of invocations
         """
         inv_list = self.gi.invocations.get_invocations(**kwargs)
         return [wrappers.InvocationPreview(inv_dict, gi=self.obj_gi) for inv_dict in inv_list]
@@ -386,7 +386,7 @@ class ObjInvocationClient(ObjClient):
            starting from item offset+1.
 
         :rtype: list of Invocation
-        :param: invocation objects
+        :return: invocation objects
         """
         inv_dict_list = self.gi.invocations.get_invocations(
             workflow_id=workflow.id if workflow else None,

@@ -688,7 +688,7 @@ class Invocation(Wrapper):
         Get the step IDs sorted based on this order index.
 
         :rtype: list of str
-        :param: sorted step IDs
+        :return: sorted step IDs
         """
         return [step.id for step in sorted(self.steps, key=lambda step: step.order_index)]
 
@@ -697,7 +697,7 @@ class Invocation(Wrapper):
         Get the set of step states for this invocation.
 
         :rtype: set
-        :param: step states
+        :return: step states
         """
         return {step.state for step in self.steps}
 
@@ -706,7 +706,7 @@ class Invocation(Wrapper):
         Get the number of steps for this invocation.
 
         :rtype: int
-        :param: number of steps
+        :return: number of steps
         """
         return len(self.steps)
 
@@ -730,7 +730,7 @@ class Invocation(Wrapper):
         :param step_ids: return steps that have matching step_ids
 
         :rtype: list of InvocationStep
-        :param: invocation steps
+        :return: invocation steps
         """
         steps: Union[List[InvocationStep], filter] = self.steps
         if indices is not None:
@@ -790,7 +790,7 @@ class Invocation(Wrapper):
         Get a summary for this invocation.
 
         :rtype: dict
-        :param: invocation summary
+        :return: invocation summary
         """
         return self.gi.gi.invocations.get_invocation_summary(self.id)
 
@@ -799,7 +799,7 @@ class Invocation(Wrapper):
         Get a summary for this invocation's step jobs.
 
         :rtype: list of dicts
-        :param: step job summaries
+        :return: step job summaries
         """
         return self.gi.gi.invocations.get_invocation_step_jobs_summary(self.id)
 
@@ -808,7 +808,7 @@ class Invocation(Wrapper):
         Get a dictionary containing a Markdown report for this invocation.
 
         :rtype: dict
-        :param: invocation report
+        :return: invocation report
         """
         return self.gi.gi.invocations.get_invocation_report(self.id)
 
@@ -829,7 +829,7 @@ class Invocation(Wrapper):
         Get a BioCompute object for this invocation.
 
         :rtype: dict
-        :param: BioCompute object
+        :return: BioCompute object
         """
         return self.gi.gi.invocations.get_invocation_biocompute_object(self.id)
 
