@@ -52,13 +52,14 @@ class FoldersClient(Client):
     def show_folder(
         self,
         folder_id: str,
+        contents: Literal[False] = False,
     ) -> Dict[str, Any]: ...
 
     @overload
     def show_folder(
         self,
         folder_id: str,
-        contents: bool = False,
+        contents: Literal[True],
         limit: int = 10,
         offset: int = 0,
         include_deleted: bool = False,
@@ -83,16 +84,15 @@ class FoldersClient(Client):
           than just the folder details.
 
         :type limit: int
-        :param limit: Maximum number of contents to return (default: 10).
-          Only considered for contents=True.
+        :param limit: When ``contents=True``, maximum number of items to return.
 
         :type offset: int
-        :param contents: Return contents from this specified position (default: 0).
-          Only considered for contents=True.
+        :param contents: When ``contents=True``, number of items to skip. Return
+          contents starting with item offset+1.
 
         :type include_deleted: bool
-        :param include_deleted: Returns also deleted contents.
-          Only considered for contents=True.
+        :param include_deleted: When ``contents=True``, whether to include
+          deleted items.
 
         :rtype: dict
         :return: dictionary including details of the folder.
@@ -123,10 +123,10 @@ class FoldersClient(Client):
         :param folder_id: the folder's encoded id, prefixed by 'F'
 
         :type limit: int
-        :param limit: Batch size to be used internally (default: 10).
+        :param limit: Batch size to be used internally.
 
         :type include_deleted: bool
-        :param include_deleted: Include also deleted contents.
+        :param include_deleted: Whether to include deleted items.
 
         :rtype: dict
         :return: A generator for the folder contents
