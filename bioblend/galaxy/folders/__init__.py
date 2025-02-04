@@ -10,6 +10,7 @@ from typing import (
     List,
     Literal,
     Optional,
+    overload,
     TYPE_CHECKING,
     Union,
 )
@@ -47,6 +48,22 @@ class FoldersClient(Client):
             payload["description"] = description
         return self._post(payload=payload, id=parent_folder_id)
 
+    @overload
+    def show_folder(
+        self,
+        folder_id: str,
+    ) -> Dict[str, Any]: ...
+
+    @overload
+    def show_folder(
+        self,
+        folder_id: str,
+        contents: bool = False,
+        limit: int = 10,
+        offset: int = 0,
+        include_deleted: bool = False,
+    ) -> Dict[str, Any]: ...
+
     def show_folder(
         self,
         folder_id: str,
@@ -78,7 +95,13 @@ class FoldersClient(Client):
           Only considered for contents=True.
 
         :rtype: dict
-        :return: dictionary including details of the folder
+        :return: dictionary including details of the folder.
+          For contents=False the dict contains infos on the folder.
+          For contents=True the dict contains the keys "metadata" (a dict with
+          infos on the folder) and "folder_contents" (a list of dicts with info
+          on the childs).
+
+        Notes: For iterating over folder contents there is also contents_iter.
         """
         params = {
             "limit": limit,
