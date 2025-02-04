@@ -113,7 +113,7 @@ class FoldersClient(Client):
     def contents_iter(
         self,
         folder_id: str,
-        limit: int = 10,
+        batch_size: int = 10,
         include_deleted: bool = False,
     ) -> Iterator[Dict[str, Any]]:
         """
@@ -122,7 +122,7 @@ class FoldersClient(Client):
         :type folder_id: str
         :param folder_id: the folder's encoded id, prefixed by 'F'
 
-        :type limit: int
+        :type batch_size: int
         :param limit: Batch size to be used internally.
 
         :type include_deleted: bool
@@ -130,7 +130,7 @@ class FoldersClient(Client):
         """
         total_rows = sys.maxsize
         params = {
-            "limit": limit,
+            "limit": batch_size,
             "offset": 0,
             "include_deleted": include_deleted,
         }
