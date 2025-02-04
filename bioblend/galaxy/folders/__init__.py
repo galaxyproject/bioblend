@@ -6,7 +6,7 @@ import sys
 from typing import (
     Any,
     Dict,
-    Iterable,
+    Iterator,
     List,
     Literal,
     Optional,
@@ -115,7 +115,7 @@ class FoldersClient(Client):
         folder_id: str,
         limit: int = 10,
         include_deleted: bool = False,
-    ) -> Iterable[Dict[str, Any]]:
+    ) -> Iterator[Dict[str, Any]]:
         """
         Iterate over folder contents.
 
@@ -127,9 +127,6 @@ class FoldersClient(Client):
 
         :type include_deleted: bool
         :param include_deleted: Whether to include deleted items.
-
-        :rtype: dict
-        :return: A generator for the folder contents
         """
         total_rows = sys.maxsize
         params = {
