@@ -4,8 +4,6 @@ Interaction with a Galaxy Tool Shed.
 
 from typing import (
     Any,
-    Dict,
-    List,
     Optional,
     TYPE_CHECKING,
 )
@@ -22,7 +20,7 @@ class ToolShedClient(Client):
     def __init__(self, galaxy_instance: "GalaxyInstance") -> None:
         super().__init__(galaxy_instance)
 
-    def get_repositories(self) -> List[Dict[str, Any]]:
+    def get_repositories(self) -> list[dict[str, Any]]:
         """
         Get the list of all installed Tool Shed repositories on this Galaxy instance.
 
@@ -47,7 +45,7 @@ class ToolShedClient(Client):
         """
         return self._get()
 
-    def show_repository(self, toolShed_id: str) -> Dict[str, Any]:
+    def show_repository(self, toolShed_id: str) -> dict[str, Any]:
         """
         Get details of a given Tool Shed repository as it is installed on this
         Galaxy instance.
@@ -82,7 +80,7 @@ class ToolShedClient(Client):
         install_resolver_dependencies: bool = False,
         tool_panel_section_id: Optional[str] = None,
         new_tool_panel_section_label: Optional[str] = None,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Install a specified repository revision from a specified Tool Shed into
         this Galaxy instance. This example demonstrates installation of a repository
@@ -144,7 +142,7 @@ class ToolShedClient(Client):
                                              that should be created and the repository
                                              installed into.
         """
-        payload: Dict[str, Any] = {}
+        payload: dict[str, Any] = {}
         payload["tool_shed_url"] = tool_shed_url
         payload["name"] = name
         payload["owner"] = owner
@@ -162,7 +160,7 @@ class ToolShedClient(Client):
 
     def uninstall_repository_revision(
         self, name: str, owner: str, changeset_revision: str, tool_shed_url: str, remove_from_disk: bool = True
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Uninstalls a specified repository revision from this Galaxy instance.
 
@@ -186,7 +184,7 @@ class ToolShedClient(Client):
         :rtype: dict
         :return: If successful, a dictionary with a message noting the removal
         """
-        payload: Dict[str, Any] = {
+        payload: dict[str, Any] = {
             "tool_shed_url": tool_shed_url,
             "name": name,
             "owner": owner,

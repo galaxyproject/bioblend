@@ -4,8 +4,6 @@ Contains possible interactions with the Galaxy Tool data tables
 
 from typing import (
     Any,
-    Dict,
-    List,
     TYPE_CHECKING,
 )
 
@@ -21,7 +19,7 @@ class ToolDataClient(Client):
     def __init__(self, galaxy_instance: "GalaxyInstance") -> None:
         super().__init__(galaxy_instance)
 
-    def get_data_tables(self) -> List[Dict[str, Any]]:
+    def get_data_tables(self) -> list[dict[str, Any]]:
         """
         Get the list of all data tables.
 
@@ -34,7 +32,7 @@ class ToolDataClient(Client):
         """
         return self._get()
 
-    def show_data_table(self, data_table_id: str) -> Dict[str, Any]:
+    def show_data_table(self, data_table_id: str) -> dict[str, Any]:
         """
         Get details of a given data table.
 
@@ -56,7 +54,7 @@ class ToolDataClient(Client):
         """
         return self._get(id=data_table_id)
 
-    def reload_data_table(self, data_table_id: str) -> Dict[str, Any]:
+    def reload_data_table(self, data_table_id: str) -> dict[str, Any]:
         """
         Reload a data table.
 
@@ -78,7 +76,7 @@ class ToolDataClient(Client):
         url = self._make_url(data_table_id) + "/reload"
         return self._get(url=url)
 
-    def delete_data_table(self, data_table_id: str, values: str) -> Dict[str, Any]:
+    def delete_data_table(self, data_table_id: str, values: str) -> dict[str, Any]:
         """
         Delete an item from a data table.
 

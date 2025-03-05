@@ -4,8 +4,6 @@ Interaction with a Tool Shed instance repositories
 
 from typing import (
     Any,
-    Dict,
-    List,
     Literal,
     Optional,
     TYPE_CHECKING,
@@ -25,7 +23,7 @@ class ToolShedRepositoryClient(Client):
     def __init__(self, toolshed_instance: "ToolShedInstance") -> None:
         super().__init__(toolshed_instance)
 
-    def get_repositories(self, name: Optional[str] = None, owner: Optional[str] = None) -> List[Dict[str, Any]]:
+    def get_repositories(self, name: Optional[str] = None, owner: Optional[str] = None) -> list[dict[str, Any]]:
         """
         Get all repositories in a Galaxy Tool Shed, or select a subset by
         specifying optional arguments for filtering (e.g. a repository name).
@@ -73,7 +71,7 @@ class ToolShedRepositoryClient(Client):
         q: str,
         page: int = 1,
         page_size: int = 10,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Search for repositories in a Galaxy Tool Shed.
 
@@ -132,7 +130,7 @@ class ToolShedRepositoryClient(Client):
     def show_repository(
         self,
         toolShed_id: str,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Display information of a repository from Tool Shed
 
@@ -170,7 +168,7 @@ class ToolShedRepositoryClient(Client):
         self,
         name: str,
         owner: str,
-    ) -> List[str]:
+    ) -> list[str]:
         """
         Returns the ordered list of changeset revision hash strings that are
         associated with installable revisions. As in the changelog, the list is
@@ -196,7 +194,7 @@ class ToolShedRepositoryClient(Client):
         name: str,
         owner: str,
         changeset_revision: str,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         Return a list of dictionaries of metadata about a certain changeset
         revision for a single tool.
@@ -305,7 +303,7 @@ class ToolShedRepositoryClient(Client):
         malicious: Optional[bool] = None,
         missing_test_components: Optional[bool] = None,
         includes_tools: Optional[bool] = None,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         Returns a (possibly filtered) list of dictionaries that include
         information about all repository revisions. The following parameters can
@@ -376,7 +374,7 @@ class ToolShedRepositoryClient(Client):
     def show_repository_revision(
         self,
         metadata_id: str,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Returns a dictionary that includes information about a specified
         repository revision.
@@ -412,7 +410,7 @@ class ToolShedRepositoryClient(Client):
         url = "/".join((self.gi.url, "repository_revisions", metadata_id))
         return self._get(url=url)
 
-    def update_repository(self, id: str, tar_ball_path: str, commit_message: Optional[str] = None) -> Dict[str, Any]:
+    def update_repository(self, id: str, tar_ball_path: str, commit_message: Optional[str] = None) -> dict[str, Any]:
         """
         Update the contents of a Tool Shed repository with specified tar ball.
 
@@ -438,7 +436,7 @@ class ToolShedRepositoryClient(Client):
         .. versionadded:: 0.5.2
         """
         url = self._make_url(id) + "/changeset_revision"
-        payload: Dict[str, Any] = {"file": attach_file(tar_ball_path)}
+        payload: dict[str, Any] = {"file": attach_file(tar_ball_path)}
         if commit_message is not None:
             payload["commit_message"] = commit_message
         try:
@@ -454,8 +452,8 @@ class ToolShedRepositoryClient(Client):
         type: Literal["unrestricted", "repository_suite_definition", "tool_dependency_definition"] = "unrestricted",
         remote_repository_url: Optional[str] = None,
         homepage_url: Optional[str] = None,
-        category_ids: Optional[List[str]] = None,
-    ) -> Dict[str, Any]:
+        category_ids: Optional[list[str]] = None,
+    ) -> dict[str, Any]:
         """
         Create a new repository in a Tool Shed.
 
@@ -501,7 +499,7 @@ class ToolShedRepositoryClient(Client):
              "type": "unrestricted",
              "user_id": "adb5f5c93f827949"}
         """
-        payload: Dict[str, Union[str, List[str]]] = {
+        payload: dict[str, Union[str, list[str]]] = {
             "name": name,
             "synopsis": synopsis,
         }
@@ -527,8 +525,8 @@ class ToolShedRepositoryClient(Client):
         description: Optional[str] = None,
         remote_repository_url: Optional[str] = None,
         homepage_url: Optional[str] = None,
-        category_ids: Optional[List[str]] = None,
-    ) -> Dict[str, Any]:
+        category_ids: Optional[list[str]] = None,
+    ) -> dict[str, Any]:
         """
         Update metadata of a Tool Shed repository.
 
@@ -557,7 +555,7 @@ class ToolShedRepositoryClient(Client):
         :rtype: dict
         :return: a dictionary containing information about the updated repository.
         """
-        payload: Dict[str, Union[str, List[str]]] = {}
+        payload: dict[str, Union[str, list[str]]] = {}
         if name:
             payload["name"] = name
         if synopsis:

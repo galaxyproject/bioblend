@@ -3,11 +3,7 @@ import os
 import shutil
 import tempfile
 import time
-from typing import (
-    Any,
-    Dict,
-    List,
-)
+from typing import Any
 
 import pytest
 
@@ -45,7 +41,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         assert len(invocations) == 1
         assert invocations[0]["id"] == invocation_id
 
-        def invocation_steps_by_order_index() -> Dict[int, Dict[str, Any]]:
+        def invocation_steps_by_order_index() -> dict[int, dict[str, Any]]:
             invocation = self.gi.workflows.show_invocation(workflow_id, invocation_id)
             return {s["order_index"]: s for s in invocation["steps"]}
 
@@ -247,7 +243,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
 
     @test_util.skip_unless_galaxy("release_21.01")
     def test_refactor_workflow(self):
-        actions: List[Dict[str, Any]] = [
+        actions: list[dict[str, Any]] = [
             {"action_type": "add_input", "type": "data", "label": "foo"},
             {"action_type": "update_step_label", "label": "bar", "step": {"label": "foo"}},
         ]

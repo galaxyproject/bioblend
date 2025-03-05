@@ -8,17 +8,15 @@ import tarfile
 import tempfile
 import unittest
 import uuid
+from collections.abc import (
+    Collection,
+    Iterable,
+)
 from ssl import SSLError
 from typing import (
     Any,
     Callable,
-    Collection,
-    Dict,
-    Iterable,
-    List,
     Literal,
-    Set,
-    Tuple,
     Union,
 )
 from urllib.error import URLError
@@ -88,7 +86,7 @@ SAMPLE_WF_DICT = {
     "tags": [],
     "url": "/api/workflows/9005c5112febe774",
 }
-SAMPLE_INV_DICT: Dict[str, Any] = {
+SAMPLE_INV_DICT: dict[str, Any] = {
     "history_id": "2f94e8ae9edff68a",
     "id": "df7a1f0c02a5b08e",
     "inputs": {"0": {"id": "a7db2fac67043c7e", "src": "hda", "uuid": "7932ffe0-2340-4952-8857-dbaa50f1f46a"}},
@@ -139,7 +137,7 @@ def is_reachable(url: str) -> bool:
 
 def upload_from_fs(
     lib: wrappers.Library, bnames: Iterable[str], **kwargs: Any
-) -> Tuple[List[wrappers.LibraryDataset], List[str]]:
+) -> tuple[list[wrappers.LibraryDataset], list[str]]:
     tempdir = tempfile.mkdtemp(prefix="bioblend_test_")
     try:
         fnames = [os.path.join(tempdir, _) for _ in bnames]
@@ -155,7 +153,7 @@ def upload_from_fs(
 class MockWrapper(wrappers.Wrapper):
     BASE_ATTRS = ("a", "b")
     a: int
-    b: List[int]
+    b: list[int]
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
@@ -163,7 +161,7 @@ class MockWrapper(wrappers.Wrapper):
 
 class TestWrapper(unittest.TestCase):
     def setUp(self):
-        self.d: Dict[str, Any] = {"a": 1, "b": [2, 3], "c": {"x": 4}}
+        self.d: dict[str, Any] = {"a": 1, "b": [2, 3], "c": {"x": 4}}
         with pytest.raises(TypeError):
             wrappers.Wrapper(self.d)
         self.w = MockWrapper(self.d)
@@ -234,7 +232,7 @@ class TestWorkflow(GalaxyObjectsTestBase):
         assert self.wf.sink_ids == {"573"}
 
     def test_dag(self):
-        inv_dag: Dict[str, Set[str]] = {}
+        inv_dag: dict[str, set[str]] = {}
         for h, tails in self.wf.dag.items():
             for t in tails:
                 inv_dag.setdefault(str(t), set()).add(h)
@@ -586,7 +584,7 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
 
     def _normalized_functions(
         self, obj_type: Literal["histories", "libraries", "workflows"]
-    ) -> Tuple[Callable, Dict[str, Any]]:
+    ) -> tuple[Callable, dict[str, Any]]:
         if obj_type == "libraries":
             create: Callable = self.gi.libraries.create
             del_kwargs = {}
@@ -608,7 +606,7 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
         obj_gi_client = getattr(self.gi, obj_type)
         create, del_kwargs = self._normalized_functions(obj_type)
 
-        def ids(seq: Iterable[wrappers.Wrapper]) -> Set[str]:
+        def ids(seq: Iterable[wrappers.Wrapper]) -> set[str]:
             return {_.id for _ in seq}
 
         names = [f"test_{uuid.uuid4().hex}" for _ in range(2)]

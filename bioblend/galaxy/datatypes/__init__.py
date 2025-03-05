@@ -2,11 +2,7 @@
 Contains possible interactions with the Galaxy Datatype
 """
 
-from typing import (
-    Dict,
-    List,
-    TYPE_CHECKING,
-)
+from typing import TYPE_CHECKING
 
 from bioblend.galaxy.client import Client
 
@@ -20,7 +16,7 @@ class DatatypesClient(Client):
     def __init__(self, galaxy_instance: "GalaxyInstance") -> None:
         super().__init__(galaxy_instance)
 
-    def get_datatypes(self, extension_only: bool = False, upload_only: bool = False) -> List[str]:
+    def get_datatypes(self, extension_only: bool = False, upload_only: bool = False) -> list[str]:
         """
         Get the list of all installed datatypes.
 
@@ -46,7 +42,7 @@ class DatatypesClient(Client):
              'xml']
         """
 
-        params: Dict[str, bool] = {}
+        params: dict[str, bool] = {}
         if extension_only:
             params["extension_only"] = True
 
@@ -55,7 +51,7 @@ class DatatypesClient(Client):
 
         return self._get(params=params)
 
-    def get_sniffers(self) -> List[str]:
+    def get_sniffers(self) -> list[str]:
         """
         Get the list of all installed sniffers.
 

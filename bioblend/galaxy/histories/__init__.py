@@ -8,15 +8,13 @@ import sys
 import time
 import typing
 import webbrowser
+from re import Pattern
 from typing import (
     Any,
-    Dict,
     IO,
-    List,
     Literal,
     Optional,
     overload,
-    Pattern,
     Union,
 )
 
@@ -43,7 +41,7 @@ class HistoryClient(Client):
     def __init__(self, galaxy_instance: "GalaxyInstance") -> None:
         super().__init__(galaxy_instance)
 
-    def create_history(self, name: Optional[str] = None) -> Dict[str, Any]:
+    def create_history(self, name: Optional[str] = None) -> dict[str, Any]:
         """
         Create a new history, optionally setting the ``name``.
 
@@ -58,7 +56,7 @@ class HistoryClient(Client):
             payload["name"] = name
         return self._post(payload)
 
-    def import_history(self, file_path: Optional[str] = None, url: Optional[str] = None) -> Dict[str, Any]:
+    def import_history(self, file_path: Optional[str] = None, url: Optional[str] = None) -> dict[str, Any]:
         """
         Import a history from an archive on disk or a URL.
 
@@ -73,7 +71,7 @@ class HistoryClient(Client):
         """
         if file_path:
             archive_file = attach_file(file_path)
-            payload: Dict[str, Any] = {
+            payload: dict[str, Any] = {
                 "archive_source": "",
                 "archive_file": archive_file,
                 "archive_type": "file",
@@ -99,16 +97,16 @@ class HistoryClient(Client):
         update_time_min: Optional[str] = None,
         update_time_max: Optional[str] = None,
         view: Optional[Literal["summary", "detailed"]] = None,
-        keys: Optional[List[str]] = None,
+        keys: Optional[list[str]] = None,
         limit: Optional[int] = None,
         offset: Optional[int] = None,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         Hidden method to be used by both get_histories() and get_published_histories()
         """
         assert not (filter_user_published is not None and get_all_published)
 
-        params: Dict[str, Any] = {}
+        params: dict[str, Any] = {}
         if deleted:
             params.setdefault("q", []).append("deleted")
             params.setdefault("qv", []).append(deleted)
@@ -161,10 +159,10 @@ class HistoryClient(Client):
         update_time_min: Optional[str] = None,
         update_time_max: Optional[str] = None,
         view: Optional[Literal["summary", "detailed"]] = None,
-        keys: Optional[List[str]] = None,
+        keys: Optional[list[str]] = None,
         limit: Optional[int] = None,
         offset: Optional[int] = None,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         Get all histories, or select a subset by specifying optional arguments
         for filtering (e.g. a history name).
@@ -258,7 +256,7 @@ class HistoryClient(Client):
         create_time_max: Optional[str] = None,
         update_time_min: Optional[str] = None,
         update_time_max: Optional[str] = None,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         Get all published histories (by any user), or select a subset by
         specifying optional arguments for filtering (e.g. a history name).
@@ -309,7 +307,7 @@ class HistoryClient(Client):
         self,
         history_id: str,
         contents: Literal[False] = False,
-    ) -> Dict[str, Any]: ...
+    ) -> dict[str, Any]: ...
 
     @overload
     def show_history(
@@ -319,9 +317,9 @@ class HistoryClient(Client):
         deleted: Optional[bool] = None,
         visible: Optional[bool] = None,
         details: Optional[str] = None,
-        types: Optional[List[str]] = None,
-        keys: Optional[List[str]] = None,
-    ) -> List[Dict[str, Any]]: ...
+        types: Optional[list[str]] = None,
+        keys: Optional[list[str]] = None,
+    ) -> list[dict[str, Any]]: ...
 
     def show_history(
         self,
@@ -330,9 +328,9 @@ class HistoryClient(Client):
         deleted: Optional[bool] = None,
         visible: Optional[bool] = None,
         details: Optional[str] = None,
-        types: Optional[List[str]] = None,
-        keys: Optional[List[str]] = None,
-    ) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
+        types: Optional[list[str]] = None,
+        keys: Optional[list[str]] = None,
+    ) -> Union[dict[str, Any], list[dict[str, Any]]]:
         """
         Get details of a given history. By default, just get the history meta
         information.
@@ -379,7 +377,7 @@ class HistoryClient(Client):
             more extensive functionality for filtering and ordering the results.
 
         """
-        params: Dict[str, Union[bool, list, str]] = {}
+        params: dict[str, Union[bool, list, str]] = {}
         if contents:
             if details:
                 params["details"] = details
@@ -446,7 +444,7 @@ class HistoryClient(Client):
         url = "/".join((self._make_url(history_id, contents=True), "dataset_collections", dataset_collection_id))
         self._delete(url=url)
 
-    def show_dataset(self, history_id: str, dataset_id: str) -> Dict[str, Any]:
+    def show_dataset(self, history_id: str, dataset_id: str) -> dict[str, Any]:
         """
         Get details about a given history dataset.
 
@@ -462,7 +460,7 @@ class HistoryClient(Client):
         url = "/".join((self._make_url(history_id, contents=True), dataset_id))
         return self._get(url=url)
 
-    def show_dataset_collection(self, history_id: str, dataset_collection_id: str) -> Dict[str, Any]:
+    def show_dataset_collection(self, history_id: str, dataset_collection_id: str) -> dict[str, Any]:
         """
         Get details about a given history dataset collection.
 
@@ -480,7 +478,7 @@ class HistoryClient(Client):
 
     def show_matching_datasets(
         self, history_id: str, name_filter: Optional[Union[str, Pattern[str]]] = None
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         Get dataset details for matching datasets within a history.
 
@@ -504,7 +502,7 @@ class HistoryClient(Client):
             if name_filter is None or name_filter.match(h["name"])
         ]
 
-    def show_dataset_provenance(self, history_id: str, dataset_id: str, follow: bool = False) -> Dict[str, Any]:
+    def show_dataset_provenance(self, history_id: str, dataset_id: str, follow: bool = False) -> dict[str, Any]:
         """
         Get details related to how dataset was created (``id``, ``job_id``,
         ``tool_id``, ``stdout``, ``stderr``, ``parameters``, ``inputs``,
@@ -543,7 +541,7 @@ class HistoryClient(Client):
         params = {"follow": follow}
         return self._get(url=url, params=params)
 
-    def update_history(self, history_id: str, **kwargs: Any) -> Dict[str, Any]:
+    def update_history(self, history_id: str, **kwargs: Any) -> dict[str, Any]:
         """
         Update history metadata information. Some of the attributes that can be
         modified are documented below.
@@ -580,7 +578,7 @@ class HistoryClient(Client):
         """
         return self._put(payload=kwargs, id=history_id)
 
-    def update_dataset(self, history_id: str, dataset_id: str, **kwargs: Any) -> Dict[str, Any]:
+    def update_dataset(self, history_id: str, dataset_id: str, **kwargs: Any) -> dict[str, Any]:
         """
         Update history dataset metadata. Some of the attributes that can be
         modified are documented below.
@@ -622,7 +620,7 @@ class HistoryClient(Client):
         url = "/".join((self._make_url(history_id, contents=True), dataset_id))
         return self._put(payload=kwargs, url=url)
 
-    def update_dataset_collection(self, history_id: str, dataset_collection_id: str, **kwargs: Any) -> Dict[str, Any]:
+    def update_dataset_collection(self, history_id: str, dataset_collection_id: str, **kwargs: Any) -> dict[str, Any]:
         """
         Update history dataset collection metadata. Some of the attributes that
         can be modified are documented below.
@@ -652,7 +650,7 @@ class HistoryClient(Client):
         url = "/".join((self._make_url(history_id, contents=True), "dataset_collections", dataset_collection_id))
         return self._put(payload=kwargs, url=url)
 
-    def create_history_tag(self, history_id: str, tag: str) -> Dict[str, Any]:
+    def create_history_tag(self, history_id: str, tag: str) -> dict[str, Any]:
         """
         Create history tag
 
@@ -672,11 +670,11 @@ class HistoryClient(Client):
              'user_value': None}
         """
         # empty payload since we are adding the new tag using the url
-        payload: Dict[str, Any] = {}
+        payload: dict[str, Any] = {}
         url = "/".join((self._make_url(history_id), "tags", tag))
         return self._post(payload, url=url)
 
-    def upload_dataset_from_library(self, history_id: str, lib_dataset_id: str) -> Dict[str, Any]:
+    def upload_dataset_from_library(self, history_id: str, lib_dataset_id: str) -> dict[str, Any]:
         """
         Upload a dataset into the history from a library. Requires the
         library dataset ID, which can be obtained from the library
@@ -701,9 +699,9 @@ class HistoryClient(Client):
     def create_dataset_collection(
         self,
         history_id: str,
-        collection_description: Union["CollectionDescription", Dict[str, Any]],
+        collection_description: Union["CollectionDescription", dict[str, Any]],
         copy_elements: bool = True,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Create a new dataset collection
 
@@ -744,7 +742,7 @@ class HistoryClient(Client):
         }
         return self._post(payload, id=history_id, contents=True)
 
-    def delete_history(self, history_id: str, purge: bool = False) -> Dict[str, Any]:
+    def delete_history(self, history_id: str, purge: bool = False) -> dict[str, Any]:
         """
         Delete a history.
 
@@ -783,7 +781,7 @@ class HistoryClient(Client):
         url = self._make_url(history_id, deleted=True) + "/undelete"
         return self._post(url=url)
 
-    def get_status(self, history_id: str) -> Dict[str, Any]:
+    def get_status(self, history_id: str) -> dict[str, Any]:
         """
         Returns the state of this history
 
@@ -798,7 +796,7 @@ class HistoryClient(Client):
         """
         history = self.show_history(history_id)
 
-        state: Dict[str, Any] = {
+        state: dict[str, Any] = {
             "state": history["state"],
         }
 
@@ -811,7 +809,7 @@ class HistoryClient(Client):
                 state["percent_complete"] = 0
         return state
 
-    def get_most_recently_used_history(self) -> Dict[str, Any]:
+    def get_most_recently_used_history(self) -> dict[str, Any]:
         """
         Returns the current user's most recently used history (not deleted).
 
@@ -926,7 +924,7 @@ class HistoryClient(Client):
 
     def copy_dataset(
         self, history_id: str, dataset_id: str, source: Literal["hda", "library", "library_folder"] = "hda"
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Copy a dataset to a history.
 
@@ -946,7 +944,7 @@ class HistoryClient(Client):
 
     def copy_content(
         self, history_id: str, content_id: str, source: Literal["hda", "hdca", "library", "library_folder"] = "hda"
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Copy existing content (e.g. a dataset) to a history.
 
@@ -996,7 +994,7 @@ class HistoryClient(Client):
         url = f"{self.gi.base_url}/history/switch_to_history?hist_id={history_id}"
         webbrowser.open_new_tab(url)
 
-    def get_extra_files(self, history_id: str, dataset_id: str) -> List[str]:
+    def get_extra_files(self, history_id: str, dataset_id: str) -> list[str]:
         """
         Get extra files associated with a composite dataset, or an empty list if
         there are none.

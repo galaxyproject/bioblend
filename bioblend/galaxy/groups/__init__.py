@@ -4,8 +4,6 @@ Contains possible interactions with the Galaxy Groups
 
 from typing import (
     Any,
-    Dict,
-    List,
     Optional,
     TYPE_CHECKING,
 )
@@ -22,7 +20,7 @@ class GroupsClient(Client):
     def __init__(self, galaxy_instance: "GalaxyInstance") -> None:
         super().__init__(galaxy_instance)
 
-    def get_groups(self) -> List[Dict[str, Any]]:
+    def get_groups(self) -> list[dict[str, Any]]:
         """
         Get all (not deleted) groups.
 
@@ -41,7 +39,7 @@ class GroupsClient(Client):
         """
         return self._get()
 
-    def show_group(self, group_id: str) -> Dict[str, Any]:
+    def show_group(self, group_id: str) -> dict[str, Any]:
         """
         Get details of a given group.
 
@@ -62,8 +60,8 @@ class GroupsClient(Client):
         return self._get(id=group_id)
 
     def create_group(
-        self, group_name: str, user_ids: Optional[List[str]] = None, role_ids: Optional[List[str]] = None
-    ) -> List[Dict[str, Any]]:
+        self, group_name: str, user_ids: Optional[list[str]] = None, role_ids: Optional[list[str]] = None
+    ) -> list[dict[str, Any]]:
         """
         Create a new group.
 
@@ -96,8 +94,8 @@ class GroupsClient(Client):
         self,
         group_id: str,
         group_name: Optional[str] = None,
-        user_ids: Optional[List[str]] = None,
-        role_ids: Optional[List[str]] = None,
+        user_ids: Optional[list[str]] = None,
+        role_ids: Optional[list[str]] = None,
     ) -> None:
         """
         Update a group.
@@ -127,7 +125,7 @@ class GroupsClient(Client):
         payload = {"name": group_name, "user_ids": user_ids, "role_ids": role_ids}
         return self._put(payload=payload, id=group_id)
 
-    def get_group_users(self, group_id: str) -> List[Dict[str, Any]]:
+    def get_group_users(self, group_id: str) -> list[dict[str, Any]]:
         """
         Get the list of users associated to the given group.
 
@@ -140,7 +138,7 @@ class GroupsClient(Client):
         url = self._make_url(group_id) + "/users"
         return self._get(url=url)
 
-    def get_group_roles(self, group_id: str) -> List[Dict[str, Any]]:
+    def get_group_roles(self, group_id: str) -> list[dict[str, Any]]:
         """
         Get the list of roles associated to the given group.
 
@@ -153,7 +151,7 @@ class GroupsClient(Client):
         url = self._make_url(group_id) + "/roles"
         return self._get(url=url)
 
-    def add_group_user(self, group_id: str, user_id: str) -> Dict[str, Any]:
+    def add_group_user(self, group_id: str, user_id: str) -> dict[str, Any]:
         """
         Add a user to the given group.
 
@@ -169,7 +167,7 @@ class GroupsClient(Client):
         url = "/".join((self._make_url(group_id), "users", user_id))
         return self._put(url=url)
 
-    def add_group_role(self, group_id: str, role_id: str) -> Dict[str, Any]:
+    def add_group_role(self, group_id: str, role_id: str) -> dict[str, Any]:
         """
         Add a role to the given group.
 
@@ -185,7 +183,7 @@ class GroupsClient(Client):
         url = "/".join((self._make_url(group_id), "roles", role_id))
         return self._put(url=url)
 
-    def delete_group_user(self, group_id: str, user_id: str) -> Dict[str, Any]:
+    def delete_group_user(self, group_id: str, user_id: str) -> dict[str, Any]:
         """
         Remove a user from the given group.
 
@@ -201,7 +199,7 @@ class GroupsClient(Client):
         url = "/".join((self._make_url(group_id), "users", user_id))
         return self._delete(url=url)
 
-    def delete_group_role(self, group_id: str, role_id: str) -> Dict[str, Any]:
+    def delete_group_role(self, group_id: str, role_id: str) -> dict[str, Any]:
         """
         Remove a role from the given group.
 

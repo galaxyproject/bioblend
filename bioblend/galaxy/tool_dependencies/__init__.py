@@ -4,8 +4,6 @@ Contains interactions dealing with Galaxy dependency resolvers.
 
 from typing import (
     Any,
-    Dict,
-    List,
     Literal,
     Optional,
     TYPE_CHECKING,
@@ -26,7 +24,7 @@ class ToolDependenciesClient(Client):
     def summarize_toolbox(
         self,
         index: Optional[int] = None,
-        tool_ids: Optional[List[str]] = None,
+        tool_ids: Optional[list[str]] = None,
         resolver_type: Optional[str] = None,
         include_containers: bool = False,
         container_type: Optional[str] = None,
@@ -104,14 +102,14 @@ class ToolDependenciesClient(Client):
         url = "/".join((self._make_url(), "toolbox"))
         return self._get(url=url, params=params)
 
-    def unused_dependency_paths(self) -> List[str]:
+    def unused_dependency_paths(self) -> list[str]:
         """
         List unused dependencies
         """
         url = "/".join((self._make_url(), "unused_paths"))
         return self._get(url=url)
 
-    def delete_unused_dependency_paths(self, paths: List[str]) -> None:
+    def delete_unused_dependency_paths(self, paths: list[str]) -> None:
         """
         Delete unused paths
 
@@ -119,6 +117,6 @@ class ToolDependenciesClient(Client):
         :param paths: paths to delete
 
         """
-        payload: Dict[str, Any] = {"paths": paths}
+        payload: dict[str, Any] = {"paths": paths}
         url = "/".join((self._make_url(), "unused_paths"))
         self._put(url=url, payload=payload)

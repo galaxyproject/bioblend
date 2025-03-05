@@ -3,10 +3,7 @@ Contains interactions dealing with Galaxy container resolvers.
 Works only with Galaxy > 22.01
 """
 
-from typing import (
-    List,
-    Optional,
-)
+from typing import Optional
 
 from bioblend.galaxy.client import Client
 
@@ -121,7 +118,7 @@ class ContainerResolutionClient(Client):
     def resolve_toolbox(
         self,
         index: Optional[int] = None,
-        tool_ids: Optional[List[str]] = None,
+        tool_ids: Optional[list[str]] = None,
         resolver_type: Optional[str] = None,
         container_type: Optional[str] = None,
         requirements_only: bool = False,
@@ -173,7 +170,7 @@ class ContainerResolutionClient(Client):
     def resolve_toolbox_with_install(
         self,
         index: Optional[int] = None,
-        tool_ids: Optional[List[str]] = None,
+        tool_ids: Optional[list[str]] = None,
         resolver_type: Optional[str] = None,
         container_type: Optional[str] = None,
         requirements_only: bool = False,

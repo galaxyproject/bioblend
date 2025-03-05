@@ -3,11 +3,9 @@ Contains possible interactions with the Galaxy library folders
 """
 
 import sys
+from collections.abc import Iterator
 from typing import (
     Any,
-    Dict,
-    Iterator,
-    List,
     Literal,
     Optional,
     overload,
@@ -27,7 +25,7 @@ class FoldersClient(Client):
     def __init__(self, galaxy_instance: "GalaxyInstance") -> None:
         super().__init__(galaxy_instance)
 
-    def create_folder(self, parent_folder_id: str, name: str, description: Optional[str] = None) -> Dict[str, Any]:
+    def create_folder(self, parent_folder_id: str, name: str, description: Optional[str] = None) -> dict[str, Any]:
         """
         Create a folder.
 
@@ -43,7 +41,7 @@ class FoldersClient(Client):
         :rtype: dict
         :return: details of the updated folder
         """
-        payload: Dict[str, str] = {"name": name}
+        payload: dict[str, str] = {"name": name}
         if description:
             payload["description"] = description
         return self._post(payload=payload, id=parent_folder_id)
@@ -53,7 +51,7 @@ class FoldersClient(Client):
         self,
         folder_id: str,
         contents: Literal[False] = False,
-    ) -> Dict[str, Any]: ...
+    ) -> dict[str, Any]: ...
 
     @overload
     def show_folder(
@@ -63,7 +61,7 @@ class FoldersClient(Client):
         limit: int = 10,
         offset: int = 0,
         include_deleted: bool = False,
-    ) -> Dict[str, Any]: ...
+    ) -> dict[str, Any]: ...
 
     def show_folder(
         self,
@@ -72,7 +70,7 @@ class FoldersClient(Client):
         limit: int = 10,
         offset: int = 0,
         include_deleted: bool = False,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Display information about a folder.
 
@@ -115,7 +113,7 @@ class FoldersClient(Client):
         folder_id: str,
         batch_size: int = 10,
         include_deleted: bool = False,
-    ) -> Iterator[Dict[str, Any]]:
+    ) -> Iterator[dict[str, Any]]:
         """
         Iterate over folder contents.
 
@@ -141,7 +139,7 @@ class FoldersClient(Client):
             yield from chunk["folder_contents"]
             params["offset"] += batch_size
 
-    def delete_folder(self, folder_id: str, undelete: bool = False) -> Dict[str, Any]:
+    def delete_folder(self, folder_id: str, undelete: bool = False) -> dict[str, Any]:
         """
         Marks the folder with the given ``id`` as `deleted` (or removes the
         `deleted` mark if the `undelete` param is True).
@@ -159,7 +157,7 @@ class FoldersClient(Client):
         payload = {"undelete": undelete}
         return self._delete(payload=payload, id=folder_id)
 
-    def update_folder(self, folder_id: str, name: str, description: Optional[str] = None) -> Dict[str, Any]:
+    def update_folder(self, folder_id: str, name: str, description: Optional[str] = None) -> dict[str, Any]:
         """
         Update folder information.
 
@@ -180,7 +178,7 @@ class FoldersClient(Client):
             payload["description"] = description
         return self._put(payload=payload, id=folder_id)
 
-    def get_permissions(self, folder_id: str, scope: Literal["current", "available"] = "current") -> Dict[str, Any]:
+    def get_permissions(self, folder_id: str, scope: Literal["current", "available"] = "current") -> dict[str, Any]:
         """
         Get the permissions of a folder.
 
@@ -200,10 +198,10 @@ class FoldersClient(Client):
         self,
         folder_id: str,
         action: Literal["set_permissions"] = "set_permissions",
-        add_ids: Optional[List[str]] = None,
-        manage_ids: Optional[List[str]] = None,
-        modify_ids: Optional[List[str]] = None,
-    ) -> Dict[str, Any]:
+        add_ids: Optional[list[str]] = None,
+        manage_ids: Optional[list[str]] = None,
+        modify_ids: Optional[list[str]] = None,
+    ) -> dict[str, Any]:
         """
         Set the permissions of a folder.
 
@@ -226,7 +224,7 @@ class FoldersClient(Client):
         :return: dictionary including details of the folder
         """
         url = self._make_url(folder_id) + "/permissions"
-        payload: Dict[str, Union[str, List[str]]] = {"action": action}
+        payload: dict[str, Union[str, list[str]]] = {"action": action}
         if add_ids:
             payload["add_ids[]"] = add_ids
         if manage_ids:

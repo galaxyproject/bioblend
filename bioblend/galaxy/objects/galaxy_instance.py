@@ -3,11 +3,8 @@ A representation of a Galaxy instance based on oo wrappers.
 """
 
 import time
-from typing import (
-    Iterable,
-    List,
-    Optional,
-)
+from collections.abc import Iterable
+from typing import Optional
 
 import bioblend
 import bioblend.galaxy
@@ -98,7 +95,7 @@ class GalaxyInstance:
           times) during the execution.
         """
 
-        def poll(ds_list: Iterable[wrappers.Dataset]) -> List[wrappers.Dataset]:
+        def poll(ds_list: Iterable[wrappers.Dataset]) -> list[wrappers.Dataset]:
             pending = []
             for ds in ds_list:
                 ds.refresh()

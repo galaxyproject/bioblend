@@ -4,7 +4,6 @@ Contains possible interactions with the Galaxy Histories
 
 from typing import (
     Any,
-    Dict,
     Literal,
     Optional,
     TYPE_CHECKING,
@@ -39,7 +38,7 @@ class GenomeClient(Client):
         chrom: Optional[str] = None,
         low: Optional[str] = None,
         high: Optional[str] = None,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Returns information about build <id>
 
@@ -61,7 +60,7 @@ class GenomeClient(Client):
         :rtype: dict
         :return: Information about the genome build
         """
-        params: Dict[str, str] = {}
+        params: dict[str, str] = {}
         if num:
             params["num"] = num
         if chrom:
@@ -81,7 +80,7 @@ class GenomeClient(Client):
         ensembl_dbkey: Optional[str] = None,
         url_dbkey: Optional[str] = None,
         indexers: Optional[list] = None,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Download and/or index a genome.
 
@@ -111,7 +110,7 @@ class GenomeClient(Client):
                  If error:
                  dict( status: 'error', error: <error message> )
         """
-        payload: Dict[str, Any] = {}
+        payload: dict[str, Any] = {}
         if source:
             payload["source"] = source
         if func:

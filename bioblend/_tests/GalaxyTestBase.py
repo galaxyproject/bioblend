@@ -2,7 +2,6 @@ import os
 import unittest
 from typing import (
     Any,
-    Dict,
     Literal,
 )
 
@@ -37,7 +36,7 @@ class GalaxyTestBase(unittest.TestCase):
 
     def _run_random_lines1(
         self, history_id: str, dataset_id: str, input_format: Literal["21.01", "legacy"] = "legacy"
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         tool_inputs = {
             "num_lines": "1",
             "input": {"src": "hda", "id": dataset_id},

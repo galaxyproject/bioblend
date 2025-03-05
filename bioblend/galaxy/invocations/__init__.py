@@ -5,8 +5,6 @@ Contains possible interactions with the Galaxy workflow invocations
 import logging
 from typing import (
     Any,
-    Dict,
-    List,
     Optional,
     TYPE_CHECKING,
 )
@@ -47,7 +45,7 @@ class InvocationClient(Client):
         offset: Optional[int] = None,
         view: str = "collection",
         step_details: bool = False,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         Get all workflow invocations, or select a subset by specifying optional
         arguments for filtering (e.g. a workflow ID).
@@ -106,7 +104,7 @@ class InvocationClient(Client):
             params["offset"] = offset
         return self._get(params=params)
 
-    def show_invocation(self, invocation_id: str) -> Dict[str, Any]:
+    def show_invocation(self, invocation_id: str) -> dict[str, Any]:
         """
         Get a workflow invocation dictionary representing the scheduling of a
         workflow. This dictionary may be sparse at first (missing inputs and
@@ -166,7 +164,7 @@ class InvocationClient(Client):
         allow_tool_state_corrections: bool = False,
         inputs_by: Optional[InputsBy] = None,
         parameters_normalized: bool = False,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Rerun a workflow invocation. For more extensive documentation of all
         parameters, see the ``gi.workflows.invoke_workflow()`` method.
@@ -256,7 +254,7 @@ class InvocationClient(Client):
         url = "/".join((self.gi.url, "workflows", workflow_id, "invocations"))
         return self.gi.make_post_request(url=url, payload=payload, params=api_params)
 
-    def cancel_invocation(self, invocation_id: str) -> Dict[str, Any]:
+    def cancel_invocation(self, invocation_id: str) -> dict[str, Any]:
         """
         Cancel the scheduling of a workflow.
 
@@ -269,7 +267,7 @@ class InvocationClient(Client):
         url = self._make_url(invocation_id)
         return self._delete(url=url)
 
-    def show_invocation_step(self, invocation_id: str, step_id: str) -> Dict[str, Any]:
+    def show_invocation_step(self, invocation_id: str, step_id: str) -> dict[str, Any]:
         """
         See the details of a particular workflow invocation step.
 
@@ -297,7 +295,7 @@ class InvocationClient(Client):
         url = self._invocation_step_url(invocation_id, step_id)
         return self._get(url=url)
 
-    def run_invocation_step_action(self, invocation_id: str, step_id: str, action: Any) -> Dict[str, Any]:
+    def run_invocation_step_action(self, invocation_id: str, step_id: str, action: Any) -> dict[str, Any]:
         """Execute an action for an active workflow invocation step. The
         nature of this action and what is expected will vary based on the
         the type of workflow step (the only currently valid action is True/False
@@ -320,7 +318,7 @@ class InvocationClient(Client):
         payload = {"action": action}
         return self._put(payload=payload, url=url)
 
-    def get_invocation_summary(self, invocation_id: str) -> Dict[str, Any]:
+    def get_invocation_summary(self, invocation_id: str) -> dict[str, Any]:
         """
         Get a summary of an invocation, stating the number of jobs which
         succeed, which are paused and which have errored.
@@ -340,7 +338,7 @@ class InvocationClient(Client):
         url = self._make_url(invocation_id) + "/jobs_summary"
         return self._get(url=url)
 
-    def get_invocation_step_jobs_summary(self, invocation_id: str) -> List[Dict[str, Any]]:
+    def get_invocation_step_jobs_summary(self, invocation_id: str) -> list[dict[str, Any]]:
         """
         Get a detailed summary of an invocation, listing all jobs with
         their job IDs and current states.
@@ -368,7 +366,7 @@ class InvocationClient(Client):
         url = self._make_url(invocation_id) + "/step_jobs_summary"
         return self._get(url=url)
 
-    def get_invocation_report(self, invocation_id: str) -> Dict[str, Any]:
+    def get_invocation_report(self, invocation_id: str) -> dict[str, Any]:
         """
         Get a Markdown report for an invocation.
 
@@ -412,7 +410,7 @@ class InvocationClient(Client):
     # TODO: Move to a new ``bioblend.galaxy.short_term_storage`` module
     def _wait_for_short_term_storage(
         self, storage_request_id: str, maxwait: float = 60, interval: float = 3
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Wait until a short term storage request is ready
 
@@ -433,14 +431,14 @@ class InvocationClient(Client):
         url = f"{self.gi.url}/short_term_storage/{storage_request_id}"
         is_ready_url = f"{url}/ready"
 
-        def check_and_get_short_term_storage() -> Dict[str, Any]:
+        def check_and_get_short_term_storage() -> dict[str, Any]:
             if self._get(url=is_ready_url):
                 return self._get(url=url)
             raise NotReady(f"Storage request {storage_request_id} is not ready")
 
         return wait_on(check_and_get_short_term_storage, maxwait=maxwait, interval=interval)
 
-    def get_invocation_biocompute_object(self, invocation_id: str, maxwait: float = 1200) -> Dict[str, Any]:
+    def get_invocation_biocompute_object(self, invocation_id: str, maxwait: float = 1200) -> dict[str, Any]:
         """
         Get a BioCompute object for an invocation.
 
@@ -472,7 +470,7 @@ class InvocationClient(Client):
 
     def wait_for_invocation(
         self, invocation_id: str, maxwait: float = 12000, interval: float = 3, check: bool = True
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Wait until an invocation is in a terminal state.
 
@@ -495,7 +493,7 @@ class InvocationClient(Client):
         :return: Details of the workflow invocation.
         """
 
-        def check_and_get_invocation() -> Dict[str, Any]:
+        def check_and_get_invocation() -> dict[str, Any]:
             invocation = self.gi.invocations.show_invocation(invocation_id)
             state = invocation["state"]
             if state in INVOCATION_TERMINAL_STATES:

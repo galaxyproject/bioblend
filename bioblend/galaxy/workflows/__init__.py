@@ -6,8 +6,6 @@ import json
 import os
 from typing import (
     Any,
-    Dict,
-    List,
     Literal,
     Optional,
     TYPE_CHECKING,
@@ -30,7 +28,7 @@ class WorkflowClient(Client):
     # the 'deleted' option is not available for workflows
     def get_workflows(
         self, workflow_id: Optional[str] = None, name: Optional[str] = None, published: bool = False
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         Get all workflows, or select a subset by specifying optional arguments
         for filtering (e.g. a workflow name).
@@ -57,7 +55,7 @@ class WorkflowClient(Client):
             raise ValueError(
                 "The workflow_id parameter has been removed, use the show_workflow() method to view details of a workflow for which you know the ID."
             )
-        params: Dict[str, Any] = {}
+        params: dict[str, Any] = {}
         if published:
             params["show_published"] = True
         workflows = self._get(params=params)
@@ -65,7 +63,7 @@ class WorkflowClient(Client):
             workflows = [_ for _ in workflows if _["name"] == name]
         return workflows
 
-    def show_workflow(self, workflow_id: str, version: Optional[int] = None) -> Dict[str, Any]:
+    def show_workflow(self, workflow_id: str, version: Optional[int] = None) -> dict[str, Any]:
         """
         Display information needed to run a workflow.
 
@@ -84,13 +82,13 @@ class WorkflowClient(Client):
              'name': 'Simple',
              'url': '/api/workflows/92c56938c2f9b315'}
         """
-        params: Dict[str, Any] = {}
+        params: dict[str, Any] = {}
         if version is not None:
             params["version"] = version
 
         return self._get(id=workflow_id, params=params)
 
-    def get_workflow_inputs(self, workflow_id: str, label: str) -> List[str]:
+    def get_workflow_inputs(self, workflow_id: str, label: str) -> list[str]:
         """
         Get a list of workflow input IDs that match the given label.
         If no input matches the given label, an empty list is returned.
@@ -108,7 +106,7 @@ class WorkflowClient(Client):
         inputs = wf["inputs"]
         return [id for id in inputs if inputs[id]["label"] == label]
 
-    def import_workflow_dict(self, workflow_dict: Dict[str, Any], publish: bool = False) -> Dict[str, Any]:
+    def import_workflow_dict(self, workflow_dict: dict[str, Any], publish: bool = False) -> dict[str, Any]:
         """
         Imports a new workflow given a dictionary representing a previously
         exported workflow.
@@ -140,7 +138,7 @@ class WorkflowClient(Client):
         url = self._make_url() + "/upload"
         return self._post(url=url, payload=payload)
 
-    def import_workflow_from_local_path(self, file_local_path: str, publish: bool = False) -> Dict[str, Any]:
+    def import_workflow_from_local_path(self, file_local_path: str, publish: bool = False) -> dict[str, Any]:
         """
         Imports a new workflow given the path to a file containing a previously
         exported workflow.
@@ -173,7 +171,7 @@ class WorkflowClient(Client):
 
         return self.import_workflow_dict(workflow_json, publish)
 
-    def import_shared_workflow(self, workflow_id: str) -> Dict[str, Any]:
+    def import_shared_workflow(self, workflow_id: str) -> dict[str, Any]:
         """
         Imports a new workflow from the shared published workflows.
 
@@ -195,7 +193,7 @@ class WorkflowClient(Client):
         url = self._make_url()
         return self._post(url=url, payload=payload)
 
-    def export_workflow_dict(self, workflow_id: str, version: Optional[int] = None) -> Dict[str, Any]:
+    def export_workflow_dict(self, workflow_id: str, version: Optional[int] = None) -> dict[str, Any]:
         """
         Exports a workflow.
 
@@ -208,7 +206,7 @@ class WorkflowClient(Client):
         :rtype: dict
         :return: Dictionary representing the requested workflow
         """
-        params: Dict[str, Any] = {}
+        params: dict[str, Any] = {}
         if version is not None:
             params["version"] = version
 
@@ -246,7 +244,7 @@ class WorkflowClient(Client):
         with open(file_local_path, "w") as fp:
             json.dump(workflow_dict, fp)
 
-    def update_workflow(self, workflow_id: str, **kwargs: Any) -> Dict[str, Any]:
+    def update_workflow(self, workflow_id: str, **kwargs: Any) -> dict[str, Any]:
         """
         Update a given workflow.
 
@@ -291,7 +289,7 @@ class WorkflowClient(Client):
         require_exact_tool_versions: bool = True,
         version: Optional[int] = None,
         use_cached_job: bool = False,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Invoke the workflow identified by ``workflow_id``. This will
         cause a workflow to be scheduled and return an object describing
@@ -477,7 +475,7 @@ class WorkflowClient(Client):
           (which is stable across workflow imports) or the step UUID which is
           also stable.
         """
-        payload: Dict[str, Any] = {
+        payload: dict[str, Any] = {
             "allow_tool_state_corrections": allow_tool_state_corrections,
             "require_exact_tool_versions": require_exact_tool_versions,
             "version": version,
@@ -505,7 +503,7 @@ class WorkflowClient(Client):
         url = self._invocations_url(workflow_id)
         return self._post(payload, url=url)
 
-    def show_invocation(self, workflow_id: str, invocation_id: str) -> Dict[str, Any]:
+    def show_invocation(self, workflow_id: str, invocation_id: str) -> dict[str, Any]:
         """
         Get a workflow invocation object representing the scheduling of a
         workflow. This object may be sparse at first (missing inputs and
@@ -556,7 +554,7 @@ class WorkflowClient(Client):
         url = self._invocation_url(workflow_id, invocation_id)
         return self._get(url=url)
 
-    def get_invocations(self, workflow_id: str) -> List[Dict[str, Any]]:
+    def get_invocations(self, workflow_id: str) -> list[dict[str, Any]]:
         """
         Get a list containing all the workflow invocations corresponding to the
         specified workflow.
@@ -581,7 +579,7 @@ class WorkflowClient(Client):
         url = self._invocations_url(workflow_id)
         return self._get(url=url)
 
-    def cancel_invocation(self, workflow_id: str, invocation_id: str) -> Dict[str, Any]:
+    def cancel_invocation(self, workflow_id: str, invocation_id: str) -> dict[str, Any]:
         """
         Cancel the scheduling of a workflow.
 
@@ -597,7 +595,7 @@ class WorkflowClient(Client):
         url = self._invocation_url(workflow_id, invocation_id)
         return self._delete(url=url)
 
-    def show_invocation_step(self, workflow_id: str, invocation_id: str, step_id: str) -> Dict[str, Any]:
+    def show_invocation_step(self, workflow_id: str, invocation_id: str, step_id: str) -> dict[str, Any]:
         """
         See the details of a particular workflow invocation step.
 
@@ -630,7 +628,7 @@ class WorkflowClient(Client):
 
     def run_invocation_step_action(
         self, workflow_id: str, invocation_id: str, step_id: str, action: Any
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Execute an action for an active workflow invocation step. The
         nature of this action and what is expected will vary based on the
         the type of workflow step (the only currently valid action is True/False
@@ -670,8 +668,8 @@ class WorkflowClient(Client):
         self._delete(id=workflow_id)
 
     def refactor_workflow(
-        self, workflow_id: str, actions: List[Dict[str, Any]], dry_run: bool = False
-    ) -> Dict[str, Any]:
+        self, workflow_id: str, actions: list[dict[str, Any]], dry_run: bool = False
+    ) -> dict[str, Any]:
         """
         Refactor workflow with given actions.
 
@@ -716,10 +714,10 @@ class WorkflowClient(Client):
         self,
         history_id: str,
         workflow_name: str,
-        job_ids: Optional[List[str]] = None,
-        dataset_hids: Optional[List[str]] = None,
-        dataset_collection_hids: Optional[List[str]] = None,
-    ) -> Dict[str, Any]:
+        job_ids: Optional[list[str]] = None,
+        dataset_hids: Optional[list[str]] = None,
+        dataset_collection_hids: Optional[list[str]] = None,
+    ) -> dict[str, Any]:
         """
         Extract a workflow from a history.
 
@@ -752,7 +750,7 @@ class WorkflowClient(Client):
         }
         return self._post(payload=payload)
 
-    def show_versions(self, workflow_id: str) -> List[Dict[str, Any]]:
+    def show_versions(self, workflow_id: str) -> list[dict[str, Any]]:
         """
         Get versions for a workflow.
 

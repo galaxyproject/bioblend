@@ -2,10 +2,7 @@
 Contains possible interactions with the Galaxy FTP Files
 """
 
-from typing import (
-    List,
-    TYPE_CHECKING,
-)
+from typing import TYPE_CHECKING
 
 from bioblend.galaxy.client import Client
 
@@ -19,7 +16,7 @@ class FTPFilesClient(Client):
     def __init__(self, galaxy_instance: "GalaxyInstance") -> None:
         super().__init__(galaxy_instance)
 
-    def get_ftp_files(self, deleted: bool = False) -> List[dict]:
+    def get_ftp_files(self, deleted: bool = False) -> list[dict]:
         """
         Get a list of local files.
 

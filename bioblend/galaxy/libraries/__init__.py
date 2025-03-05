@@ -5,8 +5,6 @@ Contains possible interactions with the Galaxy Data Libraries
 import logging
 from typing import (
     Any,
-    Dict,
-    List,
     Literal,
     Optional,
     TYPE_CHECKING,
@@ -36,7 +34,7 @@ class LibraryClient(Client):
 
     def create_library(
         self, name: str, description: Optional[str] = None, synopsis: Optional[str] = None
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Create a data library with the properties defined in the arguments.
 
@@ -64,7 +62,7 @@ class LibraryClient(Client):
             payload["synopsis"] = synopsis
         return self._post(payload)
 
-    def delete_library(self, library_id: str) -> Dict[str, Any]:
+    def delete_library(self, library_id: str) -> dict[str, Any]:
         """
         Delete a data library.
 
@@ -81,14 +79,14 @@ class LibraryClient(Client):
         """
         return self._delete(id=library_id)
 
-    def _show_item(self, library_id: str, item_id: str) -> Dict[str, Any]:
+    def _show_item(self, library_id: str, item_id: str) -> dict[str, Any]:
         """
         Get details about a given library item.
         """
         url = "/".join((self._make_url(library_id, contents=True), item_id))
         return self._get(url=url)
 
-    def delete_library_dataset(self, library_id: str, dataset_id: str, purged: bool = False) -> Dict[str, Any]:
+    def delete_library_dataset(self, library_id: str, dataset_id: str, purged: bool = False) -> dict[str, Any]:
         """
         Delete a library dataset in a data library.
 
@@ -113,7 +111,7 @@ class LibraryClient(Client):
         url = "/".join((self._make_url(library_id, contents=True), dataset_id))
         return self._delete(payload={"purged": purged}, url=url)
 
-    def update_library_dataset(self, dataset_id: str, **kwargs: Any) -> Dict[str, Any]:
+    def update_library_dataset(self, dataset_id: str, **kwargs: Any) -> dict[str, Any]:
         """
         Update library dataset metadata. Some of the attributes that can be
         modified are documented below.
@@ -142,7 +140,7 @@ class LibraryClient(Client):
         url = "/".join((self._make_url(), "datasets", dataset_id))
         return self._patch(payload=kwargs, url=url)
 
-    def show_dataset(self, library_id: str, dataset_id: str) -> Dict[str, Any]:
+    def show_dataset(self, library_id: str, dataset_id: str) -> dict[str, Any]:
         """
         Get details about a given library dataset. The required ``library_id``
         can be obtained from the datasets's library content details.
@@ -161,7 +159,7 @@ class LibraryClient(Client):
 
     def wait_for_dataset(
         self, library_id: str, dataset_id: str, maxwait: float = 12000, interval: float = 3
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Wait until the library dataset state is terminal ('ok', 'empty',
         'error', 'discarded' or 'failed_metadata').
@@ -185,7 +183,7 @@ class LibraryClient(Client):
           library
         """
 
-        def check_and_get_library_dataset() -> Dict[str, Any]:
+        def check_and_get_library_dataset() -> dict[str, Any]:
             dataset = self.show_dataset(library_id, dataset_id)
             state = dataset["state"]
             if state in TERMINAL_STATES:
@@ -194,7 +192,7 @@ class LibraryClient(Client):
 
         return wait_on(check_and_get_library_dataset, maxwait=maxwait, interval=interval)
 
-    def show_folder(self, library_id: str, folder_id: str) -> Dict[str, Any]:
+    def show_folder(self, library_id: str, folder_id: str) -> dict[str, Any]:
         """
         Get details about a given folder. The required ``folder_id`` can be
         obtained from the folder's library content details.
@@ -222,7 +220,7 @@ class LibraryClient(Client):
 
     def create_folder(
         self, library_id: str, folder_name: str, description: Optional[str] = None, base_folder_id: Optional[str] = None
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         Create a folder in a library.
 
@@ -257,7 +255,7 @@ class LibraryClient(Client):
 
     def get_folders(
         self, library_id: str, folder_id: Optional[str] = None, name: Optional[str] = None
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         Get all the folders in a library, or select a subset by specifying a
         folder name for filtering.
@@ -290,7 +288,7 @@ class LibraryClient(Client):
 
     def get_libraries(
         self, library_id: Optional[str] = None, name: Optional[str] = None, deleted: Optional[bool] = False
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         Get all libraries, or select a subset by specifying optional arguments
         for filtering (e.g. a library name).
@@ -319,7 +317,7 @@ class LibraryClient(Client):
             libraries = [_ for _ in libraries if _["name"] == name]
         return libraries
 
-    def show_library(self, library_id: str, contents: bool = False) -> Dict[str, Any]:
+    def show_library(self, library_id: str, contents: bool = False) -> dict[str, Any]:
         """
         Get information about a library.
 
@@ -335,7 +333,7 @@ class LibraryClient(Client):
         """
         return self._get(id=library_id, contents=contents)
 
-    def _do_upload(self, library_id: str, **kwargs: Any) -> List[Dict[str, Any]]:
+    def _do_upload(self, library_id: str, **kwargs: Any) -> list[dict[str, Any]]:
         """
         Set up the POST request and do the actual data upload to a data library.
         This method should not be called directly but instead refer to the
@@ -391,8 +389,8 @@ class LibraryClient(Client):
         folder_id: Optional[str] = None,
         file_type: str = "auto",
         dbkey: str = "?",
-        tags: Optional[List[str]] = None,
-    ) -> List[Dict[str, Any]]:
+        tags: Optional[list[str]] = None,
+    ) -> list[dict[str, Any]]:
         """
         Upload a file to a library from a URL.
 
@@ -429,8 +427,8 @@ class LibraryClient(Client):
         folder_id: Optional[str] = None,
         file_type: str = "auto",
         dbkey: str = "?",
-        tags: Optional[List[str]] = None,
-    ) -> List[Dict[str, Any]]:
+        tags: Optional[list[str]] = None,
+    ) -> list[dict[str, Any]]:
         """
         Upload pasted_content to a data library as a new file.
 
@@ -467,8 +465,8 @@ class LibraryClient(Client):
         folder_id: Optional[str] = None,
         file_type: str = "auto",
         dbkey: str = "?",
-        tags: Optional[List[str]] = None,
-    ) -> List[Dict[str, Any]]:
+        tags: Optional[list[str]] = None,
+    ) -> list[dict[str, Any]]:
         """
         Read local file contents from file_local_path and upload data to a
         library.
@@ -515,8 +513,8 @@ class LibraryClient(Client):
         roles: str = "",
         preserve_dirs: bool = False,
         tag_using_filenames: bool = False,
-        tags: Optional[List[str]] = None,
-    ) -> List[Dict[str, Any]]:
+        tags: Optional[list[str]] = None,
+    ) -> list[dict[str, Any]]:
         """
         Upload all files in the specified subdirectory of the Galaxy library
         import directory to a library.
@@ -593,8 +591,8 @@ class LibraryClient(Client):
         roles: str = "",
         preserve_dirs: bool = False,
         tag_using_filenames: bool = False,
-        tags: Optional[List[str]] = None,
-    ) -> List[Dict[str, Any]]:
+        tags: Optional[list[str]] = None,
+    ) -> list[dict[str, Any]]:
         """
         Upload a set of files already present on the filesystem of the Galaxy
         server to a library.
@@ -661,7 +659,7 @@ class LibraryClient(Client):
 
     def copy_from_dataset(
         self, library_id: str, dataset_id: str, folder_id: Optional[str] = None, message: str = ""
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Copy a Galaxy dataset into a library.
 
@@ -691,7 +689,7 @@ class LibraryClient(Client):
         }
         return self._post(payload, id=library_id, contents=True)
 
-    def get_library_permissions(self, library_id: str) -> Dict[str, Any]:
+    def get_library_permissions(self, library_id: str) -> dict[str, Any]:
         """
         Get the permissions for a library.
 
@@ -704,7 +702,7 @@ class LibraryClient(Client):
         url = self._make_url(library_id) + "/permissions"
         return self._get(url=url)
 
-    def get_dataset_permissions(self, dataset_id: str) -> Dict[str, Any]:
+    def get_dataset_permissions(self, dataset_id: str) -> dict[str, Any]:
         """
         Get the permissions for a dataset.
 
@@ -720,11 +718,11 @@ class LibraryClient(Client):
     def set_library_permissions(
         self,
         library_id: str,
-        access_in: Optional[List[str]] = None,
-        modify_in: Optional[List[str]] = None,
-        add_in: Optional[List[str]] = None,
-        manage_in: Optional[List[str]] = None,
-    ) -> Dict[str, Any]:
+        access_in: Optional[list[str]] = None,
+        modify_in: Optional[list[str]] = None,
+        add_in: Optional[list[str]] = None,
+        manage_in: Optional[list[str]] = None,
+    ) -> dict[str, Any]:
         """
         Set the permissions for a library. Note: it will override all security
         for this library even if you leave out a permission type.
@@ -747,7 +745,7 @@ class LibraryClient(Client):
         :rtype: dict
         :return: General information about the library
         """
-        payload: Dict[str, List[str]] = {}
+        payload: dict[str, list[str]] = {}
         if access_in:
             payload["LIBRARY_ACCESS_in"] = access_in
         if modify_in:
@@ -762,10 +760,10 @@ class LibraryClient(Client):
     def set_dataset_permissions(
         self,
         dataset_id: str,
-        access_in: Optional[List[str]] = None,
-        modify_in: Optional[List[str]] = None,
-        manage_in: Optional[List[str]] = None,
-    ) -> Dict[str, Any]:
+        access_in: Optional[list[str]] = None,
+        modify_in: Optional[list[str]] = None,
+        manage_in: Optional[list[str]] = None,
+    ) -> dict[str, Any]:
         """
         Set the permissions for a dataset. Note: it will override all security
         for this dataset even if you leave out a permission type.
@@ -786,7 +784,7 @@ class LibraryClient(Client):
         :return: dictionary with all applicable permissions' values
         """
         # we need here to define an action
-        payload: Dict[str, Any] = {
+        payload: dict[str, Any] = {
             "action": "set_permissions",
         }
         if access_in:

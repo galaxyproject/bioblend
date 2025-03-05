@@ -1,10 +1,7 @@
 import json
 import os
 import sys
-from typing import (
-    Any,
-    Dict,
-)
+from typing import Any
 
 from common import get_one  # noqa:I100,I201
 
@@ -55,7 +52,7 @@ input_map = {
 lengths = {"19", "23", "29"}
 ws_ids = iw.tool_labels_to_ids["velveth"]
 assert len(ws_ids) == len(lengths)
-params: Dict[str, Any] = {id_: {"hash_length": v} for id_, v in zip(ws_ids, lengths)}
+params: dict[str, Any] = {id_: {"hash_length": v} for id_, v in zip(ws_ids, lengths)}
 
 # Set the "ins_length" runtime parameter to the same value for the 3
 # "velvetg" steps

@@ -1,9 +1,6 @@
 import os
 import tempfile
-from typing import (
-    Any,
-    List,
-)
+from typing import Any
 
 from . import (
     GalaxyTestBase,
@@ -13,7 +10,7 @@ from . import (
 FOO_DATA = "foo\nbar\n"
 
 
-def listify(item: Any) -> List:
+def listify(item: Any) -> list:
     # Slightly simplified version of listify() from
     # https://github.com/galaxyproject/galaxy/blob/dev/lib/galaxy/util/__init__.py
     if not item:

@@ -7,7 +7,6 @@ the environment variable ``BIOBLEND_TEST_SUITE`` to ``quick``.
 import os
 import sys
 from typing import (
-    List,
     NoReturn,
     Optional,
 )
@@ -29,7 +28,7 @@ quick_tests = [
 ]
 
 
-def main(args: Optional[List[str]] = None) -> NoReturn:
+def main(args: Optional[list[str]] = None) -> NoReturn:
     """Entry point that delegates to pytest.main."""
     if pytest is None:
         raise Exception("pytest is required to use this script.")

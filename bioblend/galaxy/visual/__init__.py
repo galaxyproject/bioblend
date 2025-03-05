@@ -4,8 +4,6 @@ Contains possible interactions with the Galaxy visualization
 
 from typing import (
     Any,
-    Dict,
-    List,
     TYPE_CHECKING,
 )
 
@@ -21,7 +19,7 @@ class VisualClient(Client):
     def __init__(self, galaxy_instance: "GalaxyInstance") -> None:
         super().__init__(galaxy_instance)
 
-    def get_visualizations(self) -> List[Dict[str, Any]]:
+    def get_visualizations(self) -> list[dict[str, Any]]:
         """
         Get the list of all visualizations.
 
@@ -42,7 +40,7 @@ class VisualClient(Client):
         """
         return self._get()
 
-    def show_visualization(self, visual_id: str) -> Dict[str, Any]:
+    def show_visualization(self, visual_id: str) -> dict[str, Any]:
         """
         Get details of a given visualization.
 

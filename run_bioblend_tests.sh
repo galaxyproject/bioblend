@@ -14,7 +14,7 @@ Options:
   -p PORT
       Port to use for the Galaxy server. Defaults to 8080.
   -e TOX_ENV
-      Work against specified tox environments. Defaults to py38.
+      Work against specified tox environments. Defaults to py39.
   -t BIOBLEND_TESTS
       Subset of tests to run, e.g.
       'tests/TestGalaxyObjects.py::TestHistory::test_create_delete' . Defaults
@@ -33,7 +33,7 @@ get_abs_dirname () {
     cd "$1" && pwd
 }
 
-e_val=py38
+e_val=py39
 GALAXY_PORT=8080
 while getopts 'hcg:e:p:t:r:v:' option; do
     case $option in

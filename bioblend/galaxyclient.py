@@ -12,7 +12,6 @@ import json
 import logging
 from typing import (
     Any,
-    Dict,
     Optional,
     Union,
 )
@@ -81,7 +80,7 @@ class GalaxyClient:
             self._key = None
             self.email = email
             self.password = password
-        self.json_headers: Dict[str, Union[str, bytes, None]] = {"Content-Type": "application/json"}
+        self.json_headers: dict[str, Union[str, bytes, None]] = {"Content-Type": "application/json"}
         if user_agent:
             self.json_headers["User-Agent"] = user_agent
         # json_headers needs to be set before key can be defined, otherwise authentication with email/password causes an error

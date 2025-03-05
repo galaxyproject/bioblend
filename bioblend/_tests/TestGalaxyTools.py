@@ -1,10 +1,7 @@
 """ """
 
 import os
-from typing import (
-    Any,
-    Dict,
-)
+from typing import Any
 
 from bioblend.galaxy.tools.inputs import (
     conditional,
@@ -155,7 +152,7 @@ class TestGalaxyTools(GalaxyTestBase.GalaxyTestBase):
         assert len(citations) == 2
 
     def _wait_for_and_verify_upload(
-        self, tool_output: Dict[str, Any], file_name: str, fn: str, expected_dbkey: str = "?"
+        self, tool_output: dict[str, Any], file_name: str, fn: str, expected_dbkey: str = "?"
     ) -> None:
         assert len(tool_output["outputs"]) == 1
         output = tool_output["outputs"][0]

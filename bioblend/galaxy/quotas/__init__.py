@@ -4,8 +4,6 @@ Contains possible interactions with the Galaxy Quota
 
 from typing import (
     Any,
-    Dict,
-    List,
     Literal,
     Optional,
     TYPE_CHECKING,
@@ -26,7 +24,7 @@ class QuotaClient(Client):
     def __init__(self, galaxy_instance: "GalaxyInstance") -> None:
         super().__init__(galaxy_instance)
 
-    def get_quotas(self, deleted: bool = False) -> List[Dict[str, Any]]:
+    def get_quotas(self, deleted: bool = False) -> list[dict[str, Any]]:
         """
         Get a list of quotas
 
@@ -48,7 +46,7 @@ class QuotaClient(Client):
         """
         return self._get(deleted=deleted)
 
-    def show_quota(self, quota_id: str, deleted: bool = False) -> Dict[str, Any]:
+    def show_quota(self, quota_id: str, deleted: bool = False) -> dict[str, Any]:
         """
         Display information on a quota
 
@@ -82,9 +80,9 @@ class QuotaClient(Client):
         amount: str,
         operation: QuotaOperations,
         default: Optional[DefaultQuotaValues] = "no",
-        in_users: Optional[List[str]] = None,
-        in_groups: Optional[List[str]] = None,
-    ) -> Dict[str, Any]:
+        in_users: Optional[list[str]] = None,
+        in_groups: Optional[list[str]] = None,
+    ) -> dict[str, Any]:
         """
         Create a new quota
 
@@ -121,7 +119,7 @@ class QuotaClient(Client):
              'id': '386f14984287a0f7',
              'name': 'Testing'}
         """
-        payload: Dict[str, Any] = {
+        payload: dict[str, Any] = {
             "name": name,
             "description": description,
             "amount": amount,
@@ -144,8 +142,8 @@ class QuotaClient(Client):
         amount: Optional[str] = None,
         operation: Optional[QuotaOperations] = "=",
         default: Optional[DefaultQuotaValues] = None,
-        in_users: Optional[List[str]] = None,
-        in_groups: Optional[List[str]] = None,
+        in_users: Optional[list[str]] = None,
+        in_groups: Optional[list[str]] = None,
     ) -> str:
         """
         Update an existing quota
@@ -187,7 +185,7 @@ class QuotaClient(Client):
 
             "Quota 'Testing-A' has been renamed to 'Testing-B'; Quota 'Testing-e' is now '-100.0 GB'; Quota 'Testing-B' is now the default for unregistered users"
         """
-        payload: Dict[str, Any] = {"default": default}
+        payload: dict[str, Any] = {"default": default}
         if name:
             payload["name"] = name
 

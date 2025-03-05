@@ -4,8 +4,6 @@ Contains possible interactions with the Galaxy Forms
 
 from typing import (
     Any,
-    Dict,
-    List,
     TYPE_CHECKING,
 )
 
@@ -21,7 +19,7 @@ class FormsClient(Client):
     def __init__(self, galaxy_instance: "GalaxyInstance") -> None:
         super().__init__(galaxy_instance)
 
-    def get_forms(self) -> List[Dict[str, Any]]:
+    def get_forms(self) -> list[dict[str, Any]]:
         """
         Get the list of all forms.
 
@@ -40,7 +38,7 @@ class FormsClient(Client):
         """
         return self._get()
 
-    def show_form(self, form_id: str) -> Dict[str, Any]:
+    def show_form(self, form_id: str) -> dict[str, Any]:
         """
         Get details of a given form.
 
@@ -62,7 +60,7 @@ class FormsClient(Client):
         """
         return self._get(id=form_id)
 
-    def create_form(self, form_xml_text: str) -> List[Dict[str, Any]]:
+    def create_form(self, form_xml_text: str) -> list[dict[str, Any]]:
         """
         Create a new form.
 

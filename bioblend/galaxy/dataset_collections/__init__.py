@@ -1,8 +1,6 @@
 import logging
 from typing import (
     Any,
-    Dict,
-    List,
     Optional,
     TYPE_CHECKING,
     Union,
@@ -28,12 +26,12 @@ class HasElements:
         self,
         name: str,
         type: str = "list",
-        elements: Optional[Union[List[Union["CollectionElement", "SimpleElement"]], Dict[str, Any]]] = None,
+        elements: Optional[Union[list[Union["CollectionElement", "SimpleElement"]], dict[str, Any]]] = None,
     ) -> None:
         self.name = name
         self.type = type
         if isinstance(elements, dict):
-            self.elements: List[Union[CollectionElement, SimpleElement]] = [
+            self.elements: list[Union[CollectionElement, SimpleElement]] = [
                 HistoryDatasetElement(name=key, id=value) for key, value in elements.values()
             ]
         elif elements:
@@ -45,7 +43,7 @@ class HasElements:
 
 
 class CollectionDescription(HasElements):
-    def to_dict(self) -> Dict[str, Union[str, List]]:
+    def to_dict(self) -> dict[str, Union[str, list]]:
         return {
             "name": self.name,
             "collection_type": self.type,
@@ -54,7 +52,7 @@ class CollectionDescription(HasElements):
 
 
 class CollectionElement(HasElements):
-    def to_dict(self) -> Dict[str, Union[str, List]]:
+    def to_dict(self) -> dict[str, Union[str, list]]:
         return {
             "src": "new_collection",
             "name": self.name,
@@ -64,10 +62,10 @@ class CollectionElement(HasElements):
 
 
 class SimpleElement:
-    def __init__(self, value: Dict[str, str]) -> None:
+    def __init__(self, value: dict[str, str]) -> None:
         self.value = value
 
-    def to_dict(self) -> Dict[str, str]:
+    def to_dict(self) -> dict[str, str]:
         return self.value
 
 
@@ -111,7 +109,7 @@ class DatasetCollectionClient(Client):
     def __init__(self, galaxy_instance: "GalaxyInstance") -> None:
         super().__init__(galaxy_instance)
 
-    def show_dataset_collection(self, dataset_collection_id: str, instance_type: str = "history") -> Dict[str, Any]:
+    def show_dataset_collection(self, dataset_collection_id: str, instance_type: str = "history") -> dict[str, Any]:
         """
         Get details of a given dataset collection of the current user
 
@@ -130,7 +128,7 @@ class DatasetCollectionClient(Client):
         url = self._make_url(module_id=dataset_collection_id)
         return self._get(id=dataset_collection_id, url=url, params=params)
 
-    def download_dataset_collection(self, dataset_collection_id: str, file_path: str) -> Dict[str, Any]:
+    def download_dataset_collection(self, dataset_collection_id: str, file_path: str) -> dict[str, Any]:
         """
         Download a history dataset collection as an archive.
 
@@ -167,7 +165,7 @@ class DatasetCollectionClient(Client):
         interval: float = 3,
         proportion_complete: float = 1.0,
         check: bool = True,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Wait until all or a specified proportion of elements of a dataset
         collection are in a terminal state.
@@ -202,7 +200,7 @@ class DatasetCollectionClient(Client):
         """
         assert 0 <= proportion_complete <= 1
 
-        def check_and_get_dataset_collection() -> Dict[str, Any]:
+        def check_and_get_dataset_collection() -> dict[str, Any]:
             dataset_collection = self.show_dataset_collection(dataset_collection_id)
             states = [elem["object"]["state"] for elem in dataset_collection["elements"]]
             terminal_states = [state for state in states if state in TERMINAL_STATES]

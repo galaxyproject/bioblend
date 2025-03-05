@@ -4,8 +4,6 @@ Interaction with a Tool Shed instance categories
 
 from typing import (
     Any,
-    Dict,
-    List,
     Literal,
     TYPE_CHECKING,
 )
@@ -22,7 +20,7 @@ class ToolShedCategoryClient(Client):
     def __init__(self, toolshed_instance: "ToolShedInstance") -> None:
         super().__init__(toolshed_instance)
 
-    def get_categories(self, deleted: bool = False) -> List[Dict[str, Any]]:
+    def get_categories(self, deleted: bool = False) -> list[dict[str, Any]]:
         """
         Returns a list of dictionaries that contain descriptions of the
         repository categories found on the given Tool Shed instance.
@@ -47,7 +45,7 @@ class ToolShedCategoryClient(Client):
         """
         return self._get(deleted=deleted)
 
-    def show_category(self, category_id: str) -> Dict[str, Any]:
+    def show_category(self, category_id: str) -> dict[str, Any]:
         """
         Get details of a given category.
 
@@ -61,7 +59,7 @@ class ToolShedCategoryClient(Client):
 
     def get_repositories(
         self, category_id: str, sort_key: Literal["name", "owner"] = "name", sort_order: Literal["asc", "desc"] = "asc"
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Returns a dictionary of information for a repository category including
         a list of repositories belonging to the category.
@@ -121,7 +119,7 @@ class ToolShedCategoryClient(Client):
              'url': '/api/categories/589548af7e391bcf'}
         """
 
-        params: Dict[str, Any] = {}
+        params: dict[str, Any] = {}
         if sort_key:
             params.update({"sort_key": sort_key})
         if sort_order:

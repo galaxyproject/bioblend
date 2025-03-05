@@ -4,7 +4,6 @@ Interaction with a Tool Shed instance tools
 
 from typing import (
     Any,
-    Dict,
     TYPE_CHECKING,
 )
 
@@ -21,7 +20,7 @@ class ToolShedToolClient(Client):
     def __init__(self, toolshed_instance: "ToolShedInstance") -> None:
         super().__init__(toolshed_instance)
 
-    def search_tools(self, q: str, page: int = 1, page_size: int = 10) -> Dict[str, Any]:
+    def search_tools(self, q: str, page: int = 1, page_size: int = 10) -> dict[str, Any]:
         """
         Search for tools in a Galaxy Tool Shed.
 

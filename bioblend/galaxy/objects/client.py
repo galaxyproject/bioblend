@@ -6,18 +6,16 @@ via their handles in :class:`~.galaxy_instance.GalaxyInstance`.
 """
 
 import abc
+import builtins
 import json
 from collections.abc import Sequence
 from typing import (
     Any,
     cast,
-    Dict,
     Generic,
-    List,
     Literal,
     Optional,
     overload,
-    Type,
     TYPE_CHECKING,
     Union,
 )
@@ -86,7 +84,9 @@ class ObjClient(abc.ABC):
         else:
             return id_
 
-    def _get_dict(self, meth_name: str, reply: Optional[Union[Dict[str, Any], List[Dict[str, Any]]]]) -> Dict[str, Any]:
+    def _get_dict(
+        self, meth_name: str, reply: Optional[Union[dict[str, Any], builtins.list[dict[str, Any]]]]
+    ) -> dict[str, Any]:
         if reply is None:
             raise RuntimeError(f"{meth_name}: no reply")
         elif isinstance(reply, dict):
@@ -100,8 +100,8 @@ class ObjClient(abc.ABC):
 class ObjDatasetContainerClient(
     ObjClient, Generic[wrappers.DatasetContainerSubtype, wrappers.DatasetContainerPreviewSubtype]
 ):
-    CONTAINER_TYPE: Type[wrappers.DatasetContainer]
-    CONTAINER_PREVIEW_TYPE: Type[wrappers.DatasetContainerPreview]
+    CONTAINER_TYPE: type[wrappers.DatasetContainer]
+    CONTAINER_PREVIEW_TYPE: type[wrappers.DatasetContainerPreview]
 
     def __init__(self, obj_gi: "GalaxyInstance") -> None:
         super().__init__(obj_gi=obj_gi)
@@ -113,7 +113,7 @@ class ObjDatasetContainerClient(
 
     def get_previews(
         self, name: Optional[str] = None, deleted: bool = False, **kwargs: Any
-    ) -> List[wrappers.DatasetContainerPreviewSubtype]:
+    ) -> list[wrappers.DatasetContainerPreviewSubtype]:
         dicts = self._get_f(name=name, deleted=deleted, **kwargs)
         return [
             cast(wrappers.DatasetContainerPreviewSubtype, self.CONTAINER_PREVIEW_TYPE(_, gi=self.obj_gi)) for _ in dicts
@@ -150,7 +150,7 @@ class ObjLibraryClient(ObjDatasetContainerClient[wrappers.Library, wrappers.Libr
         lib_info = self._get_dict("create_library", res)
         return self.get(lib_info["id"])
 
-    def list(self, name: Optional[str] = None, deleted: bool = False) -> List[wrappers.Library]:
+    def list(self, name: Optional[str] = None, deleted: bool = False) -> list[wrappers.Library]:
         """
         Get libraries owned by the user of this Galaxy instance.
 
@@ -205,7 +205,7 @@ class ObjHistoryClient(ObjDatasetContainerClient[wrappers.History, wrappers.Hist
         hist_info = self._get_dict("create_history", res)
         return self.get(hist_info["id"])
 
-    def list(self, name: Optional[str] = None, deleted: bool = False) -> List[wrappers.History]:
+    def list(self, name: Optional[str] = None, deleted: bool = False) -> list[wrappers.History]:
         """
         Get histories owned by the user of this Galaxy instance.
 
@@ -244,7 +244,7 @@ class ObjWorkflowClient(ObjClient):
     Interacts with Galaxy workflows.
     """
 
-    def import_new(self, src: Union[str, Dict[str, Any]], publish: bool = False) -> wrappers.Workflow:
+    def import_new(self, src: Union[str, dict[str, Any]], publish: bool = False) -> wrappers.Workflow:
         """
         Imports a new workflow into Galaxy.
 
@@ -297,12 +297,12 @@ class ObjWorkflowClient(ObjClient):
     # the 'deleted' option is not available for workflows
     def get_previews(
         self, name: Optional[str] = None, published: bool = False, **kwargs: Any
-    ) -> List[wrappers.WorkflowPreview]:
+    ) -> list[wrappers.WorkflowPreview]:
         dicts = self.gi.workflows.get_workflows(name=name, published=published, **kwargs)
         return [wrappers.WorkflowPreview(_, gi=self.obj_gi) for _ in dicts]
 
     # the 'deleted' option is not available for workflows
-    def list(self, name: Optional[str] = None, published: bool = False) -> List[wrappers.Workflow]:
+    def list(self, name: Optional[str] = None, published: bool = False) -> list[wrappers.Workflow]:
         """
         Get workflows owned by the user of this Galaxy instance.
 
@@ -345,7 +345,7 @@ class ObjInvocationClient(ObjClient):
         inv_dict = self.gi.invocations.show_invocation(id_)
         return wrappers.Invocation(inv_dict, self.obj_gi)
 
-    def get_previews(self, **kwargs: Any) -> List[wrappers.InvocationPreview]:
+    def get_previews(self, **kwargs: Any) -> list[wrappers.InvocationPreview]:
         """
         Get previews of all invocations.
 
@@ -362,7 +362,7 @@ class ObjInvocationClient(ObjClient):
         include_terminal: bool = True,
         limit: Optional[int] = None,
         offset: Optional[int] = None,
-    ) -> List[wrappers.Invocation]:
+    ) -> list[wrappers.Invocation]:
         """
         Get full listing of workflow invocations, or select a subset
         by specifying optional arguments for filtering (e.g. a workflow).
@@ -422,7 +422,7 @@ class ObjToolClient(ObjClient):
         tool_dict = self._get_dict("show_tool", res)
         return wrappers.Tool(tool_dict, gi=self.obj_gi)
 
-    def get_previews(self, name: Optional[str] = None, trackster: bool = False, **kwargs: Any) -> List[wrappers.Tool]:
+    def get_previews(self, name: Optional[str] = None, trackster: bool = False, **kwargs: Any) -> list[wrappers.Tool]:
         """
         Get the list of tools installed on the Galaxy instance.
 
@@ -439,7 +439,7 @@ class ObjToolClient(ObjClient):
         return [wrappers.Tool(_, gi=self.obj_gi) for _ in dicts]
 
     # the 'deleted' option is not available for tools
-    def list(self, name: Optional[str] = None, trackster: bool = False) -> List[wrappers.Tool]:
+    def list(self, name: Optional[str] = None, trackster: bool = False) -> list[wrappers.Tool]:
         """
         Get the list of tools installed on the Galaxy instance.
 
@@ -484,11 +484,11 @@ class ObjJobClient(ObjClient):
         job_dict = self._get_dict("show_job", res)
         return wrappers.Job(job_dict, gi=self.obj_gi)
 
-    def get_previews(self, **kwargs: Any) -> List[wrappers.JobPreview]:
+    def get_previews(self, **kwargs: Any) -> list[wrappers.JobPreview]:
         dicts = self.gi.jobs.get_jobs(**kwargs)
         return [wrappers.JobPreview(_, gi=self.obj_gi) for _ in dicts]
 
-    def list(self) -> List[wrappers.Job]:
+    def list(self) -> list[wrappers.Job]:
         """
         Get the list of jobs of the current user.
 

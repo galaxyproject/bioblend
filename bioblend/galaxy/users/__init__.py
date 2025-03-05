@@ -6,8 +6,6 @@ Most of these methods must be executed by a registered Galaxy admin user.
 
 from typing import (
     Any,
-    Dict,
-    List,
     Optional,
     TYPE_CHECKING,
 )
@@ -31,7 +29,7 @@ class UserClient(Client):
         f_email: Optional[str] = None,
         f_name: Optional[str] = None,
         f_any: Optional[str] = None,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         Get a list of all registered users. If ``deleted`` is set to ``True``,
         get a list of deleted users.
@@ -66,7 +64,7 @@ class UserClient(Client):
                      'url': '/api/users/dda47097d9189f15'}]
 
         """
-        params: Dict[str, Any] = {}
+        params: dict[str, Any] = {}
         if f_email:
             params["f_email"] = f_email
         if f_name:
@@ -75,7 +73,7 @@ class UserClient(Client):
             params["f_any"] = f_any
         return self._get(deleted=deleted, params=params)
 
-    def show_user(self, user_id: str, deleted: bool = False) -> Dict[str, Any]:
+    def show_user(self, user_id: str, deleted: bool = False) -> dict[str, Any]:
         """
         Display information about a user.
 
@@ -90,7 +88,7 @@ class UserClient(Client):
         """
         return self._get(id=user_id, deleted=deleted)
 
-    def create_remote_user(self, user_email: str) -> Dict[str, Any]:
+    def create_remote_user(self, user_email: str) -> dict[str, Any]:
         """
         Create a new Galaxy remote user.
 
@@ -113,7 +111,7 @@ class UserClient(Client):
         }
         return self._post(payload)
 
-    def create_local_user(self, username: str, user_email: str, password: str) -> Dict[str, Any]:
+    def create_local_user(self, username: str, user_email: str, password: str) -> dict[str, Any]:
         """
         Create a new Galaxy local user.
 
@@ -142,7 +140,7 @@ class UserClient(Client):
         }
         return self._post(payload)
 
-    def get_current_user(self) -> Dict[str, Any]:
+    def get_current_user(self) -> dict[str, Any]:
         """
         Display information about the user associated with this Galaxy
         connection.
@@ -169,7 +167,7 @@ class UserClient(Client):
         }
         return self._post(payload, url=url)
 
-    def delete_user(self, user_id: str, purge: bool = False) -> Dict[str, Any]:
+    def delete_user(self, user_id: str, purge: bool = False) -> dict[str, Any]:
         """
         Delete a user.
 
@@ -232,7 +230,7 @@ class UserClient(Client):
         url = self._make_url(user_id) + "/api_key"
         return self._get(url=url)
 
-    def update_user(self, user_id: str, user_data: Optional[Dict] = None, **kwargs: Any) -> Dict[str, Any]:
+    def update_user(self, user_id: str, user_data: Optional[dict] = None, **kwargs: Any) -> dict[str, Any]:
         """
         Update user information. You can either pass the attributes you want to
         change in the user_data dictionary, or provide them separately as

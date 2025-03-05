@@ -4,7 +4,6 @@ import tempfile
 from inspect import signature
 from typing import (
     Any,
-    Dict,
     Union,
 )
 from zipfile import ZipFile
@@ -186,7 +185,7 @@ class TestGalaxyDatasetCollections(GalaxyTestBase.GalaxyTestBase):
         for element in dataset_collection["elements"]:
             assert element["object"]["state"] == "ok"
 
-    def _create_pair_in_history(self, history_id: str) -> Dict[str, Any]:
+    def _create_pair_in_history(self, history_id: str) -> dict[str, Any]:
         dataset1_id = self._test_dataset(history_id)
         dataset2_id = self._test_dataset(history_id)
         collection_response = self.gi.histories.create_dataset_collection(

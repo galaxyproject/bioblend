@@ -4,7 +4,6 @@ from typing import (
     IO,
     NamedTuple,
     Optional,
-    Type,
     TypeVar,
 )
 
@@ -39,14 +38,14 @@ def attach_file(path: str, name: Optional[str] = None) -> FileStream:
 T = TypeVar("T")
 
 
-def abstractclass(decorated_cls: Type[T]) -> Type[T]:
+def abstractclass(decorated_cls: type[T]) -> type[T]:
     """
     Decorator that marks a class as abstract even without any abstract method
 
     Adapted from https://stackoverflow.com/a/49013561/4503125
     """
 
-    def clsnew(cls: Type[T], *args: Any, **kwargs: Any) -> T:
+    def clsnew(cls: type[T], *args: Any, **kwargs: Any) -> T:
         # assert issubclass(cls, decorated_cls)
         if cls is decorated_cls:
             cls_name = getattr(decorated_cls, "__name__", str(decorated_cls))

@@ -7,6 +7,8 @@ A basic object-oriented interface for Galaxy entities.
 import abc
 import json
 from collections.abc import (
+    Iterable,
+    Iterator,
     Mapping,
     Sequence,
 )
@@ -15,17 +17,10 @@ from typing import (
     Callable,
     cast,
     ClassVar,
-    Dict,
     Generic,
     IO,
-    Iterable,
-    Iterator,
-    List,
     Literal,
     Optional,
-    Set,
-    Tuple,
-    Type,
     TYPE_CHECKING,
     TypeVar,
     Union,
@@ -80,7 +75,7 @@ class Wrapper:
     attribute.
     """
 
-    BASE_ATTRS: Tuple[str, ...] = ("id",)
+    BASE_ATTRS: tuple[str, ...] = ("id",)
     gi: Optional["GalaxyInstance"]
     id: str
     is_modified: bool
@@ -88,7 +83,7 @@ class Wrapper:
     _cached_parent: Optional["Wrapper"]
 
     def __init__(
-        self, wrapped: Dict[str, Any], parent: Optional["Wrapper"] = None, gi: Optional["GalaxyInstance"] = None
+        self, wrapped: dict[str, Any], parent: Optional["Wrapper"] = None, gi: Optional["GalaxyInstance"] = None
     ) -> None:
         """
         :type wrapped: dict
@@ -155,7 +150,7 @@ class Wrapper:
         return json.dumps(self.wrapped)
 
     @classmethod
-    def from_json(cls: Type[WrapperSubtype], jdef: str) -> WrapperSubtype:
+    def from_json(cls: type[WrapperSubtype], jdef: str) -> WrapperSubtype:
         """
         Build a new wrapper from a JSON dump.
         """
@@ -191,13 +186,13 @@ class Step(Wrapper):
         "tool_version",
         "type",
     )
-    input_steps: Dict[str, Dict]
+    input_steps: dict[str, dict]
     type: str
     tool_id: Optional[str]
-    tool_inputs: Dict
+    tool_inputs: dict
     tool_version: Optional[str]
 
-    def __init__(self, step_dict: Dict[str, Any], parent: Wrapper) -> None:
+    def __init__(self, step_dict: dict[str, Any], parent: Wrapper) -> None:
         super().__init__(step_dict, parent=parent, gi=parent.gi)
         try:
             stype = step_dict["type"]
@@ -238,7 +233,7 @@ class InvocationStep(Wrapper):
         assert ret is not None
         return ret
 
-    def __init__(self, wrapped: Dict[str, Any], parent: Wrapper, gi: "GalaxyInstance") -> None:
+    def __init__(self, wrapped: dict[str, Any], parent: Wrapper, gi: "GalaxyInstance") -> None:
         super().__init__(wrapped, parent, gi)
 
     def refresh(self) -> "InvocationStep":
@@ -251,7 +246,7 @@ class InvocationStep(Wrapper):
         self.__init__(step_dict, parent=self.parent, gi=self.gi)  # type: ignore[misc]
         return self
 
-    def get_outputs(self) -> Dict[str, "HistoryDatasetAssociation"]:
+    def get_outputs(self) -> dict[str, "HistoryDatasetAssociation"]:
         """
         Get the output datasets of the invocation step
 
@@ -262,7 +257,7 @@ class InvocationStep(Wrapper):
             self.refresh()
         return {name: self.gi.datasets.get(out_dict["id"]) for name, out_dict in self.wrapped["outputs"].items()}
 
-    def get_output_collections(self) -> Dict[str, "HistoryDatasetCollectionAssociation"]:
+    def get_output_collections(self) -> dict[str, "HistoryDatasetCollectionAssociation"]:
         """
         Get the output dataset collections of the invocation step
 
@@ -295,32 +290,32 @@ class Workflow(Wrapper):
         "steps",
         "tags",
     )
-    dag: Dict[str, Set[str]]
+    dag: dict[str, set[str]]
     deleted: bool
-    input_labels_to_ids: Dict[str, Set[str]]
-    inputs: Dict[str, Dict]
-    inv_dag: Dict[str, Set[str]]
-    missing_ids: List
+    input_labels_to_ids: dict[str, set[str]]
+    inputs: dict[str, dict]
+    inv_dag: dict[str, set[str]]
+    missing_ids: list
     name: str
     owner: str
     POLLING_INTERVAL = 10  # for output state monitoring
     published: bool
-    sink_ids: Set[str]
-    source_ids: Set[str]
-    steps: Dict[str, Step]
-    tags: List[str]
-    tool_labels_to_ids: Dict[str, Set[str]]
+    sink_ids: set[str]
+    source_ids: set[str]
+    steps: dict[str, Step]
+    tags: list[str]
+    tool_labels_to_ids: dict[str, set[str]]
 
-    def __init__(self, wf_dict: Dict[str, Any], gi: Optional["GalaxyInstance"] = None) -> None:
+    def __init__(self, wf_dict: dict[str, Any], gi: Optional["GalaxyInstance"] = None) -> None:
         super().__init__(wf_dict, gi=gi)
         if gi:
             tools_list_by_id = [t.id for t in gi.tools.get_previews()]
         else:
             tools_list_by_id = []
         missing_ids = []
-        tool_labels_to_ids: Dict[str, Set[str]] = {}
+        tool_labels_to_ids: dict[str, set[str]] = {}
         for k, v in self.steps.items():
-            step_dict = cast(Dict[str, Any], v)
+            step_dict = cast(dict[str, Any], v)
             # convert step ids to str for consistency with outer keys
             step_dict["id"] = str(step_dict["id"])
             for i in step_dict["input_steps"].values():
@@ -332,7 +327,7 @@ class Workflow(Wrapper):
                     missing_ids.append(k)
                 assert step.tool_id
                 tool_labels_to_ids.setdefault(step.tool_id, set()).add(step.id)
-        input_labels_to_ids: Dict[str, Set[str]] = {}
+        input_labels_to_ids: dict[str, set[str]] = {}
         for id_, d in self.inputs.items():
             input_labels_to_ids.setdefault(d["label"], set()).add(id_)
         object.__setattr__(self, "input_labels_to_ids", input_labels_to_ids)
@@ -348,7 +343,7 @@ class Workflow(Wrapper):
         object.__setattr__(self, "sink_ids", tails - heads)
         object.__setattr__(self, "missing_ids", missing_ids)
 
-    def _get_dag(self) -> Tuple[Dict[str, Set[str]], Dict[str, Set[str]]]:
+    def _get_dag(self) -> tuple[dict[str, set[str]], dict[str, set[str]]]:
         """
         Return the workflow's DAG.
 
@@ -365,8 +360,8 @@ class Workflow(Wrapper):
 
           {'c': {'a', 'b'}, 'd': {'c'}, 'e': {'c'}, 'f': {'c'}}
         """
-        dag: Dict[str, Set[str]] = {}
-        inv_dag: Dict[str, Set[str]] = {}
+        dag: dict[str, set[str]] = {}
+        inv_dag: dict[str, set[str]] = {}
         for s in self.steps.values():
             assert isinstance(s, Step)
             for i in s.input_steps.values():
@@ -375,11 +370,11 @@ class Workflow(Wrapper):
                 inv_dag.setdefault(tail, set()).add(head)
         return dag, inv_dag
 
-    def sorted_step_ids(self) -> List[str]:
+    def sorted_step_ids(self) -> list[str]:
         """
         Return a topological sort of the workflow's DAG.
         """
-        ids: List[str] = []
+        ids: list[str] = []
         source_ids = self.source_ids.copy()
         inv_dag = {k: v.copy() for k, v in self.inv_dag.items()}
         while source_ids:
@@ -393,35 +388,35 @@ class Workflow(Wrapper):
         return ids
 
     @property
-    def data_input_ids(self) -> Set[str]:
+    def data_input_ids(self) -> set[str]:
         """
         Return the ids of data input steps for this workflow.
         """
         return {id_ for id_, s in self.steps.items() if s.type == "data_input"}
 
     @property
-    def data_collection_input_ids(self) -> Set[str]:
+    def data_collection_input_ids(self) -> set[str]:
         """
         Return the ids of data collection input steps for this workflow.
         """
         return {id_ for id_, s in self.steps.items() if s.type == "data_collection_input"}
 
     @property
-    def parameter_input_ids(self) -> Set[str]:
+    def parameter_input_ids(self) -> set[str]:
         """
         Return the ids of parameter input steps for this workflow.
         """
         return {id_ for id_, s in self.steps.items() if s.type == "parameter_input"}
 
     @property
-    def tool_ids(self) -> Set[str]:
+    def tool_ids(self) -> set[str]:
         """
         Return the ids of tool steps for this workflow.
         """
         return {id_ for id_, s in self.steps.items() if s.type == "tool"}
 
     @property
-    def input_labels(self) -> Set[str]:
+    def input_labels(self) -> set[str]:
         """
         Return the labels of this workflow's input steps.
         """
@@ -438,7 +433,7 @@ class Workflow(Wrapper):
         return not self.missing_ids
 
     @staticmethod
-    def _convert_input_map(input_map: Dict[str, Any]) -> Dict[str, Any]:
+    def _convert_input_map(input_map: dict[str, Any]) -> dict[str, Any]:
         """
         Convert ``input_map`` to the format required by the Galaxy web API.
 
@@ -472,7 +467,7 @@ class Workflow(Wrapper):
         except IndexError:
             raise ValueError(f"no object for id {self.id}")
 
-    def export(self) -> Dict[str, Any]:
+    def export(self) -> dict[str, Any]:
         """
         Export a re-importable representation of the workflow.
 
@@ -496,11 +491,11 @@ class Workflow(Wrapper):
 
     def invoke(
         self,
-        inputs: Optional[Dict[str, Any]] = None,
-        params: Optional[Dict[str, Any]] = None,
+        inputs: Optional[dict[str, Any]] = None,
+        params: Optional[dict[str, Any]] = None,
         history: Optional[Union[str, "History"]] = None,
         import_inputs_to_history: bool = False,
-        replacement_params: Optional[Dict[str, Any]] = None,
+        replacement_params: Optional[dict[str, Any]] = None,
         allow_tool_state_corrections: bool = True,
         inputs_by: Optional[InputsBy] = None,
         parameters_normalized: bool = False,
@@ -673,17 +668,17 @@ class Invocation(Wrapper):
     gi: "GalaxyInstance"
     history_id: str
     state: str
-    steps: List[InvocationStep]
+    steps: list[InvocationStep]
     update_time: str
     uuid: str
     workflow_id: str
 
-    def __init__(self, inv_dict: Dict[str, Any], gi: "GalaxyInstance") -> None:
+    def __init__(self, inv_dict: dict[str, Any], gi: "GalaxyInstance") -> None:
         super().__init__(inv_dict, gi=gi)
         self.steps = [InvocationStep(step, parent=self, gi=gi) for step in inv_dict["steps"]]
         self.inputs = [{**v, "label": k} for k, v in inv_dict["inputs"].items()]
 
-    def sorted_step_ids(self) -> List[str]:
+    def sorted_step_ids(self) -> list[str]:
         """
         Get the step IDs sorted based on this order index.
 
@@ -692,7 +687,7 @@ class Invocation(Wrapper):
         """
         return [step.id for step in sorted(self.steps, key=lambda step: step.order_index)]
 
-    def step_states(self) -> Set[str]:
+    def step_states(self) -> set[str]:
         """
         Get the set of step states for this invocation.
 
@@ -715,7 +710,7 @@ class Invocation(Wrapper):
         indices: Optional[Iterable[int]] = None,
         states: Optional[Iterable[Union[str, None]]] = None,
         step_ids: Optional[Iterable[str]] = None,
-    ) -> List[InvocationStep]:
+    ) -> list[InvocationStep]:
         """
         Get steps for this invocation, or get a subset by specifying
         optional parameters for filtering.
@@ -732,7 +727,7 @@ class Invocation(Wrapper):
         :rtype: list of InvocationStep
         :return: invocation steps
         """
-        steps: Union[List[InvocationStep], filter] = self.steps
+        steps: Union[list[InvocationStep], filter] = self.steps
         if indices is not None:
             steps = filter(lambda step: step.order_index in indices, steps)
         if states is not None:
@@ -761,7 +756,7 @@ class Invocation(Wrapper):
         self.__init__(inv_dict, gi=self.gi)  # type: ignore[misc]
         return self
 
-    def run_step_actions(self, steps: List[InvocationStep], actions: List[object]) -> None:
+    def run_step_actions(self, steps: list[InvocationStep], actions: list[object]) -> None:
         """
         Run actions for active steps of this invocation.
 
@@ -785,7 +780,7 @@ class Invocation(Wrapper):
         for step, step_dict in zip(steps, step_dict_list):
             step.__init__(step_dict, parent=self, gi=self.gi)  # type: ignore[misc]
 
-    def summary(self) -> Dict[str, Any]:
+    def summary(self) -> dict[str, Any]:
         """
         Get a summary for this invocation.
 
@@ -794,7 +789,7 @@ class Invocation(Wrapper):
         """
         return self.gi.gi.invocations.get_invocation_summary(self.id)
 
-    def step_jobs_summary(self) -> List[Dict[str, Any]]:
+    def step_jobs_summary(self) -> list[dict[str, Any]]:
         """
         Get a summary for this invocation's step jobs.
 
@@ -803,7 +798,7 @@ class Invocation(Wrapper):
         """
         return self.gi.gi.invocations.get_invocation_step_jobs_summary(self.id)
 
-    def report(self) -> Dict[str, Any]:
+    def report(self) -> dict[str, Any]:
         """
         Get a dictionary containing a Markdown report for this invocation.
 
@@ -824,7 +819,7 @@ class Invocation(Wrapper):
         """
         self.gi.gi.invocations.get_invocation_report_pdf(self.id, file_path, chunk_size)
 
-    def biocompute_object(self) -> Dict[str, Any]:
+    def biocompute_object(self) -> dict[str, Any]:
         """
         Get a BioCompute object for this invocation.
 
@@ -879,7 +874,7 @@ class Dataset(Wrapper, metaclass=abc.ABCMeta):
     POLLING_INTERVAL = 1  # for state monitoring
     state: str
 
-    def __init__(self, ds_dict: Dict[str, Any], container: "DatasetContainer", gi: "GalaxyInstance") -> None:
+    def __init__(self, ds_dict: dict[str, Any], container: "DatasetContainer", gi: "GalaxyInstance") -> None:
         super().__init__(ds_dict, gi=gi)
         object.__setattr__(self, "container", container)
 
@@ -897,7 +892,7 @@ class Dataset(Wrapper, metaclass=abc.ABCMeta):
         :type chunk_size: int
         :param chunk_size: read this amount of bytes at a time
         """
-        kwargs: Dict[str, Any] = {"stream": True}
+        kwargs: dict[str, Any] = {"stream": True}
         if isinstance(self, LibraryDataset):
             kwargs["params"] = {"ld_ids%5B%5D": self.id}
         r = self.gi.gi.make_get_request(self._stream_url, **kwargs)
@@ -1065,7 +1060,7 @@ class DatasetCollection(Wrapper, metaclass=abc.ABCMeta):
     gi: "GalaxyInstance"
 
     def __init__(
-        self, dsc_dict: Dict[str, Any], container: Union["DatasetCollection", "History"], gi: "GalaxyInstance"
+        self, dsc_dict: dict[str, Any], container: Union["DatasetCollection", "History"], gi: "GalaxyInstance"
     ) -> None:
         super().__init__(dsc_dict, gi=gi)
         object.__setattr__(self, "container", container)
@@ -1095,7 +1090,7 @@ class HistoryDatasetCollectionAssociation(DatasetCollection):
 
     BASE_ATTRS = DatasetCollection.BASE_ATTRS + ("tags", "visible", "elements")
     SRC = "hdca"
-    elements: List[Dict]
+    elements: list[dict]
 
     def delete(self) -> None:
         self.gi.gi.histories.delete_dataset_collection(self.container.id, self.id)
@@ -1202,9 +1197,9 @@ class DatasetContainer(Wrapper, Generic[DatasetSubtype], metaclass=abc.ABCMeta):
         "name",
     )
     API_MODULE: str
-    CONTENT_INFO_TYPE: Type[ContentInfo]
+    CONTENT_INFO_TYPE: type[ContentInfo]
     DS_TYPE: ClassVar[Callable]
-    content_infos: List[ContentInfo]
+    content_infos: list[ContentInfo]
     deleted: bool
     gi: "GalaxyInstance"
     name: str
@@ -1212,8 +1207,8 @@ class DatasetContainer(Wrapper, Generic[DatasetSubtype], metaclass=abc.ABCMeta):
 
     def __init__(
         self,
-        c_dict: Dict[str, Any],
-        content_infos: Optional[List[ContentInfo]] = None,
+        c_dict: dict[str, Any],
+        content_infos: Optional[list[ContentInfo]] = None,
         gi: Optional["GalaxyInstance"] = None,
     ) -> None:
         """
@@ -1228,7 +1223,7 @@ class DatasetContainer(Wrapper, Generic[DatasetSubtype], metaclass=abc.ABCMeta):
         object.__setattr__(self, "obj_gi_client", getattr(self.gi, self.API_MODULE))
 
     @property
-    def dataset_ids(self) -> List[str]:
+    def dataset_ids(self) -> list[str]:
         """
         Return the ids of the contained datasets.
         """
@@ -1272,7 +1267,7 @@ class DatasetContainer(Wrapper, Generic[DatasetSubtype], metaclass=abc.ABCMeta):
         ds_dict = gi_client.show_dataset(self.id, ds_id)
         return self.DS_TYPE(ds_dict, self, gi=self.gi)
 
-    def get_datasets(self, name: Optional[str] = None) -> List[DatasetSubtype]:
+    def get_datasets(self, name: Optional[str] = None) -> list[DatasetSubtype]:
         """
         Get all datasets contained inside this dataset container.
 
@@ -1323,7 +1318,7 @@ class History(DatasetContainer[HistoryDatasetAssociation]):
     API_MODULE = "histories"
     annotation: str
     published: bool
-    tags: List[str]
+    tags: list[str]
 
     def update(self, **kwargs: Any) -> "History":
         """
@@ -1528,7 +1523,7 @@ class Library(DatasetContainer[LibraryDataset]):
     synopsis: str
 
     @property
-    def folder_ids(self) -> List[str]:
+    def folder_ids(self) -> list[str]:
         """
         Return the ids of the contained folders.
         """
@@ -1604,7 +1599,7 @@ class Library(DatasetContainer[LibraryDataset]):
         folder: Optional["Folder"] = None,
         link_data_only: Literal["copy_files", "link_to_files"] = "copy_files",
         **kwargs: Any,
-    ) -> List[LibraryDataset]:
+    ) -> list[LibraryDataset]:
         """
         Upload data to this library from filesystem paths on the server.
 
@@ -1718,7 +1713,7 @@ class Folder(Wrapper):
     name: str
     _cached_parent: Optional["Folder"]
 
-    def __init__(self, f_dict: Dict[str, Any], container: Library, gi: "GalaxyInstance") -> None:
+    def __init__(self, f_dict: dict[str, Any], container: Library, gi: "GalaxyInstance") -> None:
         super().__init__(f_dict, gi=gi)
         object.__setattr__(self, "container", container)
 
@@ -1768,8 +1763,8 @@ class Tool(Wrapper):
     POLLING_INTERVAL = 10  # for output state monitoring
 
     def run(
-        self, inputs: Dict[str, Any], history: History, wait: bool = False, polling_interval: float = POLLING_INTERVAL
-    ) -> List[HistoryDatasetAssociation]:
+        self, inputs: dict[str, Any], history: History, wait: bool = False, polling_interval: float = POLLING_INTERVAL
+    ) -> list[HistoryDatasetAssociation]:
         """
         Execute this tool in the given history with inputs from dict
         ``inputs``.
@@ -1882,7 +1877,7 @@ class WorkflowPreview(Wrapper):
     owner: str
     published: bool
     show_in_tool_panel: bool
-    tags: List[str]
+    tags: list[str]
 
 
 class InvocationPreview(Wrapper):

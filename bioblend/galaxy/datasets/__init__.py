@@ -8,12 +8,9 @@ import shlex
 import warnings
 from typing import (
     Any,
-    Dict,
-    List,
     Literal,
     Optional,
     overload,
-    Tuple,
     TYPE_CHECKING,
     Union,
 )
@@ -45,7 +42,7 @@ class DatasetClient(Client):
     def __init__(self, galaxy_instance: "GalaxyInstance") -> None:
         super().__init__(galaxy_instance)
 
-    def show_dataset(self, dataset_id: str, hda_ldda: HdaLdda = "hda") -> Dict[str, Any]:
+    def show_dataset(self, dataset_id: str, hda_ldda: HdaLdda = "hda") -> dict[str, Any]:
         """
         Get details about a given dataset. This can be a history or a library dataset.
 
@@ -66,7 +63,7 @@ class DatasetClient(Client):
 
     def _initiate_download(
         self, dataset_id: str, stream_content: bool, require_ok_state: bool = True, maxwait: float = 12000
-    ) -> Tuple[Dict[str, Any], str, Response]:
+    ) -> tuple[dict[str, Any], str, Response]:
         dataset = self.wait_for_dataset(dataset_id, maxwait=maxwait, check=False)
         if not dataset["state"] == "ok":
             message = f"Dataset state is not 'ok'. Dataset id: {dataset_id}, current state: {dataset['state']}"
@@ -195,8 +192,8 @@ class DatasetClient(Client):
         limit: int = 500,
         offset: int = 0,
         name: Optional[str] = None,
-        extension: Optional[Union[str, List[str]]] = None,
-        state: Optional[Union[str, List[str]]] = None,
+        extension: Optional[Union[str, list[str]]] = None,
+        state: Optional[Union[str, list[str]]] = None,
         visible: Optional[bool] = None,
         deleted: Optional[bool] = None,
         purged: Optional[bool] = None,
@@ -208,7 +205,7 @@ class DatasetClient(Client):
         update_time_min: Optional[str] = None,
         update_time_max: Optional[str] = None,
         order: str = "create_time-dsc",
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         Get the latest datasets, or select another subset by specifying optional
         arguments for filtering (e.g. a history ID).
@@ -279,7 +276,7 @@ class DatasetClient(Client):
         :rtype: list
         :return: A list of datasets
         """
-        params: Dict[str, Any] = {
+        params: dict[str, Any] = {
             "limit": limit,
             "offset": offset,
             "order": order,
@@ -287,7 +284,7 @@ class DatasetClient(Client):
         if history_id:
             params["history_id"] = history_id
 
-        q: List[str] = []
+        q: list[str] = []
         qv = []
 
         if name:
@@ -334,7 +331,7 @@ class DatasetClient(Client):
 
         return self._get(params=params)
 
-    def _param_to_filter(self, param: Union[str, List[str]]) -> Tuple[str, str]:
+    def _param_to_filter(self, param: Union[str, list[str]]) -> tuple[str, str]:
         if isinstance(param, str):
             return "eq", param
         if isinstance(param, list):
@@ -343,7 +340,7 @@ class DatasetClient(Client):
             return "in", ",".join(param)
         raise Exception("Filter param is not of type ``str`` or ``list``")
 
-    def publish_dataset(self, dataset_id: str, published: bool = False) -> Dict[str, Any]:
+    def publish_dataset(self, dataset_id: str, published: bool = False) -> dict[str, Any]:
         """
         Make a dataset publicly available or private. For more fine-grained control (assigning different
         permissions to specific roles), use the ``update_permissions()`` method.
@@ -360,7 +357,7 @@ class DatasetClient(Client):
         .. note::
           This method works only on Galaxy 19.05 or later.
         """
-        payload: Dict[str, Any] = {"action": "remove_restrictions" if published else "make_private"}
+        payload: dict[str, Any] = {"action": "remove_restrictions" if published else "make_private"}
         url = self._make_url(dataset_id) + "/permissions"
         return self.gi.datasets._put(url=url, payload=payload)
 
@@ -392,7 +389,7 @@ class DatasetClient(Client):
         .. note::
           This method works only on Galaxy 19.05 or later.
         """
-        payload: Dict[str, Any] = {"action": "set_permissions"}
+        payload: dict[str, Any] = {"action": "set_permissions"}
         if access_ids:
             payload["access"] = access_ids
         if manage_ids:
@@ -404,7 +401,7 @@ class DatasetClient(Client):
 
     def wait_for_dataset(
         self, dataset_id: str, maxwait: float = 12000, interval: float = 3, check: bool = True
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Wait until a dataset is in a terminal state.
 
@@ -425,7 +422,7 @@ class DatasetClient(Client):
         :return: Details of the given dataset.
         """
 
-        def check_and_get_dataset() -> Dict[str, Any]:
+        def check_and_get_dataset() -> dict[str, Any]:
             dataset = self.show_dataset(dataset_id)
             state = dataset["state"]
             if state in TERMINAL_STATES:
