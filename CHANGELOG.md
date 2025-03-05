@@ -5,6 +5,9 @@
 * Added ``offset`` parameter to ``InvocationClient.get_invocations()`` and
   BioBlend.objects ``ObjInvocationClient.list()`` methods.
 
+* Added ``style`` parameter to ``WorkflowClient.export_workflow_dict()`` method
+  (thanks to [Marius van den Beek](https://github.com/mvdbeek)).
+
 * Improvements to type annotations and documentation.
 
 ### BioBlend v1.4.0 - 2024-11-06

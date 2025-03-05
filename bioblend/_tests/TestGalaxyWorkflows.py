@@ -3,7 +3,11 @@ import os
 import shutil
 import tempfile
 import time
-from typing import Any
+from typing import (
+    Any,
+    Literal,
+    Optional,
+)
 
 import pytest
 
@@ -141,7 +145,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         assert not imported_wf["deleted"]
         assert imported_wf["published"]
 
-    def test_import_export_workflow_dict(self):
+    def _import_export(self, style: Optional[Literal["ga", "format2"]] = None):
         path = test_util.get_abspath(os.path.join("data", "paste_columns.ga"))
         with open(path) as f:
             wf_dict = json.load(f)
@@ -151,8 +155,21 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         assert imported_wf["url"].startswith("/api/workflows/")
         assert not imported_wf["deleted"]
         assert not imported_wf["published"]
-        exported_wf_dict = self.gi.workflows.export_workflow_dict(imported_wf["id"])
+        exported_wf_dict = self.gi.workflows.export_workflow_dict(imported_wf["id"], style=style)
         assert isinstance(exported_wf_dict, dict)
+        if style == "format2":
+            assert exported_wf_dict["class"] == "GalaxyWorkflow"
+        else:
+            assert exported_wf_dict["a_galaxy_workflow"] == "true"
+
+    def test_import_export_workflow_dict(self):
+        self._import_export()
+
+    def test_import_export_workflow_dict_ga(self):
+        self._import_export("ga")
+
+    def test_import_export_workflow_dict_format2(self):
+        self._import_export("format2")
 
     def test_import_publish_workflow_dict(self):
         path = test_util.get_abspath(os.path.join("data", "paste_columns.ga"))

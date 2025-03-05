@@ -11,6 +11,8 @@ from typing import (
     TYPE_CHECKING,
 )
 
+import yaml
+
 from bioblend.galaxy.client import Client
 
 if TYPE_CHECKING:
@@ -193,7 +195,9 @@ class WorkflowClient(Client):
         url = self._make_url()
         return self._post(url=url, payload=payload)
 
-    def export_workflow_dict(self, workflow_id: str, version: Optional[int] = None) -> dict[str, Any]:
+    def export_workflow_dict(
+        self, workflow_id: str, version: Optional[int] = None, style: Optional[Literal["ga", "format2"]] = None
+    ) -> dict[str, Any]:
         """
         Exports a workflow.
 
@@ -203,15 +207,24 @@ class WorkflowClient(Client):
         :type version: int
         :param version: Workflow version to export
 
+        :type style
+        :param style: Either "ga" for the original JSON format or "format2" for
+          the modern YAML gxformat2 format.
+
         :rtype: dict
         :return: Dictionary representing the requested workflow
         """
         params: dict[str, Any] = {}
         if version is not None:
             params["version"] = version
-
+        if style:
+            params["style"] = style
         url = "/".join((self._make_url(), "download", workflow_id))
-        return self._get(url=url, params=params)
+        json = style != "format2"
+        response = self._get(url=url, params=params, json=json)
+        if not json:
+            return yaml.safe_load(response.text)
+        return response
 
     def export_workflow_to_local_path(
         self, workflow_id: str, file_local_path: str, use_default_filename: bool = True
