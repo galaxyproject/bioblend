@@ -208,7 +208,8 @@ class WorkflowClient(Client):
         :param version: Workflow version to export
 
         :type style
-        :param style: Set style to `format2` to get gxformat2 encoded workflow
+        :param style: Either "ga" for the original JSON format or "format2" for
+          the modern YAML gxformat2 format.
 
         :rtype: dict
         :return: Dictionary representing the requested workflow
@@ -219,7 +220,7 @@ class WorkflowClient(Client):
         if style:
             params["style"] = style
         url = "/".join((self._make_url(), "download", workflow_id))
-        json = False if style == "format2" else True
+        json = style != "format2"
         response = self._get(url=url, params=params, json=json)
         if not json:
             return yaml.safe_load(response.text)
