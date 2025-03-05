@@ -33,7 +33,7 @@ jobs:
           - os: ubuntu-latest
             tox_env: py38
             galaxy_version: dev
-            galaxy_python_version: '3.8'
+            galaxy_python_version: '3.9'
           - os: ubuntu-latest
             tox_env: py38
             galaxy_version: release_24.2
@@ -108,7 +108,7 @@ jobs:
           - os: ubuntu-latest
             tox_env: py313
             galaxy_version: dev
-            galaxy_python_version: '3.8'
+            galaxy_python_version: '3.9'
           # Cannot test on macOS because service containers are not supported
           # yet: https://github.community/t/github-actions-services-available-on-others-vms/16916
           # - os: macos-latest
