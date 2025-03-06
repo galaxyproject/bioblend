@@ -82,6 +82,7 @@ class QuotaClient(Client):
         default: Optional[DefaultQuotaValues] = "no",
         in_users: Optional[list[str]] = None,
         in_groups: Optional[list[str]] = None,
+        quota_source_label: Optional[str] = None,
     ) -> dict[str, Any]:
         """
         Create a new quota
@@ -109,6 +110,10 @@ class QuotaClient(Client):
         :type in_groups: list of str
         :param in_groups: A list of group IDs or names.
 
+        :type quota_source_label: str
+        :param quota_source_label: If set, quota source label to apply this
+          quota operation to. Otherwise, the default quota is used.
+
         :rtype: dict
         :return: A description of quota.
           For example::
@@ -125,6 +130,7 @@ class QuotaClient(Client):
             "amount": amount,
             "operation": operation,
             "default": default,
+            "quota_source_label": quota_source_label,
         }
         if in_users:
             payload["in_users"] = in_users
