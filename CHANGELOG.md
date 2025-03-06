@@ -1,6 +1,10 @@
-### BioBlend v
+### BioBlend v1.5.0 - 2025-03-06
 
 * Dropped support for Python 3.8. Added support for Galaxy release 24.2.
+
+* Added ``limit``, ``offset`` and ``include_deleted`` parameters to
+  ``FoldersClient.show_folder()`` (thanks to
+  [Matthias Bernt](https://github.com/bernt-matthias)).
 
 * Added ``offset`` parameter to ``InvocationClient.get_invocations()`` and
   BioBlend.objects ``ObjInvocationClient.list()`` methods.
