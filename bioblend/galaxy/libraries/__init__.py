@@ -7,6 +7,7 @@ from typing import (
     Any,
     Literal,
     Optional,
+    overload,
     TYPE_CHECKING,
 )
 
