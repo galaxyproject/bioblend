@@ -92,7 +92,7 @@ class LibraryClient(Client):
         self,
         dataset_id: str,
         undelete: bool = False,
-    ) -> Dict[str, Any]: ...
+    ) -> dict[str, Any]: ...
 
     @overload
     def delete_library_dataset(
@@ -100,9 +100,9 @@ class LibraryClient(Client):
         library_id: str,
         dataset_id: str,
         purged: bool = False,
-    ) -> Dict[str, Any]: ...
+    ) -> dict[str, Any]: ...
 
-    def delete_library_dataset(self, library_id: Optional[str], dataset_id: str, purged: bool = False, undelete: bool = False) -> Dict[str, Any]:
+    def delete_library_dataset(self, library_id: Optional[str], dataset_id: str, purged: bool = False, undelete: bool = False) -> dict[str, Any]:
         """
         Delete a library dataset in a data library.
 
