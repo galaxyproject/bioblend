@@ -70,10 +70,10 @@ class TestGalaxyFolders(GalaxyTestBase.GalaxyTestBase):
         hda_id = self._test_dataset(history["id"])
 
         # Create 2 library datasets into the library folder
-        ldda1 = self.gi.libraries.copy_from_dataset(
+        ld1 = self.gi.libraries.copy_from_dataset(
             library_id=self.library["id"], dataset_id=hda_id, folder_id=self.folder["id"], message="Added HDA"
         )
-        ldda2 = self.gi.libraries.copy_from_dataset(
+        ld2 = self.gi.libraries.copy_from_dataset(
             library_id=self.library["id"], dataset_id=hda_id, folder_id=self.folder["id"], message="Added HDA"
         )
         folder_info = self.gi.folders.show_folder(self.folder["id"], contents=True)
@@ -81,8 +81,8 @@ class TestGalaxyFolders(GalaxyTestBase.GalaxyTestBase):
         assert folder_info["folder_contents"][0]["type"] == "file"
 
         # Delete the library datasets and check if include_deleted works
-        self.gi.libraries.delete_library_dataset(self.library["id"], ldda1["id"])
-        self.gi.libraries.delete_library_dataset(self.library["id"], ldda2["id"], purged=True)
+        self.gi.libraries.delete_library_dataset(ld1["id"])
+        self.gi.libraries.delete_library_dataset(ld2["id"], purged=True)
         folder_info = self.gi.folders.show_folder(self.folder["id"], contents=True, include_deleted=True)
         # check if there are 2 contents and the number is correct
         assert len(folder_info["folder_contents"]) == 2
