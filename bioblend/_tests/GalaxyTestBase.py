@@ -17,12 +17,14 @@ BIOBLEND_TEST_JOB_TIMEOUT = int(os.environ.get("BIOBLEND_TEST_JOB_TIMEOUT", "60"
 @test_util.skip_unless_galaxy()
 class GalaxyTestBase(unittest.TestCase):
     gi: GalaxyInstance
+    config: Dict[str, Any]
 
     @classmethod
     def setUpClass(cls) -> None:
         galaxy_key = os.environ["BIOBLEND_GALAXY_API_KEY"]
         galaxy_url = os.environ["BIOBLEND_GALAXY_URL"]
         cls.gi = GalaxyInstance(url=galaxy_url, key=galaxy_key)
+        cls.config = cls.gi.config.get_config()
 
     def _test_dataset(self, history_id: str, contents: str = "1\t2\t3", **kwargs: Any) -> str:
         tool_output = self.gi.tools.paste_content(contents, history_id, **kwargs)
