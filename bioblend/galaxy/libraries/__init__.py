@@ -103,7 +103,7 @@ class LibraryClient(Client):
     ) -> dict[str, Any]: ...
 
     def delete_library_dataset(
-        self, dataset_id: str, library_id: Optional[str], purged: bool = False, undelete: bool = False
+        self, library_id: Optional[str], dataset_id: str, purged: bool = False, undelete: bool = False
     ) -> dict[str, Any]:
         """
         Delete a library dataset in a data library.
@@ -124,7 +124,7 @@ class LibraryClient(Client):
              'id': '60e680a037f41974'}
         """
         if not library_id:
-            url = "/".join(self._make_url(), "datasets", dataset_id)
+            url = "/".join((self._make_url(), "datasets", dataset_id))
             return self._delete(params={"undelete": undelete}, url=url)
         else:
             url = "/".join((self._make_url(library_id, contents=True), dataset_id))
