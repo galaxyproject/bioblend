@@ -399,7 +399,7 @@ class TestInvocation(GalaxyObjectsTestBase):
     def test_report(self):
         inv = self._obj_invoke_workflow()
         report = inv.report()
-        assert report["workflows"] == {self.workflow.id: {"name": "paste_columns"}}
+        assert "paste_columns" in report["markdown"]
 
     @test_util.skip_unless_galaxy("release_20.09")
     def test_biocompute_object(self):

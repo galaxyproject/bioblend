@@ -87,9 +87,8 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
         invocation = self._invoke_workflow()
 
         invocation_id = invocation["id"]
-        workflow_id = invocation["workflow_id"]
         report = self.gi.invocations.get_invocation_report(invocation_id)
-        assert report["workflows"] == {workflow_id: {"name": "paste_columns"}}
+        assert "paste_columns" in report["markdown"]
         with contextlib.suppress(Exception):
             # This can fail if dependencies as weasyprint are not installed on the Galaxy server
             ret = self.gi.invocations.get_invocation_report_pdf(invocation_id, "report.pdf")
