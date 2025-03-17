@@ -19,12 +19,12 @@ class TestGalaxyToolShed(GalaxyTestBase.GalaxyTestBase):
         )
         assert isinstance(response, list), str(response)
         assert len(response) == 1
-        assert response[0]["status"] == 'Installed'
+        assert response[0]["status"] == "Installed"
 
         installed_repos = self.gi.toolshed.get_repositories()
         assert len(installed_repos) == 1
-        assert installed_repos[0]['installed_changeset_revision'] == 'c14c7fd4d1be'
-        assert installed_repos[0]['changeset_revision'] == 'c14c7fd4d1be'
+        assert installed_repos[0]["installed_changeset_revision"] == "c14c7fd4d1be"
+        assert installed_repos[0]["changeset_revision"] == "c14c7fd4d1be"
 
         self.gi.toolshed.uninstall_repository_revision(
             name="ampvis2_alpha_diversity",
@@ -45,12 +45,12 @@ class TestGalaxyToolShed(GalaxyTestBase.GalaxyTestBase):
         )
         assert isinstance(response, list), str(response)
         assert len(response) == 1
-        assert response[0]["status"] == 'Installed'
+        assert response[0]["status"] == "Installed"
 
         installed_repos = self.gi.toolshed.get_repositories()
         assert len(installed_repos) == 1
-        assert installed_repos[0]['installed_changeset_revision'] == 'c14c7fd4d1be'
-        assert installed_repos[0]['changeset_revision'] == 'c14c7fd4d1be'
+        assert installed_repos[0]["installed_changeset_revision"] == "c14c7fd4d1be"
+        assert installed_repos[0]["changeset_revision"] == "c14c7fd4d1be"
 
         # install older revision
         # -> galaxy realizes that a tool with the same version is alredy installed
@@ -62,12 +62,12 @@ class TestGalaxyToolShed(GalaxyTestBase.GalaxyTestBase):
             changeset_revision="289d6299bd2e",
         )
         assert isinstance(response, dict), str(response)
-        assert response["status"] == 'ok'
+        assert response["status"] == "ok"
 
         installed_repos = self.gi.toolshed.get_repositories()
         assert len(installed_repos) == 1
-        assert installed_repos[0]['installed_changeset_revision'] == 'c14c7fd4d1be'
-        assert installed_repos[0]['changeset_revision'] == 'c14c7fd4d1be'
+        assert installed_repos[0]["installed_changeset_revision"] == "c14c7fd4d1be"
+        assert installed_repos[0]["changeset_revision"] == "c14c7fd4d1be"
 
         self.gi.toolshed.uninstall_repository_revision(
             name="ampvis2_alpha_diversity",
