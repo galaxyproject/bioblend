@@ -6,8 +6,10 @@ from . import GalaxyTestBase
 class TestGalaxyToolShed(GalaxyTestBase.GalaxyTestBase):
 
     def test_install_old_first(self):
-        # test uses two revisions where the tool version has not been bumped
-        # 6:289d6299bd2e, 7:c14c7fd4d1be has not been bumped
+        # This test uses two revisions of the same tool, where only one has
+        # repository metadata associated:
+        # 6:289d6299bd2e contains a tool version bump
+        # 7:c14c7fd4d1be is a minor fix (no repository metadata changes)
 
         # asking to install old version immediately installs
         # new version
@@ -17,7 +19,7 @@ class TestGalaxyToolShed(GalaxyTestBase.GalaxyTestBase):
             owner="iuc",
             changeset_revision="289d6299bd2e",
         )
-        assert isinstance(response, list), str(response)
+        assert isinstance(response, list), response
         assert len(response) == 1
         assert response[0]["status"] == "Installed"
 
@@ -36,14 +38,14 @@ class TestGalaxyToolShed(GalaxyTestBase.GalaxyTestBase):
 
     def test_install_new_first(self):
         # 6:289d6299bd2e
-        # 7:c14c7fd4d1be has not been bumped
+        # 7:c14c7fd4d1be was not bumped
         response = self.gi.toolshed.install_repository_revision(
             tool_shed_url="https://toolshed.g2.bx.psu.edu/",
             name="ampvis2_alpha_diversity",
             owner="iuc",
             changeset_revision="c14c7fd4d1be",
         )
-        assert isinstance(response, list), str(response)
+        assert isinstance(response, list), response
         assert len(response) == 1
         assert response[0]["status"] == "Installed"
 
@@ -61,7 +63,7 @@ class TestGalaxyToolShed(GalaxyTestBase.GalaxyTestBase):
             owner="iuc",
             changeset_revision="289d6299bd2e",
         )
-        assert isinstance(response, dict), str(response)
+        assert isinstance(response, dict), response
         assert response["status"] == "ok"
 
         installed_repos = self.gi.toolshed.get_repositories()
