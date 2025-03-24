@@ -1,8 +1,12 @@
 """ """
 
-from . import GalaxyTestBase
+from . import (
+    GalaxyTestBase,
+    test_util,
+)
 
 
+@test_util.skip_unless_galaxy("release_20.05")
 class TestGalaxyToolShed(GalaxyTestBase.GalaxyTestBase):
 
     def test_install_old_first(self):
