@@ -1,5 +1,5 @@
 """
-Contains possible interactions with the Galaxy Histories
+Contains possible interactions with Galaxy Genomes
 """
 
 from typing import (
