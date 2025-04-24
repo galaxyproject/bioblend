@@ -1,4 +1,7 @@
-from . import GalaxyTestBase
+from . import (
+    GalaxyTestBase,
+    test_util,
+)
 
 
 class TestGalaxyConfig(GalaxyTestBase.GalaxyTestBase):
@@ -21,7 +24,11 @@ class TestGalaxyConfig(GalaxyTestBase.GalaxyTestBase):
         response = self.gi.config.reload_toolbox()
         assert response is None
 
-    def test_decode_id(self):
-        user_id = self.gi.config.whoami()["id"]
-        response = self.gi.config.decode_id(user_id)
-        assert isinstance(response, int)
+    @test_util.skip_unless_galaxy("release_24.0")
+    def test_encode_decode_id(self):
+        int_id = 42
+        encoded_id = self.gi.config.encode_id(int_id)
+        assert isinstance(encoded_id, str)
+        decoded_id = self.gi.config.decode_id(encoded_id)
+        assert isinstance(decoded_id, int)
+        assert decoded_id == int_id
