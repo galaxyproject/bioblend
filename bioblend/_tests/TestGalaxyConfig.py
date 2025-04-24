@@ -20,3 +20,8 @@ class TestGalaxyConfig(GalaxyTestBase.GalaxyTestBase):
     def test_reload_toolbox(self):
         response = self.gi.config.reload_toolbox()
         assert response is None
+
+    def test_decode_id(self):
+        user_id = self.gi.config.whoami()["id"]
+        response = self.gi.config.decode_id(user_id)
+        assert isinstance(response, int)

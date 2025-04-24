@@ -83,3 +83,13 @@ class ConfigClient(Client):
         """
         url = f"{self._make_url()}/toolbox"
         return self._put(url=url)
+
+    def decode_id(self, id: str) -> int:
+        """
+        Decode a Galaxy-encoded hexadecimal id to obtain the unencoded integer.
+
+        :rtype: int
+        :return: Integer value equivalent to the provided Galaxy-encoded id
+        """
+        url = f"{self._make_url()}/decode/{id}"
+        return self._get(url=url)["decoded_id"]
