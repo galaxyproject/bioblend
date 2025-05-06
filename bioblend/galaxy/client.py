@@ -113,6 +113,7 @@ class Client:
         url: Optional[str] = None,
         params: Optional[dict] = None,
         json: bool = True,
+        **kwargs: Any,
     ) -> Any:
         """
         Do a GET request, composing the URL from ``id``, ``deleted`` and
@@ -136,7 +137,7 @@ class Client:
         while attempts_left > 0:
             attempts_left -= 1
             try:
-                r = self.gi.make_get_request(url, params=params)
+                r = self.gi.make_get_request(url, params=params, **kwargs)
             except requests.exceptions.ConnectionError as e:
                 msg = str(e)
                 r = requests.Response()  # empty Response object used when raising ConnectionError

@@ -1,5 +1,6 @@
 import contextlib
 import os
+import tempfile
 import time
 from typing import Any
 
@@ -93,6 +94,24 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
             # This can fail if dependencies as weasyprint are not installed on the Galaxy server
             ret = self.gi.invocations.get_invocation_report_pdf(invocation_id, "report.pdf")
             assert ret is None
+
+    def test_get_invocation_archive(self):
+        invocation = self._invoke_workflow()
+        payload = {
+            "model_store_format": "rocrate.zip",
+            "include_files": True,
+            "include_deleted": False,
+            "include_hidden": False,
+        }
+        self.gi.invocations.wait_for_invocation(invocation["id"])
+        with tempfile.TemporaryDirectory() as folder:
+            file = f"{folder}/temp.rocrate.zip"
+            response = self.gi.invocations.get_invocation_archive(invocation["id"], payload=payload)
+            with open(file, "bw") as archive:
+                for chunk in response.iter_content(chunk_size=8192):
+                    archive.write(chunk)
+            # Verify file is not empty
+            assert os.path.getsize(file) > 0, "Downloaded archive is empty"
 
     @test_util.skip_unless_galaxy("release_20.09")
     def test_get_invocation_biocompute_object(self):

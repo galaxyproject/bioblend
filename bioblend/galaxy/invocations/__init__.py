@@ -2,12 +2,15 @@
 Contains possible interactions with the Galaxy workflow invocations
 """
 
+import base64
 import logging
 from typing import (
     Any,
     Optional,
     TYPE_CHECKING,
 )
+
+import requests
 
 from bioblend import (
     CHUNK_SIZE,
@@ -267,6 +270,40 @@ class InvocationClient(Client):
         url = self._make_url(invocation_id)
         return self._delete(url=url)
 
+    def import_invocation(
+        self, history_id: str, model_store_format: str, file_path: Optional[str] = None, url: Optional[str] = None
+    ) -> dict[str, Any]:
+        """
+        Import a invocation from an archive on disk or a URL.
+
+        :type history_id
+        :param history_id: id of the history where the invocation will be imported
+
+        :type model_store_format
+        :param model_store_format: archive type that will be imported
+
+        :type file_path: str
+        :param file_path: Path to exported history archive on disk.
+
+        :type url: str
+        :param url: URL for an exported history archive
+
+        """
+        if file_path:
+            payload: dict[str, Any] = {
+                "history_id": history_id,
+                "model_store_format": model_store_format,
+                "store_content_uri": "base64://" + base64.b64encode(open(file_path, "rb").read()).decode("utf-8"),
+            }
+        else:
+            payload = {
+                "history_id": history_id,
+                "model_store_format": model_store_format,
+                "store_content_uri": url,
+            }
+        url = "/".join((self._make_url(), "from_store"))
+        return self._post(url=url, payload=payload)
+
     def show_invocation_step(self, invocation_id: str, step_id: str) -> dict[str, Any]:
         """
         See the details of a particular workflow invocation step.
@@ -409,8 +446,8 @@ class InvocationClient(Client):
 
     # TODO: Move to a new ``bioblend.galaxy.short_term_storage`` module
     def _wait_for_short_term_storage(
-        self, storage_request_id: str, maxwait: float = 60, interval: float = 3
-    ) -> dict[str, Any]:
+        self, storage_request_id: str, maxwait: float = 60, interval: float = 3, json: bool = True, stream: bool = False
+    ) -> Any:
         """
         Wait until a short term storage request is ready
 
@@ -425,18 +462,43 @@ class InvocationClient(Client):
         :type interval: float
         :param interval: Time (in seconds) to wait between 2 consecutive checks.
 
-        :rtype: dict
-        :return: The short term storage request.
+        :rtype: requests.Response
+        :return:  Response containing storage object.
         """
         url = f"{self.gi.url}/short_term_storage/{storage_request_id}"
         is_ready_url = f"{url}/ready"
 
-        def check_and_get_short_term_storage() -> dict[str, Any]:
+        def check_and_get_short_term_storage() -> Any:
             if self._get(url=is_ready_url):
-                return self._get(url=url)
+                return self._get(url=url, json=json, stream=stream)
             raise NotReady(f"Storage request {storage_request_id} is not ready")
 
         return wait_on(check_and_get_short_term_storage, maxwait=maxwait, interval=interval)
+
+    def get_invocation_archive(
+        self, invocation_id: str, payload: dict[str, Any], maxwait: float = 1200
+    ) -> requests.Response:
+        """
+        Get an invocation as a compressed archive.
+
+        :type invocation_id: str
+        :param invocation_id: Encoded workflow invocation ID
+
+        :type payload: dict
+        :param payload: parameters used to setup export
+
+        :type maxwait: float
+        :param maxwait: Total time (in seconds) to wait for the invocation
+          object to become ready. After this time, a ``TimeoutException`` will
+          be raised.
+
+        :rtype: dict
+        :return: a request.Response
+        """
+        url = self._make_url(invocation_id) + "/prepare_store_download"
+        psd = self._post(url=url, payload=payload)
+        storage_request_id = psd["storage_request_id"]
+        return self._wait_for_short_term_storage(storage_request_id, maxwait=maxwait, json=False, stream=True)
 
     def get_invocation_biocompute_object(self, invocation_id: str, maxwait: float = 1200) -> dict[str, Any]:
         """
@@ -465,7 +527,6 @@ class InvocationClient(Client):
             return self._get(url=url)
         else:
             storage_request_id = psd["storage_request_id"]
-            url = f"{self.gi.url}/short_term_storage/{storage_request_id}/ready"
             return self._wait_for_short_term_storage(storage_request_id, maxwait=maxwait)
 
     def wait_for_invocation(
