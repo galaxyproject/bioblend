@@ -8,7 +8,9 @@ should not use it directly.
 import time
 from typing import (
     Any,
+    Literal,
     Optional,
+    overload,
     TYPE_CHECKING,
 )
 
@@ -79,6 +81,29 @@ class Client:
             if contents:
                 c_url = c_url + "/contents"
         return c_url
+
+    @overload
+    def _get(
+        self,
+        id: Optional[str] = None,
+        deleted: bool = False,
+        contents: bool = False,
+        url: Optional[str] = None,
+        params: Optional[dict] = None,
+        *,
+        json: Literal[False],
+    ) -> requests.Response: ...
+
+    @overload
+    def _get(
+        self,
+        id: Optional[str] = None,
+        deleted: bool = False,
+        contents: bool = False,
+        url: Optional[str] = None,
+        params: Optional[dict] = None,
+        json: bool = True,
+    ) -> Any: ...
 
     def _get(
         self,
