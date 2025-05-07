@@ -112,6 +112,15 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
         assert len(step_jobs_summary) == 1
         assert step_jobs_summary[0]["populated_state"] == "ok"
 
+    @test_util.skip_unless_galaxy("release_23.0")
+    def test_import_invocation_archive(self):
+        new_history = self.gi.histories.create_history(name="My History")
+        test_file = test_util.get_abspath(os.path.join("data", "example3.rocrate.zip"))
+        import_response = self.gi.invocations.import_invocation(
+            history_id=new_history["id"], model_store_format="rocrate.zip", file_path=test_file
+        )
+        assert "model_class" in import_response[0] and import_response[0]["model_class"] == "WorkflowInvocation"
+
     @test_util.skip_unless_galaxy("release_19.09")
     @test_util.skip_unless_tool("cat1")
     @test_util.skip_unless_tool("cat")

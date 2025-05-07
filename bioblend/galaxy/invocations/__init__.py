@@ -2,6 +2,7 @@
 Contains possible interactions with the Galaxy workflow invocations
 """
 
+import base64
 import logging
 from typing import (
     Any,
@@ -266,6 +267,39 @@ class InvocationClient(Client):
         """
         url = self._make_url(invocation_id)
         return self._delete(url=url)
+
+    def import_invocation(
+        self, history_id: str, model_store_format: str, file_path: Optional[str] = None, url: Optional[str] = None
+    ) -> Any:
+        """
+        Import a invocation from an archive on disk or a URL.
+
+        :type history_id
+        :param history_id: id of the history where the invocation will be imported
+
+        :type model_store_format
+        :param model_store_format: archive type that will be imported
+
+        :type file_path: str
+        :param file_path: Path to exported history archive on disk.
+
+        :type url: str
+        :param url: URL for an exported history archive
+
+        :rtype: dict or list of dicts
+        :return: if the import is successful, a list of dictionaries will be returned; otherwise, a single dictionary will be returned.
+        """
+        payload: dict[str, Any] = {
+            "history_id": history_id,
+            "model_store_format": model_store_format,
+        }
+        if file_path:
+            with open(file_path, "rb") as reader:
+                payload["store_content_uri"] = "base64://" + base64.b64encode(reader.read()).decode("utf-8")
+        else:
+            payload["store_content_uri"] = url
+        url = "/".join((self._make_url(), "from_store"))
+        return self._post(url=url, payload=payload)
 
     def show_invocation_step(self, invocation_id: str, step_id: str) -> dict[str, Any]:
         """
