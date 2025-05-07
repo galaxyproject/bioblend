@@ -289,18 +289,15 @@ class InvocationClient(Client):
         :param url: URL for an exported history archive
 
         """
+        payload: dict[str, Any] = {
+            "history_id": history_id,
+            "model_store_format": model_store_format,
+        }
         if file_path:
-            payload: dict[str, Any] = {
-                "history_id": history_id,
-                "model_store_format": model_store_format,
-                "store_content_uri": "base64://" + base64.b64encode(open(file_path, "rb").read()).decode("utf-8"),
-            }
+            with open(file_path, "rb") as reader:
+                payload["store_content_uri"] = "base64://" + base64.b64encode(reader.read()).decode("utf-8")
         else:
-            payload = {
-                "history_id": history_id,
-                "model_store_format": model_store_format,
-                "store_content_uri": url,
-            }
+            payload["store_content_uri"] = url
         url = "/".join((self._make_url(), "from_store"))
         return self._post(url=url, payload=payload)
 
@@ -462,8 +459,8 @@ class InvocationClient(Client):
         :type interval: float
         :param interval: Time (in seconds) to wait between 2 consecutive checks.
 
-        :rtype: requests.Response
-        :return:  Response containing storage object.
+        :return: The decoded response if ``json`` is set to ``True``, otherwise
+          the response object
         """
         url = f"{self.gi.url}/short_term_storage/{storage_request_id}"
         is_ready_url = f"{url}/ready"
@@ -492,8 +489,8 @@ class InvocationClient(Client):
           object to become ready. After this time, a ``TimeoutException`` will
           be raised.
 
-        :rtype: dict
-        :return: a request.Response
+        :rtype: requests.Response
+        :return: request.Response
         """
         url = self._make_url(invocation_id) + "/prepare_store_download"
         psd = self._post(url=url, payload=payload)

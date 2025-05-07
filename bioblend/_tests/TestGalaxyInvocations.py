@@ -95,6 +95,7 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
             ret = self.gi.invocations.get_invocation_report_pdf(invocation_id, "report.pdf")
             assert ret is None
 
+    @test_util.skip_unless_galaxy("release_23.0")
     def test_get_invocation_archive(self):
         invocation = self._invoke_workflow()
         payload = {
