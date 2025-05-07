@@ -9,6 +9,8 @@ from typing import (
     TYPE_CHECKING,
 )
 
+import requests
+
 from bioblend import (
     CHUNK_SIZE,
     ConnectionError,
@@ -409,8 +411,8 @@ class InvocationClient(Client):
 
     # TODO: Move to a new ``bioblend.galaxy.short_term_storage`` module
     def _wait_for_short_term_storage(
-        self, storage_request_id: str, maxwait: float = 60, interval: float = 3
-    ) -> dict[str, Any]:
+        self, storage_request_id: str, maxwait: float = 60, interval: float = 3, json: bool = True, stream: bool = False
+    ) -> Any:
         """
         Wait until a short term storage request is ready
 
@@ -425,18 +427,50 @@ class InvocationClient(Client):
         :type interval: float
         :param interval: Time (in seconds) to wait between 2 consecutive checks.
 
-        :rtype: dict
-        :return: The short term storage request.
+        :return: The decoded response if ``json`` is set to ``True``, otherwise
+          the response object
         """
         url = f"{self.gi.url}/short_term_storage/{storage_request_id}"
         is_ready_url = f"{url}/ready"
 
-        def check_and_get_short_term_storage() -> dict[str, Any]:
+        def check_and_get_short_term_storage() -> Any:
             if self._get(url=is_ready_url):
-                return self._get(url=url)
+                return self._get(url=url, json=json, stream=stream)
             raise NotReady(f"Storage request {storage_request_id} is not ready")
 
         return wait_on(check_and_get_short_term_storage, maxwait=maxwait, interval=interval)
+
+    def get_invocation_archive(
+        self, invocation_id: str, payload: dict[str, Any], maxwait: float = 1200
+    ) -> requests.Response:
+        """
+        Get an invocation as a compressed archive.
+
+        :type invocation_id: str
+        :param invocation_id: Encoded workflow invocation ID
+
+        :type payload: dict
+        :param payload: parameters used to setup export.
+            example::
+          {
+              "model_store_format": "rocrate.zip",
+              "include_files": True,
+              "include_deleted": False,
+              "include_hidden": False,
+          }
+
+        :type maxwait: float
+        :param maxwait: Total time (in seconds) to wait for the invocation
+          object to become ready. After this time, a ``TimeoutException`` will
+          be raised.
+
+        :rtype: requests.Response
+        :return: request.Response
+        """
+        url = self._make_url(invocation_id) + "/prepare_store_download"
+        psd = self._post(url=url, payload=payload)
+        storage_request_id = psd["storage_request_id"]
+        return self._wait_for_short_term_storage(storage_request_id, maxwait=maxwait, json=False, stream=True)
 
     def get_invocation_biocompute_object(self, invocation_id: str, maxwait: float = 1200) -> dict[str, Any]:
         """

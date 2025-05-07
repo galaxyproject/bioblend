@@ -92,6 +92,7 @@ class Client:
         params: Optional[dict] = None,
         *,
         json: Literal[False],
+        stream: Literal[False],
     ) -> requests.Response: ...
 
     @overload
@@ -103,6 +104,7 @@ class Client:
         url: Optional[str] = None,
         params: Optional[dict] = None,
         json: bool = True,
+        stream: bool = False,
     ) -> Any: ...
 
     def _get(
@@ -113,6 +115,7 @@ class Client:
         url: Optional[str] = None,
         params: Optional[dict] = None,
         json: bool = True,
+        stream: bool = False,
     ) -> Any:
         """
         Do a GET request, composing the URL from ``id``, ``deleted`` and
@@ -136,7 +139,7 @@ class Client:
         while attempts_left > 0:
             attempts_left -= 1
             try:
-                r = self.gi.make_get_request(url, params=params)
+                r = self.gi.make_get_request(url, params=params, stream=stream)
             except requests.exceptions.ConnectionError as e:
                 msg = str(e)
                 r = requests.Response()  # empty Response object used when raising ConnectionError
