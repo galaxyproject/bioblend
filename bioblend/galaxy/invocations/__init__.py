@@ -441,7 +441,18 @@ class InvocationClient(Client):
         return wait_on(check_and_get_short_term_storage, maxwait=maxwait, interval=interval)
 
     def get_invocation_archive(
-        self, invocation_id: str, payload: dict[str, Any], maxwait: float = 1200
+        self,
+        invocation_id: str,
+        model_store_format: str = "tar.gz",
+        include_files: bool = True,
+        include_deleted: bool = False,
+        include_hidden: bool = False,
+        bco_merge_history_metadata: bool = False,
+        bco_override_environment_variables: Optional[dict[str, Any]] = None,
+        bco_override_empirical_error: Optional[dict[str, Any]] = None,
+        bco_override_algorithmic_error: Optional[dict[str, Any]] = None,
+        bco_override_xref: Optional[dict[str, Any]] = None,
+        maxwait: float = 1200,
     ) -> requests.Response:
         """
         Get an invocation as a compressed archive.
@@ -449,15 +460,32 @@ class InvocationClient(Client):
         :type invocation_id: str
         :param invocation_id: Encoded workflow invocation ID
 
-        :type payload: dict
-        :param payload: parameters used to setup export.
-            example::
-          {
-              "model_store_format": "rocrate.zip",
-              "include_files": True,
-              "include_deleted": False,
-              "include_hidden": False,
-          }
+        :type model_store_format: str
+        :param model_store_format: format of model store to export
+
+        :type include_files: bool
+        :param include_files: include materialized files in export when available
+
+        :type include_deleted: bool
+        :param include_deleted: include file contents for deleted datasets (if include_files is True).
+
+        :type include_hidden: bool
+        :param include_hidden: include file contents for hidden datasets (if include_files is True).
+
+        :type bco_merge_history_metadata: bool
+        :param bco_merge_history_metadata: when reading tags/annotations to generate BCO object include history metadata.
+
+        :type bco_override_environment_variables: dict[str, Any]
+        :param bco_override_environment_variables: override environment variables for 'execution_domain' when generating BioCompute object.
+
+        :type bco_override_empirical_error: dict[str, Any]
+        :param bco_override_empirical_error: override empirical error for 'error domain' when generating BioCompute object.
+
+        :type bco_override_algorithmic_error: dict[str, Any]
+        :param bco_override_algorithmic_error: override algorithmic error for 'error domain' when generating BioCompute object.
+
+        :type bco_override_xref: dict[str, Any]
+        :param bco_override_xref: Override xref for 'description domain' when generating BioCompute object.
 
         :type maxwait: float
         :param maxwait: Total time (in seconds) to wait for the invocation
@@ -467,6 +495,22 @@ class InvocationClient(Client):
         :rtype: requests.Response
         :return: request.Response
         """
+        payload = {
+            "model_store_format": model_store_format,
+            "include_files": include_files,
+            "include_deleted": include_deleted,
+            "include_hidden": include_hidden,
+            "bco_merge_history_metadata": bco_merge_history_metadata,
+        }
+        if bco_override_environment_variables is not None:
+            payload["bco_override_environment_variables"] = bco_override_environment_variables
+        if bco_override_empirical_error is not None:
+            payload["bco_override_empirical_error"] = bco_override_empirical_error
+        if bco_override_algorithmic_error is not None:
+            payload["bco_override_algorithmic_error"] = bco_override_algorithmic_error
+        if bco_override_xref is not None:
+            payload["bco_override_xref"] = bco_override_xref
+
         url = self._make_url(invocation_id) + "/prepare_store_download"
         psd = self._post(url=url, payload=payload)
         storage_request_id = psd["storage_request_id"]

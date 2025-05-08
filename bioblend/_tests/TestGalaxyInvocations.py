@@ -2,6 +2,7 @@ import contextlib
 import os
 import tempfile
 import time
+import zipfile
 from typing import Any
 
 from . import (
@@ -98,21 +99,18 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
     @test_util.skip_unless_galaxy("release_23.0")
     def test_get_invocation_archive(self):
         invocation = self._invoke_workflow()
-        payload = {
-            "model_store_format": "rocrate.zip",
-            "include_files": True,
-            "include_deleted": False,
-            "include_hidden": False,
-        }
         self.gi.invocations.wait_for_invocation(invocation["id"])
         with tempfile.TemporaryDirectory() as folder:
             file = f"{folder}/temp.rocrate.zip"
-            response = self.gi.invocations.get_invocation_archive(invocation["id"], payload=payload)
+            response = self.gi.invocations.get_invocation_archive(
+                invocation_id=invocation["id"],
+                model_store_format="rocrate.zip",
+            )
             with open(file, "bw") as archive:
                 for chunk in response.iter_content(chunk_size=8192):
                     archive.write(chunk)
             # Verify file is not empty
-            assert os.path.getsize(file) > 0, "Downloaded archive is empty"
+            assert zipfile.is_zipfile(file)
 
     @test_util.skip_unless_galaxy("release_20.09")
     def test_get_invocation_biocompute_object(self):
