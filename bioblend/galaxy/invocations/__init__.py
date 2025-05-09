@@ -543,7 +543,6 @@ class InvocationClient(Client):
             return self._get(url=url)
         else:
             storage_request_id = psd["storage_request_id"]
-            url = f"{self.gi.url}/short_term_storage/{storage_request_id}/ready"
             return self._wait_for_short_term_storage(storage_request_id, maxwait=maxwait)
 
     def wait_for_invocation(

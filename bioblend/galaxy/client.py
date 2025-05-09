@@ -92,6 +92,7 @@ class Client:
         params: Optional[dict] = None,
         *,
         json: Literal[False],
+        stream: bool = False,
     ) -> requests.Response: ...
 
     @overload
