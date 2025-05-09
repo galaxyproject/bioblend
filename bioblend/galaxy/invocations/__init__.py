@@ -461,7 +461,9 @@ class InvocationClient(Client):
         :param invocation_id: Encoded workflow invocation ID
 
         :type model_store_format: str
-        :param model_store_format: format of model store to export
+        :param model_store_format: format of model store to export. Currently
+          supported formats: tar.gz, tar, bag.zip, bag.tar, bag.tgz, rocrate.zip
+          and bco.json .
 
         :type include_files: bool
         :param include_files: include materialized files in export when available
