@@ -9,6 +9,8 @@ from typing import (
     TYPE_CHECKING,
 )
 
+import requests
+
 from bioblend import (
     CHUNK_SIZE,
     ConnectionError,
@@ -409,8 +411,8 @@ class InvocationClient(Client):
 
     # TODO: Move to a new ``bioblend.galaxy.short_term_storage`` module
     def _wait_for_short_term_storage(
-        self, storage_request_id: str, maxwait: float = 60, interval: float = 3
-    ) -> dict[str, Any]:
+        self, storage_request_id: str, maxwait: float = 60, interval: float = 3, json: bool = True, stream: bool = False
+    ) -> Any:
         """
         Wait until a short term storage request is ready
 
@@ -425,18 +427,96 @@ class InvocationClient(Client):
         :type interval: float
         :param interval: Time (in seconds) to wait between 2 consecutive checks.
 
-        :rtype: dict
-        :return: The short term storage request.
+        :return: The decoded response if ``json`` is set to ``True``, otherwise
+          the response object
         """
         url = f"{self.gi.url}/short_term_storage/{storage_request_id}"
         is_ready_url = f"{url}/ready"
 
-        def check_and_get_short_term_storage() -> dict[str, Any]:
+        def check_and_get_short_term_storage() -> Any:
             if self._get(url=is_ready_url):
-                return self._get(url=url)
+                return self._get(url=url, json=json, stream=stream)
             raise NotReady(f"Storage request {storage_request_id} is not ready")
 
         return wait_on(check_and_get_short_term_storage, maxwait=maxwait, interval=interval)
+
+    def get_invocation_archive(
+        self,
+        invocation_id: str,
+        model_store_format: str = "tar.gz",
+        include_files: bool = True,
+        include_deleted: bool = False,
+        include_hidden: bool = False,
+        bco_merge_history_metadata: bool = False,
+        bco_override_environment_variables: Optional[dict[str, Any]] = None,
+        bco_override_empirical_error: Optional[dict[str, Any]] = None,
+        bco_override_algorithmic_error: Optional[dict[str, Any]] = None,
+        bco_override_xref: Optional[dict[str, Any]] = None,
+        maxwait: float = 1200,
+    ) -> requests.Response:
+        """
+        Get an invocation as a compressed archive.
+
+        :type invocation_id: str
+        :param invocation_id: Encoded workflow invocation ID
+
+        :type model_store_format: str
+        :param model_store_format: format of model store to export. Currently
+          supported formats: tar.gz, tar, bag.zip, bag.tar, bag.tgz, rocrate.zip
+          and bco.json .
+
+        :type include_files: bool
+        :param include_files: include materialized files in export when available
+
+        :type include_deleted: bool
+        :param include_deleted: include file contents for deleted datasets (if include_files is True).
+
+        :type include_hidden: bool
+        :param include_hidden: include file contents for hidden datasets (if include_files is True).
+
+        :type bco_merge_history_metadata: bool
+        :param bco_merge_history_metadata: when reading tags/annotations to generate BCO object include history metadata.
+
+        :type bco_override_environment_variables: dict[str, Any]
+        :param bco_override_environment_variables: override environment variables for 'execution_domain' when generating BioCompute object.
+
+        :type bco_override_empirical_error: dict[str, Any]
+        :param bco_override_empirical_error: override empirical error for 'error domain' when generating BioCompute object.
+
+        :type bco_override_algorithmic_error: dict[str, Any]
+        :param bco_override_algorithmic_error: override algorithmic error for 'error domain' when generating BioCompute object.
+
+        :type bco_override_xref: dict[str, Any]
+        :param bco_override_xref: Override xref for 'description domain' when generating BioCompute object.
+
+        :type maxwait: float
+        :param maxwait: Total time (in seconds) to wait for the invocation
+          object to become ready. After this time, a ``TimeoutException`` will
+          be raised.
+
+        :rtype: requests.Response
+        :return: request.Response
+        """
+        payload = {
+            "model_store_format": model_store_format,
+            "include_files": include_files,
+            "include_deleted": include_deleted,
+            "include_hidden": include_hidden,
+            "bco_merge_history_metadata": bco_merge_history_metadata,
+        }
+        if bco_override_environment_variables is not None:
+            payload["bco_override_environment_variables"] = bco_override_environment_variables
+        if bco_override_empirical_error is not None:
+            payload["bco_override_empirical_error"] = bco_override_empirical_error
+        if bco_override_algorithmic_error is not None:
+            payload["bco_override_algorithmic_error"] = bco_override_algorithmic_error
+        if bco_override_xref is not None:
+            payload["bco_override_xref"] = bco_override_xref
+
+        url = self._make_url(invocation_id) + "/prepare_store_download"
+        psd = self._post(url=url, payload=payload)
+        storage_request_id = psd["storage_request_id"]
+        return self._wait_for_short_term_storage(storage_request_id, maxwait=maxwait, json=False, stream=True)
 
     def get_invocation_biocompute_object(self, invocation_id: str, maxwait: float = 1200) -> dict[str, Any]:
         """
@@ -465,7 +545,6 @@ class InvocationClient(Client):
             return self._get(url=url)
         else:
             storage_request_id = psd["storage_request_id"]
-            url = f"{self.gi.url}/short_term_storage/{storage_request_id}/ready"
             return self._wait_for_short_term_storage(storage_request_id, maxwait=maxwait)
 
     def wait_for_invocation(
