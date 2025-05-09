@@ -88,7 +88,7 @@ class GalaxyClient:
             self.json_headers["User-Agent"] = user_agent
         # json_headers needs to be set before key can be defined, otherwise authentication with email/password causes an error
         if token:
-            self.json_headers["Authorization"] = f"Bearer {self.token}"
+            self.json_headers["Authorization"] = f"Bearer {token}"
         else:
             self.json_headers["x-api-key"] = self.key
         # Number of attempts before giving up on a GET request.
