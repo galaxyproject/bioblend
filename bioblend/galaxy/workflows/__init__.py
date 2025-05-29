@@ -66,7 +66,11 @@ class WorkflowClient(Client):
         return workflows
 
     def show_workflow(
-        self, workflow_id: str, instance: Optional[bool] = None, legacy: Optional[bool] = None, version: Optional[int] = None
+        self,
+        workflow_id: str,
+        instance: Optional[bool] = None,
+        legacy: Optional[bool] = None,
+        version: Optional[int] = None,
     ) -> dict[str, Any]:
         """
         Display information needed to run a workflow.
