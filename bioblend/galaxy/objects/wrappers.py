@@ -187,6 +187,7 @@ class Step(Wrapper):
         "type",
     )
     input_steps: dict[str, dict]
+    name: str
     type: str
     tool_id: Optional[str]
     tool_inputs: dict
@@ -975,6 +976,7 @@ class HistoryDatasetAssociation(Dataset):
     annotation: str
     deleted: bool
     purged: bool
+    visible: bool
 
     @property
     def _stream_url(self) -> str:
@@ -1058,6 +1060,7 @@ class DatasetCollection(Wrapper, metaclass=abc.ABCMeta):
     collection_type: str
     deleted: bool
     gi: "GalaxyInstance"
+    name: str
 
     def __init__(
         self, dsc_dict: dict[str, Any], container: Union["DatasetCollection", "History"], gi: "GalaxyInstance"
@@ -1091,6 +1094,7 @@ class HistoryDatasetCollectionAssociation(DatasetCollection):
     BASE_ATTRS = DatasetCollection.BASE_ATTRS + ("tags", "visible", "elements")
     SRC = "hdca"
     elements: list[dict]
+    visible: bool
 
     def delete(self) -> None:
         self.gi.gi.histories.delete_dataset_collection(self.container.id, self.id)
@@ -1117,6 +1121,7 @@ class LibraryDatasetDatasetAssociation(LibRelatedDataset):
 
     BASE_ATTRS = LibRelatedDataset.BASE_ATTRS + ("deleted",)
     SRC = "ldda"
+    deleted: bool
 
 
 class LibraryDataset(LibRelatedDataset):
@@ -1166,6 +1171,8 @@ class ContentInfo(Wrapper):
         "name",
         "type",
     )
+    name: str
+    type: str
 
 
 class LibraryContentInfo(ContentInfo):
@@ -1182,6 +1189,9 @@ class HistoryContentInfo(ContentInfo):
     """
 
     BASE_ATTRS = ContentInfo.BASE_ATTRS + ("deleted", "state", "visible")
+    deleted: bool
+    state: str
+    visible: bool
 
 
 DatasetContainerSubtype = TypeVar("DatasetContainerSubtype", bound="DatasetContainer")
@@ -1318,6 +1328,7 @@ class History(DatasetContainer[HistoryDatasetAssociation]):
     API_MODULE = "histories"
     annotation: str
     published: bool
+    state: str
     tags: list[str]
 
     def update(self, **kwargs: Any) -> "History":
@@ -1708,6 +1719,7 @@ class Folder(Wrapper):
         "name",
     )
     container: Library
+    deleted: bool
     description: str
     gi: "GalaxyInstance"
     name: str
@@ -1760,6 +1772,7 @@ class Tool(Wrapper):
         "version",
     )
     gi: "GalaxyInstance"
+    name: str
     POLLING_INTERVAL = 10  # for output state monitoring
 
     def run(
@@ -1810,6 +1823,7 @@ class Job(Wrapper):
     """
 
     BASE_ATTRS = Wrapper.BASE_ATTRS + ("state",)
+    state: str
 
 
 DatasetContainerPreviewSubtype = TypeVar("DatasetContainerPreviewSubtype", bound="DatasetContainerPreview")
@@ -1852,6 +1866,10 @@ class HistoryPreview(DatasetContainerPreview):
         "purged",
         "tags",
     )
+    annotation: str
+    published: bool
+    purged: bool
+    tags: list[str]
 
 
 class WorkflowPreview(Wrapper):
@@ -1911,3 +1929,4 @@ class JobPreview(Wrapper):
     """
 
     BASE_ATTRS = Wrapper.BASE_ATTRS + ("state",)
+    state: str

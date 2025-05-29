@@ -7,7 +7,9 @@ from typing import (
     Any,
     Literal,
     Optional,
+    overload,
     TYPE_CHECKING,
+    Union,
 )
 
 from bioblend import (
@@ -317,7 +319,13 @@ class LibraryClient(Client):
             libraries = [_ for _ in libraries if _["name"] == name]
         return libraries
 
-    def show_library(self, library_id: str, contents: bool = False) -> dict[str, Any]:
+    @overload
+    def show_library(self, library_id: str, contents: Literal[False] = False) -> dict[str, Any]: ...
+
+    @overload
+    def show_library(self, library_id: str, contents: Literal[True]) -> list[dict[str, Any]]: ...
+
+    def show_library(self, library_id: str, contents: bool = False) -> Union[dict[str, Any], list[dict[str, Any]]]:
         """
         Get information about a library.
 
@@ -328,8 +336,8 @@ class LibraryClient(Client):
         :param contents: whether to get contents of the library (rather
           than just the library details)
 
-        :rtype: dict
-        :return: details of the given library
+        :return: details of the given library or list of library datasets and
+          folders info
         """
         return self._get(id=library_id, contents=contents)
 

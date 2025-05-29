@@ -176,3 +176,19 @@ class TestGalaxyLibraries(GalaxyTestBase.GalaxyTestBase):
         dataset_show = self.gi.libraries.show_dataset(self.library["id"], updated_dataset["id"])
 
         assert listify(dataset_show["tags"]) == ["name:foobar", "barfoo"]
+
+    def test_folders(self):
+        folder1_name = "folder 1"
+        folder1 = self.gi.libraries.create_folder(self.library["id"], folder1_name)[0]
+        assert folder1["name"] == folder1_name
+        folder2_name = "folder 2"
+        folder2 = self.gi.libraries.create_folder(self.library["id"], folder2_name)[0]
+        assert folder2["name"] == folder2_name
+
+        folders = self.gi.libraries.get_folders(self.library["id"])
+        assert len(folders) == 3  # includes the root ("/") folder
+
+        folder2_path = f"/{folder2_name}"
+        folders = self.gi.libraries.get_folders(self.library["id"], name=folder2_path)
+        assert len(folders) == 1
+        assert folders[0]["name"] == folder2_path
