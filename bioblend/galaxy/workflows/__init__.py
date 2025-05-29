@@ -65,12 +65,20 @@ class WorkflowClient(Client):
             workflows = [_ for _ in workflows if _["name"] == name]
         return workflows
 
-    def show_workflow(self, workflow_id: str, version: Optional[int] = None) -> dict[str, Any]:
+    def show_workflow(
+        self, workflow_id: str, instance: Optional[bool] = None, legacy: Optional[bool] = None, version: Optional[int] = None
+    ) -> dict[str, Any]:
         """
         Display information needed to run a workflow.
 
         :type workflow_id: str
         :param workflow_id: Encoded workflow ID
+
+        :type instance: bool
+        :param instance: this is a workflow ID and not a stored workflow ID
+
+        :type legacy: bool
+        :param legacy: use the legacy workflow format
 
         :type version: int
         :param version: Workflow version to show
@@ -85,6 +93,11 @@ class WorkflowClient(Client):
              'url': '/api/workflows/92c56938c2f9b315'}
         """
         params: dict[str, Any] = {}
+        
+        if legacy is not None:
+            params["legacy"] = legacy
+        if instance is not None:
+            params["instance"] = instance
         if version is not None:
             params["version"] = version
 
