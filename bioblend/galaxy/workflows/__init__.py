@@ -93,7 +93,7 @@ class WorkflowClient(Client):
              'url': '/api/workflows/92c56938c2f9b315'}
         """
         params: dict[str, Any] = {}
-        
+
         if legacy is not None:
             params["legacy"] = legacy
         if instance is not None:
