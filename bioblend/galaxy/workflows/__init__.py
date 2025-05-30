@@ -82,10 +82,14 @@ class WorkflowClient(Client):
         :param version: Workflow version to show
 
         :type instance: bool
-        :param instance: this is a workflow ID and not a stored workflow ID
+        :param instance: treat ``workflow_id`` as a Workflow ID if True,
+          otherwise treat it as a StoredWorkflow ID (the default). This
+          parameter works only on Galaxy 20.01 or later.
 
         :type legacy: bool
-        :param legacy: use the legacy workflow format
+        :param legacy: whether to use the legacy workflow format (default is
+          False). Before Galaxy 24.0, passing False to this parameter was
+          mistakenly equivalent to passing True.
 
         :rtype: dict
         :return: A description of the workflow and its inputs.
@@ -98,12 +102,12 @@ class WorkflowClient(Client):
         """
         params: dict[str, Any] = {}
 
-        if legacy is not None:
-            params["legacy"] = legacy
-        if instance is not None:
-            params["instance"] = instance
         if version is not None:
             params["version"] = version
+        if instance is not None:
+            params["instance"] = instance
+        if legacy is not None:
+            params["legacy"] = legacy
 
         return self._get(id=workflow_id, params=params)
 
