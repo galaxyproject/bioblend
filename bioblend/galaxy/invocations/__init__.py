@@ -2,7 +2,6 @@
 Contains possible interactions with the Galaxy workflow invocations
 """
 
-import base64
 import logging
 from typing import (
     Any,
@@ -269,7 +268,13 @@ class InvocationClient(Client):
         return self._delete(url=url)
 
     def import_invocation(
-        self, history_id: str, model_store_format: str, file_path: Optional[str] = None, url: Optional[str] = None
+        self,
+        history_id: str,
+        model_store_format: str,
+        file_path: Optional[str] = None,
+        url: Optional[str] = None,
+        upload_url: str = "/invocations/resumable_upload",
+        chunk_size: int = CHUNK_SIZE,
     ) -> Any:
         """
         Import a invocation from an archive on disk or a URL.
@@ -286,6 +291,9 @@ class InvocationClient(Client):
         :type url: str
         :param url: URL for an exported history archive
 
+        :type chunk_size: int
+        :param chunk_size: Number of bytes to send in each chunk
+
         :rtype: dict or list of dicts
         :return: if the import is successful, a list of dictionaries will be returned; otherwise, a single dictionary will be returned.
         """
@@ -294,8 +302,10 @@ class InvocationClient(Client):
             "model_store_format": model_store_format,
         }
         if file_path:
-            with open(file_path, "rb") as reader:
-                payload["store_content_uri"] = "base64://" + base64.b64encode(reader.read()).decode("utf-8")
+            uploader = self.gi.get_tus_uploader(path=file_path, url=upload_url, chunk_size=chunk_size)
+            uploader.upload()
+            assert uploader.session_id
+            payload["store_content_uri"] = f"tus://{uploader.session_id}"
         else:
             payload["store_content_uri"] = url
         url = "/".join((self._make_url(), "from_store"))
