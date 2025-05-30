@@ -68,9 +68,9 @@ class WorkflowClient(Client):
     def show_workflow(
         self,
         workflow_id: str,
+        version: Optional[int] = None,
         instance: Optional[bool] = None,
         legacy: Optional[bool] = None,
-        version: Optional[int] = None,
     ) -> dict[str, Any]:
         """
         Display information needed to run a workflow.
@@ -78,14 +78,14 @@ class WorkflowClient(Client):
         :type workflow_id: str
         :param workflow_id: Encoded workflow ID
 
+        :type version: int
+        :param version: Workflow version to show
+
         :type instance: bool
         :param instance: this is a workflow ID and not a stored workflow ID
 
         :type legacy: bool
         :param legacy: use the legacy workflow format
-
-        :type version: int
-        :param version: Workflow version to show
 
         :rtype: dict
         :return: A description of the workflow and its inputs.
