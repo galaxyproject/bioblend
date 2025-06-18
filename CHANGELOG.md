@@ -1,3 +1,24 @@
+## BioBlend v1.6.0 - 2025-06-18
+
+* Added support for Galaxy release 25.0.
+
+* Added support for API auth with access token (thanks to
+  [Nuwan Goonasekera](https://github.com/nuwang)).
+
+* Added ``decode_id()`` and ``encode_id()`` methods to ``ConfigClient`` (thanks
+  to [Simon Bray](https://github.com/simonbray)).
+
+* Added ``get_invocation_archive()`` method to ``InvocationClient`` (thanks to
+  [Patrik Smeds](https://github.com/Smeds)).
+
+* Added ``instance`` and ``legacy`` parameters to
+  ``WorkflowClient.show_workflow()`` (thanks to
+  [Patrik Smeds](https://github.com/Smeds)).
+
+* Improvements to documentation, tests and type annotation (thanks to
+  [Dannon](https://github.com/dannon) and
+  [Matthias Bernt](https://github.com/bernt-matthias)).
+
 ### BioBlend v1.5.0 - 2025-03-06
 
 * Dropped support for Python 3.8. Added support for Galaxy release 24.2.
