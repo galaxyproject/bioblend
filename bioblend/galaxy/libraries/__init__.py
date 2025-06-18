@@ -88,12 +88,26 @@ class LibraryClient(Client):
         url = "/".join((self._make_url(library_id, contents=True), item_id))
         return self._get(url=url)
 
-    def delete_library_dataset(self, library_id: str, dataset_id: str, purged: bool = False) -> dict[str, Any]:
+    @overload
+    def delete_library_dataset(
+        self,
+        dataset_id: str,
+        undelete: bool = False,
+    ) -> dict[str, Any]: ...
+
+    @overload
+    def delete_library_dataset(
+        self,
+        library_id: str,
+        dataset_id: str,
+        purged: bool = False,
+    ) -> dict[str, Any]: ...
+
+    def delete_library_dataset(
+        self, library_id: Optional[str], dataset_id: str, purged: bool = False, undelete: bool = False
+    ) -> dict[str, Any]:
         """
         Delete a library dataset in a data library.
-
-        :type library_id: str
-        :param library_id: library id where dataset is found in
 
         :type dataset_id: str
         :param dataset_id: id of the dataset to be deleted
@@ -110,8 +124,12 @@ class LibraryClient(Client):
             {'deleted': True,
              'id': '60e680a037f41974'}
         """
-        url = "/".join((self._make_url(library_id, contents=True), dataset_id))
-        return self._delete(payload={"purged": purged}, url=url)
+        if not library_id:
+            url = "/".join((self._make_url(), "datasets", dataset_id))
+            return self._delete(params={"undelete": undelete}, url=url)
+        else:
+            url = "/".join((self._make_url(library_id, contents=True), dataset_id))
+            return self._delete(payload={"purge": purged}, url=url)
 
     def update_library_dataset(self, dataset_id: str, **kwargs: Any) -> dict[str, Any]:
         """
