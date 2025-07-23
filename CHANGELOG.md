@@ -1,3 +1,7 @@
+## BioBlend v
+
+* Added support for Python 3.14.
+
 ## BioBlend v1.6.0 - 2025-06-18
 
 * Added support for Galaxy release 25.0.
