@@ -110,7 +110,7 @@ jobs:
             galaxy_version: release_19.05
             galaxy_python_version: '3.7'
           - os: ubuntu-latest
-            tox_env: py313
+            tox_env: py314
             galaxy_version: dev
             galaxy_python_version: '3.9'
           # Cannot test on macOS because service containers are not supported
@@ -133,6 +133,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ steps.get_bioblend_python_version.outputs.bioblend_python_version }}
+          allow-prereleases: true
       - name: Install tox
         run: |
           python3 -m pip install --upgrade pip setuptools
