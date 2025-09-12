@@ -2,6 +2,8 @@
 
 * Added support for Python 3.14.
 
+* Added ``job_id`` parameter to ``InvocationClient.get_invocations()``.
+
 ## BioBlend v1.6.0 - 2025-06-18
 
 * Added support for Galaxy release 25.0.

@@ -47,6 +47,7 @@ class InvocationClient(Client):
         offset: Optional[int] = None,
         view: str = "collection",
         step_details: bool = False,
+        job_id: Optional[int] = None,
     ) -> list[dict[str, Any]]:
         """
         Get all workflow invocations, or select a subset by specifying optional
@@ -81,6 +82,9 @@ class InvocationClient(Client):
         :param step_details: If 'view' is 'element', also include details
                              on individual steps.
 
+        :type job_id: str
+        :param job_id: Encoded job ID to filter on.
+
         :rtype: list
         :return: A list of workflow invocations.
           For example::
@@ -98,6 +102,8 @@ class InvocationClient(Client):
             params["workflow_id"] = workflow_id
         if history_id:
             params["history_id"] = history_id
+        if job_id:
+            params["job_id"] = job_id
         if user_id:
             params["user_id"] = user_id
         if limit is not None:

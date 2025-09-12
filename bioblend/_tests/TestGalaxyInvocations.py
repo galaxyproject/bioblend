@@ -84,6 +84,17 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
 
         self.gi.histories.delete_history(hist2_id, purge=True)
 
+    @test_util.skip_unless_galaxy("release_21.05")
+    def test_get_invocations_filtering_by_job_id(self):
+        invocation = self._invoke_workflow()
+        self.gi.invocations.wait_for_invocation(invocation["id"])
+        hist_contents = self.gi.histories.show_history(self.history_id, contents=True)
+        hist_last_dataset_id = hist_contents[-1]["id"]
+        hist_last_job_id = self.gi.datasets.show_dataset(hist_last_dataset_id)["creating_job"]
+        invocs = self.gi.invocations.get_invocations(job_id=hist_last_job_id)
+        assert len(invocs) == 1
+        assert invocs[0]["id"] == invocation["id"]
+
     @test_util.skip_unless_galaxy("release_19.09")
     def test_get_invocation_report(self):
         invocation = self._invoke_workflow()
