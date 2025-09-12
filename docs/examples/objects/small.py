@@ -2,7 +2,7 @@ import os
 import sys
 import tempfile
 
-from common import get_one  # noqa:I100,I201
+from common import get_one
 
 from bioblend.galaxy.objects import GalaxyInstance
 
