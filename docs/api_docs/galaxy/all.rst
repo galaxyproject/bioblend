@@ -102,6 +102,13 @@ Libraries
 
 -----
 
+Notifications
+-------------
+
+.. automodule:: bioblend.galaxy.notifications
+
+-----
+
 Quotas
 ------
 
