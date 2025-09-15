@@ -807,7 +807,7 @@
   ReadTheDocs.
 
 * Solidified automated testing by using [tox](https://tox.readthedocs.org/) and
-  [flake8](https://gitlab.com/pycqa/flake8).
+  [flake8](https://flake8.pycqa.org/).
 
 ### BioBlend v0.5.3 - 2015-03-18
 
