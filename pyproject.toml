@@ -1,6 +1,57 @@
 [build-system]
-requires = ["setuptools"]
+requires = ["setuptools>=77.0.0"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "bioblend"
+dynamic = ["version"]
+description = "Library for interacting with the Galaxy API"
+readme = "README.rst"
+license = "MIT"
+license-files = [
+    "LICENSE",
+]
+authors = [
+    { name = "Enis Afgan", email = "afgane@gmail.com" },
+]
+maintainers = [
+    { name = "Nicola Soranzo", email = "nicola.soranzo@earlham.ac.uk" },
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Typing :: Typed",
+]
+requires-python = ">=3.9"
+dependencies = [
+    "PyYAML",
+    "requests>=2.20.0",
+    "requests-toolbelt>=0.5.1,!=0.9.0",
+    "tuspy",
+]
+
+[project.optional-dependencies]
+testing = [
+    "pytest",
+]
+
+[project.scripts]
+"bioblend-galaxy-tests" = "bioblend._tests.pytest_galaxy_test_wrapper:main"
+
+[project.urls]
+Homepage = "https://bioblend.readthedocs.io/"
+Documentation = "https://bioblend.readthedocs.io/"
+"Bug Tracker" = "https://github.com/galaxyproject/bioblend/issues"
+"Source Code" = "https://github.com/galaxyproject/bioblend"
 
 [tool.black]
 include = '\.pyi?$'
@@ -19,3 +70,12 @@ select = ["E", "F", "B", "C4", "G", "ISC", "UP"]
 # B9 flake8-bugbear opinionated warnings
 # E501 is line length (delegated to black)
 ignore = ["B9", "E501"]
+
+[tool.setuptools.dynamic]
+version = { attr = "bioblend.__version__" }
+
+[tool.setuptools.package-data]
+"bioblend" = [
+    "_tests/data/*",
+    "py.typed",
+]

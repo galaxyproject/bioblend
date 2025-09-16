@@ -4,6 +4,8 @@
 
 * Added ``job_id`` parameter to ``InvocationClient.get_invocations()``.
 
+* Migrated from ``setup.cfg`` to ``pyproject.toml`` .
+
 ## BioBlend v1.6.0 - 2025-06-18
 
 * Added support for Galaxy release 25.0.
