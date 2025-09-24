@@ -260,9 +260,9 @@ class Client:
         if not url:
             url = self._make_url(module_id=id, deleted=deleted, contents=contents)
         r = self.gi.make_delete_request(url, payload=payload, params=params)
-        if 200 <= r.status_code < 203:
+        if 200 <= r.status_code < 202:
             return r.json()
-        elif 203 <= r.status_code < 300:
+        elif 202 <= r.status_code < 300:
             return None
         # @see self.body for HTTP response body
         raise ConnectionError(
