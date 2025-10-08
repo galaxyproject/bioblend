@@ -121,11 +121,6 @@ jobs:
           #   galaxy_python_version: '3.8'
     steps:
       - uses: actions/checkout@v5
-      - name: Cache pip dir
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: pip-cache-${{ matrix.tox_env }}-${{ matrix.galaxy_version }}
       - name: Calculate Python version for BioBlend from tox_env
         id: get_bioblend_python_version
         run: echo "bioblend_python_version=$(echo "${{ matrix.tox_env }}" | sed -e 's/^py\([3-9]\)\([0-9]\+\)/\1.\2/')" >> $GITHUB_OUTPUT
@@ -134,6 +129,7 @@ jobs:
         with:
           python-version: ${{ steps.get_bioblend_python_version.outputs.bioblend_python_version }}
           allow-prereleases: true
+          cache: pip
       - name: Install tox
         run: |
           python3 -m pip install --upgrade pip setuptools
@@ -142,6 +138,7 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.galaxy_python_version }}
+          cache: pip
       - name: Run tests
         env:
           PGPASSWORD: postgres
