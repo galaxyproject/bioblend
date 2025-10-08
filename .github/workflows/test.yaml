@@ -121,6 +121,8 @@ jobs:
           #   galaxy_python_version: '3.8'
     steps:
       - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
       - name: Calculate Python version for BioBlend from tox_env
         id: get_bioblend_python_version
         run: echo "bioblend_python_version=$(echo "${{ matrix.tox_env }}" | sed -e 's/^py\([3-9]\)\([0-9]\+\)/\1.\2/')" >> $GITHUB_OUTPUT
