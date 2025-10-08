@@ -123,6 +123,13 @@ jobs:
       - uses: actions/checkout@v5
         with:
           persist-credentials: false
+      - name: Checkout Galaxy
+        uses: actions/checkout@v5
+        with:
+          repository: galaxyproject/galaxy
+          ref: ${{ matrix.galaxy_version }}
+          path: galaxy-${{ matrix.galaxy_version }}
+          persist-credentials: false
       - name: Calculate Python version for BioBlend from tox_env
         id: get_bioblend_python_version
         run: echo "bioblend_python_version=$(echo "${{ matrix.tox_env }}" | sed -e 's/^py\([3-9]\)\([0-9]\+\)/\1.\2/')" >> $GITHUB_OUTPUT
@@ -154,10 +161,8 @@ jobs:
               export BIOBLEND_TOOLSHED_URL=https://testtoolshed.g2.bx.psu.edu/
           fi
           # Install Galaxy
-          GALAXY_DIR=galaxy-${{ matrix.galaxy_version }}
-          git clone --depth=1 -b ${{ matrix.galaxy_version }} https://github.com/galaxyproject/galaxy $GALAXY_DIR
           export DATABASE_CONNECTION=postgresql://postgres:@localhost/galaxy
-          ./run_bioblend_tests.sh -g $GALAXY_DIR -v python${{ matrix.galaxy_python_version }} -e ${{ matrix.tox_env }}
+          ./run_bioblend_tests.sh -g galaxy-${{ matrix.galaxy_version }} -v python${{ matrix.galaxy_python_version }} -e ${{ matrix.tox_env }}
       - name: The job has failed
         if: ${{ failure() }}
         run: |
