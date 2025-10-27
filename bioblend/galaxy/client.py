@@ -20,7 +20,7 @@ import bioblend
 
 # The following import must be preserved for compatibility because
 # ConnectionError class was originally defined here
-from bioblend import ConnectionError  # noqa: I202
+from bioblend import ConnectionError
 
 if TYPE_CHECKING:
     from bioblend.galaxyclient import GalaxyClient

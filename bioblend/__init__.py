@@ -106,7 +106,7 @@ class ConnectionError(Exception):
     @see: body attribute to see the content of the http response
     """
 
-    def __init__(
+    def __init__(  # noqa: B042  # https://github.com/PyCQA/flake8-bugbear/issues/525
         self, message: str, body: Optional[Union[bytes, str]] = None, status_code: Optional[int] = None
     ) -> None:
         super().__init__(message)
