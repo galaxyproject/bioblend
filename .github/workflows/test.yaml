@@ -36,6 +36,10 @@ jobs:
             galaxy_python_version: '3.9'
           - os: ubuntu-latest
             tox_env: py39
+            galaxy_version: release_25.1
+            galaxy_python_version: '3.9'
+          - os: ubuntu-latest
+            tox_env: py39
             galaxy_version: release_25.0
             galaxy_python_version: '3.9'
           - os: ubuntu-latest
