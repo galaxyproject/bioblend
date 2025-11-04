@@ -324,8 +324,8 @@ class WorkflowClient(Client):
         require_exact_tool_versions: bool = True,
         version: Optional[int] = None,
         use_cached_job: bool = False,
-        instance: Optional[bool] = None,
-        resource_params: Optional[dict[int, Any]] = None,
+        instance: bool = False,
+        resource_params: Optional[dict[str, Any]] = None,
         preferred_object_store_id: Optional[str] = None,
         preferred_intermediate_object_store_id: Optional[str] = None,
         preferred_outputs_object_store_id: Optional[str] = None,
@@ -431,7 +431,9 @@ class WorkflowClient(Client):
           to be used for this workflow run.
 
         :type instance: bool
-        :param instance: True if the provided id is Workflow id, as opposed to StoredWorkflow id.
+        :param instance: treat ``workflow_id`` as a Workflow ID if True,
+          otherwise treat it as a StoredWorkflow ID (the default). This
+          parameter works only on Galaxy 21.05 or later.
 
         :rtype: dict
         :return: A dict containing the workflow invocation describing the
@@ -546,18 +548,17 @@ class WorkflowClient(Client):
             "require_exact_tool_versions": require_exact_tool_versions,
             "version": version,
             "use_cached_job": use_cached_job,
+            "instance": instance,
         }
 
         if params and parameters:
-            raise ValueError("Both 'params' and the 'parameters' alias were provided. This is not allowed, pick one.")
+            raise ValueError("You may specify either 'parameters' or 'params' but not both.")
         elif parameters:
             payload["parameters"] = parameters
         elif params:
             payload["parameters"] = params
 
-        split_object_store_config = bool(
-            preferred_outputs_object_store_id is not None or preferred_intermediate_object_store_id is not None
-        )
+        split_object_store_config = preferred_outputs_object_store_id is not None or preferred_intermediate_object_store_id is not None
         if split_object_store_config and preferred_object_store_id:
             raise ValueError(
                 "You may specify either 'preferred_object_store_id' or one/both of 'preferred_outputs_object_store_id' and 'preferred_intermediate_object_store_id' but not both"
@@ -574,8 +575,6 @@ class WorkflowClient(Client):
             payload["inputs"] = inputs
         if replacement_params:
             payload["replacement_params"] = replacement_params
-        if instance:
-            payload["instance"] = instance
         if history_id:
             payload["history"] = f"hist_id={history_id}"
         elif history_name:
