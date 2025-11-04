@@ -555,9 +555,13 @@ class WorkflowClient(Client):
         elif params:
             payload["parameters"] = params
 
-        split_object_store_config = bool(preferred_outputs_object_store_id is not None or preferred_intermediate_object_store_id is not None)
+        split_object_store_config = bool(
+            preferred_outputs_object_store_id is not None or preferred_intermediate_object_store_id is not None
+        )
         if split_object_store_config and preferred_object_store_id:
-            raise ValueError("You may specify either 'preferred_object_store_id' or one/both of 'preferred_outputs_object_store_id' and 'preferred_intermediate_object_store_id' but not both")
+            raise ValueError(
+                "You may specify either 'preferred_object_store_id' or one/both of 'preferred_outputs_object_store_id' and 'preferred_intermediate_object_store_id' but not both"
+            )
 
         if preferred_object_store_id:
             payload["preferred_object_store_id"] = preferred_object_store_id
