@@ -313,7 +313,6 @@ class WorkflowClient(Client):
         workflow_id: str,
         inputs: Optional[dict] = None,
         params: Optional[dict] = None,
-        parameters: Optional[dict] = None,
         history_id: Optional[str] = None,
         history_name: Optional[str] = None,
         import_inputs_to_history: bool = False,
@@ -324,6 +323,7 @@ class WorkflowClient(Client):
         require_exact_tool_versions: bool = True,
         version: Optional[int] = None,
         use_cached_job: bool = False,
+        parameters: Optional[dict] = None,
         instance: bool = False,
         resource_params: Optional[dict[str, Any]] = None,
         preferred_object_store_id: Optional[str] = None,
@@ -358,10 +358,6 @@ class WorkflowClient(Client):
         :type params: dict
         :param params: A mapping of non-datasets tool parameters (see below)
           A synonym to the "parameters" dict below. Both cannot be provided.
-
-        :type parameters: dict
-        :param parameters: A mapping of non-datasets tool parameters (see below)
-          A synonym to the "params" dict above. Both cannot be provided.
 
         :type history_id: str
         :param history_id: The encoded history ID where to store the workflow
@@ -411,6 +407,10 @@ class WorkflowClient(Client):
         :type use_cached_job: bool
         :param use_cached_job: Whether to use cached jobs for the workflow
           invocation.
+
+        :type parameters: dict
+        :param parameters: A mapping of non-datasets tool parameters (see below)
+          A synonym to the "params" dict above. Both cannot be provided.
 
         :type instance: bool
         :param instance: treat ``workflow_id`` as a Workflow ID if True,
