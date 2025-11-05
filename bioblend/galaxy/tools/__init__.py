@@ -6,9 +6,7 @@ from os.path import basename
 from typing import (
     Any,
     Literal,
-    Optional,
     TYPE_CHECKING,
-    Union,
 )
 
 from bioblend.galaxy.client import Client
@@ -28,7 +26,7 @@ class ToolClient(Client):
         super().__init__(galaxy_instance)
 
     def get_tools(
-        self, tool_id: Optional[str] = None, name: Optional[str] = None, trackster: Optional[bool] = None
+        self, tool_id: str | None = None, name: str | None = None, trackster: bool | None = None
     ) -> list[dict[str, Any]]:
         """
         Get all tools, or select a subset by specifying optional arguments for
@@ -71,7 +69,7 @@ class ToolClient(Client):
         """
         return self._raw_get_tool(in_panel=True)
 
-    def _raw_get_tool(self, in_panel: Optional[bool] = None, trackster: Optional[bool] = None) -> list[dict[str, Any]]:
+    def _raw_get_tool(self, in_panel: bool | None = None, trackster: bool | None = None) -> list[dict[str, Any]]:
         params = {
             "in_panel": in_panel,
             "trackster": trackster,
@@ -206,7 +204,7 @@ class ToolClient(Client):
         }
         return self._get(id=tool_id, params=params)
 
-    def get_tool_tests(self, tool_id: str, tool_version: Optional[str] = None) -> list[dict[str, Any]]:
+    def get_tool_tests(self, tool_id: str, tool_version: str | None = None) -> list[dict[str, Any]]:
         """
         Fetch the test case definitions configured for a tool.
 
@@ -241,9 +239,9 @@ class ToolClient(Client):
     def build(
         self,
         tool_id: str,
-        inputs: Optional[dict[str, Any]] = None,
-        tool_version: Optional[str] = None,
-        history_id: Optional[str] = None,
+        inputs: dict[str, Any] | None = None,
+        tool_version: str | None = None,
+        history_id: str | None = None,
     ) -> dict[str, Any]:
         """
         This method returns the tool model, which includes an updated input parameter array for the given tool,
@@ -342,7 +340,7 @@ class ToolClient(Client):
             }
 
         """
-        params: dict[str, Union[str, dict]] = {}
+        params: dict[str, str | dict] = {}
 
         if inputs:
             params["inputs"] = inputs
@@ -361,9 +359,9 @@ class ToolClient(Client):
         self,
         history_id: str,
         tool_id: str,
-        tool_inputs: Union[InputsBuilder, dict],
+        tool_inputs: InputsBuilder | dict,
         input_format: Literal["21.01", "legacy"] = "legacy",
-        data_manager_mode: Optional[Literal["populate", "dry_run", "bundle"]] = None,
+        data_manager_mode: Literal["populate", "dry_run", "bundle"] | None = None,
     ) -> dict[str, Any]:
         """
         Runs tool specified by ``tool_id`` in history indicated
@@ -447,7 +445,7 @@ class ToolClient(Client):
         You can also check the examples in `Galaxy's API test suite
         <https://github.com/galaxyproject/galaxy/blob/dev/lib/galaxy_test/api/test_tools.py>`_.
         """
-        payload: dict[str, Union[str, dict]] = {
+        payload: dict[str, str | dict] = {
             "history_id": history_id,
             "tool_id": tool_id,
             "input_format": input_format,
@@ -467,9 +465,9 @@ class ToolClient(Client):
         self,
         path: str,
         history_id: str,
-        storage: Optional[str] = None,
-        metadata: Optional[dict] = None,
-        chunk_size: Optional[int] = UPLOAD_CHUNK_SIZE,
+        storage: str | None = None,
+        metadata: dict | None = None,
+        chunk_size: int | None = UPLOAD_CHUNK_SIZE,
         **kwargs: Any,
     ) -> dict[str, Any]:
         """

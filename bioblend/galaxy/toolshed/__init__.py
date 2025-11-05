@@ -4,9 +4,7 @@ Interaction with a Galaxy Tool Shed.
 
 from typing import (
     Any,
-    Optional,
     TYPE_CHECKING,
-    Union,
 )
 
 from bioblend.galaxy.client import Client
@@ -79,9 +77,9 @@ class ToolShedClient(Client):
         install_tool_dependencies: bool = False,
         install_repository_dependencies: bool = False,
         install_resolver_dependencies: bool = False,
-        tool_panel_section_id: Optional[str] = None,
-        new_tool_panel_section_label: Optional[str] = None,
-    ) -> Union[list[dict[str, Any]], dict[str, str]]:
+        tool_panel_section_id: str | None = None,
+        new_tool_panel_section_label: str | None = None,
+    ) -> list[dict[str, Any]] | dict[str, str]:
         """
         Install a specified repository revision from a specified Tool Shed into
         this Galaxy instance. This example demonstrates installation of a repository

@@ -8,7 +8,6 @@ import os
 import sys
 from typing import (
     NoReturn,
-    Optional,
 )
 
 try:
@@ -28,7 +27,7 @@ quick_tests = [
 ]
 
 
-def main(args: Optional[list[str]] = None) -> NoReturn:
+def main(args: list[str] | None = None) -> NoReturn:
     """Entry point that delegates to pytest.main."""
     if pytest is None:
         raise Exception("pytest is required to use this script.")

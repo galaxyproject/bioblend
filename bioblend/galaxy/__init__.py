@@ -2,8 +2,6 @@
 A base representation of an instance of Galaxy
 """
 
-from typing import Optional
-
 from bioblend.galaxy import (
     config,
     container_resolution,
@@ -36,13 +34,13 @@ class GalaxyInstance(GalaxyClient):
     def __init__(
         self,
         url: str,
-        key: Optional[str] = None,
-        email: Optional[str] = None,
-        password: Optional[str] = None,
+        key: str | None = None,
+        email: str | None = None,
+        password: str | None = None,
         *,
-        token: Optional[str] = None,
+        token: str | None = None,
         verify: bool = True,
-        user_agent: Optional[str] = None,
+        user_agent: str | None = None,
     ) -> None:
         """
         A base representation of a connection to a Galaxy instance, identified

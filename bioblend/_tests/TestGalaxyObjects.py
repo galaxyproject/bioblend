@@ -9,15 +9,14 @@ import tempfile
 import unittest
 import uuid
 from collections.abc import (
+    Callable,
     Collection,
     Iterable,
 )
 from ssl import SSLError
 from typing import (
     Any,
-    Callable,
     Literal,
-    Union,
 )
 from urllib.error import URLError
 from urllib.request import urlopen
@@ -128,7 +127,7 @@ def is_reachable(url: str) -> bool:
     res = None
     try:
         res = urlopen(url, timeout=5)
-    except (SSLError, URLError, socket.timeout):
+    except (SSLError, URLError, TimeoutError):
         return False
     if res is not None:
         res.close()
@@ -990,7 +989,7 @@ class TestRunWorkflow(GalaxyObjectsTestBase):
     def _test(self, existing_hist: bool = False, pass_params: bool = False) -> None:
         hist_name = f"test_{uuid.uuid4().hex}"
         if existing_hist:
-            hist: Union[str, wrappers.History] = self.gi.histories.create(hist_name)
+            hist: str | wrappers.History = self.gi.histories.create(hist_name)
         else:
             hist = hist_name
         if pass_params:

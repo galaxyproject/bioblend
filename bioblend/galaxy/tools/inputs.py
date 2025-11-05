@@ -1,8 +1,6 @@
 from collections.abc import Iterator
 from typing import (
     Any,
-    Optional,
-    Union,
 )
 
 
@@ -30,7 +28,7 @@ class InputsBuilder:
             values[key] = value
         return values
 
-    def flat_iter(self, prefix: Optional[str] = None) -> Iterator[tuple[str, Any]]:
+    def flat_iter(self, prefix: str | None = None) -> Iterator[tuple[str, Any]]:
         for key, value in self._input_dict.items():
             effective_key = key if prefix is None else f"{prefix}|{key}"
             if hasattr(value, "flat_iter"):
@@ -59,7 +57,7 @@ class Param:
 
 
 class DatasetParam(Param):
-    def __init__(self, value: Union[dict[str, str], str], src: str = "hda") -> None:
+    def __init__(self, value: dict[str, str] | str, src: str = "hda") -> None:
         if not isinstance(value, dict):
             value = {"src": src, "id": value}
         super().__init__(value)

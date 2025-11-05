@@ -9,7 +9,6 @@ import time
 from typing import (
     Any,
     Literal,
-    Optional,
     overload,
     TYPE_CHECKING,
 )
@@ -58,7 +57,7 @@ class Client:
         """
         self.gi = galaxy_instance
 
-    def _make_url(self, module_id: Optional[str] = None, deleted: bool = False, contents: bool = False) -> str:
+    def _make_url(self, module_id: str | None = None, deleted: bool = False, contents: bool = False) -> str:
         """
         Compose a URL based on the provided arguments.
 
@@ -85,11 +84,11 @@ class Client:
     @overload
     def _get(
         self,
-        id: Optional[str] = None,
+        id: str | None = None,
         deleted: bool = False,
         contents: bool = False,
-        url: Optional[str] = None,
-        params: Optional[dict] = None,
+        url: str | None = None,
+        params: dict | None = None,
         *,
         json: Literal[False],
         stream: bool = False,
@@ -98,22 +97,22 @@ class Client:
     @overload
     def _get(
         self,
-        id: Optional[str] = None,
+        id: str | None = None,
         deleted: bool = False,
         contents: bool = False,
-        url: Optional[str] = None,
-        params: Optional[dict] = None,
+        url: str | None = None,
+        params: dict | None = None,
         json: bool = True,
         stream: bool = False,
     ) -> Any: ...
 
     def _get(
         self,
-        id: Optional[str] = None,
+        id: str | None = None,
         deleted: bool = False,
         contents: bool = False,
-        url: Optional[str] = None,
-        params: Optional[dict] = None,
+        url: str | None = None,
+        params: dict | None = None,
         json: bool = True,
         stream: bool = False,
     ) -> Any:
@@ -170,11 +169,11 @@ class Client:
 
     def _post(
         self,
-        payload: Optional[dict] = None,
-        id: Optional[str] = None,
+        payload: dict | None = None,
+        id: str | None = None,
         deleted: bool = False,
         contents: bool = False,
-        url: Optional[str] = None,
+        url: str | None = None,
         files_attached: bool = False,
     ) -> Any:
         """
@@ -198,10 +197,10 @@ class Client:
 
     def _put(
         self,
-        payload: Optional[dict] = None,
-        id: Optional[str] = None,
-        url: Optional[str] = None,
-        params: Optional[dict] = None,
+        payload: dict | None = None,
+        id: str | None = None,
+        url: str | None = None,
+        params: dict | None = None,
     ) -> Any:
         """
         Do a generic PUT request, composing the url from the contents of the
@@ -219,10 +218,10 @@ class Client:
 
     def _patch(
         self,
-        payload: Optional[dict] = None,
-        id: Optional[str] = None,
-        url: Optional[str] = None,
-        params: Optional[dict] = None,
+        payload: dict | None = None,
+        id: str | None = None,
+        url: str | None = None,
+        params: dict | None = None,
     ) -> Any:
         """
         Do a generic PATCH request, composing the url from the contents of the
@@ -240,12 +239,12 @@ class Client:
 
     def _delete(
         self,
-        payload: Optional[dict] = None,
-        id: Optional[str] = None,
+        payload: dict | None = None,
+        id: str | None = None,
         deleted: bool = False,
         contents: bool = False,
-        url: Optional[str] = None,
-        params: Optional[dict] = None,
+        url: str | None = None,
+        params: dict | None = None,
     ) -> Any:
         """
         Do a generic DELETE request, composing the url from the contents of the

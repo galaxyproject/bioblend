@@ -4,7 +4,6 @@ A representation of a Galaxy instance based on oo wrappers.
 
 import time
 from collections.abc import Iterable
-from typing import Optional
 
 import bioblend
 import bioblend.galaxy
@@ -50,13 +49,13 @@ class GalaxyInstance:
     def __init__(
         self,
         url: str,
-        api_key: Optional[str] = None,
-        email: Optional[str] = None,
-        password: Optional[str] = None,
+        api_key: str | None = None,
+        email: str | None = None,
+        password: str | None = None,
         *,
-        token: Optional[str] = None,
+        token: str | None = None,
         verify: bool = True,
-        user_agent: Optional[str] = None,
+        user_agent: str | None = None,
     ) -> None:
         self.gi = bioblend.galaxy.GalaxyInstance(
             url, key=api_key, email=email, password=password, token=token, verify=verify, user_agent=user_agent

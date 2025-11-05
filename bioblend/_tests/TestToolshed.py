@@ -1,7 +1,6 @@
 import os
 import unittest
 
-import bioblend
 import bioblend.toolshed
 from . import test_util
 

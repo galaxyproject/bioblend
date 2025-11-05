@@ -4,11 +4,8 @@ import os
 import random
 import string
 import unittest
-from typing import (
-    Any,
-    Callable,
-    Optional,
-)
+from collections.abc import Callable
+from typing import Any
 
 import requests
 
@@ -43,7 +40,7 @@ def skip_unless_toolshed() -> Callable:
     return lambda f: f
 
 
-def skip_unless_galaxy(min_release: Optional[str] = None) -> Callable:
+def skip_unless_galaxy(min_release: str | None = None) -> Callable:
     """Decorate tests with this to skip the test if Galaxy is not
     configured.
     """

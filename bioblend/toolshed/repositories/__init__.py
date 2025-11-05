@@ -5,9 +5,7 @@ Interaction with a Tool Shed instance repositories
 from typing import (
     Any,
     Literal,
-    Optional,
     TYPE_CHECKING,
-    Union,
 )
 
 from bioblend.galaxy.client import Client
@@ -23,7 +21,7 @@ class ToolShedRepositoryClient(Client):
     def __init__(self, toolshed_instance: "ToolShedInstance") -> None:
         super().__init__(toolshed_instance)
 
-    def get_repositories(self, name: Optional[str] = None, owner: Optional[str] = None) -> list[dict[str, Any]]:
+    def get_repositories(self, name: str | None = None, owner: str | None = None) -> list[dict[str, Any]]:
         """
         Get all repositories in a Galaxy Tool Shed, or select a subset by
         specifying optional arguments for filtering (e.g. a repository name).
@@ -299,10 +297,10 @@ class ToolShedRepositoryClient(Client):
 
     def repository_revisions(
         self,
-        downloadable: Optional[bool] = None,
-        malicious: Optional[bool] = None,
-        missing_test_components: Optional[bool] = None,
-        includes_tools: Optional[bool] = None,
+        downloadable: bool | None = None,
+        malicious: bool | None = None,
+        missing_test_components: bool | None = None,
+        includes_tools: bool | None = None,
     ) -> list[dict[str, Any]]:
         """
         Returns a (possibly filtered) list of dictionaries that include
@@ -410,7 +408,7 @@ class ToolShedRepositoryClient(Client):
         url = "/".join((self.gi.url, "repository_revisions", metadata_id))
         return self._get(url=url)
 
-    def update_repository(self, id: str, tar_ball_path: str, commit_message: Optional[str] = None) -> dict[str, Any]:
+    def update_repository(self, id: str, tar_ball_path: str, commit_message: str | None = None) -> dict[str, Any]:
         """
         Update the contents of a Tool Shed repository with specified tar ball.
 
@@ -448,11 +446,11 @@ class ToolShedRepositoryClient(Client):
         self,
         name: str,
         synopsis: str,
-        description: Optional[str] = None,
+        description: str | None = None,
         type: Literal["unrestricted", "repository_suite_definition", "tool_dependency_definition"] = "unrestricted",
-        remote_repository_url: Optional[str] = None,
-        homepage_url: Optional[str] = None,
-        category_ids: Optional[list[str]] = None,
+        remote_repository_url: str | None = None,
+        homepage_url: str | None = None,
+        category_ids: list[str] | None = None,
     ) -> dict[str, Any]:
         """
         Create a new repository in a Tool Shed.
@@ -499,7 +497,7 @@ class ToolShedRepositoryClient(Client):
              "type": "unrestricted",
              "user_id": "adb5f5c93f827949"}
         """
-        payload: dict[str, Union[str, list[str]]] = {
+        payload: dict[str, str | list[str]] = {
             "name": name,
             "synopsis": synopsis,
         }
@@ -520,12 +518,12 @@ class ToolShedRepositoryClient(Client):
     def update_repository_metadata(
         self,
         toolShed_id: str,
-        name: Optional[str] = None,
-        synopsis: Optional[str] = None,
-        description: Optional[str] = None,
-        remote_repository_url: Optional[str] = None,
-        homepage_url: Optional[str] = None,
-        category_ids: Optional[list[str]] = None,
+        name: str | None = None,
+        synopsis: str | None = None,
+        description: str | None = None,
+        remote_repository_url: str | None = None,
+        homepage_url: str | None = None,
+        category_ids: list[str] | None = None,
     ) -> dict[str, Any]:
         """
         Update metadata of a Tool Shed repository.
@@ -555,7 +553,7 @@ class ToolShedRepositoryClient(Client):
         :rtype: dict
         :return: a dictionary containing information about the updated repository.
         """
-        payload: dict[str, Union[str, list[str]]] = {}
+        payload: dict[str, str | list[str]] = {}
         if name:
             payload["name"] = name
         if synopsis:

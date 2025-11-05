@@ -6,10 +6,8 @@ import logging
 from typing import (
     Any,
     Literal,
-    Optional,
     overload,
     TYPE_CHECKING,
-    Union,
 )
 
 from bioblend import (
@@ -34,9 +32,7 @@ class LibraryClient(Client):
     def __init__(self, galaxy_instance: "GalaxyInstance") -> None:
         super().__init__(galaxy_instance)
 
-    def create_library(
-        self, name: str, description: Optional[str] = None, synopsis: Optional[str] = None
-    ) -> dict[str, Any]:
+    def create_library(self, name: str, description: str | None = None, synopsis: str | None = None) -> dict[str, Any]:
         """
         Create a data library with the properties defined in the arguments.
 
@@ -221,7 +217,7 @@ class LibraryClient(Client):
         return library_dict["root_folder_id"]
 
     def create_folder(
-        self, library_id: str, folder_name: str, description: Optional[str] = None, base_folder_id: Optional[str] = None
+        self, library_id: str, folder_name: str, description: str | None = None, base_folder_id: str | None = None
     ) -> list[dict[str, Any]]:
         """
         Create a folder in a library.
@@ -256,7 +252,7 @@ class LibraryClient(Client):
         return self._post(payload, id=library_id, contents=True)
 
     def get_folders(
-        self, library_id: str, folder_id: Optional[str] = None, name: Optional[str] = None
+        self, library_id: str, folder_id: str | None = None, name: str | None = None
     ) -> list[dict[str, Any]]:
         """
         Get all the folders in a library, or select a subset by specifying a
@@ -289,7 +285,7 @@ class LibraryClient(Client):
         return folders
 
     def get_libraries(
-        self, library_id: Optional[str] = None, name: Optional[str] = None, deleted: Optional[bool] = False
+        self, library_id: str | None = None, name: str | None = None, deleted: bool | None = False
     ) -> list[dict[str, Any]]:
         """
         Get all libraries, or select a subset by specifying optional arguments
@@ -325,7 +321,7 @@ class LibraryClient(Client):
     @overload
     def show_library(self, library_id: str, contents: Literal[True]) -> list[dict[str, Any]]: ...
 
-    def show_library(self, library_id: str, contents: bool = False) -> Union[dict[str, Any], list[dict[str, Any]]]:
+    def show_library(self, library_id: str, contents: bool = False) -> dict[str, Any] | list[dict[str, Any]]:
         """
         Get information about a library.
 
@@ -394,10 +390,10 @@ class LibraryClient(Client):
         self,
         library_id: str,
         file_url: str,
-        folder_id: Optional[str] = None,
+        folder_id: str | None = None,
         file_type: str = "auto",
         dbkey: str = "?",
-        tags: Optional[list[str]] = None,
+        tags: list[str] | None = None,
     ) -> list[dict[str, Any]]:
         """
         Upload a file to a library from a URL.
@@ -432,10 +428,10 @@ class LibraryClient(Client):
         self,
         library_id: str,
         pasted_content: str,
-        folder_id: Optional[str] = None,
+        folder_id: str | None = None,
         file_type: str = "auto",
         dbkey: str = "?",
-        tags: Optional[list[str]] = None,
+        tags: list[str] | None = None,
     ) -> list[dict[str, Any]]:
         """
         Upload pasted_content to a data library as a new file.
@@ -470,10 +466,10 @@ class LibraryClient(Client):
         self,
         library_id: str,
         file_local_path: str,
-        folder_id: Optional[str] = None,
+        folder_id: str | None = None,
         file_type: str = "auto",
         dbkey: str = "?",
-        tags: Optional[list[str]] = None,
+        tags: list[str] | None = None,
     ) -> list[dict[str, Any]]:
         """
         Read local file contents from file_local_path and upload data to a
@@ -514,14 +510,14 @@ class LibraryClient(Client):
         self,
         library_id: str,
         server_dir: str,
-        folder_id: Optional[str] = None,
+        folder_id: str | None = None,
         file_type: str = "auto",
         dbkey: str = "?",
-        link_data_only: Optional[LinkDataOnly] = None,
+        link_data_only: LinkDataOnly | None = None,
         roles: str = "",
         preserve_dirs: bool = False,
         tag_using_filenames: bool = False,
-        tags: Optional[list[str]] = None,
+        tags: list[str] | None = None,
     ) -> list[dict[str, Any]]:
         """
         Upload all files in the specified subdirectory of the Galaxy library
@@ -592,14 +588,14 @@ class LibraryClient(Client):
         self,
         library_id: str,
         filesystem_paths: str,
-        folder_id: Optional[str] = None,
+        folder_id: str | None = None,
         file_type: str = "auto",
         dbkey: str = "?",
-        link_data_only: Optional[LinkDataOnly] = None,
+        link_data_only: LinkDataOnly | None = None,
         roles: str = "",
         preserve_dirs: bool = False,
         tag_using_filenames: bool = False,
-        tags: Optional[list[str]] = None,
+        tags: list[str] | None = None,
     ) -> list[dict[str, Any]]:
         """
         Upload a set of files already present on the filesystem of the Galaxy
@@ -666,7 +662,7 @@ class LibraryClient(Client):
         )
 
     def copy_from_dataset(
-        self, library_id: str, dataset_id: str, folder_id: Optional[str] = None, message: str = ""
+        self, library_id: str, dataset_id: str, folder_id: str | None = None, message: str = ""
     ) -> dict[str, Any]:
         """
         Copy a Galaxy dataset into a library.
@@ -726,10 +722,10 @@ class LibraryClient(Client):
     def set_library_permissions(
         self,
         library_id: str,
-        access_in: Optional[list[str]] = None,
-        modify_in: Optional[list[str]] = None,
-        add_in: Optional[list[str]] = None,
-        manage_in: Optional[list[str]] = None,
+        access_in: list[str] | None = None,
+        modify_in: list[str] | None = None,
+        add_in: list[str] | None = None,
+        manage_in: list[str] | None = None,
     ) -> dict[str, Any]:
         """
         Set the permissions for a library. Note: it will override all security
@@ -768,9 +764,9 @@ class LibraryClient(Client):
     def set_dataset_permissions(
         self,
         dataset_id: str,
-        access_in: Optional[list[str]] = None,
-        modify_in: Optional[list[str]] = None,
-        manage_in: Optional[list[str]] = None,
+        access_in: list[str] | None = None,
+        modify_in: list[str] | None = None,
+        manage_in: list[str] | None = None,
     ) -> dict[str, Any]:
         """
         Set the permissions for a dataset. Note: it will override all security

@@ -7,10 +7,8 @@ from collections.abc import Iterator
 from typing import (
     Any,
     Literal,
-    Optional,
     overload,
     TYPE_CHECKING,
-    Union,
 )
 
 from bioblend.galaxy.client import Client
@@ -25,7 +23,7 @@ class FoldersClient(Client):
     def __init__(self, galaxy_instance: "GalaxyInstance") -> None:
         super().__init__(galaxy_instance)
 
-    def create_folder(self, parent_folder_id: str, name: str, description: Optional[str] = None) -> dict[str, Any]:
+    def create_folder(self, parent_folder_id: str, name: str, description: str | None = None) -> dict[str, Any]:
         """
         Create a folder.
 
@@ -157,7 +155,7 @@ class FoldersClient(Client):
         payload = {"undelete": undelete}
         return self._delete(payload=payload, id=folder_id)
 
-    def update_folder(self, folder_id: str, name: str, description: Optional[str] = None) -> dict[str, Any]:
+    def update_folder(self, folder_id: str, name: str, description: str | None = None) -> dict[str, Any]:
         """
         Update folder information.
 
@@ -198,9 +196,9 @@ class FoldersClient(Client):
         self,
         folder_id: str,
         action: Literal["set_permissions"] = "set_permissions",
-        add_ids: Optional[list[str]] = None,
-        manage_ids: Optional[list[str]] = None,
-        modify_ids: Optional[list[str]] = None,
+        add_ids: list[str] | None = None,
+        manage_ids: list[str] | None = None,
+        modify_ids: list[str] | None = None,
     ) -> dict[str, Any]:
         """
         Set the permissions of a folder.
@@ -224,7 +222,7 @@ class FoldersClient(Client):
         :return: dictionary including details of the folder
         """
         url = self._make_url(folder_id) + "/permissions"
-        payload: dict[str, Union[str, list[str]]] = {"action": action}
+        payload: dict[str, str | list[str]] = {"action": action}
         if add_ids:
             payload["add_ids[]"] = add_ids
         if manage_ids:
