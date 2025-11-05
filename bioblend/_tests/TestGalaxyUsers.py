@@ -1,7 +1,6 @@
 import pytest
 
 from bioblend import ConnectionError
-from bioblend.galaxy import GalaxyInstance
 from . import (
     GalaxyTestBase,
     test_util,
@@ -52,27 +51,21 @@ class TestGalaxyUsers(GalaxyTestBase.GalaxyTestBase):
         # WARNING: only admins can create users!
         if self.gi.config.get_config()["use_remote_user"]:
             self.skipTest("This Galaxy instance is not configured to use local users")
-        new_username = test_util.random_string()
-        new_user_email = f"{new_username}@example.org"
-        password = test_util.random_string(20)
-        new_user = self.gi.users.create_local_user(new_username, new_user_email, password)
-        assert new_user["username"] == new_username
-        assert new_user["email"] == new_user_email
         # test a BioBlend GalaxyInstance can be created using username+password
-        user_gi = GalaxyInstance(url=self.gi.base_url, email=new_user_email, password=password)
-        assert user_gi.users.get_current_user()["email"] == new_user_email
+        new_user, user_gi = test_util.new_user_gi(self.gi)
+        assert user_gi.users.get_current_user()["email"] == new_user["email"]
         # test deletion and purging
         if self.gi.config.get_config()["allow_user_deletion"]:
             deleted_user = self.gi.users.delete_user(new_user["id"])
-            assert deleted_user["username"] == new_username
-            assert deleted_user["email"] == new_user_email
+            assert deleted_user["username"] == new_user["username"]
+            assert deleted_user["email"] == new_user["email"]
             assert deleted_user["deleted"]
             assert not deleted_user["purged"]
 
             purged_user = self.gi.users.delete_user(new_user["id"], purge=True)
             # username and email are redacted when purging a user
-            assert purged_user["username"] != new_username
-            assert purged_user["email"] != new_user_email
+            assert purged_user["username"] != new_user["username"]
+            assert purged_user["email"] != new_user["email"]
             assert purged_user["deleted"]
             assert purged_user["purged"]
 

@@ -5,13 +5,14 @@ import random
 import string
 import unittest
 from typing import (
+    Any,
     Callable,
     Optional,
 )
 
 import requests
 
-import bioblend.galaxy
+from bioblend.galaxy import GalaxyInstance
 
 NO_GALAXY_MESSAGE = "Externally configured Galaxy required, but not found. Set BIOBLEND_GALAXY_URL and BIOBLEND_GALAXY_API_KEY to run this test."
 
@@ -62,7 +63,7 @@ def skip_unless_galaxy(min_release: Optional[str] = None) -> Callable:
     if "BIOBLEND_GALAXY_API_KEY" not in os.environ and "BIOBLEND_GALAXY_MASTER_API_KEY" in os.environ:
         galaxy_url = os.environ["BIOBLEND_GALAXY_URL"]
         galaxy_master_api_key = os.environ["BIOBLEND_GALAXY_MASTER_API_KEY"]
-        gi = bioblend.galaxy.GalaxyInstance(galaxy_url, key=galaxy_master_api_key)
+        gi = GalaxyInstance(galaxy_url, key=galaxy_master_api_key)
 
         if "BIOBLEND_GALAXY_USER_EMAIL" in os.environ:
             galaxy_user_email = os.environ["BIOBLEND_GALAXY_USER_EMAIL"]
@@ -126,3 +127,20 @@ def skip_unless_tool(tool_id: str) -> Callable:
 
 def get_abspath(path: str) -> str:
     return os.path.abspath(os.path.join(os.path.dirname(__file__), path))
+
+
+def new_user_gi(admin_gi: GalaxyInstance) -> tuple[dict[str, Any], GalaxyInstance]:
+    """Create a new local user and connect to the Galaxy instance as that user
+
+    :param gi: GalaxyInstance object with admin privileges
+    :return: a tuple with the new local user and the new GalaxyInstance object
+      connected as that user
+    """
+    new_username = random_string()
+    new_user_email = f"{new_username}@example.org"
+    new_password = random_string(20)
+    new_user = admin_gi.users.create_local_user(new_username, new_user_email, new_password)
+    assert new_user["username"] == new_username
+    assert new_user["email"] == new_user_email
+    new_gi = GalaxyInstance(url=admin_gi.base_url, email=new_user_email, password=new_password)
+    return new_user, new_gi

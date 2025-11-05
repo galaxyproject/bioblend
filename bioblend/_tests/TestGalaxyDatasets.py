@@ -182,16 +182,7 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
         self.gi.histories.delete_history(history_id, purge=True)
 
     def test_dataset_permissions(self):
-        admin_user_id = self.gi.users.get_current_user()["id"]
-        username = test_util.random_string()
-        user_id = self.gi.users.create_local_user(username, f"{username}@example.org", test_util.random_string(20))[
-            "id"
-        ]
-        user_api_key = self.gi.users.create_user_apikey(user_id)
         anonymous_gi = galaxy.GalaxyInstance(url=self.gi.base_url, key=None)
-        user_gi = galaxy.GalaxyInstance(url=self.gi.base_url, key=user_api_key)
-        sharing_role = self.gi.roles.create_role("sharing_role", "sharing_role", [user_id, admin_user_id])["id"]
-
         self.gi.datasets.publish_dataset(self.dataset_id, published=False)
         with pytest.raises(ConnectionError):
             anonymous_gi.datasets.show_dataset(self.dataset_id)
@@ -200,6 +191,9 @@ class TestGalaxyDatasets(GalaxyTestBase.GalaxyTestBase):
         assert anonymous_gi.datasets.show_dataset(self.dataset_id)["id"] == self.dataset_id
         self.gi.datasets.publish_dataset(self.dataset_id, published=False)
 
+        admin_user_id = self.gi.users.get_current_user()["id"]
+        new_user, user_gi = test_util.new_user_gi(self.gi)
+        sharing_role = self.gi.roles.create_role("sharing_role", "sharing_role", [new_user["id"], admin_user_id])["id"]
         with pytest.raises(ConnectionError):
             user_gi.datasets.show_dataset(self.dataset_id)
         self.gi.datasets.update_permissions(self.dataset_id, access_ids=[sharing_role], manage_ids=[sharing_role])
