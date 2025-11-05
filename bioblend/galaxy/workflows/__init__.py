@@ -363,20 +363,6 @@ class WorkflowClient(Client):
         :param parameters: A mapping of non-datasets tool parameters (see below)
           A synonym to the "params" dict above. Both cannot be provided.
 
-        :type preferred_object_store_id: str
-        :param preferred_object_store_id: The object store id where you want all
-        outputs of this workflow run be stored.
-
-        :type preferred_intermediate_object_store_id: str
-        :param preferred_intermediate_object_store_id: The object store id where
-        you want the intermediate outputs of this workflow run to be stored.
-        Cannot be set if ``preferred_object_store_id`` is set.
-
-        :type preferred_outputs_object_store_id: str
-        :param preferred_outputs_object_store_id: The object store id where
-        you want the priamry outputs of this workflow run to be stored.
-        Cannot be set if ``preferred_object_store_id`` is set.
-
         :type history_id: str
         :param history_id: The encoded history ID where to store the workflow
           output. Alternatively, ``history_name`` may be specified to create a
@@ -426,14 +412,28 @@ class WorkflowClient(Client):
         :param use_cached_job: Whether to use cached jobs for the workflow
           invocation.
 
-        :type resource_params: dict
-        :param resource_params: A dictionary containing the resource parameters
-          to be used for this workflow run.
-
         :type instance: bool
         :param instance: treat ``workflow_id`` as a Workflow ID if True,
           otherwise treat it as a StoredWorkflow ID (the default). This
           parameter works only on Galaxy 21.05 or later.
+
+        :type resource_params: dict
+        :param resource_params: A dictionary containing the resource parameters
+          to be used for this workflow run.
+
+        :type preferred_object_store_id: str
+        :param preferred_object_store_id: The object store id where you want all
+        outputs of this workflow run be stored.
+
+        :type preferred_intermediate_object_store_id: str
+        :param preferred_intermediate_object_store_id: The object store id where
+        you want the intermediate outputs of this workflow run to be stored.
+        Cannot be set if ``preferred_object_store_id`` is set.
+
+        :type preferred_outputs_object_store_id: str
+        :param preferred_outputs_object_store_id: The object store id where
+        you want the priamry outputs of this workflow run to be stored.
+        Cannot be set if ``preferred_object_store_id`` is set.
 
         :rtype: dict
         :return: A dict containing the workflow invocation describing the
