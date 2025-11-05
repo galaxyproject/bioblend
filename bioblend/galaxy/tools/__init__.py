@@ -206,6 +206,27 @@ class ToolClient(Client):
         }
         return self._get(id=tool_id, params=params)
 
+    def get_tool_tests(self, tool_id: str, tool_version: Optional[str] = None) -> list[dict[str, Any]]:
+        """
+        Fetch the test case definitions configured for a tool.
+
+        :type tool_id: str
+        :param tool_id: id of the requested tool
+
+        :type tool_version: str
+        :param tool_version: optional tool version selector. Use ``'*'`` to retrieve
+          the tests for all available tool versions.
+
+        :rtype: list
+        :return: List of test case definitions as returned by
+          ``GET /api/tools/{tool_id}/test_data``.
+        """
+        params: dict[str, str] = {}
+        if tool_version is not None:
+            params["tool_version"] = tool_version
+        url = self._make_url(tool_id) + "/test_data"
+        return self._get(url=url, params=params or None)
+
     def build(
         self,
         tool_id: str,

@@ -166,3 +166,13 @@ class TestGalaxyTools(GalaxyTestBase.GalaxyTestBase):
         history_id = self.gi.histories.create_history(name="test_run_random_lines history")["id"]
         tool_model = self.gi.tools.build(tool_id="random_lines1", history_id=history_id)
         assert len(tool_model["inputs"]) == 3
+
+    @test_util.skip_unless_tool("random_lines1")
+    def test_get_tool_tests(self):
+        tests = self.gi.tools.get_tool_tests("random_lines1")
+        assert isinstance(tests, list)
+        assert tests
+        first_test = tests[0]
+        assert first_test["tool_id"] == "random_lines1", first_test
+        assert "inputs" in first_test
+        assert "outputs" in first_test
