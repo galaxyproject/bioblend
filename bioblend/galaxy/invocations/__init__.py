@@ -172,6 +172,9 @@ class InvocationClient(Client):
         allow_tool_state_corrections: bool = False,
         inputs_by: Optional[InputsBy] = None,
         parameters_normalized: bool = False,
+        resource_params: Optional[dict[str, Any]] = None,
+        use_cached_job: bool = True,
+        instance: bool = True,
     ) -> dict[str, Any]:
         """
         Rerun a workflow invocation. For more extensive documentation of all
@@ -181,9 +184,10 @@ class InvocationClient(Client):
         :param invocation_id: Encoded workflow invocation ID to be rerun
 
         :type inputs_update: dict
-        :param inputs_update: If different datasets should be used to the original
+        :param inputs_update: If different inputs should be used to the original
           invocation, this should contain a mapping of workflow inputs to the new
-          datasets and dataset collections.
+          datasets and dataset collections. Watch out for conflict with the
+          legacy params_update.
 
         :type params_update: dict
         :param params_update: If different non-dataset tool parameters should be
@@ -226,24 +230,29 @@ class InvocationClient(Client):
           Default is ``False``, but when setting parameters for a subworkflow,
           ``True`` is required.
 
+        :type resource_params: dict
+        :param resource_params: A dictionary containing the resource parameters
+          to be used for this workflow run.
+
+        :type use_cached_job: bool
+        :param use_cached_job: Whether to use cached jobs for the workflow
+          invocation.
+
+        :type instance: bool
+        :param instance: True if the provided id is Workflow id, as opposed to StoredWorkflow id.
+
         :rtype: dict
         :return: A dict describing the new workflow invocation.
 
         .. note::
-          This method works only on Galaxy 21.01 or later.
+          This method works only on Galaxy 24.02 or later.
         """
-        invocation_details = self.show_invocation(invocation_id)
-        workflow_id = invocation_details["workflow_id"]
-        inputs = invocation_details["inputs"]
-        wf_params = invocation_details["input_step_parameters"]
+        payload = self.get_invocation_request(invocation_id)
+        workflow_id = payload["workflow_id"]
         if inputs_update:
-            for inp, input_value in inputs_update.items():
-                inputs[inp] = input_value
+            payload.setdefault("inputs", {}).update(inputs_update)
         if params_update:
-            for param, param_value in params_update.items():
-                wf_params[param] = param_value
-        payload = {"inputs": inputs, "params": wf_params}
-
+            payload.setdefault("params", {}).update(params_update)
         if replacement_params:
             payload["replacement_params"] = replacement_params
         if history_id:
@@ -258,9 +267,14 @@ class InvocationClient(Client):
             payload["inputs_by"] = inputs_by
         if parameters_normalized:
             payload["parameters_normalized"] = parameters_normalized
-        api_params = {"instance": True}
+        if resource_params:
+            payload["resource_params"] = resource_params
+        if use_cached_job:
+            payload["use_cached_job"] = use_cached_job
+        if instance:
+            payload["instance"] = instance
         url = "/".join((self.gi.url, "workflows", workflow_id, "invocations"))
-        return self.gi.make_post_request(url=url, payload=payload, params=api_params)
+        return self.gi.make_post_request(url=url, payload=payload)
 
     def cancel_invocation(self, invocation_id: str) -> dict[str, Any]:
         """
@@ -372,6 +386,22 @@ class InvocationClient(Client):
               'states': {'new': 1}}]
         """
         url = self._make_url(invocation_id) + "/step_jobs_summary"
+        return self._get(url=url)
+
+    def get_invocation_request(self, invocation_id: str) -> dict[str, Any]:
+        """
+        Get a request dict for an invocation.
+
+        :type invocation_id: str
+        :param invocation_id: Encoded workflow invocation ID
+
+        :rtype: dict
+        :return: The invocation request.
+
+        .. note::
+          This method works only on Galaxy 24.02 or later.
+        """
+        url = self._make_url(invocation_id) + "/request"
         return self._get(url=url)
 
     def get_invocation_report(self, invocation_id: str) -> dict[str, Any]:
