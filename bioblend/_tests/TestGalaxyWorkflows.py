@@ -145,6 +145,16 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         assert not imported_wf["deleted"]
         assert imported_wf["published"]
 
+    def test_import_other_users_published_workflow(self) -> None:
+        path = test_util.get_abspath(os.path.join("data", "paste_columns.ga"))
+        imported_wf = self.gi.workflows.import_workflow_from_local_path(path, publish=True)
+        _, new_gi = test_util.new_user_gi(self.gi)
+        imported_wf_by_new_user = new_gi.workflows.import_shared_workflow(imported_wf["id"])
+        assert imported_wf_by_new_user["name"] == f"imported: {imported_wf['name']}"
+        assert imported_wf_by_new_user["url"].startswith("/api/workflows/")
+        assert not imported_wf_by_new_user["deleted"]
+        assert not imported_wf_by_new_user["published"]
+
     def _import_export(self, style: Optional[Literal["ga", "format2"]] = None):
         path = test_util.get_abspath(os.path.join("data", "paste_columns.ga"))
         with open(path) as f:

@@ -559,19 +559,23 @@ class TestGalaxyInstance(GalaxyObjectsTestBase):
             assert wf.published
         wf.delete()
 
-    # not very accurate:
-    #   * we can't publish a wf from the API
-    #   * we can't directly get another user's wf
     def test_workflow_from_shared(self):
-        all_prevs = {_.id: _ for _ in self.gi.workflows.get_previews(published=True)}
-        pub_only_ids = set(all_prevs).difference(_.id for _ in self.gi.workflows.get_previews())
-        if pub_only_ids:
-            wf_id = pub_only_ids.pop()
-            imported = self.gi.workflows.import_shared(wf_id)
-            assert isinstance(imported, wrappers.Workflow)
-            imported.delete()
-        else:
-            self.skipTest("no published workflows, manually publish a workflow to run this test")
+        with open(SAMPLE_FN) as f:
+            imported_wf = self.gi.workflows.import_new(json.load(f), publish=True)
+        _, new_gi = test_util.new_user_gi(self.gi.gi)
+        new_obj_gi = galaxy_instance.GalaxyInstance(
+            new_gi.base_url,
+            api_key=new_gi.key,
+        )
+        imported_wf_by_new_user = new_obj_gi.workflows.import_shared(imported_wf.id)
+        assert isinstance(imported_wf_by_new_user, wrappers.Workflow)
+        # The new StoredWorkflow's name is prepended with 'imported: ', but in
+        # recent Galaxy versions the API returns the Workflow's name, which is not changed.
+        assert imported_wf_by_new_user.name in {f"imported: {imported_wf.name}", imported_wf.name}
+        assert not imported_wf_by_new_user.deleted
+        assert not imported_wf_by_new_user.published
+        imported_wf_by_new_user.delete()
+        imported_wf.delete()
 
     def test_get_libraries(self):
         self._test_multi_get("libraries")
