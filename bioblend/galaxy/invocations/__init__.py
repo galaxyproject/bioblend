@@ -256,6 +256,9 @@ class InvocationClient(Client):
                 "params": invocation["input_step_parameters"],
                 "workflow_id": invocation["workflow_id"],
             }
+        else:
+            # Drop history_id from the payload as we will set history later
+            payload.pop("history_id")
         workflow_id = payload["workflow_id"]
         if inputs_update:
             payload.setdefault("inputs", {}).update(inputs_update)
