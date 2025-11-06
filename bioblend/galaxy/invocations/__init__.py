@@ -245,9 +245,21 @@ class InvocationClient(Client):
         :return: A dict describing the new workflow invocation.
 
         .. note::
-          This method works only on Galaxy 24.02 or later.
+          This method works only on Galaxy 21.01 or later.
         """
-        payload = self.get_invocation_request(invocation_id)
+        try:
+            payload = self.get_invocation_request(invocation_id)
+        except ConnectionError as e:
+            if e.status_code != 404:
+                raise
+            # Galaxy release_24.1 or earlier
+            invocation = self.show_invocation(invocation_id)
+            payload = {
+                "inputs": invocation["inputs"],
+                "instance": True,
+                "params": invocation["input_step_parameters"],
+                "workflow_id": invocation["workflow_id"],
+            }
         workflow_id = payload["workflow_id"]
         if inputs_update:
             payload.setdefault("inputs", {}).update(inputs_update)
