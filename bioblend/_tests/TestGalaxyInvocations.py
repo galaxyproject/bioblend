@@ -14,6 +14,7 @@ from . import (
 class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
     workflow_id: str
     pause_workflow_id: str
+    x_random_lines_workflow_id: str
 
     @classmethod
     def setUpClass(cls) -> None:
