@@ -175,23 +175,26 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
         history = self.gi.histories.show_history(rerun_invocation["history_id"], contents=True)
         assert len(history) == 3
 
-    @test_util.skip_unless_galaxy("release_24.02")
+    @test_util.skip_unless_galaxy("release_21.01")
     def test_rerun_invocation_with_input_params(self):
         threeline_dataset_id = self._test_dataset(self.history_id, contents="A\nB\nC")
         invocation = self._invoke_x_random_lines_workflow(threeline_dataset_id)
         self.gi.invocations.wait_for_invocation(invocation["id"])
-        params = {
-            "how_many": {
-                "parameter_value": "1",
-                "label": "how_many",
-            }
-        }
+        rerun_invocation = self.gi.invocations.rerun_invocation(invocation["id"], history_id=self.history_id)
+        self.gi.invocations.wait_for_invocation(rerun_invocation["id"])
+
+    @test_util.skip_unless_galaxy("release_24.2")
+    def test_rerun_invocation_with_input_params_changed(self):
+        threeline_dataset_id = self._test_dataset(self.history_id, contents="A\nB\nC")
+        invocation = self._invoke_x_random_lines_workflow(threeline_dataset_id)
+        self.gi.invocations.wait_for_invocation(invocation["id"])
+        inputs_update = {"how_many": 1}
         rerun_invocation = self.gi.invocations.rerun_invocation(
-            invocation["id"], params_update=params, history_id=self.history_id
+            invocation["id"], inputs_update=inputs_update, history_id=self.history_id
         )
         self.gi.invocations.wait_for_invocation(rerun_invocation["id"])
         rerun_request = self.gi.invocations.get_invocation_request(rerun_invocation["id"])
-        assert rerun_request["inputs"]["how_many"] == "1"
+        assert rerun_request["inputs"]["how_many"] == 1
 
     def _invoke_workflow(self) -> dict[str, Any]:
         dataset = {"src": "hda", "id": self.dataset_id}
@@ -213,7 +216,7 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
     def _invoke_x_random_lines_workflow(self, dataset_id: str) -> dict[str, Any]:
         return self.gi.workflows.invoke_workflow(
             self.x_random_lines_workflow_id,
-            inputs={"from_what": {"src": "hda", "id": dataset_id}, "how_many": "2"},
+            inputs={"from_what": {"src": "hda", "id": dataset_id}, "how_many": 2},
             history_id=self.history_id,
             inputs_by="name",
         )

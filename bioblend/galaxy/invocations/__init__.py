@@ -250,10 +250,18 @@ class InvocationClient(Client):
                 raise
             # Galaxy release_24.1 or earlier
             invocation = self.show_invocation(invocation_id)
+            workflow_step_id_to_index = {
+                step["workflow_step_id"]: index for index, step in enumerate(invocation["steps"])
+            }
+            # Merge input_step_parameters (indexed by label) into inputs (indexed by step index)
+            inputs = invocation["inputs"]
+            for param_input_dict in invocation["input_step_parameters"].values():
+                workflow_step_id = param_input_dict["workflow_step_id"]
+                workflow_step_index = workflow_step_id_to_index[workflow_step_id]
+                inputs[str(workflow_step_index)] = param_input_dict
             payload = {
-                "inputs": invocation["inputs"],
+                "inputs": inputs,
                 "instance": True,
-                "params": invocation["input_step_parameters"],
                 "workflow_id": invocation["workflow_id"],
             }
         else:
@@ -261,9 +269,13 @@ class InvocationClient(Client):
             payload.pop("history_id")
         workflow_id = payload["workflow_id"]
         if inputs_update:
-            payload.setdefault("inputs", {}).update(inputs_update)
+            if payload.get("inputs") is None:
+                payload["inputs"] = {}
+            payload["inputs"].update(inputs_update)
         if params_update:
-            payload.setdefault("params", {}).update(params_update)
+            if payload.get("parameters") is None:
+                payload["parameters"] = {}
+            payload["parameters"].update(params_update)
         if replacement_params:
             payload["replacement_params"] = replacement_params
         if history_id:
@@ -407,7 +419,7 @@ class InvocationClient(Client):
         :return: The invocation request.
 
         .. note::
-          This method works only on Galaxy 24.02 or later.
+          This method works only on Galaxy 24.2 or later.
         """
         url = self._make_url(invocation_id) + "/request"
         return self._get(url=url)
