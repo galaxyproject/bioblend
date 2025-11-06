@@ -176,8 +176,8 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
 
     @test_util.skip_unless_galaxy("release_24.02")
     def test_rerun_invocation_with_input_params(self):
-        self.threeline_dataset_id = self._test_dataset(self.history_id, contents="A\nB\nC")
-        invocation = self._invoke_x_random_lines_workflow()
+        threeline_dataset_id = self._test_dataset(self.history_id, contents="A\nB\nC")
+        invocation = self._invoke_x_random_lines_workflow(threeline_dataset_id)
         self.gi.invocations.wait_for_invocation(invocation["id"])
         params = {
             "how_many": {
@@ -209,10 +209,10 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
             history_id=self.history_id,
         )
 
-    def _invoke_x_random_lines_workflow(self) -> dict[str, Any]:
+    def _invoke_x_random_lines_workflow(self, dataset_id: str) -> dict[str, Any]:
         return self.gi.workflows.invoke_workflow(
             self.x_random_lines_workflow_id,
-            inputs={"from_what": {"src": "hda", "id": self.threeline_dataset_id}, "how_many": "2"},
+            inputs={"from_what": {"src": "hda", "id": dataset_id}, "how_many": "2"},
             history_id=self.history_id,
             inputs_by="name",
         )
