@@ -278,7 +278,6 @@ class InvocationClient(Client):
         if resource_params:
             payload["resource_params"] = resource_params
         payload["use_cached_job"] = use_cached_job
-        if instance:
         url = "/".join((self.gi.url, "workflows", workflow_id, "invocations"))
         return self.gi.make_post_request(url=url, payload=payload)
 
