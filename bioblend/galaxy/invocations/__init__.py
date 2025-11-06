@@ -174,7 +174,6 @@ class InvocationClient(Client):
         parameters_normalized: bool = False,
         resource_params: Optional[dict[str, Any]] = None,
         use_cached_job: bool = True,
-        instance: bool = True,
     ) -> dict[str, Any]:
         """
         Rerun a workflow invocation. For more extensive documentation of all
@@ -238,9 +237,6 @@ class InvocationClient(Client):
         :param use_cached_job: Whether to use cached jobs for the workflow
           invocation.
 
-        :type instance: bool
-        :param instance: True if the provided id is Workflow id, as opposed to StoredWorkflow id.
-
         :rtype: dict
         :return: A dict describing the new workflow invocation.
 
@@ -281,10 +277,8 @@ class InvocationClient(Client):
             payload["parameters_normalized"] = parameters_normalized
         if resource_params:
             payload["resource_params"] = resource_params
-        if use_cached_job:
-            payload["use_cached_job"] = use_cached_job
+        payload["use_cached_job"] = use_cached_job
         if instance:
-            payload["instance"] = instance
         url = "/".join((self.gi.url, "workflows", workflow_id, "invocations"))
         return self.gi.make_post_request(url=url, payload=payload)
 
