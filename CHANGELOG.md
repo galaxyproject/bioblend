@@ -1,10 +1,36 @@
-## BioBlend v
+## BioBlend v1.7.0 - 2025-11-07
 
-* Added support for Python 3.14.
+* Deprecation: this is the last release to support end-of-life Python 3.9.
+
+* Added support for Python 3.14. Added support for Galaxy release 25.1.
+
+* Added ``get_invocation_request()`` method to ``InvocationClient`` (thanks to
+  [Martin Čech](https://github.com/martenson)).
+
+* Added ``get_tool_tests()`` method to ``ToolClient`` (thanks to
+  [JunhaoQiu](https://github.com/qchiujunhao)).
 
 * Added ``job_id`` parameter to ``InvocationClient.get_invocations()``.
 
+* Added ``resource_params`` and ``use_cached_job`` parameters to
+  ``InvocationClient.rerun_invocation()`` (thanks to
+  [Martin Čech](https://github.com/martenson)).
+
+* Added ``parameters``, ``instance``, ``resource_params``,
+  ``preferred_object_store_id``, ``preferred_intermediate_object_store_id`` and
+  ``preferred_outputs_object_store_id`` parameters to
+  ``WorkflowClient.invoke_workflow()`` (thanks to
+  [Martin Čech](https://github.com/martenson)).
+
+* Refactored implementation of ``InvocationClient.rerun_invocation()`` to use
+  ``InvocationClient.get_invocation_request()`` on Galaxy release 24.2 and
+  later. Also fixed reuse of parameter inputs from the original invocation on
+  Galaxy release 24.1 and earlier. (thanks to
+  [Martin Čech](https://github.com/martenson)).
+
 * Migrated from ``setup.cfg`` to ``pyproject.toml`` .
+
+* Improvements to documentation and tests.
 
 ## BioBlend v1.6.0 - 2025-06-18
 
