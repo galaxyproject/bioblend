@@ -172,6 +172,8 @@ class InvocationClient(Client):
         allow_tool_state_corrections: bool = False,
         inputs_by: Optional[InputsBy] = None,
         parameters_normalized: bool = False,
+        resource_params: Optional[dict[str, Any]] = None,
+        use_cached_job: bool = True,
     ) -> dict[str, Any]:
         """
         Rerun a workflow invocation. For more extensive documentation of all
@@ -181,9 +183,10 @@ class InvocationClient(Client):
         :param invocation_id: Encoded workflow invocation ID to be rerun
 
         :type inputs_update: dict
-        :param inputs_update: If different datasets should be used to the original
+        :param inputs_update: If different inputs should be used to the original
           invocation, this should contain a mapping of workflow inputs to the new
-          datasets and dataset collections.
+          datasets and dataset collections. Watch out for conflict with the
+          legacy params_update.
 
         :type params_update: dict
         :param params_update: If different non-dataset tool parameters should be
@@ -226,24 +229,53 @@ class InvocationClient(Client):
           Default is ``False``, but when setting parameters for a subworkflow,
           ``True`` is required.
 
+        :type resource_params: dict
+        :param resource_params: A dictionary containing the resource parameters
+          to be used for this workflow run.
+
+        :type use_cached_job: bool
+        :param use_cached_job: Whether to use cached jobs for the workflow
+          invocation.
+
         :rtype: dict
         :return: A dict describing the new workflow invocation.
 
         .. note::
           This method works only on Galaxy 21.01 or later.
         """
-        invocation_details = self.show_invocation(invocation_id)
-        workflow_id = invocation_details["workflow_id"]
-        inputs = invocation_details["inputs"]
-        wf_params = invocation_details["input_step_parameters"]
+        try:
+            payload = self.get_invocation_request(invocation_id)
+        except ConnectionError as e:
+            if e.status_code != 404:
+                raise
+            # Galaxy release_24.1 or earlier
+            invocation = self.show_invocation(invocation_id)
+            workflow_step_id_to_index = {
+                step["workflow_step_id"]: index for index, step in enumerate(invocation["steps"])
+            }
+            # Merge input_step_parameters (indexed by label) into inputs (indexed by step index)
+            inputs = invocation["inputs"]
+            for param_input_dict in invocation["input_step_parameters"].values():
+                workflow_step_id = param_input_dict["workflow_step_id"]
+                workflow_step_index = workflow_step_id_to_index[workflow_step_id]
+                inputs[str(workflow_step_index)] = param_input_dict
+            payload = {
+                "inputs": inputs,
+                "instance": True,
+                "workflow_id": invocation["workflow_id"],
+            }
+        else:
+            # Drop history_id from the payload as we will set history later
+            payload.pop("history_id")
+        workflow_id = payload["workflow_id"]
         if inputs_update:
-            for inp, input_value in inputs_update.items():
-                inputs[inp] = input_value
+            if payload.get("inputs") is None:
+                payload["inputs"] = {}
+            payload["inputs"].update(inputs_update)
         if params_update:
-            for param, param_value in params_update.items():
-                wf_params[param] = param_value
-        payload = {"inputs": inputs, "params": wf_params}
-
+            if payload.get("parameters") is None:
+                payload["parameters"] = {}
+            payload["parameters"].update(params_update)
         if replacement_params:
             payload["replacement_params"] = replacement_params
         if history_id:
@@ -258,9 +290,11 @@ class InvocationClient(Client):
             payload["inputs_by"] = inputs_by
         if parameters_normalized:
             payload["parameters_normalized"] = parameters_normalized
-        api_params = {"instance": True}
+        if resource_params:
+            payload["resource_params"] = resource_params
+        payload["use_cached_job"] = use_cached_job
         url = "/".join((self.gi.url, "workflows", workflow_id, "invocations"))
-        return self.gi.make_post_request(url=url, payload=payload, params=api_params)
+        return self.gi.make_post_request(url=url, payload=payload)
 
     def cancel_invocation(self, invocation_id: str) -> dict[str, Any]:
         """
@@ -372,6 +406,22 @@ class InvocationClient(Client):
               'states': {'new': 1}}]
         """
         url = self._make_url(invocation_id) + "/step_jobs_summary"
+        return self._get(url=url)
+
+    def get_invocation_request(self, invocation_id: str) -> dict[str, Any]:
+        """
+        Get a request dict for an invocation.
+
+        :type invocation_id: str
+        :param invocation_id: Encoded workflow invocation ID
+
+        :rtype: dict
+        :return: The invocation request.
+
+        .. note::
+          This method works only on Galaxy 24.2 or later.
+        """
+        url = self._make_url(invocation_id) + "/request"
         return self._get(url=url)
 
     def get_invocation_report(self, invocation_id: str) -> dict[str, Any]:

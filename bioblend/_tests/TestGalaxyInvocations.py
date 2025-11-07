@@ -14,6 +14,7 @@ from . import (
 class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
     workflow_id: str
     pause_workflow_id: str
+    x_random_lines_workflow_id: str
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -22,6 +23,8 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
         cls.workflow_id = cls.gi.workflows.import_workflow_from_local_path(path)["id"]
         path = test_util.get_abspath(os.path.join("data", "test_workflow_pause.ga"))
         cls.pause_workflow_id = cls.gi.workflows.import_workflow_from_local_path(path)["id"]
+        path = test_util.get_abspath(os.path.join("data", "select_x_random_lines.ga"))
+        cls.x_random_lines_workflow_id = cls.gi.workflows.import_workflow_from_local_path(path)["id"]
 
     def setUp(self):
         super().setUp()
@@ -172,6 +175,27 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
         history = self.gi.histories.show_history(rerun_invocation["history_id"], contents=True)
         assert len(history) == 3
 
+    @test_util.skip_unless_galaxy("release_21.01")
+    def test_rerun_invocation_with_input_params(self):
+        threeline_dataset_id = self._test_dataset(self.history_id, contents="A\nB\nC")
+        invocation = self._invoke_x_random_lines_workflow(threeline_dataset_id)
+        self.gi.invocations.wait_for_invocation(invocation["id"])
+        rerun_invocation = self.gi.invocations.rerun_invocation(invocation["id"], history_id=self.history_id)
+        self.gi.invocations.wait_for_invocation(rerun_invocation["id"])
+
+    @test_util.skip_unless_galaxy("release_24.2")
+    def test_rerun_invocation_with_input_params_changed(self):
+        threeline_dataset_id = self._test_dataset(self.history_id, contents="A\nB\nC")
+        invocation = self._invoke_x_random_lines_workflow(threeline_dataset_id)
+        self.gi.invocations.wait_for_invocation(invocation["id"])
+        inputs_update = {"how_many": 1}
+        rerun_invocation = self.gi.invocations.rerun_invocation(
+            invocation["id"], inputs_update=inputs_update, history_id=self.history_id
+        )
+        self.gi.invocations.wait_for_invocation(rerun_invocation["id"])
+        rerun_request = self.gi.invocations.get_invocation_request(rerun_invocation["id"])
+        assert rerun_request["inputs"]["how_many"] == 1
+
     def _invoke_workflow(self) -> dict[str, Any]:
         dataset = {"src": "hda", "id": self.dataset_id}
 
@@ -187,4 +211,12 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
             self.pause_workflow_id,
             inputs={"0": {"src": "hda", "id": self.dataset_id}},
             history_id=self.history_id,
+        )
+
+    def _invoke_x_random_lines_workflow(self, dataset_id: str) -> dict[str, Any]:
+        return self.gi.workflows.invoke_workflow(
+            self.x_random_lines_workflow_id,
+            inputs={"from_what": {"src": "hda", "id": dataset_id}, "how_many": 2},
+            history_id=self.history_id,
+            inputs_by="name",
         )
