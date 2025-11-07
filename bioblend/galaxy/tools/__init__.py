@@ -218,14 +218,25 @@ class ToolClient(Client):
           the tests for all available tool versions.
 
         :rtype: list
-        :return: List of test case definitions as returned by
-          ``GET /api/tools/{tool_id}/test_data``.
+        :return: List of test case definitions, e.g.::
+
+            [
+                {
+                    "name": "Test-1",
+                    "tool_id": "random_lines1",
+                    "tool_version": "2.0.2",
+                    "inputs": {"num_lines": ["1"], "input": ["1.bed"]},
+                    "outputs": [{"name": "out_file1", "value": "1.bed"}],
+                    "required_files": [["1.bed", {"value": "1.bed"}]],
+                },
+                ...
+            ]
         """
         params: dict[str, str] = {}
         if tool_version is not None:
             params["tool_version"] = tool_version
         url = self._make_url(tool_id) + "/test_data"
-        return self._get(url=url, params=params or None)
+        return self._get(url=url, params=params)
 
     def build(
         self,

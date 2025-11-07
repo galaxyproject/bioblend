@@ -171,7 +171,6 @@ class TestGalaxyTools(GalaxyTestBase.GalaxyTestBase):
     def test_get_tool_tests(self):
         tests = self.gi.tools.get_tool_tests("random_lines1")
         assert isinstance(tests, list)
-        assert tests
         first_test = tests[0]
         assert first_test["tool_id"] == "random_lines1", first_test
         assert "inputs" in first_test
