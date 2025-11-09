@@ -6,7 +6,6 @@ import time
 from typing import (
     Any,
     Literal,
-    Optional,
 )
 
 import pytest
@@ -155,7 +154,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         assert not imported_wf_by_new_user["deleted"]
         assert not imported_wf_by_new_user["published"]
 
-    def _import_export(self, style: Optional[Literal["ga", "format2"]] = None):
+    def _import_export(self, style: Literal["ga", "format2"] | None = None):
         path = test_util.get_abspath(os.path.join("data", "paste_columns.ga"))
         with open(path) as f:
             wf_dict = json.load(f)

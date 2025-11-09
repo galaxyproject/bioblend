@@ -3,11 +3,9 @@ import logging
 import logging.config
 import os
 import time
+from collections.abc import Callable
 from typing import (
-    Callable,
-    Optional,
     TypeVar,
-    Union,
 )
 
 from bioblend.config import (
@@ -68,7 +66,7 @@ init_logging()
 
 
 def set_file_logger(
-    name: str, filepath: str, level: Union[int, str] = logging.INFO, format_string: Optional[str] = None
+    name: str, filepath: str, level: int | str = logging.INFO, format_string: str | None = None
 ) -> None:
     global log
     if not format_string:
@@ -83,7 +81,7 @@ def set_file_logger(
     log = logger
 
 
-def set_stream_logger(name: str, level: Union[int, str] = logging.DEBUG, format_string: Optional[str] = None) -> None:
+def set_stream_logger(name: str, level: int | str = logging.DEBUG, format_string: str | None = None) -> None:
     global log
     if not format_string:
         format_string = default_format_string
@@ -107,7 +105,7 @@ class ConnectionError(Exception):
     """
 
     def __init__(  # noqa: B042  # https://github.com/PyCQA/flake8-bugbear/issues/525
-        self, message: str, body: Optional[Union[bytes, str]] = None, status_code: Optional[int] = None
+        self, message: str, body: bytes | str | None = None, status_code: int | None = None
     ) -> None:
         super().__init__(message)
         self.body = body

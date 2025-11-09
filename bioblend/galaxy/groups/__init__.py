@@ -4,7 +4,6 @@ Contains possible interactions with the Galaxy Groups
 
 from typing import (
     Any,
-    Optional,
     TYPE_CHECKING,
 )
 
@@ -60,7 +59,7 @@ class GroupsClient(Client):
         return self._get(id=group_id)
 
     def create_group(
-        self, group_name: str, user_ids: Optional[list[str]] = None, role_ids: Optional[list[str]] = None
+        self, group_name: str, user_ids: list[str] | None = None, role_ids: list[str] | None = None
     ) -> list[dict[str, Any]]:
         """
         Create a new group.
@@ -93,9 +92,9 @@ class GroupsClient(Client):
     def update_group(
         self,
         group_id: str,
-        group_name: Optional[str] = None,
-        user_ids: Optional[list[str]] = None,
-        role_ids: Optional[list[str]] = None,
+        group_name: str | None = None,
+        user_ids: list[str] | None = None,
+        role_ids: list[str] | None = None,
     ) -> None:
         """
         Update a group.

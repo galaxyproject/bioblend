@@ -6,7 +6,6 @@ import logging
 from typing import (
     Any,
     Literal,
-    Optional,
     TYPE_CHECKING,
 )
 
@@ -34,14 +33,14 @@ class JobsClient(Client):
 
     def get_jobs(
         self,
-        state: Optional[str] = None,
-        history_id: Optional[str] = None,
-        invocation_id: Optional[str] = None,
-        tool_id: Optional[str] = None,
-        workflow_id: Optional[str] = None,
-        user_id: Optional[str] = None,
-        date_range_min: Optional[str] = None,
-        date_range_max: Optional[str] = None,
+        state: str | None = None,
+        history_id: str | None = None,
+        invocation_id: str | None = None,
+        tool_id: str | None = None,
+        workflow_id: str | None = None,
+        user_id: str | None = None,
+        date_range_min: str | None = None,
+        date_range_max: str | None = None,
         limit: int = 500,
         offset: int = 0,
         user_details: bool = False,
@@ -195,8 +194,8 @@ class JobsClient(Client):
         self,
         job_id: str,
         remap: bool = False,
-        tool_inputs_update: Optional[dict[str, Any]] = None,
-        history_id: Optional[str] = None,
+        tool_inputs_update: dict[str, Any] | None = None,
+        history_id: str | None = None,
     ) -> dict[str, Any]:
         """
         Rerun a job.
@@ -272,7 +271,7 @@ class JobsClient(Client):
         """
         return self.show_job(job_id).get("state", "")
 
-    def search_jobs(self, tool_id: str, inputs: dict[str, Any], state: Optional[str] = None) -> list[dict[str, Any]]:
+    def search_jobs(self, tool_id: str, inputs: dict[str, Any], state: str | None = None) -> list[dict[str, Any]]:
         """
         Return jobs matching input parameters.
 
@@ -339,7 +338,7 @@ class JobsClient(Client):
         """
         return self._delete(id=job_id)
 
-    def report_error(self, job_id: str, dataset_id: str, message: str, email: Optional[str] = None) -> dict[str, Any]:
+    def report_error(self, job_id: str, dataset_id: str, message: str, email: str | None = None) -> dict[str, Any]:
         """
         Report an error for a given job and dataset to the server administrators.
 

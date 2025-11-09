@@ -3,8 +3,6 @@ Contains interactions dealing with Galaxy container resolvers.
 Works only with Galaxy > 22.01
 """
 
-from typing import Optional
-
 from bioblend.galaxy.client import Client
 
 
@@ -57,9 +55,9 @@ class ContainerResolutionClient(Client):
     def resolve(
         self,
         tool_id: str,
-        index: Optional[int] = None,
-        resolver_type: Optional[str] = None,
-        container_type: Optional[str] = None,
+        index: int | None = None,
+        resolver_type: str | None = None,
+        container_type: str | None = None,
         requirements_only: bool = False,
         install: bool = False,
     ) -> dict:
@@ -117,10 +115,10 @@ class ContainerResolutionClient(Client):
 
     def resolve_toolbox(
         self,
-        index: Optional[int] = None,
-        tool_ids: Optional[list[str]] = None,
-        resolver_type: Optional[str] = None,
-        container_type: Optional[str] = None,
+        index: int | None = None,
+        tool_ids: list[str] | None = None,
+        resolver_type: str | None = None,
+        container_type: str | None = None,
         requirements_only: bool = False,
         install: bool = False,
     ) -> list:
@@ -169,10 +167,10 @@ class ContainerResolutionClient(Client):
 
     def resolve_toolbox_with_install(
         self,
-        index: Optional[int] = None,
-        tool_ids: Optional[list[str]] = None,
-        resolver_type: Optional[str] = None,
-        container_type: Optional[str] = None,
+        index: int | None = None,
+        tool_ids: list[str] | None = None,
+        resolver_type: str | None = None,
+        container_type: str | None = None,
         requirements_only: bool = False,
     ) -> list:
         """

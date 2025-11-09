@@ -12,8 +12,6 @@ import json
 import logging
 from typing import (
     Any,
-    Optional,
-    Union,
 )
 
 import requests
@@ -35,14 +33,14 @@ class GalaxyClient:
     def __init__(
         self,
         url: str,
-        key: Optional[str] = None,
-        email: Optional[str] = None,
-        password: Optional[str] = None,
+        key: str | None = None,
+        email: str | None = None,
+        password: str | None = None,
         *,
-        token: Optional[str] = None,
+        token: str | None = None,
         verify: bool = True,
-        timeout: Optional[float] = None,
-        user_agent: Optional[str] = None,
+        timeout: float | None = None,
+        user_agent: str | None = None,
     ) -> None:
         """
         :param verify: Whether to verify the server's TLS certificate
@@ -76,14 +74,14 @@ class GalaxyClient:
         # If key has been supplied, use it; otherwise just set email and
         # password and grab user's key before first request.
         if key:
-            self._key: Optional[str] = key
+            self._key: str | None = key
         elif token:
-            self.token: Optional[str] = token
+            self.token: str | None = token
         else:
             self._key = None
             self.email = email
             self.password = password
-        self.json_headers: dict[str, Union[str, bytes, None]] = {"Content-Type": "application/json"}
+        self.json_headers: dict[str, str | bytes | None] = {"Content-Type": "application/json"}
         if user_agent:
             self.json_headers["User-Agent"] = user_agent
         # json_headers needs to be set before key can be defined, otherwise authentication with email/password causes an error
@@ -149,7 +147,7 @@ class GalaxyClient:
         return r
 
     def make_post_request(
-        self, url: str, payload: Optional[dict] = None, params: Optional[dict] = None, files_attached: bool = False
+        self, url: str, payload: dict | None = None, params: dict | None = None, files_attached: bool = False
     ) -> Any:
         """
         Make a POST request using the provided ``url`` and ``payload``.
@@ -212,7 +210,7 @@ class GalaxyClient:
         )
 
     def make_delete_request(
-        self, url: str, payload: Optional[dict] = None, params: Optional[dict] = None
+        self, url: str, payload: dict | None = None, params: dict | None = None
     ) -> requests.Response:
         """
         Make a DELETE request using the provided ``url`` and the optional
@@ -237,7 +235,7 @@ class GalaxyClient:
         )
         return r
 
-    def make_put_request(self, url: str, payload: Optional[dict] = None, params: Optional[dict] = None) -> Any:
+    def make_put_request(self, url: str, payload: dict | None = None, params: dict | None = None) -> Any:
         """
         Make a PUT request using the provided ``url`` with required payload.
 
@@ -273,7 +271,7 @@ class GalaxyClient:
             status_code=r.status_code,
         )
 
-    def make_patch_request(self, url: str, payload: Optional[dict] = None, params: Optional[dict] = None) -> Any:
+    def make_patch_request(self, url: str, payload: dict | None = None, params: dict | None = None) -> Any:
         """
         Make a PATCH request using the provided ``url`` with required payload.
 
@@ -313,9 +311,9 @@ class GalaxyClient:
         self,
         path: str,
         url: str = "/upload/resumable_upload",
-        storage: Optional[str] = None,
-        metadata: Optional[dict] = None,
-        chunk_size: Optional[int] = UPLOAD_CHUNK_SIZE,
+        storage: str | None = None,
+        metadata: dict | None = None,
+        chunk_size: int | None = UPLOAD_CHUNK_SIZE,
     ) -> tusclient.uploader.Uploader:
         """
         Return the tus client uploader object for uploading to the Galaxy tus endpoint
@@ -357,7 +355,7 @@ class GalaxyClient:
             )
 
     @property
-    def key(self) -> Optional[str]:
+    def key(self) -> str | None:
         if not self._key and self.email is not None and self.password is not None:
             unencoded_credentials = f"{self.email}:{self.password}"
             authorization = base64.b64encode(unencoded_credentials.encode())

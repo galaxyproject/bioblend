@@ -4,7 +4,6 @@ import tempfile
 from inspect import signature
 from typing import (
     Any,
-    Union,
 )
 from zipfile import ZipFile
 
@@ -166,7 +165,7 @@ class TestGalaxyDatasetCollections(GalaxyTestBase.GalaxyTestBase):
         os.mkdir(extract_dir_path)
 
         if archive_type == "zip":
-            archive: Union[ZipFile, tarfile.TarFile] = ZipFile(archive_path)
+            archive: ZipFile | tarfile.TarFile = ZipFile(archive_path)
         elif archive_type == "tgz":
             archive = tarfile.open(archive_path)
 

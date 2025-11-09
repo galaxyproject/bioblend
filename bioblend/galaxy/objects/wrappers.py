@@ -7,6 +7,7 @@ A basic object-oriented interface for Galaxy entities.
 import abc
 import json
 from collections.abc import (
+    Callable,
     Iterable,
     Iterator,
     Mapping,
@@ -14,7 +15,6 @@ from collections.abc import (
 )
 from typing import (
     Any,
-    Callable,
     cast,
     ClassVar,
     Generic,
@@ -189,9 +189,9 @@ class Step(Wrapper):
     input_steps: dict[str, dict]
     name: str
     type: str
-    tool_id: Optional[str]
+    tool_id: str | None
     tool_inputs: dict
-    tool_version: Optional[str]
+    tool_version: str | None
 
     def __init__(self, step_dict: dict[str, Any], parent: Wrapper) -> None:
         super().__init__(step_dict, parent=parent, gi=parent.gi)
@@ -218,7 +218,7 @@ class InvocationStep(Wrapper):
         "workflow_step_label",
         "workflow_step_uuid",
     )
-    action: Optional[object]
+    action: object | None
     gi: "GalaxyInstance"
     job_id: str
     order_index: int
@@ -492,13 +492,13 @@ class Workflow(Wrapper):
 
     def invoke(
         self,
-        inputs: Optional[dict[str, Any]] = None,
-        params: Optional[dict[str, Any]] = None,
-        history: Optional[Union[str, "History"]] = None,
+        inputs: dict[str, Any] | None = None,
+        params: dict[str, Any] | None = None,
+        history: Union[str, "History"] | None = None,
         import_inputs_to_history: bool = False,
-        replacement_params: Optional[dict[str, Any]] = None,
+        replacement_params: dict[str, Any] | None = None,
         allow_tool_state_corrections: bool = True,
-        inputs_by: Optional[InputsBy] = None,
+        inputs_by: InputsBy | None = None,
         parameters_normalized: bool = False,
     ) -> "Invocation":
         """
@@ -708,9 +708,9 @@ class Invocation(Wrapper):
 
     def sorted_steps_by(
         self,
-        indices: Optional[Iterable[int]] = None,
-        states: Optional[Iterable[Union[str, None]]] = None,
-        step_ids: Optional[Iterable[str]] = None,
+        indices: Iterable[int] | None = None,
+        states: Iterable[str | None] | None = None,
+        step_ids: Iterable[str] | None = None,
     ) -> list[InvocationStep]:
         """
         Get steps for this invocation, or get a subset by specifying
@@ -728,7 +728,7 @@ class Invocation(Wrapper):
         :rtype: list of InvocationStep
         :return: invocation steps
         """
-        steps: Union[list[InvocationStep], filter] = self.steps
+        steps: list[InvocationStep] | filter = self.steps
         if indices is not None:
             steps = filter(lambda step: step.order_index in indices, steps)
         if states is not None:
@@ -1218,7 +1218,7 @@ class DatasetContainer(Wrapper, Generic[DatasetSubtype], metaclass=abc.ABCMeta):
     def __init__(
         self,
         c_dict: dict[str, Any],
-        content_infos: Optional[list[ContentInfo]] = None,
+        content_infos: list[ContentInfo] | None = None,
         gi: Optional["GalaxyInstance"] = None,
     ) -> None:
         """
@@ -1277,7 +1277,7 @@ class DatasetContainer(Wrapper, Generic[DatasetSubtype], metaclass=abc.ABCMeta):
         ds_dict = gi_client.show_dataset(self.id, ds_id)
         return self.DS_TYPE(ds_dict, self, gi=self.gi)
 
-    def get_datasets(self, name: Optional[str] = None) -> list[DatasetSubtype]:
+    def get_datasets(self, name: str | None = None) -> list[DatasetSubtype]:
         """
         Get all datasets contained inside this dataset container.
 
@@ -1458,7 +1458,7 @@ class History(DatasetContainer[HistoryDatasetAssociation]):
         include_hidden: bool = False,
         include_deleted: bool = False,
         wait: bool = False,
-        maxwait: Optional[int] = None,
+        maxwait: int | None = None,
     ) -> str:
         """
         Start a job to create an export archive for this history.  See
@@ -1548,7 +1548,7 @@ class Library(DatasetContainer[LibraryDataset]):
         self.refresh()
         self.unmap()
 
-    def _pre_upload(self, folder: Optional["Folder"]) -> Optional[str]:
+    def _pre_upload(self, folder: Optional["Folder"]) -> str | None:
         """
         Return the id of the given folder, after sanity checking.
         """
@@ -1606,7 +1606,7 @@ class Library(DatasetContainer[LibraryDataset]):
 
     def upload_from_galaxy_fs(
         self,
-        paths: Union[str, Iterable[str]],
+        paths: str | Iterable[str],
         folder: Optional["Folder"] = None,
         link_data_only: Literal["copy_files", "link_to_files"] = "copy_files",
         **kwargs: Any,
@@ -1663,7 +1663,7 @@ class Library(DatasetContainer[LibraryDataset]):
         return self.get_dataset(res["library_dataset_id"])
 
     def create_folder(
-        self, name: str, description: Optional[str] = None, base_folder: Optional["Folder"] = None
+        self, name: str, description: str | None = None, base_folder: Optional["Folder"] = None
     ) -> "Folder":
         """
         Create a folder in this library.

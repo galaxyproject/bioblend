@@ -4,7 +4,6 @@ Contains possible interactions with the Galaxy Roles
 
 from typing import (
     Any,
-    Optional,
     TYPE_CHECKING,
 )
 
@@ -63,8 +62,8 @@ class RolesClient(Client):
         self,
         role_name: str,
         description: str,
-        user_ids: Optional[list[str]] = None,
-        group_ids: Optional[list[str]] = None,
+        user_ids: list[str] | None = None,
+        group_ids: list[str] | None = None,
     ) -> dict[str, Any]:
         """
         Create a new role.

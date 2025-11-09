@@ -9,10 +9,8 @@ import warnings
 from typing import (
     Any,
     Literal,
-    Optional,
     overload,
     TYPE_CHECKING,
-    Union,
 )
 
 from requests import Response
@@ -112,11 +110,11 @@ class DatasetClient(Client):
     def download_dataset(
         self,
         dataset_id: str,
-        file_path: Optional[str] = None,
+        file_path: str | None = None,
         use_default_filename: bool = True,
         require_ok_state: bool = True,
         maxwait: float = 12000,
-    ) -> Union[bytes, str]:
+    ) -> bytes | str:
         """
         Download a dataset to file or in memory. If the dataset state is not
         'ok', a ``DatasetStateException`` will be thrown, unless ``require_ok_state=False``.
@@ -191,19 +189,19 @@ class DatasetClient(Client):
         self,
         limit: int = 500,
         offset: int = 0,
-        name: Optional[str] = None,
-        extension: Optional[Union[str, list[str]]] = None,
-        state: Optional[Union[str, list[str]]] = None,
-        visible: Optional[bool] = None,
-        deleted: Optional[bool] = None,
-        purged: Optional[bool] = None,
-        tool_id: Optional[str] = None,
-        tag: Optional[str] = None,
-        history_id: Optional[str] = None,
-        create_time_min: Optional[str] = None,
-        create_time_max: Optional[str] = None,
-        update_time_min: Optional[str] = None,
-        update_time_max: Optional[str] = None,
+        name: str | None = None,
+        extension: str | list[str] | None = None,
+        state: str | list[str] | None = None,
+        visible: bool | None = None,
+        deleted: bool | None = None,
+        purged: bool | None = None,
+        tool_id: str | None = None,
+        tag: str | None = None,
+        history_id: str | None = None,
+        create_time_min: str | None = None,
+        create_time_max: str | None = None,
+        update_time_min: str | None = None,
+        update_time_max: str | None = None,
         order: str = "create_time-dsc",
     ) -> list[dict[str, Any]]:
         """
@@ -331,7 +329,7 @@ class DatasetClient(Client):
 
         return self._get(params=params)
 
-    def _param_to_filter(self, param: Union[str, list[str]]) -> tuple[str, str]:
+    def _param_to_filter(self, param: str | list[str]) -> tuple[str, str]:
         if isinstance(param, str):
             return "eq", param
         if isinstance(param, list):
@@ -364,9 +362,9 @@ class DatasetClient(Client):
     def update_permissions(
         self,
         dataset_id: str,
-        access_ids: Optional[list] = None,
-        manage_ids: Optional[list] = None,
-        modify_ids: Optional[list] = None,
+        access_ids: list | None = None,
+        manage_ids: list | None = None,
+        modify_ids: list | None = None,
     ) -> dict:
         """
         Set access, manage or modify permissions for a dataset to a list of roles.

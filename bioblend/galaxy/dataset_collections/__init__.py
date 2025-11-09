@@ -1,7 +1,6 @@
 import logging
 from typing import (
     Any,
-    Optional,
     TYPE_CHECKING,
     Union,
 )
@@ -26,12 +25,12 @@ class HasElements:
         self,
         name: str,
         type: str = "list",
-        elements: Optional[Union[list[Union["CollectionElement", "SimpleElement"]], dict[str, Any]]] = None,
+        elements: list[Union["CollectionElement", "SimpleElement"]] | dict[str, Any] | None = None,
     ) -> None:
         self.name = name
         self.type = type
         if isinstance(elements, dict):
-            self.elements: list[Union[CollectionElement, SimpleElement]] = [
+            self.elements: list[CollectionElement | SimpleElement] = [
                 HistoryDatasetElement(name=key, id=value) for key, value in elements.values()
             ]
         elif elements:
@@ -43,7 +42,7 @@ class HasElements:
 
 
 class CollectionDescription(HasElements):
-    def to_dict(self) -> dict[str, Union[str, list]]:
+    def to_dict(self) -> dict[str, str | list]:
         return {
             "name": self.name,
             "collection_type": self.type,
@@ -52,7 +51,7 @@ class CollectionDescription(HasElements):
 
 
 class CollectionElement(HasElements):
-    def to_dict(self) -> dict[str, Union[str, list]]:
+    def to_dict(self) -> dict[str, str | list]:
         return {
             "src": "new_collection",
             "name": self.name,

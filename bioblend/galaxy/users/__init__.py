@@ -6,7 +6,6 @@ Most of these methods must be executed by a registered Galaxy admin user.
 
 from typing import (
     Any,
-    Optional,
     TYPE_CHECKING,
 )
 
@@ -26,9 +25,9 @@ class UserClient(Client):
     def get_users(
         self,
         deleted: bool = False,
-        f_email: Optional[str] = None,
-        f_name: Optional[str] = None,
-        f_any: Optional[str] = None,
+        f_email: str | None = None,
+        f_name: str | None = None,
+        f_any: str | None = None,
     ) -> list[dict[str, Any]]:
         """
         Get a list of all registered users. If ``deleted`` is set to ``True``,
@@ -230,7 +229,7 @@ class UserClient(Client):
         url = self._make_url(user_id) + "/api_key"
         return self._get(url=url)
 
-    def update_user(self, user_id: str, user_data: Optional[dict] = None, **kwargs: Any) -> dict[str, Any]:
+    def update_user(self, user_id: str, user_data: dict | None = None, **kwargs: Any) -> dict[str, Any]:
         """
         Update user information. You can either pass the attributes you want to
         change in the user_data dictionary, or provide them separately as

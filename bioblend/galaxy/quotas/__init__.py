@@ -5,7 +5,6 @@ Contains possible interactions with the Galaxy Quota
 from typing import (
     Any,
     Literal,
-    Optional,
     TYPE_CHECKING,
 )
 
@@ -79,10 +78,10 @@ class QuotaClient(Client):
         description: str,
         amount: str,
         operation: QuotaOperations,
-        default: Optional[DefaultQuotaValues] = "no",
-        in_users: Optional[list[str]] = None,
-        in_groups: Optional[list[str]] = None,
-        quota_source_label: Optional[str] = None,
+        default: DefaultQuotaValues | None = "no",
+        in_users: list[str] | None = None,
+        in_groups: list[str] | None = None,
+        quota_source_label: str | None = None,
     ) -> dict[str, Any]:
         """
         Create a new quota
@@ -143,13 +142,13 @@ class QuotaClient(Client):
     def update_quota(
         self,
         quota_id: str,
-        name: Optional[str] = None,
-        description: Optional[str] = None,
-        amount: Optional[str] = None,
-        operation: Optional[QuotaOperations] = "=",
-        default: Optional[DefaultQuotaValues] = None,
-        in_users: Optional[list[str]] = None,
-        in_groups: Optional[list[str]] = None,
+        name: str | None = None,
+        description: str | None = None,
+        amount: str | None = None,
+        operation: QuotaOperations | None = "=",
+        default: DefaultQuotaValues | None = None,
+        in_users: list[str] | None = None,
+        in_groups: list[str] | None = None,
     ) -> str:
         """
         Update an existing quota

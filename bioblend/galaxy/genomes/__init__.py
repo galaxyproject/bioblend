@@ -5,7 +5,6 @@ Contains possible interactions with Galaxy Genomes
 from typing import (
     Any,
     Literal,
-    Optional,
     TYPE_CHECKING,
 )
 
@@ -34,10 +33,10 @@ class GenomeClient(Client):
     def show_genome(
         self,
         id: str,
-        num: Optional[str] = None,
-        chrom: Optional[str] = None,
-        low: Optional[str] = None,
-        high: Optional[str] = None,
+        num: str | None = None,
+        chrom: str | None = None,
+        low: str | None = None,
+        high: str | None = None,
     ) -> dict[str, Any]:
         """
         Returns information about build <id>
@@ -74,12 +73,12 @@ class GenomeClient(Client):
     def install_genome(
         self,
         func: Literal["download", "index"] = "download",
-        source: Optional[str] = None,
-        dbkey: Optional[str] = None,
-        ncbi_name: Optional[str] = None,
-        ensembl_dbkey: Optional[str] = None,
-        url_dbkey: Optional[str] = None,
-        indexers: Optional[list] = None,
+        source: str | None = None,
+        dbkey: str | None = None,
+        ncbi_name: str | None = None,
+        ensembl_dbkey: str | None = None,
+        url_dbkey: str | None = None,
+        indexers: list | None = None,
     ) -> dict[str, Any]:
         """
         Download and/or index a genome.

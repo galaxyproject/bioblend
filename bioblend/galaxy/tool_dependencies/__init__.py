@@ -5,7 +5,6 @@ Contains interactions dealing with Galaxy dependency resolvers.
 from typing import (
     Any,
     Literal,
-    Optional,
     TYPE_CHECKING,
 )
 
@@ -23,11 +22,11 @@ class ToolDependenciesClient(Client):
 
     def summarize_toolbox(
         self,
-        index: Optional[int] = None,
-        tool_ids: Optional[list[str]] = None,
-        resolver_type: Optional[str] = None,
+        index: int | None = None,
+        tool_ids: list[str] | None = None,
+        resolver_type: str | None = None,
         include_containers: bool = False,
-        container_type: Optional[str] = None,
+        container_type: str | None = None,
         index_by: Literal["requirements", "tools"] = "requirements",
     ) -> list:
         """
