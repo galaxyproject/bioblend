@@ -124,11 +124,11 @@ jobs:
           #   galaxy_version: dev
           #   galaxy_python_version: '3.8'
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           persist-credentials: false
       - name: Checkout Galaxy
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           repository: galaxyproject/galaxy
           ref: ${{ matrix.galaxy_version }}
