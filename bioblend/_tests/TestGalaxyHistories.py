@@ -27,7 +27,7 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
         assert new_history["id"] is not None
         assert new_history["name"] == history_name
         assert new_history["url"] is not None
-    
+
     def test_copy_history(self):
         history_id = self.history["id"]
         dataset1_id = self._test_dataset(history_id)
