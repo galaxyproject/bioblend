@@ -31,7 +31,7 @@ class TestGalaxyHistories(GalaxyTestBase.GalaxyTestBase):
     def test_copy_history(self):
         history_id = self.history["id"]
         dataset1_id = self._test_dataset(history_id)
-        copied_history = self.gi.histories.copy_history(history_id, name="Copied history")
+        copied_history = self.gi.histories.copy_history(history_id, name="Copied History")
         assert copied_history["id"] is not None
         assert copied_history["name"] == "Copied history"
         copied_history_contents = self.gi.histories.show_history(copied_history["id"], contents=True)
