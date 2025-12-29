@@ -55,7 +55,9 @@ class HistoryClient(Client):
             payload["name"] = name
         return self._post(payload)
 
-    def copy_history(self, source_history_id: str, name: str | None = None, all_datasets: bool = False) -> dict[str, Any]:
+    def copy_history(
+        self, source_history_id: str, name: str | None = None, all_datasets: bool = False
+    ) -> dict[str, Any]:
         """
         Create a new history by copying an existing one.
 
