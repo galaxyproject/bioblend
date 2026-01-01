@@ -56,27 +56,27 @@ class HistoryClient(Client):
         return self._post(payload)
 
     def copy_history(
-        self, source_history_id: str, name: str | None = None, all_datasets: bool = False
+        self, history_id: str, name: str | None = None, all_datasets: bool = False
     ) -> dict[str, Any]:
         """
         Create a new history by copying an existing one.
 
-        :type source_history_id: str
-        :param source_history_id: ID of the history to copy.
+        :type history_id: str
+        :param history_id: ID of the history to copy.
 
         :type name: str
         :param name: Optional name for new history
 
         :type all_datasets: bool
-        :param all_datasets: If ``True``, copy all datasets, including deleted
+        :param all_datasets: Whether to copy also deleted datasets and dataset collections.
 
         :rtype: dict
-        :return: Dictionary containing information about newly created history
+        :return: Dictionary containing information about the newly created history
         """
         payload: dict[str, Any] = {"source": "history"}
         if name is not None:
             payload["name"] = name
-        payload["history_id"] = source_history_id
+        payload["history_id"] = history_id
         if all_datasets:
             payload["all_datasets"] = all_datasets
 
