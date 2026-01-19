@@ -76,14 +76,14 @@ if [ -n "${r_val}" ]; then
     git checkout "${r_val}"
     if git show-ref -q --verify "refs/heads/${r_val}" 2>/dev/null; then
         # ${r_val} is a branch
-        export GALAXY_VERSION=${r_val}
+        export GALAXY_VERSION="${r_val}"
         git pull --ff-only
     fi
 else
     BRANCH=$(git rev-parse --abbrev-ref HEAD)
     case $BRANCH in
         dev | release_*)
-            export GALAXY_VERSION=$BRANCH
+            export GALAXY_VERSION="$BRANCH"
             ;;
     esac
 fi
@@ -138,24 +138,35 @@ else
         echo 'galaxyctl status not working'
         exit 1
     fi
-    while true; do
-        sleep 1
+    MAX_WAIT=120
+    i=0
+    while [ $i -lt $MAX_WAIT ]; do
         if .venv/bin/galaxyctl status | grep -q 'gunicorn.*RUNNING'; then
             break
-        else
-            echo 'gunicorn not running yet'
         fi
-    done
-    while true; do
+        echo 'gunicorn not running yet'
         sleep 1
+        i=$((i + 1))
+    done
+    if [ $i -eq $MAX_WAIT ]; then
+        echo 'gunicorn failed to start'
+        exit 1
+    fi
+    i=0
+    while [ $i -lt $MAX_WAIT ]; do
         if grep -q "[Ss]erving on http://127.0.0.1:${GALAXY_PORT}" "${GRAVITY_STATE_DIR}/log/gunicorn.log"; then
             break
-        else
-            echo 'Galaxy not serving yet'
         fi
+        echo 'Galaxy not serving yet'
+        sleep 1
+        i=$((i + 1))
     done
+    if [ $i -eq $MAX_WAIT ]; then
+        echo 'Galaxy failed to start'
+        exit 1
+    fi
 fi
-export BIOBLEND_GALAXY_URL=http://localhost:${GALAXY_PORT}
+export BIOBLEND_GALAXY_URL=http://localhost:"${GALAXY_PORT}"
 
 # Run the tests
 cd "${BIOBLEND_DIR}"
