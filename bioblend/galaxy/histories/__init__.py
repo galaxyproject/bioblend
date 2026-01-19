@@ -565,7 +565,19 @@ class HistoryClient(Client):
         params = {"follow": follow}
         return self._get(url=url, params=params)
 
-    def update_history(self, history_id: str, **kwargs: Any) -> dict[str, Any]:
+    def update_history(
+        self,
+        history_id: str,
+        *,
+        name: str | None = None,
+        annotation: str | None = None,
+        deleted: bool | None = None,
+        purged: bool | None = None,
+        published: bool | None = None,
+        importable: bool | None = None,
+        tags: list[str] | None = None,
+        preferred_object_store_id: str | None = None,
+    ) -> dict[str, Any]:
         """
         Update history metadata information. Some of the attributes that can be
         modified are documented below.
@@ -594,13 +606,34 @@ class HistoryClient(Client):
         :type tags: list
         :param tags: Replace history tags with the given list
 
+        :type preferred_object_store_id: str
+        :param preferred_object_store_id: The ID of the object store that should
+          be used to store new datasets in this history
+
         :rtype: dict
         :return: details of the updated history
 
         .. versionchanged:: 0.8.0
             Changed the return value from the status code (type int) to a dict.
         """
-        return self._put(payload=kwargs, id=history_id)
+        payload: dict[str, Any] = {}
+        if name is not None:
+            payload["name"] = name
+        if annotation is not None:
+            payload["annotation"] = annotation
+        if deleted is not None:
+            payload["deleted"] = deleted
+        if purged is not None:
+            payload["purged"] = purged
+        if published is not None:
+            payload["published"] = published
+        if importable is not None:
+            payload["importable"] = importable
+        if tags is not None:
+            payload["tags"] = tags
+        if preferred_object_store_id is not None:
+            payload["preferred_object_store_id"] = preferred_object_store_id
+        return self._put(payload=payload, id=history_id)
 
     def update_dataset(self, history_id: str, dataset_id: str, **kwargs: Any) -> dict[str, Any]:
         """

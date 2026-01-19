@@ -4,6 +4,7 @@
 By default all Galaxy tests will run but a smaller subset can be executed by setting
 the environment variable ``BIOBLEND_TEST_SUITE`` to ``quick``.
 """
+
 import os
 import sys
 from typing import (

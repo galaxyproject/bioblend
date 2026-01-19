@@ -2,6 +2,9 @@
 
 * Dropped support for Python 3.9.
 
+* Added ``preferred_object_store_id`` parameter to
+  ``HistoryClient.update_history()``.
+
 ## BioBlend v1.7.0 - 2025-11-07
 
 * Deprecation: this is the last release to support end-of-life Python 3.9.
