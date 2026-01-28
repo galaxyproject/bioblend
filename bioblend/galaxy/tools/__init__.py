@@ -197,16 +197,14 @@ class ToolClient(Client):
             r"<help\b[^>]*>\s*(?P<body>.*?)\s*</help>",
             flags=re.DOTALL | re.IGNORECASE,
         )
-
         ht_url = f"/api/tools/{tool_id}/raw_tool_source"
         try:
             ht_response = self._get(ht_url)
+            xml_text = ht_response.text
+            ht = HELP_BLOCK_RE.search(xml_text)
+            return ht.group("body").strip()
         except Exception as e:
-            raise RuntimeError(f"Could not retrieve tool source for tool '{tool_id}': {e}") from e
-
-        xml_text = ht_response.text
-        ht = HELP_BLOCK_RE.search(xml_text)
-        return ht.group("body").strip()
+            raise RuntimeError(f"Could not retrieve tool source for tool '{tool_id}': {e}")
 
     def show_tool(self, tool_id: str, io_details: bool = False, link_details: bool = False) -> dict[str, Any]:
         """
