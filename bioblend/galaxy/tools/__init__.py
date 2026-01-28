@@ -3,6 +3,7 @@ Contains possible interaction dealing with Galaxy tools.
 """
 
 from os.path import basename
+import re
 from typing import (
     Any,
     Literal,
@@ -181,6 +182,31 @@ class ToolClient(Client):
         """
         url = self._make_url(tool_id) + "/dependencies"
         return self._delete(url=url)
+    
+    def get_tool_help_text(self, tool_id: str) -> str:
+        """
+        Extract the contents of <help>...</help>.
+
+        :type tool_id: str
+        :param tool_id: id of the requested tool
+
+        :rtype: dict
+        :return: Tool requirement status
+        """
+        HELP_BLOCK_RE = re.compile(
+            r"<help\b[^>]*>\s*(?P<body>.*?)\s*</help>",
+            flags=re.DOTALL | re.IGNORECASE,
+        )
+
+        ht_url = f"/api/tools/{tool_id}/raw_tool_source"
+        try:
+            ht_response = self._get(ht_url)
+        except Exception as e:
+            raise RuntimeError(f"Could not retrieve tool source for tool '{tool_id}': {e}") from e
+
+        xml_text = ht_response.text
+        ht = HELP_BLOCK_RE.search(xml_text)
+        return ht.group("body").strip()
 
     def show_tool(self, tool_id: str, io_details: bool = False, link_details: bool = False) -> dict[str, Any]:
         """
