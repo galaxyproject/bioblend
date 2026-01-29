@@ -176,6 +176,7 @@ class TestGalaxyTools(GalaxyTestBase.GalaxyTestBase):
         assert "inputs" in first_test
         assert "outputs" in first_test
 
+    @test_util.skip_unless_galaxy("release_22.01")
     @test_util.skip_unless_tool("random_lines1")
     def test_get_tool_source(self):
         tool_source = self.gi.tools.get_tool_source("random_lines1")
