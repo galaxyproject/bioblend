@@ -2,7 +2,6 @@
 Contains possible interaction dealing with Galaxy tools.
 """
 
-import re
 from os.path import basename
 from typing import (
     Any,
@@ -199,27 +198,6 @@ class ToolClient(Client):
             return ht_response.text
         except Exception as e:
             raise RuntimeError(f"Could not retrieve tool source for tool '{tool_id}': {e}")
-
-    def get_tool_help_text(self, tool_id: str) -> str:
-        """
-        Extract the contents of <help>...</help>.
-
-        :type tool_id: str
-        :param tool_id: id of the requested tool
-
-        :rtype: str
-        :return: Tool help text
-        """
-        HELP_BLOCK_RE = re.compile(
-            r"<help\b[^>]*>\s*(?P<body>.*?)\s*</help>",
-            flags=re.DOTALL | re.IGNORECASE,
-        )
-        try:
-            tool_source = self.get_tool_source(tool_id)
-            ht = HELP_BLOCK_RE.search(tool_source)
-            return ht.group("body").strip() if ht else ""
-        except Exception as e:
-            raise RuntimeError(f"Could not retrieve tool helptext for tool '{tool_id}': {e}")
 
     def show_tool(self, tool_id: str, io_details: bool = False, link_details: bool = False) -> dict[str, Any]:
         """

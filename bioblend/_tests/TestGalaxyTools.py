@@ -187,13 +187,3 @@ class TestGalaxyTools(GalaxyTestBase.GalaxyTestBase):
         assert "</test>" in tool_source.lower()
         assert "<help>" in tool_source.lower()
         assert "</help>" in tool_source.lower()
-
-    @test_util.skip_unless_tool("random_lines1")
-    def test_get_tool_help_text(self):
-        help_text = self.gi.tools.get_tool_help_text("random_lines1")
-        assert isinstance(help_text, str)
-        assert help_text
-        assert help_text == help_text.strip()
-        assert "random lines" in help_text.lower()
-        assert "<help>" not in help_text.lower()
-        assert "</help>" not in help_text.lower()
