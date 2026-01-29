@@ -201,7 +201,7 @@ class ToolClient(Client):
             ht_url = f"{tool_id}/raw_tool_source/"
             ht_response = self._get(ht_url, json=False)
             ht = HELP_BLOCK_RE.search(ht_response.text)
-            return ht.group("body").strip()
+            return ht.group("body").strip() if ht else ""
         except Exception as e:
             raise RuntimeError(f"Could not retrieve tool source for tool '{tool_id}': {e}")
 
