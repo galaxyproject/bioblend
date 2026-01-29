@@ -198,8 +198,8 @@ class ToolClient(Client):
             flags=re.DOTALL | re.IGNORECASE,
         )
         try:
-            ht_url = f"{tool_id}/raw_tool_source/"
-            ht_response = self._get(ht_url, json=False)
+            raw_source_url = self._make_url(tool_id) + "/raw_tool_source"
+            ht_response = self._get(url=raw_source_url, json=False)
             ht = HELP_BLOCK_RE.search(ht_response.text)
             return ht.group("body").strip() if ht else ""
         except Exception as e:
