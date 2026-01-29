@@ -1,6 +1,6 @@
 ## BioBlend v
 
-* Dropped support for Python 3.9.
+* Dropped support for Python 3.9. Added support for Galaxy release 26.0.
 
 * Added ``preferred_object_store_id`` parameter to
   ``HistoryClient.update_history()``.

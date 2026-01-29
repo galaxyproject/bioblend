@@ -33,7 +33,11 @@ jobs:
           - os: ubuntu-latest
             tox_env: py310
             galaxy_version: dev
-            galaxy_python_version: '3.9'
+            galaxy_python_version: '3.10'
+          - os: ubuntu-latest
+            tox_env: py310
+            galaxy_version: release_26.0
+            galaxy_python_version: '3.10'
           - os: ubuntu-latest
             tox_env: py310
             galaxy_version: release_25.1
@@ -116,13 +120,13 @@ jobs:
           - os: ubuntu-latest
             tox_env: py314
             galaxy_version: dev
-            galaxy_python_version: '3.9'
+            galaxy_python_version: '3.10'
           # Cannot test on macOS because service containers are not supported
           # yet: https://github.community/t/github-actions-services-available-on-others-vms/16916
           # - os: macos-latest
           #   tox_env: py310
           #   galaxy_version: dev
-          #   galaxy_python_version: '3.8'
+          #   galaxy_python_version: '3.10'
     steps:
       - uses: actions/checkout@v6
         with:
