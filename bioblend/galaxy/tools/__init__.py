@@ -190,8 +190,8 @@ class ToolClient(Client):
         :type tool_id: str
         :param tool_id: id of the requested tool
 
-        :rtype: dict
-        :return: Tool requirement status
+        :rtype: str
+        :return: Tool help text
         """
         HELP_BLOCK_RE = re.compile(
             r"<help\b[^>]*>\s*(?P<body>.*?)\s*</help>",
@@ -200,8 +200,7 @@ class ToolClient(Client):
         try:
             ht_url = f"{tool_id}/raw_tool_source/"
             ht_response = self._get(ht_url, json=False)
-            xml_text = ht_response.text
-            ht = HELP_BLOCK_RE.search(xml_text)
+            ht = HELP_BLOCK_RE.search(ht_response.text)
             return ht.group("body").strip()
         except Exception as e:
             raise RuntimeError(f"Could not retrieve tool source for tool '{tool_id}': {e}")

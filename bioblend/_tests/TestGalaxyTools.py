@@ -182,5 +182,6 @@ class TestGalaxyTools(GalaxyTestBase.GalaxyTestBase):
         assert isinstance(help_text, str)
         assert help_text
         assert help_text == help_text.strip()
-        assert "<help" not in help_text.lower()
+        assert "random lines" in help_text.lower()
+        assert "<help>" not in help_text.lower()
         assert "</help>" not in help_text.lower()
