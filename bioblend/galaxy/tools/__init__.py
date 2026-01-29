@@ -181,7 +181,7 @@ class ToolClient(Client):
         """
         url = self._make_url(tool_id) + "/dependencies"
         return self._delete(url=url)
-    
+
     def get_tool_source(self, tool_id: str) -> str:
         """
         Get the raw tool XML source for a given tool ID.
