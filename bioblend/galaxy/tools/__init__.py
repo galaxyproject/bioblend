@@ -182,6 +182,23 @@ class ToolClient(Client):
         """
         url = self._make_url(tool_id) + "/dependencies"
         return self._delete(url=url)
+    
+    def get_tool_source(self, tool_id: str) -> str:
+        """
+        Get the raw tool XML source for a given tool ID.
+
+        :type tool_id: str
+        :param tool_id: id of the requested tool
+
+        :rtype: str
+        :return: Tool XML source as a string
+        """
+        try:
+            raw_source_url = self._make_url(tool_id) + "/raw_tool_source"
+            ht_response = self._get(url=raw_source_url, json=False)
+            return ht_response.text
+        except Exception as e:
+            raise RuntimeError(f"Could not retrieve tool source for tool '{tool_id}': {e}")
 
     def get_tool_help_text(self, tool_id: str) -> str:
         """
@@ -198,12 +215,11 @@ class ToolClient(Client):
             flags=re.DOTALL | re.IGNORECASE,
         )
         try:
-            raw_source_url = self._make_url(tool_id) + "/raw_tool_source"
-            ht_response = self._get(url=raw_source_url, json=False)
-            ht = HELP_BLOCK_RE.search(ht_response.text)
+            tool_source = self.get_tool_source(tool_id)
+            ht = HELP_BLOCK_RE.search(tool_source)
             return ht.group("body").strip() if ht else ""
         except Exception as e:
-            raise RuntimeError(f"Could not retrieve tool source for tool '{tool_id}': {e}")
+            raise RuntimeError(f"Could not retrieve tool helptext for tool '{tool_id}': {e}")
 
     def show_tool(self, tool_id: str, io_details: bool = False, link_details: bool = False) -> dict[str, Any]:
         """
