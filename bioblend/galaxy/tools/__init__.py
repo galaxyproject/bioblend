@@ -197,9 +197,9 @@ class ToolClient(Client):
             r"<help\b[^>]*>\s*(?P<body>.*?)\s*</help>",
             flags=re.DOTALL | re.IGNORECASE,
         )
-        ht_url = f"/api/tools/{tool_id}/raw_tool_source"
         try:
-            ht_response = self._get(ht_url)
+            ht_url = f"{tool_id}/raw_tool_source/"
+            ht_response = self._get(ht_url, json=False)
             xml_text = ht_response.text
             ht = HELP_BLOCK_RE.search(xml_text)
             return ht.group("body").strip()
