@@ -2,8 +2,16 @@
 
 * Dropped support for Python 3.9. Added support for Galaxy release 26.0.
 
+* Added ``copy_history()`` method to ``HistoryClient`` (thanks to
+  [Peter van Heusden ](https://github.com/pvanheus)).
+
+* Added ``get_tool_source()`` method to ``ToolClient`` (thanks to
+  [Anup Kumar](https://github.com/anuprulez)).
+
 * Added ``preferred_object_store_id`` parameter to
   ``HistoryClient.update_history()``.
+
+* Improvements to documentation and tests.
 
 ## BioBlend v1.7.0 - 2025-11-07
 

@@ -182,6 +182,26 @@ class ToolClient(Client):
         url = self._make_url(tool_id) + "/dependencies"
         return self._delete(url=url)
 
+    def get_tool_source(self, tool_id: str) -> str:
+        """
+        Get the raw tool XML source for a given tool ID.
+
+        :type tool_id: str
+        :param tool_id: id of the requested tool
+
+        :rtype: str
+        :return: Tool XML source as a string
+
+        .. note::
+          This method works only on Galaxy 22.01 or later and if the user is a
+          Galaxy admin or the Galaxy instance has the
+          ``enable_tool_source_display`` option set to ``true`` in the
+          ``config/galaxy.yml`` configuration file.
+        """
+        raw_source_url = self._make_url(tool_id) + "/raw_tool_source"
+        ht_response = self._get(url=raw_source_url, json=False)
+        return ht_response.text
+
     def show_tool(self, tool_id: str, io_details: bool = False, link_details: bool = False) -> dict[str, Any]:
         """
         Get details of a given tool.
@@ -216,7 +236,8 @@ class ToolClient(Client):
           the tests for all available tool versions.
 
         :rtype: list
-        :return: List of test case definitions, e.g.::
+        :return: List of test case definitions.
+          For example::
 
             [
                 {
@@ -551,10 +572,10 @@ class ToolClient(Client):
         :type session_id: str
         :param session_id: Session ID returned by the tus service
 
-        See :meth:`upload_file` for additional parameters.
-
         :rtype: dict
         :return: Information about the created upload job
+
+        See :meth:`upload_file` for additional parameters.
         """
         payload = self._fetch_payload(path, history_id, session_id, **kwargs)
         url = "/".join((self.gi.url, "tools/fetch"))
@@ -571,10 +592,10 @@ class ToolClient(Client):
         :type history_id: str
         :param history_id: id of the history where to upload the file
 
-        See :meth:`upload_file` for the optional parameters.
-
         :rtype: dict
         :return: Information about the created upload job
+
+        See :meth:`upload_file` for the optional parameters.
         """
         payload = self._upload_payload(history_id, **kwargs)
         payload["files_0|ftp_files"] = path
