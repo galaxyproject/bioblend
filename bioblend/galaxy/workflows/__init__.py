@@ -422,17 +422,17 @@ class WorkflowClient(Client):
 
         :type preferred_object_store_id: str
         :param preferred_object_store_id: The object store id where you want all
-        outputs of this workflow run be stored.
+          outputs of this workflow run be stored.
 
         :type preferred_intermediate_object_store_id: str
         :param preferred_intermediate_object_store_id: The object store id where
-        you want the intermediate outputs of this workflow run to be stored.
-        Cannot be set if ``preferred_object_store_id`` is set.
+          you want the intermediate outputs of this workflow run to be stored.
+          Cannot be set if ``preferred_object_store_id`` is set.
 
         :type preferred_outputs_object_store_id: str
         :param preferred_outputs_object_store_id: The object store id where
-        you want the priamry outputs of this workflow run to be stored.
-        Cannot be set if ``preferred_object_store_id`` is set.
+          you want the priamry outputs of this workflow run to be stored.
+          Cannot be set if ``preferred_object_store_id`` is set.
 
         :rtype: dict
         :return: A dict containing the workflow invocation describing the

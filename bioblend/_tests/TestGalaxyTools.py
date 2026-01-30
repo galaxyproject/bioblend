@@ -180,11 +180,5 @@ class TestGalaxyTools(GalaxyTestBase.GalaxyTestBase):
     @test_util.skip_unless_tool("random_lines1")
     def test_get_tool_source(self):
         tool_source = self.gi.tools.get_tool_source("random_lines1")
-        assert isinstance(tool_source, str)
-        assert tool_source
-        assert "<tool" in tool_source.lower()
-        assert "</tool>" in tool_source.lower()
-        assert "<test>" in tool_source.lower()
-        assert "</test>" in tool_source.lower()
-        assert "<help>" in tool_source.lower()
-        assert "</help>" in tool_source.lower()
+        assert tool_source.startswith("<tool")
+        assert tool_source.endswith("</tool>")
