@@ -840,7 +840,8 @@ class Invocation(Wrapper):
         :param interval: polling interval in secconds
 
         :type check: bool
-        :param check: if ``true``, raise an error if the terminal state is not 'scheduled'
+        :param check: if ``true``, raise an error if the terminal state is not
+          successful.
 
         .. note::
           On success, this method updates the Invocation object's internal variables.
