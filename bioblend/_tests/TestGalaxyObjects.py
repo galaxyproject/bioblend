@@ -25,6 +25,7 @@ import pytest
 
 import bioblend
 from bioblend.galaxy import dataset_collections
+from bioblend.galaxy.invocations import INVOCATION_SUCCESS_STATES
 from bioblend.galaxy.objects import (
     galaxy_instance,
     wrappers,
@@ -357,7 +358,7 @@ class TestInvocation(GalaxyObjectsTestBase):
     def test_wait(self):
         inv = self._obj_invoke_workflow()
         inv.wait()
-        assert inv.state == "scheduled"
+        assert inv.state in INVOCATION_SUCCESS_STATES
 
     def test_refresh(self):
         inv = self._obj_invoke_workflow()
@@ -365,7 +366,7 @@ class TestInvocation(GalaxyObjectsTestBase):
         # use wait_for_invocation() directly, because inv.wait() will update inv automatically
         self.gi.gi.invocations.wait_for_invocation(inv.id)
         inv.refresh()
-        assert inv.state == "scheduled"
+        assert inv.state in INVOCATION_SUCCESS_STATES
 
     def test_run_step_actions(self):
         inv = self.workflow_pause.invoke(
@@ -444,7 +445,7 @@ class TestObjInvocationClient(GalaxyObjectsTestBase):
         assert inv.id == self.inv.id
         assert inv.workflow_id == self.workflow.id
         assert inv.history_id == self.history.id
-        assert inv.state == "scheduled"
+        assert inv.state in INVOCATION_SUCCESS_STATES
         assert inv.update_time == self.inv.update_time
         assert inv.uuid == self.inv.uuid
 
@@ -455,7 +456,7 @@ class TestObjInvocationClient(GalaxyObjectsTestBase):
         assert inv_preview.id == self.inv.id
         assert inv_preview.workflow_id == self.workflow.id
         assert inv_preview.history_id == self.history.id
-        assert inv_preview.state == "scheduled"
+        assert inv_preview.state in INVOCATION_SUCCESS_STATES
         assert inv_preview.update_time == self.inv.update_time
         assert inv_preview.uuid == self.inv.uuid
 
@@ -465,7 +466,7 @@ class TestObjInvocationClient(GalaxyObjectsTestBase):
         assert inv.id == self.inv.id
         assert inv.workflow_id == self.workflow.id
         assert inv.history_id == self.history.id
-        assert inv.state == "scheduled"
+        assert inv.state in INVOCATION_SUCCESS_STATES
         assert inv.update_time == self.inv.update_time
         assert inv.uuid == self.inv.uuid
         assert len(self.inv.steps) > 0

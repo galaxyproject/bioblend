@@ -24,7 +24,8 @@ if TYPE_CHECKING:
 
 log = logging.getLogger(__name__)
 
-INVOCATION_TERMINAL_STATES = {"cancelled", "completed", "failed", "scheduled"}
+INVOCATION_SUCCESS_STATES = {"scheduled", "completed"}
+INVOCATION_TERMINAL_STATES = INVOCATION_SUCCESS_STATES | {"cancelled", "failed"}
 # Invocation non-terminal states are: "cancelling", "new", "ready"
 
 
@@ -631,7 +632,7 @@ class InvocationClient(Client):
             invocation = self.gi.invocations.show_invocation(invocation_id)
             state = invocation["state"]
             if state in INVOCATION_TERMINAL_STATES:
-                if check and state != "scheduled":
+                if check and state not in INVOCATION_SUCCESS_STATES:
                     raise Exception(f"Invocation {invocation_id} is in terminal state {state}")
                 return invocation
             raise NotReady(f"Invocation {invocation_id} is in non-terminal state {state}")
