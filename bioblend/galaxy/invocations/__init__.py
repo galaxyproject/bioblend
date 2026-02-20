@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 
 log = logging.getLogger(__name__)
 
-INVOCATION_TERMINAL_STATES = {"cancelled", "failed", "scheduled"}
+INVOCATION_TERMINAL_STATES = {"cancelled", "completed", "failed", "scheduled"}
 # Invocation non-terminal states are: "cancelling", "new", "ready"
 
 
