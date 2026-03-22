@@ -23,7 +23,7 @@ class TestGalaxyQuotas(GalaxyTestBase.GalaxyTestBase):
         quota = self.gi.quotas.show_quota(self.quota["id"])
         assert quota["id"] == self.quota["id"]
         assert quota["name"] == self.quota_name
-        assert quota["bytes"] == 107374182400
+        assert quota["bytes"] in (107374182400, 100000000000)  # 100 GiB (Galaxy release_26.0 and earlier) or GB
         assert quota["operation"] == "="
         assert quota["description"] == "testing"
 
@@ -45,7 +45,7 @@ class TestGalaxyQuotas(GalaxyTestBase.GalaxyTestBase):
         quota = self.gi.quotas.show_quota(self.quota["id"])
         assert quota["id"] == self.quota["id"]
         assert quota["name"] == self.quota_name + "-new"
-        assert quota["bytes"] == 10995116277
+        assert quota["bytes"] in (10995116277, 10000000000)  # 0.01 TiB (Galaxy release_26.0 and earlier) or TB
         assert quota["operation"] == "-"
         assert quota["description"] == "asdf"
 
