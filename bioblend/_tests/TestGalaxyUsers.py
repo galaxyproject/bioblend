@@ -197,7 +197,7 @@ class TestGalaxyUsers(GalaxyTestBase.GalaxyTestBase):
     def test_get_credentials_for_tool(self):
         user_id = self.gi.users.get_current_user()["id"]
         tool_id = f"test_credential_tool_run_{test_util.random_string()}"
-        self.gi.users.create_credentials(
+        group = self.gi.users.create_credentials(
             user_id=user_id,
             source_type="tool",
             source_id=tool_id,
@@ -206,6 +206,16 @@ class TestGalaxyUsers(GalaxyTestBase.GalaxyTestBase):
             service_version="2.0",
             group_name="default",
             secrets=[{"name": "token", "value": "abc123"}],
+        )
+        # Set the active credential group (not auto-set on creation)
+        creds = self.gi.users.get_credentials(user_id, source_id=tool_id)
+        self.gi.users.select_credential_group(
+            user_id=user_id,
+            source_type="tool",
+            source_id=tool_id,
+            source_version="1.0",
+            user_credentials_id=creds[0]["id"],
+            group_id=group["id"],
         )
         context = self.gi.users.get_credentials_for_tool(user_id, tool_id)
         assert context is not None
@@ -216,3 +226,9 @@ class TestGalaxyUsers(GalaxyTestBase.GalaxyTestBase):
         assert entry["version"] == "2.0"
         assert "id" in entry["selected_group"]
         assert entry["selected_group"]["name"] == "default"
+
+    @test_util.skip_unless_galaxy("release_25.0")
+    def test_get_credentials_for_tool_none(self):
+        user_id = self.gi.users.get_current_user()["id"]
+        context = self.gi.users.get_credentials_for_tool(user_id, "nonexistent_tool_id")
+        assert context is None

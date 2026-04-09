@@ -497,7 +497,7 @@ class ToolClient(Client):
         if data_manager_mode:
             payload["data_manager_mode"] = data_manager_mode
 
-        if credentials_context:
+        if credentials_context is not None:
             payload["credentials_context"] = credentials_context
 
         return self._post(payload)
