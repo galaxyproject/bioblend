@@ -110,7 +110,9 @@ class UserClient(Client):
         }
         return self._post(payload)
 
-    def create_local_user(self, username: str, user_email: str, password: str) -> dict[str, Any]:
+    def create_local_user(
+        self, username: str, user_email: str, password: str
+    ) -> dict[str, Any]:
         """
         Create a new Galaxy local user.
 
@@ -229,7 +231,9 @@ class UserClient(Client):
         url = self._make_url(user_id) + "/api_key"
         return self._get(url=url)
 
-    def update_user(self, user_id: str, user_data: dict | None = None, **kwargs: Any) -> dict[str, Any]:
+    def update_user(
+        self, user_id: str, user_data: dict | None = None, **kwargs: Any
+    ) -> dict[str, Any]:
         """
         Update user information. You can either pass the attributes you want to
         change in the user_data dictionary, or provide them separately as
@@ -375,20 +379,30 @@ class UserClient(Client):
         :rtype: list of dicts or None
         :return: credentials_context list for run_tool(), or None
         """
-        creds = self.get_credentials(user_id, source_type="tool", source_id=tool_id, source_version=tool_version)
+        creds = self.get_credentials(
+            user_id, source_type="tool", source_id=tool_id, source_version=tool_version
+        )
         if not creds:
             return None
         context = []
         for cred in creds:
-            current_group = cred.get("current_group")
-            if current_group:
-                context.append({
+            current_group_id = cred.get("current_group_id")
+            if not current_group_id:
+                continue
+            group_name = "default"
+            for group in cred.get("groups", []):
+                if group["id"] == current_group_id:
+                    group_name = group.get("name", "default")
+                    break
+            context.append(
+                {
                     "user_credentials_id": cred["id"],
-                    "name": cred.get("service_name", ""),
-                    "version": cred.get("service_version", ""),
+                    "name": cred.get("name", ""),
+                    "version": cred.get("version", ""),
                     "selected_group": {
-                        "id": current_group["id"],
-                        "name": current_group.get("name", "default"),
+                        "id": current_group_id,
+                        "name": group_name,
                     },
-                })
+                }
+            )
         return context if context else None

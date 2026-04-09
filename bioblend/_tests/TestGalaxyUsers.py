@@ -89,7 +89,9 @@ class TestGalaxyUsers(GalaxyTestBase.GalaxyTestBase):
         new_user_id = new_user["id"]
         updated_username = test_util.random_string()
         updated_user_email = f"{updated_username}@example.org"
-        self.gi.users.update_user(new_user_id, username=updated_username, email=updated_user_email)
+        self.gi.users.update_user(
+            new_user_id, username=updated_username, email=updated_user_email
+        )
         updated_user = self.gi.users.show_user(new_user_id)
         assert updated_user["username"] == updated_username
         assert updated_user["email"] == updated_user_email
@@ -110,7 +112,9 @@ class TestGalaxyUsers(GalaxyTestBase.GalaxyTestBase):
         if self.gi.config.get_config()["use_remote_user"]:
             self.skipTest("This Galaxy instance is not configured to use local users")
         if not self.gi.config.get_config()["allow_user_deletion"]:
-            self.skipTest("This Galaxy instance is not configured to allow user deletion")
+            self.skipTest(
+                "This Galaxy instance is not configured to allow user deletion"
+            )
         new_username = test_util.random_string()
         new_user = self.gi.users.create_local_user(
             new_username, f"{new_username}@example.org", test_util.random_string(20)
@@ -155,4 +159,60 @@ class TestGalaxyUsers(GalaxyTestBase.GalaxyTestBase):
         assert new_apikey and new_apikey != "Not available."
         # Test regenerating an API key for a user that already has one
         regenerated_apikey = self.gi.users.create_user_apikey(new_user_id)
-        assert regenerated_apikey and regenerated_apikey not in (new_apikey, "Not available.")
+        assert regenerated_apikey and regenerated_apikey not in (
+            new_apikey,
+            "Not available.",
+        )
+
+    @test_util.skip_unless_galaxy("release_25.0")
+    def test_get_credentials_empty(self):
+        user_id = self.gi.users.get_current_user()["id"]
+        creds = self.gi.users.get_credentials(user_id, source_id="nonexistent_tool_id")
+        assert creds == []
+
+    @test_util.skip_unless_galaxy("release_25.0")
+    def test_create_and_get_credentials(self):
+        user_id = self.gi.users.get_current_user()["id"]
+        tool_id = f"test_credential_tool_{test_util.random_string()}"
+        cred = self.gi.users.create_credentials(
+            user_id=user_id,
+            source_type="tool",
+            source_id=tool_id,
+            source_version="1.0",
+            service_name="test_service",
+            service_version="1.0",
+            group_name="default",
+            variables=[{"name": "api_url", "value": "https://example.org"}],
+            secrets=[{"name": "api_key", "value": "secret123"}],
+        )
+        assert cred is not None
+        creds = self.gi.users.get_credentials(user_id, source_id=tool_id)
+        assert len(creds) == 1
+        assert creds[0]["source_id"] == tool_id
+        assert creds[0]["name"] == "test_service"
+        assert creds[0]["version"] == "1.0"
+        assert len(creds[0]["groups"]) == 1
+
+    @test_util.skip_unless_galaxy("release_25.0")
+    def test_get_credentials_for_tool(self):
+        user_id = self.gi.users.get_current_user()["id"]
+        tool_id = f"test_credential_tool_run_{test_util.random_string()}"
+        self.gi.users.create_credentials(
+            user_id=user_id,
+            source_type="tool",
+            source_id=tool_id,
+            source_version="1.0",
+            service_name="test_service",
+            service_version="2.0",
+            group_name="default",
+            secrets=[{"name": "token", "value": "abc123"}],
+        )
+        context = self.gi.users.get_credentials_for_tool(user_id, tool_id)
+        assert context is not None
+        assert len(context) == 1
+        entry = context[0]
+        assert "user_credentials_id" in entry
+        assert entry["name"] == "test_service"
+        assert entry["version"] == "2.0"
+        assert "id" in entry["selected_group"]
+        assert entry["selected_group"]["name"] == "default"
