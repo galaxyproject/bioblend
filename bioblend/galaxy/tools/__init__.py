@@ -383,6 +383,7 @@ class ToolClient(Client):
         tool_inputs: InputsBuilder | dict,
         input_format: Literal["21.01", "legacy"] = "legacy",
         data_manager_mode: Literal["populate", "dry_run", "bundle"] | None = None,
+        credentials_context: list[dict[str, Any]] | None = None,
     ) -> dict[str, Any]:
         """
         Runs tool specified by ``tool_id`` in history indicated
@@ -403,6 +404,13 @@ class ToolClient(Client):
           'dry_run' will skip any processing after the data manager job completes
 
           'bundle' will create a data manager bundle that can be imported on other Galaxy servers.
+
+        :type credentials_context: list of dicts
+        :param credentials_context: list of credential context dicts for tools
+          that require credentials (e.g. API keys). Each dict should contain
+          ``user_credentials_id``, ``name``, ``version``, and ``selected_group``
+          (with ``id`` and ``name`` keys). Obtain credential IDs by storing
+          credentials via the Galaxy credentials API first.
 
         :type tool_inputs: dict
         :param tool_inputs: dictionary of input datasets and parameters
@@ -479,6 +487,9 @@ class ToolClient(Client):
 
         if data_manager_mode:
             payload["data_manager_mode"] = data_manager_mode
+
+        if credentials_context:
+            payload["credentials_context"] = credentials_context
 
         return self._post(payload)
 
