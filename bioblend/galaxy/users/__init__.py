@@ -110,9 +110,7 @@ class UserClient(Client):
         }
         return self._post(payload)
 
-    def create_local_user(
-        self, username: str, user_email: str, password: str
-    ) -> dict[str, Any]:
+    def create_local_user(self, username: str, user_email: str, password: str) -> dict[str, Any]:
         """
         Create a new Galaxy local user.
 
@@ -231,9 +229,7 @@ class UserClient(Client):
         url = self._make_url(user_id) + "/api_key"
         return self._get(url=url)
 
-    def update_user(
-        self, user_id: str, user_data: dict | None = None, **kwargs: Any
-    ) -> dict[str, Any]:
+    def update_user(self, user_id: str, user_data: dict | None = None, **kwargs: Any) -> dict[str, Any]:
         """
         Update user information. You can either pass the attributes you want to
         change in the user_data dictionary, or provide them separately as
@@ -432,9 +428,7 @@ class UserClient(Client):
         :rtype: list of dicts or None
         :return: credentials_context list for run_tool(), or None
         """
-        creds = self.get_credentials(
-            user_id, source_type="tool", source_id=tool_id, source_version=tool_version
-        )
+        creds = self.get_credentials(user_id, source_type="tool", source_id=tool_id, source_version=tool_version)
         if not creds:
             return None
         context = []

@@ -26,10 +26,7 @@ class ToolClient(Client):
         super().__init__(galaxy_instance)
 
     def get_tools(
-        self,
-        tool_id: str | None = None,
-        name: str | None = None,
-        trackster: bool | None = None,
+        self, tool_id: str | None = None, name: str | None = None, trackster: bool | None = None
     ) -> list[dict[str, Any]]:
         """
         Get all tools, or select a subset by specifying optional arguments for
@@ -72,9 +69,7 @@ class ToolClient(Client):
         """
         return self._raw_get_tool(in_panel=True)
 
-    def _raw_get_tool(
-        self, in_panel: bool | None = None, trackster: bool | None = None
-    ) -> list[dict[str, Any]]:
+    def _raw_get_tool(self, in_panel: bool | None = None, trackster: bool | None = None) -> list[dict[str, Any]]:
         params = {
             "in_panel": in_panel,
             "trackster": trackster,
@@ -207,9 +202,7 @@ class ToolClient(Client):
         ht_response = self._get(url=raw_source_url, json=False)
         return ht_response.text
 
-    def show_tool(
-        self, tool_id: str, io_details: bool = False, link_details: bool = False
-    ) -> dict[str, Any]:
+    def show_tool(self, tool_id: str, io_details: bool = False, link_details: bool = False) -> dict[str, Any]:
         """
         Get details of a given tool.
 
@@ -231,9 +224,7 @@ class ToolClient(Client):
         }
         return self._get(id=tool_id, params=params)
 
-    def get_tool_tests(
-        self, tool_id: str, tool_version: str | None = None
-    ) -> list[dict[str, Any]]:
+    def get_tool_tests(self, tool_id: str, tool_version: str | None = None) -> list[dict[str, Any]]:
         """
         Fetch the test case definitions configured for a tool.
 
@@ -562,9 +553,7 @@ class ToolClient(Client):
         """
         if self.gi.config.get_version()["version_major"] >= "22.01":
             # Use the tus protocol
-            uploader = self.gi.get_tus_uploader(
-                path, storage=storage, metadata=metadata, chunk_size=chunk_size
-            )
+            uploader = self.gi.get_tus_uploader(path, storage=storage, metadata=metadata, chunk_size=chunk_size)
             uploader.upload()
             return self.post_to_fetch(path, history_id, uploader.session_id, **kwargs)
         else:
@@ -577,9 +566,7 @@ class ToolClient(Client):
             finally:
                 payload["files_0|file_data"].close()
 
-    def post_to_fetch(
-        self, path: str, history_id: str, session_id: str, **kwargs: Any
-    ) -> dict[str, Any]:
+    def post_to_fetch(self, path: str, history_id: str, session_id: str, **kwargs: Any) -> dict[str, Any]:
         """
         Make a POST request to the Fetch API after performing a tus upload.
 
@@ -605,9 +592,7 @@ class ToolClient(Client):
         url = "/".join((self.gi.url, "tools/fetch"))
         return self._post(payload, url=url)
 
-    def upload_from_ftp(
-        self, path: str, history_id: str, **kwargs: Any
-    ) -> dict[str, Any]:
+    def upload_from_ftp(self, path: str, history_id: str, **kwargs: Any) -> dict[str, Any]:
         """
         Upload the file specified by ``path`` from the user's FTP directory to
         the history specified by ``history_id``.
@@ -627,9 +612,7 @@ class ToolClient(Client):
         payload["files_0|ftp_files"] = path
         return self._post(payload)
 
-    def paste_content(
-        self, content: str, history_id: str, **kwargs: Any
-    ) -> dict[str, Any]:
+    def paste_content(self, content: str, history_id: str, **kwargs: Any) -> dict[str, Any]:
         """
         Upload a string to a new dataset in the history specified by
         ``history_id``.
@@ -670,9 +653,7 @@ class ToolClient(Client):
             "inputs": tool_input,
         }
 
-    def _fetch_payload(
-        self, path: str, history_id: str, session_id: str, **kwargs: Any
-    ) -> dict:
+    def _fetch_payload(self, path: str, history_id: str, session_id: str, **kwargs: Any) -> dict:
         file_name = kwargs.get("file_name", basename(path))
         element = {
             "src": "files",
