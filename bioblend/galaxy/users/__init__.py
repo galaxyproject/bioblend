@@ -365,7 +365,7 @@ class UserClient(Client):
     ) -> None:
         """
         Select the active credential group for a set of user credentials.
-        This must be called after ``create_credentials()`` before the
+        This must be called after credentials have been created but before the
         credentials can be used with ``run_tool()``.
 
         :type user_id: str
