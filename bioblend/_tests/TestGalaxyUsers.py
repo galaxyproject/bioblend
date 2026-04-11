@@ -164,60 +164,52 @@ class TestGalaxyUsers(GalaxyTestBase.GalaxyTestBase):
         assert creds == []
 
     @test_util.skip_unless_galaxy("release_25.1")
-    @test_util.skip_unless_tool("random_lines1")
+    @test_util.skip_unless_tool("secret_tool")
     def test_create_and_get_credentials(self):
         user_id = self.gi.users.get_current_user()["id"]
-        tool_id = "random_lines1"
+        tool_id = "secret_tool"
         tool = self.gi.tools.show_tool(tool_id)
-        try:
-            cred = self.gi.users.create_credentials(
-                user_id=user_id,
-                source_type="tool",
-                source_id=tool_id,
-                source_version=tool["version"],
-                service_name="test_service",
-                service_version="1.0",
-                group_name="default",
-                variables=[{"name": "api_url", "value": "https://example.org"}],
-                secrets=[{"name": "api_key", "value": "secret123"}],
-            )
-        except ConnectionError as e:
-            if "does not require any credentials" in str(e) or "not defined" in str(e):
-                self.skipTest("Test tool does not have credential definitions")
-            raise
-        assert cred is not None
+        group_name = test_util.random_string()
+        cred = self.gi.users.create_credentials(
+            user_id=user_id,
+            source_type="tool",
+            source_id=tool_id,
+            source_version=tool["version"],
+            service_name="service1",
+            service_version="v1",
+            group_name=group_name,
+            variables=[{"name": "server", "value": "https://example.org"}],
+            secrets=[{"name": "username", "value": "alice"}, {"name": "password", "value": "s3cret"}],
+        )
+        assert cred["name"] == group_name
         creds = self.gi.users.get_credentials(user_id, source_id=tool_id)
-        assert len(creds) >= 1
-        matching = [c for c in creds if c["name"] == "test_service"]
+        matching = [c for c in creds if c["name"] == "service1"]
         assert len(matching) == 1
         assert matching[0]["source_id"] == tool_id
-        assert matching[0]["version"] == "1.0"
-        assert len(matching[0]["groups"]) >= 1
+        assert matching[0]["version"] == "v1"
+        assert any(g["name"] == group_name for g in matching[0]["groups"])
 
     @test_util.skip_unless_galaxy("release_25.1")
-    @test_util.skip_unless_tool("random_lines1")
+    @test_util.skip_unless_tool("secret_tool")
     def test_get_credentials_for_tool(self):
         user_id = self.gi.users.get_current_user()["id"]
-        tool_id = "random_lines1"
+        tool_id = "secret_tool"
         tool = self.gi.tools.show_tool(tool_id)
-        try:
-            group = self.gi.users.create_credentials(
-                user_id=user_id,
-                source_type="tool",
-                source_id=tool_id,
-                source_version=tool["version"],
-                service_name="test_service_run",
-                service_version="2.0",
-                group_name="default",
-                secrets=[{"name": "token", "value": "abc123"}],
-            )
-        except ConnectionError as e:
-            if "does not require any credentials" in str(e) or "not defined" in str(e):
-                self.skipTest("Test tool does not have credential definitions")
-            raise
+        group_name = test_util.random_string()
+        group = self.gi.users.create_credentials(
+            user_id=user_id,
+            source_type="tool",
+            source_id=tool_id,
+            source_version=tool["version"],
+            service_name="service1",
+            service_version="v1",
+            group_name=group_name,
+            variables=[{"name": "server", "value": "https://example.org"}],
+            secrets=[{"name": "username", "value": "alice"}],
+        )
         # Set the active credential group (not auto-set on creation)
         creds = self.gi.users.get_credentials(user_id, source_id=tool_id)
-        matching = [c for c in creds if c["name"] == "test_service_run"]
+        matching = [c for c in creds if c["name"] == "service1"]
         self.gi.users.select_credential_group(
             user_id=user_id,
             source_type="tool",
@@ -228,14 +220,13 @@ class TestGalaxyUsers(GalaxyTestBase.GalaxyTestBase):
         )
         context = self.gi.users.get_credentials_for_tool(user_id, tool_id, tool_version=tool["version"])
         assert context is not None
-        assert len(context) >= 1
-        entries = [e for e in context if e["name"] == "test_service_run"]
+        entries = [e for e in context if e["name"] == "service1"]
         assert len(entries) == 1
         entry = entries[0]
         assert "user_credentials_id" in entry
-        assert entry["version"] == "2.0"
-        assert "id" in entry["selected_group"]
-        assert entry["selected_group"]["name"] == "default"
+        assert entry["version"] == "v1"
+        assert entry["selected_group"]["id"] == group["id"]
+        assert entry["selected_group"]["name"] == group_name
 
     @test_util.skip_unless_galaxy("release_25.1")
     def test_get_credentials_for_tool_none(self):
