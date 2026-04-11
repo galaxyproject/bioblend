@@ -434,21 +434,19 @@ class UserClient(Client):
         context = []
         for cred in creds:
             current_group_id = cred.get("current_group_id")
-            if not current_group_id:
+            if current_group_id is None:
                 continue
-            group_name = "default"
-            for group in cred.get("groups", []):
-                if group["id"] == current_group_id:
-                    group_name = group.get("name", "default")
-                    break
+            current_group = next((g for g in cred["groups"] if g["id"] == current_group_id), None)
+            if current_group is None:
+                continue
             context.append(
                 {
                     "user_credentials_id": cred["id"],
-                    "name": cred.get("name", ""),
-                    "version": cred.get("version", ""),
+                    "name": cred["name"],
+                    "version": cred["version"],
                     "selected_group": {
                         "id": current_group_id,
-                        "name": group_name,
+                        "name": current_group["name"],
                     },
                 }
             )

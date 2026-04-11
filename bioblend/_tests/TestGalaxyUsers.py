@@ -164,8 +164,8 @@ class TestGalaxyUsers(GalaxyTestBase.GalaxyTestBase):
         assert creds == []
 
     @test_util.skip_unless_galaxy("release_25.1")
+    @test_util.skip_unless_tool("random_lines1")
     def test_create_and_get_credentials(self):
-        # Requires a Galaxy tool with credential definitions; skip if unavailable
         user_id = self.gi.users.get_current_user()["id"]
         tool_id = "random_lines1"
         tool = self.gi.tools.show_tool(tool_id)
@@ -195,8 +195,8 @@ class TestGalaxyUsers(GalaxyTestBase.GalaxyTestBase):
         assert len(matching[0]["groups"]) >= 1
 
     @test_util.skip_unless_galaxy("release_25.1")
+    @test_util.skip_unless_tool("random_lines1")
     def test_get_credentials_for_tool(self):
-        # Requires a Galaxy tool with credential definitions; skip if unavailable
         user_id = self.gi.users.get_current_user()["id"]
         tool_id = "random_lines1"
         tool = self.gi.tools.show_tool(tool_id)
