@@ -170,7 +170,7 @@ class TestGalaxyUsers(GalaxyTestBase.GalaxyTestBase):
         tool_id = "secret_tool"
         tool = self.gi.tools.show_tool(tool_id)
         group_name = test_util.random_string()
-        cred = self.gi.users.create_credentials(
+        group = self.gi.users.create_credentials(
             user_id=user_id,
             source_type="tool",
             source_id=tool_id,
@@ -181,7 +181,7 @@ class TestGalaxyUsers(GalaxyTestBase.GalaxyTestBase):
             variables=[{"name": "server", "value": "https://example.org"}],
             secrets=[{"name": "username", "value": "alice"}, {"name": "password", "value": "s3cret"}],
         )
-        assert cred["name"] == group_name
+        assert group["name"] == group_name
         creds = self.gi.users.get_credentials(user_id, source_id=tool_id)
         matching = [c for c in creds if c["name"] == "service1"]
         assert len(matching) == 1
