@@ -156,3 +156,80 @@ class TestGalaxyUsers(GalaxyTestBase.GalaxyTestBase):
         # Test regenerating an API key for a user that already has one
         regenerated_apikey = self.gi.users.create_user_apikey(new_user_id)
         assert regenerated_apikey and regenerated_apikey not in (new_apikey, "Not available.")
+
+    @test_util.skip_unless_galaxy("release_25.1")
+    def test_get_credentials_empty(self):
+        user_id = self.gi.users.get_current_user()["id"]
+        creds = self.gi.users.get_credentials(user_id, source_id="nonexistent_tool_id")
+        assert creds == []
+
+    @test_util.skip_unless_galaxy("release_25.1")
+    @test_util.skip_unless_tool("secret_tool")
+    def test_create_and_get_credentials(self):
+        user_id = self.gi.users.get_current_user()["id"]
+        tool_id = "secret_tool"
+        tool = self.gi.tools.show_tool(tool_id)
+        group_name = test_util.random_string()
+        group = self.gi.users.create_credentials(
+            user_id=user_id,
+            source_type="tool",
+            source_id=tool_id,
+            source_version=tool["version"],
+            service_name="service1",
+            service_version="v1",
+            group_name=group_name,
+            variables=[{"name": "server", "value": "https://example.org"}],
+            secrets=[{"name": "username", "value": "alice"}, {"name": "password", "value": "s3cret"}],
+        )
+        assert group["name"] == group_name
+        creds = self.gi.users.get_credentials(user_id, source_id=tool_id)
+        matching = [c for c in creds if c["name"] == "service1"]
+        assert len(matching) == 1
+        assert matching[0]["source_id"] == tool_id
+        assert matching[0]["version"] == "v1"
+        assert any(g["name"] == group_name for g in matching[0]["groups"])
+
+    @test_util.skip_unless_galaxy("release_25.1")
+    @test_util.skip_unless_tool("secret_tool")
+    def test_get_credentials_for_tool(self):
+        user_id = self.gi.users.get_current_user()["id"]
+        tool_id = "secret_tool"
+        tool = self.gi.tools.show_tool(tool_id)
+        group_name = test_util.random_string()
+        group = self.gi.users.create_credentials(
+            user_id=user_id,
+            source_type="tool",
+            source_id=tool_id,
+            source_version=tool["version"],
+            service_name="service1",
+            service_version="v1",
+            group_name=group_name,
+            variables=[{"name": "server", "value": "https://example.org"}],
+            secrets=[{"name": "username", "value": "alice"}],
+        )
+        # Set the active credential group (not auto-set on creation)
+        creds = self.gi.users.get_credentials(user_id, source_id=tool_id)
+        matching = [c for c in creds if c["name"] == "service1"]
+        self.gi.users.select_credential_group(
+            user_id=user_id,
+            source_type="tool",
+            source_id=tool_id,
+            source_version=tool["version"],
+            user_credentials_id=matching[0]["id"],
+            group_id=group["id"],
+        )
+        context = self.gi.users.get_credentials_for_tool(user_id, tool_id, tool_version=tool["version"])
+        assert context is not None
+        entries = [e for e in context if e["name"] == "service1"]
+        assert len(entries) == 1
+        entry = entries[0]
+        assert "user_credentials_id" in entry
+        assert entry["version"] == "v1"
+        assert entry["selected_group"]["id"] == group["id"]
+        assert entry["selected_group"]["name"] == group_name
+
+    @test_util.skip_unless_galaxy("release_25.1")
+    def test_get_credentials_for_tool_none(self):
+        user_id = self.gi.users.get_current_user()["id"]
+        context = self.gi.users.get_credentials_for_tool(user_id, "nonexistent_tool_id")
+        assert context is None

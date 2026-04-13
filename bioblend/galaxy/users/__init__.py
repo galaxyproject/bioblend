@@ -257,3 +257,197 @@ class UserClient(Client):
         user_data.update(kwargs)
         url = self._make_url(user_id) + "/information/inputs"
         return self._put(url=url, payload=user_data, id=user_id)
+
+    def get_credentials(
+        self,
+        user_id: str,
+        source_type: str = "tool",
+        source_id: str | None = None,
+        source_version: str | None = None,
+    ) -> list[dict[str, Any]]:
+        """
+        Get stored credentials for a user, optionally filtered by tool.
+
+        :type user_id: str
+        :param user_id: encoded user ID
+
+        :type source_type: str
+        :param source_type: credential source type (default: 'tool')
+
+        :type source_id: str
+        :param source_id: tool ID to filter by
+
+        :type source_version: str
+        :param source_version: tool version to filter by
+
+        :rtype: list of dicts
+        :return: list of stored credentials
+        """
+        url = self._make_url(user_id) + "/credentials"
+        params: dict[str, str] = {"source_type": source_type}
+        if source_id is not None:
+            params["source_id"] = source_id
+        if source_version is not None:
+            params["source_version"] = source_version
+        return self._get(url=url, params=params)
+
+    def create_credentials(
+        self,
+        user_id: str,
+        source_type: str,
+        source_id: str,
+        source_version: str,
+        service_name: str,
+        service_version: str,
+        group_name: str,
+        variables: list[dict[str, str]] | None = None,
+        secrets: list[dict[str, str]] | None = None,
+    ) -> dict[str, Any]:
+        """
+        Store credentials for a user (e.g. API keys for external services).
+
+        :type user_id: str
+        :param user_id: encoded user ID
+
+        :type source_type: str
+        :param source_type: credential source type (e.g. 'tool')
+
+        :type source_id: str
+        :param source_id: tool ID
+
+        :type source_version: str
+        :param source_version: tool version
+
+        :type service_name: str
+        :param service_name: name of the credential service
+
+        :type service_version: str
+        :param service_version: version of the credential service
+
+        :type group_name: str
+        :param group_name: name for the credential group (minimum 3 characters)
+
+        :type variables: list of dicts
+        :param variables: list of variable dicts with 'name' and 'value' keys
+
+        :type secrets: list of dicts
+        :param secrets: list of secret dicts with 'name' and 'value' keys
+
+        :rtype: dict
+        :return: the created credential group (with ``id``, ``name``,
+          ``variables``, ``secrets``, and ``update_time``)
+        """
+        url = self._make_url(user_id) + "/credentials"
+        payload = {
+            "source_type": source_type,
+            "source_id": source_id,
+            "source_version": source_version,
+            "service_credential": {
+                "name": service_name,
+                "version": service_version,
+                "group": {
+                    "name": group_name,
+                    "variables": variables or [],
+                    "secrets": secrets or [],
+                },
+            },
+        }
+        return self._post(url=url, payload=payload)
+
+    def select_credential_group(
+        self,
+        user_id: str,
+        source_type: str,
+        source_id: str,
+        source_version: str,
+        user_credentials_id: str,
+        group_id: str | None,
+    ) -> None:
+        """
+        Select the active credential group for a set of user credentials.
+        This must be called after credentials have been created but before the
+        credentials can be used with ``run_tool()``.
+
+        :type user_id: str
+        :param user_id: encoded user ID
+
+        :type source_type: str
+        :param source_type: credential source type (e.g. 'tool')
+
+        :type source_id: str
+        :param source_id: tool ID
+
+        :type source_version: str
+        :param source_version: tool version
+
+        :type user_credentials_id: str
+        :param user_credentials_id: encoded ID of the user credentials entry
+
+        :type group_id: str or None
+        :param group_id: encoded ID of the credential group to activate,
+          or ``None`` to unset
+        """
+        url = self._make_url(user_id) + "/credentials"
+        payload = {
+            "source_type": source_type,
+            "source_id": source_id,
+            "source_version": source_version,
+            "service_credentials": [
+                {
+                    "user_credentials_id": user_credentials_id,
+                    "current_group_id": group_id,
+                },
+            ],
+        }
+        try:
+            self._put(url=url, payload=payload)
+        except ConnectionError as e:
+            if e.status_code == 204:
+                return None
+            raise
+
+    def get_credentials_for_tool(
+        self,
+        user_id: str,
+        tool_id: str,
+        tool_version: str | None = None,
+    ) -> list[dict[str, Any]] | None:
+        """
+        Build a credentials_context list suitable for passing to
+        ``tools.run_tool()``. Returns None if no credentials are stored.
+
+        :type user_id: str
+        :param user_id: encoded user ID
+
+        :type tool_id: str
+        :param tool_id: tool ID to look up credentials for
+
+        :type tool_version: str
+        :param tool_version: tool version
+
+        :rtype: list of dicts or None
+        :return: credentials_context list for run_tool(), or None
+        """
+        creds = self.get_credentials(user_id, source_type="tool", source_id=tool_id, source_version=tool_version)
+        if not creds:
+            return None
+        context = []
+        for cred in creds:
+            current_group_id = cred.get("current_group_id")
+            if current_group_id is None:
+                continue
+            current_group = next((g for g in cred["groups"] if g["id"] == current_group_id), None)
+            if current_group is None:
+                continue
+            context.append(
+                {
+                    "user_credentials_id": cred["id"],
+                    "name": cred["name"],
+                    "version": cred["version"],
+                    "selected_group": {
+                        "id": current_group_id,
+                        "name": current_group["name"],
+                    },
+                }
+            )
+        return context if context else None
