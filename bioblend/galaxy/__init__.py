@@ -23,6 +23,7 @@ from bioblend.galaxy import (
     tool_dependencies,
     tools,
     toolshed,
+    unprivileged_tools,
     users,
     visual,
     workflows,
@@ -116,6 +117,7 @@ class GalaxyInstance(GalaxyClient):
         self.tool_data = tool_data.ToolDataClient(self)
         self.folders = folders.FoldersClient(self)
         self.tool_dependencies = tool_dependencies.ToolDependenciesClient(self)
+        self.unprivileged_tools = unprivileged_tools.UnprivilegedToolsClient(self)
 
     def __repr__(self) -> str:
         """
