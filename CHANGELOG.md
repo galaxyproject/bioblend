@@ -1,3 +1,14 @@
+## BioBlend v1.9.0 - 2026-04-14
+
+* Added ``create_credentials()``, ``get_credentials()``,
+  ``get_credentials_for_tool()``, and ``select_credential_group()`` methods to
+  ``UserClient`` (thanks to [Dannon Baker](https://github.com/dannon)).
+
+* Added ``credentials_context`` parameter to ``ToolClient.run_tool()``
+  (thanks to [Dannon Baker](https://github.com/dannon)).
+
+* Improvements to tests.
+
 ## BioBlend v1.8.0 - 2026-02-20
 
 * Dropped support for Python 3.9. Added support for Galaxy release 26.0.
