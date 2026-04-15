@@ -6,9 +6,8 @@ import bioblend
 from . import GalaxyTestBase
 
 # Minimal user-tool representation (mirrors TOOL_WITH_SHELL_COMMAND from
-# galaxy_test.base.populators). Galaxy must allow the test user to run
-# unprivileged tools for these tests to succeed; otherwise create returns
-# a payload with ``err_msg`` and we skip.
+# galaxy_test.base.populators). Requires the test user to be granted the
+# USER_TOOL_EXECUTE role in Galaxy; otherwise the tests skip.
 USER_TOOL_REPRESENTATION = {
     "id": "bioblend_test_basecommand",
     "name": "BioBlend test base command tool",
@@ -36,9 +35,12 @@ USER_TOOL_REPRESENTATION = {
 class TestGalaxyUnprivilegedTools(GalaxyTestBase.GalaxyTestBase):
     def setUp(self):
         super().setUp()
-        created = self.gi.unprivileged_tools.create_user_tool(USER_TOOL_REPRESENTATION)
-        if "err_msg" in created:
-            raise unittest.SkipTest(f"Galaxy did not accept the unprivileged tool: {created['err_msg']}")
+        try:
+            created = self.gi.unprivileged_tools.create_user_tool(USER_TOOL_REPRESENTATION)
+        except bioblend.ConnectionError as e:
+            if e.status_code in (401, 403):
+                raise unittest.SkipTest(f"User lacks permission to run unprivileged tools: {e}")
+            raise
         self.tool_uuid = created["uuid"]
 
     def tearDown(self):

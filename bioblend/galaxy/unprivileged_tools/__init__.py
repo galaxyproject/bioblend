@@ -88,8 +88,8 @@ class UnprivilegedToolsClient(Client):
         """
         Run an unprivileged tool by its ``tool_uuid``.
 
-        Unprivileged tool runs are submitted to the jobs API rather than the
-        regular tools API; the returned shape mirrors
+        Submitted to ``POST /api/tools``, which accepts ``tool_uuid`` as an
+        alternative to ``tool_id``; the returned shape mirrors
         :meth:`bioblend.galaxy.tools.ToolClient.run_tool`.
 
         :type history_id: str
@@ -128,5 +128,5 @@ class UnprivilegedToolsClient(Client):
         if tool_version is not None:
             payload["tool_version"] = tool_version
 
-        url = "/".join((self.gi.url, "jobs"))
+        url = "/".join((self.gi.url, "tools"))
         return self._post(payload, url=url)
