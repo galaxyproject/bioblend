@@ -2,6 +2,7 @@
 
 import unittest
 
+import bioblend
 from . import GalaxyTestBase
 
 # Minimal user-tool representation (mirrors TOOL_WITH_SHELL_COMMAND from
@@ -41,10 +42,11 @@ class TestGalaxyUnprivilegedTools(GalaxyTestBase.GalaxyTestBase):
         self.tool_uuid = created["uuid"]
 
     def tearDown(self):
+        if self.tool_uuid is None:
+            return
         try:
             self.gi.unprivileged_tools.delete_user_tool(self.tool_uuid)
-        except Exception:
-            # Best-effort cleanup -- tool may already be deactivated by a test.
+        except bioblend.ConnectionError:
             pass
 
     def test_create_user_tool(self):
@@ -57,9 +59,11 @@ class TestGalaxyUnprivilegedTools(GalaxyTestBase.GalaxyTestBase):
         assert any(t["uuid"] == self.tool_uuid for t in active)
 
     def test_delete_user_tool(self):
-        self.gi.unprivileged_tools.delete_user_tool(self.tool_uuid)
+        uuid = self.tool_uuid
+        self.gi.unprivileged_tools.delete_user_tool(uuid)
+        self.tool_uuid = None
         active = self.gi.unprivileged_tools.get_user_tools(active=True)
-        assert not any(t["uuid"] == self.tool_uuid for t in active)
+        assert not any(t["uuid"] == uuid for t in active)
 
     def test_run_user_tool(self):
         history = self.gi.histories.create_history(name="test_run_user_tool history")
