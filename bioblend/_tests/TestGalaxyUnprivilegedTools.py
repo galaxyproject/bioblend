@@ -70,7 +70,7 @@ class TestGalaxyUnprivilegedTools(GalaxyTestBase.GalaxyTestBase):
     def test_run_user_tool(self):
         history = self.gi.histories.create_history(name="test_run_user_tool history")
         dataset_id = self._test_dataset(history["id"], contents="abc\n")
-        result = self.gi.unprivileged_tools.run_user_tool(
+        result = self.gi.tools.run_tool(
             history_id=history["id"],
             tool_uuid=self.tool_uuid,
             tool_inputs={"input": {"src": "hda", "id": dataset_id}},
