@@ -3,7 +3,10 @@
 import unittest
 
 import bioblend
-from . import GalaxyTestBase
+from . import (
+    GalaxyTestBase,
+    test_util,
+)
 
 # Minimal user-tool representation (mirrors TOOL_WITH_SHELL_COMMAND from
 # galaxy_test.base.populators). Requires the test user to be granted the
@@ -32,6 +35,7 @@ USER_TOOL_REPRESENTATION = {
 }
 
 
+@test_util.skip_unless_galaxy("release_25.0")
 class TestGalaxyUnprivilegedTools(GalaxyTestBase.GalaxyTestBase):
     def setUp(self):
         super().setUp()
