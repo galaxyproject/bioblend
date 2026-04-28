@@ -144,6 +144,13 @@ ToolShed
 
 -----
 
+Unprivileged tools
+------------------
+
+.. automodule:: bioblend.galaxy.unprivileged_tools
+
+-----
+
 Users
 -----
 
