@@ -3,6 +3,7 @@ on: [push, pull_request]
 jobs:
   build_packages:
     runs-on: ubuntu-latest
+    permissions: {}
     steps:
       - uses: actions/checkout@v6
         with:
