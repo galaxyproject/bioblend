@@ -1,0 +1,2 @@
+[environment]
+extra-paths = ["docs/examples/objects"]

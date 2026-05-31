@@ -11,10 +11,7 @@ from typing import (
     NoReturn,
 )
 
-try:
-    import pytest
-except ImportError:
-    pytest = None
+import pytest
 
 DIRECTORY = os.path.abspath(os.path.dirname(__file__))
 BIOBLEND_TEST_SUITE = os.environ.get("BIOBLEND_TEST_SUITE", "full")

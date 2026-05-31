@@ -176,9 +176,9 @@ class TestWrapper(unittest.TestCase):
         assert self.d["a"] == 1
         assert self.d["b"][0] == 2
         with pytest.raises(AttributeError):
-            _ = self.w.foo  # type: ignore[attr-defined]
+            _ = self.w.foo  # type: ignore[attr-defined]  # ty: ignore[unresolved-attribute]
         with pytest.raises(AttributeError):
-            self.w.foo = 0  # type: ignore[assignment]
+            self.w.foo = 0  # type: ignore[assignment]  # ty: ignore[unresolved-attribute]
 
     def test_taint(self):
         assert not self.w.is_modified
@@ -200,7 +200,7 @@ class TestWrapper(unittest.TestCase):
         w = MockWrapper(self.d, parent=parent)
         assert w.parent is parent
         with pytest.raises(AttributeError):
-            w.parent = 0  # type: ignore[assignment,misc]
+            w.parent = 0  # type: ignore[assignment,misc]  # ty: ignore[invalid-assignment]
 
 
 @test_util.skip_unless_galaxy()

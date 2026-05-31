@@ -17,9 +17,9 @@ from typing import (
 import requests
 import tusclient.client
 import tusclient.exceptions
-import tusclient.storage.filestorage
-import tusclient.uploader
 from requests_toolbelt import MultipartEncoder
+from tusclient.storage.filestorage import FileStorage
+from tusclient.uploader.uploader import Uploader
 
 from bioblend import ConnectionError
 from bioblend.util import FileStream
@@ -314,7 +314,7 @@ class GalaxyClient:
         storage: str | None = None,
         metadata: dict | None = None,
         chunk_size: int | None = UPLOAD_CHUNK_SIZE,
-    ) -> tusclient.uploader.Uploader:
+    ) -> Uploader:
         """
         Return the tus client uploader object for uploading to the Galaxy tus endpoint
 
@@ -336,9 +336,11 @@ class GalaxyClient:
         :rtype: tusclient.uploader.Uploader
         :return: tus uploader object
         """
-        headers = {"x-api-key": self.key}
+        key = self.key
+        assert key is not None
+        headers = {"x-api-key": key}
         client = tusclient.client.TusClient(self.url + url, headers=headers)
-        url_storage = tusclient.storage.filestorage.FileStorage(storage) if storage else None
+        url_storage = FileStorage(storage) if storage else None  # type: ignore[no-untyped-call]
         try:
             return client.uploader(
                 file_path=path,
@@ -380,10 +382,10 @@ class GalaxyClient:
         return self._key
 
 
-def _tus_uploader_session_id(self: tusclient.uploader.Uploader) -> str:
+def _tus_uploader_session_id(self: Uploader) -> str:
     assert self.url
-    return self.url.rsplit("/", 1)[1]
+    return self.url.rsplit("/", 1)[1]  # type: ignore[unreachable]
 
 
 # monkeypatch a session_id property on to uploader
-tusclient.uploader.Uploader.session_id = property(_tus_uploader_session_id)
+Uploader.session_id = property(_tus_uploader_session_id)  # type: ignore[attr-defined]  # ty:ignore[unresolved-attribute]

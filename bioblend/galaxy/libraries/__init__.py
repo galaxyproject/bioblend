@@ -363,6 +363,7 @@ class LibraryClient(Client):
         if kwargs.get("tags"):
             payload["tags"] = kwargs["tags"]
         # upload options
+        attached_file = None
         if kwargs.get("file_url") is not None:
             payload["upload_option"] = "upload_file"
             payload["files_0|url_paste"] = kwargs["file_url"]
@@ -374,7 +375,8 @@ class LibraryClient(Client):
             payload["server_dir"] = kwargs["server_dir"]
         elif kwargs.get("file_local_path") is not None:
             payload["upload_option"] = "upload_file"
-            payload["files_0|file_data"] = attach_file(kwargs["file_local_path"])
+            attached_file = attach_file(kwargs["file_local_path"])
+            payload["files_0|file_data"] = attached_file
             files_attached = True
         elif kwargs.get("filesystem_paths") is not None:
             payload["upload_option"] = "upload_paths"
@@ -383,8 +385,8 @@ class LibraryClient(Client):
         try:
             return self._post(payload, id=library_id, contents=True, files_attached=files_attached)
         finally:
-            if payload.get("files_0|file_data") is not None:
-                payload["files_0|file_data"].close()
+            if attached_file is not None:
+                attached_file.close()
 
     def upload_file_from_url(
         self,

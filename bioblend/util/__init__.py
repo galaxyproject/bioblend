@@ -49,9 +49,9 @@ def abstractclass(decorated_cls: type[T]) -> type[T]:
         if cls is decorated_cls:
             cls_name = getattr(decorated_cls, "__name__", str(decorated_cls))
             raise TypeError(f"Can't instantiate abstract class {cls_name}")
-        return super(decorated_cls, cls).__new__(cls)  # type: ignore[misc]
+        return super(decorated_cls, cls).__new__(cls)  # type: ignore[misc]  # ty: ignore[unresolved-attribute]
 
-    decorated_cls.__new__ = clsnew  # type: ignore[assignment]
+    decorated_cls.__new__ = clsnew  # type: ignore[assignment]  # ty: ignore[invalid-assignment]
     return decorated_cls
 
 

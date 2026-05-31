@@ -555,7 +555,7 @@ class ToolClient(Client):
             # Use the tus protocol
             uploader = self.gi.get_tus_uploader(path, storage=storage, metadata=metadata, chunk_size=chunk_size)
             uploader.upload()
-            return self.post_to_fetch(path, history_id, uploader.session_id, **kwargs)
+            return self.post_to_fetch(path, history_id, uploader.session_id, **kwargs)  # type: ignore[attr-defined]  # ty:ignore[unresolved-attribute]
         else:
             if "file_name" not in kwargs:
                 kwargs["file_name"] = basename(path)

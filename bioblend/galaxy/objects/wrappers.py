@@ -31,6 +31,7 @@ from bioblend.galaxy.workflows import InputsBy
 from bioblend.util import abstractclass
 
 if TYPE_CHECKING:
+    from bioblend.galaxy.dataset_collections import CollectionDescription
     from . import client
     from .galaxy_instance import GalaxyInstance
 
@@ -1486,7 +1487,7 @@ class History(DatasetContainer[HistoryDatasetAssociation]):
 
     def create_dataset_collection(
         self,
-        collection_description: bioblend.galaxy.dataset_collections.CollectionDescription,
+        collection_description: "CollectionDescription",
         copy_elements: bool = True,
     ) -> "HistoryDatasetCollectionAssociation":
         """
@@ -1809,8 +1810,16 @@ class Tool(Wrapper):
         format.
         """
         for k, v in inputs.items():
-            if isinstance(v, Dataset):
-                inputs[k] = {"src": v.SRC, "id": v.id}  # type: ignore
+            if isinstance(
+                v,
+                (
+                    HistoryDatasetAssociation,
+                    HistoryDatasetCollectionAssociation,
+                    LibraryDatasetDatasetAssociation,
+                    LibraryDataset,
+                ),
+            ):
+                inputs[k] = {"src": v.SRC, "id": v.id}
         out_dict = self.gi.gi.tools.run_tool(history.id, self.id, inputs)
         outputs = [history.get_dataset(_["id"]) for _ in out_dict["outputs"]]
         if wait:

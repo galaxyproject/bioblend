@@ -47,7 +47,7 @@ class InvocationClient(Client):
         offset: int | None = None,
         view: str = "collection",
         step_details: bool = False,
-        job_id: int | None = None,
+        job_id: str | None = None,
     ) -> list[dict[str, Any]]:
         """
         Get all workflow invocations, or select a subset by specifying optional
@@ -97,7 +97,7 @@ class InvocationClient(Client):
               'uuid': 'c8aa2b1c-801a-11e5-a9e5-8ca98228593c',
               'workflow_id': '03501d7626bd192f'}]
         """
-        params = {"include_terminal": include_terminal, "view": view, "step_details": step_details}
+        params: dict[str, Any] = {"include_terminal": include_terminal, "view": view, "step_details": step_details}
         if workflow_id:
             params["workflow_id"] = workflow_id
         if history_id:
@@ -244,7 +244,7 @@ class InvocationClient(Client):
           This method works only on Galaxy 21.01 or later.
         """
         try:
-            payload = self.get_invocation_request(invocation_id)
+            payload: dict[str, Any] = self.get_invocation_request(invocation_id)
         except ConnectionError as e:
             if e.status_code != 404:
                 raise
@@ -553,7 +553,7 @@ class InvocationClient(Client):
         :rtype: requests.Response
         :return: request.Response
         """
-        payload = {
+        payload: dict[str, Any] = {
             "model_store_format": model_store_format,
             "include_files": include_files,
             "include_deleted": include_deleted,
