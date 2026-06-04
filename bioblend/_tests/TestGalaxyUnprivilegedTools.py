@@ -74,7 +74,15 @@ class TestGalaxyUnprivilegedTools(GalaxyTestBase.GalaxyTestBase):
 
     def setUp(self):
         super().setUp()
-        created = self.gi.unprivileged_tools.create_user_tool(USER_TOOL_REPRESENTATION)
+        try:
+            created = self.gi.unprivileged_tools.create_user_tool(USER_TOOL_REPRESENTATION)
+        except bioblend.ConnectionError as e:
+            # Galaxy refuses dynamic tool creation unless enable_beta_tool_formats
+            # is set server-side (err_code 403004). Skip rather than fail when
+            # pointed at a server that lacks the flag; bioblend's own CI enables it.
+            if e.status_code == 403 and "403004" in str(e.body):
+                raise unittest.SkipTest("Galaxy server lacks enable_beta_tool_formats; cannot create user tools.")
+            raise
         self.tool_uuid: str = created["uuid"]
         self._tool_deleted = False
 
