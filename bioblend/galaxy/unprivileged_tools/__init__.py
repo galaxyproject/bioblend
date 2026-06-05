@@ -18,7 +18,6 @@ if TYPE_CHECKING:
 
 
 class UnprivilegedToolsClient(Client):
-    gi: "GalaxyInstance"
     module = "unprivileged_tools"
 
     def __init__(self, galaxy_instance: "GalaxyInstance") -> None:

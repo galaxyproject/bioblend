@@ -60,7 +60,7 @@ class TestGalaxyUnprivilegedTools(GalaxyTestBase.GalaxyTestBase):
             "group_ids": [],
         }
         role = cls.admin_gi.make_post_request(f"{cls.admin_gi.url}/roles", payload=payload)
-        cls.role_id = role[0]["id"] if isinstance(role, list) else role["id"]
+        cls.role_id = role["id"]
 
     @classmethod
     def tearDownClass(cls):
