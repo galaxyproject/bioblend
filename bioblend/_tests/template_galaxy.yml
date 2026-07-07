@@ -14,6 +14,8 @@ galaxy:
   admin_users: $BIOBLEND_GALAXY_USER_EMAIL
   allow_user_deletion: true
   enable_beta_workflow_modules: true
+  # Required to create dynamic/unprivileged tools (Galaxy 25.0+)
+  enable_beta_tool_formats: true
   master_api_key: $BIOBLEND_GALAXY_MASTER_API_KEY
   enable_quotas: true
   cleanup_job: onsuccess
