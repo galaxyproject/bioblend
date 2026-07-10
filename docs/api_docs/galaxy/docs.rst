@@ -175,6 +175,40 @@ If files are greater than 2GB in size, they will need to be uploaded via FTP. Im
                   'uuid': '2cbe8f0a-4019-47c4-87e2-005ce35b8449',
                   'visible': True}]}
 
+Create and run a user-defined tool
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Galaxy calls the lifecycle API for user-defined tools "unprivileged tools". These operations use ``/api/unprivileged_tools`` and identify a tool by its UUID, which is distinct from a normal ``tool_id``. Execution uses ``/api/tools`` with that UUID; submitting a user-defined tool through ``/api/jobs`` is not portable.
+
+This API requires Galaxy 25.0 or later. The Galaxy administrator must enable beta tool formats and grant the account permission to execute user-defined tools.
+
+The following example creates a tool, runs it with a native Galaxy dataset reference, waits for its jobs, collects output IDs, and deactivates it::
+
+    representation = {
+        "class": "GalaxyUserTool",
+        "id": "copy-file",
+        "version": "1.0.0",
+        "name": "Copy a file",
+        "container": "quay.io/biocontainers/coreutils:9.5--h4bc722e_0",
+        "shell_command": "cp '$(inputs.input_file.path)' output.txt",
+        "inputs": [{"name": "input_file", "type": "data"}],
+        "outputs": [{"name": "output", "type": "data", "format": "txt", "from_work_dir": "output.txt"}],
+    }
+
+    created = gi.tools.create_user_tool(representation)
+    tool_uuid = created["uuid"]
+    result = gi.tools.run_user_tool(
+        history_id,
+        tool_uuid,
+        {"input_file": {"src": "hda", "id": dataset_id}},
+    )
+    for job in result.get("jobs", []):
+        gi.jobs.wait_for_job(job["id"])
+    output_ids = [output["id"] for output in result.get("outputs", [])]
+    gi.tools.delete_user_tool(tool_uuid)
+
+``delete_user_tool()`` normally deactivates only the current user's association with the tool. Galaxy applies the ``active`` filter to both that association and the underlying dynamic-tool record, so a normally deleted tool may appear in neither ``get_user_tools(active=True)`` nor ``get_user_tools(active=False)``. Higher-level applications can compose create, run, and wait operations when needed.
+
 
 View Data Libraries
 ~~~~~~~~~~~~~~~~~~~
