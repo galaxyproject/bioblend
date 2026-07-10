@@ -459,6 +459,68 @@ class ToolClient(Client):
         url = f"{self.gi.url}/unprivileged_tools/{tool_uuid}"
         return self._delete(url=url)
 
+    def run_user_tool(
+        self,
+        history_id: str,
+        tool_uuid: str,
+        inputs: dict[str, Any],
+    ) -> dict[str, Any]:
+        """Run a user-defined tool in a history.
+
+        The lifecycle lookup uses Galaxy's ``/api/unprivileged_tools`` API,
+        while execution uses ``/api/tools`` with the UUID and resolved tool
+        version. Dataset, collection, and scalar input references are passed
+        through unchanged. ``/api/jobs`` is not a portable submission route
+        for user-defined tools.
+
+        Wait for submitted jobs with, for example::
+
+            result = gi.tools.run_user_tool(history_id, tool_uuid, inputs)
+            for job in result.get("jobs", []):
+                gi.jobs.wait_for_job(job["id"])
+
+        :type history_id: str
+        :param history_id: encoded ID of the history in which to run the tool
+
+        :type tool_uuid: str
+        :param tool_uuid: UUID of the user-defined tool, not an ordinary tool ID
+
+        :type inputs: dict
+        :param inputs: user-defined tool inputs
+
+        :rtype: dict
+        :return: Information about jobs, outputs, and output collections.
+        """
+        if not history_id:
+            raise ValueError("history_id must not be empty")
+        if not tool_uuid:
+            raise ValueError("tool_uuid must not be empty")
+        if not isinstance(inputs, dict):
+            raise TypeError("inputs must be a dict")
+
+        user_tool = self.show_user_tool(tool_uuid)
+        if not isinstance(user_tool, dict) or not user_tool:
+            raise ValueError(f"Galaxy returned no user-defined tool for UUID {tool_uuid!r}")
+
+        tool_id = user_tool.get("tool_id")
+        diagnostic = f"UUID {tool_uuid!r}" + (f" (tool_id {tool_id!r})" if tool_id else "")
+        if user_tool.get("active") is False:
+            raise ValueError(f"User-defined tool {diagnostic} is inactive")
+
+        representation = user_tool.get("representation")
+        tool_version = representation.get("version") if isinstance(representation, dict) else None
+        if not tool_version:
+            raise ValueError(f"User-defined tool {diagnostic} has no representation version")
+
+        payload = {
+            "history_id": history_id,
+            "tool_uuid": tool_uuid,
+            "tool_version": tool_version,
+            "inputs": inputs,
+            "input_format": "legacy",
+        }
+        return self._post(payload=payload)
+
     def run_tool(
         self,
         history_id: str,
