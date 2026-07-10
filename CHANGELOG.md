@@ -1,3 +1,8 @@
+## BioBlend v1.10.0 - unreleased
+
+* Added first-class user-defined tool lifecycle and execution methods to
+  ``ToolClient``.
+
 ## BioBlend v1.9.0 - 2026-04-14
 
 * Added ``create_credentials()``, ``get_credentials()``,
