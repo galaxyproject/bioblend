@@ -376,6 +376,89 @@ class ToolClient(Client):
 
         return self._post(payload=params, url=url)
 
+    def get_user_tools(self, active: bool = True) -> list[dict[str, Any]]:
+        """Get the current user's user-defined tools.
+
+        Galaxy calls the underlying API "unprivileged tools". The ``active``
+        argument must match both Galaxy's dynamic-tool state and the current
+        user's association state. Since deletion normally deactivates only the
+        association, a deleted tool may appear in neither result set.
+
+        :type active: bool
+        :param active: active state to select
+
+        :rtype: list
+        :return: List of user-defined tool descriptions.
+        """
+        url = f"{self.gi.url}/unprivileged_tools"
+        return self._get(url=url, params={"active": active})
+
+    def show_user_tool(self, tool_uuid: str) -> dict[str, Any]:
+        """Get a user-defined tool by UUID.
+
+        Galaxy calls the underlying API "unprivileged tools". ``tool_uuid``
+        is the user-defined tool UUID, not an encoded Galaxy ID or ordinary
+        tool ID.
+
+        :type tool_uuid: str
+        :param tool_uuid: UUID of the user-defined tool
+
+        :rtype: dict
+        :return: Description of the user-defined tool.
+        """
+        if not tool_uuid:
+            raise ValueError("tool_uuid must not be empty")
+        url = f"{self.gi.url}/unprivileged_tools/{tool_uuid}"
+        return self._get(url=url)
+
+    def create_user_tool(self, representation: dict[str, Any]) -> dict[str, Any]:
+        """Create a user-defined tool from a GalaxyUserTool representation.
+
+        Galaxy calls the underlying API "unprivileged tools". This method
+        accepts the inner representation and adds Galaxy's request envelope.
+        Galaxy remains authoritative for the complete representation schema.
+
+        :type representation: dict
+        :param representation: GalaxyUserTool representation
+
+        :rtype: dict
+        :return: Description of the created user-defined tool, including its UUID.
+        """
+        if not isinstance(representation, dict):
+            raise TypeError("representation must be a dict")
+        required_fields = ("class", "id", "version", "name", "shell_command", "container")
+        missing_fields = [field for field in required_fields if field not in representation]
+        if missing_fields:
+            raise ValueError(
+                f"User-defined tool representation is missing required fields: {', '.join(missing_fields)}"
+            )
+        if representation["class"] != "GalaxyUserTool":
+            raise ValueError("representation class must be 'GalaxyUserTool'")
+        if not isinstance(representation["container"], str):
+            raise TypeError("representation container must be a string")
+
+        url = f"{self.gi.url}/unprivileged_tools"
+        payload = {"src": "representation", "representation": representation}
+        return self._post(payload=payload, url=url)
+
+    def delete_user_tool(self, tool_uuid: str) -> Any:
+        """Deactivate a user-defined tool by UUID.
+
+        Galaxy calls the underlying API "unprivileged tools" and normally
+        deactivates rather than removes the tool. The return value follows
+        BioBlend's standard DELETE conventions.
+
+        :type tool_uuid: str
+        :param tool_uuid: UUID of the user-defined tool
+
+        :return: Galaxy's decoded response, or ``None`` according to BioBlend's
+          standard DELETE conventions.
+        """
+        if not tool_uuid:
+            raise ValueError("tool_uuid must not be empty")
+        url = f"{self.gi.url}/unprivileged_tools/{tool_uuid}"
+        return self._delete(url=url)
+
     def run_tool(
         self,
         history_id: str,
