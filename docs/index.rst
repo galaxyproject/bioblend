@@ -61,7 +61,7 @@ ToolShed) instance object::
 
     from bioblend.galaxy import GalaxyInstance
 
-    gi = GalaxyInstance(url='https://usegalaxy.org', key='your_api_key')
+    gi = GalaxyInstance(url="https://usegalaxy.org", key="your_api_key")
     # Give up after a total of 5 minutes of waiting.
     gi.max_total_retry_delay = 300.0
     # Never wait more than 1 minute before a single retry.
@@ -79,11 +79,13 @@ Reusing connections
 
 By default, each request opens a new connection. Scripts making many requests
 can reuse a single session instead, which avoids re-establishing a connection
-every time::
+every time. In the following example, one connection is used for the initial
+request and for the one made for each history returned by it::
 
-    with GalaxyInstance(url='https://usegalaxy.org', key='your_api_key') as gi:
+    with GalaxyInstance(url="https://usegalaxy.org", key="your_api_key") as gi:
         for history in gi.histories.get_histories():
-            print(history['name'])
+            datasets = gi.histories.show_history(history["id"], contents=True)
+            print(history["name"], len(datasets))
 
 Equivalently, ``gi.use_session = True`` enables it and ``gi.close()`` releases
 the connections. An instance with a session enabled should not be shared between

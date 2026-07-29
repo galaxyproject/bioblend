@@ -17,6 +17,7 @@ from http.server import (
 from typing import Any
 
 import pytest
+from typing_extensions import Self
 
 from bioblend import ConnectionError
 from bioblend.galaxy import GalaxyInstance
@@ -72,7 +73,7 @@ class MockServer:
     def request_count(self) -> int:
         return len(self.requests)
 
-    def __enter__(self) -> "MockServer":
+    def __enter__(self) -> Self:
         self._thread = threading.Thread(target=self._httpd.serve_forever, daemon=True)
         self._thread.start()
         return self
@@ -237,7 +238,10 @@ class TestGalaxySession(unittest.TestCase):
             with gi as entered:
                 assert entered is gi
                 used_inside = gi.use_session
-                assert gi.make_get_request(f"{gi.url}/libraries").status_code == 200
+                # Accessing a GalaxyInstance-only attribute also checks that
+                # entering the context manager preserves the subclass.
+                assert entered.libraries.gi is entered
+                assert entered.make_get_request(f"{gi.url}/libraries").status_code == 200
             assert used_inside is True
             assert gi.use_session is False
 

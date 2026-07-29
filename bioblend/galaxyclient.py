@@ -24,6 +24,7 @@ from requests.adapters import HTTPAdapter
 from requests_toolbelt import MultipartEncoder
 from tusclient.storage.filestorage import FileStorage
 from tusclient.uploader.uploader import Uploader
+from typing_extensions import Self
 from urllib3 import BaseHTTPResponse
 from urllib3.connectionpool import ConnectionPool
 from urllib3.util.retry import Retry
@@ -295,11 +296,11 @@ class GalaxyClient:
             self._session.close()
             self._session = None
 
-    def __enter__(self) -> "GalaxyClient":
+    def __enter__(self) -> Self:
         self.use_session = True
         return self
 
-    def __exit__(self, *args: Any) -> None:
+    def __exit__(self, *args: object) -> None:
         self.close()
 
     @property
