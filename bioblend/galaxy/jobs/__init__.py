@@ -246,7 +246,7 @@ class JobsClient(Client):
         if tool_inputs_update:
             update_inputs(job_inputs, tool_inputs_update)
 
-        url = "/".join((self.gi.url, "tools"))
+        url = f"{self.gi.url}/tools"
         payload = {
             "history_id": history_id if history_id else job_rerun_params["history_id"],
             "tool_id": job_rerun_params["id"],
@@ -510,7 +510,7 @@ class JobsClient(Client):
             state = job["state"]
             if state in JOB_TERMINAL_STATES:
                 if check and state != "ok":
-                    raise Exception(f"Job {job_id} is in terminal state {state}")
+                    raise RuntimeError(f"Job {job_id} is in terminal state {state}")
                 return job
             raise NotReady(f"Job {job_id} is in non-terminal state {state}")
 

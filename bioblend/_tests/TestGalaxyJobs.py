@@ -1,10 +1,9 @@
+import datetime
 import os
-from datetime import (
-    datetime,
-    timedelta,
-)
 from operator import itemgetter
 from typing import Literal
+
+import pytest
 
 from bioblend.galaxy.tools.inputs import (
     dataset,
@@ -43,13 +42,14 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
         assert len(jobs) == 2
         jobs = self.gi.jobs.get_jobs(history_id=self.history_id, state="failed")
         assert len(jobs) == 0
-        yesterday = datetime.today() - timedelta(days=1)
+        today = datetime.datetime.now(tz=datetime.timezone.utc)
+        yesterday = today - datetime.timedelta(days=1)
         jobs = self.gi.jobs.get_jobs(date_range_max=yesterday.strftime("%Y-%m-%d"), history_id=self.history_id)
         assert len(jobs) == 0
-        tomorrow = datetime.today() + timedelta(days=1)
+        tomorrow = today + datetime.timedelta(days=1)
         jobs = self.gi.jobs.get_jobs(date_range_min=tomorrow.strftime("%Y-%m-%d"))
         assert len(jobs) == 0
-        jobs = self.gi.jobs.get_jobs(date_range_min=datetime.today().strftime("%Y-%m-%d"), history_id=self.history_id)
+        jobs = self.gi.jobs.get_jobs(date_range_min=today.strftime("%Y-%m-%d"), history_id=self.history_id)
         assert len(jobs) == 3
 
     @test_util.skip_unless_galaxy("release_21.05")
@@ -109,12 +109,8 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
         invocation = self.gi.invocations.wait_for_invocation(invocation_id)
         job_steps = [step for step in invocation["steps"] if step["job_id"]]
         job_steps.sort(key=itemgetter("order_index"))
-        try:
+        with pytest.raises(RuntimeError):
             self.gi.jobs.wait_for_job(job_steps[0]["job_id"])
-        except Exception:
-            pass  # indicates the job failed as expected
-        else:
-            raise Exception("The job should have failed")
 
         history_contents = self.gi.histories.show_history(self.history_id, contents=True)
         assert len(history_contents) == 3

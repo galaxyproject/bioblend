@@ -1,4 +1,6 @@
-""" """
+"""
+Tests for the bioblend.galaxy.unprivileged_tools module.
+"""
 
 import os
 import unittest

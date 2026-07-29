@@ -36,6 +36,7 @@ dependencies = [
     "requests>=2.20.0",
     "requests-toolbelt>=0.5.1,!=0.9.0",
     "tuspy",
+    "typing-extensions",
 ]
 
 [project.optional-dependencies]
@@ -64,11 +65,11 @@ isort = true
 target-version = "py310"
 
 [tool.ruff.lint]
-select = ["E", "F", "B", "C4", "G", "ISC", "UP"]
+extend-select = ["E", "F", "B", "C4", "G", "ISC", "UP"]
 # Exceptions:
 # B9 flake8-bugbear opinionated warnings
 # E501 is line length (delegated to black)
-ignore = ["B9", "E501"]
+ignore = ["B9", "BLE001", "E501", "I001", "N999", "RET501", "TRY002", "TRY004"]
 
 [tool.setuptools.dynamic]
 version = { attr = "bioblend.__version__" }

@@ -239,7 +239,7 @@ class WorkflowClient(Client):
             params["version"] = version
         if style:
             params["style"] = style
-        url = "/".join((self._make_url(), "download", workflow_id))
+        url = f"{self._make_url()}/download/{workflow_id}"
         json = style != "format2"
         response = self._get(url=url, params=params, json=json)
         if not json:

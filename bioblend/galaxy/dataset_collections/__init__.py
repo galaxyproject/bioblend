@@ -226,7 +226,7 @@ __all__ = (
     "CollectionDescription",
     "CollectionElement",
     "DatasetCollectionClient",
-    "HistoryDatasetElement",
     "HistoryDatasetCollectionElement",
+    "HistoryDatasetElement",
     "LibraryDatasetElement",
 )

@@ -1,6 +1,7 @@
 import os
 import tarfile
 import tempfile
+from collections.abc import Callable
 from inspect import signature
 from typing import (
     Any,
@@ -147,8 +148,8 @@ class TestGalaxyDatasetCollections(GalaxyTestBase.GalaxyTestBase):
         for element1, element2 in zip(dataset_collection1["elements"], dataset_collection2["elements"]):
             assert element1["id"] == element2["id"]
             assert element1.keys() == element2.keys()
-            for key in element1["object"].keys():
-                assert key in element2["object"].keys()
+            for key in element1["object"]:
+                assert key in element2["object"]
 
     def test_download_dataset_collection(self):
         history_id = self.gi.histories.create_history(name="TestDatasetCollectionDownload")["id"]
@@ -165,17 +166,17 @@ class TestGalaxyDatasetCollections(GalaxyTestBase.GalaxyTestBase):
         os.mkdir(extract_dir_path)
 
         if archive_type == "zip":
-            archive: ZipFile | tarfile.TarFile = ZipFile(archive_path)
+            archive_open: Callable[[str], ZipFile | tarfile.TarFile] = ZipFile
         elif archive_type == "tgz":
-            archive = tarfile.open(archive_path)
+            archive_open = tarfile.open
 
-        archive.extractall(extract_dir_path)
-        for fname in os.listdir(extract_dir_path):
-            dataset_dir_path = os.path.join(extract_dir_path, fname)
-            file_path = os.path.join(dataset_dir_path, os.listdir(dataset_dir_path)[0])
-            with open(file_path) as f:
-                assert expected_contents == f.read()
-        archive.close()
+        with archive_open(archive_path) as archive:
+            archive.extractall(extract_dir_path)
+            for fname in os.listdir(extract_dir_path):
+                dataset_dir_path = os.path.join(extract_dir_path, fname)
+                file_path = os.path.join(dataset_dir_path, os.listdir(dataset_dir_path)[0])
+                with open(file_path) as f:
+                    assert expected_contents == f.read()
 
     def test_wait_for_dataset_collection(self):
         history_id = self.gi.histories.create_history(name="TestDatasetCollectionWait")["id"]

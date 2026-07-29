@@ -293,7 +293,7 @@ class InvocationClient(Client):
         if resource_params:
             payload["resource_params"] = resource_params
         payload["use_cached_job"] = use_cached_job
-        url = "/".join((self.gi.url, "workflows", workflow_id, "invocations"))
+        url = f"{self.gi.url}/workflows/{workflow_id}/invocations"
         return self.gi.make_post_request(url=url, payload=payload)
 
     def cancel_invocation(self, invocation_id: str) -> dict[str, Any]:
@@ -462,8 +462,7 @@ class InvocationClient(Client):
                 "Failed to get the PDF report, the necessary dependencies may not be installed on the Galaxy server."
             )
         with open(file_path, "wb") as outf:
-            for chunk in r.iter_content(chunk_size):
-                outf.write(chunk)
+            outf.writelines(r.iter_content(chunk_size))
 
     # TODO: Move to a new ``bioblend.galaxy.short_term_storage`` module
     def _wait_for_short_term_storage(

@@ -5,7 +5,9 @@ from typing import (
 
 
 class InputsBuilder:
-    """ """
+    """
+    A builder for constructing input dictionaries for Galaxy tools.
+    """
 
     def __init__(self) -> None:
         self._input_dict: dict[str, Any] = {}
@@ -69,4 +71,4 @@ conditional = InputsBuilder
 param = Param
 dataset = DatasetParam
 
-__all__ = ("inputs", "repeat", "conditional", "param")
+__all__ = ("conditional", "inputs", "param", "repeat")

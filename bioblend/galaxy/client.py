@@ -72,11 +72,11 @@ class Client:
         :param contents: If ``True``, include 'contents' in the URL, after the module ID:
                          ``<base_url>/api/libraries/<encoded_library_id>/contents``
         """
-        c_url = "/".join((self.gi.url, self.module))
+        c_url = f"{self.gi.url}/{self.module}"
         if deleted:
             c_url = c_url + "/deleted"
         if module_id:
-            c_url = "/".join((c_url, module_id))
+            c_url = f"{c_url}/{module_id}"
             if contents:
                 c_url = c_url + "/contents"
         return c_url

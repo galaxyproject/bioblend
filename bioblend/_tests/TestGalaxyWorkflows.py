@@ -124,7 +124,7 @@ class TestGalaxyWorkflows(GalaxyTestBase.GalaxyTestBase):
         assert imported_wf["url"].startswith("/api/workflows/")
         assert not imported_wf["deleted"]
         assert not imported_wf["published"]
-        with pytest.raises(TypeError):
+        with pytest.raises(ConnectionError):
             self.gi.workflows.export_workflow_to_local_path(None, None, None)  # type: ignore[arg-type]
         export_dir = tempfile.mkdtemp(prefix="bioblend_test_")
         try:

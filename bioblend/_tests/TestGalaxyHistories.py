@@ -1,4 +1,6 @@
-""" """
+"""
+Tests for the bioblend.galaxy.histories module.
+"""
 
 import os
 import shutil

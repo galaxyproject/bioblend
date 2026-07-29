@@ -1,4 +1,6 @@
-""" """
+"""
+Tests for the bioblend.galaxy.tools module.
+"""
 
 import os
 from typing import Any
@@ -157,7 +159,8 @@ class TestGalaxyTools(GalaxyTestBase.GalaxyTestBase):
         assert len(tool_output["outputs"]) == 1
         output = tool_output["outputs"][0]
         assert output["name"] == file_name
-        expected_contents = open(fn, "rb").read()
+        with open(fn, "rb") as f:
+            expected_contents = f.read()
         self._wait_and_verify_dataset(output["id"], expected_contents)
         assert output["genome_build"] == expected_dbkey
 

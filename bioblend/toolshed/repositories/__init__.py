@@ -405,7 +405,7 @@ class ToolShedRepositoryClient(Client):
         # Not using '_make_url' or '_get' to create url since the module id used
         # to create url is not the same as needed for this method
         # since metadata_id has to be defined, easy to create the url here
-        url = "/".join((self.gi.url, "repository_revisions", metadata_id))
+        url = f"{self.gi.url}/repository_revisions/{metadata_id}"
         return self._get(url=url)
 
     def update_repository(self, id: str, tar_ball_path: str, commit_message: str | None = None) -> dict[str, Any]:

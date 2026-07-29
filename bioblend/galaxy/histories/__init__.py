@@ -163,7 +163,7 @@ class HistoryClient(Client):
         if offset:
             params["offset"] = offset
 
-        url = "/".join((self._make_url(), "published")) if get_all_published else None
+        url = f"{self._make_url()}/published" if get_all_published else None
         histories = self._get(url=url, params=params)
 
         if name is not None:

@@ -63,7 +63,7 @@ class DatasetClient(Client):
         self, dataset_id: str, stream_content: bool, require_ok_state: bool = True, maxwait: float = 12000
     ) -> tuple[dict[str, Any], str, Response]:
         dataset = self.wait_for_dataset(dataset_id, maxwait=maxwait, check=False)
-        if not dataset["state"] == "ok":
+        if dataset["state"] != "ok":
             message = f"Dataset state is not 'ok'. Dataset id: {dataset_id}, current state: {dataset['state']}"
             if require_ok_state:
                 raise DatasetStateException(message)

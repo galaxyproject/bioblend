@@ -178,7 +178,7 @@ class TestWrapper(unittest.TestCase):
         with pytest.raises(AttributeError):
             _ = self.w.foo  # type: ignore[attr-defined]  # ty: ignore[unresolved-attribute]
         with pytest.raises(AttributeError):
-            self.w.foo = 0  # type: ignore[assignment]  # ty: ignore[unresolved-attribute]
+            self.w.foo = 0  # type: ignore[assignment]  # ty: ignore[invalid-assignment]
 
     def test_taint(self):
         assert not self.w.is_modified

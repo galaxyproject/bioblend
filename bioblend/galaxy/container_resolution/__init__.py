@@ -110,7 +110,7 @@ class ContainerResolutionClient(Client):
         if index is not None:
             url = "/".join((self._make_url(), str(index), "resolve"))
         else:
-            url = "/".join((self._make_url(), "resolve"))
+            url = f"{self._make_url()}/resolve"
         return self._get(url=url, params=params)
 
     def resolve_toolbox(
@@ -162,7 +162,7 @@ class ContainerResolutionClient(Client):
         if index is not None:
             url = "/".join((self._make_url(), str(index), "toolbox"))
         else:
-            url = "/".join((self._make_url(), "toolbox"))
+            url = f"{self._make_url()}/toolbox"
         return self._get(url=url, params=params)
 
     def resolve_toolbox_with_install(
@@ -230,5 +230,5 @@ class ContainerResolutionClient(Client):
         if index is not None:
             url = "/".join((self._make_url(), str(index), "toolbox", "install"))
         else:
-            url = "/".join((self._make_url(), "toolbox", "install"))
+            url = f"{self._make_url()}/toolbox/install"
         return self._post(url=url, payload=params)

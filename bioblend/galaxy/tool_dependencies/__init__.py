@@ -98,14 +98,14 @@ class ToolDependenciesClient(Client):
         if container_type:
             params["container_type"] = container_type
 
-        url = "/".join((self._make_url(), "toolbox"))
+        url = f"{self._make_url()}/toolbox"
         return self._get(url=url, params=params)
 
     def unused_dependency_paths(self) -> list[str]:
         """
         List unused dependencies
         """
-        url = "/".join((self._make_url(), "unused_paths"))
+        url = f"{self._make_url()}/unused_paths"
         return self._get(url=url)
 
     def delete_unused_dependency_paths(self, paths: list[str]) -> None:
@@ -117,5 +117,5 @@ class ToolDependenciesClient(Client):
 
         """
         payload: dict[str, Any] = {"paths": paths}
-        url = "/".join((self._make_url(), "unused_paths"))
+        url = f"{self._make_url()}/unused_paths"
         self._put(url=url, payload=payload)

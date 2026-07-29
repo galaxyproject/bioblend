@@ -135,7 +135,7 @@ class LibraryClient(Client):
         :rtype: dict
         :return: details of the updated dataset
         """
-        url = "/".join((self._make_url(), "datasets", dataset_id))
+        url = f"{self._make_url()}/datasets/{dataset_id}"
         return self._patch(payload=kwargs, url=url)
 
     def show_dataset(self, library_id: str, dataset_id: str) -> dict[str, Any]:
@@ -718,7 +718,7 @@ class LibraryClient(Client):
         :rtype: dict
         :return: dictionary with all applicable permissions' values
         """
-        url = "/".join((self._make_url(), "datasets", dataset_id, "permissions"))
+        url = f"{self._make_url()}/datasets/{dataset_id}/permissions"
         return self._get(url=url)
 
     def set_library_permissions(
@@ -799,5 +799,5 @@ class LibraryClient(Client):
             payload["modify_ids[]"] = modify_in
         if manage_in:
             payload["manage_ids[]"] = manage_in
-        url = "/".join((self._make_url(), "datasets", dataset_id, "permissions"))
+        url = f"{self._make_url()}/datasets/{dataset_id}/permissions"
         return self._post(payload, url=url)

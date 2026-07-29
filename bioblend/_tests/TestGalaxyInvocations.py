@@ -121,8 +121,7 @@ class TestGalaxyInvocations(GalaxyTestBase.GalaxyTestBase):
                 model_store_format="rocrate.zip",
             )
             with open(file, "bw") as archive:
-                for chunk in response.iter_content(chunk_size=8192):
-                    archive.write(chunk)
+                archive.writelines(response.iter_content(chunk_size=8192))
             # Verify file is not empty
             assert zipfile.is_zipfile(file)
 

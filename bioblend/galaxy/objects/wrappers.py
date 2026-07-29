@@ -26,6 +26,8 @@ from typing import (
     Union,
 )
 
+from typing_extensions import Self
+
 import bioblend
 from bioblend.galaxy.workflows import InputsBy
 from bioblend.util import abstractclass
@@ -36,29 +38,27 @@ if TYPE_CHECKING:
     from .galaxy_instance import GalaxyInstance
 
 __all__ = (
-    "Wrapper",
-    "Step",
-    "Workflow",
-    "LibraryContentInfo",
-    "HistoryContentInfo",
-    "DatasetContainer",
-    "History",
-    "Library",
-    "Folder",
     "Dataset",
-    "HistoryDatasetAssociation",
     "DatasetCollection",
+    "DatasetContainer",
+    "Folder",
+    "History",
+    "HistoryContentInfo",
+    "HistoryDatasetAssociation",
     "HistoryDatasetCollectionAssociation",
-    "LibraryDatasetDatasetAssociation",
-    "LibraryDataset",
-    "Tool",
-    "Job",
-    "LibraryPreview",
     "HistoryPreview",
+    "Job",
+    "Library",
+    "LibraryContentInfo",
+    "LibraryDataset",
+    "LibraryDatasetDatasetAssociation",
+    "LibraryPreview",
+    "Step",
+    "Tool",
+    "Workflow",
     "WorkflowPreview",
+    "Wrapper",
 )
-
-WrapperSubtype = TypeVar("WrapperSubtype", bound="Wrapper")
 
 
 @abstractclass
@@ -130,7 +130,7 @@ class Wrapper:
         """
         object.__setattr__(self, "id", None)
 
-    def clone(self: WrapperSubtype) -> WrapperSubtype:
+    def clone(self) -> Self:
         """
         Return an independent copy of this wrapper.
         """
@@ -151,7 +151,7 @@ class Wrapper:
         return json.dumps(self.wrapped)
 
     @classmethod
-    def from_json(cls: type[WrapperSubtype], jdef: str) -> WrapperSubtype:
+    def from_json(cls, jdef: str) -> Self:
         """
         Build a new wrapper from a JSON dump.
         """
@@ -465,7 +465,7 @@ class Workflow(Wrapper):
     def preview(self) -> "WorkflowPreview":
         assert self.gi is not None
         try:
-            return [_ for _ in self.gi.workflows.get_previews(published=True) if _.id == self.id][0]
+            return next(_ for _ in self.gi.workflows.get_previews(published=True) if _.id == self.id)
         except IndexError:
             raise ValueError(f"no object for id {self.id}")
 
@@ -851,9 +851,6 @@ class Invocation(Wrapper):
         self.__init__(inv_dict, gi=self.gi)  # type: ignore[misc]
 
 
-DatasetSubtype = TypeVar("DatasetSubtype", bound="Dataset")
-
-
 class Dataset(Wrapper, metaclass=abc.ABCMeta):
     """
     Abstract base class for Galaxy datasets.
@@ -937,7 +934,7 @@ class Dataset(Wrapper, metaclass=abc.ABCMeta):
         """
         return b"".join(self.get_stream(chunk_size=chunk_size))
 
-    def refresh(self: DatasetSubtype) -> DatasetSubtype:
+    def refresh(self) -> Self:
         """
         Re-fetch the attributes pertaining to this object.
 
@@ -1043,9 +1040,6 @@ class HistoryDatasetAssociation(Dataset):
         self.refresh()
 
 
-DatasetCollectionSubtype = TypeVar("DatasetCollectionSubtype", bound="DatasetCollection")
-
-
 class DatasetCollection(Wrapper, metaclass=abc.ABCMeta):
     """
     Abstract base class for Galaxy dataset collections.
@@ -1070,7 +1064,7 @@ class DatasetCollection(Wrapper, metaclass=abc.ABCMeta):
         super().__init__(dsc_dict, gi=gi)
         object.__setattr__(self, "container", container)
 
-    def refresh(self: DatasetCollectionSubtype) -> DatasetCollectionSubtype:
+    def refresh(self) -> Self:
         """
         Re-fetch the attributes pertaining to this object.
 
@@ -1196,7 +1190,7 @@ class HistoryContentInfo(ContentInfo):
     visible: bool
 
 
-DatasetContainerSubtype = TypeVar("DatasetContainerSubtype", bound="DatasetContainer")
+DatasetSubtype = TypeVar("DatasetSubtype", bound="Dataset")
 
 
 class DatasetContainer(Wrapper, Generic[DatasetSubtype], metaclass=abc.ABCMeta):
@@ -1246,15 +1240,15 @@ class DatasetContainer(Wrapper, Generic[DatasetSubtype], metaclass=abc.ABCMeta):
         getf = self.obj_gi_client.get_previews
         # self.state could be stale: check both regular and deleted containers
         try:
-            p = [_ for _ in getf() if _.id == self.id][0]
+            p = next(_ for _ in getf() if _.id == self.id)
         except IndexError:
             try:
-                p = [_ for _ in getf(deleted=True) if _.id == self.id][0]
+                p = next(_ for _ in getf(deleted=True) if _.id == self.id)
             except IndexError:
                 raise ValueError(f"no object for id {self.id}")
         return p
 
-    def refresh(self: DatasetContainerSubtype) -> DatasetContainerSubtype:
+    def refresh(self) -> Self:
         """
         Re-fetch the attributes pertaining to this object.
 
@@ -1834,9 +1828,6 @@ class Job(Wrapper):
 
     BASE_ATTRS = Wrapper.BASE_ATTRS + ("state",)
     state: str
-
-
-DatasetContainerPreviewSubtype = TypeVar("DatasetContainerPreviewSubtype", bound="DatasetContainerPreview")
 
 
 @abstractclass

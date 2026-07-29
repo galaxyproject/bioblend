@@ -17,7 +17,7 @@ import sys
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "..")))
 
-from bioblend import get_version  # noqa: E402
+from bioblend import get_version  # noqa: E402,RUF100
 
 # -- General configuration -----------------------------------------------------
 

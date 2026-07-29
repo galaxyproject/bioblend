@@ -18,7 +18,7 @@ class TestToolshed(unittest.TestCase):
         # we cannot test get_categories with deleted=True as it requires administrator status
 
         # show_category
-        visualization_category_id = [c for c in categories if c["name"] == "Visualization"][0]["id"]
+        visualization_category_id = next(c for c in categories if c["name"] == "Visualization")["id"]
         visualization_category = self.ts.categories.show_category(visualization_category_id)
         assert visualization_category["description"] == "Tools for visualizing data"
 

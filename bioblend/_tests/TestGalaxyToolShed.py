@@ -1,4 +1,6 @@
-""" """
+"""
+Tests for the bioblend.galaxy.toolshed module.
+"""
 
 from . import (
     GalaxyTestBase,

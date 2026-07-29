@@ -16,6 +16,7 @@ from typing import (
     Literal,
     overload,
     TYPE_CHECKING,
+    TypeVar,
 )
 
 import bioblend
@@ -93,9 +94,11 @@ class ObjClient(abc.ABC):
             raise RuntimeError(f"{meth_name}: unexpected reply: {reply!r}")
 
 
-class ObjDatasetContainerClient(
-    ObjClient, Generic[wrappers.DatasetContainerSubtype, wrappers.DatasetContainerPreviewSubtype]
-):
+DatasetContainerSubtype = TypeVar("DatasetContainerSubtype", bound="wrappers.DatasetContainer")
+DatasetContainerPreviewSubtype = TypeVar("DatasetContainerPreviewSubtype", bound="wrappers.DatasetContainerPreview")
+
+
+class ObjDatasetContainerClient(ObjClient, Generic[DatasetContainerSubtype, DatasetContainerPreviewSubtype]):
     CONTAINER_TYPE: type[wrappers.DatasetContainer]
     CONTAINER_PREVIEW_TYPE: type[wrappers.DatasetContainerPreview]
 
@@ -109,13 +112,11 @@ class ObjDatasetContainerClient(
 
     def get_previews(
         self, name: str | None = None, deleted: bool = False, **kwargs: Any
-    ) -> list[wrappers.DatasetContainerPreviewSubtype]:
+    ) -> list[DatasetContainerPreviewSubtype]:
         dicts = self._get_f(name=name, deleted=deleted, **kwargs)
-        return [
-            cast(wrappers.DatasetContainerPreviewSubtype, self.CONTAINER_PREVIEW_TYPE(_, gi=self.obj_gi)) for _ in dicts
-        ]
+        return [cast(DatasetContainerPreviewSubtype, self.CONTAINER_PREVIEW_TYPE(_, gi=self.obj_gi)) for _ in dicts]
 
-    def get(self, id_: str) -> wrappers.DatasetContainerSubtype:
+    def get(self, id_: str) -> DatasetContainerSubtype:
         """
         Retrieve the dataset container corresponding to the given id.
         """
@@ -124,7 +125,7 @@ class ObjDatasetContainerClient(
         if not isinstance(c_infos, Sequence):
             raise RuntimeError(f"{self._show_f.__name__}: unexpected reply: {c_infos!r}")
         c_infos = [self.CONTAINER_TYPE.CONTENT_INFO_TYPE(_) for _ in c_infos]
-        return cast(wrappers.DatasetContainerSubtype, self.CONTAINER_TYPE(cdict, content_infos=c_infos, gi=self.obj_gi))
+        return cast(DatasetContainerSubtype, self.CONTAINER_TYPE(cdict, content_infos=c_infos, gi=self.obj_gi))
 
 
 class ObjLibraryClient(ObjDatasetContainerClient[wrappers.Library, wrappers.LibraryPreview]):

@@ -372,7 +372,7 @@ class ToolClient(Client):
         if history_id:
             params["history_id"] = history_id
 
-        url = "/".join((self.gi.url, "tools", tool_id, "build"))
+        url = f"{self.gi.url}/tools/{tool_id}/build"
 
         return self._post(payload=params, url=url)
 
@@ -610,7 +610,7 @@ class ToolClient(Client):
         See :meth:`upload_file` for additional parameters.
         """
         payload = self._fetch_payload(path, history_id, session_id, **kwargs)
-        url = "/".join((self.gi.url, "tools/fetch"))
+        url = f"{self.gi.url}/tools/fetch"
         return self._post(payload, url=url)
 
     def upload_from_ftp(self, path: str, history_id: str, **kwargs: Any) -> dict[str, Any]:
