@@ -1,3 +1,17 @@
+## BioBlend v1.10.0 - unreleased
+
+* Added ``UnprivilegedToolsClient`` with ``create_user_tool()``,
+  ``get_user_tools()``, ``show_user_tool()``, and ``delete_user_tool()``
+  methods for managing user-defined tools via the
+  ``/api/unprivileged_tools`` endpoints (thanks to
+  [Dannon Baker](https://github.com/dannon)).
+
+* Added ``tool_uuid`` and ``tool_version`` parameters to
+  ``ToolClient.run_tool()`` so unprivileged user tools can be run by UUID.
+  ``tool_id`` is now optional; exactly one of ``tool_id`` or ``tool_uuid``
+  must be provided (thanks to
+  [Dannon Baker](https://github.com/dannon)).
+
 ## BioBlend v1.9.0 - 2026-04-14
 
 * Added ``create_credentials()``, ``get_credentials()``,

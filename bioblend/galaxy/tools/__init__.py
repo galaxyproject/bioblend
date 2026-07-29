@@ -379,21 +379,32 @@ class ToolClient(Client):
     def run_tool(
         self,
         history_id: str,
-        tool_id: str,
-        tool_inputs: InputsBuilder | dict,
+        tool_id: str | None = None,
+        tool_inputs: InputsBuilder | dict | None = None,
         input_format: Literal["21.01", "legacy"] = "legacy",
         data_manager_mode: Literal["populate", "dry_run", "bundle"] | None = None,
         credentials_context: list[dict[str, Any]] | None = None,
+        tool_uuid: str | None = None,
+        tool_version: str | None = None,
     ) -> dict[str, Any]:
         """
-        Runs tool specified by ``tool_id`` in history indicated
-        by ``history_id`` with inputs from ``dict`` ``tool_inputs``.
+        Runs the tool specified by ``tool_id`` (or ``tool_uuid`` for an
+        unprivileged user tool) in the history indicated by ``history_id``
+        with inputs from ``dict`` ``tool_inputs``.
 
         :type history_id: str
         :param history_id: encoded ID of the history in which to run the tool
 
         :type tool_id: str
-        :param tool_id: ID of the tool to be run
+        :param tool_id: ID of the tool to be run. Mutually exclusive with
+          ``tool_uuid``; one of the two must be provided.
+
+        :type tool_uuid: str
+        :param tool_uuid: UUID of an unprivileged user tool to run. Mutually
+          exclusive with ``tool_id``.
+
+        :type tool_version: str
+        :param tool_version: Optional tool version to pin the run to.
 
         :type data_manager_mode: str
         :param data_manager_mode: Possible values are 'populate', 'dry_run' and 'bundle'.
@@ -474,11 +485,21 @@ class ToolClient(Client):
         You can also check the examples in `Galaxy's API test suite
         <https://github.com/galaxyproject/galaxy/blob/dev/lib/galaxy_test/api/test_tools.py>`_.
         """
+        if (tool_id is None) == (tool_uuid is None):
+            raise ValueError("Exactly one of tool_id or tool_uuid must be provided.")
+        if tool_inputs is None:
+            raise ValueError("tool_inputs is required.")
+
         payload: dict[str, Any] = {
             "history_id": history_id,
-            "tool_id": tool_id,
             "input_format": input_format,
         }
+        if tool_id is not None:
+            payload["tool_id"] = tool_id
+        if tool_uuid is not None:
+            payload["tool_uuid"] = tool_uuid
+        if tool_version is not None:
+            payload["tool_version"] = tool_version
 
         if isinstance(tool_inputs, InputsBuilder):
             payload["inputs"] = tool_inputs.to_dict()
