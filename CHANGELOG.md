@@ -1,5 +1,7 @@
 ## BioBlend v1.10.0 - unreleased
 
+* Added support for Galaxy release 26.1.
+
 * Added ``UnprivilegedToolsClient`` with ``create_user_tool()``,
   ``get_user_tools()``, ``show_user_tool()``, and ``delete_user_tool()``
   methods for managing user-defined tools via the
