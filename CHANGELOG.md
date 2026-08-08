@@ -14,6 +14,28 @@
   must be provided (thanks to
   [Dannon Baker](https://github.com/dannon)).
 
+* Requests rejected with HTTP status 429 (Too Many Requests) are now retried
+  automatically, honouring the ``Retry-After`` header. All HTTP methods are
+  retried, since a 429 response means that the request was rejected before being
+  processed. Multipart uploads are not retried, because their body cannot be
+  replayed.
+
+* Added ``max_total_retry_delay``, ``max_retry_after`` and ``max_429_retries``
+  properties to ``GalaxyClient``, bounding the above. Retrying stops after a
+  total of 60 s of waiting by default; set ``max_total_retry_delay`` to 0 to
+  disable it.
+
+* Added ``use_session`` property, ``close()`` method and context manager support
+  to ``GalaxyClient``, to reuse connections across requests. Disabled by
+  default.
+
+* ``Client._get()`` does not retry requests rejected with HTTP status 429 any
+  more, as they have already been retried. This only affects users who set
+  ``max_get_attempts`` to a value greater than 1.
+
+* Added dependency on ``urllib3`` >= 2.0, previously an indirect one through
+  ``requests``.
+
 ## BioBlend v1.9.0 - 2026-04-14
 
 * Added ``create_credentials()``, ``get_credentials()``,

@@ -38,6 +38,59 @@ The developed scripts do not need to reside in any particular location on the sy
 It is probably best to take a look at the example scripts in ``docs/examples`` source
 directory and browse the `API documentation`_. Beyond that, it's up to your creativity :).
 
+Rate limiting
+=============
+
+Public Galaxy servers usually limit how many API requests a user may make in a
+given period of time, and reject the requests made over that limit with HTTP
+status 429 (Too Many Requests).
+
+BioBlend retries such requests automatically, so scripts do not need to handle
+them. When the server indicates through the ``Retry-After`` header how long to
+wait, that delay is honoured. Otherwise BioBlend waits for a progressively
+longer time between attempts. Every method is retried, including ``POST`` ones:
+a 429 response means that the request was rejected before being processed, so
+replaying it cannot duplicate anything on the server.
+
+Retrying is bounded, so that a rate-limited call fails in a predictable amount
+of time instead of blocking for as long as the server asks for. Once the total
+time spent waiting reaches ``max_total_retry_delay`` (60 seconds by default), a
+``bioblend.ConnectionError`` with a ``status_code`` of 429 is raised, just as if
+no retrying had taken place. The bounds can be changed on the Galaxy (or
+ToolShed) instance object::
+
+    from bioblend.galaxy import GalaxyInstance
+
+    gi = GalaxyInstance(url="https://usegalaxy.org", key="your_api_key")
+    # Give up after a total of 5 minutes of waiting.
+    gi.max_total_retry_delay = 300.0
+    # Never wait more than 1 minute before a single retry.
+    gi.max_retry_after = 60.0
+
+Setting ``max_total_retry_delay`` to 0 disables retrying altogether.
+
+Two kinds of requests are deliberately not retried: uploads sending a file as
+multipart form data, because their body is a stream which cannot be replayed,
+and requests which fail with a connection or read error, since those may have
+reached the server.
+
+Reusing connections
+===================
+
+By default, each request opens a new connection. Scripts making many requests
+can reuse a single session instead, which avoids re-establishing a connection
+every time. In the following example, one connection is used for the initial
+request and for the one made for each history returned by it::
+
+    with GalaxyInstance(url="https://usegalaxy.org", key="your_api_key") as gi:
+        for history in gi.histories.get_histories():
+            datasets = gi.histories.show_history(history["id"], contents=True)
+            print(history["name"], len(datasets))
+
+Equivalently, ``gi.use_session = True`` enables it and ``gi.close()`` releases
+the connections. An instance with a session enabled should not be shared between
+threads.
+
 Development
 ===========
 
