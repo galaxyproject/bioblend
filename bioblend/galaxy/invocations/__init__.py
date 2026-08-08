@@ -309,6 +309,50 @@ class InvocationClient(Client):
         url = self._make_url(invocation_id)
         return self._delete(url=url)
 
+    def import_invocation(
+        self,
+        history_id: str,
+        model_store_format: str,
+        file_path: Optional[str] = None,
+        url: Optional[str] = None,
+        upload_url: str = "/invocations/resumable_upload",
+        chunk_size: int = CHUNK_SIZE,
+    ) -> Any:
+        """
+        Import a invocation from an archive on disk or a URL.
+
+        :type history_id
+        :param history_id: id of the history where the invocation will be imported
+
+        :type model_store_format
+        :param model_store_format: archive type that will be imported
+
+        :type file_path: str
+        :param file_path: Path to exported history archive on disk.
+
+        :type url: str
+        :param url: URL for an exported history archive
+
+        :type chunk_size: int
+        :param chunk_size: Number of bytes to send in each chunk
+
+        :rtype: dict or list of dicts
+        :return: if the import is successful, a list of dictionaries will be returned; otherwise, a single dictionary will be returned.
+        """
+        payload: dict[str, Any] = {
+            "history_id": history_id,
+            "model_store_format": model_store_format,
+        }
+        if file_path:
+            uploader = self.gi.get_tus_uploader(path=file_path, url=upload_url, chunk_size=chunk_size)
+            uploader.upload()
+            assert uploader.session_id
+            payload["store_content_uri"] = f"tus://{uploader.session_id}"
+        else:
+            payload["store_content_uri"] = url
+        url = "/".join((self._make_url(), "from_store"))
+        return self._post(url=url, payload=payload)
+
     def show_invocation_step(self, invocation_id: str, step_id: str) -> dict[str, Any]:
         """
         See the details of a particular workflow invocation step.
