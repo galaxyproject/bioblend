@@ -87,9 +87,9 @@ request and for the one made for each history returned by it::
             datasets = gi.histories.show_history(history["id"], contents=True)
             print(history["name"], len(datasets))
 
-Equivalently, ``gi.use_session = True`` enables it and ``gi.close()`` releases
-the connections. An instance with a session enabled should not be shared between
-threads.
+Equivalently, set ``gi.use_session = True`` to enable it and
+``gi.use_session = False`` to close the session and stop reusing connections.
+An instance with a session enabled should not be shared between threads.
 
 Development
 ===========

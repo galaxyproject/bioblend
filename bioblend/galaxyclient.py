@@ -11,7 +11,7 @@ import contextlib
 import json
 import logging
 import time
-from collections.abc import Iterator
+from collections.abc import Generator
 from types import TracebackType
 from typing import (
     Any,
@@ -27,6 +27,7 @@ from tusclient.uploader.uploader import Uploader
 from typing_extensions import Self
 from urllib3 import BaseHTTPResponse
 from urllib3.connectionpool import ConnectionPool
+from urllib3.exceptions import InvalidHeader
 from urllib3.util.retry import Retry
 
 from bioblend import ConnectionError
@@ -86,7 +87,13 @@ class _RateLimitRetry(Retry):
         return super().new(**kwargs)
 
     def get_retry_after(self, response: BaseHTTPResponse) -> float | None:
-        retry_after = super().get_retry_after(response)
+        try:
+            retry_after = super().get_retry_after(response)
+        except InvalidHeader:
+            # Fall back to exponential backoff rather than letting urllib3's
+            # exception escape instead of the usual ConnectionError.
+            log.warning("Ignoring invalid Retry-After header: %r", response.headers.get("Retry-After"))
+            return None
         if retry_after is None:
             return None
         return min(retry_after, self.max_retry_after)
@@ -150,7 +157,9 @@ class GalaxyClient:
         self._max_429_retries = DEFAULT_MAX_429_RETRIES
         self._max_retry_after = DEFAULT_MAX_RETRY_AFTER
         self._max_total_retry_delay = DEFAULT_MAX_TOTAL_RETRY_DELAY
-        # Persistent session, only used when `use_session` is enabled.
+        self._use_session = False
+        # Persistent session, created on the first request made while
+        # `use_session` is enabled.
         self._session: requests.Session | None = None
         # Make sure the URL scheme is defined (otherwise requests will not work)
         if not url.lower().startswith("http"):
@@ -236,7 +245,7 @@ class GalaxyClient:
         return session
 
     @contextlib.contextmanager
-    def _session_ctx(self, retry: bool = True) -> Iterator[requests.Session]:
+    def _session_ctx(self, retry: bool = True) -> Generator[requests.Session]:
         """
         Yield the session to use for a single request.
 
@@ -252,7 +261,9 @@ class GalaxyClient:
         if not retry:
             with requests.Session() as session:
                 yield session
-        elif self._session is not None:
+        elif self._use_session:
+            if self._session is None:
+                self._session = self._new_session()
             yield self._session
         else:
             session = self._new_session()
@@ -261,14 +272,6 @@ class GalaxyClient:
             finally:
                 session.close()
 
-    def _reset_session(self) -> None:
-        """
-        Rebuild the persistent session, if any, e.g. after a settings change.
-        """
-        if self._session is not None:
-            self._session.close()
-            self._session = self._new_session()
-
     @property
     def use_session(self) -> bool:
         """
@@ -276,21 +279,23 @@ class GalaxyClient:
 
         Enabling this reuses connections across requests, which is faster when
         making many of them. The resulting object should not be shared between
-        threads, and ``close()`` should be called when done with it.
+        threads, and this should be set back to ``False`` when done with it,
+        which closes the session.
         """
-        return self._session is not None
+        return self._use_session
 
     @use_session.setter
     def use_session(self, value: bool) -> None:
-        if value:
-            if self._session is None:
-                self._session = self._new_session()
-        else:
+        self._use_session = value
+        if not value:
             self.close()
 
     def close(self) -> None:
         """
         Close the persistent session, if any, releasing its connections.
+
+        If ``use_session`` is still enabled, a new session is opened by the
+        next request.
         """
         if self._session is not None:
             self._session.close()
@@ -301,7 +306,7 @@ class GalaxyClient:
         return self
 
     def __exit__(self, *args: object) -> None:
-        self.close()
+        self.use_session = False
 
     @property
     def max_429_retries(self) -> int:
@@ -319,7 +324,8 @@ class GalaxyClient:
         if value < 0:
             raise ValueError(f"Number of retries must be >= 0 (got: {value})")
         self._max_429_retries = value
-        self._reset_session()
+        # The settings are applied when the session is created.
+        self.close()
 
     @property
     def max_total_retry_delay(self) -> float:
@@ -338,7 +344,8 @@ class GalaxyClient:
         if value < 0:
             raise ValueError(f"Retry delay budget must be >= 0 (got: {value})")
         self._max_total_retry_delay = value
-        self._reset_session()
+        # The settings are applied when the session is created.
+        self.close()
 
     @property
     def max_retry_after(self) -> float:
@@ -356,7 +363,8 @@ class GalaxyClient:
         if value < 0:
             raise ValueError(f"Retry delay must be >= 0 (got: {value})")
         self._max_retry_after = value
-        self._reset_session()
+        # The settings are applied when the session is created.
+        self.close()
 
     @property
     def max_get_attempts(self) -> int:

@@ -30,14 +30,24 @@ class MockServer:
     The last status code of the sequence is repeated for any further request.
     """
 
-    def __init__(self, statuses: list[int], retry_after: int | None = None) -> None:
+    def __init__(self, statuses: list[int], retry_after: int | str | None = None) -> None:
         self.statuses = statuses
         self.retry_after = retry_after
         self.requests: list[tuple[str, str]] = []
+        self.connection_count = 0
         lock = threading.Lock()
         server = self
 
         class Handler(BaseHTTPRequestHandler):
+            # Keep connections open, so that their reuse can be tested.
+            protocol_version = "HTTP/1.1"
+
+            def setup(self) -> None:
+                # Called once per connection, however many requests it serves.
+                super().setup()
+                with lock:
+                    server.connection_count += 1
+
             def _reply(self) -> None:
                 # The request body must be consumed, otherwise the client may
                 # block while writing it.
@@ -203,6 +213,12 @@ class TestGalaxyRateLimit(unittest.TestCase):
             assert libraries == {"ok": True}
             assert server.request_count == 3
 
+    def test_invalid_retry_after_falls_back_to_backoff(self):
+        with MockServer([429, 200], retry_after="soon") as server:
+            gi = galaxy_instance(server)
+            assert gi.make_get_request(f"{gi.url}/libraries").status_code == 200
+            assert server.request_count == 2
+
     def test_streamed_response_is_readable(self):
         with MockServer([429, 200], retry_after=1) as server:
             gi = galaxy_instance(server)
@@ -228,9 +244,34 @@ class TestGalaxySession(unittest.TestCase):
     def test_requests_keep_working_after_closing_the_session(self):
         with MockServer([200]) as server:
             gi = galaxy_instance(server, use_session=True)
-            gi.close()
-            assert gi.use_session is False
             assert gi.make_get_request(f"{gi.url}/libraries").status_code == 200
+            gi.close()
+            assert gi.use_session is True
+            assert gi.make_get_request(f"{gi.url}/libraries").status_code == 200
+            assert server.connection_count == 2
+
+    def test_requests_keep_working_after_disabling_the_session(self):
+        with MockServer([200]) as server:
+            gi = galaxy_instance(server, use_session=True)
+            assert gi.make_get_request(f"{gi.url}/libraries").status_code == 200
+            gi.use_session = False
+            assert gi.use_session is False
+            # Disabling the session also closes it.
+            assert gi._session is None
+            assert gi.make_get_request(f"{gi.url}/libraries").status_code == 200
+            assert server.connection_count == 2
+
+    def test_connections_are_reused_only_with_session(self):
+        with MockServer([200]) as server:
+            gi = galaxy_instance(server)
+            for _ in range(3):
+                assert gi.make_get_request(f"{gi.url}/libraries").status_code == 200
+            assert server.connection_count == 3
+        with MockServer([200]) as server:
+            gi = galaxy_instance(server, use_session=True)
+            for _ in range(3):
+                assert gi.make_get_request(f"{gi.url}/libraries").status_code == 200
+            assert server.connection_count == 1
 
     def test_context_manager_enables_and_closes_the_session(self):
         with MockServer([200]) as server:
