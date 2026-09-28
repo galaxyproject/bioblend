@@ -109,6 +109,5 @@ class GalaxyInstance:
             return pending
 
         self.log.info("Waiting for datasets")
-        while datasets:
-            datasets = poll(datasets)
+        while datasets := poll(datasets):
             time.sleep(polling_interval)
