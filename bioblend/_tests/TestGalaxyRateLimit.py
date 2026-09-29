@@ -206,12 +206,29 @@ class TestGalaxyRateLimit(unittest.TestCase):
             assert server.request_count == 1
             assert duration < 5, f"Took {duration} s, the GET retry loop was not skipped"
 
+    def test_get_client_retries_429_when_session_retrying_is_disabled(self):
+        with MockServer([429, 200]) as server:
+            gi = galaxy_instance(server, max_total_retry_delay=0, max_get_attempts=2, get_retry_delay=0)
+            libraries: Any = gi.libraries.get_libraries()
+            assert libraries == {"ok": True}
+            assert server.request_count == 2
+
     def test_get_client_still_retries_other_errors(self):
         with MockServer([500, 500, 200]) as server:
             gi = galaxy_instance(server, max_get_attempts=3, get_retry_delay=0)
             libraries: Any = gi.libraries.get_libraries()
             assert libraries == {"ok": True}
             assert server.request_count == 3
+
+    def test_first_retry_without_retry_after_waits(self):
+        # urllib3 alone would retry immediately the first time.
+        with MockServer([429, 200]) as server:
+            gi = galaxy_instance(server, max_retry_after=0.5)
+            start = time.monotonic()
+            assert gi.make_get_request(f"{gi.url}/libraries").status_code == 200
+            duration = time.monotonic() - start
+            assert server.request_count == 2
+            assert duration >= 0.5, f"First retry waited only {duration} s"
 
     def test_invalid_retry_after_falls_back_to_backoff(self):
         with MockServer([429, 200], retry_after="soon") as server:

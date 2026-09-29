@@ -155,11 +155,12 @@ class Client:
                             msg = f"GET: invalid JSON : {r.content!r}"
                 else:
                     msg = f"GET: error {r.status_code}: {r.content!r}"
-                    if r.status_code == 429:
+                    if r.status_code == 429 and self.gi.max_total_retry_delay > 0:
                         # Rate-limited requests are already retried while
                         # honouring the Retry-After header, see gi's
                         # `max_total_retry_delay` property. Trying again here
-                        # would only add load to an overloaded server.
+                        # would only add load to an overloaded server. When
+                        # that retrying is disabled, fall back to this loop.
                         attempts_left = 0
             msg = f"{msg}, {attempts_left} attempts left"
             if attempts_left <= 0:

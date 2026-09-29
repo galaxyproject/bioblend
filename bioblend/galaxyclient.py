@@ -10,6 +10,7 @@ import base64
 import contextlib
 import json
 import logging
+import random
 import time
 from collections.abc import Generator
 from types import TracebackType
@@ -97,6 +98,14 @@ class _RateLimitRetry(Retry):
         if retry_after is None:
             return None
         return min(retry_after, self.max_retry_after)
+
+    def get_backoff_time(self) -> float:
+        backoff = super().get_backoff_time()
+        if backoff == 0 and self.history:
+            # urllib3 does not wait at all before the first retry, which for a
+            # rate-limited request would most likely be rejected again.
+            backoff = min(self.backoff_max, self.backoff_factor + random.random() * self.backoff_jitter)
+        return backoff
 
     def sleep(self, response: BaseHTTPResponse | None = None) -> None:
         start = time.monotonic()
