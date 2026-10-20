@@ -39,6 +39,7 @@ if TYPE_CHECKING:
     from .galaxy_instance import GalaxyInstance
 
 __all__ = (
+    "BoundWrapper",
     "Dataset",
     "DatasetCollection",
     "DatasetContainer",
@@ -78,11 +79,11 @@ class Wrapper:
     """
 
     BASE_ATTRS: tuple[str, ...] = ("id",)
-    gi: Optional["GalaxyInstance"]
     id: str
     is_modified: bool
     wrapped: dict
     _cached_parent: Optional["Wrapper"]
+    _gi: Optional["GalaxyInstance"]
 
     def __init__(
         self, wrapped: dict[str, Any], parent: Optional["Wrapper"] = None, gi: Optional["GalaxyInstance"] = None
@@ -109,7 +110,14 @@ class Wrapper:
             object.__setattr__(self, k, self.wrapped.get(k))
         object.__setattr__(self, "_cached_parent", parent)
         object.__setattr__(self, "is_modified", False)
-        object.__setattr__(self, "gi", gi)
+        object.__setattr__(self, "_gi", gi)
+
+    @property
+    def gi(self) -> Optional["GalaxyInstance"]:
+        """
+        The GalaxyInstance through which we can access this wrapper.
+        """
+        return self._gi
 
     @property
     def parent(self) -> Optional["Wrapper"]:
@@ -170,6 +178,22 @@ class Wrapper:
         return f"{self.__class__.__name__}({self.wrapped!r})"
 
 
+@abstractclass
+class BoundWrapper(Wrapper):
+    """
+    Abstract base class for wrappers which are always bound to a
+    GalaxyInstance.
+    """
+
+    @property
+    def gi(self) -> "GalaxyInstance":
+        """
+        The GalaxyInstance through which we can access this wrapper.
+        """
+        assert self._gi is not None
+        return self._gi
+
+
 class Step(Wrapper):
     """
     Workflow step.
@@ -210,7 +234,7 @@ class Step(Wrapper):
         return self._cached_parent
 
 
-class InvocationStep(Wrapper):
+class InvocationStep(BoundWrapper):
     """
     Invocation step.
     """
@@ -226,7 +250,6 @@ class InvocationStep(Wrapper):
         "workflow_step_uuid",
     )
     action: object | None
-    gi: "GalaxyInstance"
     job_id: str
     order_index: int
     state: str
@@ -659,7 +682,7 @@ class Workflow(Wrapper):
         return self.gi.invocations.get(inv_dict["id"])
 
 
-class Invocation(Wrapper):
+class Invocation(BoundWrapper):
     """
     Invocation of a workflow.
     This causes the steps of a workflow to be executed in sequential order.
@@ -672,7 +695,6 @@ class Invocation(Wrapper):
         "uuid",
         "workflow_id",
     )
-    gi: "GalaxyInstance"
     history_id: str
     state: str
     steps: list[InvocationStep]
@@ -856,7 +878,7 @@ class Invocation(Wrapper):
         self.__init__(inv_dict, gi=self.gi)  # type: ignore[misc]
 
 
-class Dataset(Wrapper, metaclass=abc.ABCMeta):
+class Dataset(BoundWrapper, metaclass=abc.ABCMeta):
     """
     Abstract base class for Galaxy datasets.
     """
@@ -873,7 +895,6 @@ class Dataset(Wrapper, metaclass=abc.ABCMeta):
     )
     container: "DatasetContainer"
     genome_build: str
-    gi: "GalaxyInstance"
     misc_info: str
     name: str
     POLLING_INTERVAL = 1  # for state monitoring
@@ -1045,7 +1066,7 @@ class HistoryDatasetAssociation(Dataset):
         self.refresh()
 
 
-class DatasetCollection(Wrapper, metaclass=abc.ABCMeta):
+class DatasetCollection(BoundWrapper, metaclass=abc.ABCMeta):
     """
     Abstract base class for Galaxy dataset collections.
     """
@@ -1060,7 +1081,6 @@ class DatasetCollection(Wrapper, metaclass=abc.ABCMeta):
     API_MODULE = "dataset_collections"
     collection_type: str
     deleted: bool
-    gi: "GalaxyInstance"
     name: str
 
     def __init__(
@@ -1198,7 +1218,7 @@ class HistoryContentInfo(ContentInfo):
 DatasetSubtype = TypeVar("DatasetSubtype", bound="Dataset")
 
 
-class DatasetContainer(Wrapper, Generic[DatasetSubtype], metaclass=abc.ABCMeta):
+class DatasetContainer(BoundWrapper, Generic[DatasetSubtype], metaclass=abc.ABCMeta):
     """
     Abstract base class for dataset containers (histories and libraries).
     """
@@ -1212,7 +1232,6 @@ class DatasetContainer(Wrapper, Generic[DatasetSubtype], metaclass=abc.ABCMeta):
     DS_TYPE: ClassVar[Callable]
     content_infos: list[ContentInfo]
     deleted: bool
-    gi: "GalaxyInstance"
     name: str
     obj_gi_client: "client.ObjDatasetContainerClient"
 
@@ -1708,7 +1727,7 @@ class Library(DatasetContainer[LibraryDataset]):
         return self.get_folder(self.gi.gi.libraries._get_root_folder_id(self.id))
 
 
-class Folder(Wrapper):
+class Folder(BoundWrapper):
     """
     Maps to a folder in a Galaxy library.
     """
@@ -1722,7 +1741,6 @@ class Folder(Wrapper):
     container: Library
     deleted: bool
     description: str
-    gi: "GalaxyInstance"
     name: str
 
     def __init__(self, f_dict: dict[str, Any], container: Library, gi: "GalaxyInstance") -> None:
@@ -1756,7 +1774,7 @@ class Folder(Wrapper):
         return self
 
 
-class Tool(Wrapper):
+class Tool(BoundWrapper):
     """
     Maps to a Galaxy tool.
     """
@@ -1765,7 +1783,6 @@ class Tool(Wrapper):
         "name",
         "version",
     )
-    gi: "GalaxyInstance"
     name: str
     POLLING_INTERVAL = 10  # for output state monitoring
 
@@ -1819,7 +1836,7 @@ class Tool(Wrapper):
         return outputs
 
 
-class Job(Wrapper):
+class Job(BoundWrapper):
     """
     Maps to a Galaxy job.
     """
@@ -1829,7 +1846,7 @@ class Job(Wrapper):
 
 
 @abstractclass
-class DatasetContainerPreview(Wrapper):
+class DatasetContainerPreview(BoundWrapper):
     """
     Abstract base class for dataset container (history and library) 'previews'.
     """
@@ -1871,7 +1888,7 @@ class HistoryPreview(DatasetContainerPreview):
     tags: list[str]
 
 
-class WorkflowPreview(Wrapper):
+class WorkflowPreview(BoundWrapper):
     """
     Models Galaxy workflow 'previews'.
 
@@ -1897,7 +1914,7 @@ class WorkflowPreview(Wrapper):
     tags: list[str]
 
 
-class InvocationPreview(Wrapper):
+class InvocationPreview(BoundWrapper):
     """
     Models Galaxy invocation 'previews'.
 
@@ -1919,7 +1936,7 @@ class InvocationPreview(Wrapper):
     workflow_id: str
 
 
-class JobPreview(Wrapper):
+class JobPreview(BoundWrapper):
     """
     Models Galaxy job 'previews'.
 
