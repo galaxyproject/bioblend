@@ -33,8 +33,7 @@ TERMINAL_STATES = {"ok", "empty", "error", "discarded", "failed_metadata"}
 # Non-terminal states are: 'new', 'upload', 'queued', 'running', 'paused', 'setting_metadata'
 
 
-class DatasetClient(Client):
-    gi: "GalaxyInstance"
+class DatasetClient(Client["GalaxyInstance"]):
     module = "datasets"
 
     def __init__(self, galaxy_instance: "GalaxyInstance") -> None:

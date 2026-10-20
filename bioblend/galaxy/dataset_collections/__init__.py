@@ -101,8 +101,7 @@ class LibraryDatasetElement(SimpleElement):
         )
 
 
-class DatasetCollectionClient(Client):
-    gi: "GalaxyInstance"
+class DatasetCollectionClient(Client["GalaxyInstance"]):
     module = "dataset_collections"
 
     def __init__(self, galaxy_instance: "GalaxyInstance") -> None:

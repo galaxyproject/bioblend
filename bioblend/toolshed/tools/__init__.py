@@ -13,8 +13,7 @@ if TYPE_CHECKING:
     from bioblend.toolshed import ToolShedInstance
 
 
-class ToolShedToolClient(Client):
-    gi: "ToolShedInstance"
+class ToolShedToolClient(Client["ToolShedInstance"]):
     module = "tools"
 
     def __init__(self, toolshed_instance: "ToolShedInstance") -> None:

@@ -29,8 +29,7 @@ INVOCATION_TERMINAL_STATES = INVOCATION_SUCCESS_STATES | {"cancelled", "failed"}
 # Invocation non-terminal states are: "cancelling", "new", "ready"
 
 
-class InvocationClient(Client):
-    gi: "GalaxyInstance"
+class InvocationClient(Client["GalaxyInstance"]):
     module = "invocations"
 
     def __init__(self, galaxy_instance: "GalaxyInstance") -> None:

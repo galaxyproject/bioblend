@@ -8,12 +8,14 @@ should not use it directly.
 import time
 from typing import (
     Any,
+    Generic,
     Literal,
     overload,
     TYPE_CHECKING,
 )
 
 import requests
+from typing_extensions import TypeVar
 
 import bioblend
 
@@ -24,11 +26,13 @@ from bioblend import ConnectionError
 if TYPE_CHECKING:
     from bioblend.galaxyclient import GalaxyClient
 
+GalaxyClientT = TypeVar("GalaxyClientT", bound="GalaxyClient", default="GalaxyClient")
 
-class Client:
+
+class Client(Generic[GalaxyClientT]):
     # The `module` attribute needs to be defined in subclasses
     module: str
-    gi: "GalaxyClient"
+    gi: GalaxyClientT
 
     @classmethod
     def max_get_retries(cls) -> None:
@@ -46,7 +50,7 @@ class Client:
     def set_get_retry_delay(cls, value: float) -> None:
         raise AttributeError("Deprecated method, please use gi's `get_retry_delay` property")
 
-    def __init__(self, galaxy_instance: "GalaxyClient") -> None:
+    def __init__(self, galaxy_instance: GalaxyClientT) -> None:
         """
         A generic Client interface defining the common fields.
 

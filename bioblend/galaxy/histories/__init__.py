@@ -33,8 +33,7 @@ if typing.TYPE_CHECKING:
 log = logging.getLogger(__name__)
 
 
-class HistoryClient(Client):
-    gi: "GalaxyInstance"
+class HistoryClient(Client["GalaxyInstance"]):
     module = "histories"
 
     def __init__(self, galaxy_instance: "GalaxyInstance") -> None:

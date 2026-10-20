@@ -37,7 +37,7 @@ dependencies = [
     "requests>=2.20.0",
     "requests-toolbelt>=0.5.1,!=0.9.0",
     "tuspy",
-    "typing-extensions",
+    "typing-extensions>=4.4.0",
     # Required for the `backoff_max` and `backoff_jitter` retry settings
     "urllib3>=2.0",
 ]

@@ -18,8 +18,7 @@ if TYPE_CHECKING:
     from bioblend.galaxy import GalaxyInstance
 
 
-class ToolClient(Client):
-    gi: "GalaxyInstance"
+class ToolClient(Client["GalaxyInstance"]):
     module = "tools"
 
     def __init__(self, galaxy_instance: "GalaxyInstance") -> None:
