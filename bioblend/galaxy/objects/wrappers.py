@@ -5,6 +5,7 @@ A basic object-oriented interface for Galaxy entities.
 """
 
 import abc
+import functools
 import json
 from collections.abc import (
     Callable,
@@ -194,7 +195,7 @@ class Step(Wrapper):
     tool_inputs: dict
     tool_version: str | None
 
-    def __init__(self, step_dict: dict[str, Any], parent: Wrapper) -> None:
+    def __init__(self, step_dict: dict[str, Any], parent: "Workflow") -> None:
         super().__init__(step_dict, parent=parent, gi=parent.gi)
         try:
             stype = step_dict["type"]
@@ -202,6 +203,11 @@ class Step(Wrapper):
             raise ValueError("not a step dict")
         if stype not in {"data_collection_input", "data_input", "parameter_input", "pause", "subworkflow", "tool"}:
             raise ValueError(f"Unknown step type: {stype!r}")
+
+    @property
+    def parent(self) -> "Workflow":
+        assert isinstance(self._cached_parent, Workflow)
+        return self._cached_parent
 
 
 class InvocationStep(Wrapper):
@@ -229,14 +235,13 @@ class InvocationStep(Wrapper):
     workflow_step_label: str
     workflow_step_uuid: str
 
-    @property
-    def parent(self) -> Wrapper:
-        ret = super().parent
-        assert ret is not None
-        return ret
-
-    def __init__(self, wrapped: dict[str, Any], parent: Wrapper, gi: "GalaxyInstance") -> None:
+    def __init__(self, wrapped: dict[str, Any], parent: "Invocation", gi: "GalaxyInstance") -> None:
         super().__init__(wrapped, parent, gi)
+
+    @property
+    def parent(self) -> "Invocation":
+        assert isinstance(self._cached_parent, Invocation)
+        return self._cached_parent
 
     def refresh(self) -> "InvocationStep":
         """
@@ -1719,13 +1724,12 @@ class Folder(Wrapper):
     description: str
     gi: "GalaxyInstance"
     name: str
-    _cached_parent: Optional["Folder"]
 
     def __init__(self, f_dict: dict[str, Any], container: Library, gi: "GalaxyInstance") -> None:
         super().__init__(f_dict, gi=gi)
         object.__setattr__(self, "container", container)
 
-    @property
+    @functools.cached_property
     def parent(self) -> Optional["Folder"]:
         """
         The parent folder of this folder. The parent of the root folder is
@@ -1733,14 +1737,6 @@ class Folder(Wrapper):
 
         :rtype: :class:`~.Folder`
         :return: the parent of this folder
-        """
-        if self._cached_parent is None:
-            object.__setattr__(self, "_cached_parent", self._get_parent())
-        return self._cached_parent
-
-    def _get_parent(self) -> Optional["Folder"]:
-        """
-        Return the parent folder of this folder.
         """
         parent_id = self.wrapped["parent_id"]
         if parent_id is None:
@@ -1755,6 +1751,8 @@ class Folder(Wrapper):
         """
         f_dict = self.gi.gi.libraries.show_folder(self.container.id, self.id)
         self.__init__(f_dict, self.container, gi=self.gi)  # type: ignore[misc]
+        # Invalidate the cached parent, the folder may have been moved
+        self.__dict__.pop("parent", None)
         return self
 
 
