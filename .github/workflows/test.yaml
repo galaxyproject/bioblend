@@ -110,7 +110,7 @@ jobs:
             galaxy_version: release_20.05
             galaxy_python_version: '3.8'
           - os: ubuntu-latest
-            tox_env: py314
+            tox_env: py315
             galaxy_version: dev
             galaxy_python_version: '3.10'
           # Cannot test on macOS because service containers are not supported
