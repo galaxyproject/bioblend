@@ -47,46 +47,48 @@ jobs:
             tox_env: py310
             galaxy_version: release_25.1
             galaxy_python_version: '3.10'
+          # The minimum Python supported version by the following releases is
+          # 3.9, but it is not available via setup-python on ubuntu >=26.04
           - os: ubuntu-latest
             tox_env: py310
             galaxy_version: release_25.0
-            galaxy_python_version: '3.9'
+            galaxy_python_version: '3.10'
           # The minimum Python supported version by the following releases is
           # 3.8, but it is not available via setup-python on ubuntu >=26.04
           - os: ubuntu-latest
             tox_env: py310
             galaxy_version: release_24.2
-            galaxy_python_version: '3.9'
+            galaxy_python_version: '3.10'
           - os: ubuntu-latest
             tox_env: py310
             galaxy_version: release_24.1
-            galaxy_python_version: '3.9'
+            galaxy_python_version: '3.10'
           - os: ubuntu-latest
             tox_env: py310
             galaxy_version: release_24.0
-            galaxy_python_version: '3.9'
+            galaxy_python_version: '3.10'
           # The minimum Python supported version by the following releases is
           # 3.7, but it is not available via setup-python on ubuntu >=26.04
           - os: ubuntu-latest
             tox_env: py310
             galaxy_version: release_23.2
-            galaxy_python_version: '3.9'
+            galaxy_python_version: '3.10'
           - os: ubuntu-latest
             tox_env: py310
             galaxy_version: release_23.1
-            galaxy_python_version: '3.9'
+            galaxy_python_version: '3.10'
           - os: ubuntu-latest
             tox_env: py310
             galaxy_version: release_23.0
-            galaxy_python_version: '3.9'
+            galaxy_python_version: '3.10'
           - os: ubuntu-latest
             tox_env: py310
             galaxy_version: release_22.05
-            galaxy_python_version: '3.9'
+            galaxy_python_version: '3.10'
           - os: ubuntu-latest
             tox_env: py310
             galaxy_version: release_22.01
-            galaxy_python_version: '3.9'
+            galaxy_python_version: '3.10'
           # The minimum Python supported version by the following releases is
           # 3.6, but it is not available via setup-python on ubuntu >=24.04
           - os: ubuntu-24.04
