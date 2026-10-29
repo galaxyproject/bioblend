@@ -42,7 +42,7 @@ class TestGalaxyJobs(GalaxyTestBase.GalaxyTestBase):
         assert len(jobs) == 2
         jobs = self.gi.jobs.get_jobs(history_id=self.history_id, state="failed")
         assert len(jobs) == 0
-        today = datetime.datetime.now(tz=datetime.timezone.utc)
+        today = datetime.datetime.now(tz=datetime.UTC)
         yesterday = today - datetime.timedelta(days=1)
         jobs = self.gi.jobs.get_jobs(date_range_max=yesterday.strftime("%Y-%m-%d"), history_id=self.history_id)
         assert len(jobs) == 0

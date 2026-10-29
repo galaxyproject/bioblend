@@ -14,10 +14,12 @@ from http.server import (
     BaseHTTPRequestHandler,
     ThreadingHTTPServer,
 )
-from typing import Any
+from typing import (
+    Any,
+    Self,
+)
 
 import pytest
-from typing_extensions import Self
 
 from bioblend import ConnectionError
 from bioblend.galaxy import GalaxyInstance

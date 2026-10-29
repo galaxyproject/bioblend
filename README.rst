@@ -15,7 +15,7 @@ BioBlend is a Python library for interacting with the `Galaxy`_ API.
 
 BioBlend is supported and tested on:
 
-- Python 3.10 - 3.15
+- Python 3.11 - 3.15
 - Galaxy release 20.05 and later.
 
 Full docs are available at https://bioblend.readthedocs.io/ with a quick library

@@ -1,7 +1,8 @@
 ## BioBlend v1.10.0 - unreleased
 
-* Added support for Python 3.15. Dropped support for Galaxy releases 19.05,
-  19.09 and 20.01. Added support for  Galaxy release 26.1.
+* Dropped support for Python 3.10. Added support for Python 3.15. Dropped
+  support for Galaxy releases 19.05, 19.09 and 20.01. Added support for  Galaxy
+  release 26.1.
 
 * Added ``UnprivilegedToolsClient`` with ``create_user_tool()``,
   ``get_user_tools()``, ``show_user_tool()``, and ``delete_user_tool()``

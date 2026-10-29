@@ -16,6 +16,7 @@ from collections.abc import Generator
 from types import TracebackType
 from typing import (
     Any,
+    Self,
 )
 
 import requests
@@ -25,7 +26,6 @@ from requests.adapters import HTTPAdapter
 from requests_toolbelt import MultipartEncoder
 from tusclient.storage.filestorage import FileStorage
 from tusclient.uploader.uploader import Uploader
-from typing_extensions import Self
 from urllib3 import BaseHTTPResponse
 from urllib3.connectionpool import ConnectionPool
 from urllib3.exceptions import InvalidHeader

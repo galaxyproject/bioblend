@@ -22,12 +22,11 @@ from typing import (
     IO,
     Literal,
     Optional,
+    Self,
     TYPE_CHECKING,
     TypeVar,
     Union,
 )
-
-from typing_extensions import Self
 
 import bioblend
 from bioblend.galaxy.workflows import InputsBy

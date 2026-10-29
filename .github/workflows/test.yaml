@@ -32,85 +32,85 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            tox_env: py310
+            tox_env: py311
             galaxy_version: dev
             galaxy_python_version: '3.10'
           - os: ubuntu-latest
-            tox_env: py310
+            tox_env: py311
             galaxy_version: release_26.1
             galaxy_python_version: '3.10'
           - os: ubuntu-latest
-            tox_env: py310
+            tox_env: py311
             galaxy_version: release_26.0
             galaxy_python_version: '3.10'
           - os: ubuntu-latest
-            tox_env: py310
+            tox_env: py311
             galaxy_version: release_25.1
             galaxy_python_version: '3.10'
           # The minimum Python supported version by the following releases is
           # 3.9, but it is not available via setup-python on ubuntu >=26.04
           - os: ubuntu-latest
-            tox_env: py310
+            tox_env: py311
             galaxy_version: release_25.0
             galaxy_python_version: '3.10'
           # The minimum Python supported version by the following releases is
           # 3.8, but it is not available via setup-python on ubuntu >=26.04
           - os: ubuntu-latest
-            tox_env: py310
+            tox_env: py311
             galaxy_version: release_24.2
             galaxy_python_version: '3.10'
           - os: ubuntu-latest
-            tox_env: py310
+            tox_env: py311
             galaxy_version: release_24.1
             galaxy_python_version: '3.10'
           - os: ubuntu-latest
-            tox_env: py310
+            tox_env: py311
             galaxy_version: release_24.0
             galaxy_python_version: '3.10'
           # The minimum Python supported version by the following releases is
           # 3.7, but it is not available via setup-python on ubuntu >=26.04
           - os: ubuntu-latest
-            tox_env: py310
+            tox_env: py311
             galaxy_version: release_23.2
             galaxy_python_version: '3.10'
           - os: ubuntu-latest
-            tox_env: py310
+            tox_env: py311
             galaxy_version: release_23.1
             galaxy_python_version: '3.10'
           - os: ubuntu-latest
-            tox_env: py310
+            tox_env: py311
             galaxy_version: release_23.0
             galaxy_python_version: '3.10'
           - os: ubuntu-latest
-            tox_env: py310
+            tox_env: py311
             galaxy_version: release_22.05
             galaxy_python_version: '3.10'
           - os: ubuntu-latest
-            tox_env: py310
+            tox_env: py311
             galaxy_version: release_22.01
             galaxy_python_version: '3.10'
           # The minimum Python supported version by the following releases is
           # 3.6, but it is not available via setup-python on ubuntu >=24.04
           - os: ubuntu-24.04
-            tox_env: py310
+            tox_env: py311
             galaxy_version: release_21.09
             galaxy_python_version: '3.8'
           - os: ubuntu-24.04
-            tox_env: py310
+            tox_env: py311
             galaxy_version: release_21.05
             galaxy_python_version: '3.8'
           - os: ubuntu-24.04
-            tox_env: py310
+            tox_env: py311
             galaxy_version: release_21.01
             galaxy_python_version: '3.8'
           # The minimum Python supported version by the following releases is
           # 3.5, but it is not available via setup-python on ubuntu >=24.04
           - os: ubuntu-24.04
-            tox_env: py310
+            tox_env: py311
             galaxy_version: release_20.09
             galaxy_python_version: '3.8'
           - os: ubuntu-24.04
-            tox_env: py310
+            tox_env: py311
             galaxy_version: release_20.05
             galaxy_python_version: '3.8'
           - os: ubuntu-latest
@@ -120,7 +120,7 @@ jobs:
           # Cannot test on macOS because service containers are not supported
           # yet: https://github.community/t/github-actions-services-available-on-others-vms/16916
           # - os: macos-latest
-          #   tox_env: py310
+          #   tox_env: py311
           #   galaxy_version: dev
           #   galaxy_python_version: '3.10'
     steps:
