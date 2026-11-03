@@ -169,7 +169,7 @@
                             "y": 556.5
                         },
                         "tool_id": null,
-                        "tool_state": "{\"parameter_type\": \"text\", \"optional\": false}",
+                        "tool_state": "{\"parameter_type\": \"text\", \"optional\": false, \"default\": \"T\"}",
                         "tool_version": null,
                         "type": "parameter_input",
                         "uuid": "15a0ee89-4104-4e5a-9b44-65346f1604e1",
