@@ -41,3 +41,28 @@ def test_repeat():
     assert as_dict["queries_0|input2"]["id"] == "encoded2"
     assert as_dict["queries_1|input2"]["src"] == "hda"
     assert as_dict["queries_1|input2"]["id"] == "encoded3"
+
+
+def test_to_nested_dict():
+    as_dict = (
+        inputs()
+        .set("num_lines", 1)
+        .set("input", dataset("encoded1"))
+        .set("seed_source", conditional().set("seed_source_selector", "set_seed").set("seed", "asdf"))
+        .set(
+            "queries",
+            repeat()
+            .instance(inputs().set_dataset_param("input2", "encoded2"))
+            .instance(inputs().set_param("input2", {"src": "ldda", "id": "encoded3"})),
+        )
+        .to_nested_dict()
+    )
+    assert as_dict == {
+        "num_lines": 1,
+        "input": {"src": "hda", "id": "encoded1"},
+        "seed_source": {"seed_source_selector": "set_seed", "seed": "asdf"},
+        "queries": [
+            {"input2": {"src": "hda", "id": "encoded2"}},
+            {"input2": {"src": "ldda", "id": "encoded3"}},
+        ],
+    }
