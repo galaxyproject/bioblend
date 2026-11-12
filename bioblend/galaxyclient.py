@@ -677,4 +677,4 @@ def _tus_uploader_session_id(self: Uploader) -> str:
 
 
 # monkeypatch a session_id property on to uploader
-Uploader.session_id = property(_tus_uploader_session_id)  # type: ignore[attr-defined]  # ty:ignore[unresolved-attribute]
+Uploader.session_id = property(_tus_uploader_session_id)  # type: ignore[attr-defined]  # ty:ignore[missing-attribute]
