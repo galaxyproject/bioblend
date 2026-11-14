@@ -16,6 +16,13 @@
   must be provided (thanks to
   [Dannon Baker](https://github.com/dannon)).
 
+* Added ``strict`` parameter to ``ToolClient.run_tool()``: with
+  ``strict=True`` the tool is run through the Tool Request API of Galaxy 26.0
+  or later, which rejects inputs that do not match the tool parameters instead
+  of ignoring them. Added ``run_tool_request()``, ``get_tool_request()``,
+  ``wait_for_tool_request()`` and ``get_tool_request_outputs()`` methods to
+  ``ToolClient``, and ``InputsBuilder.to_nested_dict()``.
+
 * Requests rejected with HTTP status 429 (Too Many Requests) are now retried
   automatically, honouring the ``Retry-After`` header. All HTTP methods are
   retried, since a 429 response means that the request was rejected before being
