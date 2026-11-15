@@ -22,3 +22,6 @@ galaxy:
   enable_celery_tasks: true
   # Vault is required by the credentials API (Galaxy 25.1+)
   vault_config_file: ${BIOBLEND_DIR}/tests/template_vault_conf.yml
+  # Allow images from anywhere for test User Defined Tools (Galaxy 26.2+)
+  user_defined_tool_allowed_containers:
+    - '*'
