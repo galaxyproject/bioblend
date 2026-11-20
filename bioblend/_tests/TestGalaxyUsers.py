@@ -103,10 +103,15 @@ class TestGalaxyUsers(GalaxyTestBase.GalaxyTestBase):
         Test purging without prior deletion
         """
         # WARNING: only admins can create users!
-        if self.gi.config.get_config()["use_remote_user"]:
+        config = self.gi.config.get_config()
+        if config["use_remote_user"]:
             self.skipTest("This Galaxy instance is not configured to use local users")
-        if not self.gi.config.get_config()["allow_user_deletion"]:
+        if not config["allow_user_deletion"]:
             self.skipTest("This Galaxy instance is not configured to allow user deletion")
+        if config["version_major"] >= "27.0":
+            # TODO: Once https://github.com/galaxyproject/galaxy/pull/25011 is merged, test that
+            # purging a user who is not deleted yet deletes them first
+            self.skipTest("Purging a user who is not deleted yet changes in Galaxy 27.0")
         new_username = test_util.random_string()
         new_user = self.gi.users.create_local_user(
             new_username, f"{new_username}@example.org", test_util.random_string(20)
