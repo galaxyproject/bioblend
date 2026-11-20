@@ -103,17 +103,24 @@ class TestGalaxyUsers(GalaxyTestBase.GalaxyTestBase):
         Test purging without prior deletion
         """
         # WARNING: only admins can create users!
-        if self.gi.config.get_config()["use_remote_user"]:
+        config = self.gi.config.get_config()
+        if config["use_remote_user"]:
             self.skipTest("This Galaxy instance is not configured to use local users")
-        if not self.gi.config.get_config()["allow_user_deletion"]:
+        if not config["allow_user_deletion"]:
             self.skipTest("This Galaxy instance is not configured to allow user deletion")
         new_username = test_util.random_string()
         new_user = self.gi.users.create_local_user(
             new_username, f"{new_username}@example.org", test_util.random_string(20)
         )
-        # Purging a user fails if it's not deleted beforehand
-        with pytest.raises(ConnectionError):
-            self.gi.users.delete_user(new_user["id"], purge=True)
+        if config["version_major"] >= "27.0":
+            # Since Galaxy 27.0, purging a user who is not deleted yet deletes them first
+            purged_user = self.gi.users.delete_user(new_user["id"], purge=True)
+            assert purged_user["deleted"]
+            assert purged_user["purged"]
+        else:
+            # Purging a user fails if it's not deleted beforehand
+            with pytest.raises(ConnectionError):
+                self.gi.users.delete_user(new_user["id"], purge=True)
 
     def test_get_user_apikey(self):
         # Test getting the API key of the current user, which surely has one
