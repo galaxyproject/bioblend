@@ -108,17 +108,22 @@ class TestGalaxyUsers(GalaxyTestBase.GalaxyTestBase):
             self.skipTest("This Galaxy instance is not configured to use local users")
         if not config["allow_user_deletion"]:
             self.skipTest("This Galaxy instance is not configured to allow user deletion")
-        if config["version_major"] >= "27.0":
-            # TODO: Once https://github.com/galaxyproject/galaxy/pull/25011 is merged, test that
-            # purging a user who is not deleted yet deletes them first
-            self.skipTest("Purging a user who is not deleted yet changes in Galaxy 27.0")
         new_username = test_util.random_string()
         new_user = self.gi.users.create_local_user(
             new_username, f"{new_username}@example.org", test_util.random_string(20)
         )
-        # Purging a user fails if it's not deleted beforehand
-        with pytest.raises(ConnectionError):
-            self.gi.users.delete_user(new_user["id"], purge=True)
+        if config["version_major"] >= "27.0":
+            # Since Galaxy 27.0, purging a user who is not deleted yet deletes them first
+            purged_user = self.gi.users.delete_user(new_user["id"], purge=True)
+            # username and email are redacted when purging a user
+            assert purged_user["username"] != new_user["username"]
+            assert purged_user["email"] != new_user["email"]
+            assert purged_user["deleted"]
+            assert purged_user["purged"]
+        else:
+            # Purging a user fails if it's not deleted beforehand
+            with pytest.raises(ConnectionError):
+                self.gi.users.delete_user(new_user["id"], purge=True)
 
     def test_get_user_apikey(self):
         # Test getting the API key of the current user, which surely has one
