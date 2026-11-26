@@ -33,7 +33,7 @@ classifiers = [
 requires-python = ">=3.11"
 dependencies = [
     "PyYAML",
-    "requests>=2.20.0",
+    "requests>=2.34.0",
     "requests-toolbelt>=0.5.1,!=0.9.0",
     "tuspy",
     "typing-extensions>=4.4.0",

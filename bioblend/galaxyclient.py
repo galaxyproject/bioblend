@@ -201,13 +201,13 @@ class GalaxyClient:
             self._key = None
             self.email = email
             self.password = password
-        self.json_headers: dict[str, str | bytes | None] = {"Content-Type": "application/json"}
+        self.json_headers: dict[str, str | bytes] = {"Content-Type": "application/json"}
         if user_agent:
             self.json_headers["User-Agent"] = user_agent
         # json_headers needs to be set before key can be defined, otherwise authentication with email/password causes an error
         if token:
             self.json_headers["Authorization"] = f"Bearer {token}"
-        else:
+        elif self.key:
             self.json_headers["x-api-key"] = self.key
         # Number of attempts before giving up on a GET request.
         self._max_get_attempts = 1
