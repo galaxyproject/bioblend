@@ -44,6 +44,8 @@ dependencies = [
 [project.optional-dependencies]
 testing = [
     "pytest",
+    "pytest-httpserver",
+    "werkzeug",
 ]
 
 [project.scripts]
