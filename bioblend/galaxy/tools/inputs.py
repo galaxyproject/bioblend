@@ -30,6 +30,22 @@ class InputsBuilder:
             values[key] = value
         return values
 
+    def to_nested_dict(self) -> dict[str, Any]:
+        """
+        Return the inputs in the nested format (``input_format='21.01'`` in
+        :meth:`bioblend.galaxy.tools.ToolClient.run_tool`).
+        """
+        values: dict[str, Any] = {}
+        for key, value in self._input_dict.items():
+            if isinstance(value, InputsBuilder):
+                value = value.to_nested_dict()
+            elif isinstance(value, RepeatBuilder):
+                value = value.to_nested_list()
+            elif isinstance(value, Param):
+                value = value.value
+            values[key] = value
+        return values
+
     def flat_iter(self, prefix: str | None = None) -> Iterator[tuple[str, Any]]:
         for key, value in self._input_dict.items():
             effective_key = key if prefix is None else f"{prefix}|{key}"
@@ -51,6 +67,9 @@ class RepeatBuilder:
         for index, instance in enumerate(self._instances):
             index_prefix = f"{prefix}_{index}"
             yield from instance.flat_iter(index_prefix)
+
+    def to_nested_list(self) -> list[dict[str, Any]]:
+        return [instance.to_nested_dict() for instance in self._instances]
 
 
 class Param:
